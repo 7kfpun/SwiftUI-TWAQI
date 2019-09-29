@@ -10,7 +10,40 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello World")
+        TabView {
+            MainView()
+                .tabItem {
+                    Image(systemName: "map.fill")
+                    Text("Forecast")
+            }
+
+            DetailsListView()
+                .tabItem {
+                    Image(systemName: "list.bullet")
+
+                    Text("First")
+            }
+
+            ForecastView()
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Forecast")
+                }
+
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "bell")
+                    Text("Settings")
+                }
+
+            HelpView()
+                .tabItem {
+                    Image(systemName: "questionmark.circle")
+                    Text("Settings")
+            }
+        }
+        .font(.headline)
+        .accentColor(Color(0x5AC8FA))
     }
 }
 
