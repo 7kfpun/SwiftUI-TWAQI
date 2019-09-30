@@ -38,7 +38,7 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationView {
-            VStack{
+            VStack {
                 TextField("Search", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
@@ -60,7 +60,7 @@ struct SettingsView: View {
                     }
                     .padding(.horizontal)
 
-                    HStack{
+                    HStack {
                         Text("End Date")
                         Spacer()
                         Text("8:30 AM")
@@ -70,8 +70,8 @@ struct SettingsView: View {
                 .padding(.vertical)
                 .background(Color(0xEEEEEE))
 
-                List{
-                    ForEach(locations.filter{$0.name.hasPrefix(searchText) || searchText == ""}, id:\.self) {location in
+                List {
+                    ForEach(locations.filter {$0.name.hasPrefix(searchText) || searchText == ""}, id: \.self) {location in
                         SettingsRow(location: location)
                     }
                 }

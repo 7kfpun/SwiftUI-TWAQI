@@ -21,7 +21,7 @@ struct MapView: UIViewRepresentable {
 
 struct MainView: View {
     var body: some View {
-        ZStack{
+        ZStack {
             MapView().edgesIgnoringSafeArea(.vertical)
 
             HStack {

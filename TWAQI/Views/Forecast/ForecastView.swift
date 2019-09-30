@@ -13,7 +13,7 @@ struct ForecastView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView{
+            ScrollView {
                 VStack(alignment: .leading) {
                     Toggle(isOn: $isForecastNotificationEnabled) {
                         Text("Forecast Notification (daily)")

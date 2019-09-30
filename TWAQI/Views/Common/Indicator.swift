@@ -57,7 +57,7 @@ struct Indicator: View {
 
     var body: some View {
         GeometryReader { geometry in
-            HStack (alignment: .top) {
+            HStack(alignment: .top) {
                 ForEach(self.indexRanges, id: \.id) { indexRange in
                     VStack {
                         Rectangle()

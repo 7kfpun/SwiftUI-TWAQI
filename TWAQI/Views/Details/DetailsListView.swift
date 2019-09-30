@@ -43,10 +43,10 @@ struct DetailsListView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
 
-                List{
-                    ForEach(locations.filter{$0.name.hasPrefix(searchText) || searchText == ""}, id:\.self) {location in
+                List {
+                    ForEach(locations.filter {$0.name.hasPrefix(searchText) || searchText == ""}, id: \.self) {location in
 
-                        NavigationLink (destination: DetailsView(location: location)) {
+                        NavigationLink(destination: DetailsView(location: location)) {
                             DetailsRow(location: location)
                         }
                     }

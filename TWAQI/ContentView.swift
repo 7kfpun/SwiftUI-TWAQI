@@ -20,8 +20,7 @@ struct ContentView: View {
             DetailsListView()
                 .tabItem {
                     Image(systemName: "list.bullet")
-
-                    Text("First")
+                    Text("Details")
             }
 
             ForecastView()
