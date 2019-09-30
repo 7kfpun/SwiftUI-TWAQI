@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct DetailsView: View {
-    var location: Location
+    var station: Station
     private var name: String
     private var localName: String
 
@@ -20,15 +20,15 @@ struct DetailsView: View {
         }
     }
 
-    init(location: Location) {
-        self.location = location
-        self.name = location.name
-        self.localName = location.localName
+    init(station: Station) {
+        self.station = station
+        self.name = station.name
+        self.localName = station.localName
     }
 }
 
 struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailsView(location: Location(name: "Taipei", localName: "台北"))
+        DetailsView(station: Station(name: "Lianjiang", localName: "馬祖", lon: 119.949875, lat: 26.160469))
     }
 }

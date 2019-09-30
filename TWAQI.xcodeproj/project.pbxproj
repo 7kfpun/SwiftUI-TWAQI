@@ -25,6 +25,9 @@
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A67234099990064D874 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A66234099990064D874 /* Location.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
+		9EFE2E0023423662007B7723 /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2DFF23423662007B7723 /* Station.swift */; };
+		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
+		9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0323425053007B7723 /* DetailsGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +51,9 @@
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A66234099990064D874 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
+		9EFE2DFF23423662007B7723 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Station.swift; sourceTree = "<group>"; };
+		9EFE2E0123423D74007B7723 /* SettingsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroup.swift; sourceTree = "<group>"; };
+		9EFE2E0323425053007B7723 /* DetailsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +143,7 @@
 			children = (
 				9E1AC557233F9A1800AC862D /* SettingsView.swift */,
 				9E794A682340A6090064D874 /* SettingsRow.swift */,
+				9EFE2E0123423D74007B7723 /* SettingsGroup.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -161,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
+				9EFE2E0323425053007B7723 /* DetailsGroup.swift */,
 				9E1AC563233F9AC100AC862D /* DetailsListView.swift */,
 				9E794A632340993C0064D874 /* DetailsRow.swift */,
 			);
@@ -179,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				9E794A66234099990064D874 /* Location.swift */,
+				9EFE2DFF23423662007B7723 /* Station.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -276,6 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
+				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
 				9E794A67234099990064D874 /* Location.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
@@ -285,6 +295,8 @@
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* HexColors.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
+				9EFE2E0023423662007B7723 /* Station.swift in Sources */,
+				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
