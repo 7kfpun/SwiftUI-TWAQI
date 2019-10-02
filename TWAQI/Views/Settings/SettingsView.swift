@@ -10,7 +10,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var searchText = ""
-    @State private var isDnDEnable = true
 
     let stationGroups = [
         StationGroup(name: "Lianjiang County", localName: "連江縣", stations: [
@@ -49,41 +48,14 @@ struct SettingsView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                // DnD
-                VStack {
-                    Toggle(isOn: $isDnDEnable) {
-                        Text("Do not disturb")
-                            .bold()
-                    }
-                    .padding(.horizontal)
+                DnD()
 
-                    Divider()
-
-                    HStack {
-                        Text("Start Date")
-                        Spacer()
-                        Text("10:00 PM")
-                    }
-                    .padding(.horizontal)
-
-                    HStack {
-                        Text("End Date")
-                        Spacer()
-                        Text("8:30 AM")
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical)
-                .background(Color(0xEEEEEE))
-
-                if searchText.isEmpty {
-                    List {
+                List {
+                    if searchText.isEmpty {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             SettingsGroup(stationGroup: stationGroup)
                         }
-                    }
-                } else {
-                    List {
+                    } else {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
                                 SettingsRow(station: station)

@@ -24,24 +24,28 @@ struct MainView: View {
         ZStack {
             MapView().edgesIgnoringSafeArea(.vertical)
 
-            HStack {
-                VStack {
-                    Spacer()
-                    button(for: "wind")
-                }
+            VStack {
+                HStack {
+                    VStack {
+                        Spacer()
+                        button(for: "wind")
+                    }
 
-                Spacer()
-
-                VStack {
                     Spacer()
 
-                    button(for: "square.and.arrow.up.fill")
-                    button(for: "viewfinder")
-                    button(for: "paperplane.fill")
+                    VStack {
+                        Spacer()
+
+                        button(for: "square.and.arrow.up.fill")
+                        button(for: "viewfinder")
+                        button(for: "paperplane.fill")
+                    }
                 }
+                .padding()
+
+                IndexSelector()
             }
-            .padding()
-            .padding(.vertical, 20)
+            .padding(.vertical, 10)
         }
     }
 }

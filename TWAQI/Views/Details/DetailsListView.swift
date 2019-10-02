@@ -9,9 +9,9 @@
 import SwiftUI
 
 struct DetailsListView: View {
-
+    
     @State private var searchText = ""
-
+    
     let stationGroups = [
         StationGroup(name: "Lianjiang County", localName: "連江縣", stations: [
             Station(name: "Lianjiang", localName: "馬祖", lon: 119.949875, lat: 26.160469)
@@ -41,24 +41,22 @@ struct DetailsListView: View {
         StationGroup(name: "Kaohsiung City", localName: "高雄市", stations: []),
         StationGroup(name: "Pingtung County", localName: "屏東縣", stations: [])
     ]
-
+    
     var body: some View {
         NavigationView {
             VStack {
                 TextField("Search", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-
+                
                 Divider()
-
-                if searchText.isEmpty {
-                    List {
+                
+                List {
+                    if searchText.isEmpty {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             DetailsGroup(stationGroup: stationGroup)
                         }
-                    }
-                } else {
-                    List {
+                    } else {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
                                 DetailsRow(station: station)
@@ -66,7 +64,7 @@ struct DetailsListView: View {
                         }
                     }
                 }
-
+                
             }
             .navigationBarTitle("Details")
         }

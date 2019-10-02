@@ -6,7 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SwiftUI
+import Foundation
 
 struct StationGroup: Hashable, Codable, Identifiable {
     let id = UUID()

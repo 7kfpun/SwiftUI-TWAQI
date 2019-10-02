@@ -43,6 +43,7 @@ struct ContentView: View {
         }
         .font(.headline)
         .accentColor(Color(0x5AC8FA))
+        .edgesIgnoringSafeArea(.top)
     }
 }
 
