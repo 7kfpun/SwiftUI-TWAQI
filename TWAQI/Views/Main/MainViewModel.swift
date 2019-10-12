@@ -8,7 +8,6 @@
 
 import Combine
 import Foundation
-import SwiftUI
 
 class MainViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()

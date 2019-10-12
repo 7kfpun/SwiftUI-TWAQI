@@ -23,7 +23,7 @@ struct ContentView: View {
                     Text("Details")
             }
 
-            ForecastView()
+            ForecastView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "calendar")
                     Text("Forecast")

@@ -15,7 +15,7 @@ struct DetailsRow: View {
         NavigationLink(destination: DetailsView(station: station)) {
             Text(station.name)
                 .fontWeight(.light)
-                .padding(.vertical)
+                .padding(.vertical, 10)
         }
     }
 }
@@ -26,6 +26,6 @@ struct DetailsRow_Previews: PreviewProvider {
             DetailsRow(station: Station(name: "Yangming", localName: "陽明", lon: 121.529583, lat: 25.182722))
             DetailsRow(station: Station(name: "Songshan", localName: "松山", lon: 121.578611, lat: 25.050000))
         }
-        .previewLayout(.fixed(width: 300, height: 50))
+        .previewLayout(.fixed(width: 300, height: 100))
     }
 }
