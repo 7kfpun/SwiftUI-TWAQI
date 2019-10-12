@@ -48,7 +48,8 @@ class MainViewModel: ObservableObject {
                             location: .init(
                                 latitude: Double(pollutant.latitude)!,
                                 longitude: Double(pollutant.longitude)!
-                            )
+                            ),
+                            aqi: pollutant.aqi
                         )
                     )
                 }

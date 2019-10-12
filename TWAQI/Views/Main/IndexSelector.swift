@@ -28,24 +28,14 @@ struct IndexSelector: View {
                     Button(action: {
                         self.selectedIndex = index.key
                     }) {
-                        if self.selectedIndex == index.key {
-                            Text(index.name)
-                                .fontWeight(.regular)
-                                .padding(.vertical)
-                                .frame(width: 55)
-                                .padding(.horizontal)
-                                .background(Color.white)
-                                .cornerRadius(40)
-                        } else {
-                            Text(index.name)
-                                .foregroundColor(Color.black)
-                                .fontWeight(.regular)
-                                .padding(.vertical)
-                                .frame(width: 55)
-                                .padding(.horizontal)
-                                .background(Color.white)
-                                .cornerRadius(40)
-                        }
+                        Text(index.name)
+                            .foregroundColor(self.selectedIndex == index.key ? Color(0x5AC8FA) : Color.black)
+                            .fontWeight(.regular)
+                            .padding(.vertical)
+                            .frame(width: 55)
+                            .padding(.horizontal)
+                            .background(Color.white)
+                            .cornerRadius(40)
                     }
                 }
             }

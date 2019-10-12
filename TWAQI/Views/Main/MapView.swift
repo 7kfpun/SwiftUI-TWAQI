@@ -12,12 +12,20 @@ import MapKit
 final class LandmarkAnnotation: NSObject, MKAnnotation {
     let id: String
     let title: String?
+    let subtitle: String?
     let coordinate: CLLocationCoordinate2D
+    let aqi: String?
 
     init(landmark: Landmark) {
         self.id = landmark.id
         self.title = landmark.name
+        self.subtitle = landmark.aqi
         self.coordinate = landmark.location
+        self.aqi = landmark.aqi
+    }
+
+    func getColor() -> Int {
+        return 0x5AC8FA
     }
 }
 
@@ -61,6 +69,7 @@ struct MapView: UIViewRepresentable {
                 annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 annotationView?.canShowCallout = true
                 annotationView?.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+                annotationView?.markerTintColor = UIColor(rgb: annotation.getColor())
             } else {
                 annotationView?.annotation = annotation
             }

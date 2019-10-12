@@ -17,4 +17,5 @@ struct Landmark: Equatable {
     let id = UUID().uuidString
     let name: String
     let location: CLLocationCoordinate2D
+    let aqi: String
 }
