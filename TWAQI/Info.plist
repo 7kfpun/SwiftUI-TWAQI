@@ -56,5 +56,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>AQI API</key>
+	<string>$(AQI_API)</string>
 </dict>
 </plist>

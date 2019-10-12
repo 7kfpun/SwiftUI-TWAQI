@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
 		9E1AC540233F981700AC862D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53F233F981700AC862D /* ContentView.swift */; };
@@ -24,17 +25,23 @@
 		9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E5257A32342FE56001ECFE1 /* Indexes.json */; };
 		9E5257A8234305D6001ECFE1 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A7234305D6001ECFE1 /* Index.swift */; };
 		9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A92343064F001ECFE1 /* IndexSelector.swift */; };
+		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
+		9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
+		9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257B12344AA12001ECFE1 /* Stations.swift */; };
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A67234099990064D874 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A66234099990064D874 /* Location.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
-		9EFE2E0023423662007B7723 /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2DFF23423662007B7723 /* Station.swift */; };
+		9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B63A4234CEA6300C206C8 /* MapView.swift */; };
+		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
+		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
 		9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0323425053007B7723 /* DetailsGroup.swift */; };
 		9EFE2E062342677D007B7723 /* DnD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E052342677D007B7723 /* DnD.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TWAQI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC538233F981700AC862D /* TWAQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TWAQI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53D233F981700AC862D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -54,14 +61,22 @@
 		9E5257A32342FE56001ECFE1 /* Indexes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Indexes.json; sourceTree = "<group>"; };
 		9E5257A7234305D6001ECFE1 /* Index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		9E5257A92343064F001ECFE1 /* IndexSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelector.swift; sourceTree = "<group>"; };
+		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
+		9E5257AF2344A676001ECFE1 /* Pollutants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pollutants.swift; sourceTree = "<group>"; };
+		9E5257B12344AA12001ECFE1 /* Stations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stations.swift; sourceTree = "<group>"; };
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A66234099990064D874 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
-		9EFE2DFF23423662007B7723 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Station.swift; sourceTree = "<group>"; };
+		9E8B63A4234CEA6300C206C8 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
+		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
+		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
 		9EFE2E0123423D74007B7723 /* SettingsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroup.swift; sourceTree = "<group>"; };
 		9EFE2E0323425053007B7723 /* DetailsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsGroup.swift; sourceTree = "<group>"; };
 		9EFE2E052342677D007B7723 /* DnD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DnD.swift; sourceTree = "<group>"; };
+		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
+		DF13A9AEE12BB503E5C3EA73 /* Pods-TWAQI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.debug.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +96,8 @@
 			children = (
 				9E1AC53A233F981700AC862D /* TWAQI */,
 				9E1AC539233F981700AC862D /* Products */,
+				EC74AF5E2E6315550EC00CA3 /* Pods */,
+				AE3FAE52D0FC9E2F007C900A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,6 +112,7 @@
 		9E1AC53A233F981700AC862D /* TWAQI */ = {
 			isa = PBXGroup;
 			children = (
+				9EC596072351BC0500B8AA99 /* Config */,
 				9E5257A12342FD88001ECFE1 /* Resources */,
 				9E794A65234099830064D874 /* Models */,
 				9E1AC565233FB09000AC862D /* Utils */,
@@ -142,8 +161,10 @@
 		9E1AC553233F99CE00AC862D /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				9E1AC554233F99F600AC862D /* MainView.swift */,
 				9E5257A92343064F001ECFE1 /* IndexSelector.swift */,
+				9E1AC554233F99F600AC862D /* MainView.swift */,
+				9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */,
+				9E8B63A4234CEA6300C206C8 /* MapView.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -190,6 +211,7 @@
 			isa = PBXGroup;
 			children = (
 				9E1AC566233FB0A400AC862D /* HexColors.swift */,
+				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -205,11 +227,38 @@
 		9E794A65234099830064D874 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				9E794A66234099990064D874 /* Location.swift */,
-				9EFE2DFF23423662007B7723 /* Station.swift */,
 				9E5257A7234305D6001ECFE1 /* Index.swift */,
+				9E794A66234099990064D874 /* Location.swift */,
+				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
+				9E5257B12344AA12001ECFE1 /* Stations.swift */,
+				9EC5960D2351C29E00B8AA99 /* Landmark.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		9EC596072351BC0500B8AA99 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9EC596082351BC5D00B8AA99 /* release.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		AE3FAE52D0FC9E2F007C900A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EC74AF5E2E6315550EC00CA3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DF13A9AEE12BB503E5C3EA73 /* Pods-TWAQI.debug.xcconfig */,
+				D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,10 +268,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9E1AC54C233F981900AC862D /* Build configuration list for PBXNativeTarget "TWAQI" */;
 			buildPhases = (
+				F325A4A10B9FB5D16F8BF4E7 /* [CP] Check Pods Manifest.lock */,
 				9E1AC534233F981700AC862D /* Sources */,
 				9E1AC535233F981700AC862D /* Frameworks */,
 				9E1AC536233F981700AC862D /* Resources */,
 				9EFE2DFC23419BBC007B7723 /* ShellScript */,
+				C5D0E6ADAEF6BA2F4785E9F3 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -298,6 +349,45 @@
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
+		C5D0E6ADAEF6BA2F4785E9F3 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F325A4A10B9FB5D16F8BF4E7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TWAQI-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -306,18 +396,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
+				9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */,
 				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
+				9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
+				9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */,
 				9E794A67234099990064D874 /* Location.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
 				9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */,
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
+				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
+				9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */,
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* HexColors.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
-				9EFE2E0023423662007B7723 /* Station.swift in Sources */,
 				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				9E5257A8234305D6001ECFE1 /* Index.swift in Sources */,
@@ -326,6 +420,7 @@
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
+				9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +440,7 @@
 /* Begin XCBuildConfiguration section */
 		9E1AC54A233F981900AC862D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9EC596082351BC5D00B8AA99 /* release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -405,6 +501,7 @@
 		};
 		9E1AC54B233F981900AC862D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9EC596082351BC5D00B8AA99 /* release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -459,6 +556,7 @@
 		};
 		9E1AC54D233F981900AC862D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DF13A9AEE12BB503E5C3EA73 /* Pods-TWAQI.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -479,6 +577,7 @@
 		};
 		9E1AC54E233F981900AC862D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
