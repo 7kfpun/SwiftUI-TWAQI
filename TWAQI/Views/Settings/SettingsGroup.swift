@@ -9,13 +9,13 @@
 import SwiftUI
 
 struct SettingsGroup: View {
-    @State var isOpen = false
+    @State private var isOpen: Bool = false
     var stationGroup: StationGroup
 
     var body: some View {
         VStack {
             Button(action: {
-                self.isOpen = !self.isOpen
+                self.isOpen.toggle()
             }) {
                 HStack {
                     Text(stationGroup.name)
@@ -23,7 +23,7 @@ struct SettingsGroup: View {
                         .padding(.vertical, 15)
                         .foregroundColor(Color.black)
                     Spacer()
-                    if isOpen {
+                    if self.isOpen {
                         Image(systemName: "chevron.down")
                             .foregroundColor(Color.black)
                     } else {
@@ -33,7 +33,7 @@ struct SettingsGroup: View {
                 }
             }
 
-            if isOpen {
+            if self.isOpen {
                 ForEach(stationGroup.stations, id: \.self) {station in
                     SettingsRow(station: station)
                 }

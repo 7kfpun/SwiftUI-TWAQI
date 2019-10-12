@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct SettingsRow: View {
-    @State var isNotificationEnabled = false
+    @State private var isNotificationEnabled: Bool = false
     @State private var min: Double = 30
     @State private var max: Double = 120
 
@@ -23,7 +23,7 @@ struct SettingsRow: View {
                     .padding(.vertical, 15)
             }
 
-            if isNotificationEnabled {
+            if self.isNotificationEnabled {
                 HStack {
                     Text("Pollution therhold")
                         .fontWeight(.light)
