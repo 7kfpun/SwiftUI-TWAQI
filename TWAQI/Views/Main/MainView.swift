@@ -7,24 +7,23 @@
 //
 
 import SwiftUI
-import MapKit
-
-struct MapView: UIViewRepresentable {
-    func makeUIView(context: Context) -> MKMapView {
-        MKMapView(frame: .zero)
-    }
-
-    func updateUIView(_ uiView: MKMapView, context: Context) {
-
-    }
-}
 
 struct MainView: View {
+    @ObservedObject var viewModel: MainViewModel
+
+    @State var selectedLandmark: Landmark? = nil
+
     var body: some View {
-        ZStack {
-            MapView().edgesIgnoringSafeArea(.vertical)
+
+        return ZStack {
+            MapView(
+                landmarks: $viewModel.landmarks,
+                selectedLandmark: $selectedLandmark
+            ).edgesIgnoringSafeArea(.vertical)
 
             VStack {
+                Text(String(viewModel.count))
+
                 HStack {
                     VStack {
                         Spacer()
@@ -47,11 +46,16 @@ struct MainView: View {
             }
             .padding(.vertical, 10)
         }
+        .onAppear(perform: getData)
+    }
+
+    private func getData() {
+        self.viewModel.getData()
     }
 }
 
-struct MapView_Previews: PreviewProvider {
+struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView()
+        MainView(viewModel: .init())
     }
 }
