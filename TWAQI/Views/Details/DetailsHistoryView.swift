@@ -10,15 +10,13 @@ import SwiftUI
 import SwiftUICharts
 
 struct DetailsHistoryView: View {
-    @ObservedObject var viewModel = DetailsHistoryViewModel()
-
-    var station: Station
+    var historyPollutants: [HistoryPollutant]
 
     @State private var viewType = 0
 
     var body: some View {
-        let data = viewModel.historytPollutants.map({ (historytPollutant) -> Int in
-            return historytPollutant.aqi
+        let data = self.historyPollutants.map({ (historyPollutant) -> Int in
+            return historyPollutant.aqi
         })
 
         print("data", data)
@@ -35,7 +33,6 @@ struct DetailsHistoryView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding(.bottom, 10)
-            .onAppear(perform: getData)
 
             if !data.isEmpty {
                 BarChartView(
@@ -50,23 +47,25 @@ struct DetailsHistoryView: View {
         .padding(.horizontal, 10)
     }
 
-    init(station: Station) {
-        self.station = station
-    }
-
-    private func getData() {
-        self.viewModel.getData()
+    init(historyPollutants: [HistoryPollutant]) {
+        self.historyPollutants = historyPollutants
     }
 }
 
 struct DetailsHistoryView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailsHistoryView(station: Station(
-            name: "Matsu",
-            localName: "馬祖",
-            lon: 119.949875,
-            lat: 26.160469,
-            imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
-        ))
+        DetailsHistoryView(historyPollutants: [
+            HistoryPollutant(
+                stationId: 96,
+                aqi: 61,
+                pm25: 15,
+                pm10: 26,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39,
+                publishTime: "2019-10-13T22:00:00"
+            )
+        ])
     }
 }

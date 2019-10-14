@@ -10,6 +10,8 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct DetailsView: View {
+    @ObservedObject var viewModel = DetailsViewModel()
+
     var station: Station
 
     var body: some View {
@@ -21,15 +23,24 @@ struct DetailsView: View {
                         .aspectRatio(contentMode: .fill)
                 }
 
+                if !viewModel.historyPollutants.isEmpty {
+                    DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
+                }
+
                 Indicator()
 
-                DetailsHistoryView(station: self.station)
+                DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
             }
+            .onAppear(perform: getData)
         }
     }
 
     init(station: Station) {
         self.station = station
+    }
+
+    private func getData() {
+        self.viewModel.getData()
     }
 }
 
