@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SwiftUICharts
 
 struct DetailsHistoryView: View {
     @ObservedObject var viewModel = DetailsHistoryViewModel()
@@ -16,7 +17,13 @@ struct DetailsHistoryView: View {
     @State private var viewType = 0
 
     var body: some View {
-        VStack {
+        let data = viewModel.historytPollutants.map({ (historytPollutant) -> Int in
+            return historytPollutant.aqi
+        })
+
+        print("data", data)
+
+        return VStack {
             Picker(selection: $viewType, label: Text("History Type")) {
                 Text("AQI").tag(0)
                 Text("PM2.5").tag(1)
@@ -27,9 +34,20 @@ struct DetailsHistoryView: View {
                 Text("NO2").tag(6)
             }
             .pickerStyle(SegmentedPickerStyle())
-            .padding(10)
+            .padding(.bottom, 10)
             .onAppear(perform: getData)
+
+            if !data.isEmpty {
+                BarChartView(
+                    data: data,
+                    title: "123",
+                    form: Form.large
+                )
+            }
+
+            Text("AQI - Air quality index")
         }
+        .padding(.horizontal, 10)
     }
 
     init(station: Station) {
