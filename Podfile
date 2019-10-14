@@ -7,5 +7,6 @@ target 'TWAQI' do
 
   # Pods for TWAQI
   pod 'Alamofire', '~> 5.0.0-rc.2'
+  pod 'SDWebImageSwiftUI', '0.3.2'
 
 end

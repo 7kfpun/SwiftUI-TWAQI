@@ -16,4 +16,5 @@ struct Station: Hashable, Codable, Identifiable {
     let localName: String
     let lon: Double
     let lat: Double
+    var imageUrl: String = ""
 }

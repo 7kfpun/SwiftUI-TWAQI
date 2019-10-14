@@ -9,34 +9,28 @@
 import SwiftUI
 
 struct DetailsGroup: View {
-    @State var isOpen = false
+    @State var isOpen = true
     var stationGroup: StationGroup
     
     var body: some View {
         VStack {
-            Button(action: {
-                self.isOpen.toggle()
-            }) {
-                HStack {
-                    Text(stationGroup.name)
-                        .bold()
-                        .padding(.vertical, 15)
+            HStack {
+                Text(stationGroup.name)
+                    .bold()
+                    .padding(.vertical, 15)
+                    .foregroundColor(Color.black)
+                Spacer()
+                if isOpen {
+                    Image(systemName: "chevron.down")
                         .foregroundColor(Color.black)
-                    Spacer()
-                    if isOpen {
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(Color.black)
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(Color.black)
-                    }
+                } else {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(Color.black)
                 }
             }
 
-            if isOpen {
-                ForEach(stationGroup.stations, id: \.self) {station in
-                    DetailsRow(station: station)
-                }
+            ForEach(stationGroup.stations, id: \.self) {station in
+                DetailsRow(station: station)
             }
         }
     }
