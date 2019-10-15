@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct HistoryPollutant: Hashable, Codable {
+struct HistoryPollutant: Codable {
     let stationId: Int
     let aqi: Int
     let pm25: Double

@@ -15,9 +15,12 @@ struct ForecastView: View {
     @State private var forecastType = 0
 
     var body: some View {
-        NavigationView {
+        let groupedByAreas = Dictionary(grouping: viewModel.forecastAreas) { $0.area }
+        let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
+
+        return NavigationView {
             ScrollView {
-                VStack(alignment: .leading) {
+                VStack {
                     Toggle(isOn: $isForecastNotificationEnabled) {
                         Text("Forecast Notification (daily)")
                             .bold()
@@ -31,21 +34,31 @@ struct ForecastView: View {
                         Text("Details").tag(1)
                     }.pickerStyle(SegmentedPickerStyle())
 
-                    forecastTypeView()
-                        .padding(.vertical)
+                    if forecastType == 0 {
+                        HStack {
+                            ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
+                                Text(area.forecastDate)
+                            }
+                        }
+
+                        ForEach(areaGroups, id: \.self) {areaGroup in
+                            HStack {
+                                Text(areaGroup)
+                                ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                                    Text(area.aqi)
+                                }
+                            }
+                        }
+                    }
+
+                    if forecastType == 1 {
+                        Text(viewModel.forecastDetail)
+                    }
                 }
                 .padding()
             }
             .navigationBarTitle("Forecast")
         }.onAppear(perform: getData)
-    }
-
-    func forecastTypeView() -> Text {
-        if forecastType == 1 {
-            return Text(viewModel.forecastDetail)
-        }
-
-        return Text("")
     }
 
     private func getData() {

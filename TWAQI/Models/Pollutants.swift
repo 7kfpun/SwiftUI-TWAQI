@@ -10,7 +10,7 @@ import Foundation
 
 typealias Pollutants = [Pollutant]
 
-struct Pollutant: Hashable, Codable {
+struct Pollutant: Codable {
     let aqi: String
     let co: String
     let co8hr: String

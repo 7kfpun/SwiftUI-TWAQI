@@ -38,7 +38,7 @@ struct ContentView: View {
             HelpView()
                 .tabItem {
                     Image(systemName: "questionmark.circle")
-                    Text("Settings")
+                    Text("Help")
             }
         }
         .font(.headline)

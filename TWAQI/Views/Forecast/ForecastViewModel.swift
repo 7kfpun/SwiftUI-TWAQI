@@ -17,8 +17,13 @@ class ForecastViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    init(forecastDetail: String = "") {
+    @Published var forecastAreas: [ForecastArea] = [] {
+        willSet { self.objectWillChange.send() }
+    }
+
+    init(forecastDetail: String = "", forecastAreas: [ForecastArea] = []) {
         self.forecastDetail = forecastDetail
+        self.forecastAreas = forecastAreas
     }
 
     private(set) lazy var getData: () -> Void = {
@@ -29,10 +34,11 @@ class ForecastViewModel: ObservableObject {
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
-                    let forecastArea = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
+                    let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
 
-                    if !forecastArea.isEmpty {
-                        self.forecastDetail = forecastArea[0].content
+                    if !forecastAreas.isEmpty {
+                        self.forecastAreas = forecastAreas
+                        self.forecastDetail = forecastAreas[0].content
                     }
                     print("Forecast content: \(self.forecastDetail)")
                 } catch {

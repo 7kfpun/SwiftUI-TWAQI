@@ -8,7 +8,8 @@
 
 import Foundation
 
-struct ForecastArea: Hashable, Codable {
+struct ForecastArea: Codable, Hashable {
+    let id = UUID()
     let aqi: String
     let area: String
     let content: String
