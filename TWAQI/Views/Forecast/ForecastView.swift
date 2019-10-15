@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import SwiftDate
 
 struct ForecastView: View {
     @ObservedObject var viewModel: ForecastViewModel
@@ -26,26 +27,40 @@ struct ForecastView: View {
                             .bold()
                     }
 
-                    Indicator()
-                        .frame(height: 90)
-
                     Picker(selection: $forecastType, label: Text("Forecast view?")) {
                         Text("3 Days").tag(0)
                         Text("Details").tag(1)
                     }.pickerStyle(SegmentedPickerStyle())
 
                     if forecastType == 0 {
+                        Indicator()
+                            .frame(height: 90)
+
                         HStack {
+                            Text("Publish Time")
+                            Spacer()
+                            Text(viewModel.forecastAreas.first?.publishTime ?? "")
+                        }
+
+                        HStack {
+                            Spacer()
                             ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
-                                Text(area.forecastDate)
+                                HStack {
+                                    Spacer()
+                                    Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
+                                }
                             }
                         }
 
                         ForEach(areaGroups, id: \.self) {areaGroup in
                             HStack {
                                 Text(areaGroup)
+                                Spacer()
                                 ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
-                                    Text(area.aqi)
+                                    HStack {
+                                        Spacer()
+                                        Text(area.aqi)
+                                    }
                                 }
                             }
                         }
