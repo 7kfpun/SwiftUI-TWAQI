@@ -43,6 +43,7 @@ struct SettingsRow: View {
                 Slider(value: $min, in: 0...500, step: 1)
             }
         }
+        .padding(.horizontal)
     }
 
     init(station: Station) {

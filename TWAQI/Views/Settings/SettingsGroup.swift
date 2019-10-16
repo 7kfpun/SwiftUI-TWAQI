@@ -20,7 +20,7 @@ struct SettingsGroup: View {
                 HStack {
                     Text(stationGroup.name)
                         .bold()
-                        .padding(.vertical, 15)
+                        .padding(.vertical, 10)
                         .foregroundColor(Color.black)
                     Spacer()
                     if self.isOpen {
@@ -31,6 +31,7 @@ struct SettingsGroup: View {
                             .foregroundColor(Color.black)
                     }
                 }
+                .padding(.horizontal)
             }
 
             if self.isOpen {
@@ -38,6 +39,10 @@ struct SettingsGroup: View {
                     SettingsRow(station: station)
                 }
             }
+
+            Divider()
+                .padding(.vertical, 0)
+                .padding(.leading, 15)
         }
     }
 

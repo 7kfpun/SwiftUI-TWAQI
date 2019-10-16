@@ -38,28 +38,26 @@ struct SettingsView: View {
         StationGroup(name: "Tainan City", localName: "臺南市", stations: []),
         StationGroup(name: "Taitung County", localName: "臺東縣", stations: []),
         StationGroup(name: "Kaohsiung City", localName: "高雄市", stations: []),
-        StationGroup(name: "Pingtung County", localName: "屏東縣", stations: [])
+        StationGroup(name: "Pingtung County", localName: "屏東縣", stations: []),
     ]
 
     var body: some View {
         NavigationView {
-            VStack {
+            ScrollView {
                 TextField("Search", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
-                DnD()
+                if searchText.isEmpty {
+                    DnD()
 
-                List {
-                    if searchText.isEmpty {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            SettingsGroup(stationGroup: stationGroup)
-                        }
-                    } else {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
-                                SettingsRow(station: station)
-                            }
+                    ForEach(stationGroups, id: \.self) {stationGroup in
+                        SettingsGroup(stationGroup: stationGroup)
+                    }
+                } else {
+                    ForEach(stationGroups, id: \.self) {stationGroup in
+                        ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
+                            SettingsRow(station: station)
                         }
                     }
                 }
