@@ -6,11 +6,11 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SwiftUI
 import SDWebImageSwiftUI
+import SwiftUI
 
 struct DetailsView: View {
-    @ObservedObject var viewModel = DetailsViewModel()
+    @ObservedObject var viewModel: DetailsViewModel
 
     var station: Station
 
@@ -32,13 +32,16 @@ struct DetailsView: View {
 
                 DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
             }
-            .onAppear(perform: getData)
+            .onAppear {
+                self.getData()
+            }
         }
         .edgesIgnoringSafeArea(.top)
     }
 
     init(station: Station) {
         self.station = station
+        self.viewModel = DetailsViewModel(station: station)
     }
 
     private func getData() {

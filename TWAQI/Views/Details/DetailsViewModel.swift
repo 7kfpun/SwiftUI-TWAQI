@@ -12,12 +12,14 @@ import Foundation
 
 class DetailsViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
+    var station: Station
 
     @Published var historyPollutants: [HistoryPollutant] = [] {
         willSet { self.objectWillChange.send() }
     }
 
-    init(historyPollutants: [HistoryPollutant] = []) {
+    init(station: Station, historyPollutants: [HistoryPollutant] = []) {
+        self.station = station
         self.historyPollutants = historyPollutants
     }
 
@@ -25,7 +27,7 @@ class DetailsViewModel: ObservableObject {
         let url: String = getEnv("HISTORY API")!
         print("HISTORY API", url)
         let parameters: Parameters = [
-            "station": "苗栗",
+            "station": self.station.localName,
         ]
 
         AF.request(url, parameters: parameters)
@@ -33,7 +35,6 @@ class DetailsViewModel: ObservableObject {
             .responseData { response in
                 do {
                     let data = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: response.data!)
-
                     self.historyPollutants = data["data"]!
                     print("HistoryPollutants: \(self.historyPollutants)")
                 } catch {
