@@ -52,7 +52,7 @@ struct Indicator: View {
             type: "AQI",
             status: "Hazardous",
             color: 0x7E2200
-        )
+        ),
     ]
 
     var body: some View {

@@ -28,11 +28,13 @@ struct DetailsView: View {
                 }
 
                 Indicator()
+                    .frame(height: 90)
 
                 DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
             }
             .onAppear(perform: getData)
         }
+        .edgesIgnoringSafeArea(.top)
     }
 
     init(station: Station) {

@@ -19,8 +19,6 @@ struct DetailsHistoryView: View {
             return historyPollutant.aqi
         })
 
-        print("data", data)
-
         return VStack {
             Picker(selection: $viewType, label: Text("History Type")) {
                 Text("AQI").tag(0)
@@ -42,7 +40,10 @@ struct DetailsHistoryView: View {
                 )
             }
 
-            Text("AQI - Air quality index")
+            HStack {
+                Text("AQI - Air quality index")
+                Spacer()
+            }
         }
         .padding(.horizontal, 10)
     }

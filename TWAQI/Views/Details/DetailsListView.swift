@@ -185,27 +185,24 @@ struct DetailsListView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            ScrollView {
                 TextField("Search", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
                 Divider()
 
-                List {
-                    if searchText.isEmpty {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            DetailsGroup(stationGroup: stationGroup)
-                        }
-                    } else {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
-                                DetailsRow(station: station)
-                            }
+                if searchText.isEmpty {
+                    ForEach(stationGroups, id: \.self) {stationGroup in
+                        DetailsGroup(stationGroup: stationGroup)
+                    }
+                } else {
+                    ForEach(stationGroups, id: \.self) {stationGroup in
+                        ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
+                            DetailsRow(station: station)
                         }
                     }
                 }
-
             }
             .navigationBarTitle("Details")
         }

@@ -13,9 +13,18 @@ struct DetailsRow: View {
 
     var body: some View {
         NavigationLink(destination: DetailsView(station: station)) {
-            Text(station.name)
-                .fontWeight(.light)
-                .padding(.vertical, 10)
+            HStack {
+                Text(station.name)
+                    .foregroundColor(Color.black)
+                    .fontWeight(.light)
+                    .padding(.vertical, 10)
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .foregroundColor(Color.gray)
+            }
+            .padding(.horizontal)
         }
     }
 }

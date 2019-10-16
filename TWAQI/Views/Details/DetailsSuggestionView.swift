@@ -33,6 +33,7 @@ struct DetailsSuggestionView: View {
                 .frame(width: geometry.size.width * 2 / 3, height: 140)
             }
         }
+        .frame(height: 150)
     }
 
     init(lastPollutant: HistoryPollutant) {
