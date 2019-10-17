@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import GoogleMobileAds
 import SwiftUI
 import SwiftDate
 
@@ -18,62 +19,70 @@ struct ForecastView: View {
     var body: some View {
         let groupedByAreas = Dictionary(grouping: viewModel.forecastAreas) { $0.area }
         let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
-        print(viewModel.forecastAreas)
+
         return NavigationView {
-            ScrollView {
-                VStack {
-                    Toggle(isOn: $isForecastNotificationEnabled) {
-                        Text("Forecast Notification (daily)")
-                            .bold()
-                    }
-
-                    Picker(selection: $forecastType, label: Text("Forecast view?")) {
-                        Text("3 Days").tag(0)
-                        Text("Details").tag(1)
-                    }.pickerStyle(SegmentedPickerStyle())
-
-                    if forecastType == 0 {
-                        Indicator()
-                            .frame(height: 90)
-
-                        HStack {
-                            Text("Publish Time")
-                            Spacer()
-                            Text(viewModel.forecastAreas.first?.publishTime ?? "")
+            ZStack {
+                ScrollView {
+                    VStack {
+                        Toggle(isOn: $isForecastNotificationEnabled) {
+                            Text("Forecast Notification (daily)")
+                                .bold()
                         }
 
-                        HStack {
-                            Spacer()
-                            ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
-                                HStack {
-                                    Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
-                                }
-                                .frame(width: 70)
-                            }
-                        }
-                        .padding(.vertical, 10)
+                        Picker(selection: $forecastType, label: Text("Forecast view?")) {
+                            Text("3 Days").tag(0)
+                            Text("Details").tag(1)
+                        }.pickerStyle(SegmentedPickerStyle())
 
-                        ForEach(areaGroups, id: \.self) {areaGroup in
+                        if forecastType == 0 {
+                            Indicator()
+                                .frame(height: 90)
+
                             HStack {
-                                Text(areaGroup)
+                                Text("Publish Time")
                                 Spacer()
-                                ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                                Text(viewModel.forecastAreas.first?.publishTime ?? "")
+                            }
+
+                            HStack {
+                                Spacer()
+                                ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
                                     HStack {
-                                        Text(area.aqi)
+                                        Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
                                     }
                                     .frame(width: 70)
                                 }
                             }
-                        }
-                        .padding(.vertical, 10)
-                    }
+                            .padding(.vertical, 10)
 
-                    if forecastType == 1 {
-                        Text(viewModel.forecastDetail)
-                            .lineSpacing(12)
+                            ForEach(areaGroups, id: \.self) {areaGroup in
+                                HStack {
+                                    Text(areaGroup)
+                                    Spacer()
+                                    ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                                        HStack {
+                                            Text(area.aqi)
+                                        }
+                                        .frame(width: 70)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 10)
+                        }
+
+                        if forecastType == 1 {
+                            Text(viewModel.forecastDetail)
+                                .lineSpacing(12)
+                        }
                     }
+                    .padding()
                 }
-                .padding()
+
+                VStack {
+                    Spacer()
+                    GADBannerViewController(adUnitID: "ca-app-pub-3940256099942544/2934735716")
+                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
+                }
             }
             .navigationBarTitle("Forecast")
         }.onAppear(perform: getData)

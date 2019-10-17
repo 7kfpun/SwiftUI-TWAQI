@@ -10,4 +10,8 @@ target 'TWAQI' do
   pod 'SDWebImageSwiftUI', '~> 0.3.2'
   pod 'SwiftDate', '~> 6.1'
 
+  pod 'Firebase', '~> 6.10'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/AdMob'
+
 end

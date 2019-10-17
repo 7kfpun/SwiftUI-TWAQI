@@ -66,7 +66,7 @@ struct DetailsHistoryView_Previews: PreviewProvider {
                 co: 0.25,
                 o3: 39,
                 publishTime: "2019-10-13T22:00:00"
-            )
+            ),
         ])
     }
 }

@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import GoogleMobileAds
 import SwiftUI
 
 struct MainView: View {
@@ -14,8 +15,7 @@ struct MainView: View {
     @State var selectedLandmark: Landmark? = nil
 
     var body: some View {
-
-        return ZStack {
+        ZStack {
             MapView(
                 landmarks: $viewModel.landmarks,
                 selectedLandmark: $selectedLandmark
@@ -43,8 +43,10 @@ struct MainView: View {
                 .padding()
 
                 IndexSelector()
+
+                GADBannerViewController(adUnitID: "ca-app-pub-3940256099942544/2934735716")
+                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
             }
-            .padding(.vertical, 10)
         }
         .onAppear(perform: getData)
     }

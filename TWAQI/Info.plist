@@ -62,5 +62,7 @@
 	<string>$(FORECAST_API)</string>
 	<key>HISTORY API</key>
 	<string>$(HISTORY_API)</string>
+	<key>GADApplicationIdentifier</key>
+	<string>$(GADApplicationIdentifier)</string>
 </dict>
 </plist>

@@ -38,6 +38,8 @@
 		9E794A67234099990064D874 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A66234099990064D874 /* Location.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
 		9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B63A4234CEA6300C206C8 /* MapView.swift */; };
+		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
+		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
@@ -80,6 +82,8 @@
 		9E794A66234099990064D874 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		9E8B63A4234CEA6300C206C8 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 				9E1AC53F233F981700AC862D /* ContentView.swift */,
 				9E1AC541233F981900AC862D /* Assets.xcassets */,
 				9E1AC546233F981900AC862D /* LaunchScreen.storyboard */,
+				9E978F152357808100C66A03 /* GoogleService-Info.plist */,
 				9E1AC549233F981900AC862D /* Info.plist */,
 				9E1AC543233F981900AC862D /* Preview Content */,
 			);
@@ -169,6 +174,7 @@
 			children = (
 				9E1AC551233F99BC00AC862D /* Common.swift */,
 				9E794A61234083700064D874 /* Indicator.swift */,
+				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -352,6 +358,7 @@
 			files = (
 				9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */,
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
+				9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */,
 				9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */,
 				9E1AC542233F981900AC862D /* Assets.xcassets in Resources */,
 			);
@@ -434,6 +441,7 @@
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
 				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
 				9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */,
+				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
