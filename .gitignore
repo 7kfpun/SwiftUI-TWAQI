@@ -92,3 +92,4 @@ iOSInjectionProject/
 # Project
 **/*.xcconfig
 Pods
+GoogleService-Info.plist

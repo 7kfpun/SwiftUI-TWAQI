@@ -31,4 +31,11 @@ file_length:
 cyclomatic_complexity:
     warning: 15
     error: 25
+trailing_comma:
+    mandatory_comma: true
+identifier_name:
+    severity: warning
+    excluded: # excluded via string array
+      - id
+      - URL
 reporter: "xcode"
