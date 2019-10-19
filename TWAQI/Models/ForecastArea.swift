@@ -20,13 +20,13 @@ struct ForecastArea: Codable, Hashable {
     let publishTime: String
 
     private enum CodingKeys: String, CodingKey {
-      case aqi = "AQI"
-      case area = "Area"
-      case content = "Content"
-      case forecastDate = "ForecastDate"
-      case majorPollutant = "MajorPollutant"
-      case minorPollutant = "MinorPollutant"
-      case minorPollutantAQI = "MinorPollutantAQI"
-      case publishTime = "PublishTime"
+        case aqi = "AQI"
+        case area = "Area"
+        case content = "Content"
+        case forecastDate = "ForecastDate"
+        case majorPollutant = "MajorPollutant"
+        case minorPollutant = "MinorPollutant"
+        case minorPollutantAQI = "MinorPollutantAQI"
+        case publishTime = "PublishTime"
     }
 }

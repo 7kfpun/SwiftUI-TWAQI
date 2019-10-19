@@ -27,7 +27,7 @@ class DetailsViewModel: ObservableObject {
         let url: String = getEnv("HISTORY API")!
         print("HISTORY API", url)
         let parameters: Parameters = [
-            "station": self.station.localName,
+            "station": self.station.nameLocal,
         ]
 
         AF.request(url, parameters: parameters)

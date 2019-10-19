@@ -35,12 +35,14 @@
 		9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257B12344AA12001ECFE1 /* Stations.swift */; };
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
-		9E794A67234099990064D874 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A66234099990064D874 /* Location.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
 		9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B63A4234CEA6300C206C8 /* MapView.swift */; };
 		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
 		9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F19235ABB0500C66A03 /* Constants.swift */; };
+		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
+		9E978F1E235B0A0300C66A03 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
+		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
@@ -80,12 +82,14 @@
 		9E5257B12344AA12001ECFE1 /* Stations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stations.swift; sourceTree = "<group>"; };
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
-		9E794A66234099990064D874 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		9E8B63A4234CEA6300C206C8 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
 		9E978F19235ABB0500C66A03 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		9E978F1B235AFA7000C66A03 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
+		9E978F1D235B0A0300C66A03 /* stations.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = stations.json; sourceTree = "<group>"; };
+		9E978F1F235B0CDC00C66A03 /* StationGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationGroups.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -240,6 +244,8 @@
 				9E1AC566233FB0A400AC862D /* HexColors.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9E978F19235ABB0500C66A03 /* Constants.swift */,
+				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
+				9E978F1D235B0A0300C66A03 /* stations.json */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -256,9 +262,9 @@
 			isa = PBXGroup;
 			children = (
 				9E5257A7234305D6001ECFE1 /* Index.swift */,
-				9E794A66234099990064D874 /* Location.swift */,
 				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
 				9E5257B12344AA12001ECFE1 /* Stations.swift */,
+				9E978F1F235B0CDC00C66A03 /* StationGroups.swift */,
 				9EC5960D2351C29E00B8AA99 /* Landmark.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
@@ -361,6 +367,7 @@
 			files = (
 				9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */,
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
+				9E978F1E235B0A0300C66A03 /* stations.json in Resources */,
 				9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */,
 				9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */,
 				9E1AC542233F981900AC862D /* Assets.xcassets in Resources */,
@@ -440,7 +447,6 @@
 				9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
 				9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */,
-				9E794A67234099990064D874 /* Location.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
 				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
@@ -464,6 +470,8 @@
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
+				9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */,
+				9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */,
 				9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */,

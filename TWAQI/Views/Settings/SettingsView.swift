@@ -11,35 +11,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var searchText = ""
 
-    let stationGroups = [
-        StationGroup(name: "Lianjiang County", localName: "連江縣", stations: [
-            Station(name: "Lianjiang", localName: "馬祖", lon: 119.949875, lat: 26.160469)
-        ]),
-        StationGroup(name: "Taipei City", localName: "臺北市", stations: [
-            Station(name: "Yangming", localName: "陽明", lon: 121.529583, lat: 25.182722),
-            Station(name: "Songshan", localName: "松山", lon: 121.578611, lat: 25.050000)
-        ]),
-        StationGroup(name: "New Taipei City", localName: "新北市", stations: []),
-        StationGroup(name: "Keelung City", localName: "基隆市", stations: []),
-        StationGroup(name: "Taoyuan City", localName: "桃園市", stations: []),
-        StationGroup(name: "Hsinchu County", localName: "新竹縣", stations: []),
-        StationGroup(name: "Hsinchu City", localName: "新竹市", stations: []),
-        StationGroup(name: "Ilan County", localName: "宜蘭縣", stations: []),
-        StationGroup(name: "Miaoli County", localName: "苗栗縣", stations: []),
-        StationGroup(name: "Kinmen County", localName: "金門縣", stations: []),
-        StationGroup(name: "Taichung City", localName: "臺中市", stations: []),
-        StationGroup(name: "Changhua County", localName: "彰化縣", stations: []),
-        StationGroup(name: "Hualien County", localName: "花蓮縣", stations: []),
-        StationGroup(name: "Nantou County", localName: "南投縣", stations: []),
-        StationGroup(name: "Yunlin County", localName: "雲林縣", stations: []),
-        StationGroup(name: "Penghu County", localName: "澎湖縣", stations: []),
-        StationGroup(name: "Chiayi County", localName: "嘉義縣", stations: []),
-        StationGroup(name: "Chiayi City", localName: "嘉義市", stations: []),
-        StationGroup(name: "Tainan City", localName: "臺南市", stations: []),
-        StationGroup(name: "Taitung County", localName: "臺東縣", stations: []),
-        StationGroup(name: "Kaohsiung City", localName: "高雄市", stations: []),
-        StationGroup(name: "Pingtung County", localName: "屏東縣", stations: []),
-    ]
+    var stationGroups: StationGroups
 
     var body: some View {
         NavigationView {
@@ -63,6 +35,23 @@ struct SettingsView: View {
                 }
             }
             .navigationBarTitle("Notification")
+        }
+    }
+
+    init(stationGroups: StationGroups = [], searchText: String = "") {
+        self.stationGroups = stationGroups
+        self.searchText = searchText
+        loadStationsFromJSON()
+    }
+
+    private mutating func loadStationsFromJSON() {
+        DataManager.getDataFromFileWithSuccess { file in
+            do {
+                let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
+                self.stationGroups = data["stationGroups"]!
+            } catch {
+                print(error)
+            }
         }
     }
 }

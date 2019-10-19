@@ -1,0 +1,917 @@
+{
+  "stationGroups": [{
+      "county": "Lianjiang County",
+      "county_local": "連江縣",
+      "area": "其他",
+      "stations": [{
+        "name_local": "馬祖",
+        "name": "Matsu",
+        "township": "南竿鄉",
+        "address": "連江縣南竿鄉介壽村13號",
+        "lon": 119.949875,
+        "lat": 26.160469,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+      }]
+    },
+    {
+      "county": "Taipei City",
+      "county_local": "臺北市",
+      "area": "北部空品區",
+      "stations": [{
+          "name_local": "中山",
+          "name": "Zhongshan",
+          "township": "中山區",
+          "address": "臺北市中山區林森北路511號",
+          "lon": 121.526528,
+          "lat": 25.062361,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "萬華",
+          "name": "Wanhua",
+          "township": "萬華區",
+          "address": "臺北市萬華區中華路1段66號",
+          "lon": 121.507972,
+          "lat": 25.046503,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=13&type=l"
+        }, {
+          "name_local": "陽明",
+          "name": "Yangming",
+          "township": "北投區",
+          "address": "臺北市北投區竹子湖路111號",
+          "lon": 121.529583,
+          "lat": 25.182722,
+          "site_type": "公園測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=64&type=l"
+        },
+        {
+          "name_local": "古亭",
+          "name": "Guting",
+          "township": "大安區",
+          "address": "臺北市大安區羅斯福路三段153號",
+          "lon": 121.529556,
+          "lat": 25.020608,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "松山",
+          "name": "Songshan",
+          "township": "松山區",
+          "address": "臺北市松山區八德路四段746號",
+          "lon": 121.578611,
+          "lat": 25.050000,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "大同",
+          "name": "Datong",
+          "township": "大同區",
+          "address": "臺北市大同區重慶北路三段2號",
+          "lon": 121.513311,
+          "lat": 25.063200,
+          "site_type": "交通測站"
+        },
+        {
+          "name_local": "士林",
+          "name": "Shilin",
+          "township": "北投區",
+          "address": "臺北市北投區文林北路155號",
+          "lon": 121.515389,
+          "lat": 25.105417,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=11&type=l"
+        }
+      ]
+    },
+    {
+      "county": "New Taipei City",
+      "county_local": "新北市",
+      "area": "北部空品區",
+      "stations": [{
+          "name": "Banqiao",
+          "name_local": "板橋",
+          "township": "板橋區",
+          "address": "新北市板橋區文化路一段25號",
+          "lon": 121.458667,
+          "lat": 25.012972,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Tucheng",
+          "name_local": "土城",
+          "township": "土城區",
+          "address": "新北市土城區學府路一段241號",
+          "lon": 121.451861,
+          "lat": 24.982528,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Wanli",
+          "name_local": "萬里",
+          "township": "萬里區",
+          "address": "新北市萬里區瑪鋉路221號",
+          "lon": 121.689881,
+          "lat": 25.179667,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Xinzhuang",
+          "name_local": "新莊",
+          "township": "新莊區",
+          "address": "新北市新莊區中正路510號",
+          "lon": 121.432500,
+          "lat": 25.037972,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=7&type=l"
+        },
+        {
+          "name": "Xindian",
+          "name_local": "新店",
+          "township": "新店區",
+          "address": "新北市新店區民族路108號",
+          "lon": 121.537778,
+          "lat": 24.977222,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=4&type=l"
+        },
+        {
+          "name": "Cailiao",
+          "name_local": "菜寮",
+          "township": "三重區",
+          "address": "新北市三重區中正北路163號",
+          "lon": 121.481028,
+          "lat": 25.068950,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Tamsui",
+          "name_local": "淡水",
+          "township": "淡水區",
+          "address": "新北市淡水區中正東路42巷6號",
+          "lon": 121.449239,
+          "lat": 25.164500,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Linkou",
+          "name_local": "林口",
+          "township": "林口區",
+          "address": "新北市林口區民治路25號",
+          "lon": 121.376869,
+          "lat": 25.077197,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=9&type=l"
+        },
+        {
+          "name": "Xizhi",
+          "name_local": "汐止",
+          "township": "汐止區",
+          "address": "新北市汐止區樟樹一路141巷2號",
+          "lon": 121.6405878,
+          "lat": 25.0658384,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=2&type=l"
+        },
+        {
+          "name": "Yonghe",
+          "name_local": "永和",
+          "township": "永和區",
+          "address": "新北市永和區永和路光復路交口",
+          "lon": 121.516306,
+          "lat": 25.017000,
+          "site_type": "交通測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=70&type=l"
+        },
+        {
+          "name": "Sanchong",
+          "name_local": "三重",
+          "township": "三重區",
+          "address": "新北市三重區三和路重陽路交口",
+          "lon": 121.493806,
+          "lat": 25.072611,
+          "site_type": "交通測站"
+        },
+        {
+          "name": "FugueiCape",
+          "name_local": "富貴角",
+          "township": "石門區",
+          "address": "新北市石門區山溪里10鄰九芎林13號",
+          "lon": 121.565258,
+          "lat": 25.263783,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=84&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Keelung City",
+      "county_local": "基隆市",
+      "area": "北部空品區",
+      "stations": [{
+        "name_local": "基隆",
+        "name": "Keelung",
+        "township": "信義區",
+        "address": "基隆市東信路324號",
+        "lon": 121.760056,
+        "lat": 25.129167,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=1&type=l"
+      }]
+    },
+    {
+      "county": "Taoyuan City",
+      "county_local": "桃園市",
+      "area": "北部空品區",
+      "stations": [{
+          "name_local": "觀音",
+          "name": "Guanyin",
+          "township": "觀音區",
+          "address": "桃園市觀音區文化路2號",
+          "lon": 121.082761,
+          "lat": 25.035503,
+          "site_type": "背景測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=19&type=l"
+        },
+        {
+          "name_local": "龍潭",
+          "name": "Longtan",
+          "township": "龍潭區",
+          "address": "桃園市龍潭區中正路210號",
+          "lon": 121.216350,
+          "lat": 24.863869,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "桃園",
+          "name": "Taoyuan",
+          "township": "桃園區",
+          "address": "桃園市桃園區成功路二段144號",
+          "lon": 121.319964,
+          "lat": 24.994789,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=18&type=l"
+        },
+        {
+          "name_local": "平鎮",
+          "name": "Pingzhen",
+          "township": "平鎮區",
+          "address": "桃園市平鎮區文化街189號",
+          "lon": 121.203986,
+          "lat": 24.952786,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "中壢",
+          "name": "Zhongli",
+          "township": "中壢區",
+          "address": "桃園市中壢區延平路622號",
+          "lon": 121.221667,
+          "lat": 24.953278,
+          "site_type": "交通測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=68&type=l"
+        },
+        {
+          "name_local": "大園",
+          "name": "Dayuan",
+          "township": "大園區",
+          "address": "桃園市大園區中正東路160號",
+          "lon": 121.201811,
+          "lat": 25.060344,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=18&type=l"
+        },
+        {
+          "name_local": "桃園(觀音工業區)",
+          "name": "GuanyinIndustrial",
+          "township": "觀音區",
+          "address": "桃園市觀音區新村路二段12號",
+          "lon": 121.128044,
+          "lat": 25.063039,
+          "site_type": "工業測站"
+        }
+      ]
+    },
+    {
+      "county": "Hsinchu County",
+      "county_local": "新竹縣",
+      "area": "竹苗空品區",
+      "stations": [{
+          "name_local": "湖口",
+          "name": "Hukou",
+          "township": "湖口鄉",
+          "address": "新竹縣湖口鄉成功路360號",
+          "lon": 121.038653,
+          "lat": 24.900142,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "竹東",
+          "name": "Zhudong",
+          "township": "竹東鎮",
+          "address": "新竹縣竹東鎮榮樂里三民街70號",
+          "lon": 121.088903,
+          "lat": 24.740644,
+          "site_type": "一般測站"
+        }
+      ]
+    },
+    {
+      "county": "Hsinchu City",
+      "county_local": "新竹市",
+      "area": "竹苗空品區",
+      "stations": [{
+        "name_local": "新竹",
+        "name": "Hsinchu",
+        "township": "東區",
+        "address": "新竹市民族路33號",
+        "lon": 120.972075,
+        "lat": 24.805619,
+        "site_type": "一般測站"
+      }]
+    },
+    {
+      "county": "Ilan County",
+      "county_local": "宜蘭縣",
+      "area": "宜蘭空品區",
+      "stations": [{
+          "name": "Yilan",
+          "name_local": "宜蘭",
+          "township": "宜蘭市",
+          "address": "宜蘭縣宜蘭市復興路二段77號",
+          "lon": 121.746394,
+          "lat": 24.747917,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=65&type=l"
+        },
+        {
+          "name": "Dongshan",
+          "name_local": "冬山",
+          "township": "冬山鄉",
+          "address": "宜蘭縣冬山鄉南興村照安路26號",
+          "lon": 121.792928,
+          "lat": 24.632203,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=66&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Miaoli County",
+      "county_local": "苗栗縣",
+      "area": "竹苗空品區",
+      "stations": [{
+          "name": "Toufen",
+          "name_local": "頭份",
+          "township": "頭份鎮",
+          "address": "苗栗縣頭份鎮文化街20號",
+          "lon": 120.898572,
+          "lat": 24.696969,
+          "site_type": "工業測站"
+        },
+        {
+          "name": "Miaoli",
+          "name_local": "苗栗",
+          "township": "苗栗市",
+          "address": "苗栗市縣府路100號",
+          "lon": 120.820200,
+          "lat": 24.565269,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Sanyi",
+          "name_local": "三義",
+          "township": "三義鄉",
+          "address": "苗栗縣三義鄉西湖村上湖61-1號",
+          "lon": 120.758833,
+          "lat": 24.382942,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=27&type=l"
+        },
+        {
+          "name": "Houlong",
+          "name_local": "苗栗(後龍)",
+          "township": "後龍鎮",
+          "address": "苗栗縣後龍鎮勝利路",
+          "lon": 120.786028,
+          "lat": 24.616369,
+          "site_type": "檢測車"
+        }
+      ]
+    },
+    {
+      "county": "Kinmen County",
+      "county_local": "金門縣",
+      "area": "其他",
+      "stations": [{
+        "name": "Kinmen",
+        "name_local": "金門",
+        "township": "金城鎮",
+        "address": "金門縣金城鎮民權路32號",
+        "lon": 118.312256,
+        "lat": 24.432133,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=77&type=l"
+      }]
+    },
+    {
+      "county": "Taichung City",
+      "county_local": "臺中市",
+      "area": "中部空品區",
+      "stations": [{
+          "name_local": "豐原",
+          "name": "Fengyuan",
+          "township": "豐原區",
+          "address": "臺中市豐原區水源路150號",
+          "lon": 120.741711,
+          "lat": 24.256586,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=28&type=l"
+        },
+        {
+          "name_local": "忠明",
+          "name": "Zhongming",
+          "township": "南屯區",
+          "address": "臺中市南屯區公益路二段296號",
+          "lon": 120.641092,
+          "lat": 24.151958,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=31&type=l"
+        },
+        {
+          "name_local": "沙鹿",
+          "name": "Shalu",
+          "township": "沙鹿區",
+          "address": "臺中市沙鹿區英才路150號",
+          "lon": 120.568794,
+          "lat": 24.225628,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=29&type=l"
+        },
+        {
+          "name_local": "西屯",
+          "name": "Xitun",
+          "township": "西屯區",
+          "address": "臺中市西屯區安和路1號",
+          "lon": 120.616917,
+          "lat": 24.162197,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=32&type=l"
+        },
+        {
+          "name_local": "大里",
+          "name": "Dali",
+          "township": "大里區",
+          "address": "臺中市大里區大新街36號",
+          "lon": 120.677689,
+          "lat": 24.099611,
+          "site_type": "一般測站"
+        }
+      ]
+    },
+    {
+      "county": "Changhua County",
+      "county_local": "彰化縣",
+      "area": "中部空品區",
+      "stations": [{
+          "name_local": "線西",
+          "name": "Xianxi",
+          "township": "線西鄉",
+          "address": "彰化縣線西鄉寓埔村中央路二段145號",
+          "lon": 120.469061,
+          "lat": 24.131672,
+          "site_type": "工業測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=34&type=l"
+        },
+        {
+          "name_local": "彰化",
+          "name": "Changhua",
+          "township": "彰化市",
+          "address": "彰化縣彰化市文心街55號",
+          "lon": 120.541519,
+          "lat": 24.066000,
+          "site_type": "一般測站"
+        },
+        {
+          "name_local": "二林",
+          "name": "Erlin",
+          "township": "二林鎮",
+          "address": "彰化縣二林鎮萬合里江山巷1號",
+          "lon": 120.409653,
+          "lat": 23.925175,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=35&type=l"
+        },
+        {
+          "name_local": "彰化(大城)",
+          "name": "Dacheng",
+          "township": "大城鄉",
+          "address": "527彰化縣大城鄉 下海漧堤防",
+          "lon": 120.273117,
+          "lat": 23.843139,
+          "site_type": "工業測站"
+        }
+      ]
+    },
+    {
+      "county": "Hualien County",
+      "county_local": "花蓮縣",
+      "area": "花東空品區",
+      "stations": [{
+        "name": "Hualien",
+        "name_local": "花蓮",
+        "township": "花蓮市",
+        "address": "花蓮市中正路210號",
+        "lon": 121.599769,
+        "lat": 23.971306,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=63&type=l"
+      }]
+    },
+    {
+      "county": "Nantou County",
+      "county_local": "南投縣",
+      "area": "中部空品區",
+      "stations": [{
+          "name_local": "埔里",
+          "name": "Puli",
+          "township": "埔里鎮",
+          "address": "南投縣埔里鎮西安路一段193號",
+          "lon": 120.967903,
+          "lat": 23.968842,
+          "site_type": "其它測站"
+        },
+        {
+          "name_local": "南投",
+          "name": "Nantou",
+          "township": "南投市",
+          "address": "南投市南陽路269號",
+          "lon": 120.685306,
+          "lat": 23.913000,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=36&type=l"
+        },
+        {
+          "name_local": "竹山",
+          "name": "Zhushan",
+          "township": "竹山鎮",
+          "address": "南投縣竹山鎮大明路666號",
+          "lon": 120.677306,
+          "lat": 23.756389,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=69&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Yunlin County",
+      "county_local": "雲林縣",
+      "area": "雲嘉南空品區",
+      "stations": [{
+          "name": "Taixi",
+          "name_local": "臺西",
+          "township": "臺西鄉",
+          "address": "雲林縣臺西鄉五港路505號",
+          "lon": 120.202842,
+          "lat": 23.717533,
+          "site_type": "工業測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=41&type=l"
+        },
+        {
+          "name": "Mailiao",
+          "name_local": "麥寮",
+          "township": "麥寮鄉",
+          "address": "雲林縣麥寮鄉中興路115號",
+          "lon": 120.251825,
+          "lat": 23.753506,
+          "site_type": "工業測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=83&type=l"
+        },
+        {
+          "name": "Lunbei",
+          "name_local": "崙背",
+          "township": "崙背鄉",
+          "address": "雲林縣崙背鄉南陽村大成路91號",
+          "lon": 120.348742,
+          "lat": 23.757547,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=38&type=l"
+        },
+        {
+          "name": "Douliu",
+          "name_local": "斗六",
+          "township": "斗六市",
+          "address": "雲林縣斗六市民生路224號",
+          "lon": 120.544994,
+          "lat": 23.711853,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=37&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Penghu County",
+      "county_local": "澎湖縣",
+      "area": "其他",
+      "stations": [{
+        "name_local": "馬公",
+        "name": "Magong",
+        "township": "馬公市",
+        "address": "澎湖縣馬公市中正路115號",
+        "lon": 119.566158,
+        "lat": 23.569031,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=78&type=l"
+      }]
+    },
+    {
+      "county": "Chiayi County",
+      "county_local": "嘉義縣",
+      "area": "雲嘉南空品區",
+      "stations": [{
+          "name": "Xingang",
+          "name_local": "新港",
+          "township": "新港鄉",
+          "address": "嘉義縣新港鄉登雲路105號",
+          "lon": 120.345531,
+          "lat": 23.554839,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=39&type=l"
+        },
+        {
+          "name": "Puzi",
+          "name_local": "朴子",
+          "township": "朴子市",
+          "address": "嘉義縣朴子市光復路34號",
+          "lon": 120.247350,
+          "lat": 23.465308,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=40&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Chiayi City",
+      "county_local": "嘉義市",
+      "area": "雲嘉南空品區",
+      "stations": [{
+        "name_local": "嘉義",
+        "name": "Chiayi",
+        "township": "西區",
+        "address": "嘉義市西區新民路580號",
+        "lon": 120.440833,
+        "lat": 23.462778,
+        "site_type": "一般測站",
+        "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=42&type=l"
+      }]
+    },
+    {
+      "county": "Tainan City",
+      "county_local": "臺南市",
+      "area": "雲嘉南空品區",
+      "stations": [{
+          "name": "Tainan",
+          "name_local": "臺南",
+          "township": "中西區",
+          "address": "臺南市中西區南寧街45號",
+          "lon": 120.202617,
+          "lat": 22.984581,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Xinying",
+          "name_local": "新營",
+          "township": "新營區",
+          "address": "臺南市新營區中正路4號",
+          "lon": 120.317250,
+          "lat": 23.305633,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=43&type=l"
+        },
+        {
+          "name": "Shanhua",
+          "name_local": "善化",
+          "township": "善化區",
+          "address": "臺南市善化區益名寮60號",
+          "lon": 120.297142,
+          "lat": 23.115097,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=44&type=l"
+        },
+        {
+          "name": "Annan",
+          "name_local": "安南",
+          "township": "安南區",
+          "address": "臺南市安南區安和路三段193號",
+          "lon": 120.217500,
+          "lat": 23.048197,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=45&type=l"
+        },
+        {
+          "name": "Madou",
+          "name_local": "臺南(麻豆)",
+          "township": "佳里區",
+          "address": "台南市麻豆區和平路9號",
+          "lon": 120.245831,
+          "lat": 23.179047,
+          "site_type": "檢測車"
+        }
+      ]
+    },
+    {
+      "county": "Taitung County",
+      "county_local": "臺東縣",
+      "area": "花東空品區",
+      "stations": [{
+          "name": "Taitung",
+          "name_local": "臺東",
+          "township": "臺東市",
+          "address": "臺東市中山路276號",
+          "lon": 121.150450,
+          "lat": 22.755358,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=62&type=l"
+        },
+        {
+          "name": "Guanshan",
+          "name_local": "關山",
+          "township": "關山鎮",
+          "address": "臺東縣關山鎮自強路66號",
+          "lon": 121.161933,
+          "lat": 23.045083,
+          "site_type": "其它測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=80&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Kaohsiung City",
+      "county_local": "高雄市",
+      "area": "高屏空品區",
+      "stations": [{
+          "name": "Qiaotou",
+          "name_local": "橋頭",
+          "township": "橋頭區",
+          "address": "高雄市橋頭區隆豐北路1號",
+          "lon": 120.305689,
+          "lat": 22.757506,
+          "site_type": "背景測站"
+        },
+        {
+          "name": "Fengshan",
+          "name_local": "鳳山",
+          "township": "鳳山區",
+          "address": "高雄市鳳山區曹公路6號",
+          "lon": 120.358083,
+          "lat": 22.627392,
+          "site_type": "交通測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=50&type=l"
+        },
+        {
+          "name": "Nanzi",
+          "name_local": "楠梓",
+          "township": "楠梓區",
+          "address": "高雄市楠梓區楠梓路262號",
+          "lon": 120.328289,
+          "lat": 22.733667,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Fuxing",
+          "name_local": "復興",
+          "township": "前鎮區",
+          "address": "高雄市前鎮區民權二路331號",
+          "lon": 120.312017,
+          "lat": 22.608711,
+          "site_type": "交通測站"
+        },
+        {
+          "name": "Meinong",
+          "name_local": "美濃",
+          "township": "美濃區",
+          "address": "高雄市美濃區中壇里忠孝路19號",
+          "lon": 120.530542,
+          "lat": 22.883583,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=47&type=l"
+        },
+        {
+          "name": "Qianzhen",
+          "name_local": "前鎮",
+          "township": "前鎮區",
+          "address": "高雄市前鎮區中山三路43號",
+          "lon": 120.307564,
+          "lat": 22.605386,
+          "site_type": "工業測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=57&type=l"
+        },
+        {
+          "name": "Qianjin",
+          "name_local": "前金",
+          "township": "前金區",
+          "address": "高雄市前金區河南二路196號",
+          "lon": 120.288086,
+          "lat": 22.632567,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Linyuan",
+          "name_local": "林園",
+          "township": "林園區",
+          "address": "高雄市林園區北汕路58巷2號",
+          "lon": 120.411750,
+          "lat": 22.479500,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=52&type=l"
+        },
+        {
+          "name": "Zuoying",
+          "name_local": "左營",
+          "township": "左營區",
+          "address": "高雄市左營區翠華路687號",
+          "lon": 120.292917,
+          "lat": 22.674861,
+          "site_type": "一般測站"
+        },
+
+        {
+          "name": "Renwu",
+          "name_local": "仁武",
+          "township": "仁武區",
+          "address": "高雄市仁武區八卦里永仁街555號",
+          "lon": 120.332631,
+          "lat": 22.689056,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=49&type=l"
+        },
+        {
+          "name": "Xiaogang",
+          "name_local": "小港",
+          "township": "小港區",
+          "address": "高雄市小港區平和南路185號",
+          "lon": 120.337736,
+          "lat": 22.565833,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=58&type=l"
+        },
+        {
+          "name": "Daliao",
+          "name_local": "大寮",
+          "township": "大寮區",
+          "address": "高雄市大寮區潮寮路61號",
+          "lon": 120.425081,
+          "lat": 22.565747,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=51&type=l"
+        }
+      ]
+    },
+    {
+      "county": "Pingtung County",
+      "county_local": "屏東縣",
+      "area": "高屏空品區",
+      "stations": [{
+          "name": "Chaozhou",
+          "name_local": "潮州",
+          "township": "潮州鎮",
+          "address": "屏東縣潮州鎮九塊里復興路66號",
+          "lon": 120.561175,
+          "lat": 22.523108,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=60&type=l"
+        },
+        {
+          "name": "Hengchun",
+          "name_local": "恆春",
+          "township": "恆春鎮",
+          "address": "屏東縣恆春鎮公園路44號",
+          "lon": 120.788928,
+          "lat": 21.958069,
+          "site_type": "一般測站",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=61&type=l"
+        },
+        {
+          "name": "Pingtung",
+          "name_local": "屏東",
+          "township": "屏東市",
+          "address": "屏東市蘇州街75號",
+          "lon": 120.488033,
+          "lat": 22.673081,
+          "site_type": "一般測站"
+        },
+        {
+          "name": "Liuqiu",
+          "name_local": "屏東(琉球)",
+          "township": "琉球鄉",
+          "address": "929屏東縣琉球鄉中福村行政路12號",
+          "lon": 120.377222,
+          "lat": 22.352222,
+          "site_type": "檢測車",
+          "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=204&type=l"
+        }
+      ]
+    }
+  ]
+}

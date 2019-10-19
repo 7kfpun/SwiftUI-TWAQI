@@ -17,8 +17,8 @@ struct DetailsView: View {
     var body: some View {
         ScrollView {
             VStack {
-                if !self.station.imageUrl.isEmpty {
-                    WebImage(url: URL(string: self.station.imageUrl))
+                if !(self.station.imageUrl?.isEmpty ?? true) {
+                    WebImage(url: URL(string: self.station.imageUrl!))
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 }
@@ -53,7 +53,7 @@ struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
         DetailsView(station: Station(
             name: "Matsu",
-            localName: "馬祖",
+            nameLocal: "馬祖",
             lon: 119.949875,
             lat: 26.160469,
             imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"

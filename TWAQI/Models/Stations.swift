@@ -13,8 +13,16 @@ typealias Stations = [Station]
 struct Station: Hashable, Codable, Identifiable {
     let id = UUID()
     let name: String
-    let localName: String
+    let nameLocal: String
     let lon: Double
     let lat: Double
-    var imageUrl: String = ""
+    var imageUrl: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case name = "name"
+        case nameLocal = "name_local"
+        case lon = "lon"
+        case lat = "lat"
+        case imageUrl = "imageUrl"
+    }
 }
