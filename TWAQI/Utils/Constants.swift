@@ -76,5 +76,93 @@ enum Constants {
             ]
             return UInt32(colors[self.rawValue] ?? 0xEEEEEE)
         }
+
+        func getGeneralPublicGuidance() -> String {
+            let texts = [
+                "good": "Enjoy your usual outdoor activities",
+                "moderate": "Enjoy your usual outdoor activities",
+                "unhealthyforsensitivegroup": "Consider reducing outdoor activities",
+                "unhealthy": "Should reduce physical exertion, particularly outdoors",
+                "veryunhealthy": "Reduce outdoor activities",
+                "hazardous": "Avoid outdoor activities and keep doors and windows closed",
+            ]
+            return texts[self.rawValue] ?? ""
+        }
+
+        func getSensitivePublicGuidance() -> String {
+            let texts = [
+                "good": "Enjoy your usual outdoor activities",
+                "moderate": "Can still be active outside",
+                "unhealthyforsensitivegroup": "Reduce physical exertion and outdoor activities",
+                "unhealthy": "Stay indoors and reduce physical exertion",
+                "veryunhealthy": "Stay indoors and reduce physical exertion",
+                "hazardous": "Stay indoors and avoid physical exertion",
+            ]
+            return texts[self.rawValue] ?? ""
+        }
+
+        static func checkStatus(value: Double) -> String {
+            return "text"
+        }
+    }
+
+    enum LinkPages: CaseIterable, Identifiable {
+        case aqi
+        case pm25
+        case pm10
+        case o3
+        case co
+        case so2
+        case no2
+        case partner
+        case feedback
+
+        var id: String { url.absoluteString }
+
+        var url: URL {
+            switch self {
+            case .aqi:
+                return URL(string: "https://en.wikipedia.org/wiki/Air_quality_index")!
+            case .pm25:
+                return URL(string: "https://en.wikipedia.org/wiki/Particulates#Size,_shape_and_solubility_matter?pm25")!
+            case .pm10:
+                return URL(string: "https://en.wikipedia.org/wiki/Particulates#Size,_shape_and_solubility_matter?pm10")!
+            case .o3:
+                return URL(string: "https://en.wikipedia.org/wiki/Ozone")!
+            case .co:
+                return URL(string: "https://en.wikipedia.org/wiki/Carbon_monoxide")!
+            case .so2:
+                return URL(string: "https://en.wikipedia.org/wiki/Sulfur_dioxide")!
+            case .no2:
+                return URL(string: "https://en.wikipedia.org/wiki/Nitrogen_dioxide")!
+            case .partner:
+                return URL(string: "https://en.wikipedia.org/wiki/Air_quality_index?partner")!
+            case .feedback:
+                return URL(string: "https://en.wikipedia.org/wiki/Air_quality_index?partner")!
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .aqi:
+                return "AQI"
+            case .pm25:
+                return "PM25"
+            case .pm10:
+                return "PM10"
+            case .o3:
+                return "O3"
+            case .co:
+                return "CO"
+            case .so2:
+                return "SO2"
+            case .no2:
+                return "NO2"
+            case .partner:
+                return "Interested to be our Business Partner?"
+            case .feedback:
+                return "Feedback / Contact us"
+            }
+        }
     }
 }

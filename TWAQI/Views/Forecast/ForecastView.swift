@@ -82,6 +82,7 @@ struct ForecastView: View {
                     ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
                         HStack {
                             Text(area.aqi)
+                                .fontWeight(.light)
                         }
                         .frame(width: 70)
                     }

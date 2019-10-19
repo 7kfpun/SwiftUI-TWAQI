@@ -9,31 +9,35 @@
 import SwiftUI
 
 struct HelpView: View {
+    @State var linkPage: Constants.LinkPages?
+
     var body: some View {
         NavigationView {
             List {
-                HStack {
-                    Text("Hello")
-                    Spacer()
-                    Text("1")
+                ForEach(Constants.LinkPages.allCases) { linkPage in
+                    Button(action: {
+                        // setting a new value to self.linkPage
+                        // this is used for triggering the SafariView presentation through .sheet()
+                        self.linkPage = linkPage
+                    }) {
+                        Text(linkPage.title)
+                            .fontWeight(.light)
+                            .padding(.vertical, 12)
+                    }
                 }
-                .padding(.vertical, 12)
 
                 HStack {
-                    Text("Hello")
+                    Text("Particulates")
+                        .fontWeight(.light)
                     Spacer()
                     Text("2")
                 }
                 .padding(.vertical, 12)
             }
+            .sheet(item: $linkPage, content: { linkPage in
+                SafariView(url: linkPage.url)
+            })
             .navigationBarTitle("Help")
-            .navigationBarItems(trailing:
-                Button(action: {
-                    print("Help tapped!")
-                }) {
-                    Text("Help")
-                }
-            )
         }
     }
 }
