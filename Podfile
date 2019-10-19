@@ -14,4 +14,6 @@ target 'TWAQI' do
   pod 'Firebase/Analytics'
   pod 'Firebase/AdMob'
 
+  pod 'AppCenter', '~> 2.5.0'
+
 end

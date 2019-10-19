@@ -1,5 +1,13 @@
 PODS:
   - Alamofire (5.0.0-rc.2)
+  - AppCenter (2.5.0):
+    - AppCenter/Analytics (= 2.5.0)
+    - AppCenter/Crashes (= 2.5.0)
+  - AppCenter/Analytics (2.5.0):
+    - AppCenter/Core
+  - AppCenter/Core (2.5.0)
+  - AppCenter/Crashes (2.5.0):
+    - AppCenter/Core
   - Firebase (6.10.0):
     - Firebase/Core (= 6.10.0)
   - Firebase/AdMob (6.10.0):
@@ -81,6 +89,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.2)
+  - AppCenter (~> 2.5.0)
   - Firebase (~> 6.10)
   - Firebase/AdMob
   - Firebase/Analytics
@@ -90,6 +99,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
+    - AppCenter
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -108,6 +118,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   Alamofire: f9450d3c7f6bea2ad62e7a541c3e9b186c7991d6
+  AppCenter: 637f180deefc61e8ab3f94223869ee50f61dabea
   Firebase: 5e6b7b12bf9adb90986688edc06b156c37e109cd
   FirebaseAnalytics: 0e3ecff2c5d86070f7d4325e21f1edabfbd558dc
   FirebaseCore: 064c2dd92a8ca5974bbdcb080df9921e46bd34cd
@@ -124,6 +135,6 @@ SPEC CHECKSUMS:
   SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: 8013e6f521fe22ea84bb0db4e0b77da67c94ee42
+PODFILE CHECKSUM: b054ca7a86bd5e5abae27c882a6b3679f35f14f4
 
 COCOAPODS: 1.8.3

@@ -64,5 +64,7 @@
 	<string>$(HISTORY_API)</string>
 	<key>GADApplicationIdentifier</key>
 	<string>$(GADApplicationIdentifier)</string>
+	<key>AppCenterAppSecret</key>
+	<string>$(AppCenterAppSecret)</string>
 </dict>
 </plist>

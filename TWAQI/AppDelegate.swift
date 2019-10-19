@@ -7,6 +7,10 @@
 //
 
 import UIKit
+
+import AppCenter
+import AppCenterAnalytics
+import AppCenterCrashes
 import Firebase
 
 @UIApplicationMain
@@ -20,6 +24,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Initialize the Google Mobile Ads SDK.
         GADMobileAds.sharedInstance().start(completionHandler: nil)
+
+        // Initialize App Center services.
+        MSAppCenter.start(getEnv("AppCenterAppSecret"), withServices: [
+          MSAnalytics.self,
+          MSCrashes.self,
+        ])
 
         return true
     }
