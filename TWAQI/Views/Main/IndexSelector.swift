@@ -9,27 +9,19 @@
 import SwiftUI
 
 struct IndexSelector: View {
-    let indexes = [
-        Index(key: "AQI", name: "AQI", unit: ""),
-        Index(key: "PM2_5", name: "PM2.5", unit: "μg/m3"),
-        Index(key: "PM10", name: "PM10", unit: "μg/m3"),
-        Index(key: "O3", name: "O3", unit: "ppb"),
-        Index(key: "CO", name: "CO", unit: "ppm"),
-        Index(key: "SO2", name: "SO2", unit: "ppb"),
-        Index(key: "NO2", name: "NO2", unit: "ppb")
-    ]
 
     @State private var selectedIndex = "AQI"
 
     var body: some View {
+
         ScrollView(.horizontal) {
             HStack {
-                ForEach(indexes, id: \.key) {index in
+                ForEach(Constants.AirIndexTypes.allCases, id: \.self) {airIndex in
                     Button(action: {
-                        self.selectedIndex = index.key
+                        self.selectedIndex = airIndex.toString()
                     }) {
-                        Text(index.name)
-                            .foregroundColor(self.selectedIndex == index.key ? Color(0x5AC8FA) : Color.black)
+                        Text(airIndex.toString())
+                            .foregroundColor(self.selectedIndex == airIndex.toString() ? Color(0x5AC8FA) : Color.black)
                             .fontWeight(.regular)
                             .padding(.vertical)
                             .frame(width: 55)

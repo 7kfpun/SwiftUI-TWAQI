@@ -17,9 +17,6 @@ struct ForecastView: View {
     @State private var forecastType = 0
 
     var body: some View {
-        let groupedByAreas = Dictionary(grouping: viewModel.forecastAreas) { $0.area }
-        let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
-
         return NavigationView {
             ZStack {
                 ScrollView {
@@ -35,44 +32,9 @@ struct ForecastView: View {
                         }.pickerStyle(SegmentedPickerStyle())
 
                         if forecastType == 0 {
-                            Indicator()
-                                .frame(height: 90)
-
-                            HStack {
-                                Text("Publish Time")
-                                Spacer()
-                                Text(viewModel.forecastAreas.first?.publishTime ?? "")
-                            }
-
-                            HStack {
-                                Spacer()
-                                ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
-                                    HStack {
-                                        Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
-                                    }
-                                    .frame(width: 70)
-                                }
-                            }
-                            .padding(.vertical, 10)
-
-                            ForEach(areaGroups, id: \.self) {areaGroup in
-                                HStack {
-                                    Text(areaGroup)
-                                    Spacer()
-                                    ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
-                                        HStack {
-                                            Text(area.aqi)
-                                        }
-                                        .frame(width: 70)
-                                    }
-                                }
-                            }
-                            .padding(.vertical, 10)
-                        }
-
-                        if forecastType == 1 {
-                            Text(viewModel.forecastDetail)
-                                .lineSpacing(12)
+                            forecast3daysView
+                        } else if forecastType == 1 {
+                            forecastTextView
                         }
                     }
                     .padding()
@@ -86,6 +48,55 @@ struct ForecastView: View {
             }
             .navigationBarTitle("Forecast")
         }.onAppear(perform: getData)
+    }
+
+    var forecast3daysView: some View {
+        let groupedByAreas = Dictionary(grouping: viewModel.forecastAreas) { $0.area }
+        let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
+
+        return VStack {
+            Indicator()
+                .frame(height: 90)
+
+            HStack {
+                Text("Publish Time")
+                Spacer()
+                Text(viewModel.forecastAreas.first?.publishTime ?? "")
+            }
+
+            HStack {
+                Spacer()
+                ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
+                    HStack {
+                        Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
+                    }
+                    .frame(width: 70)
+                }
+            }
+            .padding(.vertical, 10)
+
+            ForEach(areaGroups, id: \.self) {areaGroup in
+                HStack {
+                    Text(areaGroup)
+                    Spacer()
+                    ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                        HStack {
+                            Text(area.aqi)
+                        }
+                        .frame(width: 70)
+                    }
+                }
+            }
+            .padding(.vertical, 10)
+        }
+    }
+
+    var forecastTextView: some View {
+        VStack {
+            Text(viewModel.forecastDetail)
+                .lineSpacing(12)
+        }
+        .padding(.vertical)
     }
 
     private func getData() {

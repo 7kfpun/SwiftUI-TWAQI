@@ -42,13 +42,15 @@ class MainViewModel: ObservableObject {
                 var landmarks: [Landmark] = []
 
                 for pollutant in pollutants {
+                    guard let dLatitude: Double = Double(pollutant.latitude),
+                        let dLongitude: Double = Double(pollutant.longitude) else {
+                       return
+                    }
+
                     landmarks.append(
                         Landmark(
                             name: pollutant.siteName,
-                            location: .init(
-                                latitude: Double(pollutant.latitude)!,
-                                longitude: Double(pollutant.longitude)!
-                            ),
+                            location: .init(latitude: dLatitude, longitude: dLongitude),
                             aqi: pollutant.aqi
                         )
                     )

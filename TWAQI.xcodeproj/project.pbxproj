@@ -40,6 +40,7 @@
 		9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B63A4234CEA6300C206C8 /* MapView.swift */; };
 		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
+		9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F19235ABB0500C66A03 /* Constants.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
@@ -84,6 +85,7 @@
 		9E8B63A4234CEA6300C206C8 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
+		9E978F19235ABB0500C66A03 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -237,6 +239,7 @@
 			children = (
 				9E1AC566233FB0A400AC862D /* HexColors.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
+				9E978F19235ABB0500C66A03 /* Constants.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -431,6 +434,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
+				9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */,
 				9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */,
 				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
 				9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */,

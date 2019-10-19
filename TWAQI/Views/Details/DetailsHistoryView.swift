@@ -42,6 +42,7 @@ struct DetailsHistoryView: View {
 
             HStack {
                 Text("AQI - Air quality index")
+                    .fontWeight(.light)
                 Spacer()
             }
         }
