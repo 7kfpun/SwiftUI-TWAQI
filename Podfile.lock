@@ -80,6 +80,7 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
+  - OneSignal (2.11.2)
   - SDWebImage (5.2.3):
     - SDWebImage/Core (= 5.2.3)
   - SDWebImage/Core (5.2.3)
@@ -93,6 +94,7 @@ DEPENDENCIES:
   - Firebase (~> 6.10)
   - Firebase/AdMob
   - Firebase/Analytics
+  - OneSignal (< 3.0, >= 2.6.2)
   - SDWebImageSwiftUI (~> 0.3.2)
   - SwiftDate (~> 6.1)
 
@@ -112,6 +114,7 @@ SPEC REPOS:
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
     - nanopb
+    - OneSignal
     - SDWebImage
     - SDWebImageSwiftUI
     - SwiftDate
@@ -131,10 +134,11 @@ SPEC CHECKSUMS:
   GoogleDataTransportCCTSupport: f6ab1962e9dc05ab1fb938b795e5b310209edeec
   GoogleUtilities: f895fde57977df4e0233edda0dbeac490e3703b6
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  OneSignal: 4e3e68bb6c29975286a2fa910cb49132bc6e20bb
   SDWebImage: 46a7f73228f84ce80990c786e4372cf4db5875ce
   SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: b054ca7a86bd5e5abae27c882a6b3679f35f14f4
+PODFILE CHECKSUM: 777993319632d302542d5316b2b4cfada9e8e789
 
 COCOAPODS: 1.8.3

@@ -12,6 +12,7 @@ import AppCenter
 import AppCenterAnalytics
 import AppCenterCrashes
 import Firebase
+import OneSignal
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -30,6 +31,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           MSAnalytics.self,
           MSCrashes.self,
         ])
+
+        // Initialize OneSignal push services.
+        let onesignalInitSettings = [kOSSettingsKeyAutoPrompt: false]
+        OneSignal.initWithLaunchOptions(
+            launchOptions,
+            appId: getEnv("OneSignalAppId"),
+            handleNotificationAction: nil,
+            settings: onesignalInitSettings
+        )
+
+        OneSignal.inFocusDisplayType = OSNotificationDisplayType.notification
+
+        // TODO: Recommend moving the below line to prompt for push after informing the user about
+        // how your app will use them.
+        OneSignal.promptForPushNotifications(userResponse: { accepted in
+            print("User accepted notifications: \(accepted)")
+        })
 
         return true
     }

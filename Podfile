@@ -15,5 +15,12 @@ target 'TWAQI' do
   pod 'Firebase/AdMob'
 
   pod 'AppCenter', '~> 2.5.0'
+  pod 'OneSignal', '>= 2.6.2', '< 3.0'
 
+end
+
+target 'OneSignalNotificationServiceExtension' do
+  use_frameworks!
+
+  pod 'OneSignal', '>= 2.6.2', '< 3.0'
 end
