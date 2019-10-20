@@ -94,7 +94,7 @@ DEPENDENCIES:
   - Firebase (~> 6.10)
   - Firebase/AdMob
   - Firebase/Analytics
-  - OneSignal (< 3.0, >= 2.6.2)
+  - OneSignal (< 3.0, >= 2.11.2)
   - SDWebImageSwiftUI (~> 0.3.2)
   - SwiftDate (~> 6.1)
 
@@ -139,6 +139,6 @@ SPEC CHECKSUMS:
   SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: 777993319632d302542d5316b2b4cfada9e8e789
+PODFILE CHECKSUM: 94d1962b5dca4cc0252cd6c740fc7cfab66636d0
 
 COCOAPODS: 1.8.3

@@ -29,7 +29,7 @@ struct ContentView: View {
                     Text("Forecast")
                 }
 
-            SettingsView()
+            SettingsView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "bell")
                     Text("Settings")

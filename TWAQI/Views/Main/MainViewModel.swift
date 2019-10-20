@@ -34,9 +34,9 @@ class MainViewModel: ObservableObject {
 
         let session = URLSession.shared
         let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
-            print(response!)
-
             do {
+                print(response)
+
                 let pollutants = try JSONDecoder().decode([Pollutant].self, from: data!)
 
                 var landmarks: [Landmark] = []

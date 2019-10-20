@@ -21,16 +21,16 @@ struct DetailsGroup: View {
                     Text(stationGroup.name)
                         .bold()
                         .padding(.vertical, 10)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(Color.primary)
 
                     Spacer()
 
                     if isOpen {
                         Image(systemName: "chevron.down")
-                            .foregroundColor(Color.black)
+                            .foregroundColor(Color.primary)
                     } else {
                         Image(systemName: "chevron.right")
-                            .foregroundColor(Color.black)
+                            .foregroundColor(Color.primary)
                     }
                 }
                 .padding(.horizontal)

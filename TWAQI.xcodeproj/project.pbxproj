@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */; };
+		9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F532235C30A400BC3486 /* SettingsViewModel.swift */; };
+		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
 		9E1AC540233F981700AC862D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53F233F981700AC862D /* ContentView.swift */; };
@@ -50,9 +52,9 @@
 		9EC6BB17235B462B00213041 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB16235B462B00213041 /* SafariView.swift */; };
 		9EC6BB1F235B590500213041 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB1E235B590500213041 /* NotificationService.swift */; };
 		9EC6BB23235B590500213041 /* OneSignalNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE9E6BD235C8F150046A590 /* SettingsStore.swift */; };
 		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
 		9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0323425053007B7723 /* DetailsGroup.swift */; };
-		9EFE2E062342677D007B7723 /* DnD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E052342677D007B7723 /* DnD.swift */; };
 		AEAF311CBA65697B61E2412E /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */; };
 /* End PBXBuildFile section */
 
@@ -84,6 +86,8 @@
 		2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TWAQI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OneSignalNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		437631D7D7C9B18A5CECB5C3 /* Pods-OneSignalNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
+		9E01F532235C30A400BC3486 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* TWAQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TWAQI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53D233F981700AC862D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -133,9 +137,9 @@
 		9EC6BB20235B590500213041 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9EC6BB28235B5AD800213041 /* OneSignalNotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneSignalNotificationServiceExtension.entitlements; sourceTree = "<group>"; };
 		9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TWAQI.entitlements; sourceTree = "<group>"; };
+		9EE9E6BD235C8F150046A590 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		9EFE2E0123423D74007B7723 /* SettingsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroup.swift; sourceTree = "<group>"; };
 		9EFE2E0323425053007B7723 /* DetailsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsGroup.swift; sourceTree = "<group>"; };
-		9EFE2E052342677D007B7723 /* DnD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DnD.swift; sourceTree = "<group>"; };
 		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
 		DF13A9AEE12BB503E5C3EA73 /* Pods-TWAQI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.debug.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -249,9 +253,9 @@
 			isa = PBXGroup;
 			children = (
 				9E1AC557233F9A1800AC862D /* SettingsView.swift */,
+				9E01F532235C30A400BC3486 /* SettingsViewModel.swift */,
 				9E794A682340A6090064D874 /* SettingsRow.swift */,
 				9EFE2E0123423D74007B7723 /* SettingsGroup.swift */,
-				9EFE2E052342677D007B7723 /* DnD.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -294,6 +298,7 @@
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9E978F19235ABB0500C66A03 /* Constants.swift */,
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
+				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -317,6 +322,7 @@
 				9EC5960D2351C29E00B8AA99 /* Landmark.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
+				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -568,8 +574,10 @@
 				9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */,
 				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
+				9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
+				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
 				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
 				9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */,
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
@@ -577,11 +585,11 @@
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
 				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
+				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				9E5257A8234305D6001ECFE1 /* Index.swift in Sources */,
 				9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
-				9EFE2E062342677D007B7723 /* DnD.swift in Sources */,
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
 				9EC6BB17235B462B00213041 /* SafariView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,

@@ -15,14 +15,14 @@ struct DetailsRow: View {
         NavigationLink(destination: DetailsView(station: station)) {
             HStack {
                 Text(station.name)
-                    .foregroundColor(Color.black)
+                    .foregroundColor(Color.primary)
                     .fontWeight(.light)
                     .padding(.vertical, 10)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(Color.secondary)
             }
             .padding(.horizontal)
         }

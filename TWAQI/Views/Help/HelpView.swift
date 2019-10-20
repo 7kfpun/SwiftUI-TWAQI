@@ -9,34 +9,68 @@
 import SwiftUI
 
 struct HelpView: View {
+    @EnvironmentObject var settings: SettingsStore
+
     @State var linkPage: Constants.LinkPages?
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(Constants.LinkPages.allCases) { linkPage in
-                    Button(action: {
-                        // setting a new value to self.linkPage
-                        // this is used for triggering the SafariView presentation through .sheet()
-                        self.linkPage = linkPage
-                    }) {
-                        Text(linkPage.title)
-                            .fontWeight(.light)
-                            .padding(.vertical, 12)
+            Form {
+                Section(header: Text("Do Not Disturb")) {
+                    Toggle(isOn: $settings.isDndEnabled) {
+                        Text("Turn on Do Not Disturb")
+                            .bold()
+                    }
+
+                    if settings.isDndEnabled {
+                        DatePicker(
+                            selection: $settings.startDate,
+                            displayedComponents: .hourAndMinute,
+                            label: { Text("Start Date").fontWeight(.light) }
+                        )
+
+                        DatePicker(
+                            selection: $settings.endDate,
+                            displayedComponents: .hourAndMinute,
+                            label: { Text("End Date").fontWeight(.light) }
+                        )
                     }
                 }
 
-                HStack {
-                    Text("Particulates")
-                        .fontWeight(.light)
-                    Spacer()
-                    Text("2")
+                if !settings.isPro {
+                    Section {
+                        Button(action: {
+                            self.settings.unlockPro()
+                        }) {
+                            Text("Unlock PRO")
+                        }
+
+                        Button(action: {
+                            self.settings.restorePurchase()
+                        }) {
+                            Text("Restore purchase")
+                        }
+                    }
                 }
-                .padding(.vertical, 12)
+
+                Section {
+                    ForEach(Constants.LinkPages.allCases) { linkPage in
+                        Button(action: {
+                            // setting a new value to self.linkPage
+                            // this is used for triggering the SafariView presentation through .sheet()
+                            self.linkPage = linkPage
+                        }) {
+                            Text(linkPage.title)
+                                .foregroundColor(Color.primary)
+                                .fontWeight(.light)
+                        }
+                    }
+                }
+                .sheet(item: $linkPage, content: { linkPage in
+                    SafariView(url: linkPage.url)
+                })
+                
             }
-            .sheet(item: $linkPage, content: { linkPage in
-                SafariView(url: linkPage.url)
-            })
             .navigationBarTitle("Help")
         }
     }
@@ -44,6 +78,6 @@ struct HelpView: View {
 
 struct HelpView_Previews: PreviewProvider {
     static var previews: some View {
-        HelpView()
+        HelpView().environmentObject(SettingsStore())
     }
 }
