@@ -11,6 +11,7 @@ import SwiftUICharts
 
 struct DetailsHistoryView: View {
     @EnvironmentObject var settings: SettingsStore
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
 
     var historyPollutants: [HistoryPollutant]
 
@@ -32,12 +33,13 @@ struct DetailsHistoryView: View {
                 }
             }
             .pickerStyle(SegmentedPickerStyle())
-            .padding(.bottom, 10)
+            .padding(.bottom)
 
             if !data.isEmpty {
                 BarChartView(
                     data: data,
-                    title: "123",
+                    title: "\(settings.airIndexTypeSelected.toString()) - \(data.last!)",
+                    style: colorScheme == .light ? Styles.barChartStyleOrangeLight : Styles.barChartStyleOrangeDark,
                     form: Form.large
                 )
             }
@@ -58,18 +60,36 @@ struct DetailsHistoryView: View {
 
 struct DetailsHistoryView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailsHistoryView(historyPollutants: [
-            HistoryPollutant(
-                stationId: 96,
-                aqi: 61,
-                pm25: 15,
-                pm10: 26,
-                no2: 6.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T22:00:00"
-            ),
-        ]).environmentObject(SettingsStore())
+        Group {
+            DetailsHistoryView(historyPollutants: [
+                HistoryPollutant(
+                    stationId: 96,
+                    aqi: 61,
+                    pm25: 15,
+                    pm10: 26,
+                    no2: 6.7,
+                    so2: 2.3,
+                    co: 0.25,
+                    o3: 39,
+                    publishTime: "2019-10-13T22:00:00"
+                ),
+            ])
+            .environmentObject(SettingsStore())
+            DetailsHistoryView(historyPollutants: [
+                HistoryPollutant(
+                    stationId: 96,
+                    aqi: 61,
+                    pm25: 15,
+                    pm10: 26,
+                    no2: 6.7,
+                    so2: 2.3,
+                    co: 0.25,
+                    o3: 39,
+                    publishTime: "2019-10-13T22:00:00"
+                ),
+            ])
+            .environmentObject(SettingsStore())
+            .environment(\.colorScheme, .dark)
+        }
     }
 }

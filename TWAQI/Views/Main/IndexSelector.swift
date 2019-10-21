@@ -9,19 +9,19 @@
 import SwiftUI
 
 struct IndexSelector: View {
-
-    @State private var selectedIndex = "AQI"
+    @EnvironmentObject var settings: SettingsStore
 
     var body: some View {
-
         ScrollView(.horizontal) {
             HStack {
                 ForEach(Constants.AirIndexTypes.allCases, id: \.self) {airIndex in
                     Button(action: {
-                        self.selectedIndex = airIndex.toString()
+                        self.settings.airIndexTypeSelected = airIndex
                     }) {
                         Text(airIndex.toString())
-                            .foregroundColor(self.selectedIndex == airIndex.toString() ? Color(0x5AC8FA) : Color.black)
+                            .foregroundColor(
+                                self.settings.airIndexTypeSelected == airIndex ? Color(0x5AC8FA) : Color.black
+                            )
                             .fontWeight(.regular)
                             .padding(.vertical)
                             .frame(width: 55)
