@@ -16,25 +16,23 @@ struct DetailsView: View {
 
     var body: some View {
         ScrollView {
-            VStack {
-                if !(self.station.imageUrl?.isEmpty ?? true) {
-                    WebImage(url: URL(string: self.station.imageUrl!))
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                }
-
-                if !viewModel.historyPollutants.isEmpty {
-                    DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
-                }
-
-                Indicator()
-                    .frame(height: 90)
-
-                DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
+            if !(self.station.imageUrl?.isEmpty ?? true) {
+                WebImage(url: URL(string: self.station.imageUrl!))
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             }
-            .onAppear {
-                self.getData()
+
+            if !viewModel.historyPollutants.isEmpty {
+                DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
             }
+
+            Indicator()
+                .frame(height: 90)
+
+            DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
+        }
+        .onAppear {
+            self.getData()
         }
         .edgesIgnoringSafeArea(.top)
     }

@@ -23,6 +23,6 @@ struct Station: Hashable, Codable, Identifiable {
         case nameLocal = "name_local"
         case lon = "lon"
         case lat = "lat"
-        case imageUrl = "imageUrl"
+        case imageUrl = "image_url"
     }
 }

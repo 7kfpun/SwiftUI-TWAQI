@@ -55,11 +55,11 @@ struct SettingsGroup_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             SettingsGroup(stationGroup: StationGroup(name: "Lianjiang County", nameLocal: "連江縣", stations: [
-                Station(name: "Lianjiang", nameLocal: "馬祖", lon: 119.949875, lat: 26.160469)
+                Station(name: "Lianjiang", nameLocal: "馬祖", lon: 119.949875, lat: 26.160469),
             ]))
             SettingsGroup(stationGroup: StationGroup(name: "Taipei City", nameLocal: "臺北市", stations: [
                 Station(name: "Yangming", nameLocal: "陽明", lon: 121.529583, lat: 25.182722),
-                Station(name: "Songshan", nameLocal: "松山", lon: 121.578611, lat: 25.050000)
+                Station(name: "Songshan", nameLocal: "松山", lon: 121.578611, lat: 25.050000),
             ]))
         }
         .previewLayout(.fixed(width: 400, height: 250))
