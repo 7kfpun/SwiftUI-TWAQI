@@ -190,19 +190,19 @@
 		9E1AC53A233F981700AC862D /* TWAQI */ = {
 			isa = PBXGroup;
 			children = (
-				9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */,
 				9EC596072351BC0500B8AA99 /* Config */,
-				9E5257A12342FD88001ECFE1 /* Resources */,
 				9E794A65234099830064D874 /* Models */,
+				9E5257A12342FD88001ECFE1 /* Resources */,
 				9E1AC565233FB09000AC862D /* Utils */,
 				9E1AC54F233F998E00AC862D /* Views */,
-				9E1AC53B233F981700AC862D /* AppDelegate.swift */,
-				9E1AC53D233F981700AC862D /* SceneDelegate.swift */,
-				9E1AC53F233F981700AC862D /* ContentView.swift */,
-				9E1AC541233F981900AC862D /* Assets.xcassets */,
-				9E1AC546233F981900AC862D /* LaunchScreen.storyboard */,
+				9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */,
 				9E978F152357808100C66A03 /* GoogleService-Info.plist */,
 				9E1AC549233F981900AC862D /* Info.plist */,
+				9E1AC53B233F981700AC862D /* AppDelegate.swift */,
+				9E1AC53F233F981700AC862D /* ContentView.swift */,
+				9E1AC53D233F981700AC862D /* SceneDelegate.swift */,
+				9E1AC541233F981900AC862D /* Assets.xcassets */,
+				9E1AC546233F981900AC862D /* LaunchScreen.storyboard */,
 				9E1AC543233F981900AC862D /* Preview Content */,
 			);
 			path = TWAQI;
@@ -219,12 +219,12 @@
 		9E1AC54F233F998E00AC862D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				9E1AC55F233F9A7300AC862D /* Details */,
-				9E1AC55C233F9A4400AC862D /* Help */,
-				9E1AC559233F9A2A00AC862D /* Forecast */,
-				9E1AC556233F9A0600AC862D /* Settings */,
-				9E1AC553233F99CE00AC862D /* Main */,
 				9E1AC550233F999B00AC862D /* Common */,
+				9E1AC55F233F9A7300AC862D /* Details */,
+				9E1AC559233F9A2A00AC862D /* Forecast */,
+				9E1AC55C233F9A4400AC862D /* Help */,
+				9E1AC553233F99CE00AC862D /* Main */,
+				9E1AC556233F9A0600AC862D /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -233,8 +233,8 @@
 			isa = PBXGroup;
 			children = (
 				9E1AC551233F99BC00AC862D /* Common.swift */,
-				9E794A61234083700064D874 /* Indicator.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
+				9E794A61234083700064D874 /* Indicator.swift */,
 				9EC6BB16235B462B00213041 /* SafariView.swift */,
 				9EC3CF1F235E0EF100F17332 /* Separator.swift */,
 			);
@@ -255,10 +255,10 @@
 		9E1AC556233F9A0600AC862D /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				9EFE2E0123423D74007B7723 /* SettingsGroup.swift */,
+				9E794A682340A6090064D874 /* SettingsRow.swift */,
 				9E1AC557233F9A1800AC862D /* SettingsView.swift */,
 				9E01F532235C30A400BC3486 /* SettingsViewModel.swift */,
-				9E794A682340A6090064D874 /* SettingsRow.swift */,
-				9EFE2E0123423D74007B7723 /* SettingsGroup.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -297,10 +297,10 @@
 		9E1AC565233FB09000AC862D /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				9E1AC566233FB0A400AC862D /* HexColors.swift */,
-				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9E978F19235ABB0500C66A03 /* Constants.swift */,
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
+				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
+				9E1AC566233FB0A400AC862D /* HexColors.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 			);
 			path = Utils;
@@ -309,8 +309,8 @@
 		9E5257A12342FD88001ECFE1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				9E978F1D235B0A0300C66A03 /* stations.json */,
 				9E5257A32342FE56001ECFE1 /* Indexes.json */,
+				9E978F1D235B0A0300C66A03 /* stations.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -333,8 +333,8 @@
 		9EC596072351BC0500B8AA99 /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				9EC596082351BC5D00B8AA99 /* release.xcconfig */,
 				9EC596112351C94900B8AA99 /* debug.xcconfig */,
+				9EC596082351BC5D00B8AA99 /* release.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
