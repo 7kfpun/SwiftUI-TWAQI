@@ -38,17 +38,18 @@ struct DetailsHistoryView: View {
             if !data.isEmpty {
                 BarChartView(
                     data: data,
-                    title: "\(settings.airIndexTypeSelected.toString()) - \(data.last!)",
+                    title: "\(data.last!)",
                     style: colorScheme == .light ? Styles.barChartStyleOrangeLight : Styles.barChartStyleOrangeDark,
                     form: Form.large
                 )
             }
 
             HStack {
-                Text("AQI - Air quality index")
+                Text("\(settings.airIndexTypeSelected.toString()) - \(settings.airIndexTypeSelected.getDescription())")
                     .fontWeight(.light)
                 Spacer()
             }
+            .padding(.leading, 5)
         }
         .padding(.horizontal, 10)
     }

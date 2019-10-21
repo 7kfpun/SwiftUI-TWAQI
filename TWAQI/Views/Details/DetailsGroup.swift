@@ -15,7 +15,7 @@ struct DetailsGroup: View {
     var body: some View {
         VStack {
             Button(action: {
-                self.isOpen = !self.isOpen
+                self.isOpen.toggle()
             }) {
                 HStack {
                     Text(stationGroup.name)

@@ -23,8 +23,6 @@ struct DetailsListView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
 
-                    Divider()
-
                     if searchText.isEmpty {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             DetailsGroup(stationGroup: stationGroup)

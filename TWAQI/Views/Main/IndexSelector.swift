@@ -12,7 +12,7 @@ struct IndexSelector: View {
     @EnvironmentObject var settings: SettingsStore
 
     var body: some View {
-        ScrollView(.horizontal) {
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack {
                 ForEach(Constants.AirIndexTypes.allCases, id: \.self) {airIndex in
                     Button(action: {
@@ -40,5 +40,6 @@ struct IndexSelector_Previews: PreviewProvider {
     static var previews: some View {
         IndexSelector()
             .previewLayout(.fixed(width: 600, height: 100))
+            .environmentObject(SettingsStore())
     }
 }

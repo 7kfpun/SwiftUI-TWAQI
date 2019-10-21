@@ -37,7 +37,8 @@ identifier_name:
     severity: warning
     excluded: # excluded via string array
       - id
-      - o3 # Ozone
       - co # Carbon monoxide
+      - no # Nitric oxide
+      - o3 # Ozone
       - URL
 reporter: "xcode"

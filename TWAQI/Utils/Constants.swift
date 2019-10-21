@@ -31,6 +31,19 @@ enum Constants {
             return readableStrings[self.rawValue] ?? ""
         }
 
+        func getDescription() -> String {
+            let units = [
+                "aqi": "Air quality index",
+                "pm25": "Particulates",
+                "pm10": "Particulates",
+                "o3": "Ozone",
+                "co": "Carbon monoxide",
+                "so2": "Sulfur dioxide",
+                "no2": "Nitrogen dioxide",
+            ]
+            return units[self.rawValue] ?? ""
+        }
+
         func getUnit() -> String {
             let units = [
                 "aqi": "",

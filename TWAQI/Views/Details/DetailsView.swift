@@ -26,10 +26,18 @@ struct DetailsView: View {
                 DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
             }
 
+            Separator()
+
+            SettingsRow(station: station)
+
+            Separator()
+
             Indicator()
                 .frame(height: 90)
 
             DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
+
+            Separator()
         }
         .onAppear {
             self.getData()

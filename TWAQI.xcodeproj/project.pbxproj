@@ -45,6 +45,7 @@
 		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
 		9E978F1E235B0A0300C66A03 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
 		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
+		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
@@ -125,6 +126,7 @@
 		9E978F1D235B0A0300C66A03 /* stations.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = stations.json; sourceTree = "<group>"; };
 		9E978F1F235B0CDC00C66A03 /* StationGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationGroups.swift; sourceTree = "<group>"; };
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				9E794A61234083700064D874 /* Indicator.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 				9EC6BB16235B462B00213041 /* SafariView.swift */,
+				9EC3CF1F235E0EF100F17332 /* Separator.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -280,13 +283,13 @@
 		9E1AC55F233F9A7300AC862D /* Details */ = {
 			isa = PBXGroup;
 			children = (
-				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
-				9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */,
-				9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */,
-				9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */,
 				9EFE2E0323425053007B7723 /* DetailsGroup.swift */,
+				9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */,
 				9E1AC563233F9AC100AC862D /* DetailsListView.swift */,
 				9E794A632340993C0064D874 /* DetailsRow.swift */,
+				9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */,
+				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
+				9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -596,6 +599,7 @@
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
 				9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */,
 				9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */,
+				9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */,
 				9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */,

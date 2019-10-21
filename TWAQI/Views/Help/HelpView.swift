@@ -17,7 +17,7 @@ struct HelpView: View {
         NavigationView {
             Form {
                 Section(header: Text("Do Not Disturb")) {
-                    Toggle(isOn: $settings.isDndEnabled) {
+                    Toggle(isOn: $settings.isDndEnabled.animation()) {
                         Text("Turn on Do Not Disturb")
                             .bold()
                     }
