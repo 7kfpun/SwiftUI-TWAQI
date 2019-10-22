@@ -16,12 +16,10 @@ struct IndexRange {
 }
 
 struct Indicator: View {
-
     var body: some View {
-
         GeometryReader { geometry in
             HStack(alignment: .top) {
-                ForEach(Constants.AirStatuses.allCases, id: \.self) { airStatus in
+                ForEach(Constants.AirStatuses.getShowAllCases(), id: \.self) { airStatus in
                     VStack {
                         Rectangle()
                             .fill(Color(airStatus.getColor()))
@@ -45,6 +43,6 @@ struct Indicator: View {
 struct Indicator_Previews: PreviewProvider {
     static var previews: some View {
         Indicator()
-            .previewLayout(.fixed(width: 400, height: 100))
+            .previewLayout(.fixed(width: 600, height: 100))
     }
 }

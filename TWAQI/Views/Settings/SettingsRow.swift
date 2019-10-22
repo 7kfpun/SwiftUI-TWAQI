@@ -28,7 +28,10 @@ struct SettingsRow: View {
                     Text("Pollution therhold")
                         .fontWeight(.light)
                     Spacer()
-                    Text("\(max)")
+                    LabelView(
+                        airIndexTypes: Constants.AirIndexTypes.aqi,
+                        value: Int(max)
+                    )
                 }
 
                 Slider(value: $max, in: 0...500, step: 1)
@@ -37,7 +40,10 @@ struct SettingsRow: View {
                     Text("Cleanliness therhold")
                         .fontWeight(.light)
                     Spacer()
-                    Text("\(min)")
+                    LabelView(
+                        airIndexTypes: Constants.AirIndexTypes.aqi,
+                        value: Int(min)
+                    )
                 }
 
                 Slider(value: $min, in: 0...500, step: 1)

@@ -71,6 +71,7 @@ struct ForecastView: View {
                 ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
                     HStack {
                         Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
+                            .fontWeight(.regular)
                     }
                     .frame(width: 70)
                 }
@@ -83,8 +84,10 @@ struct ForecastView: View {
                     Spacer()
                     ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
                         HStack {
-                            Text(area.aqi)
-                                .fontWeight(.light)
+                            LabelView(
+                                airIndexTypes: Constants.AirIndexTypes.aqi,
+                                value: Int((area as ForecastArea).aqi) ?? 0
+                            )
                         }
                         .frame(width: 70)
                     }
@@ -92,6 +95,7 @@ struct ForecastView: View {
             }
             .padding(.vertical, 10)
         }
+        .padding(.bottom, 50)
     }
 
     var forecastTextView: some View {

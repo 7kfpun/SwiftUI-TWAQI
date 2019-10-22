@@ -56,6 +56,24 @@ enum Constants {
             ]
             return units[self.rawValue] ?? ""
         }
+
+        func getAirStatus(value: Int) -> Constants.AirStatuses {
+            let ranges: [Range<Int>: Constants.AirStatuses] = [
+                1..<51: Constants.AirStatuses.good,
+                51..<101: Constants.AirStatuses.moderate,
+                101..<151: Constants.AirStatuses.unhealthyforsensitivegroup,
+                151..<201: Constants.AirStatuses.unhealthy,
+                201..<301: Constants.AirStatuses.veryunhealthy,
+                301..<501: Constants.AirStatuses.hazardous,
+            ]
+
+            for (range, airStatus) in ranges {
+                if range.contains(value) {
+                    return airStatus
+                }
+            }
+            return Constants.AirStatuses.unknown
+        }
     }
 
     enum AirStatuses: String, CaseIterable, Hashable {
@@ -65,6 +83,18 @@ enum Constants {
         case unhealthy
         case veryunhealthy
         case hazardous
+        case unknown
+
+        static func getShowAllCases() -> [Constants.AirStatuses] {
+            [
+                Constants.AirStatuses.good,
+                Constants.AirStatuses.moderate,
+                Constants.AirStatuses.unhealthyforsensitivegroup,
+                Constants.AirStatuses.unhealthy,
+                Constants.AirStatuses.veryunhealthy,
+                Constants.AirStatuses.hazardous,
+            ]
+        }
 
         func toString() -> String {
             let readableStrings = [
@@ -88,6 +118,20 @@ enum Constants {
                 "hazardous": 0x7E2200,
             ]
             return UInt32(colors[self.rawValue] ?? 0xEEEEEE)
+        }
+
+        func getForegroundColor() -> UInt32 {
+            let white = 0xFFFFFF
+            let black = 0x000000
+            let colors = [
+                "good": white,
+                "moderate": black,
+                "unhealthyforsensitivegroup": black,
+                "unhealthy": white,
+                "veryunhealthy": white,
+                "hazardous": white,
+            ]
+            return UInt32(colors[self.rawValue] ?? white)
         }
 
         func getGeneralPublicGuidance() -> String {
