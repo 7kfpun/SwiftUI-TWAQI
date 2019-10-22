@@ -1,0 +1,30 @@
+//
+//  example.xcconfig
+//  TWAQI
+//
+//  Created by kf on 22/10/19.
+//  Copyright © 2019 kf. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+// Please copy the file and rename to debug.xcconfig and release.xcconfig
+
+// APIs
+AQI_API =
+FORECAST_API =
+HISTORY_API =
+
+// Services
+GADApplicationIdentifier =
+AppCenterSecret =
+OneSignalAppId =
+
+// AdMob AdUnitId
+AdUnitIdMainFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdDetailsListFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdDetailsFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdForecastFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdSettingsFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716

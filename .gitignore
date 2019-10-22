@@ -90,6 +90,7 @@ fastlane/test_output
 iOSInjectionProject/
 
 # Project
-**/*.xcconfig
+**/debug.xcconfig
+**/release.xcconfig
 Pods
 GoogleService-Info.plist

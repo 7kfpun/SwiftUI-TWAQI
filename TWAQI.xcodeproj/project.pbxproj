@@ -129,6 +129,7 @@
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
+		9EC3CF23235F5ABB00F17332 /* example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = example.xcconfig; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -338,6 +339,7 @@
 			children = (
 				9EC596112351C94900B8AA99 /* debug.xcconfig */,
 				9EC596082351BC5D00B8AA99 /* release.xcconfig */,
+				9EC3CF23235F5ABB00F17332 /* example.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
