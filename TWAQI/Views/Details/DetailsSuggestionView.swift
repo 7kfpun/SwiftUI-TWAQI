@@ -16,24 +16,63 @@ struct DetailsSuggestionView: View {
             HStack {
                 VStack {
                     Text("AQI")
-                    Text("\(self.lastPollutant.aqi)")
-                    Text("Good")
-                }
-                .frame(width: geometry.size.width / 3, height: 140)
-
-                VStack {
-                    Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-                    Text("Hello, World!")
+                        .fontWeight(.regular)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
 
                     Spacer()
 
-                    Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-                    Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+                    Text("\(self.lastPollutant.aqi)")
+                        .font(.largeTitle)
+
+                    Spacer()
+
+                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).toString())
+                        .fontWeight(.thin)
                 }
-                .frame(width: geometry.size.width * 2 / 3, height: 140)
+                .frame(width: geometry.size.width / 3)
+
+                VStack(alignment: .leading) {
+                    Text("General public")
+                        .fontWeight(.regular)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
+
+                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).getGeneralPublicGuidance())
+                        .font(.body)
+                        .fontWeight(.thin)
+                        .padding(.top, 6)
+
+                    Spacer()
+
+                    Text("Sensitive group")
+                        .fontWeight(.regular)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.black, lineWidth: 1)
+                        )
+
+                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).getSensitivePublicGuidance())
+                        .font(.body)
+                        .fontWeight(.thin)
+                        .padding(.top, 6
+                    )
+                }
+                .frame(width: geometry.size.width * 2 / 3)
             }
         }
         .frame(height: 150)
+        .padding()
     }
 
     init(lastPollutant: HistoryPollutant) {

@@ -101,7 +101,8 @@ struct ForecastView: View {
     var forecastTextView: some View {
         VStack {
             Text(viewModel.forecastDetail)
-                .lineSpacing(12)
+                .fontWeight(.regular)
+                .lineSpacing(14)
         }
         .padding(.vertical)
     }
