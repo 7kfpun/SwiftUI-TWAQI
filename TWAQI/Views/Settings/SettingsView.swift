@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import GoogleMobileAds
 import SwiftUI
 
 struct SettingsView: View {
@@ -15,21 +16,29 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                TextField("Search", text: $searchText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+            ZStack {
+                ScrollView {
+                    TextField("Search", text: $searchText)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
 
-                if searchText.isEmpty {
-                    ForEach(self.viewModel.stationGroups, id: \.self) {stationGroup in
-                        SettingsGroup(stationGroup: stationGroup)
-                    }
-                } else {
-                    ForEach(self.viewModel.stationGroups, id: \.self) {stationGroup in
-                        ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
-                            SettingsRow(station: station)
+                    if searchText.isEmpty {
+                        ForEach(self.viewModel.stationGroups, id: \.self) {stationGroup in
+                            SettingsGroup(stationGroup: stationGroup)
+                        }
+                    } else {
+                        ForEach(self.viewModel.stationGroups, id: \.self) {stationGroup in
+                            ForEach(stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self) {station in
+                                SettingsRow(station: station)
+                            }
                         }
                     }
+                }
+
+                VStack {
+                    Spacer()
+                    GADBannerViewController(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
+                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
                 }
             }
             .navigationBarTitle("Notification")

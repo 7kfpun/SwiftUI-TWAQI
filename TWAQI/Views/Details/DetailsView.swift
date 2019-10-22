@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import GoogleMobileAds
 import SDWebImageSwiftUI
 import SwiftUI
 
@@ -15,29 +16,37 @@ struct DetailsView: View {
     var station: Station
 
     var body: some View {
-        ScrollView {
-            if !(self.station.imageUrl?.isEmpty ?? true) {
-                WebImage(url: URL(string: self.station.imageUrl!))
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+        ZStack {
+            ScrollView {
+                if !(self.station.imageUrl?.isEmpty ?? true) {
+                    WebImage(url: URL(string: self.station.imageUrl!))
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                }
+
+                if !viewModel.historyPollutants.isEmpty {
+                    DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
+                }
+
+                Separator()
+
+                SettingsRow(station: station)
+
+                Separator()
+
+                Indicator()
+                    .frame(height: 90)
+
+                DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
+
+                Separator()
             }
 
-            if !viewModel.historyPollutants.isEmpty {
-                DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
+            VStack {
+                Spacer()
+                GADBannerViewController(adUnitID: getEnv("AdUnitIdHelpFooter")!)
+                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
             }
-
-            Separator()
-
-            SettingsRow(station: station)
-
-            Separator()
-
-            Indicator()
-                .frame(height: 90)
-
-            DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
-
-            Separator()
         }
         .onAppear {
             self.getData()

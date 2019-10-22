@@ -38,7 +38,7 @@ struct DetailsListView: View {
 
                 VStack {
                     Spacer()
-                    GADBannerViewController()
+                    GADBannerViewController(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
                         .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
                 }
             }

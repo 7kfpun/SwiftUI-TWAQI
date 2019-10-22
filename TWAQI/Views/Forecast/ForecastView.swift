@@ -44,8 +44,8 @@ struct ForecastView: View {
 
                 VStack {
                     Spacer()
-                    GADBannerViewController(adUnitID: "ca-app-pub-3940256099942544/2934735716")
-                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
+                    GADBannerViewController(adUnitID: getEnv("AdUnitIdForecastFooter")!)
+                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
                 }
             }
             .navigationBarTitle("Forecast")

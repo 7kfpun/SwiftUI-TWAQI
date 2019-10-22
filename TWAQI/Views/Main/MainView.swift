@@ -44,7 +44,7 @@ struct MainView: View {
 
                 IndexSelector()
 
-                GADBannerViewController(adUnitID: "ca-app-pub-3940256099942544/2934735716")
+                GADBannerViewController(adUnitID: getEnv("AdUnitIdMainFooter")!)
                     .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
             }
         }

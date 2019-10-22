@@ -72,5 +72,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>AdUnitIdMainFooter</key>
+	<string>$(AdUnitIdMainFooter)</string>
+	<key>AdUnitIdDetailsListFooter</key>
+	<string>$(AdUnitIdDetailsListFooter)</string>
+	<key>AdUnitIdDetailsFooter</key>
+	<string>$(AdUnitIdDetailsFooter)</string>
+	<key>AdUnitIdForecastFooter</key>
+	<string>$(AdUnitIdForecastFooter)</string>
+	<key>AdUnitIdSettingsFooter</key>
+	<string>$(AdUnitIdSettingsFooter)</string>
+	<key>AdUnitIdHelpFooter</key>
+	<string>$(AdUnitIdHelpFooter)</string>
 </dict>
 </plist>
