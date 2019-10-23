@@ -35,6 +35,7 @@ struct DetailsListView: View {
                         }
                     }
                 }
+                .padding(.bottom, 50)
 
                 VStack {
                     Spacer()

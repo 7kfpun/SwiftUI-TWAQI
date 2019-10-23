@@ -34,6 +34,7 @@ struct SettingsView: View {
                         }
                     }
                 }
+                .padding(.bottom, 50)
 
                 VStack {
                     Spacer()

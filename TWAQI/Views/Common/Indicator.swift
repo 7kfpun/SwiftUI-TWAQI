@@ -37,6 +37,7 @@ struct Indicator: View {
                 }
             }
         }
+        .frame(height: 90)
     }
 }
 
