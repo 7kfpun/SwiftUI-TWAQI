@@ -17,8 +17,9 @@ FORECAST_API =
 HISTORY_API =
 
 // Services
-GADApplicationIdentifier =
 AppCenterSecret =
+BugsnagApiKey = 
+GADApplicationIdentifier =
 OneSignalAppId =
 
 // AdMob AdUnitId

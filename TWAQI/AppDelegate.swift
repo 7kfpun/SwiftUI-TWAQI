@@ -11,6 +11,7 @@ import UIKit
 import AppCenter
 import AppCenterAnalytics
 import AppCenterCrashes
+import Bugsnag
 import Firebase
 import OneSignal
 
@@ -19,6 +20,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+
+        // Initialize the Bugsnag SDK.
+        Bugsnag.start(withApiKey: getEnv("BugsnagApiKey")!)
 
         // Use Firebase library to configure APIs.
         FirebaseApp.configure()

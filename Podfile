@@ -13,8 +13,12 @@ target 'TWAQI' do
   pod 'Firebase', '~> 6.10'
   pod 'Firebase/Analytics'
   pod 'Firebase/AdMob'
+  pod 'Firebase/InAppMessagingDisplay'
+  pod 'Fabric', '~> 1.10.2'
+  pod 'Crashlytics', '~> 3.14.0'
 
   pod 'AppCenter', '~> 2.5.0'
+  pod 'Bugsnag', '~> 5.22'
   pod 'OneSignal', '>= 2.11.2', '< 3.0'
 
 end

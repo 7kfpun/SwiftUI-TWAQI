@@ -27,7 +27,7 @@
 		9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */; };
 		9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
-		9E205FCB2354AD3300C6D3C1 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 9E205FCA2354AD3300C6D3C1 /* SwiftUICharts */; };
+		9E205FCB2354AD3300C6D3C1 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; productRef = 9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */; };
 		9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */; };
 		9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E5257A32342FE56001ECFE1 /* Indexes.json */; };
 		9E5257A8234305D6001ECFE1 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A7234305D6001ECFE1 /* Index.swift */; };
@@ -155,7 +155,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */,
-				9E205FCB2354AD3300C6D3C1 /* SwiftUICharts in Frameworks */,
+				9E205FCB2354AD3300C6D3C1 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -388,6 +388,8 @@
 				9EFE2DFC23419BBC007B7723 /* ShellScript */,
 				C5D0E6ADAEF6BA2F4785E9F3 /* [CP] Embed Pods Frameworks */,
 				9EC6BB27235B590500213041 /* Embed App Extensions */,
+				9EC3CF24235FF8C100F17332 /* ShellScript */,
+				125FC49B402E9EE6571A23C6 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -396,7 +398,7 @@
 			);
 			name = TWAQI;
 			packageProductDependencies = (
-				9E205FCA2354AD3300C6D3C1 /* SwiftUICharts */,
+				9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */,
 			);
 			productName = TWAQI;
 			productReference = 9E1AC538233F981700AC862D /* TWAQI.app */;
@@ -448,7 +450,7 @@
 			);
 			mainGroup = 9E1AC52F233F981700AC862D;
 			packageReferences = (
-				9E205FC92354AD3200C6D3C1 /* XCRemoteSwiftPackageReference "ChartView" */,
+				9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */,
 			);
 			productRefGroup = 9E1AC539233F981700AC862D /* Products */;
 			projectDirPath = "";
@@ -484,6 +486,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		125FC49B402E9EE6571A23C6 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TWAQI/Pods-TWAQI-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		9E42A2F81DAB4433795A8DEB /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -505,6 +524,23 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		9EC3CF24235FF8C100F17332 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Fabric/run\"\n";
 		};
 		9EFE2DFC23419BBC007B7723 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -881,7 +917,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		9E205FC92354AD3200C6D3C1 /* XCRemoteSwiftPackageReference "ChartView" */ = {
+		9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AppPear/ChartView";
 			requirement = {
@@ -892,9 +928,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		9E205FCA2354AD3300C6D3C1 /* SwiftUICharts */ = {
+		9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9E205FC92354AD3200C6D3C1 /* XCRemoteSwiftPackageReference "ChartView" */;
+			package = 9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */;
 			productName = SwiftUICharts;
 		};
 /* End XCSwiftPackageProductDependency section */
