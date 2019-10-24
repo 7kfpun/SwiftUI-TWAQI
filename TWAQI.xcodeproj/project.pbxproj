@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -27,7 +27,6 @@
 		9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */; };
 		9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
-		9E205FCB2354AD3300C6D3C1 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; productRef = 9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */; };
 		9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */; };
 		9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E5257A32342FE56001ECFE1 /* Indexes.json */; };
 		9E5257A8234305D6001ECFE1 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A7234305D6001ECFE1 /* Index.swift */; };
@@ -47,6 +46,7 @@
 		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
+		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
@@ -130,6 +130,7 @@
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
 		9EC3CF23235F5ABB00F17332 /* example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = example.xcconfig; sourceTree = "<group>"; };
+		9EC3CF252360A81300F17332 /* BarsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarsView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
@@ -155,7 +156,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */,
-				9E205FCB2354AD3300C6D3C1 /* BuildFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,6 +235,7 @@
 		9E1AC550233F999B00AC862D /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				9EC3CF252360A81300F17332 /* BarsView.swift */,
 				9E1AC551233F99BC00AC862D /* Common.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 				9E794A61234083700064D874 /* Indicator.swift */,
@@ -398,7 +399,6 @@
 			);
 			name = TWAQI;
 			packageProductDependencies = (
-				9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */,
 			);
 			productName = TWAQI;
 			productReference = 9E1AC538233F981700AC862D /* TWAQI.app */;
@@ -450,7 +450,6 @@
 			);
 			mainGroup = 9E1AC52F233F981700AC862D;
 			packageReferences = (
-				9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */,
 			);
 			productRefGroup = 9E1AC539233F981700AC862D /* Products */;
 			projectDirPath = "";
@@ -620,6 +619,7 @@
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
 				9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
+				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
 				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
@@ -915,25 +915,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AppPear/ChartView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		9E205FCA2354AD3300C6D3C1 /* SwiftPackageProductDependency */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 9E205FC92354AD3200C6D3C1 /* RemoteSwiftPackageReference */;
-			productName = SwiftUICharts;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9E1AC530233F981700AC862D /* Project object */;
 }
