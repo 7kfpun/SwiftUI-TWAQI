@@ -10,16 +10,20 @@ import GoogleMobileAds
 import SwiftUI
 
 struct MainView: View {
+    @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: MainViewModel
 
-    @State var selectedLandmark: Landmark? = nil
+    @State var selectedLandmark: Landmark?
 
     var body: some View {
         ZStack {
-            MapView(
-                landmarks: $viewModel.landmarks,
-                selectedLandmark: $selectedLandmark
-            ).edgesIgnoringSafeArea(.vertical)
+//            MapView(
+//                landmarks: $viewModel.landmarks,
+//                selectedLandmark: $selectedLandmark
+//            ).edgesIgnoringSafeArea(.vertical)
+
+            GoogleMapView(pollutants: viewModel.pollutants, isWindMode: self.settings.isWindMode)
+                .edgesIgnoringSafeArea(.vertical)
 
             VStack {
                 Text(String(viewModel.count))
@@ -27,7 +31,17 @@ struct MainView: View {
                 HStack {
                     VStack {
                         Spacer()
-                        button(for: "wind")
+
+                        Button(action: {
+                            self.settings.isWindMode.toggle()
+                        }) {
+                            Image(systemName: "wind")
+                                .frame(width: 60.0, height: 60.0)
+                                .background(Color.white)
+                                .foregroundColor(Color(0x5AC8FA))
+                                .clipShape(Circle())
+                                .shadow(radius: 2)
+                        }
                     }
 
                     Spacer()
@@ -59,5 +73,6 @@ struct MainView: View {
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         MainView(viewModel: .init())
+            .environmentObject(SettingsStore())
     }
 }

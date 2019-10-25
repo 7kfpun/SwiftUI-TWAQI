@@ -15,6 +15,9 @@ class MainViewModel: ObservableObject {
     @Published var landmarks: [Landmark] = [] {
         willSet { self.objectWillChange.send() }
     }
+    @Published var pollutants: [Pollutant] = [] {
+        willSet { self.objectWillChange.send() }
+    }
     @Published var count: Int = 0 {
         willSet { self.objectWillChange.send() }
     }
@@ -56,6 +59,7 @@ class MainViewModel: ObservableObject {
                     )
                 }
 
+                self.pollutants = pollutants
                 self.landmarks = landmarks
                 self.count = landmarks.count
                 print("Total: \(landmarks.count), first item \(landmarks[0])")

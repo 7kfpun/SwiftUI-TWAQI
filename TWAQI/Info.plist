@@ -8,6 +8,8 @@
 	<string>$(AQI_API)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
+	<key>GMSServicesApiKey</key>
+	<string>$(GMSServicesApiKey)</string>
 	<key>OneSignalAppId</key>
 	<string>$(OneSignalAppId)</string>
 	<key>CFBundleDevelopmentRegion</key>
@@ -86,5 +88,10 @@
 	<string>$(AdUnitIdSettingsFooter)</string>
 	<key>AdUnitIdHelpFooter</key>
 	<string>$(AdUnitIdHelpFooter)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+	</array>
 </dict>
 </plist>

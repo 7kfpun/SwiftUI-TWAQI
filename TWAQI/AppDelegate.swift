@@ -13,6 +13,7 @@ import AppCenterAnalytics
 import AppCenterCrashes
 import Bugsnag
 import Firebase
+import GoogleMaps
 import OneSignal
 
 @UIApplicationMain
@@ -22,7 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
 
         // Initialize the Bugsnag SDK.
-        Bugsnag.start(withApiKey: getEnv("BugsnagApiKey")!)
+        if let bugsnagApiKey = getEnv("BugsnagApiKey") {
+            Bugsnag.start(withApiKey: bugsnagApiKey)
+        }
 
         // Use Firebase library to configure APIs.
         FirebaseApp.configure()
@@ -30,28 +33,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize the Google Mobile Ads SDK.
         GADMobileAds.sharedInstance().start(completionHandler: nil)
 
+        // Initialize Google Map Service
+        if let gmsServicesApiKey = getEnv("GMSServicesApiKey") {
+            GMSServices.provideAPIKey(gmsServicesApiKey)
+        }
+
         // Initialize App Center services.
-        MSAppCenter.start(getEnv("AppCenterAppSecret"), withServices: [
-          MSAnalytics.self,
-          MSCrashes.self,
-        ])
+        if let appCenterAppSecret = getEnv("AppCenterAppSecret") {
+            MSAppCenter.start(appCenterAppSecret, withServices: [
+              MSAnalytics.self,
+              MSCrashes.self,
+            ])
+        }
 
         // Initialize OneSignal push services.
-        let onesignalInitSettings = [kOSSettingsKeyAutoPrompt: false]
-        OneSignal.initWithLaunchOptions(
-            launchOptions,
-            appId: getEnv("OneSignalAppId"),
-            handleNotificationAction: nil,
-            settings: onesignalInitSettings
-        )
+        if let oneSignalAppId = getEnv("OneSignalAppId") {
+            let onesignalInitSettings = [kOSSettingsKeyAutoPrompt: false]
+            OneSignal.initWithLaunchOptions(
+                launchOptions,
+                appId: oneSignalAppId,
+                handleNotificationAction: nil,
+                settings: onesignalInitSettings
+            )
 
-        OneSignal.inFocusDisplayType = OSNotificationDisplayType.notification
+            OneSignal.inFocusDisplayType = OSNotificationDisplayType.notification
 
-        // TODO: Recommend moving the below line to prompt for push after informing the user about
-        // how your app will use them.
-        OneSignal.promptForPushNotifications(userResponse: { accepted in
-            print("User accepted notifications: \(accepted)")
-        })
+            // TODO: Recommend moving the below line to prompt for push after informing the user about
+            // how your app will use them.
+            OneSignal.promptForPushNotifications(userResponse: { accepted in
+                print("User accepted notifications: \(accepted)")
+            })
+        }
 
         return true
     }

@@ -1,5 +1,5 @@
 //
-//  HexColors.swift
+//  ColorExtensions.swift
 //  TWAQI
 //
 //  Created by kf on 28/9/19.

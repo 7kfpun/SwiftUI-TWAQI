@@ -17,6 +17,7 @@ final class SettingsStore: ObservableObject {
         static let dndEnabled = "dndEnabled"
         static let startDate = "startDate"
         static let endDate = "endDate"
+        static let windMode = "windMode"
     }
 
     private let cancellable: Cancellable
@@ -73,6 +74,11 @@ final class SettingsStore: ObservableObject {
     var endDate: Date {
         set { defaults.set(newValue, forKey: Keys.endDate) }
         get { defaults.value(forKey: Keys.endDate) as! Date }
+    }
+
+    var isWindMode: Bool {
+        set { defaults.set(newValue, forKey: Keys.windMode) }
+        get { defaults.bool(forKey: Keys.windMode) }
     }
 }
 
