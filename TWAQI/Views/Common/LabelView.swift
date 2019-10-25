@@ -16,7 +16,8 @@ struct LabelView: View {
         Text("\(value)")
             .foregroundColor(Color(airIndexTypes.getAirStatus(value: value).getForegroundColor()))
             .fontWeight(.thin)
-            .padding(6)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
             .background(Color(airIndexTypes.getAirStatus(value: value).getColor()))
             .cornerRadius(8)
     }

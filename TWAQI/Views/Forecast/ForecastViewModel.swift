@@ -27,13 +27,13 @@ class ForecastViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
-
         let url: String = getEnv("FORECAST API")!
-        print("FORECAST API", url)
         AF.request(url)
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
+                    debugPrint(response)
+                    
                     let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
 
                     if !forecastAreas.isEmpty {

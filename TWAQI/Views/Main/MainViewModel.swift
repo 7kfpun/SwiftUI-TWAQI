@@ -6,15 +6,13 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import Alamofire
 import Combine
 import Foundation
 
 class MainViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
-    @Published var landmarks: [Landmark] = [] {
-        willSet { self.objectWillChange.send() }
-    }
     @Published var pollutants: [Pollutant] = [] {
         willSet { self.objectWillChange.send() }
     }
@@ -22,52 +20,22 @@ class MainViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    init(landmarks: [Landmark] = []) {
-        self.landmarks = landmarks
-    }
-
     private(set) lazy var getData: () -> Void = {
-        self.landmarks = []
-
         let url: String = getEnv("AQI API")!
+        AF.request(url)
+            .validate(contentType: ["application/json"])
+            .responseData { response in
+                do {
+                    debugPrint(response)
 
-        var request = URLRequest(url: URL(string: url)!)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                    let pollutants = try JSONDecoder().decode(Pollutants.self, from: response.data!)
 
-        let session = URLSession.shared
-        let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
-            do {
-                print(response)
-
-                let pollutants = try JSONDecoder().decode([Pollutant].self, from: data!)
-
-                var landmarks: [Landmark] = []
-
-                for pollutant in pollutants {
-                    guard let dLatitude: Double = Double(pollutant.latitude),
-                        let dLongitude: Double = Double(pollutant.longitude) else {
-                       return
-                    }
-
-                    landmarks.append(
-                        Landmark(
-                            name: pollutant.siteName,
-                            location: .init(latitude: dLatitude, longitude: dLongitude),
-                            aqi: pollutant.aqi
-                        )
-                    )
+                    self.pollutants = pollutants
+                    self.count = pollutants.count
+                    print("Total: \(pollutants.count), first item \(pollutants[0])")
+                } catch {
+                    print(error)
                 }
-
-                self.pollutants = pollutants
-                self.landmarks = landmarks
-                self.count = landmarks.count
-                print("Total: \(landmarks.count), first item \(landmarks[0])")
-            } catch {
-                print(error)
             }
-        })
-
-        task.resume()
     }
 }
