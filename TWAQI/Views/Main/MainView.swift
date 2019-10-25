@@ -13,15 +13,8 @@ struct MainView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: MainViewModel
 
-    @State var selectedLandmark: Landmark?
-
     var body: some View {
         ZStack {
-//            MapView(
-//                landmarks: $viewModel.landmarks,
-//                selectedLandmark: $selectedLandmark
-//            ).edgesIgnoringSafeArea(.vertical)
-
             GoogleMapView(pollutants: viewModel.pollutants, isWindMode: self.settings.isWindMode)
                 .edgesIgnoringSafeArea(.vertical)
 

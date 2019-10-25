@@ -37,7 +37,6 @@
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
-		9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8B63A4234CEA6300C206C8 /* MapView.swift */; };
 		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
 		9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F19235ABB0500C66A03 /* Constants.swift */; };
@@ -49,7 +48,6 @@
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
 		9EC3CF282361D77600F17332 /* GoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF272361D77600F17332 /* GoogleMapView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
-		9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960D2351C29E00B8AA99 /* Landmark.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
 		9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
 		9EC6BB17235B462B00213041 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB16235B462B00213041 /* SafariView.swift */; };
@@ -121,7 +119,6 @@
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
-		9E8B63A4234CEA6300C206C8 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
 		9E978F19235ABB0500C66A03 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -136,7 +133,6 @@
 		9EC3CF272361D77600F17332 /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
-		9EC5960D2351C29E00B8AA99 /* Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Landmark.swift; sourceTree = "<group>"; };
 		9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastViewModel.swift; sourceTree = "<group>"; };
 		9EC596112351C94900B8AA99 /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = debug.xcconfig; sourceTree = "<group>"; };
 		9EC596122351CF4400B8AA99 /* ForecastArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastArea.swift; sourceTree = "<group>"; };
@@ -256,7 +252,6 @@
 				9E5257A92343064F001ECFE1 /* IndexSelector.swift */,
 				9E1AC554233F99F600AC862D /* MainView.swift */,
 				9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */,
-				9E8B63A4234CEA6300C206C8 /* MapView.swift */,
 				9EC3CF272361D77600F17332 /* GoogleMapView.swift */,
 			);
 			path = Main;
@@ -333,7 +328,6 @@
 				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
 				9E5257B12344AA12001ECFE1 /* Stations.swift */,
 				9E978F1F235B0CDC00C66A03 /* StationGroups.swift */,
-				9EC5960D2351C29E00B8AA99 /* Landmark.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
@@ -612,7 +606,6 @@
 			files = (
 				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
 				9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */,
-				9E8B63A5234CEA6300C206C8 /* MapView.swift in Sources */,
 				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
 				9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
@@ -630,7 +623,6 @@
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
 				9EC3CF282361D77600F17332 /* GoogleMapView.swift in Sources */,
 				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
-				9EC5960E2351C29F00B8AA99 /* Landmark.swift in Sources */,
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
