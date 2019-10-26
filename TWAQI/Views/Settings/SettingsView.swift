@@ -48,7 +48,6 @@ struct SettingsView: View {
     
     private func loadData() {
         self.viewModel.loadStationsFromJSON()
-        self.viewModel.getSettings()
     }
 }
 

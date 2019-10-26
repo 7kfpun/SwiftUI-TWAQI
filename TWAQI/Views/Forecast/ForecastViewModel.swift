@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Alamofire
 import Combine
 import Foundation
 
@@ -27,23 +26,16 @@ class ForecastViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
-        let url: String = getEnv("FORECAST API")!
-        AF.request(url)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    debugPrint(response)
-
-                    let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
-
-                    if !forecastAreas.isEmpty {
-                        self.forecastAreas = forecastAreas
-                        self.forecastDetail = forecastAreas[0].content
-                    }
-                    print("Forecast content: \(self.forecastDetail)")
-                } catch {
-                    print(error)
+        APIManager.getForecast { result in
+            switch result {
+            case .success(let forecastAreas):
+                if !forecastAreas.isEmpty {
+                    self.forecastAreas = forecastAreas
+                    self.forecastDetail = forecastAreas[0].content
                 }
+            case .failure(let error):
+                print(error.localizedDescription)
             }
+        }
     }
 }

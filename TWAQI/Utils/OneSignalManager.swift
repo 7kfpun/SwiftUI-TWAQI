@@ -9,12 +9,12 @@
 import Foundation
 import OneSignal
 
-enum NetworkError: Error {
+enum OneSignalError: Error {
     case oneSignalError
 }
 
 struct OneSignalManager {
-    static func enableForecast(completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
+    static func enableForecast(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         OneSignal.sendTag("isForecastEnabled", value: "true", onSuccess: { result in
             print("Tags sent, [isForecastEnabled: true] - \(result!)")
             completionHandler(.success(true))
@@ -24,7 +24,7 @@ struct OneSignalManager {
         }
     }
 
-    static func disableForecast(completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
+    static func disableForecast(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         OneSignal.sendTag("isForecastEnabled", value: "", onSuccess: { result in
             print("Tags sent, [isForecastEnabled: ''] - \(result!)")
             completionHandler(.success(true))
@@ -34,7 +34,7 @@ struct OneSignalManager {
         }
     }
 
-    static func enableDnd(completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
+    static func enableDnd(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         OneSignal.sendTag("isDndEnabled", value: "true", onSuccess: { result in
             print("Tags sent, [isDndEnabled: true] - \(result!)")
             completionHandler(.success(true))
@@ -44,8 +44,8 @@ struct OneSignalManager {
         }
     }
 
-    static func disableDnd(completionHandler: @escaping (Result<Bool, NetworkError>) -> Void) {
-        OneSignal.sendTag("isDndEnabled", value: "", onSuccess: { result in
+    static func disableDnd(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
+        OneSignal.deleteTags(["isDndEnabled", "dndStartTime", "dndEndTime"], onSuccess: { result in
             print("Tags sent, [isDndEnabled: ''] - \(result!)")
             completionHandler(.success(true))
         }) { error in
@@ -54,7 +54,7 @@ struct OneSignalManager {
         }
     }
 
-    static func getOneSignalSettings(completionHandler: @escaping (Result<OneSignalSettings, NetworkError>) -> Void) {
+    static func getOneSignalSettings(completionHandler: @escaping (Result<OneSignalSettings, OneSignalError>) -> Void) {
         var oneSignalSettings = OneSignalSettings()
 
         OneSignal.getTags({ tags in

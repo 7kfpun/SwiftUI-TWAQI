@@ -8,6 +8,8 @@
 
 import Foundation
 
+typealias ForecastAreas = [ForecastArea]
+
 struct ForecastArea: Codable, Hashable {
     let id = UUID()
     let aqi: String

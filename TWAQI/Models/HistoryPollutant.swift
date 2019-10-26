@@ -8,6 +8,8 @@
 
 import Foundation
 
+typealias HistoryPollutants = [HistoryPollutant]
+
 struct HistoryPollutant: Codable {
     let stationId: Int
     let aqi: Int

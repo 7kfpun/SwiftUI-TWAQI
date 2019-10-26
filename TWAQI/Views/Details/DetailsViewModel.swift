@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Alamofire
 import Combine
 import Foundation
 
@@ -24,22 +23,13 @@ class DetailsViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
-        let url: String = getEnv("HISTORY API")!
-        print("HISTORY API", url)
-        let parameters: Parameters = [
-            "station": self.station.nameLocal,
-        ]
-
-        AF.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    let data = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: response.data!)
-                    self.historyPollutants = data["data"]!
-                    print("HistoryPollutants: \(self.historyPollutants)")
-                } catch {
-                    print(error)
-                }
+        APIManager.getHistory(nameLocal: self.station.nameLocal) { result in
+            switch result {
+            case .success(let historyPollutants):
+                self.historyPollutants = historyPollutants
+            case .failure(let error):
+                print(error.localizedDescription)
             }
+        }
     }
 }

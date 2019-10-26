@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Alamofire
 import Combine
 import Foundation
 
@@ -21,21 +20,16 @@ class MainViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
-        let url: String = getEnv("AQI API")!
-        AF.request(url)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    debugPrint(response)
-
-                    let pollutants = try JSONDecoder().decode(Pollutants.self, from: response.data!)
-
-                    self.pollutants = pollutants
-                    self.count = pollutants.count
-                    print("Total: \(pollutants.count), first item \(pollutants[0])")
-                } catch {
-                    print(error)
-                }
+        APIManager.getAQI { result in
+            switch result {
+            case .success(let pollutants):
+                print("\(pollutants) unread messages.")
+                self.pollutants = pollutants
+                self.count = pollutants.count
+                print("Total: \(pollutants.count), first item \(pollutants[0])")
+            case .failure(let error):
+                print(error.localizedDescription)
             }
+        }
     }
 }
