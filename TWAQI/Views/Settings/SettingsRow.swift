@@ -9,7 +9,8 @@
 import SwiftUI
 
 struct SettingsRow: View {
-    @State private var isNotificationEnabled: Bool = false
+    @State private var isPollutionNotificationEnabled: Bool = false
+    @State private var isCleanlinessNotificationEnabled: Bool = false
     @State private var min: Double = 30
     @State private var max: Double = 120
 
@@ -17,36 +18,41 @@ struct SettingsRow: View {
 
     var body: some View {
         VStack {
-            Toggle(isOn: $isNotificationEnabled) {
+            HStack {
                 Text(station.name)
-                    .fontWeight(.light)
-                    .padding(.vertical, 15)
+                    .fontWeight(.regular)
+                    .padding(.top, 15)
+                Spacer()
             }
 
-            if self.isNotificationEnabled {
-                HStack {
-                    Text("Pollution therhold")
-                        .fontWeight(.light)
-                    Spacer()
-                    LabelView(
-                        airIndexTypes: Constants.AirIndexTypes.aqi,
-                        value: Int(max)
-                    )
-                }
+            // Pollution Notification
+            Toggle(isOn: $isPollutionNotificationEnabled) {
+                Text("Notice me when AQI is above")
+                    .fontWeight(.thin)
 
-                Slider(value: $max, in: 0...500, step: 1)
+                LabelView(
+                    airIndexTypes: Constants.AirIndexTypes.aqi,
+                    value: Int(max)
+                )
+            }
 
-                HStack {
-                    Text("Cleanliness therhold")
-                        .fontWeight(.light)
-                    Spacer()
-                    LabelView(
-                        airIndexTypes: Constants.AirIndexTypes.aqi,
-                        value: Int(min)
-                    )
-                }
+            if self.isPollutionNotificationEnabled {
+                Slider(value: $max, in: 1...500, step: 1)
+            }
 
-                Slider(value: $min, in: 0...500, step: 1)
+            // Cleanliness Notification
+            Toggle(isOn: $isCleanlinessNotificationEnabled) {
+                Text("Notice me when AQI is below")
+                    .fontWeight(.thin)
+
+                LabelView(
+                    airIndexTypes: Constants.AirIndexTypes.aqi,
+                    value: Int(min)
+                )
+            }
+
+            if self.isCleanlinessNotificationEnabled {
+                Slider(value: $min, in: 1...500, step: 1)
             }
         }
         .padding(.horizontal)

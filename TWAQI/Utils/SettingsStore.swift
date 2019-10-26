@@ -30,7 +30,7 @@ final class SettingsStore: ObservableObject {
 
         defaults.register(defaults: [
             Keys.airIndexTypeSelected: Constants.AirIndexTypes.aqi.rawValue,
-            Keys.forecastEnabled: true,
+            Keys.forecastEnabled: false,
             Keys.dndEnabled: false,
             Keys.startDate: Date(),
             Keys.endDate: Date(),
@@ -57,12 +57,54 @@ final class SettingsStore: ObservableObject {
     }
 
     var isForecastEnabled: Bool {
-        set { defaults.set(newValue, forKey: Keys.forecastEnabled) }
+        set {
+            defaults.set(newValue, forKey: Keys.forecastEnabled)
+            if newValue {
+                OneSignalManager.enableForecast { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            } else {
+                OneSignalManager.disableForecast { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+        }
         get { defaults.bool(forKey: Keys.forecastEnabled) }
     }
 
     var isDndEnabled: Bool {
-        set { defaults.set(newValue, forKey: Keys.dndEnabled) }
+        set {
+            defaults.set(newValue, forKey: Keys.dndEnabled)
+            if newValue {
+                OneSignalManager.enableDnd { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            } else {
+                OneSignalManager.disableDnd { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+        }
         get { defaults.bool(forKey: Keys.dndEnabled) }
     }
 

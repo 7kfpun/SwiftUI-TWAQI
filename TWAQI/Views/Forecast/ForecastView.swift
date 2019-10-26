@@ -14,7 +14,6 @@ struct ForecastView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: ForecastViewModel
 
-    @State private var isForecastNotificationEnabled = true
     @State private var forecastType = 0
 
     var body: some View {

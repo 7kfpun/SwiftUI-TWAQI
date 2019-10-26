@@ -33,7 +33,7 @@ class ForecastViewModel: ObservableObject {
             .responseData { response in
                 do {
                     debugPrint(response)
-                    
+
                     let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
 
                     if !forecastAreas.isEmpty {
