@@ -93,5 +93,7 @@
 		<string>googlechromes</string>
 		<string>comgooglemaps</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Use location to select your nearest air quality monitoring station</string>
 </dict>
 </plist>
