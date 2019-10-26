@@ -11,6 +11,7 @@ import UIKit
 import AppCenter
 import AppCenterAnalytics
 import AppCenterCrashes
+import AppCenterPush
 import Bugsnag
 import Firebase
 import GoogleMaps
@@ -43,6 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             MSAppCenter.start(appCenterAppSecret, withServices: [
               MSAnalytics.self,
               MSCrashes.self,
+              MSPush.self,
             ])
         }
 

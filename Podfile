@@ -19,6 +19,7 @@ target 'TWAQI' do
   pod 'Crashlytics', '~> 3.14.0'
 
   pod 'AppCenter', '~> 2.5.0'
+  pod 'AppCenter/Push'
   pod 'Bugsnag', '~> 5.22'
   pod 'OneSignal', '>= 2.11.2', '< 3.0'
 

@@ -8,6 +8,8 @@ PODS:
   - AppCenter/Core (2.5.0)
   - AppCenter/Crashes (2.5.0):
     - AppCenter/Core
+  - AppCenter/Push (2.5.0):
+    - AppCenter/Core
   - Bugsnag (5.22.9)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
@@ -112,6 +114,7 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.2)
   - AppCenter (~> 2.5.0)
+  - AppCenter/Push
   - Bugsnag (~> 5.22)
   - Crashlytics (~> 3.14.0)
   - Fabric (~> 1.10.2)
@@ -179,6 +182,6 @@ SPEC CHECKSUMS:
   SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: 5dbef685f6b4c9f227ade16d75112f7ac8950ef3
+PODFILE CHECKSUM: a6f28cdb63261ee24215d0edc6740d56d5102a57
 
 COCOAPODS: 1.8.3
