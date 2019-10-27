@@ -19,8 +19,6 @@ struct MainView: View {
                 .edgesIgnoringSafeArea(.vertical)
 
             VStack {
-                Text(String(viewModel.count))
-
                 HStack {
                     VStack {
                         Spacer()
