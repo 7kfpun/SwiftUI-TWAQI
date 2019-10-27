@@ -13,10 +13,13 @@ struct LabelView: View {
     var value: Double
     
     var body: some View {
-        Text(airIndexTypes == Constants.AirIndexTypes.aqi ? "\(Int(value))" : "\(value)")
+        let isInteger = floor(value) == value
+        let text = value.format(f: isInteger ? ".0" : ".2")
+
+        return Text(text)
             .foregroundColor(
                 Color(Constants.AirStatuses.checkAirStatus(
-                    airIndexType: Constants.AirIndexTypes.aqi,
+                    airIndexType: airIndexTypes,
                     value: value
                 ).getForegroundColor())
             )
@@ -25,7 +28,7 @@ struct LabelView: View {
             .padding(.horizontal, 8)
             .background(
                 Color(Constants.AirStatuses.checkAirStatus(
-                    airIndexType: Constants.AirIndexTypes.aqi,
+                    airIndexType: airIndexTypes,
                     value: value
                 ).getColor())
             )

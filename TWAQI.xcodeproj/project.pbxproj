@@ -45,6 +45,7 @@
 		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
 		9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */; };
 		9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */; };
+		9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
@@ -131,6 +132,7 @@
 		9E978F1F235B0CDC00C66A03 /* StationGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationGroups.swift; sourceTree = "<group>"; };
 		9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast3DaysView.swift; sourceTree = "<group>"; };
 		9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetailView.swift; sourceTree = "<group>"; };
+		9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberExtensions.swift; sourceTree = "<group>"; };
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
+				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 			);
@@ -642,6 +645,7 @@
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
+				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
 				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,

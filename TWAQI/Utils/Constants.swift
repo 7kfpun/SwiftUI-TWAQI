@@ -175,7 +175,7 @@ enum Constants {
                     405..<605: .hazardous,
                 ],
                 Constants.AirIndexTypes.co: [
-                    0..<4.5: .good,
+                    0.0..<4.5: .good,
                     4.5..<9.5: .moderate,
                     9.5..<12.5: .unhealthyforsensitivegroup,
                     12.5..<15.5: .unhealthy,
@@ -200,7 +200,7 @@ enum Constants {
                 ],
             ]
 
-            for (range, airStatus) in rangeMaps[Constants.AirIndexTypes.aqi] ?? [:] {
+            for (range, airStatus) in rangeMaps[airIndexType] ?? [:] {
                 if range.contains(value) {
                     return airStatus
                 }

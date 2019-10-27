@@ -17,12 +17,25 @@ struct DetailsHistoryView: View {
     @State private var viewType = 0
 
     var body: some View {
-        let bars = self.historyPollutants.map({ (historyPollutant) -> Bar in
-            return Bar(
-                value: historyPollutant.pm25,
-                color: Color.green
+        let historyPollutantsMap: [Constants.AirIndexTypes: [Double]] = [
+            Constants.AirIndexTypes.aqi: historyPollutants.map({ $0.aqi }),
+            Constants.AirIndexTypes.pm25: historyPollutants.map({ $0.pm25 }),
+            Constants.AirIndexTypes.pm10: historyPollutants.map({ $0.pm10 }),
+            Constants.AirIndexTypes.o3: historyPollutants.map({ $0.o3 }),
+            Constants.AirIndexTypes.co: historyPollutants.map({ $0.co }),
+            Constants.AirIndexTypes.so2: historyPollutants.map({ $0.so2 }),
+            Constants.AirIndexTypes.no2: historyPollutants.map({ $0.no2 }),
+        ]
+
+        let bars: [Bar] = historyPollutantsMap[settings.airIndexTypeSelected]!.map {
+            Bar(
+                value: $0,
+                color: Color(Constants.AirStatuses.checkAirStatus(
+                    airIndexType: settings.airIndexTypeSelected,
+                    value: $0
+                ).getColor())
             )
-        })
+        }
 
         return VStack {
             Picker(
@@ -41,8 +54,8 @@ struct DetailsHistoryView: View {
                 HStack {
                     VStack {
                         LabelView(
-                            airIndexTypes: Constants.AirIndexTypes.aqi,
-                            value: self.historyPollutants.last?.aqi ?? 0
+                            airIndexTypes: settings.airIndexTypeSelected,
+                            value: historyPollutantsMap[settings.airIndexTypeSelected]?.last ?? 0
                         )
 
                         Spacer()
