@@ -12,7 +12,7 @@ typealias HistoryPollutants = [HistoryPollutant]
 
 struct HistoryPollutant: Codable {
     let stationId: Int
-    let aqi: Int
+    let aqi: Double
     let pm25: Double
     let pm10: Double
     let no2: Double

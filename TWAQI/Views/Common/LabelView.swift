@@ -10,14 +10,14 @@ import SwiftUI
 
 struct LabelView: View {
     var airIndexTypes: Constants.AirIndexTypes
-    var value: Int
+    var value: Double
     
     var body: some View {
-        Text("\(value)")
+        Text(airIndexTypes == Constants.AirIndexTypes.aqi ? "\(Int(value))" : "\(value)")
             .foregroundColor(
                 Color(Constants.AirStatuses.checkAirStatus(
                     airIndexType: Constants.AirIndexTypes.aqi,
-                    value: Double(value)
+                    value: value
                 ).getForegroundColor())
             )
             .fontWeight(.thin)
@@ -26,7 +26,7 @@ struct LabelView: View {
             .background(
                 Color(Constants.AirStatuses.checkAirStatus(
                     airIndexType: Constants.AirIndexTypes.aqi,
-                    value: Double(value)
+                    value: value
                 ).getColor())
             )
             .cornerRadius(8)
@@ -44,6 +44,11 @@ struct LabelView_Previews: PreviewProvider {
             LabelView(
                 airIndexTypes: Constants.AirIndexTypes.aqi,
                 value: 120
+            )
+
+            LabelView(
+                airIndexTypes: Constants.AirIndexTypes.o3,
+                value: 12.3
             )
         }
         .previewLayout(.fixed(width: 100, height: 100))

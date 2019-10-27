@@ -32,7 +32,7 @@ struct SettingsRow: View {
 
                 LabelView(
                     airIndexTypes: Constants.AirIndexTypes.aqi,
-                    value: Int(max)
+                    value: max
                 )
             }
 
@@ -47,7 +47,7 @@ struct SettingsRow: View {
 
                 LabelView(
                     airIndexTypes: Constants.AirIndexTypes.aqi,
-                    value: Int(min)
+                    value: min
                 )
             }
 

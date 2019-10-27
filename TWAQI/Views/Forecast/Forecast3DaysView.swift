@@ -1,67 +1,65 @@
 //
-//  ForecastView.swift
+//  Forecast3DaysView.swift
 //  TWAQI
 //
-//  Created by kf on 28/9/19.
+//  Created by kf on 27/10/19.
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
-import SwiftDate
 
-struct ForecastView: View {
-    @EnvironmentObject var settings: SettingsStore
-    @ObservedObject var viewModel: ForecastViewModel
-
-    @State var forecastType = 0
+struct Forecast3DaysView: View {
+    var forecastAreas: ForecastAreas
 
     var body: some View {
-        return NavigationView {
-            ZStack {
-                ScrollView {
-                    VStack {
-                        Toggle(isOn: $settings.isForecastEnabled) {
-                            Text("Forecast Notification (daily)")
-                                .bold()
-                        }
-                        .padding(.bottom)
+        let groupedByAreas = Dictionary(grouping: forecastAreas) { $0.area }
+        let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
 
-                        Picker(selection: $forecastType, label: Text("Forecast view?")) {
-                            Text("3 Days").tag(0)
-                            Text("Details").tag(1)
-                        }.pickerStyle(SegmentedPickerStyle())
+        return VStack {
+            Indicator()
+                .frame(height: 90)
 
-                        if forecastType == 0 {
-                            Forecast3DaysView(forecastAreas: viewModel.forecastAreas)
-                        } else if forecastType == 1 {
-                            ForecastDetailView(forecastDetail: viewModel.forecastDetail)
-                        }
+            HStack {
+                Text("Publish Time")
+                Spacer()
+                Text(forecastAreas.first?.publishTime ?? "")
+            }
+
+            HStack {
+                Spacer()
+                ForEach(groupedByAreas["北部"] ?? [], id: \.self) {area in
+                    HStack {
+                        Text(area.forecastDate.toDate("yyyy-MM-dd")?.toFormat("MM/dd") ?? "")
+                            .fontWeight(.regular)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 50)
-                }
-
-                VStack {
-                    Spacer()
-                    GADBannerViewController(adUnitID: getEnv("AdUnitIdForecastFooter")!)
-                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
+                    .frame(width: 70)
                 }
             }
-            .navigationBarTitle("Forecast")
-        }.onAppear(perform: getData)
-    }
+            .padding(.vertical, 10)
 
-    private func getData() {
-        self.viewModel.getData()
+            ForEach(areaGroups, id: \.self) {areaGroup in
+                HStack {
+                    Text(areaGroup)
+                    Spacer()
+                    ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                        HStack {
+                            LabelView(
+                                airIndexTypes: Constants.AirIndexTypes.aqi,
+                                value: Double((area as ForecastArea).aqi) ?? 0
+                            )
+                        }
+                        .frame(width: 70)
+                    }
+                }
+            }
+            .padding(.vertical, 10)
+        }
     }
 }
 
-struct ForecastView_Previews: PreviewProvider {
+struct Forecast3DaysView_Previews: PreviewProvider {
     static var previews: some View {
-        ForecastView(viewModel: .init(
-            // swiftlint:disable:next line_length
-            forecastDetail: "1.今(15)日受東北風影響，雲嘉南以南位於下風區，擴散條件較差，空氣品質多為普通等級，雲嘉南沿海地區因風速較強，引發地表揚塵現象，局部地區懸浮微粒濃度偏高。依16時監測結果，竹苗、宜蘭空品區為「良好」等級；北部、中部、高屏、花東空品區及馬祖、金門、澎湖地區為「普通」等級為主；雲嘉南空品區多為「橘色提醒」等級。\r2.依氣象局15日16時資料：16日受東北風影響，中部以北擴散條件較佳，北部及東半部有雨；中部以南內陸山區位於弱風區，易累積污染物，午後受光化作用影響易使臭氧濃度上升；雲嘉南沿海地區風速較強，須留意地表揚塵影響空氣品質。竹苗、宜蘭、花東空品區為「良好」等級；北部、中部、高屏空品區及馬祖、金門、澎湖為「普通」等級，中部及高屏空品區局部地區短時間可能達橘色提醒等級；雲嘉南空品區為「橘色提醒」等級，局部地區短時間可能達紅色警示等級。\r3.17日仍為東北風，北部及東半部仍有降雨，擴散條件仍佳；雲嘉南以南位於下風處，污染物易累積，午後受光化作用影響致臭氧濃度上升；雲嘉南地區因沿岸風速較強，仍有機會引發地表揚塵現象影響空氣品質。竹苗、宜蘭及花東空品區為「良好」等級；北部及中部空品區為「普通」等級，中部內陸近山區短時間可能達橘色提醒等級；雲嘉南及高屏空品區為「橘色提醒」等級。\r4.18日持續為東北風，雲嘉南以南位於下風處，污染物仍可能累積，午後受光化作用影響致臭氧濃度上升；雲嘉南地區因沿岸風速較強，仍有機會引發地表揚塵現象。北部、竹苗、宜蘭及花東空品區為「良好」等級；中部空品區為「普通」等級，內陸近山區短時間可能達橘色提醒等級；雲嘉南及高屏空品區為「橘色提醒」等級。未來一週，16日至20日受東北風影響，北部及東半部位於迎風面，擴散條件較佳，雲嘉南以南位於下風處，須留意擴散不良致空氣品質較差；雲嘉南沿海風速較強，須留意地表揚塵現象發生。空氣品質受氣象條件影響大，請隨時留意最新空氣品質資訊，並歡迎下載「環境即時通」APP，依個人防護需求設定不同警戒值通知。\r",
+        Forecast3DaysView(
             forecastAreas: [
                 ForecastArea(
                     aqi: "55",
@@ -304,6 +302,7 @@ struct ForecastView_Previews: PreviewProvider {
                     publishTime: "2019-10-15 22:00"
                 ),
             ]
-        )).environmentObject(SettingsStore())
+        )
+        .previewLayout(.sizeThatFits)
     }
 }

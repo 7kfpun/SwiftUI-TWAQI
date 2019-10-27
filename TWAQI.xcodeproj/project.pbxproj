@@ -43,6 +43,8 @@
 		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
 		9E978F1E235B0A0300C66A03 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
 		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
+		9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */; };
+		9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
@@ -127,6 +129,8 @@
 		9E978F1B235AFA7000C66A03 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		9E978F1D235B0A0300C66A03 /* stations.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = stations.json; sourceTree = "<group>"; };
 		9E978F1F235B0CDC00C66A03 /* StationGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationGroups.swift; sourceTree = "<group>"; };
+		9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast3DaysView.swift; sourceTree = "<group>"; };
+		9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetailView.swift; sourceTree = "<group>"; };
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
@@ -253,10 +257,10 @@
 		9E1AC553233F99CE00AC862D /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				9EC3CF272361D77600F17332 /* GoogleMapView.swift */,
 				9E5257A92343064F001ECFE1 /* IndexSelector.swift */,
 				9E1AC554233F99F600AC862D /* MainView.swift */,
 				9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */,
-				9EC3CF272361D77600F17332 /* GoogleMapView.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -275,6 +279,8 @@
 		9E1AC559233F9A2A00AC862D /* Forecast */ = {
 			isa = PBXGroup;
 			children = (
+				9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */,
+				9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */,
 				9E1AC55A233F9A3900AC862D /* ForecastView.swift */,
 				9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */,
 			);
@@ -626,10 +632,12 @@
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
+				9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
 				9EC3CF282361D77600F17332 /* GoogleMapView.swift in Sources */,
 				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
+				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
