@@ -56,24 +56,6 @@ enum Constants {
             ]
             return units[self.rawValue] ?? ""
         }
-
-        func getAirStatus(value: Int) -> Constants.AirStatuses {
-            let ranges: [Range<Int>: Constants.AirStatuses] = [
-                1..<51: Constants.AirStatuses.good,
-                51..<101: Constants.AirStatuses.moderate,
-                101..<151: Constants.AirStatuses.unhealthyforsensitivegroup,
-                151..<201: Constants.AirStatuses.unhealthy,
-                201..<301: Constants.AirStatuses.veryunhealthy,
-                301..<501: Constants.AirStatuses.hazardous,
-            ]
-
-            for (range, airStatus) in ranges {
-                if range.contains(value) {
-                    return airStatus
-                }
-            }
-            return Constants.AirStatuses.unknown
-        }
     }
 
     enum AirStatuses: String, CaseIterable, Hashable {
@@ -158,8 +140,72 @@ enum Constants {
             return texts[self.rawValue] ?? ""
         }
 
-        static func checkStatus(value: Double) -> String {
-            return "text"
+        static func checkAirStatus(airIndexType: Constants.AirIndexTypes, value: Double) -> Constants.AirStatuses {
+            let rangeMaps: [Constants.AirIndexTypes: [Range<Double>: Constants.AirStatuses]] = [
+                Constants.AirIndexTypes.aqi: [
+                    1..<51: .good,
+                    51..<101: .moderate,
+                    101..<151: .unhealthyforsensitivegroup,
+                    151..<201: .unhealthy,
+                    201..<301: .veryunhealthy,
+                    301..<501: .hazardous,
+                ],
+                Constants.AirIndexTypes.pm25: [
+                    0.0..<15.5: .good,
+                    15.5..<35.5: .moderate,
+                    35.5..<54.5: .unhealthyforsensitivegroup,
+                    54.5..<150.5: .unhealthy,
+                    150.5..<250.5: .veryunhealthy,
+                    250.5..<500.5: .hazardous,
+                ],
+                Constants.AirIndexTypes.pm10: [
+                    0..<55: .good,
+                    55..<126: .moderate,
+                    126..<255: .unhealthyforsensitivegroup,
+                    255..<355: .unhealthy,
+                    355..<425: .veryunhealthy,
+                    425..<605: .hazardous,
+                ],
+                Constants.AirIndexTypes.o3: [
+                    0..<55: .good,
+                    55..<125: .moderate,
+                    125..<165: .unhealthyforsensitivegroup,
+                    165..<205: .unhealthy,
+                    205..<405: .veryunhealthy,
+                    405..<605: .hazardous,
+                ],
+                Constants.AirIndexTypes.co: [
+                    0..<4.5: .good,
+                    4.5..<9.5: .moderate,
+                    9.5..<12.5: .unhealthyforsensitivegroup,
+                    12.5..<15.5: .unhealthy,
+                    15.5..<30.5: .veryunhealthy,
+                    30.5..<50.5: .hazardous,
+                ],
+                Constants.AirIndexTypes.so2: [
+                    0..<36: .good,
+                    36..<76: .moderate,
+                    76..<186: .unhealthyforsensitivegroup,
+                    186..<305: .unhealthy,
+                    305..<605: .veryunhealthy,
+                    605..<1005: .hazardous,
+                ],
+                Constants.AirIndexTypes.no2: [
+                    0..<54: .good,
+                    54..<101: .moderate,
+                    101..<361: .unhealthyforsensitivegroup,
+                    361..<650: .unhealthy,
+                    650..<1250: .veryunhealthy,
+                    1250..<2050: .hazardous,
+                ],
+            ]
+
+            for (range, airStatus) in rangeMaps[Constants.AirIndexTypes.aqi] ?? [:] {
+                if range.contains(value) {
+                    return airStatus
+                }
+            }
+            return .unknown
         }
     }
 

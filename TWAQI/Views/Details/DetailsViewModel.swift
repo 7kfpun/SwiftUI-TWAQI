@@ -13,11 +13,11 @@ class DetailsViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
     var station: Station
 
-    @Published var historyPollutants: [HistoryPollutant] = [] {
+    @Published var historyPollutants: HistoryPollutants = [] {
         willSet { self.objectWillChange.send() }
     }
 
-    init(station: Station, historyPollutants: [HistoryPollutant] = []) {
+    init(station: Station, historyPollutants: HistoryPollutants = []) {
         self.station = station
         self.historyPollutants = historyPollutants
     }

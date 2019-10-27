@@ -31,8 +31,13 @@ struct DetailsSuggestionView: View {
 
                     Spacer()
 
-                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).toString())
-                        .fontWeight(.thin)
+                    Text(
+                        Constants.AirStatuses.checkAirStatus(
+                            airIndexType: Constants.AirIndexTypes.aqi,
+                            value: Double(self.lastPollutant.aqi)
+                        ).toString()
+                    )
+                    .fontWeight(.thin)
                 }
                 .frame(width: geometry.size.width / 3)
 
@@ -46,10 +51,15 @@ struct DetailsSuggestionView: View {
                                 .stroke(Color.black, lineWidth: 1)
                         )
 
-                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).getGeneralPublicGuidance())
-                        .font(.body)
-                        .fontWeight(.thin)
-                        .padding(.top, 6)
+                    Text(
+                        Constants.AirStatuses.checkAirStatus(
+                            airIndexType: Constants.AirIndexTypes.aqi,
+                            value: Double(self.lastPollutant.aqi)
+                        ).getGeneralPublicGuidance()
+                    )
+                    .font(.caption)
+                    .fontWeight(.thin)
+                    .padding(.top, 6)
 
                     Spacer()
 
@@ -62,11 +72,15 @@ struct DetailsSuggestionView: View {
                                 .stroke(Color.black, lineWidth: 1)
                         )
 
-                    Text(Constants.AirIndexTypes.aqi.getAirStatus(value: self.lastPollutant.aqi).getSensitivePublicGuidance())
-                        .font(.body)
-                        .fontWeight(.thin)
-                        .padding(.top, 6
+                    Text(
+                        Constants.AirStatuses.checkAirStatus(
+                            airIndexType: Constants.AirIndexTypes.aqi,
+                            value: Double(self.lastPollutant.aqi)
+                        ).getSensitivePublicGuidance()
                     )
+                    .font(.caption)
+                    .fontWeight(.thin)
+                    .padding(.top, 6)
                 }
                 .frame(width: geometry.size.width * 2 / 3)
             }

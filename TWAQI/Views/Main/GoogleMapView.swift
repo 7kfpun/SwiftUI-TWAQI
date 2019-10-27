@@ -23,7 +23,10 @@ final class PollutantMarker: GMSMarker {
         }
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
-        let airStatus = Constants.AirIndexTypes.aqi.getAirStatus(value: Int(pollutant.aqi) ?? 0)
+        let airStatus = Constants.AirStatuses.checkAirStatus(
+            airIndexType: Constants.AirIndexTypes.aqi,
+            value: Double(pollutant.aqi) ?? 0
+        )
         let color = UIColor(rgb: Int(airStatus.getColor()))
         let foregroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
 
@@ -56,7 +59,10 @@ final class WindDirectionMarker: GMSMarker {
         }
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
-        let airStatus = Constants.AirIndexTypes.aqi.getAirStatus(value: Int(pollutant.aqi) ?? 0)
+        let airStatus = Constants.AirStatuses.checkAirStatus(
+            airIndexType: Constants.AirIndexTypes.aqi,
+            value: Double(pollutant.aqi) ?? 0
+        )
         let color = UIColor(rgb: Int(airStatus.getColor()))
 
         let boldConfig = UIImage.SymbolConfiguration(weight: .bold)

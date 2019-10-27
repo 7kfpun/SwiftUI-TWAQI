@@ -11,6 +11,7 @@ import Foundation
 
 enum NetworkError: Error {
     case badURL
+    case networkError
 }
 
 struct APIManager {
@@ -24,12 +25,17 @@ struct APIManager {
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
                     debugPrint(response)
-                    let pollutants = try JSONDecoder().decode(Pollutants.self, from: response.data!)
+                    let pollutants = try JSONDecoder().decode(Pollutants.self, from: data)
                     completionHandler(.success(pollutants))
                 } catch {
                     print(error)
-                    completionHandler(.failure(.badURL))
+                    completionHandler(.failure(.networkError))
                 }
             }
     }
@@ -44,12 +50,17 @@ struct APIManager {
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
                     debugPrint(response)
-                    let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: response.data!)
+                    let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: data)
                     completionHandler(.success(forecastAreas))
                 } catch {
                     print(error)
-                    completionHandler(.failure(.badURL))
+                    completionHandler(.failure(.networkError))
                 }
             }
     }
@@ -68,11 +79,17 @@ struct APIManager {
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
                     debugPrint(response)
-                    let data = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: response.data!)
-                    completionHandler(.success(data["data"]!))
+                    let jsonData = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: data)
+                    completionHandler(.success(jsonData["data"]!))
                 } catch {
                     print(error)
+                    completionHandler(.failure(.networkError))
                 }
             }
     }

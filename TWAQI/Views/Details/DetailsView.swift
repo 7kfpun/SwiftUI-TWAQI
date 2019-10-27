@@ -38,9 +38,8 @@ struct DetailsView: View {
 
                 if !viewModel.historyPollutants.isEmpty {
                     DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)
+                    Separator()
                 }
-
-                Separator()
 
                 Indicator()
 

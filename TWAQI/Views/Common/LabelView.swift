@@ -14,11 +14,21 @@ struct LabelView: View {
     
     var body: some View {
         Text("\(value)")
-            .foregroundColor(Color(airIndexTypes.getAirStatus(value: value).getForegroundColor()))
+            .foregroundColor(
+                Color(Constants.AirStatuses.checkAirStatus(
+                    airIndexType: Constants.AirIndexTypes.aqi,
+                    value: Double(value)
+                ).getForegroundColor())
+            )
             .fontWeight(.thin)
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
-            .background(Color(airIndexTypes.getAirStatus(value: value).getColor()))
+            .background(
+                Color(Constants.AirStatuses.checkAirStatus(
+                    airIndexType: Constants.AirIndexTypes.aqi,
+                    value: Double(value)
+                ).getColor())
+            )
             .cornerRadius(8)
     }
 }
