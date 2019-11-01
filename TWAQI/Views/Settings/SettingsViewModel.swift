@@ -16,10 +16,6 @@ class SettingsViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    @Published var oneSignalSettings: OneSignalSettings = OneSignalSettings() {
-        willSet { self.objectWillChange.send() }
-    }
-
     private(set) lazy var loadStationsFromJSON: () -> Void = {
         DataManager.getDataFromFileWithSuccess { file in
             do {

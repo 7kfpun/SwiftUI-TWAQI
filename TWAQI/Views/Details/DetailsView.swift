@@ -74,20 +74,24 @@ struct DetailsView: View {
 struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            DetailsView(station: Station(
-                name: "Matsu",
-                nameLocal: "馬祖",
-                lon: 119.949875,
-                lat: 26.160469,
-                imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
-            )).environmentObject(SettingsStore())
+            DetailsView(
+                station: Station(
+                    name: "Matsu",
+                    nameLocal: "馬祖",
+                    lon: 119.949875,
+                    lat: 26.160469,
+                    imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+                )
+            ).environmentObject(SettingsStore())
 
-            DetailsView(station: Station(
-                name: "Matsu",
-                nameLocal: "馬祖",
-                lon: 119.949875,
-                lat: 26.160469
-            )).environmentObject(SettingsStore())
+            DetailsView(
+                station: Station(
+                    name: "Matsu",
+                    nameLocal: "馬祖",
+                    lon: 119.949875,
+                    lat: 26.160469
+                )
+            ).environmentObject(SettingsStore())
         }
     }
 }

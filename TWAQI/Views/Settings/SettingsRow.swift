@@ -9,10 +9,7 @@
 import SwiftUI
 
 struct SettingsRow: View {
-    @State private var isPollutionNotificationEnabled: Bool = false
-    @State private var isCleanlinessNotificationEnabled: Bool = false
-    @State private var min: Double = 30
-    @State private var max: Double = 120
+    @ObservedObject var viewModel: SettingsRowViewModel
 
     var station: Station
 
@@ -26,33 +23,33 @@ struct SettingsRow: View {
             }
 
             // Pollution Notification
-            Toggle(isOn: $isPollutionNotificationEnabled) {
+            Toggle(isOn: $viewModel.stationSetting.isPollutionNotificationEnabled) {
                 Text("Notice me when AQI is above")
                     .fontWeight(.thin)
 
                 LabelView(
                     airIndexTypes: Constants.AirIndexTypes.aqi,
-                    value: max
+                    value: viewModel.stationSetting.pollutionTherhold
                 )
             }
 
-            if self.isPollutionNotificationEnabled {
-                Slider(value: $max, in: 1...500, step: 1)
+            if viewModel.stationSetting.isPollutionNotificationEnabled {
+                Slider(value: $viewModel.stationSetting.pollutionTherhold, in: 1...500, step: 1)
             }
 
             // Cleanliness Notification
-            Toggle(isOn: $isCleanlinessNotificationEnabled) {
+            Toggle(isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled) {
                 Text("Notice me when AQI is below")
                     .fontWeight(.thin)
 
                 LabelView(
                     airIndexTypes: Constants.AirIndexTypes.aqi,
-                    value: min
+                    value: viewModel.stationSetting.cleanlinessTherhold
                 )
             }
 
-            if self.isCleanlinessNotificationEnabled {
-                Slider(value: $min, in: 1...500, step: 1)
+            if viewModel.stationSetting.isCleanlinessNotificationEnabled {
+                Slider(value: $viewModel.stationSetting.cleanlinessTherhold, in: 1...500, step: 1)
             }
         }
         .padding(.horizontal)
@@ -60,6 +57,7 @@ struct SettingsRow: View {
 
     init(station: Station) {
         self.station = station
+        self.viewModel = SettingsRowViewModel(station: station)
     }
 }
 

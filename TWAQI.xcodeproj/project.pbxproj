@@ -46,6 +46,7 @@
 		9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */; };
 		9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */; };
 		9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
+		9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
@@ -133,6 +134,7 @@
 		9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast3DaysView.swift; sourceTree = "<group>"; };
 		9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetailView.swift; sourceTree = "<group>"; };
 		9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberExtensions.swift; sourceTree = "<group>"; };
+		9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRowViewModel.swift; sourceTree = "<group>"; };
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 			children = (
 				9EFE2E0123423D74007B7723 /* SettingsGroup.swift */,
 				9E794A682340A6090064D874 /* SettingsRow.swift */,
+				9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */,
 				9E1AC557233F9A1800AC862D /* SettingsView.swift */,
 				9E01F532235C30A400BC3486 /* SettingsViewModel.swift */,
 			);
@@ -339,13 +342,13 @@
 		9E794A65234099830064D874 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				9E5257A7234305D6001ECFE1 /* Index.swift */,
-				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
-				9E5257B12344AA12001ECFE1 /* Stations.swift */,
-				9E978F1F235B0CDC00C66A03 /* StationGroups.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
+				9E5257A7234305D6001ECFE1 /* Index.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
+				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
+				9E978F1F235B0CDC00C66A03 /* StationGroups.swift */,
+				9E5257B12344AA12001ECFE1 /* Stations.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -628,6 +631,7 @@
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
 				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
+				9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */,
 				9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */,
 				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
