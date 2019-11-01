@@ -23,6 +23,7 @@ struct HelpView: View {
                             Text("Turn on Do Not Disturb")
                                 .bold()
                         }
+                        .padding(.vertical, 10)
 
                         if settings.isDndEnabled {
                             DatePicker(
@@ -30,12 +31,14 @@ struct HelpView: View {
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("Start Date").fontWeight(.light) }
                             )
+                            .padding(.vertical, 10)
 
                             DatePicker(
                                 selection: $settings.endDate,
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("End Date").fontWeight(.light) }
                             )
+                            .padding(.vertical, 10)
                         }
                     }
 
@@ -65,6 +68,7 @@ struct HelpView: View {
                                 Text(linkPage.title)
                                     .foregroundColor(Color.primary)
                                     .fontWeight(.light)
+                                    .padding(.vertical, 10)
                             }
                         }
                     }

@@ -6,16 +6,15 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SwiftUI
 import SafariServices
+import SwiftUI
 
 struct SafariView: UIViewControllerRepresentable {
-    typealias UIViewControllerType = SFSafariViewController
 
-    var url: URL?
+    let url: URL
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
-        return SFSafariViewController(url: url!)
+        return SFSafariViewController(url: url)
     }
 
     func updateUIViewController(_ safariViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {
