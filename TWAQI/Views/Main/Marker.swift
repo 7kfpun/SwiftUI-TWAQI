@@ -34,26 +34,19 @@ final class PollutantMarker: GMSMarker {
         let color = UIColor(rgb: Int(airStatus.getColor()))
         let foregroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
 
-//        let label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
-//        label.text = pollutant.aqi
-//        label.textColor = foregroundColor
-//        label.font = UIFont.systemFont(ofSize: 15.0, weight: .thin)
-//        label.backgroundColor = color
-//        label.textAlignment = NSTextAlignment.center
-//        label.layer.borderColor = UIColor.white.cgColor
-//        label.layer.borderWidth = 1.0
-//        label.layer.cornerRadius = 8
-//        label.layer.masksToBounds = true
+        let isInteger = floor(value) == value
+        let text = value.format(f: isInteger ? ".0" : ".2")
 
-        let label = UIButton(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
-        label.setTitle("\(value)", for: .normal)
-        label.setTitleColor(foregroundColor, for: .normal)
-        label.titleLabel?.font = .systemFont(ofSize: 15, weight: .thin)
+        let label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
+        label.text = text
+        label.textColor = foregroundColor
+        label.font = UIFont.systemFont(ofSize: 15.0, weight: .thin)
         label.backgroundColor = color
+        label.textAlignment = NSTextAlignment.center
         label.layer.borderColor = UIColor.white.cgColor
         label.layer.borderWidth = 0.6
         label.layer.cornerRadius = 8
-//        label.addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
+        label.layer.masksToBounds = true
 
         self.iconView = label
     }

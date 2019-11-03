@@ -15,7 +15,11 @@ class SettingsRowViewModel: ObservableObject {
 
     init(station: Station) {
         self.station = station
-        self.stationSetting = OneSignalStationSetting(stationName: station.name, isPollutionNotificationEnabled: false, isCleanlinessNotificationEnabled: false)
+        self.stationSetting = OneSignalStationSetting(
+            stationName: station.name,
+            isPollutionNotificationEnabled: false,
+            isCleanlinessNotificationEnabled: false
+        )
 
         OneSignalManager.getOneSignalSettings { result in
             switch result {

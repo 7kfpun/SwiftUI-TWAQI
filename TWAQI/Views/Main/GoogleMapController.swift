@@ -59,6 +59,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    @objc func dismissModal() {
+        self.dismiss(animated: true, completion: nil)
+    }
+
     var isWindMode = false {
         didSet {
             windModeButton.tintColor = isWindMode ? .white : .black
@@ -225,7 +229,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
-        self.present(detailsViewController, animated: true, completion: nil)
+        detailsViewController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .done,
+            target: self,
+            action: #selector(dismissModal)
+        )
+        let detailsViewNavigationController = UINavigationController(rootViewController: detailsViewController)
+        self.present(detailsViewNavigationController, animated: true, completion: nil)
 
         return true
     }

@@ -25,7 +25,7 @@ struct DetailsView: View {
                         .aspectRatio(contentMode: .fill)
                 } else {
                     Spacer()
-                        .frame(width: screenSize.width, height: 85)
+                        .frame(width: screenSize.width, height: 80)
                 }
 
                 SettingsRow(station: station)
