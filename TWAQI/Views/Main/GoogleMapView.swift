@@ -10,74 +10,11 @@ import GoogleMaps
 import SwiftUI
 import UIKit
 
-final class PollutantMarker: GMSMarker {
-    let pollutant: Pollutant
-
-    init(pollutant: Pollutant) {
-        self.pollutant = pollutant
-        super.init()
-
-        guard let dLatitude: Double = Double(pollutant.latitude),
-            let dLongitude: Double = Double(pollutant.longitude) else {
-           return
-        }
-        self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
-
-        let airStatus = Constants.AirStatuses.checkAirStatus(
-            airIndexType: Constants.AirIndexTypes.aqi,
-            value: Double(pollutant.aqi) ?? 0
-        )
-        let color = UIColor(rgb: Int(airStatus.getColor()))
-        let foregroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
-
-        let label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
-        label.text = pollutant.aqi
-        label.textColor = foregroundColor
-        label.font = UIFont.systemFont(ofSize: 15.0, weight: .thin)
-        label.backgroundColor = color
-        label.textAlignment = NSTextAlignment.center
-        label.layer.borderColor = UIColor.white.cgColor
-        label.layer.borderWidth = 1.0
-        label.layer.cornerRadius = 8
-        label.layer.masksToBounds = true
-        self.iconView = label
-    }
-}
-
-final class WindDirectionMarker: GMSMarker {
-    let pollutant: Pollutant
-
-    init(pollutant: Pollutant) {
-        self.pollutant = pollutant
-        super.init()
-
-        guard let dLatitude: Double = Double(pollutant.latitude),
-            let dLongitude: Double = Double(pollutant.longitude),
-            let dWindDirection: Double = Double(pollutant.windDirection),
-            let dWindSpeed: Double = Double(pollutant.windSpeed) else {
-           return
-        }
-        self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
-
-        let airStatus = Constants.AirStatuses.checkAirStatus(
-            airIndexType: Constants.AirIndexTypes.aqi,
-            value: Double(pollutant.aqi) ?? 0
-        )
-        let color = UIColor(rgb: Int(airStatus.getColor()))
-
-        let boldConfig = UIImage.SymbolConfiguration(weight: .bold)
-        let icon = UIImage(systemName: "arrow.down", withConfiguration: boldConfig)!
-            .withTintColor(color, renderingMode: .alwaysOriginal)
-            .resizeImage(targetSize: CGSize(width: dWindSpeed * 5, height: dWindSpeed * 5))
-            .addShadow()
-        self.icon = icon
-        self.rotation = dWindDirection
-    }
-}
-
 struct GoogleMapView: UIViewRepresentable {
     let pollutants: Pollutants
     let isWindMode: Bool
+
+    var selectedIndex: Constants.AirIndexTypes = Constants.AirIndexTypes.aqi
 
     /// Creates a `UIView` instance to be presented.
     func makeUIView(context: Self.Context) -> GMSMapView {
@@ -85,6 +22,14 @@ struct GoogleMapView: UIViewRepresentable {
         let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
         mapView.isMyLocationEnabled = true
         mapView.settings.compassButton = true
+        mapView.padding = UIEdgeInsets(top: 0, left: 0, bottom: 130, right: 8)
+
+        do {
+            // Set the map style by passing a valid JSON string.
+            mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
+        } catch {
+            NSLog("One or more of the map styles failed to load. \(error)")
+        }
 
         return mapView
     }
@@ -96,11 +41,17 @@ struct GoogleMapView: UIViewRepresentable {
         pollutants.forEach { pollutant in
             var pollutantMarker: GMSMarker
             if isWindMode {
-                pollutantMarker = WindDirectionMarker(pollutant: pollutant)
+                pollutantMarker = WindDirectionMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
             } else {
-                pollutantMarker = PollutantMarker(pollutant: pollutant)
+                pollutantMarker = PollutantMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
             }
             pollutantMarker.map = mapView
+        }
+
+        if let mylocation = mapView.myLocation {
+            print("User's location: \(mylocation)")
+        } else {
+            print("User's location is unknown")
         }
     }
 }

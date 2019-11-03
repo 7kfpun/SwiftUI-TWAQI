@@ -14,7 +14,7 @@ struct ContentView: View {
             MainView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "map.fill")
-                    Text("Forecast")
+                    Text("Map")
             }
 
             DetailsListView()

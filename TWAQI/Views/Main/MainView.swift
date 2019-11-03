@@ -15,39 +15,17 @@ struct MainView: View {
 
     var body: some View {
         ZStack {
-            GoogleMapView(pollutants: viewModel.pollutants, isWindMode: self.settings.isWindMode)
+            GoogleMapController()
                 .edgesIgnoringSafeArea(.vertical)
 
+//            GoogleMapView(
+//                pollutants: viewModel.pollutants,
+//                isWindMode: self.settings.isWindMode
+//            )
+//            .edgesIgnoringSafeArea(.vertical)
+
             VStack {
-                HStack {
-                    VStack {
-                        Spacer()
-
-                        Button(action: {
-                            self.settings.isWindMode.toggle()
-                        }) {
-                            Image(systemName: "wind")
-                                .frame(width: 60.0, height: 60.0)
-                                .background(Color.white)
-                                .foregroundColor(Color(0x5AC8FA))
-                                .clipShape(Circle())
-                                .shadow(radius: 2)
-                        }
-                    }
-
-                    Spacer()
-
-                    VStack {
-                        Spacer()
-
-                        button(for: "square.and.arrow.up.fill")
-                        button(for: "viewfinder")
-                        button(for: "paperplane.fill")
-                    }
-                }
-                .padding()
-
-                IndexSelector()
+                Spacer()
 
                 GADBannerViewController(adUnitID: getEnv("AdUnitIdMainFooter")!)
                     .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
@@ -57,13 +35,17 @@ struct MainView: View {
     }
 
     private func getData() {
-        self.viewModel.getData()
+//        self.viewModel.getData()
     }
 }
 
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView(viewModel: .init())
-            .environmentObject(SettingsStore())
+        ForEach(["iPhone SE", "iPhone XS Max"], id: \.self) { deviceName in
+            MainView(viewModel: .init())
+                .environmentObject(SettingsStore())
+                .previewDevice(PreviewDevice(rawValue: deviceName))
+                .previewDisplayName(deviceName)
+        }
     }
 }

@@ -36,6 +36,7 @@ trailing_comma:
 identifier_name:
     severity: warning
     excluded: # excluded via string array
+      - i
       - id
       - co # Carbon monoxide
       - no # Nitric oxide

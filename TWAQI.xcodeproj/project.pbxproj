@@ -47,6 +47,9 @@
 		9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */; };
 		9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */; };
+		9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */; };
+		9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC70236DDA2D008C3942 /* Marker.swift */; };
+		9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
@@ -135,6 +138,9 @@
 		9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetailView.swift; sourceTree = "<group>"; };
 		9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberExtensions.swift; sourceTree = "<group>"; };
 		9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRowViewModel.swift; sourceTree = "<group>"; };
+		9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapController.swift; sourceTree = "<group>"; };
+		9EA1BC70236DDA2D008C3942 /* Marker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Marker.swift; sourceTree = "<group>"; };
+		9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapStyles.swift; sourceTree = "<group>"; };
 		9EAF6D2B799535C450BD0580 /* Pods-OneSignalNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
@@ -261,10 +267,12 @@
 		9E1AC553233F99CE00AC862D /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */,
 				9EC3CF272361D77600F17332 /* GoogleMapView.swift */,
 				9E5257A92343064F001ECFE1 /* IndexSelector.swift */,
 				9E1AC554233F99F600AC862D /* MainView.swift */,
 				9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */,
+				9EA1BC70236DDA2D008C3942 /* Marker.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -322,6 +330,7 @@
 				9E978F19235ABB0500C66A03 /* Constants.swift */,
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
+				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
 				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
@@ -649,6 +658,7 @@
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
+				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
 				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
 				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
@@ -661,12 +671,14 @@
 				9EC6BB17235B462B00213041 /* SafariView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
+				9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */,
 				9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */,
 				9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */,
 				9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */,
 				9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */,
 				9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
+				9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */,
 				9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */,
 				9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */,
 			);
