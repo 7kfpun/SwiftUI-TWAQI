@@ -18,11 +18,11 @@ struct DetailsSuggestionView: View {
                     Text("AQI")
                         .font(.callout)
                         .fontWeight(.regular)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color.primary, lineWidth: 0.5)
                         )
 
                     Spacer()
@@ -46,7 +46,8 @@ struct DetailsSuggestionView: View {
                     )
                     .font(.footnote)
                     .fontWeight(.regular)
-                    .padding(.vertical, 4)
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 3)
                     .padding(.horizontal)
                     .lineLimit(2)
                     .background(
@@ -63,11 +64,11 @@ struct DetailsSuggestionView: View {
                     Text("General public")
                         .font(.callout)
                         .fontWeight(.regular)
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color.primary, lineWidth: 0.5)
                         )
 
                     Text(
@@ -89,7 +90,7 @@ struct DetailsSuggestionView: View {
                         .padding(.horizontal, 10)
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.black, lineWidth: 1)
+                                .stroke(Color.primary, lineWidth: 0.5)
                         )
 
                     Text(

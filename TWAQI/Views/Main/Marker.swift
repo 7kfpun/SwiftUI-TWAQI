@@ -25,9 +25,11 @@ final class PollutantMarker: GMSMarker {
         }
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
+        let value = pollutant.getValue(airIndexType: selectedIndex)
+
         let airStatus = Constants.AirStatuses.checkAirStatus(
             airIndexType: selectedIndex,
-            value: pollutant.getValue(airIndexType: selectedIndex)
+            value: value
         )
         let color = UIColor(rgb: Int(airStatus.getColor()))
         let foregroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
@@ -44,7 +46,7 @@ final class PollutantMarker: GMSMarker {
 //        label.layer.masksToBounds = true
 
         let label = UIButton(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
-        label.setTitle(pollutant.aqi, for: .normal)
+        label.setTitle("\(value)", for: .normal)
         label.setTitleColor(foregroundColor, for: .normal)
         label.titleLabel?.font = .systemFont(ofSize: 15, weight: .thin)
         label.backgroundColor = color

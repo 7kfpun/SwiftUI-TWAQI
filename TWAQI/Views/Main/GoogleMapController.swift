@@ -213,7 +213,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
-        print("Marker tapped", marker)
+        var detailsView: DetailsView
+        if isWindMode {
+            let mmarker = marker as! WindDirectionMarker
+            print("Marker tapped", marker, mmarker.pollutant.siteName)
+            detailsView = DetailsView(station: mmarker.pollutant.getStation())
+        } else {
+            let mmarker = marker as! PollutantMarker
+            print("Marker tapped", marker, mmarker.pollutant.siteName)
+            detailsView = DetailsView(station: mmarker.pollutant.getStation())
+        }
+
+        let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
+        self.present(detailsViewController, animated: true, completion: nil)
+
         return true
     }
 

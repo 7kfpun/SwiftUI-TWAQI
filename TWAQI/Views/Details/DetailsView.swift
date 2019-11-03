@@ -21,15 +21,11 @@ struct DetailsView: View {
                 if !(self.station.imageUrl?.isEmpty ?? true) {
                     WebImage(url: URL(string: self.station.imageUrl!))
                         .resizable()
+                        .frame(width: screenSize.width, height: screenSize.width * 720/1280)
                         .aspectRatio(contentMode: .fill)
                 } else {
-                    Rectangle()
-                        .fill(Color.white)
-                        .frame(
-                            width: 20,
-                            height: 120
-                        )
-                        .cornerRadius(10, antialiased: true)
+                    Spacer()
+                        .frame(width: screenSize.width, height: 85)
                 }
 
                 SettingsRow(station: station)

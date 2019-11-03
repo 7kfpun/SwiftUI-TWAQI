@@ -25,12 +25,14 @@ struct BarsView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            HStack(alignment: .bottom, spacing: 0) {
+            HStack(alignment: .bottom, spacing: 1) {
                 ForEach(self.bars) { bar in
-                    Capsule()
-                        .fill(bar.color)
-                        .frame(height: CGFloat(bar.value) / CGFloat(self.max) * geometry.size.height)
-                        .overlay(Rectangle().stroke(Color.white))
+                    VStack {
+                        Spacer()
+                        Capsule()
+                            .fill(bar.color)
+                            .frame(height: self.max > 0 ? CGFloat(bar.value) / CGFloat(self.max) * geometry.size.height : 1)
+                    }
                 }
             }
         }
@@ -39,14 +41,50 @@ struct BarsView: View {
 
 struct BarsView_Previews: PreviewProvider {
     static var previews: some View {
-        BarsView(bars: [
-            Bar(value: 4, color: Color.green),
-            Bar(value: 2, color: Color.green),
-            Bar(value: 3, color: Color.green),
-            Bar(value: 5, color: Color.green),
-            Bar(value: 2, color: Color.green),
-            Bar(value: 1, color: Color.green),
-            Bar(value: 4, color: Color.green),
-        ])
+        Group {
+            BarsView(bars: [
+                Bar(value: 2, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 4, color: Color.green),
+                Bar(value: 2, color: Color.green),
+                Bar(value: 3, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 2, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 4, color: Color.green),
+                Bar(value: 2, color: Color.green),
+                Bar(value: 3, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 2, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 5, color: Color.green),
+                Bar(value: 2, color: Color.green),
+                Bar(value: 1, color: Color.green),
+                Bar(value: 4, color: Color.green),
+            ])
+
+            BarsView(bars: [
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+                Bar(value: 0, color: Color.green),
+            ])
+        }
+        .previewLayout(.fixed(width: 500, height: 200))
+        .environment(\.colorScheme, .dark)
     }
 }
