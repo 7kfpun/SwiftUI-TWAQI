@@ -37,29 +37,48 @@ struct Pollutant: Codable {
     let windSpeed: String
 
     private enum CodingKeys: String, CodingKey {
-      case aqi = "AQI"
-      case co = "CO"
-      case co8hr = "CO_8hr"
-      case county = "County"
-      case latitude = "Latitude"
-      case longitude = "Longitude"
-      case no = "NO"
-      case no2 = "NO2"
-      case nox = "NOx"
-      case o3 = "O3"
-      case o38hr = "O3_8hr"
-      case pm10 = "PM10"
-      case pm10Avg = "PM10_AVG"
-      case pm25 = "PM2_5"
-      case pm25Avg = "PM2_5_AVG"
-      case pollutant = "Pollutant"
-      case publishTime = "PublishTime"
-      case so2 = "SO2"
-      case so2Avg = "SO2_AVG"
-      case siteId = "SiteId"
-      case siteName = "SiteName"
-      case status = "Status"
-      case windDirection = "WindDirec"
-      case windSpeed = "WindSpeed"
+        case aqi = "AQI"
+        case co = "CO"
+        case co8hr = "CO_8hr"
+        case county = "County"
+        case latitude = "Latitude"
+        case longitude = "Longitude"
+        case no = "NO"
+        case no2 = "NO2"
+        case nox = "NOx"
+        case o3 = "O3"
+        case o38hr = "O3_8hr"
+        case pm10 = "PM10"
+        case pm10Avg = "PM10_AVG"
+        case pm25 = "PM2_5"
+        case pm25Avg = "PM2_5_AVG"
+        case pollutant = "Pollutant"
+        case publishTime = "PublishTime"
+        case so2 = "SO2"
+        case so2Avg = "SO2_AVG"
+        case siteId = "SiteId"
+        case siteName = "SiteName"
+        case status = "Status"
+        case windDirection = "WindDirec"
+        case windSpeed = "WindSpeed"
+    }
+
+    func getValue(airIndexType: Constants.AirIndexTypes) -> Double {
+        switch airIndexType {
+        case Constants.AirIndexTypes.aqi:
+            return Double(self.aqi) ?? 0
+        case Constants.AirIndexTypes.pm25:
+            return Double(self.pm25) ?? 0
+        case Constants.AirIndexTypes.pm10:
+            return Double(self.pm10) ?? 0
+        case Constants.AirIndexTypes.no2:
+            return Double(self.no2) ?? 0
+        case Constants.AirIndexTypes.so2:
+            return Double(self.so2) ?? 0
+        case Constants.AirIndexTypes.co:
+            return Double(self.co) ?? 0
+        case Constants.AirIndexTypes.o3:
+            return Double(self.o3) ?? 0
+        }
     }
 }

@@ -25,7 +25,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var buttons: [UIButton] = []
 
     var pollutants: Pollutants = []
-    var selectedIndex: Constants.AirIndexTypes = Constants.AirIndexTypes.aqi
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
@@ -34,8 +33,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     @objc func goToMyLocation() {
         if let mylocation = self.mapView.myLocation {
             print("User's location: \(mylocation)")
-            let cam = GMSCameraPosition.camera(withLatitude: mylocation.coordinate.latitude, longitude: mylocation.coordinate.longitude, zoom: 15)
-            self.mapView.animate(to: cam)
+            let mylocationCamera = GMSCameraPosition.camera(
+                withLatitude: mylocation.coordinate.latitude,
+                longitude: mylocation.coordinate.longitude,
+                zoom: 15
+            )
+            self.mapView.animate(to: mylocationCamera)
         } else {
             print("User's location is unknown")
         }
@@ -58,13 +61,21 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var isWindMode = false {
         didSet {
+            windModeButton.tintColor = isWindMode ? .white : .black
+            windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .white
+            update()
+        }
+    }
+
+    var selectedIndex: Constants.AirIndexTypes = Constants.AirIndexTypes.aqi {
+        didSet {
             update()
         }
     }
 
     func update() {
         self.mapView.clear()
-        pollutants.forEach { pollutant in
+        self.pollutants.forEach { pollutant in
             var pollutantMarker: GMSMarker
             if self.isWindMode {
                 pollutantMarker = WindDirectionMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
@@ -81,11 +92,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         mapView.settings.compassButton = true
         // mapView.settings.myLocationButton = true
 
-        do {
-            // Set the map style by passing a valid JSON string.
-            mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
-        } catch {
-            NSLog("One or more of the map styles failed to load. \(error)")
+        if self.traitCollection.userInterfaceStyle == .dark {
+            // User Interface is Dark
+            do {
+                // Set the map style by passing a valid JSON string.
+                mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
         }
 
         mapView.delegate = self
@@ -109,8 +123,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         windModeButton = UIButton(frame: CGRect(x: 15, y: screenSize.height - 270, width: 60, height: 60))
         let windModeIcon = UIImage(systemName: "wind")
         windModeButton.setImage(windModeIcon, for: .normal)
-        windModeButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        windModeButton.backgroundColor = .white
+        windModeButton.tintColor = isWindMode ? .white : .black
+        windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .white
         windModeButton.layer.cornerRadius = 30
         windModeButton.layer.shadowColor = UIColor.black.cgColor
         windModeButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)

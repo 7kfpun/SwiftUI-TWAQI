@@ -12,71 +12,38 @@ enum GoogleMapStyles: String {
     case dark = """
     [
       {
+        "featureType": "all",
         "elementType": "geometry",
         "stylers": [
           {
-            "color": "#ebe3cd"
+            "color": "#242f3e"
           }
         ]
       },
       {
-        "elementType": "labels.text.fill",
-        "stylers": [
-          {
-            "color": "#523735"
-          }
-        ]
-      },
-      {
+        "featureType": "all",
         "elementType": "labels.text.stroke",
         "stylers": [
           {
-            "color": "#f5f1e6"
+            "lightness": -80
           }
         ]
       },
       {
         "featureType": "administrative",
-        "elementType": "geometry.stroke",
-        "stylers": [
-          {
-            "color": "#c9b2a6"
-          }
-        ]
-      },
-      {
-        "featureType": "administrative.land_parcel",
-        "elementType": "geometry.stroke",
-        "stylers": [
-          {
-            "color": "#dcd2be"
-          }
-        ]
-      },
-      {
-        "featureType": "administrative.land_parcel",
         "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#ae9e90"
+            "color": "#746855"
           }
         ]
       },
       {
-        "featureType": "landscape.natural",
-        "elementType": "geometry",
+        "featureType": "administrative.locality",
+        "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#dfd2ae"
-          }
-        ]
-      },
-      {
-        "featureType": "poi",
-        "elementType": "geometry",
-        "stylers": [
-          {
-            "color": "#dfd2ae"
+            "color": "#d59563"
           }
         ]
       },
@@ -85,16 +52,16 @@ enum GoogleMapStyles: String {
         "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#93817c"
+            "color": "#d59563"
           }
         ]
       },
       {
         "featureType": "poi.park",
-        "elementType": "geometry.fill",
+        "elementType": "geometry",
         "stylers": [
           {
-            "color": "#a5b076"
+            "color": "#263c3f"
           }
         ]
       },
@@ -103,42 +70,52 @@ enum GoogleMapStyles: String {
         "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#447530"
+            "color": "#6b9a76"
           }
         ]
       },
       {
         "featureType": "road",
-        "elementType": "geometry",
+        "elementType": "geometry.fill",
         "stylers": [
           {
-            "color": "#f5f1e6"
+            "color": "#2b3544"
+          }
+        ]
+      },
+      {
+        "featureType": "road",
+        "elementType": "labels.text.fill",
+        "stylers": [
+          {
+            "color": "#9ca5b3"
           }
         ]
       },
       {
         "featureType": "road.arterial",
+        "elementType": "geometry.fill",
         "stylers": [
           {
-            "visibility": "off"
+            "color": "#38414e"
           }
         ]
       },
       {
         "featureType": "road.arterial",
-        "elementType": "geometry",
+        "elementType": "geometry.stroke",
         "stylers": [
           {
-            "color": "#fdfcf8"
+            "color": "#212a37"
           }
         ]
       },
       {
         "featureType": "road.highway",
-        "elementType": "geometry",
+        "elementType": "geometry.fill",
         "stylers": [
           {
-            "color": "#f8c967"
+            "color": "#746855"
           }
         ]
       },
@@ -147,96 +124,61 @@ enum GoogleMapStyles: String {
         "elementType": "geometry.stroke",
         "stylers": [
           {
-            "color": "#e9bc62"
+            "color": "#1f2835"
           }
         ]
       },
       {
         "featureType": "road.highway",
-        "elementType": "labels",
+        "elementType": "labels.text.fill",
         "stylers": [
           {
-            "visibility": "off"
+            "color": "#f3d19c"
           }
         ]
       },
       {
-        "featureType": "road.highway.controlled_access",
-        "elementType": "geometry",
+        "featureType": "road.local",
+        "elementType": "geometry.fill",
         "stylers": [
           {
-            "color": "#e98d58"
+            "color": "#38414e"
           }
         ]
       },
       {
-        "featureType": "road.highway.controlled_access",
+        "featureType": "road.local",
         "elementType": "geometry.stroke",
         "stylers": [
           {
-            "color": "#db8555"
+            "color": "#212a37"
           }
         ]
       },
       {
-        "featureType": "road.local",
-        "stylers": [
-          {
-            "visibility": "off"
-          }
-        ]
-      },
-      {
-        "featureType": "road.local",
-        "elementType": "labels.text.fill",
-        "stylers": [
-          {
-            "color": "#806b63"
-          }
-        ]
-      },
-      {
-        "featureType": "transit.line",
+        "featureType": "transit",
         "elementType": "geometry",
         "stylers": [
           {
-            "color": "#dfd2ae"
-          }
-        ]
-      },
-      {
-        "featureType": "transit.line",
-        "elementType": "labels.text.fill",
-        "stylers": [
-          {
-            "color": "#8f7d77"
-          }
-        ]
-      },
-      {
-        "featureType": "transit.line",
-        "elementType": "labels.text.stroke",
-        "stylers": [
-          {
-            "color": "#ebe3cd"
+            "color": "#2f3948"
           }
         ]
       },
       {
         "featureType": "transit.station",
-        "elementType": "geometry",
+        "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#dfd2ae"
+            "color": "#d59563"
           }
         ]
       },
       {
         "featureType": "water",
-        "elementType": "geometry.fill",
+        "elementType": "geometry",
         "stylers": [
           {
-            "color": "#b9d3c2"
+            "color": "#17263c"
           }
         ]
       },
@@ -245,7 +187,16 @@ enum GoogleMapStyles: String {
         "elementType": "labels.text.fill",
         "stylers": [
           {
-            "color": "#92998d"
+            "color": "#515c6d"
+          }
+        ]
+      },
+      {
+        "featureType": "water",
+        "elementType": "labels.text.stroke",
+        "stylers": [
+          {
+            "lightness": -20
           }
         ]
       }
