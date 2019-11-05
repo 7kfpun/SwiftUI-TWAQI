@@ -8,6 +8,7 @@
 
 import UIKit
 
+import Amplitude_iOS
 import AppCenter
 import AppCenterAnalytics
 import AppCenterCrashes
@@ -22,6 +23,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+
+        // Initialize the Amplitude SDK.
+        Amplitude.instance().trackingSessionEvents = true
+        Amplitude.instance().initializeApiKey("07e21467800b3fc5a02420ee32c85829")
 
         // Initialize the Bugsnag SDK.
         if let bugsnagApiKey = getEnv("BugsnagApiKey") {

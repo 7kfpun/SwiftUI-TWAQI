@@ -18,6 +18,7 @@ target 'TWAQI' do
   pod 'Fabric', '~> 1.10.2'
   pod 'Crashlytics', '~> 3.14.0'
 
+  pod 'Amplitude-iOS', '~> 4.5'
   pod 'AppCenter', '~> 2.5.0'
   pod 'AppCenter/Push'
   pod 'Bugsnag', '~> 5.22'

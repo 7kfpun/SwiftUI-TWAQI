@@ -1,5 +1,6 @@
 PODS:
   - Alamofire (5.0.0-rc.2)
+  - Amplitude-iOS (4.8.2)
   - AppCenter (2.5.0):
     - AppCenter/Analytics (= 2.5.0)
     - AppCenter/Crashes (= 2.5.0)
@@ -113,6 +114,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.2)
+  - Amplitude-iOS (~> 4.5)
   - AppCenter (~> 2.5.0)
   - AppCenter/Push
   - Bugsnag (~> 5.22)
@@ -130,6 +132,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
+    - Amplitude-iOS
     - AppCenter
     - Bugsnag
     - Crashlytics
@@ -157,6 +160,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   Alamofire: f9450d3c7f6bea2ad62e7a541c3e9b186c7991d6
+  Amplitude-iOS: 46c8e6e65c49bb1ad1909a9add1a68e1f8562b3f
   AppCenter: 637f180deefc61e8ab3f94223869ee50f61dabea
   Bugsnag: d11978309d9c7de3732d8234a640fb855b6fc73c
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
@@ -182,6 +186,6 @@ SPEC CHECKSUMS:
   SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: a6f28cdb63261ee24215d0edc6740d56d5102a57
+PODFILE CHECKSUM: ee23698575c2e3cb58c14f52e8728e11b802e115
 
 COCOAPODS: 1.8.3
