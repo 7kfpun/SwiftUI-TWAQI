@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
 
 struct SettingsView: View {
@@ -38,11 +37,7 @@ struct SettingsView: View {
                 }
                 .padding(.bottom, 50)
 
-                VStack {
-                    Spacer()
-                    GADBannerViewController(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
-                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-                }
+                AdBanner(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
             }
             .navigationBarTitle("Notification")
         }.onAppear(perform: loadData)

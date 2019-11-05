@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
 
 struct DetailsListView: View {
@@ -39,11 +38,7 @@ struct DetailsListView: View {
                 }
                 .padding(.bottom, 50)
 
-                VStack {
-                    Spacer()
-                    GADBannerViewController(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
-                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-                }
+                AdBanner(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
             }
             .navigationBarTitle("Details")
         }

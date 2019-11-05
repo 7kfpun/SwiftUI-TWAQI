@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
 import SwiftDate
 
@@ -42,11 +41,7 @@ struct ForecastView: View {
                     .padding(.bottom, 50)
                 }
 
-                VStack {
-                    Spacer()
-                    GADBannerViewController(adUnitID: getEnv("AdUnitIdForecastFooter")!)
-                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-                }
+                AdBanner(adUnitID: getEnv("AdUnitIdForecastFooter")!)
             }
             .navigationBarTitle("Forecast")
         }.onAppear(perform: getData)

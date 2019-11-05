@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SDWebImageSwiftUI
 import SwiftUI
 
@@ -45,11 +44,7 @@ struct DetailsView: View {
             }
             .padding(.bottom, 50)
 
-            VStack {
-                Spacer()
-                GADBannerViewController(adUnitID: getEnv("AdUnitIdHelpFooter")!)
-                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-            }
+            AdBanner(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
         }
         .onAppear {
             self.getData()

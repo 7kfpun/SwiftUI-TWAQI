@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
 
 struct HelpView: View {
@@ -78,11 +77,10 @@ struct HelpView: View {
 
                 }
 
-                VStack {
-                    Spacer()
-                    GADBannerViewController(adUnitID: getEnv("AdUnitIdHelpFooter")!)
-                        .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-                }
+                AdBanner(adUnitID: getEnv("AdUnitIdHelpFooter")!)
+            }
+            .onAppear {
+                IAPManager.shared.fetchAvailableProducts()
             }
             .navigationBarTitle("Help")
         }

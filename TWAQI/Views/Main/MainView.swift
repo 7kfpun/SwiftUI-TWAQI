@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import GoogleMobileAds
 import SwiftUI
 
 struct MainView: View {
@@ -24,18 +23,8 @@ struct MainView: View {
 //            )
 //            .edgesIgnoringSafeArea(.vertical)
 
-            VStack {
-                Spacer()
-
-                GADBannerViewController(adUnitID: getEnv("AdUnitIdMainFooter")!)
-                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
-            }
+            AdBanner(adUnitID: getEnv("AdUnitIdMainFooter")!)
         }
-        .onAppear(perform: getData)
-    }
-
-    private func getData() {
-//        self.viewModel.getData()
     }
 }
 

@@ -6,6 +6,8 @@
 	<string>$(BugsnagApiKey)</string>
 	<key>AmplitudeApiKey</key>
 	<string>$(AmplitudeApiKey)</string>
+	<key>InAppPurchaseProductId</key>
+	<string>$(InAppPurchaseProductId)</string>
 	<key>AQI API</key>
 	<string>$(AQI_API)</string>
 	<key>AppCenterAppSecret</key>

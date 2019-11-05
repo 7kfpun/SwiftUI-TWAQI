@@ -12,14 +12,15 @@
 // Please copy the file and rename to debug.xcconfig and release.xcconfig
 
 // APIs
-AQI_API =
-FORECAST_API =
-HISTORY_API =
+AQI_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqi.json?alt=media&token=1c4ec7d6-a38d-4046-9bca-9bbe9c9761f0
+FORECAST_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqfn.json?alt=media&token=e790ed5f-a6aa-4b50-8473-98e68186d11b
+HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/history.json?alt=media&token=4ff87ac5-e117-4149-9257-4784aea2fdbe
 
 // Services
 AppCenterSecret =
-BugsnagApiKey = 
+BugsnagApiKey =
 GADApplicationIdentifier =
+GMSServicesApiKey =
 OneSignalAppId =
 
 // AdMob AdUnitId
@@ -29,3 +30,6 @@ AdUnitIdDetailsFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdForecastFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdSettingsFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
+
+// In-App Purchase
+InAppPurchaseProductId =

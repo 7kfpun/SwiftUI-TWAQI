@@ -6,8 +6,8 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 final class SettingsStore: ObservableObject {
     private enum Keys {
@@ -17,6 +17,8 @@ final class SettingsStore: ObservableObject {
         static let dndEnabled = "dndEnabled"
         static let startDate = "startDate"
         static let endDate = "endDate"
+        static let dndStartTime = "dndStartTime"
+        static let dndEndTime = "dndEndTime"
         static let windMode = "windMode"
     }
 
@@ -34,6 +36,8 @@ final class SettingsStore: ObservableObject {
             Keys.dndEnabled: false,
             Keys.startDate: Date(),
             Keys.endDate: Date(),
+            Keys.dndStartTime: Date(),
+            Keys.dndEndTime: Date(),
         ])
 
         cancellable = NotificationCenter.default
@@ -118,6 +122,16 @@ final class SettingsStore: ObservableObject {
         get { defaults.value(forKey: Keys.endDate) as! Date }
     }
 
+    var dndStartTime: Date {
+        set { defaults.set(newValue, forKey: Keys.dndStartTime) }
+        get { defaults.value(forKey: Keys.dndStartTime) as! Date }
+    }
+
+    var dndEndTime: Date {
+        set { defaults.set(newValue, forKey: Keys.dndEndTime) }
+        get { defaults.value(forKey: Keys.dndEndTime) as! Date }
+    }
+
     var isWindMode: Bool {
         set { defaults.set(newValue, forKey: Keys.windMode) }
         get { defaults.bool(forKey: Keys.windMode) }
@@ -126,12 +140,26 @@ final class SettingsStore: ObservableObject {
 
 extension SettingsStore {
     func unlockPro() {
-        // TODO: in-app transactions here
-        isPro = true
+        IAPManager.shared.purchaseMyProduct(index: 0)
+        IAPManager.shared.purchaseStatusBlock = { type in
+            if type == .purchased {
+                print("Purchased")
+                self.isPro = true
+            } else {
+                print(type)
+            }
+        }
     }
 
     func restorePurchase() {
-        // TODO: in-app purchase restore here
-        isPro = true
+        IAPManager.shared.restorePurchase()
+        IAPManager.shared.purchaseStatusBlock = { type in
+            if type == .restored {
+                print("Restored")
+                self.isPro = true
+            } else {
+                print(type)
+            }
+        }
     }
 }
