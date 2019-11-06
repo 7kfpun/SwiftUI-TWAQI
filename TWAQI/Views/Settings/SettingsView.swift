@@ -17,7 +17,7 @@ struct SettingsView: View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    TextField("Search", text: $searchText)
+                    TextField("Settings.search", text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
 
@@ -39,7 +39,7 @@ struct SettingsView: View {
 
                 AdBanner(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
             }
-            .navigationBarTitle("Notification")
+            .navigationBarTitle("Settings.notification")
         }.onAppear(perform: loadData)
     }
     

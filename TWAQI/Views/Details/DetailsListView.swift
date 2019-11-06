@@ -18,7 +18,7 @@ struct DetailsListView: View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    TextField("Search", text: $searchText)
+                    TextField("DetailsList.search", text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
 
@@ -40,7 +40,7 @@ struct DetailsListView: View {
 
                 AdBanner(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
             }
-            .navigationBarTitle("Details")
+            .navigationBarTitle("DetailsList.details")
         }
     }
 

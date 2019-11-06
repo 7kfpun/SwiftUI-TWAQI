@@ -1,0 +1,35 @@
+/* 
+  Localizable.strings
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "Main";
+"Tabbar.details" = "Details";
+"Tabbar.forecast" = "Forecast";
+"Tabbar.settings" = "Settings";
+"Tabbar.help" = "Help";
+
+"DetailsList.details" = "Details";
+"DetailsList.search" = "Search";
+
+"Forecast.forecast" = "Forecast";
+"Forecast.forecast_notification_daily" = "Forecast Notification (daily)";
+"Forecast.publish_time" = "Publish Time";
+"Forecast.three_days_forecast" = "3 Days";
+"Forecast.details_forecast" = "Details";
+
+"Settings.notification" = "Notification";
+"Settings.search" = "Search";
+"Settings.notice_me_when_aqi_is_above" = "Notice me when AQI is above";
+"Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
+
+"Help.help" = "Help";
+"Help.do_not_disturb" = "Do Not Disturb";
+"Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
+"Help.start_time" = "Start Time";
+"Help.end_time" = "End Time";
+"Help.ad_free" = "Remove Ads?";
+"Help.restore_purchase" = "Restore purchase";

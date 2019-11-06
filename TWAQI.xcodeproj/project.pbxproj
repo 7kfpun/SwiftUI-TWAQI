@@ -32,6 +32,7 @@
 		9E34B4F42371B23600B6E600 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E34B4F32371B23600B6E600 /* StoreKit.framework */; };
 		9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F52371B78600B6E600 /* IAPManager.swift */; };
 		9E34B4F82371CDF900B6E600 /* AdBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBanner.swift */; };
+		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E5257A32342FE56001ECFE1 /* Indexes.json */; };
 		9E5257A8234305D6001ECFE1 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A7234305D6001ECFE1 /* Index.swift */; };
 		9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A92343064F001ECFE1 /* IndexSelector.swift */; };
@@ -127,6 +128,8 @@
 		9E34B4F32371B23600B6E600 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		9E34B4F52371B78600B6E600 /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		9E34B4F72371CDF900B6E600 /* AdBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBanner.swift; sourceTree = "<group>"; };
+		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E5257A32342FE56001ECFE1 /* Indexes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Indexes.json; sourceTree = "<group>"; };
 		9E5257A7234305D6001ECFE1 /* Index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		9E5257A92343064F001ECFE1 /* IndexSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelector.swift; sourceTree = "<group>"; };
@@ -220,6 +223,7 @@
 		9E1AC53A233F981700AC862D /* TWAQI */ = {
 			isa = PBXGroup;
 			children = (
+				9E34B4F92371D4EC00B6E600 /* Localization */,
 				9EC596072351BC0500B8AA99 /* Config */,
 				9E794A65234099830064D874 /* Models */,
 				9E5257A12342FD88001ECFE1 /* Resources */,
@@ -349,6 +353,14 @@
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		9E34B4F92371D4EC00B6E600 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				9E34B5032371E7B700B6E600 /* Localizable.strings */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 		9E5257A12342FD88001ECFE1 /* Resources */ = {
@@ -487,6 +499,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hant",
 			);
 			mainGroup = 9E1AC52F233F981700AC862D;
 			packageReferences = (
@@ -509,6 +522,7 @@
 				9E5257A42342FE57001ECFE1 /* Indexes.json in Resources */,
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
 				9E978F1E235B0A0300C66A03 /* stations.json in Resources */,
+				9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */,
 				9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */,
 				9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */,
 				9E1AC542233F981900AC862D /* Assets.xcassets in Resources */,
@@ -727,6 +741,15 @@
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
+		9E34B5032371E7B700B6E600 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9E34B5022371E7B700B6E600 /* en */,
+				9E34B5042371E7BB00B6E600 /* zh-Hant */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -735,6 +758,7 @@
 			baseConfigurationReference = 9EC596112351C94900B8AA99 /* debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -796,6 +820,7 @@
 			baseConfigurationReference = 9EC596082351BC5D00B8AA99 /* release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

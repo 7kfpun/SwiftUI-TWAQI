@@ -14,31 +14,31 @@ struct ContentView: View {
             MainView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "map.fill")
-                    Text("Map")
+                    Text("Tabbar.main")
             }
 
             DetailsListView()
                 .tabItem {
                     Image(systemName: "list.bullet")
-                    Text("Details")
+                    Text("Tabbar.details")
             }
 
             ForecastView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "calendar")
-                    Text("Forecast")
+                    Text("Tabbar.forecast")
                 }
 
             SettingsView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "bell")
-                    Text("Settings")
+                    Text("Tabbar.settings")
                 }
 
             HelpView()
                 .tabItem {
                     Image(systemName: "questionmark.circle")
-                    Text("Help")
+                    Text("Tabbar.help")
             }
         }
         .font(.headline)
@@ -49,6 +49,12 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ForEach(["zh-Hant", "en"], id: \.self) { localIdentifier in
+            ContentView()
+                .environmentObject(SettingsStore())
+                .environment(\.locale, .init(identifier: localIdentifier))
+                .previewDisplayName(localIdentifier)
+        }
+
     }
 }

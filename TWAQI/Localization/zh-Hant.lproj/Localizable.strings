@@ -1,0 +1,35 @@
+/* 
+  Localizable.strings
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "首頁";
+"Tabbar.details" = "詳細";
+"Tabbar.forecast" = "預報";
+"Tabbar.settings" = "通知";
+"Tabbar.help" = "幫助";
+
+"DetailsList.details" = "詳細";
+"DetailsList.search" = "搜素";
+
+"Forecast.forecast" = "空氣品質預報";
+"Forecast.forecast_notification_daily" = "空氣品質預報通知（每日）";
+"Forecast.publish_time" = "發布時間";
+"Forecast.three_days_forecast" = "3 天預測";
+"Forecast.details_forecast" = "詳細預測";
+
+"Settings.notification" = "通知";
+"Settings.search" = "搜素";
+"Settings.notice_me_when_aqi_is_above" = "當空氣品質明顯惡化時，請通知我";
+"Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
+
+"Help.help" = "幫助";
+"Help.do_not_disturb" = "請勿打擾";
+"Help.turn_on_do_not_disturb" = "開啟請勿打擾";
+"Help.start_time" = "開始";
+"Help.end_time" = "結束";
+"Help.ad_free" = "想移除廣告？";
+"Help.restore_purchase" = "恢復你的應用內購買";

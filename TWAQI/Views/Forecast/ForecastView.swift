@@ -21,14 +21,14 @@ struct ForecastView: View {
                 ScrollView {
                     VStack {
                         Toggle(isOn: $settings.isForecastEnabled) {
-                            Text("Forecast Notification (daily)")
+                            Text("Forecast.forecast_notification_daily")
                                 .bold()
                         }
                         .padding(.bottom)
 
                         Picker(selection: $forecastType, label: Text("Forecast view?")) {
-                            Text("3 Days").tag(0)
-                            Text("Details").tag(1)
+                            Text("Forecast.three_days_forecast").tag(0)
+                            Text("Forecast.details_forecast").tag(1)
                         }.pickerStyle(SegmentedPickerStyle())
 
                         if forecastType == 0 {
@@ -43,7 +43,7 @@ struct ForecastView: View {
 
                 AdBanner(adUnitID: getEnv("AdUnitIdForecastFooter")!)
             }
-            .navigationBarTitle("Forecast")
+            .navigationBarTitle("Forecast.forecast")
         }.onAppear(perform: getData)
     }
 

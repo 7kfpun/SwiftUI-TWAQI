@@ -34,6 +34,7 @@ cyclomatic_complexity:
 trailing_comma:
     mandatory_comma: true
 identifier_name:
+    allowed_symbols: "_"
     severity: warning
     excluded: # excluded via string array
       - i

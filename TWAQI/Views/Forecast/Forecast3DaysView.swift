@@ -20,7 +20,7 @@ struct Forecast3DaysView: View {
                 .frame(height: 90)
 
             HStack {
-                Text("Publish Time")
+                Text("Forecast.publish_time")
                 Spacer()
                 Text(forecastAreas.first?.publishTime ?? "")
             }

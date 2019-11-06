@@ -17,9 +17,9 @@ struct HelpView: View {
         NavigationView {
             ZStack {
                 Form {
-                    Section(header: Text("Do Not Disturb")) {
+                    Section(header: Text("Help.do_not_disturb")) {
                         Toggle(isOn: $settings.isDndEnabled.animation()) {
-                            Text("Turn on Do Not Disturb")
+                            Text("Help.turn_on_do_not_disturb")
                                 .bold()
                         }
                         .padding(.vertical, 10)
@@ -28,14 +28,14 @@ struct HelpView: View {
                             DatePicker(
                                 selection: $settings.startDate,
                                 displayedComponents: .hourAndMinute,
-                                label: { Text("Start Date").fontWeight(.light) }
+                                label: { Text("Help.start_time").fontWeight(.light) }
                             )
                             .padding(.vertical, 10)
 
                             DatePicker(
                                 selection: $settings.endDate,
                                 displayedComponents: .hourAndMinute,
-                                label: { Text("End Date").fontWeight(.light) }
+                                label: { Text("Help.end_time").fontWeight(.light) }
                             )
                             .padding(.vertical, 10)
                         }
@@ -46,13 +46,13 @@ struct HelpView: View {
                             Button(action: {
                                 self.settings.unlockPro()
                             }) {
-                                Text("Unlock PRO")
+                                Text("Help.ad_free")
                             }
 
                             Button(action: {
                                 self.settings.restorePurchase()
                             }) {
-                                Text("Restore purchase")
+                                Text("Help.restore_purchase")
                             }
                         }
                     }
@@ -82,7 +82,7 @@ struct HelpView: View {
             .onAppear {
                 IAPManager.shared.fetchAvailableProducts()
             }
-            .navigationBarTitle("Help")
+            .navigationBarTitle("Help.help")
         }
     }
 }

@@ -24,7 +24,7 @@ struct SettingsRow: View {
 
             // Pollution Notification
             Toggle(isOn: $viewModel.stationSetting.isPollutionNotificationEnabled) {
-                Text("Notice me when AQI is above")
+                Text("Settings.notice_me_when_aqi_is_above")
                     .fontWeight(.thin)
 
                 LabelView(
@@ -39,7 +39,7 @@ struct SettingsRow: View {
 
             // Cleanliness Notification
             Toggle(isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled) {
-                Text("Notice me when AQI is below")
+                Text("Settings.notice_me_when_aqi_is_below")
                     .fontWeight(.thin)
 
                 LabelView(
