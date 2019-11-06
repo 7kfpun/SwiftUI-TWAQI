@@ -7,7 +7,7 @@
 */
 
 "Tabbar.main" = "Main";
-"Tabbar.details" = "Details";
+"Tabbar.details_list" = "List";
 "Tabbar.forecast" = "Forecast";
 "Tabbar.settings" = "Settings";
 "Tabbar.help" = "Help";
@@ -27,7 +27,9 @@
 "Settings.notification" = "Notification";
 "Settings.search" = "Search";
 "Settings.notice_me_when_aqi_is_above" = "Notice me when AQI is above";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
 
 "Help.help" = "Help";
 "Help.do_not_disturb" = "Do Not Disturb";

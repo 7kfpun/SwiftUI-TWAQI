@@ -7,12 +7,12 @@
 */
 
 "Tabbar.main" = "首頁";
-"Tabbar.details" = "詳細";
+"Tabbar.details_list" = "列表";
 "Tabbar.forecast" = "預報";
 "Tabbar.settings" = "通知";
 "Tabbar.help" = "幫助";
 
-"DetailsList.details" = "詳細";
+"DetailsList.details" = "空氣品質詳情";
 "DetailsList.search" = "搜素";
 
 "Details.general_public" = "一般族群";
@@ -24,10 +24,12 @@
 "Forecast.three_days_forecast" = "3 天預測";
 "Forecast.details_forecast" = "詳細預測";
 
-"Settings.notification" = "通知";
+"Settings.notification" = "空氣品質通知";
 "Settings.search" = "搜素";
 "Settings.notice_me_when_aqi_is_above" = "當空氣品質明顯惡化時，請通知我";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所設定的值偏低，將會收到很多通知哦";
 "Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "您所設定的值偏高，將會收到很多通知哦";
 
 "Help.help" = "幫助";
 "Help.do_not_disturb" = "請勿打擾";

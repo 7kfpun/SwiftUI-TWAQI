@@ -13,6 +13,9 @@ struct SettingsRow: View {
 
     var station: Station
 
+    let TOO_SMALL_POLLUTION = 110.0
+    let TOO_LARGE_CLEANLINESS = 30.0
+
     var body: some View {
         VStack {
             HStack {
@@ -37,6 +40,16 @@ struct SettingsRow: View {
                 Slider(value: $viewModel.stationSetting.pollutionTherhold, in: 1...500, step: 1)
             }
 
+            if viewModel.stationSetting.pollutionTherhold < TOO_SMALL_POLLUTION {
+                HStack {
+                    Text("Settings.the_value_is_too_small_you_would_get_lots_of_notifications")
+                        .font(.caption)
+                        .fontWeight(.thin)
+
+                    Spacer()
+                }
+            }
+
             // Cleanliness Notification
             Toggle(isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled) {
                 Text("Settings.notice_me_when_aqi_is_below")
@@ -50,6 +63,16 @@ struct SettingsRow: View {
 
             if viewModel.stationSetting.isCleanlinessNotificationEnabled {
                 Slider(value: $viewModel.stationSetting.cleanlinessTherhold, in: 1...500, step: 1)
+            }
+
+            if viewModel.stationSetting.cleanlinessTherhold > TOO_LARGE_CLEANLINESS {
+                HStack {
+                    Text("Settings.the_value_is_too_large_you_would_get_lots_of_notifications")
+                        .font(.caption)
+                        .fontWeight(.thin)
+
+                    Spacer()
+                }
             }
         }
         .padding(.horizontal)
