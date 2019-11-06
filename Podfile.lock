@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.0.0-rc.2)
+  - Alamofire (5.0.0-rc.3)
   - Amplitude-iOS (4.8.2)
   - AppCenter (2.5.0):
     - AppCenter/Analytics (= 2.5.0)
@@ -105,15 +105,15 @@ PODS:
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
   - OneSignal (2.11.2)
-  - SDWebImage (5.2.3):
-    - SDWebImage/Core (= 5.2.3)
-  - SDWebImage/Core (5.2.3)
-  - SDWebImageSwiftUI (0.3.2):
+  - SDWebImage (5.2.5):
+    - SDWebImage/Core (= 5.2.5)
+  - SDWebImage/Core (5.2.5)
+  - SDWebImageSwiftUI (0.7.0):
     - SDWebImage (~> 5.1)
   - SwiftDate (6.1.0)
 
 DEPENDENCIES:
-  - Alamofire (~> 5.0.0-rc.2)
+  - Alamofire (~> 5.0.0-rc.3)
   - Amplitude-iOS (~> 4.5)
   - AppCenter (~> 2.5.0)
   - AppCenter/Push
@@ -126,7 +126,7 @@ DEPENDENCIES:
   - Firebase/InAppMessagingDisplay
   - GoogleMaps (~> 3.5)
   - OneSignal (< 3.0, >= 2.11.2)
-  - SDWebImageSwiftUI (~> 0.3.2)
+  - SDWebImageSwiftUI (~> 0.7.0)
   - SwiftDate (~> 6.1)
 
 SPEC REPOS:
@@ -159,7 +159,7 @@ SPEC REPOS:
     - SwiftDate
 
 SPEC CHECKSUMS:
-  Alamofire: f9450d3c7f6bea2ad62e7a541c3e9b186c7991d6
+  Alamofire: ca8c0de6906873be89d6deec5c8de279e00bf872
   Amplitude-iOS: 46c8e6e65c49bb1ad1909a9add1a68e1f8562b3f
   AppCenter: 637f180deefc61e8ab3f94223869ee50f61dabea
   Bugsnag: d11978309d9c7de3732d8234a640fb855b6fc73c
@@ -182,10 +182,10 @@ SPEC CHECKSUMS:
   GoogleUtilities: f895fde57977df4e0233edda0dbeac490e3703b6
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   OneSignal: 4e3e68bb6c29975286a2fa910cb49132bc6e20bb
-  SDWebImage: 46a7f73228f84ce80990c786e4372cf4db5875ce
-  SDWebImageSwiftUI: a8a03ef596dde2e9668a76794f6c59d194289bb0
+  SDWebImage: 4eabf2fa6695c95c47724214417a9c036c965e4a
+  SDWebImageSwiftUI: 45e23f8884a6bc7af436e9bb8ea8eb1e47e27edd
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: ee23698575c2e3cb58c14f52e8728e11b802e115
+PODFILE CHECKSUM: 760ea2bb11e04a59b47e9e9fe16cd7b56ce43a9c
 
 COCOAPODS: 1.8.3

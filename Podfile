@@ -6,8 +6,8 @@ target 'TWAQI' do
   use_frameworks!
 
   # Pods for TWAQI
-  pod 'Alamofire', '~> 5.0.0-rc.2'
-  pod 'SDWebImageSwiftUI', '~> 0.3.2'
+  pod 'Alamofire', '~> 5.0.0-rc.3'
+  pod 'SDWebImageSwiftUI', '~> 0.7'
   pod 'SwiftDate', '~> 6.1'
   pod 'GoogleMaps', '~> 3.5'
 

@@ -15,11 +15,16 @@ struct DetailsView: View {
     var station: Station
 
     var body: some View {
-        ZStack {
+        SDImageCache.shared.config.maxDiskAge = 60 * 2
+        let imageUrl = self.station.imageUrl ?? ""
+
+        return ZStack {
             ScrollView {
-                if !(self.station.imageUrl?.isEmpty ?? true) {
-                    WebImage(url: URL(string: self.station.imageUrl!))
+                if !imageUrl.isEmpty {
+                    WebImage(url: URL(string: imageUrl))
                         .resizable()
+                        .indicator(.activity)
+                        .transition(.fade)
                         .frame(width: screenSize.width, height: screenSize.width * 720/1280)
                         .aspectRatio(contentMode: .fill)
                 } else {
