@@ -42,7 +42,7 @@ struct HelpView: View {
                     }
 
                     if !settings.isPro {
-                        Section {
+                        Section(header: Text("Help.in_app_purchase")) {
                             Button(action: {
                                 self.settings.unlockPro()
                             }) {

@@ -36,8 +36,11 @@
 "Help.turn_on_do_not_disturb" = "開啟請勿打擾";
 "Help.start_time" = "開始";
 "Help.end_time" = "結束";
+"Help.in_app_purchase" = "應用程式內購買";
 "Help.ad_free" = "想移除廣告？";
 "Help.restore_purchase" = "恢復你的應用內購買";
+"Help.interested_to_be_our_business_partner" = "想成為我們合作夥伴嗎？";
+"Help.feedback_or_contact_us" = "反饋 / 聯絡我們";
 
 "AirIndex.meaning_aqi" = "空氣品質指數";
 "AirIndex.meaning_pm25" = "細懸浮微粒";

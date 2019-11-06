@@ -10,6 +10,14 @@
 	<string>$(InAppPurchaseProductId)</string>
 	<key>AQI API</key>
 	<string>$(AQI_API)</string>
+	<key>FeedbackUrlZh</key>
+	<string>$(FeedbackUrlZh)</string>
+	<key>FeedbackUrlEn</key>
+	<string>$(FeedbackUrlEn)</string>
+	<key>PartnerUrlZh</key>
+	<string>$(PartnerUrlZh)</string>
+	<key>PartnerUrlEn</key>
+	<string>$(PartnerUrlEn)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
 	<key>GMSServicesApiKey</key>

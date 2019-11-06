@@ -36,8 +36,11 @@
 "Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
 "Help.start_time" = "Start Time";
 "Help.end_time" = "End Time";
+"Help.in_app_purchase" = "In-app purchase";
 "Help.ad_free" = "Remove Ads?";
 "Help.restore_purchase" = "Restore purchase";
+"Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
+"Help.feedback_or_contact_us" = "Feedback / Contact us";
 
 "AirIndex.meaning_aqi" = "Air quality index";
 "AirIndex.meaning_pm25" = "Particulates";
