@@ -41,6 +41,7 @@
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
+		9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9042E92372F73200DDD4D9 /* DateExtension.swift */; };
 		9E942E342372BAB10010915D /* AreaGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E332372BAB10010915D /* AreaGroups.swift */; };
 		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
@@ -141,6 +142,7 @@
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
+		9E9042E92372F73200DDD4D9 /* DateExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
 		9E942E332372BAB10010915D /* AreaGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaGroups.swift; sourceTree = "<group>"; };
 		9E942E352372BFDA0010915D /* AirIndexTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirIndexTypes.swift; sourceTree = "<group>"; };
 		9E942E372372C0380010915D /* AirStatusTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusTypes.swift; sourceTree = "<group>"; };
@@ -349,6 +351,7 @@
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				9E1AC566233FB0A400AC862D /* ColorExtensions.swift */,
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
+				9E9042E92372F73200DDD4D9 /* DateExtension.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
@@ -689,6 +692,7 @@
 				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
 				9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */,
 				9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */,
+				9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */,
 				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,

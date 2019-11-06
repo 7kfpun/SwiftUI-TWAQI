@@ -15,13 +15,14 @@ struct DetailsView: View {
     var station: Station
 
     var body: some View {
-        SDImageCache.shared.config.maxDiskAge = 60 * 2
+        // SDImageCache.shared.config.maxDiskAge = 60 * 5  // This seems not working
         let imageUrl = self.station.imageUrl ?? ""
+        let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
 
         return ZStack {
             ScrollView {
                 if !imageUrl.isEmpty {
-                    WebImage(url: URL(string: imageUrl))
+                    WebImage(url: URL(string: "\(imageUrl)?\(cacheKey)"))
                         .resizable()
                         .indicator(.activity)
                         .transition(.fade)
