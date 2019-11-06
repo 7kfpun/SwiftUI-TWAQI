@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum Constants {
     enum AirIndexTypes: String, CaseIterable, Hashable {
@@ -31,15 +32,28 @@ enum Constants {
             return readableStrings[self.rawValue] ?? ""
         }
 
-        func getDescription() -> String {
+        func getMeaning() -> LocalizedStringKey {
             let units = [
-                "aqi": "Air quality index",
-                "pm25": "Particulates",
-                "pm10": "Particulates",
-                "o3": "Ozone",
-                "co": "Carbon monoxide",
-                "so2": "Sulfur dioxide",
-                "no2": "Nitrogen dioxide",
+                "aqi": "AirIndex.meaning_aqi" as LocalizedStringKey,
+                "pm25": "AirIndex.meaning_pm25" as LocalizedStringKey,
+                "pm10": "AirIndex.meaning_pm10" as LocalizedStringKey,
+                "o3": "AirIndex.meaning_o3" as LocalizedStringKey,
+                "co": "AirIndex.meaning_co" as LocalizedStringKey,
+                "so2": "AirIndex.meaning_so2" as LocalizedStringKey,
+                "no2": "AirIndex.meaning_no2" as LocalizedStringKey,
+            ]
+            return units[self.rawValue] ?? ""
+        }
+
+        func getDescription() -> LocalizedStringKey {
+            let units = [
+                "aqi": "AirIndex.description_aqi" as LocalizedStringKey,
+                "pm25": "AirIndex.description_pm25" as LocalizedStringKey,
+                "pm10": "AirIndex.description_pm10" as LocalizedStringKey,
+                "o3": "AirIndex.description_o3" as LocalizedStringKey,
+                "co": "AirIndex.description_co" as LocalizedStringKey,
+                "so2": "AirIndex.description_so2" as LocalizedStringKey,
+                "no2": "AirIndex.description_no2" as LocalizedStringKey,
             ]
             return units[self.rawValue] ?? ""
         }
@@ -78,14 +92,14 @@ enum Constants {
             ]
         }
 
-        func toString() -> String {
+        func toString() -> LocalizedStringKey {
             let readableStrings = [
-                "good": "Good",
-                "moderate": "Moderate",
-                "unhealthyforsensitivegroup": "Unhealthy for sensitive groups",
-                "unhealthy": "Unhealthy",
-                "veryunhealthy": "Very unhealthy",
-                "hazardous": "Hazardous",
+                "good": "AirStatus.good" as LocalizedStringKey,
+                "moderate": "AirStatus.moderate" as LocalizedStringKey,
+                "unhealthyforsensitivegroup": "AirStatus.unhealthyforsensitivegroup" as LocalizedStringKey,
+                "unhealthy": "AirStatus.unhealthy" as LocalizedStringKey,
+                "veryunhealthy": "AirStatus.veryunhealthy" as LocalizedStringKey,
+                "hazardous": "AirStatus.hazardous" as LocalizedStringKey,
             ]
             return readableStrings[self.rawValue] ?? ""
         }
@@ -116,28 +130,28 @@ enum Constants {
             return UInt32(colors[self.rawValue] ?? white)
         }
 
-        func getGeneralPublicGuidance() -> String {
-            let texts = [
-                "good": "Enjoy your usual outdoor activities",
-                "moderate": "Enjoy your usual outdoor activities",
-                "unhealthyforsensitivegroup": "Consider reducing outdoor activities",
-                "unhealthy": "Should reduce physical exertion, particularly outdoors",
-                "veryunhealthy": "Reduce outdoor activities",
-                "hazardous": "Avoid outdoor activities and keep doors and windows closed",
+        func getGeneralPublicGuidance() -> LocalizedStringKey {
+            let readableStrings = [
+                "good": "AirStatus.general_public_guidance_good" as LocalizedStringKey,
+                "moderate": "AirStatus.general_public_guidance_moderate" as LocalizedStringKey,
+                "unhealthyforsensitivegroup": "AirStatus.general_public_guidance_unhealthyforsensitivegroup" as LocalizedStringKey,
+                "unhealthy": "AirStatus.general_public_guidance_unhealthy" as LocalizedStringKey,
+                "veryunhealthy": "AirStatus.general_public_guidance_veryunhealthy" as LocalizedStringKey,
+                "hazardous": "AirStatus.general_public_guidance_hazardous" as LocalizedStringKey,
             ]
-            return texts[self.rawValue] ?? ""
+            return readableStrings[self.rawValue] ?? ""
         }
 
-        func getSensitivePublicGuidance() -> String {
-            let texts = [
-                "good": "Enjoy your usual outdoor activities",
-                "moderate": "Can still be active outside",
-                "unhealthyforsensitivegroup": "Reduce physical exertion and outdoor activities",
-                "unhealthy": "Stay indoors and reduce physical exertion",
-                "veryunhealthy": "Stay indoors and reduce physical exertion",
-                "hazardous": "Stay indoors and avoid physical exertion",
+        func getSensitivePublicGuidance() -> LocalizedStringKey {
+            let readableStrings = [
+                "good": "AirStatus.sensitive_group_guidance_good" as LocalizedStringKey,
+                "moderate": "AirStatus.sensitive_group_guidance_moderate" as LocalizedStringKey,
+                "unhealthyforsensitivegroup": "AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" as LocalizedStringKey,
+                "unhealthy": "AirStatus.sensitive_group_guidance_unhealthy" as LocalizedStringKey,
+                "veryunhealthy": "AirStatus.sensitive_group_guidance_veryunhealthy" as LocalizedStringKey,
+                "hazardous": "AirStatus.sensitive_group_guidance_hazardous" as LocalizedStringKey,
             ]
-            return texts[self.rawValue] ?? ""
+            return readableStrings[self.rawValue] ?? ""
         }
 
         static func checkAirStatus(airIndexType: Constants.AirIndexTypes, value: Double) -> Constants.AirStatuses {

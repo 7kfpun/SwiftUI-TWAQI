@@ -1,4 +1,4 @@
-/* 
+/*
   Localizable.strings
   TWAQI
 
@@ -14,6 +14,9 @@
 
 "DetailsList.details" = "詳細";
 "DetailsList.search" = "搜素";
+
+"Details.general_public" = "一般族群";
+"Details.sensitive_group" = "敏感族群";
 
 "Forecast.forecast" = "空氣品質預報";
 "Forecast.forecast_notification_daily" = "空氣品質預報通知（每日）";
@@ -33,3 +36,48 @@
 "Help.end_time" = "結束";
 "Help.ad_free" = "想移除廣告？";
 "Help.restore_purchase" = "恢復你的應用內購買";
+
+"AirIndex.meaning_aqi" = "空氣品質指數";
+"AirIndex.meaning_pm25" = "細懸浮微粒";
+"AirIndex.meaning_pm10" = "懸浮微粒";
+"AirIndex.meaning_o3" = "臭氧";
+"AirIndex.meaning_co" = "一氧化碳";
+"AirIndex.meaning_so2" = "二氧化硫";
+"AirIndex.meaning_no2" = "二氧化氮";
+
+"AirIndex.description_aqi" = "綜合各項污染的空氣指標，數值愈高，空氣愈髒";
+"AirIndex.description_pm25" = "對心血管、神經系統傷害大，可能含有重金屬等重度污染物";
+"AirIndex.description_pm10" = "顆粒較大的懸浮微粒，過量可形成霧霾";
+"AirIndex.description_o3" = "對眼睛、呼吸道等有侵蝕和損害作用";
+"AirIndex.description_co" = "主要由燃燒化石燃料或火山爆發產生，通常在大氣少量存在";
+"AirIndex.description_so2" = "過量接觸將有眼睛疼痛、肺部傷害";
+"AirIndex.description_no2" = "來自於車輛廢氣、火力發電廠或其他工業染料，過量吸收傷害肺部";
+
+"AirIndex.url_aqi" = "https://zh.wikipedia.org/wiki/%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E6%8C%87%E6%95%B0";
+"AirIndex.url_pm25" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
+"AirIndex.url_pm10" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
+"AirIndex.url_o3" = "https://zh.wikipedia.org/wiki/%E8%87%AD%E6%B0%A7";
+"AirIndex.url_co" = "https://zh.wikipedia.org/wiki/%E4%B8%80%E6%B0%A7%E5%8C%96%E7%A2%B3";
+"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
+"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
+
+"AirStatus.good" = "良好";
+"AirStatus.moderate" = "普通";
+"AirStatus.unhealthyforsensitivegroup" = "對敏感族群不良";
+"AirStatus.unhealthy" = "對所有族群不良";
+"AirStatus.veryunhealthy" = "非常不良";
+"AirStatus.hazardous" = "有害";
+
+"AirStatus.general_public_guidance_good" = "正常戶外活動";
+"AirStatus.general_public_guidance_moderate" = "正常戶外活動";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "考慮減少戶外活動";
+"AirStatus.general_public_guidance_unhealthy" = "減少體力消耗，特別是減少戶外活動";
+"AirStatus.general_public_guidance_veryunhealthy" = "減少戶外活動";
+"AirStatus.general_public_guidance_hazardous" = "避免戶外活動";
+
+"AirStatus.sensitive_group_guidance_good" = "正常戶外活動";
+"AirStatus.sensitive_group_guidance_moderate" = "仍可正常戶外活動";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "減少體力消耗活動及戶外活動";
+"AirStatus.sensitive_group_guidance_unhealthy" = "留在室內並減少體力消耗活動";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "留在室內並減少體力消耗活動";
+"AirStatus.sensitive_group_guidance_hazardous" = "留在室內並避免體力消耗活動";

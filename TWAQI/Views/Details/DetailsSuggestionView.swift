@@ -61,7 +61,7 @@ struct DetailsSuggestionView: View {
                 .frame(width: geometry.size.width / 3)
 
                 VStack(alignment: .leading) {
-                    Text("General public")
+                    Text("Details.general_public")
                         .font(.callout)
                         .fontWeight(.regular)
                         .padding(.vertical, 3)
@@ -83,7 +83,7 @@ struct DetailsSuggestionView: View {
 
                     Spacer()
 
-                    Text("Sensitive group")
+                    Text("Details.sensitive_group")
                         .font(.callout)
                         .fontWeight(.regular)
                         .padding(.vertical, 4)

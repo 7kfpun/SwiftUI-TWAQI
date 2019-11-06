@@ -67,7 +67,6 @@ struct DetailsHistoryView: View {
                             .font(.caption)
                             .fontWeight(.thin)
                     }
-                    .frame(width: 50)
                     .padding()
 
                     VStack {
@@ -85,11 +84,18 @@ struct DetailsHistoryView: View {
                         }
                     }
                 }
-                .frame(height: 100)
             }
 
             HStack {
-                Text("\(settings.airIndexTypeSelected.toString()) - \(settings.airIndexTypeSelected.getDescription())")
+                Text(settings.airIndexTypeSelected.toString())
+                    .fontWeight(.light)
+                    .font(.caption)
+
+                Text("-")
+                    .fontWeight(.light)
+                    .font(.caption)
+
+                Text(settings.airIndexTypeSelected.getDescription())
                     .fontWeight(.light)
                     .font(.caption)
                 Spacer()
@@ -407,7 +413,7 @@ struct DetailsHistoryView_Previews: PreviewProvider {
             ),
             HistoryPollutant(
                 stationId: 80,
-                aqi: 51,
+                aqi: 64,
                 pm25: 30,
                 pm10: 36,
                 no2: 6.9,

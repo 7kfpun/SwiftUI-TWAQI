@@ -1,4 +1,4 @@
-/* 
+/*
   Localizable.strings
   TWAQI
 
@@ -14,6 +14,9 @@
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";
+
+"Details.general_public" = "General public";
+"Details.sensitive_group" = "Sensitive group";
 
 "Forecast.forecast" = "Forecast";
 "Forecast.forecast_notification_daily" = "Forecast Notification (daily)";
@@ -33,3 +36,48 @@
 "Help.end_time" = "End Time";
 "Help.ad_free" = "Remove Ads?";
 "Help.restore_purchase" = "Restore purchase";
+
+"AirIndex.meaning_aqi" = "Air quality index";
+"AirIndex.meaning_pm25" = "Particulates";
+"AirIndex.meaning_pm10" = "Particulates";
+"AirIndex.meaning_o3" = "Ozone";
+"AirIndex.meaning_co" = "Carbon monoxide";
+"AirIndex.meaning_so2" = "Sulfur dioxide";
+"AirIndex.meaning_no2" = "Nitrogen dioxide";
+
+"AirIndex.description_aqi" = "";
+"AirIndex.description_pm25" = "";
+"AirIndex.description_pm10" = "";
+"AirIndex.description_o3" = "";
+"AirIndex.description_co" = "";
+"AirIndex.description_so2" = "";
+"AirIndex.description_no2" = "";
+
+"AirIndex.url_aqi" = "https://en.wikipedia.org/wiki/Air_quality_index";
+"AirIndex.url_pm25" = "https://en.wikipedia.org/wiki/Particulates";
+"AirIndex.url_pm10" = "https://en.wikipedia.org/wiki/Particulates";
+"AirIndex.url_o3" = "https://en.wikipedia.org/wiki/Ozone";
+"AirIndex.url_co" = "https://en.wikipedia.org/wiki/Carbon_monoxide";
+"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
+"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
+
+"AirStatus.good" = "Good";
+"AirStatus.moderate" = "Moderate";
+"AirStatus.unhealthyforsensitivegroup" = "Unhealthy for sensitive groups";
+"AirStatus.unhealthy" = "Unhealthy";
+"AirStatus.veryunhealthy" = "Very unhealthy";
+"AirStatus.hazardous" = "Hazardous";
+
+"AirStatus.general_public_guidance_good" = "Enjoy your usual outdoor activities";
+"AirStatus.general_public_guidance_moderate" = "Enjoy your usual outdoor activities";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "Consider reducing outdoor activities";
+"AirStatus.general_public_guidance_unhealthy" = "Should reduce physical exertion, particularly outdoors";
+"AirStatus.general_public_guidance_veryunhealthy" = "Reduce outdoor activities";
+"AirStatus.general_public_guidance_hazardous" = "Avoid outdoor activities and keep doors and windows closed";
+
+"AirStatus.sensitive_group_guidance_good" = "Enjoy your usual outdoor activities";
+"AirStatus.sensitive_group_guidance_moderate" = "Can still be active outside";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "Reduce physical exertion and outdoor activities";
+"AirStatus.sensitive_group_guidance_unhealthy" = "Stay indoors and reduce physical exertion";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "Stay indoors and reduce physical exertion";
+"AirStatus.sensitive_group_guidance_hazardous" = "Stay indoors and avoid physical exertion";
