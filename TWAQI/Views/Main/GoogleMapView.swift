@@ -14,7 +14,7 @@ struct GoogleMapView: UIViewRepresentable {
     let pollutants: Pollutants
     let isWindMode: Bool
 
-    var selectedIndex: Constants.AirIndexTypes = Constants.AirIndexTypes.aqi
+    var selectedIndex: AirIndexTypes = AirIndexTypes.aqi
 
     /// Creates a `UIView` instance to be presented.
     func makeUIView(context: Self.Context) -> GMSMapView {

@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct LabelView: View {
-    var airIndexTypes: Constants.AirIndexTypes
+    var airIndexTypes: AirIndexTypes
     var value: Double
     
     var body: some View {
@@ -18,16 +18,17 @@ struct LabelView: View {
 
         return Text(text)
             .foregroundColor(
-                Color(Constants.AirStatuses.checkAirStatus(
+                Color(AirStatuses.checkAirStatus(
                     airIndexType: airIndexTypes,
                     value: value
                 ).getForegroundColor())
             )
             .fontWeight(.thin)
+            .frame(minWidth: 25)
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .background(
-                Color(Constants.AirStatuses.checkAirStatus(
+                Color(AirStatuses.checkAirStatus(
                     airIndexType: airIndexTypes,
                     value: value
                 ).getColor())
@@ -40,18 +41,28 @@ struct LabelView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             LabelView(
-                airIndexTypes: Constants.AirIndexTypes.aqi,
+                airIndexTypes: AirIndexTypes.aqi,
                 value: 12
             )
 
             LabelView(
-                airIndexTypes: Constants.AirIndexTypes.aqi,
+                airIndexTypes: AirIndexTypes.aqi,
+                value: 55
+            )
+
+            LabelView(
+                airIndexTypes: AirIndexTypes.aqi,
                 value: 120
             )
 
             LabelView(
-                airIndexTypes: Constants.AirIndexTypes.o3,
+                airIndexTypes: AirIndexTypes.o3,
                 value: 12.3
+            )
+
+            LabelView(
+                airIndexTypes: AirIndexTypes.o3,
+                value: 121.3
             )
         }
         .previewLayout(.fixed(width: 100, height: 100))

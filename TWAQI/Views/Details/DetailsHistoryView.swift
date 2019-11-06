@@ -17,20 +17,20 @@ struct DetailsHistoryView: View {
     @State private var viewType = 0
 
     var body: some View {
-        let historyPollutantsMap: [Constants.AirIndexTypes: [Double]] = [
-            Constants.AirIndexTypes.aqi: historyPollutants.map({ $0.aqi }),
-            Constants.AirIndexTypes.pm25: historyPollutants.map({ $0.pm25 }),
-            Constants.AirIndexTypes.pm10: historyPollutants.map({ $0.pm10 }),
-            Constants.AirIndexTypes.o3: historyPollutants.map({ $0.o3 }),
-            Constants.AirIndexTypes.co: historyPollutants.map({ $0.co }),
-            Constants.AirIndexTypes.so2: historyPollutants.map({ $0.so2 }),
-            Constants.AirIndexTypes.no2: historyPollutants.map({ $0.no2 }),
+        let historyPollutantsMap: [AirIndexTypes: [Double]] = [
+            AirIndexTypes.aqi: historyPollutants.map({ $0.aqi }),
+            AirIndexTypes.pm25: historyPollutants.map({ $0.pm25 }),
+            AirIndexTypes.pm10: historyPollutants.map({ $0.pm10 }),
+            AirIndexTypes.o3: historyPollutants.map({ $0.o3 }),
+            AirIndexTypes.co: historyPollutants.map({ $0.co }),
+            AirIndexTypes.so2: historyPollutants.map({ $0.so2 }),
+            AirIndexTypes.no2: historyPollutants.map({ $0.no2 }),
         ]
 
         let bars: [Bar] = historyPollutantsMap[settings.airIndexTypeSelected]!.map {
             Bar(
                 value: $0,
-                color: Color(Constants.AirStatuses.checkAirStatus(
+                color: Color(AirStatuses.checkAirStatus(
                     airIndexType: settings.airIndexTypeSelected,
                     value: $0
                 ).getColor())
@@ -42,7 +42,7 @@ struct DetailsHistoryView: View {
                 selection: $settings.airIndexTypeSelected,
                 label: Text("Air Index Type").fontWeight(.light)
             ) {
-                ForEach(Constants.AirIndexTypes.allCases, id: \.self) {
+                ForEach(AirIndexTypes.allCases, id: \.self) {
                     Text($0.toString())
                         .tag($0)
                 }

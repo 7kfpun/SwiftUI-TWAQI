@@ -63,21 +63,21 @@ struct Pollutant: Codable {
         case windSpeed = "WindSpeed"
     }
 
-    func getValue(airIndexType: Constants.AirIndexTypes) -> Double {
+    func getValue(airIndexType: AirIndexTypes) -> Double {
         switch airIndexType {
-        case Constants.AirIndexTypes.aqi:
+        case AirIndexTypes.aqi:
             return Double(self.aqi) ?? 0
-        case Constants.AirIndexTypes.pm25:
+        case AirIndexTypes.pm25:
             return Double(self.pm25) ?? 0
-        case Constants.AirIndexTypes.pm10:
+        case AirIndexTypes.pm10:
             return Double(self.pm10) ?? 0
-        case Constants.AirIndexTypes.no2:
+        case AirIndexTypes.no2:
             return Double(self.no2) ?? 0
-        case Constants.AirIndexTypes.so2:
+        case AirIndexTypes.so2:
             return Double(self.so2) ?? 0
-        case Constants.AirIndexTypes.co:
+        case AirIndexTypes.co:
             return Double(self.co) ?? 0
-        case Constants.AirIndexTypes.o3:
+        case AirIndexTypes.o3:
             return Double(self.o3) ?? 0
         }
     }

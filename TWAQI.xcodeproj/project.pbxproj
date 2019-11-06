@@ -43,9 +43,11 @@
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
 		9E942E342372BAB10010915D /* AreaGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E332372BAB10010915D /* AreaGroups.swift */; };
+		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
+		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
+		9E942E3A2372C3B20010915D /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
 		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
-		9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F19235ABB0500C66A03 /* Constants.swift */; };
 		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
 		9E978F1E235B0A0300C66A03 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
 		9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1F235B0CDC00C66A03 /* StationGroups.swift */; };
@@ -141,9 +143,11 @@
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		9E942E332372BAB10010915D /* AreaGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaGroups.swift; sourceTree = "<group>"; };
+		9E942E352372BFDA0010915D /* AirIndexTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirIndexTypes.swift; sourceTree = "<group>"; };
+		9E942E372372C0380010915D /* AirStatusTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusTypes.swift; sourceTree = "<group>"; };
+		9E942E392372C3B20010915D /* LinkPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPages.swift; sourceTree = "<group>"; };
 		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
-		9E978F19235ABB0500C66A03 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9E978F1B235AFA7000C66A03 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		9E978F1D235B0A0300C66A03 /* stations.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = stations.json; sourceTree = "<group>"; };
 		9E978F1F235B0CDC00C66A03 /* StationGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationGroups.swift; sourceTree = "<group>"; };
@@ -344,7 +348,6 @@
 			children = (
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				9E1AC566233FB0A400AC862D /* ColorExtensions.swift */,
-				9E978F19235ABB0500C66A03 /* Constants.swift */,
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
@@ -392,7 +395,10 @@
 		9E942E322372BA810010915D /* Constants */ = {
 			isa = PBXGroup;
 			children = (
+				9E942E352372BFDA0010915D /* AirIndexTypes.swift */,
+				9E942E372372C0380010915D /* AirStatusTypes.swift */,
 				9E942E332372BAB10010915D /* AreaGroups.swift */,
+				9E942E392372C3B20010915D /* LinkPages.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -670,7 +676,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
-				9E978F1A235ABB0500C66A03 /* Constants.swift in Sources */,
 				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
 				9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
@@ -696,6 +701,7 @@
 				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
+				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
 				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
@@ -710,8 +716,10 @@
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */,
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
+				9E942E3A2372C3B20010915D /* LinkPages.swift in Sources */,
 				9EC6BB17235B462B00213041 /* SafariView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
+				9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */,
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
 				9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */,
 				9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */,

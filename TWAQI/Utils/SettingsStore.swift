@@ -31,7 +31,7 @@ final class SettingsStore: ObservableObject {
         self.defaults = defaults
 
         defaults.register(defaults: [
-            Keys.airIndexTypeSelected: Constants.AirIndexTypes.aqi.rawValue,
+            Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
             Keys.forecastEnabled: false,
             Keys.dndEnabled: false,
             Keys.startDate: Date(),
@@ -51,10 +51,10 @@ final class SettingsStore: ObservableObject {
         get { defaults.bool(forKey: Keys.pro) }
     }
 
-    var airIndexTypeSelected: Constants.AirIndexTypes {
+    var airIndexTypeSelected: AirIndexTypes {
         get {
             return defaults.string(forKey: Keys.airIndexTypeSelected)
-                .flatMap { Constants.AirIndexTypes(rawValue: $0) } ?? .aqi
+                .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
         }
 
         set { defaults.set(newValue.rawValue, forKey: Keys.airIndexTypeSelected) }

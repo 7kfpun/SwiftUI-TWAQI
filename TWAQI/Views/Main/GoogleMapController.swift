@@ -50,8 +50,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     @objc func changeIndex(sender: UIButton?) {
         if let tag = sender?.tag {
-            print(tag, Constants.AirIndexTypes.allCases[tag])
-            self.selectedIndex = Constants.AirIndexTypes.allCases[tag]
+            print(tag, AirIndexTypes.allCases[tag])
+            self.selectedIndex = AirIndexTypes.allCases[tag]
 
             for button in buttons {
                 button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .black, for: .normal)
@@ -71,7 +71,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
-    var selectedIndex: Constants.AirIndexTypes = Constants.AirIndexTypes.aqi {
+    var selectedIndex: AirIndexTypes = AirIndexTypes.aqi {
         didSet {
             update()
         }
@@ -183,7 +183,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let buttonPadding: CGFloat = 10
         var xOffset: CGFloat = 15
 
-        for (i, airIndexType) in Constants.AirIndexTypes.allCases.enumerated() {
+        for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
             let button = UIButton()
             buttons.append(button)
             button.tag = i

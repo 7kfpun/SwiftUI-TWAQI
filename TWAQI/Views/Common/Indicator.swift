@@ -19,7 +19,7 @@ struct Indicator: View {
     var body: some View {
         GeometryReader { geometry in
             HStack(alignment: .top) {
-                ForEach(Constants.AirStatuses.getShowAllCases(), id: \.self) { airStatus in
+                ForEach(AirStatuses.getShowAllCases(), id: \.self) { airStatus in
                     VStack {
                         Rectangle()
                             .fill(Color(airStatus.getColor()))

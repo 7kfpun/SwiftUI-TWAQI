@@ -33,14 +33,14 @@ struct DetailsSuggestionView: View {
                     Spacer()
 
                     Text(
-                        Constants.AirStatuses.checkAirStatus(
-                            airIndexType: Constants.AirIndexTypes.aqi,
+                        AirStatuses.checkAirStatus(
+                            airIndexType: AirIndexTypes.aqi,
                             value: Double(self.lastPollutant.aqi)
                         ).toString()
                     )
                     .foregroundColor(
-                        Color(Constants.AirStatuses.checkAirStatus(
-                            airIndexType: Constants.AirIndexTypes.aqi,
+                        Color(AirStatuses.checkAirStatus(
+                            airIndexType: AirIndexTypes.aqi,
                             value: Double(self.lastPollutant.aqi)
                         ).getForegroundColor())
                     )
@@ -51,8 +51,8 @@ struct DetailsSuggestionView: View {
                     .padding(.horizontal)
                     .lineLimit(2)
                     .background(
-                        Color(Constants.AirStatuses.checkAirStatus(
-                            airIndexType: Constants.AirIndexTypes.aqi,
+                        Color(AirStatuses.checkAirStatus(
+                            airIndexType: AirIndexTypes.aqi,
                             value: Double(self.lastPollutant.aqi)
                         ).getColor())
                     )
@@ -72,8 +72,8 @@ struct DetailsSuggestionView: View {
                         )
 
                     Text(
-                        Constants.AirStatuses.checkAirStatus(
-                            airIndexType: Constants.AirIndexTypes.aqi,
+                        AirStatuses.checkAirStatus(
+                            airIndexType: AirIndexTypes.aqi,
                             value: Double(self.lastPollutant.aqi)
                         ).getGeneralPublicGuidance()
                     )
@@ -94,8 +94,8 @@ struct DetailsSuggestionView: View {
                         )
 
                     Text(
-                        Constants.AirStatuses.checkAirStatus(
-                            airIndexType: Constants.AirIndexTypes.aqi,
+                        AirStatuses.checkAirStatus(
+                            airIndexType: AirIndexTypes.aqi,
                             value: Double(self.lastPollutant.aqi)
                         ).getSensitivePublicGuidance()
                     )

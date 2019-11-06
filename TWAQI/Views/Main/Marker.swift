@@ -12,9 +12,9 @@ import UIKit
 
 final class PollutantMarker: GMSMarker {
     let pollutant: Pollutant
-    let selectedIndex: Constants.AirIndexTypes
+    let selectedIndex: AirIndexTypes
 
-    init(pollutant: Pollutant, selectedIndex: Constants.AirIndexTypes) {
+    init(pollutant: Pollutant, selectedIndex: AirIndexTypes) {
         self.pollutant = pollutant
         self.selectedIndex = selectedIndex
         super.init()
@@ -27,7 +27,7 @@ final class PollutantMarker: GMSMarker {
 
         let value = pollutant.getValue(airIndexType: selectedIndex)
 
-        let airStatus = Constants.AirStatuses.checkAirStatus(
+        let airStatus = AirStatuses.checkAirStatus(
             airIndexType: selectedIndex,
             value: value
         )
@@ -54,9 +54,9 @@ final class PollutantMarker: GMSMarker {
 
 final class WindDirectionMarker: GMSMarker {
     let pollutant: Pollutant
-    let selectedIndex: Constants.AirIndexTypes
+    let selectedIndex: AirIndexTypes
 
-    init(pollutant: Pollutant, selectedIndex: Constants.AirIndexTypes) {
+    init(pollutant: Pollutant, selectedIndex: AirIndexTypes) {
         self.pollutant = pollutant
         self.selectedIndex = selectedIndex
         super.init()
@@ -69,7 +69,7 @@ final class WindDirectionMarker: GMSMarker {
         }
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
-        let airStatus = Constants.AirStatuses.checkAirStatus(
+        let airStatus = AirStatuses.checkAirStatus(
             airIndexType: selectedIndex,
             value: pollutant.getValue(airIndexType: selectedIndex)
         )

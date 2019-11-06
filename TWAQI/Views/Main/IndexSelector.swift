@@ -14,7 +14,7 @@ struct IndexSelector: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                ForEach(Constants.AirIndexTypes.allCases, id: \.self) {airIndex in
+                ForEach(AirIndexTypes.allCases, id: \.self) {airIndex in
                     Button(action: {
                         self.settings.airIndexTypeSelected = airIndex
                     }) {

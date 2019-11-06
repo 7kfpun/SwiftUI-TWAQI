@@ -28,7 +28,7 @@ struct SettingsRow: View {
                     .fontWeight(.thin)
 
                 LabelView(
-                    airIndexTypes: Constants.AirIndexTypes.aqi,
+                    airIndexTypes: AirIndexTypes.aqi,
                     value: viewModel.stationSetting.pollutionTherhold
                 )
             }
@@ -43,7 +43,7 @@ struct SettingsRow: View {
                     .fontWeight(.thin)
 
                 LabelView(
-                    airIndexTypes: Constants.AirIndexTypes.aqi,
+                    airIndexTypes: AirIndexTypes.aqi,
                     value: viewModel.stationSetting.cleanlinessTherhold
                 )
             }

@@ -43,7 +43,7 @@ struct Forecast3DaysView: View {
                     ForEach(groupedByAreas[areaGroup.getKey()] ?? [], id: \.self) {area in
                         HStack {
                             LabelView(
-                                airIndexTypes: Constants.AirIndexTypes.aqi,
+                                airIndexTypes: AirIndexTypes.aqi,
                                 value: Double((area as ForecastArea).aqi) ?? 0
                             )
                         }

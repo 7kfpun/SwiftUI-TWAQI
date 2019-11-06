@@ -11,7 +11,7 @@ import SwiftUI
 struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
 
-    @State var linkPage: Constants.LinkPages?
+    @State var linkPage: LinkPages?
 
     var body: some View {
         NavigationView {
@@ -58,7 +58,7 @@ struct HelpView: View {
                     }
 
                     Section {
-                        ForEach(Constants.LinkPages.allCases) { linkPage in
+                        ForEach(LinkPages.allCases) { linkPage in
                             Button(action: {
                                 // setting a new value to self.linkPage
                                 // this is used for triggering the SafariView presentation through .sheet()
@@ -76,6 +76,7 @@ struct HelpView: View {
                     })
 
                 }
+                .padding(.bottom, 50)
 
                 AdBanner(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
