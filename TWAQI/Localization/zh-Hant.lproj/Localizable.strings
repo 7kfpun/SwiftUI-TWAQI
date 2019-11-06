@@ -81,3 +81,14 @@
 "AirStatus.sensitive_group_guidance_unhealthy" = "留在室內並減少體力消耗活動";
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "留在室內並減少體力消耗活動";
 "AirStatus.sensitive_group_guidance_hazardous" = "留在室內並避免體力消耗活動";
+
+"AreaGroup.north" = "北部";
+"AreaGroup.chumiao" = "竹苗";
+"AreaGroup.central" = "中部";
+"AreaGroup.yunchianan" = "雲嘉南";
+"AreaGroup.kaoping" = "高屏";
+"AreaGroup.yilan" = "宜蘭";
+"AreaGroup.huatun" = "花東";
+"AreaGroup.matsu" = "馬祖";
+"AreaGroup.kinmen" = "金門";
+"AreaGroup.magong" = "澎湖";

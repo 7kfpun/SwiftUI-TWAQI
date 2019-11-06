@@ -81,3 +81,14 @@
 "AirStatus.sensitive_group_guidance_unhealthy" = "Stay indoors and reduce physical exertion";
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "Stay indoors and reduce physical exertion";
 "AirStatus.sensitive_group_guidance_hazardous" = "Stay indoors and avoid physical exertion";
+
+"AreaGroup.north" = "North";
+"AreaGroup.chumiao" = "Chu-Miao";
+"AreaGroup.central" = "Central";
+"AreaGroup.yunchianan" = "Yun-Chia-Nan";
+"AreaGroup.kaoping" = "KaoPing";
+"AreaGroup.yilan" = "Yilan";
+"AreaGroup.huatun" = "Hua-Tun";
+"AreaGroup.matsu" = "Matsu";
+"AreaGroup.kinmen" = "Kinmen";
+"AreaGroup.magong" = "Magong";

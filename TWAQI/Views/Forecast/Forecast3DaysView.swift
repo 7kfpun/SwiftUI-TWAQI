@@ -13,7 +13,6 @@ struct Forecast3DaysView: View {
 
     var body: some View {
         let groupedByAreas = Dictionary(grouping: forecastAreas) { $0.area }
-        let areaGroups: [String] = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
 
         return VStack {
             Indicator()
@@ -37,11 +36,11 @@ struct Forecast3DaysView: View {
             }
             .padding(.vertical, 10)
 
-            ForEach(areaGroups, id: \.self) {areaGroup in
+            ForEach(AreaGroups.allCases, id: \.self) {areaGroup in
                 HStack {
-                    Text(areaGroup)
+                    Text(areaGroup.toString())
                     Spacer()
-                    ForEach(groupedByAreas[areaGroup] ?? [], id: \.self) {area in
+                    ForEach(groupedByAreas[areaGroup.getKey()] ?? [], id: \.self) {area in
                         HStack {
                             LabelView(
                                 airIndexTypes: Constants.AirIndexTypes.aqi,
