@@ -14,7 +14,7 @@ struct DetailsRow: View {
     var body: some View {
         NavigationLink(destination: DetailsView(station: station)) {
             HStack {
-                Text(station.name)
+                Text(Locale.isChinese ? station.nameLocal : station.name)
                     .foregroundColor(Color.primary)
                     .fontWeight(.light)
                     .padding(.vertical, 10)

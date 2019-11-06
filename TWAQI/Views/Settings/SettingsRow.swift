@@ -16,7 +16,7 @@ struct SettingsRow: View {
     var body: some View {
         VStack {
             HStack {
-                Text(station.name)
+                Text(Locale.isChinese ? station.nameLocal : station.name)
                     .fontWeight(.regular)
                     .padding(.top, 15)
                 Spacer()

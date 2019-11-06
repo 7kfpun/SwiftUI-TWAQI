@@ -45,6 +45,7 @@
 		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
 		9E942E3A2372C3B20010915D /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
+		9E942E3C2372CA4B0010915D /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E3B2372CA4B0010915D /* LocaleExtension.swift */; };
 		9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F152357808100C66A03 /* GoogleService-Info.plist */; };
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
 		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
@@ -144,6 +145,7 @@
 		9E942E352372BFDA0010915D /* AirIndexTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirIndexTypes.swift; sourceTree = "<group>"; };
 		9E942E372372C0380010915D /* AirStatusTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusTypes.swift; sourceTree = "<group>"; };
 		9E942E392372C3B20010915D /* LinkPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPages.swift; sourceTree = "<group>"; };
+		9E942E3B2372CA4B0010915D /* LocaleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleExtension.swift; sourceTree = "<group>"; };
 		9E978F152357808100C66A03 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
 		9E978F1B235AFA7000C66A03 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
@@ -349,12 +351,13 @@
 				9E978F1B235AFA7000C66A03 /* DataManager.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
+				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
+				9E942E3B2372CA4B0010915D /* LocaleExtension.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
-				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -678,6 +681,7 @@
 				9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
+				9E942E3C2372CA4B0010915D /* LocaleExtension.swift in Sources */,
 				9E942E342372BAB10010915D /* AreaGroups.swift in Sources */,
 				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
 				9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */,

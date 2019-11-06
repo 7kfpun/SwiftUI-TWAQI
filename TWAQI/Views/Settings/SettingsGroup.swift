@@ -18,7 +18,7 @@ struct SettingsGroup: View {
                 self.isOpen.toggle()
             }) {
                 HStack {
-                    Text(stationGroup.name)
+                    Text(Locale.isChinese ? stationGroup.nameLocal : stationGroup.name)
                         .bold()
                         .padding(.vertical, 10)
                         .foregroundColor(Color.primary)
