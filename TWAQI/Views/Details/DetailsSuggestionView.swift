@@ -15,7 +15,7 @@ struct DetailsSuggestionView: View {
         GeometryReader { geometry in
             HStack {
                 VStack {
-                    Text("AQI")
+                    Text("AQI \(Int(self.lastPollutant.aqi))")
                         .font(.callout)
                         .fontWeight(.regular)
                         .padding(.vertical, 3)
@@ -27,10 +27,9 @@ struct DetailsSuggestionView: View {
 
                     Spacer()
 
-                    Text("\(Int(self.lastPollutant.aqi))")
-                        .font(.largeTitle)
-
-                    Spacer()
+                    Image("status_good")
+                        .resizable()
+                        .frame(width: 65, height: 65)
 
                     Text(
                         AirStatuses.checkAirStatus(
