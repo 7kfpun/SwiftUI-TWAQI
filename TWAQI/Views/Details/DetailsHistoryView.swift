@@ -86,7 +86,7 @@ struct DetailsHistoryView: View {
                 }
             }
 
-            HStack {
+            HStack(alignment: .top) {
                 Text(settings.airIndexTypeSelected.toString())
                     .fontWeight(.light)
                     .font(.caption)
@@ -98,10 +98,11 @@ struct DetailsHistoryView: View {
                 Text(settings.airIndexTypeSelected.getDescription())
                     .fontWeight(.light)
                     .font(.caption)
+
                 Spacer()
             }
-            .padding(.top, 5)
             .padding(.leading, 5)
+            .padding(.vertical, 10)
         }
         .padding(.horizontal, 10)
     }

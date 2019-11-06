@@ -12,7 +12,12 @@ struct DetailsSuggestionView: View {
     var lastPollutant: HistoryPollutant
 
     var body: some View {
-        GeometryReader { geometry in
+        let airStatus = AirStatuses.checkAirStatus(
+            airIndexType: AirIndexTypes.aqi,
+            value: Double(self.lastPollutant.aqi)
+        )
+
+        return GeometryReader { geometry in
             HStack {
                 VStack {
                     Text("AQI \(Int(self.lastPollutant.aqi))")
@@ -27,35 +32,23 @@ struct DetailsSuggestionView: View {
 
                     Spacer()
 
-                    Image("status_good")
+                    Image("status_\(airStatus)")
                         .resizable()
                         .frame(width: 65, height: 65)
+                        .padding(.top, 10)
 
-                    Text(
-                        AirStatuses.checkAirStatus(
-                            airIndexType: AirIndexTypes.aqi,
-                            value: Double(self.lastPollutant.aqi)
-                        ).toString()
-                    )
-                    .foregroundColor(
-                        Color(AirStatuses.checkAirStatus(
-                            airIndexType: AirIndexTypes.aqi,
-                            value: Double(self.lastPollutant.aqi)
-                        ).getForegroundColor())
-                    )
-                    .font(.footnote)
-                    .fontWeight(.regular)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 3)
-                    .padding(.horizontal)
-                    .lineLimit(2)
-                    .background(
-                        Color(AirStatuses.checkAirStatus(
-                            airIndexType: AirIndexTypes.aqi,
-                            value: Double(self.lastPollutant.aqi)
-                        ).getColor())
-                    )
-                    .cornerRadius(6)
+                    Spacer()
+
+                    Text(airStatus.toString())
+                        .foregroundColor(Color(airStatus.getForegroundColor()))
+                        .font(.footnote)
+                        .fontWeight(.regular)
+                        .multilineTextAlignment(.center)
+                        .padding(.vertical, 3)
+                        .padding(.horizontal)
+                        .lineLimit(2)
+                        .background(Color(airStatus.getColor()))
+                        .cornerRadius(6)
                 }
                 .frame(width: geometry.size.width / 3)
 
@@ -70,15 +63,10 @@ struct DetailsSuggestionView: View {
                                 .stroke(Color.primary, lineWidth: 0.5)
                         )
 
-                    Text(
-                        AirStatuses.checkAirStatus(
-                            airIndexType: AirIndexTypes.aqi,
-                            value: Double(self.lastPollutant.aqi)
-                        ).getGeneralPublicGuidance()
-                    )
-                    .font(.footnote)
-                    .fontWeight(.thin)
-                    .padding(.top, 6)
+                    Text(airStatus.getGeneralPublicGuidance())
+                        .font(.footnote)
+                        .fontWeight(.thin)
+                        .padding(.top, 6)
 
                     Spacer()
 
@@ -92,15 +80,10 @@ struct DetailsSuggestionView: View {
                                 .stroke(Color.primary, lineWidth: 0.5)
                         )
 
-                    Text(
-                        AirStatuses.checkAirStatus(
-                            airIndexType: AirIndexTypes.aqi,
-                            value: Double(self.lastPollutant.aqi)
-                        ).getSensitivePublicGuidance()
-                    )
-                    .font(.footnote)
-                    .fontWeight(.thin)
-                    .padding(.top, 6)
+                    Text(airStatus.getSensitivePublicGuidance())
+                        .font(.footnote)
+                        .fontWeight(.thin)
+                        .padding(.top, 6)
                 }
                 .frame(width: geometry.size.width * 2 / 3)
             }
