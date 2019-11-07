@@ -16,7 +16,7 @@ struct ForecastView: View {
     @State var forecastType = 0
 
     var body: some View {
-        return NavigationView {
+        NavigationView {
             ZStack {
                 ScrollView {
                     VStack {
@@ -44,7 +44,9 @@ struct ForecastView: View {
                 AdBanner(adUnitID: getEnv("AdUnitIdForecastFooter")!)
             }
             .navigationBarTitle("Forecast.forecast")
-        }.onAppear(perform: getData)
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear(perform: getData)
     }
 
     private func getData() {

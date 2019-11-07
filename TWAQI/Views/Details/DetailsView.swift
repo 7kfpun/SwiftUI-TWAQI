@@ -26,11 +26,10 @@ struct DetailsView: View {
                         .resizable()
                         .indicator(.activity)
                         .transition(.fade)
-                        .frame(width: screenSize.width, height: screenSize.width * 720/1280)
                         .aspectRatio(contentMode: .fill)
                 } else {
                     Spacer()
-                        .frame(width: screenSize.width, height: 80)
+                        .frame(height: 80)
                 }
 
                 SettingsRow(station: station)

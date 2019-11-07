@@ -2,28 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>BugsnagApiKey</key>
-	<string>$(BugsnagApiKey)</string>
-	<key>AmplitudeApiKey</key>
-	<string>$(AmplitudeApiKey)</string>
-	<key>InAppPurchaseProductId</key>
-	<string>$(InAppPurchaseProductId)</string>
 	<key>AQI API</key>
 	<string>$(AQI_API)</string>
-	<key>FeedbackUrlZh</key>
-	<string>$(FeedbackUrlZh)</string>
-	<key>FeedbackUrlEn</key>
-	<string>$(FeedbackUrlEn)</string>
-	<key>PartnerUrlZh</key>
-	<string>$(PartnerUrlZh)</string>
-	<key>PartnerUrlEn</key>
-	<string>$(PartnerUrlEn)</string>
+	<key>AdUnitIdDetailsFooter</key>
+	<string>$(AdUnitIdDetailsFooter)</string>
+	<key>AdUnitIdDetailsListFooter</key>
+	<string>$(AdUnitIdDetailsListFooter)</string>
+	<key>AdUnitIdForecastFooter</key>
+	<string>$(AdUnitIdForecastFooter)</string>
+	<key>AdUnitIdHelpFooter</key>
+	<string>$(AdUnitIdHelpFooter)</string>
+	<key>AdUnitIdMainFooter</key>
+	<string>$(AdUnitIdMainFooter)</string>
+	<key>AdUnitIdSettingsFooter</key>
+	<string>$(AdUnitIdSettingsFooter)</string>
+	<key>AmplitudeApiKey</key>
+	<string>$(AmplitudeApiKey)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
-	<key>GMSServicesApiKey</key>
-	<string>$(GMSServicesApiKey)</string>
-	<key>OneSignalAppId</key>
-	<string>$(OneSignalAppId)</string>
+	<key>BugsnagApiKey</key>
+	<string>$(BugsnagApiKey)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -42,12 +40,33 @@
 	<string>1</string>
 	<key>FORECAST API</key>
 	<string>$(FORECAST_API)</string>
+	<key>FeedbackUrlEn</key>
+	<string>$(FeedbackUrlEn)</string>
+	<key>FeedbackUrlZh</key>
+	<string>$(FeedbackUrlZh)</string>
 	<key>GADApplicationIdentifier</key>
 	<string>$(GADApplicationIdentifier)</string>
+	<key>GMSServicesApiKey</key>
+	<string>$(GMSServicesApiKey)</string>
 	<key>HISTORY API</key>
 	<string>$(HISTORY_API)</string>
+	<key>InAppPurchaseProductId</key>
+	<string>$(InAppPurchaseProductId)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Use location to select your nearest air quality monitoring station</string>
+	<key>OneSignalAppId</key>
+	<string>$(OneSignalAppId)</string>
+	<key>PartnerUrlEn</key>
+	<string>$(PartnerUrlEn)</string>
+	<key>PartnerUrlZh</key>
+	<string>$(PartnerUrlZh)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -75,6 +94,8 @@
 	<array>
 		<string>armv7</string>
 	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -88,24 +109,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>AdUnitIdMainFooter</key>
-	<string>$(AdUnitIdMainFooter)</string>
-	<key>AdUnitIdDetailsListFooter</key>
-	<string>$(AdUnitIdDetailsListFooter)</string>
-	<key>AdUnitIdDetailsFooter</key>
-	<string>$(AdUnitIdDetailsFooter)</string>
-	<key>AdUnitIdForecastFooter</key>
-	<string>$(AdUnitIdForecastFooter)</string>
-	<key>AdUnitIdSettingsFooter</key>
-	<string>$(AdUnitIdSettingsFooter)</string>
-	<key>AdUnitIdHelpFooter</key>
-	<string>$(AdUnitIdHelpFooter)</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>googlechromes</string>
-		<string>comgooglemaps</string>
-	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Use location to select your nearest air quality monitoring station</string>
 </dict>
 </plist>

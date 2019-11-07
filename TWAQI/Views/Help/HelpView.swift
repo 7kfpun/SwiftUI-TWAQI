@@ -85,6 +85,7 @@ struct HelpView: View {
             }
             .navigationBarTitle("Help.help")
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

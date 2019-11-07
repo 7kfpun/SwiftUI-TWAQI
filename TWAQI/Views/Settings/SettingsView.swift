@@ -40,7 +40,9 @@ struct SettingsView: View {
                 AdBanner(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
             }
             .navigationBarTitle("Settings.notification")
-        }.onAppear(perform: loadData)
+        }
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear(perform: loadData)
     }
     
     private func loadData() {

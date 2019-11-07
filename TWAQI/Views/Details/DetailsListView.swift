@@ -42,6 +42,7 @@ struct DetailsListView: View {
             }
             .navigationBarTitle("DetailsList.details")
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     init(stationGroups: StationGroups = [], searchText: String = "") {
