@@ -46,8 +46,9 @@ struct DetailsView: View {
                 DetailsHistoryView(historyPollutants: viewModel.historyPollutants)
 
                 Separator()
+
+                Spacer().frame(height: 50)
             }
-            .padding(.bottom, 50)
 
             AdBanner(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
         }

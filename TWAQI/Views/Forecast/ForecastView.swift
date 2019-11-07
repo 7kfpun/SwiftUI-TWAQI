@@ -38,7 +38,8 @@ struct ForecastView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 50)
+
+                    Spacer().frame(height: 50)
                 }
 
                 AdBanner(adUnitID: getEnv("AdUnitIdForecastFooter")!)

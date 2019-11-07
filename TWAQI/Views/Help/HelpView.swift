@@ -75,8 +75,8 @@ struct HelpView: View {
                         SafariView(url: linkPage.url)
                     })
 
+                    Spacer().frame(height: 50)
                 }
-                .padding(.bottom, 50)
 
                 AdBanner(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }

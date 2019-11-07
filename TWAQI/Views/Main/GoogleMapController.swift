@@ -12,10 +12,11 @@ import UIKit
 
 let camera = GMSCameraPosition.camera(withLatitude: 23.49, longitude: 120.96, zoom: 7.9)
 let screenSize: CGRect = UIScreen.main.bounds
+let isLandscape = UIDevice.current.orientation.isLandscape
 
 class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
-    let mapView = GMSMapView.map(withFrame: CGRect(x: 0, y: 0, width: screenSize.width, height: screenSize.height), camera: camera)
+    let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
 
     var windModeButton: UIButton!
     var myLocationButton: UIButton!
@@ -90,41 +91,19 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
-    override func loadView() {
-        // Prepare a map
-        mapView.isMyLocationEnabled = true
-        mapView.settings.compassButton = true
-        // mapView.settings.myLocationButton = true
-
-        if self.traitCollection.userInterfaceStyle == .dark {
-            // User Interface is Dark
-            do {
-                // Set the map style by passing a valid JSON string.
-                mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
-            } catch {
-                NSLog("One or more of the map styles failed to load. \(error)")
-            }
-        }
-
-        mapView.delegate = self
-
-        APIManager.getAQI { result in
-            switch result {
-            case .success(let result):
-                self.pollutants = result
-                print("Total: \(result.count), first item \(result[0])")
-                self.update()
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
+    func loadContent(
+        width: CGFloat = screenSize.width,
+        height: CGFloat = screenSize.height,
+        isLandscape: Bool = UIDevice.current.orientation.isLandscape
+    ) {
+        mapView.frame = CGRect(x: 0, y: 0, width: width, height: height)
 
         let view = UIView()
         view.backgroundColor = .white
         view.addSubview(mapView)
 
         // Wind button
-        windModeButton = UIButton(frame: CGRect(x: 15, y: screenSize.height - 270, width: 60, height: 60))
+        windModeButton = UIButton(frame: CGRect(x: isLandscape ? 55 : 15, y: isLandscape ? height - 250 : height - 270, width: 60, height: 60))
         let windModeIcon = UIImage(systemName: "wind")
         windModeButton.setImage(windModeIcon, for: .normal)
         windModeButton.tintColor = isWindMode ? .white : .black
@@ -138,7 +117,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(windModeButton)
 
         // My location button
-        myLocationButton = UIButton(frame: CGRect(x: screenSize.width  - 75, y: screenSize.height - 270, width: 60, height: 60))
+        myLocationButton = UIButton(frame: CGRect(
+            x: isLandscape ? width - 115 : width - 75,
+            y: isLandscape ? height - 250 : height - 270,
+            width: 60,
+            height: 60
+        ))
         let myLocationIcon = UIImage(systemName: "paperplane.fill")
         myLocationButton.setImage(myLocationIcon, for: .normal)
         myLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
@@ -152,7 +136,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(myLocationButton)
 
         // Default location button
-        defaultLocationButton = UIButton(frame: CGRect(x: screenSize.width  - 75, y: screenSize.height - 340, width: 60, height: 60))
+        defaultLocationButton = UIButton(frame: CGRect(
+            x: isLandscape ? width - 115 : width  - 75,
+            y: isLandscape ? height - 320 : height - 340,
+            width: 60,
+            height: 60
+        ))
         let defaultLocationIcon = UIImage(systemName: "viewfinder")
         defaultLocationButton.setImage(defaultLocationIcon, for: .normal)
         defaultLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
@@ -176,7 +165,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         indexButton.layer.shadowOpacity = 0.1
         indexButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
 
-        scrollView = UIScrollView(frame: CGRect(x: 0, y: screenSize.height - 195, width: screenSize.width, height: 60))
+        scrollView = UIScrollView(frame: CGRect(
+            x: isLandscape ? 40 : 0, 
+            y: isLandscape ? height - 175 : height - 195, 
+            width: width, 
+            height: 60
+        ))
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
 
@@ -209,6 +203,50 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(scrollView)
 
         self.view = view
+    }
+
+    override func loadView() {
+        // Prepare a map
+        mapView.isMyLocationEnabled = true
+        mapView.settings.compassButton = true
+        // mapView.settings.myLocationButton = true
+
+        if self.traitCollection.userInterfaceStyle == .dark {
+            // User Interface is Dark
+            do {
+                // Set the map style by passing a valid JSON string.
+                mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+        }
+
+        mapView.delegate = self
+
+        APIManager.getAQI { result in
+            switch result {
+            case .success(let result):
+                self.pollutants = result
+                print("Total: \(result.count), first item \(result[0])")
+                self.update()
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+
+        self.loadContent()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        if UIDevice.current.orientation.isLandscape {
+            print("Landscape", size.width, UIDevice.current.orientation, screenSize)
+            self.loadContent(width: size.width, height: size.height, isLandscape: true)
+        } else {
+            print("Portrait", size, UIDevice.current.orientation, screenSize)
+            self.loadContent(width: size.width, height: size.height, isLandscape: false)
+        }
+        update()
     }
 
     // MARK: GMSMapViewDelegate

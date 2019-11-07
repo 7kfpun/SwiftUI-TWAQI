@@ -34,8 +34,9 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    Spacer().frame(height: 50)
                 }
-                .padding(.bottom, 50)
 
                 AdBanner(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
             }

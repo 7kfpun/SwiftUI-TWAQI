@@ -15,7 +15,7 @@ struct MainView: View {
     var body: some View {
         ZStack {
             GoogleMapController()
-                .edgesIgnoringSafeArea(.vertical)
+                .edgesIgnoringSafeArea(.all)
 
 //            GoogleMapView(
 //                pollutants: viewModel.pollutants,
