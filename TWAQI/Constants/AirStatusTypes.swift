@@ -67,6 +67,10 @@ enum AirStatuses: String, CaseIterable, Hashable {
         return UInt32(colors[self.rawValue] ?? white)
     }
 
+    func getImage() -> String {
+        "status_\(self.rawValue)"
+    }
+
     func getGeneralPublicGuidance() -> LocalizedStringKey {
         let readableStrings = [
             "good": "AirStatus.general_public_guidance_good" as LocalizedStringKey,
