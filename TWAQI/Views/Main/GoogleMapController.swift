@@ -94,6 +94,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    func callApi() {
+        APIManager.getAQI { result in
+            switch result {
+            case .success(let result):
+                self.pollutants = result
+                print("Total: \(result.count), first item \(result[0])")
+                self.update()
+                self.loadClosestStationView(latitude: defaultLatitude, longitude: defaultLongitude)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
     func loadContent(
         width: CGFloat = screenSize.width,
         height: CGFloat = screenSize.height,
@@ -273,16 +287,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
         mapView.delegate = self
 
-        APIManager.getAQI { result in
-            switch result {
-            case .success(let result):
-                self.pollutants = result
-                print("Total: \(result.count), first item \(result[0])")
-                self.update()
-                self.loadClosestStationView(latitude: defaultLatitude, longitude: defaultLongitude)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
+        self.callApi()
+        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
+            // Schedule in seconds
+            self.callApi()
         }
 
         loadContent()

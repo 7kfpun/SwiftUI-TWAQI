@@ -73,10 +73,8 @@ final class ClosestStationView: UIView {
         addSubview(subLabel)
 
         aqiLabel = UILabel(frame: CGRect(origin: CGPoint(x: width * 2 / 3, y: 6), size: CGSize(width: width / 3 - 12, height: 20)))
-        aqiLabel.textColor = .black
         aqiLabel.font = UIFont.systemFont(ofSize: 12)
         aqiLabel.textAlignment = NSTextAlignment.center
-        aqiLabel.backgroundColor = .yellow
         aqiLabel.layer.cornerRadius = 4
         aqiLabel.layer.masksToBounds = true
         addSubview(aqiLabel)

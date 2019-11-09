@@ -50,13 +50,13 @@
 "AirIndex.meaning_so2" = "Sulfur dioxide";
 "AirIndex.meaning_no2" = "Nitrogen dioxide";
 
-"AirIndex.description_aqi" = "";
-"AirIndex.description_pm25" = "";
-"AirIndex.description_pm10" = "";
-"AirIndex.description_o3" = "";
-"AirIndex.description_co" = "";
-"AirIndex.description_so2" = "";
-"AirIndex.description_no2" = "";
+"AirIndex.description_aqi" = "Air quality index";
+"AirIndex.description_pm25" = "Particulates";
+"AirIndex.description_pm10" = "Particulates";
+"AirIndex.description_o3" = "Ozone";
+"AirIndex.description_co" = "Carbon monoxide";
+"AirIndex.description_so2" = "Sulfur dioxide";
+"AirIndex.description_no2" = "Nitrogen dioxide";
 
 "AirIndex.url_aqi" = "https://en.wikipedia.org/wiki/Air_quality_index";
 "AirIndex.url_pm25" = "https://en.wikipedia.org/wiki/Particulates";
