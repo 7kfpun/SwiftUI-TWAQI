@@ -27,14 +27,14 @@ struct HelpView: View {
 
                         if settings.isDndEnabled {
                             DatePicker(
-                                selection: $settings.startDate,
+                                selection: $settings.dndStartTime,
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("Help.start_time").fontWeight(.light) }
                             )
                             .padding(.vertical, 10)
 
                             DatePicker(
-                                selection: $settings.endDate,
+                                selection: $settings.dndEndTime,
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("Help.end_time").fontWeight(.light) }
                             )

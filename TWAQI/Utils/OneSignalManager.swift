@@ -8,6 +8,7 @@
 
 import Foundation
 import OneSignal
+import SwiftDate
 
 enum OneSignalError: Error {
     case oneSignalError
@@ -41,8 +42,16 @@ struct OneSignalManager {
         }
     }
 
-    static func enableDnd(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
-        let tags = ["isDndEnabled": "true"]
+    static func enableDnd(dndStartTime: Date, dndEndTime: Date, completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
+        let dndStartTimeCurrentRegion = dndStartTime.convertTo(region: .current)
+        let dndEndTimeCurrentRegion = dndEndTime.convertTo(region: .current)
+
+        let tags: [String: Any] = [
+            "isDndEnabled": "true",
+            "dndStartTime": dndStartTimeCurrentRegion.hour * 60 + dndStartTimeCurrentRegion.minute,
+            "dndEndTime": dndEndTimeCurrentRegion.hour * 60 + dndEndTimeCurrentRegion.minute,
+            "isDndStartEarlierThanEnd": dndStartTimeCurrentRegion > dndEndTimeCurrentRegion,
+        ]
         OneSignal.sendTags(tags, onSuccess: { result in
             print("Tags sent, \(tags) - \(result!)")
             completionHandler(.success(true))
@@ -53,7 +62,7 @@ struct OneSignalManager {
     }
 
     static func disableDnd(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
-        let tags = ["isDndEnabled", "dndStartTime", "dndEndTime"]
+        let tags = ["isDndEnabled", "dndStartTime", "dndEndTime", "isDndStartEarlierThanEnd"]
         OneSignal.deleteTags(tags, onSuccess: { result in
             print("Tags deleted, \(tags) - \(result!)")
             completionHandler(.success(true))

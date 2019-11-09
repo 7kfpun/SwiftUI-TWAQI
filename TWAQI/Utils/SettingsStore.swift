@@ -7,6 +7,7 @@
 //
 
 import Combine
+import SwiftDate
 import SwiftUI
 
 final class SettingsStore: ObservableObject {
@@ -15,11 +16,8 @@ final class SettingsStore: ObservableObject {
         static let airIndexTypeSelected = "airIndexTypeSelected"
         static let forecastEnabled = "forecastEnabled"
         static let dndEnabled = "dndEnabled"
-        static let startDate = "startDate"
-        static let endDate = "endDate"
         static let dndStartTime = "dndStartTime"
         static let dndEndTime = "dndEndTime"
-        static let windMode = "windMode"
     }
 
     private let cancellable: Cancellable
@@ -34,10 +32,8 @@ final class SettingsStore: ObservableObject {
             Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
             Keys.forecastEnabled: false,
             Keys.dndEnabled: false,
-            Keys.startDate: Date(),
-            Keys.endDate: Date(),
             Keys.dndStartTime: Date(),
-            Keys.dndEndTime: Date(),
+            Keys.dndEndTime: Date() + 2.hours,
         ])
 
         cancellable = NotificationCenter.default
@@ -90,7 +86,10 @@ final class SettingsStore: ObservableObject {
         set {
             defaults.set(newValue, forKey: Keys.dndEnabled)
             if newValue {
-                OneSignalManager.enableDnd { result in
+                defaults.set(Date(), forKey: Keys.dndStartTime)
+                defaults.set(Date() + 2.hours, forKey: Keys.dndEndTime)
+
+                OneSignalManager.enableDnd(dndStartTime: Date(), dndEndTime: Date() + 2.hours) { result in
                     switch result {
                     case .success(let result):
                         print(result)
@@ -112,29 +111,34 @@ final class SettingsStore: ObservableObject {
         get { defaults.bool(forKey: Keys.dndEnabled) }
     }
 
-    var startDate: Date {
-        set { defaults.set(newValue, forKey: Keys.startDate) }
-        get { defaults.value(forKey: Keys.startDate) as! Date }
-    }
-
-    var endDate: Date {
-        set { defaults.set(newValue, forKey: Keys.endDate) }
-        get { defaults.value(forKey: Keys.endDate) as! Date }
-    }
-
     var dndStartTime: Date {
-        set { defaults.set(newValue, forKey: Keys.dndStartTime) }
-        get { defaults.value(forKey: Keys.dndStartTime) as! Date }
+        set {
+            defaults.set(newValue, forKey: Keys.dndStartTime)
+            OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
+                switch result {
+                case .success(let result):
+                    print(result)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+        get { defaults.object(forKey: Keys.dndStartTime) as! Date }
     }
 
     var dndEndTime: Date {
-        set { defaults.set(newValue, forKey: Keys.dndEndTime) }
-        get { defaults.value(forKey: Keys.dndEndTime) as! Date }
-    }
-
-    var isWindMode: Bool {
-        set { defaults.set(newValue, forKey: Keys.windMode) }
-        get { defaults.bool(forKey: Keys.windMode) }
+        set {
+            defaults.set(newValue, forKey: Keys.dndEndTime)
+            OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
+                switch result {
+                case .success(let result):
+                    print(result)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+        get { defaults.object(forKey: Keys.dndEndTime) as! Date }
     }
 }
 
