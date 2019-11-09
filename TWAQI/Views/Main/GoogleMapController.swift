@@ -286,6 +286,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         loadContent()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.goToMyLocation()
+        }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

@@ -31,7 +31,7 @@ final class AirStatusBarView: UIView {
             let faceImageView = UIImageView(image: faceImage)
             faceImageView.frame = CGRect(x: xOffset, y: 5, width: 20, height: 20)
 
-            let bar = UIView(frame: CGRect(x: xOffset, y: 25, width: 20, height: 2))
+            let bar = UIView(frame: CGRect(x: xOffset, y: 26, width: 20, height: 2))
             bar.backgroundColor = UIColor(rgb: Int(airStatus.getColor()))
             bar.layer.cornerRadius = 2
 
