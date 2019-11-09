@@ -39,20 +39,22 @@
 "Help.in_app_purchase" = "In-app purchase";
 "Help.ad_free" = "Remove Ads?";
 "Help.restore_purchase" = "Restore purchase";
+"Help.contact_us" = "Contact us";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
 "Help.feedback_or_contact_us" = "Feedback / Contact us";
+"Help.definition" = "Terms";
 
 "AirIndex.meaning_aqi" = "Air quality index";
-"AirIndex.meaning_pm25" = "Particulates";
-"AirIndex.meaning_pm10" = "Particulates";
+"AirIndex.meaning_pm25" = "Particulates (PM2.5)";
+"AirIndex.meaning_pm10" = "Particulates (PM10)";
 "AirIndex.meaning_o3" = "Ozone";
 "AirIndex.meaning_co" = "Carbon monoxide";
 "AirIndex.meaning_so2" = "Sulfur dioxide";
 "AirIndex.meaning_no2" = "Nitrogen dioxide";
 
 "AirIndex.description_aqi" = "Air quality index";
-"AirIndex.description_pm25" = "Particulates";
-"AirIndex.description_pm10" = "Particulates";
+"AirIndex.description_pm25" = "Particulates (PM2.5)";
+"AirIndex.description_pm10" = "Particulates (PM10)";
 "AirIndex.description_o3" = "Ozone";
 "AirIndex.description_co" = "Carbon monoxide";
 "AirIndex.description_so2" = "Sulfur dioxide";

@@ -58,7 +58,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self.selectedIndex = AirIndexTypes.allCases[tag]
 
             for button in buttons {
-                button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .black, for: .normal)
+                button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             }
         }
     }
@@ -69,8 +69,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var isWindMode = false {
         didSet {
-            windModeButton.tintColor = isWindMode ? .white : .black
-            windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .white
+            windModeButton.tintColor = isWindMode ? .white : .label
+            windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
             update()
         }
     }
@@ -123,8 +123,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         windModeButton = UIButton(frame: CGRect(x: isLandscape ? 55 : 15, y: isLandscape ? height - 250 : height - 270, width: 60, height: 60))
         let windModeIcon = UIImage(systemName: "wind")
         windModeButton.setImage(windModeIcon, for: .normal)
-        windModeButton.tintColor = isWindMode ? .white : .black
-        windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .white
+        windModeButton.tintColor = isWindMode ? .white : .label
+        windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
         windModeButton.layer.cornerRadius = 30
         windModeButton.layer.shadowColor = UIColor.black.cgColor
         windModeButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
@@ -143,7 +143,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let myLocationIcon = UIImage(systemName: "paperplane.fill")
         myLocationButton.setImage(myLocationIcon, for: .normal)
         myLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        myLocationButton.backgroundColor = .white
+        myLocationButton.backgroundColor = .tertiarySystemBackground
         myLocationButton.layer.cornerRadius = 30
         myLocationButton.layer.shadowColor = UIColor.black.cgColor
         myLocationButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
@@ -162,7 +162,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let defaultLocationIcon = UIImage(systemName: "viewfinder")
         defaultLocationButton.setImage(defaultLocationIcon, for: .normal)
         defaultLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        defaultLocationButton.backgroundColor = .white
+        defaultLocationButton.backgroundColor = .tertiarySystemBackground
         defaultLocationButton.layer.cornerRadius = 30
         defaultLocationButton.layer.shadowColor = UIColor.black.cgColor
         defaultLocationButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
@@ -199,9 +199,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             buttons.append(button)
             button.tag = i
             button.setTitle(airIndexType.toString(), for: .normal)
-            button.setTitleColor(selectedIndex == airIndexType ? UIColor(rgb: 0x5AC8FA) : .black, for: .normal)
+            button.setTitleColor(selectedIndex == airIndexType ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             button.titleLabel?.font = .systemFont(ofSize: 14)
-            button.backgroundColor = .white
+            button.backgroundColor = .tertiarySystemBackground
             button.layer.cornerRadius = 25
             button.layer.shadowColor = UIColor.black.cgColor
             button.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)

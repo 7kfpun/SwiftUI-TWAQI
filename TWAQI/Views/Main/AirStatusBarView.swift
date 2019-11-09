@@ -20,7 +20,7 @@ final class AirStatusBarView: UIView {
     }
 
     func createSubviews() {
-        backgroundColor = .white
+        backgroundColor = .tertiarySystemBackground
         layer.cornerRadius = 5
 
         let imagePadding: CGFloat = (frame.size.width - 10) / 6 - 20

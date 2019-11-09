@@ -57,7 +57,7 @@ final class ClosestStationView: UIView {
     func createSubviews() {
         translatesAutoresizingMaskIntoConstraints = false
 
-        backgroundColor = .white
+        backgroundColor = .tertiarySystemBackground
         layer.cornerRadius = 5
 
         let width = frame.size.width
