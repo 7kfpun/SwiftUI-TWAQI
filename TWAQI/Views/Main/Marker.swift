@@ -12,11 +12,11 @@ import UIKit
 
 final class PollutantMarker: GMSMarker {
     let pollutant: Pollutant
-    let selectedIndex: AirIndexTypes
+    let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: Pollutant, selectedIndex: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
-        self.selectedIndex = selectedIndex
+        self.airIndexTypeSelected = airIndexTypeSelected
         super.init()
 
         guard let dLatitude: Double = Double(pollutant.latitude),
@@ -25,10 +25,10 @@ final class PollutantMarker: GMSMarker {
         }
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
-        let value = pollutant.getValue(airIndexType: selectedIndex)
+        let value = pollutant.getValue(airIndexType: airIndexTypeSelected)
 
         let airStatus = AirStatuses.checkAirStatus(
-            airIndexType: selectedIndex,
+            airIndexType: airIndexTypeSelected,
             value: value
         )
         let color = UIColor(rgb: Int(airStatus.getColor()))
@@ -54,11 +54,11 @@ final class PollutantMarker: GMSMarker {
 
 final class WindDirectionMarker: GMSMarker {
     let pollutant: Pollutant
-    let selectedIndex: AirIndexTypes
+    let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: Pollutant, selectedIndex: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
-        self.selectedIndex = selectedIndex
+        self.airIndexTypeSelected = airIndexTypeSelected
         super.init()
 
         guard let dLatitude: Double = Double(pollutant.latitude),
@@ -70,8 +70,8 @@ final class WindDirectionMarker: GMSMarker {
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
         let airStatus = AirStatuses.checkAirStatus(
-            airIndexType: selectedIndex,
-            value: pollutant.getValue(airIndexType: selectedIndex)
+            airIndexType: airIndexTypeSelected,
+            value: pollutant.getValue(airIndexType: airIndexTypeSelected)
         )
         let color = UIColor(rgb: Int(airStatus.getColor()))
 

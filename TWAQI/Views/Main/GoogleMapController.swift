@@ -19,14 +19,11 @@ let isLandscape = UIDevice.current.orientation.isLandscape
 class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
+    let defaults = UserDefaults.standard
 
-    var windModeButton: UIButton!
-    var myLocationButton: UIButton!
-    var defaultLocationButton: UIButton!
     var closestStationView: ClosestStationView!
-
-    var scrollView: UIScrollView!
-    var buttons: [UIButton] = []
+    var functionalButtonsView: FunctionalButtonsView!
+    var indexSelectorView: IndexSelectorView!
 
     var pollutants: Pollutants = []
 
@@ -55,9 +52,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     @objc func changeIndex(sender: UIButton?) {
         if let tag = sender?.tag {
             print(tag, AirIndexTypes.allCases[tag])
-            self.selectedIndex = AirIndexTypes.allCases[tag]
+            self.airIndexTypeSelected = AirIndexTypes.allCases[tag]
 
-            for button in buttons {
+            for button in indexSelectorView.buttons {
                 button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             }
         }
@@ -69,14 +66,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var isWindMode = false {
         didSet {
-            windModeButton.tintColor = isWindMode ? .white : .label
-            windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
+            functionalButtonsView.windModeButton.tintColor = isWindMode ? .white : .label
+            functionalButtonsView.windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
             update()
         }
     }
 
-    var selectedIndex: AirIndexTypes = AirIndexTypes.aqi {
-        didSet {
+    var airIndexTypeSelected: AirIndexTypes {
+        get {
+            return defaults.string(forKey: "airIndexTypeSelected")
+                .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
+        }
+
+        set {
+            defaults.set(newValue.rawValue, forKey: "airIndexTypeSelected")
             update()
         }
     }
@@ -86,9 +89,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.pollutants.forEach { pollutant in
             var pollutantMarker: GMSMarker
             if self.isWindMode {
-                pollutantMarker = WindDirectionMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
+                pollutantMarker = WindDirectionMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
             } else {
-                pollutantMarker = PollutantMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
+                pollutantMarker = PollutantMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
             }
             pollutantMarker.tracksViewChanges = false
             pollutantMarker.map = self.mapView
@@ -120,105 +123,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.backgroundColor = .white
         view.addSubview(mapView)
 
-        // Wind button
-        windModeButton = UIButton(frame: CGRect(x: isLandscape ? 55 : 15, y: isLandscape ? height - 250 : height - 270, width: 60, height: 60))
-        let windModeIcon = UIImage(systemName: "wind")
-        windModeButton.setImage(windModeIcon, for: .normal)
-        windModeButton.tintColor = isWindMode ? .white : .label
-        windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
-        windModeButton.layer.cornerRadius = 30
-        windModeButton.layer.shadowColor = UIColor.black.cgColor
-        windModeButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-        windModeButton.layer.shadowRadius = 2
-        windModeButton.layer.shadowOpacity = 0.1
-        windModeButton.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
-        view.addSubview(windModeButton)
-
-        // My location button
-        myLocationButton = UIButton(frame: CGRect(
-            x: isLandscape ? width - 115 : width - 75,
-            y: isLandscape ? height - 250 : height - 270,
-            width: 60,
-            height: 60
-        ))
-        let myLocationIcon = UIImage(systemName: "paperplane.fill")
-        myLocationButton.setImage(myLocationIcon, for: .normal)
-        myLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        myLocationButton.backgroundColor = .tertiarySystemBackground
-        myLocationButton.layer.cornerRadius = 30
-        myLocationButton.layer.shadowColor = UIColor.black.cgColor
-        myLocationButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-        myLocationButton.layer.shadowRadius = 2
-        myLocationButton.layer.shadowOpacity = 0.1
-        myLocationButton.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
-        view.addSubview(myLocationButton)
-
-        // Default location button
-        defaultLocationButton = UIButton(frame: CGRect(
-            x: isLandscape ? width - 115 : width  - 75,
-            y: isLandscape ? height - 320 : height - 340,
-            width: 60,
-            height: 60
-        ))
-        let defaultLocationIcon = UIImage(systemName: "viewfinder")
-        defaultLocationButton.setImage(defaultLocationIcon, for: .normal)
-        defaultLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        defaultLocationButton.backgroundColor = .tertiarySystemBackground
-        defaultLocationButton.layer.cornerRadius = 30
-        defaultLocationButton.layer.shadowColor = UIColor.black.cgColor
-        defaultLocationButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-        defaultLocationButton.layer.shadowRadius = 2
-        defaultLocationButton.layer.shadowOpacity = 0.1
-        defaultLocationButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
-        view.addSubview(defaultLocationButton)
-
-        let indexButton = UIButton()
-        indexButton.setImage(defaultLocationIcon, for: .normal)
-        indexButton.tintColor = UIColor(rgb: 0x5AC8FA)
-        indexButton.backgroundColor = .white
-        indexButton.layer.cornerRadius = 30
-        indexButton.layer.shadowColor = UIColor.black.cgColor
-        indexButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-        indexButton.layer.shadowRadius = 2
-        indexButton.layer.shadowOpacity = 0.1
-        indexButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
-
-        scrollView = UIScrollView(frame: CGRect(
-            x: isLandscape ? 40 : 0, 
-            y: isLandscape ? height - 175 : height - 195, 
-            width: width, 
-            height: 60
-        ))
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsHorizontalScrollIndicator = false
-
-        let buttonPadding: CGFloat = 10
-        var xOffset: CGFloat = 15
-
-        for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
-            let button = UIButton()
-            buttons.append(button)
-            button.tag = i
-            button.setTitle(airIndexType.toString(), for: .normal)
-            button.setTitleColor(selectedIndex == airIndexType ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
-            button.titleLabel?.font = .systemFont(ofSize: 14)
-            button.backgroundColor = .tertiarySystemBackground
-            button.layer.cornerRadius = 25
-            button.layer.shadowColor = UIColor.black.cgColor
-            button.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-            button.layer.shadowRadius = 2
-            button.layer.shadowOpacity = 0.1
-            button.addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
-
-            button.frame = CGRect(x: xOffset, y: 0, width: 75, height: 50)
-            xOffset += CGFloat(buttonPadding) + button.frame.size.width
-
-            scrollView.addSubview(button)
-        }
-
-        scrollView.contentSize = CGSize(width: xOffset, height: scrollView.frame.height)
-        view.addSubview(scrollView)
-
         // MARK: closestStationView
         closestStationView = ClosestStationView(frame: CGRect(
             x: isLandscape ? 55 : 20,
@@ -236,6 +140,42 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             height: 32
         ))
         view.addSubview(airStatusesView)
+
+        let isPro = defaults.bool(forKey: "pro")
+        let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
+            .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
+
+        // MARK: functionalButtonsView
+        var positionY: CGFloat = isLandscape ? height - 300 : height - 345
+        functionalButtonsView = FunctionalButtonsView(frame: CGRect(
+            x: isLandscape ? 55 : 15,
+            y: isPro ? positionY + 50 : positionY,
+            width: isLandscape ? width - 115 : width - 30,
+            height: isLandscape ? 125 : 135
+        ))
+        functionalButtonsView.defaultLocationButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
+        functionalButtonsView.myLocationButton.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
+        functionalButtonsView.windModeButton.tintColor = isWindMode ? .white : .label
+        functionalButtonsView.windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
+        functionalButtonsView.windModeButton.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
+        view.addSubview(functionalButtonsView)
+
+        // MARK: indexSelectorView
+        positionY = isLandscape ? height - 175 : height - 195
+        indexSelectorView = IndexSelectorView(frame: CGRect(
+            x: isLandscape ? 40 : 0,
+            y: isPro ? positionY + 50 : positionY,
+            width: width,
+            height: 50
+        ))
+        for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
+            indexSelectorView.buttons[i].addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
+
+            if airIndexTypeSelected == airIndexType {
+                indexSelectorView.buttons[i].setTitleColor(UIColor(rgb: 0x5AC8FA), for: .normal)
+            }
+        }
+        view.addSubview(indexSelectorView)
 
         self.view = view
     }

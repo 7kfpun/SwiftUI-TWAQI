@@ -62,7 +62,6 @@
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
-		9EC3CF282361D77600F17332 /* GoogleMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF272361D77600F17332 /* GoogleMapView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
 		9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
@@ -76,6 +75,8 @@
 		9EF2501523766BC000A731D5 /* ClosestStationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF2501423766BC000A731D5 /* ClosestStationView.swift */; };
 		9EF250172376702100A731D5 /* AirStatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF250162376702100A731D5 /* AirStatusBarView.swift */; };
 		9EF250192376B95D00A731D5 /* DefinitionPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF250182376B95D00A731D5 /* DefinitionPages.swift */; };
+		9EFCDAB52378030400EA2203 /* FunctionalButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFCDAB42378030400EA2203 /* FunctionalButtonsView.swift */; };
+		9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */; };
 		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
 		9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0323425053007B7723 /* DetailsGroup.swift */; };
 		AEAF311CBA65697B61E2412E /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */; };
@@ -168,7 +169,6 @@
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
 		9EC3CF23235F5ABB00F17332 /* example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = example.xcconfig; sourceTree = "<group>"; };
 		9EC3CF252360A81300F17332 /* BarsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarsView.swift; sourceTree = "<group>"; };
-		9EC3CF272361D77600F17332 /* GoogleMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastViewModel.swift; sourceTree = "<group>"; };
@@ -187,6 +187,8 @@
 		9EF2501423766BC000A731D5 /* ClosestStationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosestStationView.swift; sourceTree = "<group>"; };
 		9EF250162376702100A731D5 /* AirStatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusBarView.swift; sourceTree = "<group>"; };
 		9EF250182376B95D00A731D5 /* DefinitionPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefinitionPages.swift; sourceTree = "<group>"; };
+		9EFCDAB42378030400EA2203 /* FunctionalButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionalButtonsView.swift; sourceTree = "<group>"; };
+		9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelectorView.swift; sourceTree = "<group>"; };
 		9EFE2E0123423D74007B7723 /* SettingsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroup.swift; sourceTree = "<group>"; };
 		9EFE2E0323425053007B7723 /* DetailsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsGroup.swift; sourceTree = "<group>"; };
 		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
@@ -298,9 +300,10 @@
 			children = (
 				9EF250162376702100A731D5 /* AirStatusBarView.swift */,
 				9EF2501423766BC000A731D5 /* ClosestStationView.swift */,
+				9EFCDAB42378030400EA2203 /* FunctionalButtonsView.swift */,
 				9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */,
-				9EC3CF272361D77600F17332 /* GoogleMapView.swift */,
 				9E5257A92343064F001ECFE1 /* IndexSelector.swift */,
+				9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */,
 				9E1AC554233F99F600AC862D /* MainView.swift */,
 				9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */,
 				9EA1BC70236DDA2D008C3942 /* Marker.swift */,
@@ -694,6 +697,7 @@
 				9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
+				9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */,
 				9E942E3C2372CA4B0010915D /* LocaleExtension.swift in Sources */,
 				9E942E342372BAB10010915D /* AreaGroups.swift in Sources */,
 				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
@@ -710,11 +714,11 @@
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
 				9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
-				9EC3CF282361D77600F17332 /* GoogleMapView.swift in Sources */,
 				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
 				9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */,
 				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
+				9EFCDAB52378030400EA2203 /* FunctionalButtonsView.swift in Sources */,
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
