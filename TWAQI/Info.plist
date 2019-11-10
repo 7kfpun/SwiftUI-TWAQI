@@ -52,6 +52,8 @@
 	<string>$(HISTORY_API)</string>
 	<key>InAppPurchaseProductId</key>
 	<string>$(InAppPurchaseProductId)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>googlechromes</string>
