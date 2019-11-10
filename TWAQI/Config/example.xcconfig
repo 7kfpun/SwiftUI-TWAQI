@@ -32,10 +32,11 @@ AdUnitIdSettingsFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
 
 // In-App Purchase
-InAppPurchaseProductId =
+InAppPurchaseProductId = test
 
 // Links
-FeedbackUrlZh =
-FeedbackUrlEn =
-PartnerUrlZh =
-PartnerUrlEn =
+FeedbackUrlZh = http:\/\/example.com/
+FeedbackUrlEn = http:\/\/example.com/
+PartnerUrlZh = http:\/\/example.com/
+PartnerUrlEn = http:\/\/example.com/
+BetaTesterUrl = http:\/\/example.com/
