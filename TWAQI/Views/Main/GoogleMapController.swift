@@ -90,6 +90,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             } else {
                 pollutantMarker = PollutantMarker(pollutant: pollutant, selectedIndex: self.selectedIndex)
             }
+            pollutantMarker.tracksViewChanges = false
             pollutantMarker.map = self.mapView
         }
     }

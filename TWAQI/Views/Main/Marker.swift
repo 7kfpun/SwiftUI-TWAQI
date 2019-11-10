@@ -82,5 +82,6 @@ final class WindDirectionMarker: GMSMarker {
             .addShadow()
         self.icon = icon
         self.rotation = dWindDirection
+        self.isFlat = true
     }
 }
