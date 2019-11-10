@@ -113,8 +113,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func loadContent(
-        width: CGFloat = screenSize.width,
-        height: CGFloat = screenSize.height,
+        width: CGFloat = UIScreen.main.bounds.width,
+        height: CGFloat = UIScreen.main.bounds.height,
         isLandscape: Bool = UIDevice.current.orientation.isLandscape
     ) {
         mapView.frame = CGRect(x: 0, y: 0, width: width, height: height)
@@ -123,19 +123,26 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.backgroundColor = .white
         view.addSubview(mapView)
 
+        // TODO: move to auto-layout
+        let hasNotch = UIDevice.current.hasNotch
+
         // MARK: closestStationView
+        var positionY: CGFloat = isLandscape ? 20 : 50
+        positionY = hasNotch ? positionY : positionY - 30
         closestStationView = ClosestStationView(frame: CGRect(
             x: isLandscape ? 55 : 20,
-            y: isLandscape ? 15 : 50,
+            y: positionY,
             width: 200,
             height: 75
         ))
         view.addSubview(closestStationView)
 
         // MARK: airStatusesView
+        positionY = isLandscape ? 100 : 130
+        positionY = hasNotch ? positionY : positionY - 30
         let airStatusesView = AirStatusBarView(frame: CGRect(
             x: isLandscape ? 55 : 20,
-            y: isLandscape ? 95 : 130,
+            y: positionY,
             width: 200,
             height: 32
         ))
@@ -146,7 +153,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
         // MARK: functionalButtonsView
-        var positionY: CGFloat = isLandscape ? height - 300 : height - 345
+        positionY = isLandscape ? height - 300 : height - 345
+        positionY = hasNotch ? positionY : positionY + 40
         functionalButtonsView = FunctionalButtonsView(frame: CGRect(
             x: isLandscape ? 55 : 15,
             y: isPro ? positionY + 50 : positionY,
@@ -161,13 +169,24 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(functionalButtonsView)
 
         // MARK: indexSelectorView
-        positionY = isLandscape ? height - 175 : height - 195
-        indexSelectorView = IndexSelectorView(frame: CGRect(
-            x: isLandscape ? 40 : 0,
-            y: isPro ? positionY + 50 : positionY,
-            width: width,
-            height: 50
-        ))
+        positionY = isLandscape ? height - 173 : height - 195
+        positionY = hasNotch ? positionY : positionY + 40
+        if width > 800 {
+            indexSelectorView = IndexSelectorView(frame: CGRect(
+                x: isLandscape ? 40 : 0,
+                y: isPro ? positionY + 50 : positionY,
+                width: 620,
+                height: 50
+            ))
+            indexSelectorView.center.x = width / 2
+        } else {
+            indexSelectorView = IndexSelectorView(frame: CGRect(
+                x: isLandscape ? 40 : 0,
+                y: isPro ? positionY + 50 : positionY,
+                width: width,
+                height: 50
+            ))
+        }
         for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
             indexSelectorView.buttons[i].addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
 
@@ -245,12 +264,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         super.viewWillTransition(to: size, with: coordinator)
         if UIDevice.current.orientation.isLandscape {
             print("Landscape", size.width, UIDevice.current.orientation, screenSize)
-            self.loadContent(width: size.width, height: size.height, isLandscape: true)
+            loadContent(width: size.width, height: size.height, isLandscape: true)
         } else {
             print("Portrait", size, UIDevice.current.orientation, screenSize)
-            self.loadContent(width: size.width, height: size.height, isLandscape: false)
+            loadContent(width: size.width, height: size.height, isLandscape: false)
         }
-        update()
+        callApi()
     }
 
     // MARK: GMSMapViewDelegate
