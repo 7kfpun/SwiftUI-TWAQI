@@ -52,10 +52,10 @@
 	<string>$(GMSServicesApiKey)</string>
 	<key>HISTORY API</key>
 	<string>$(HISTORY_API)</string>
-	<key>InAppPurchaseProductId</key>
-	<string>$(InAppPurchaseProductId)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>InAppPurchaseProductId</key>
+	<string>$(InAppPurchaseProductId)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>googlechromes</string>
@@ -63,6 +63,8 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Use location to select your nearest air quality monitoring station</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Use location to select your nearest air quality monitoring station</string>
 	<key>OneSignalAppId</key>
