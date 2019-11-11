@@ -11,7 +11,6 @@ import UIKit
 final class FunctionalButtonsView: UIView {
     var defaultLocationButton: UIButton!
     var myLocationButton: UIButton!
-    var windModeButton: UIButton!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -62,21 +61,5 @@ final class FunctionalButtonsView: UIView {
         myLocationButton.layer.shadowRadius = 2
         myLocationButton.layer.shadowOpacity = 0.1
         addSubview(myLocationButton)
-
-        // MARK: Wind button
-        windModeButton = UIButton(frame: CGRect(
-            x: 0,
-            y: height - 60,
-            width: 60,
-            height: 60
-        ))
-        let windModeIcon = UIImage(systemName: "wind")
-        windModeButton.setImage(windModeIcon, for: .normal)
-        windModeButton.layer.cornerRadius = 30
-        windModeButton.layer.shadowColor = UIColor.black.cgColor
-        windModeButton.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
-        windModeButton.layer.shadowRadius = 2
-        windModeButton.layer.shadowOpacity = 0.1
-        addSubview(windModeButton)
     }
 }

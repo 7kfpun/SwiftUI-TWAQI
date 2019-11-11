@@ -24,6 +24,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var closestStationView: ClosestStationView!
     var functionalButtonsView: FunctionalButtonsView!
     var indexSelectorView: IndexSelectorView!
+    var windModeButton: WindModeButton!
 
     var pollutants: Pollutants = []
 
@@ -66,8 +67,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var isWindMode = false {
         didSet {
-            functionalButtonsView.windModeButton.tintColor = isWindMode ? .white : .label
-            functionalButtonsView.windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
+            windModeButton.isWindMode = isWindMode
             update()
         }
     }
@@ -156,17 +156,27 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         positionY = isLandscape ? height - 300 : height - 345
         positionY = hasNotch ? positionY : positionY + 40
         functionalButtonsView = FunctionalButtonsView(frame: CGRect(
-            x: isLandscape ? 55 : 15,
+            x: isLandscape ? width - 110 : width - 75,
             y: isPro ? positionY + 50 : positionY,
-            width: isLandscape ? width - 115 : width - 30,
+            width: 60,
             height: isLandscape ? 125 : 135
         ))
         functionalButtonsView.defaultLocationButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
         functionalButtonsView.myLocationButton.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
-        functionalButtonsView.windModeButton.tintColor = isWindMode ? .white : .label
-        functionalButtonsView.windModeButton.backgroundColor = isWindMode ? UIColor(rgb: 0x5AC8FA) : .tertiarySystemBackground
-        functionalButtonsView.windModeButton.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
         view.addSubview(functionalButtonsView)
+
+        // MARK: Wind button
+        positionY = isLandscape ? height - 235 : height - 270
+        positionY = hasNotch ? positionY : positionY + 40
+        windModeButton = WindModeButton(frame: CGRect(
+            x: isLandscape ? 55 : 15,
+            y: isPro ? positionY + 50 : positionY,
+            width: 60,
+            height: 60
+        ))
+        windModeButton.isWindMode = false
+        windModeButton.button.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
+        view.addSubview(windModeButton)
 
         // MARK: indexSelectorView
         positionY = isLandscape ? height - 173 : height - 195
