@@ -80,6 +80,7 @@ final class WindDirectionMarker: GMSMarker {
             .withTintColor(color, renderingMode: .alwaysOriginal)
             .resizeImage(targetSize: CGSize(width: dWindSpeed * 5, height: dWindSpeed * 5))
             .addShadow()
+        
         self.icon = icon
         self.rotation = dWindDirection
         self.isFlat = true

@@ -30,9 +30,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
+        TrackingManager.logEvent(eventName: "set_wind_mode", parameters: ["label": self.isWindMode ? "on" : "off"])
     }
 
-    @objc func goToMyLocation() {
+    @objc func goToMyLocation(isSkipLog: Bool = false) {
         if let mylocation = self.mapView.myLocation {
             print("User's location: \(mylocation)")
             let mylocationCamera = GMSCameraPosition.camera(
@@ -41,6 +42,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 zoom: 15
             )
             self.mapView.animate(to: mylocationCamera)
+
+            if !isSkipLog {
+                TrackingManager.logEvent(eventName: "move_to_current_location")
+            }
         } else {
             print("User's location is unknown")
         }
@@ -48,16 +53,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     @objc func goToDefaultLocation() {
         self.mapView.animate(to: camera)
+        TrackingManager.logEvent(eventName: "move_to_default_location")
     }
 
     @objc func changeIndex(sender: UIButton?) {
         if let tag = sender?.tag {
-            print(tag, AirIndexTypes.allCases[tag])
-            self.airIndexTypeSelected = AirIndexTypes.allCases[tag]
+            let airIndexTypes = AirIndexTypes.allCases[tag]
+            print(tag, airIndexTypes)
+            self.airIndexTypeSelected = airIndexTypes
 
             for button in indexSelectorView.buttons {
                 button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             }
+
+            TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
         }
     }
 
@@ -266,7 +275,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         loadContent()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            self.goToMyLocation()
+            self.goToMyLocation(isSkipLog: true)
         }
     }
 
@@ -297,6 +306,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             let mmarker = marker as! PollutantMarker
             print("Marker tapped", marker, mmarker.pollutant.siteName)
             detailsView = DetailsView(station: mmarker.pollutant.getStation())
+            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+                // "name": mmarker.pollutant.siteName,
+                "nameLocal": mmarker.pollutant.siteName,
+            ])
         }
 
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))

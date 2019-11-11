@@ -64,6 +64,7 @@ struct HelpView: View {
                                 // setting a new value to self.linkPage
                                 // this is used for triggering the SafariView presentation through .sheet()
                                 self.linkPage = linkPage
+                                TrackingManager.logEvent(eventName: "open_contact_us_link", parameters: ["label": linkPage.rawValue])
                             }) {
                                 Text(linkPage.title)
                                     .foregroundColor(Color.primary)
@@ -82,6 +83,7 @@ struct HelpView: View {
                                 // setting a new value to self.linkPage
                                 // this is used for triggering the SafariView presentation through .sheet()
                                 self.definitionPage = definitionPage
+                                TrackingManager.logEvent(eventName: "open_definition_link", parameters: ["label": definitionPage.rawValue])
                             }) {
                                 Text(definitionPage.title)
                                     .foregroundColor(Color.primary)

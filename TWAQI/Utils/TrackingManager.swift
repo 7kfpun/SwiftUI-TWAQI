@@ -17,7 +17,9 @@ struct TrackingManager {
         Analytics.setUserProperty(value, forName: key)
     }
 
-    static func logEvent(eventName: String, parameters: [String: String]) {
+    static func logEvent(eventName: String, parameters: [String: Any] = [:]) {
+        print("LogEvent", eventName, parameters)
+
         // Amplitude log event.
         Amplitude.instance().logEvent(eventName, withEventProperties: parameters)
 
@@ -25,6 +27,9 @@ struct TrackingManager {
         Analytics.logEvent(eventName, parameters: parameters)
 
         // App Center Analytics log event.
-        MSAnalytics.trackEvent(eventName, withProperties: parameters)
+        let msParameters = parameters.mapValues { value in
+            return "\(value)"
+        }
+        MSAnalytics.trackEvent(eventName, withProperties: msParameters)
     }
 }

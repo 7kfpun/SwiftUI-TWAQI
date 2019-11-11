@@ -48,12 +48,14 @@ final class SettingsStore: ObservableObject {
     }
 
     var airIndexTypeSelected: AirIndexTypes {
+        set {
+            defaults.set(newValue.rawValue, forKey: Keys.airIndexTypeSelected)
+            TrackingManager.logEvent(eventName: "select_index", parameters: ["label": newValue.rawValue])
+        }
         get {
             return defaults.string(forKey: Keys.airIndexTypeSelected)
                 .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
         }
-
-        set { defaults.set(newValue.rawValue, forKey: Keys.airIndexTypeSelected) }
     }
 
     var isForecastEnabled: Bool {
@@ -78,6 +80,8 @@ final class SettingsStore: ObservableObject {
                     }
                 }
             }
+
+            TrackingManager.logEvent(eventName: "set_forecast_notification", parameters: ["label": newValue ? "on" : "off"])
         }
         get { defaults.bool(forKey: Keys.forecastEnabled) }
     }
@@ -107,6 +111,12 @@ final class SettingsStore: ObservableObject {
                     }
                 }
             }
+
+            TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
+                "label": newValue ? "on" : "off",
+                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
+                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
+            ])
         }
         get { defaults.bool(forKey: Keys.dndEnabled) }
     }
@@ -122,6 +132,12 @@ final class SettingsStore: ObservableObject {
                     print(error.localizedDescription)
                 }
             }
+
+            TrackingManager.logEvent(eventName: "set_dnd_notification_start_time", parameters: [
+                "label": isDndEnabled ? "on" : "off",
+                "dndStartTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
+                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
+            ])
         }
         get { defaults.object(forKey: Keys.dndStartTime) as! Date }
     }
@@ -137,6 +153,12 @@ final class SettingsStore: ObservableObject {
                     print(error.localizedDescription)
                 }
             }
+
+            TrackingManager.logEvent(eventName: "set_dnd_notification_end_time", parameters: [
+                "label": isDndEnabled ? "on" : "off",
+                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
+                "dndEndTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
+            ])
         }
         get { defaults.object(forKey: Keys.dndEndTime) as! Date }
     }
@@ -144,25 +166,31 @@ final class SettingsStore: ObservableObject {
 
 extension SettingsStore {
     func unlockPro() {
+        TrackingManager.logEvent(eventName: "user_premium_buy_product_started")
         IAPManager.shared.purchaseMyProduct(index: 0)
         IAPManager.shared.purchaseStatusBlock = { type in
             if type == .purchased {
                 print("Purchased")
                 self.isPro = true
+                TrackingManager.logEvent(eventName: "user_premium_buy_product_done")
             } else {
                 print(type)
+                TrackingManager.logEvent(eventName: "user_premium_buy_product_failed")
             }
         }
     }
 
     func restorePurchase() {
+        TrackingManager.logEvent(eventName: "user_premium_restore_purchase_started")
         IAPManager.shared.restorePurchase()
         IAPManager.shared.purchaseStatusBlock = { type in
             if type == .restored {
                 print("Restored")
                 self.isPro = true
+                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_done")
             } else {
                 print(type)
+                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_failed")
             }
         }
     }

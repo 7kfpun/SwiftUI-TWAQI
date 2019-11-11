@@ -33,7 +33,6 @@
 		9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F52371B78600B6E600 /* IAPManager.swift */; };
 		9E34B4F82371CDF900B6E600 /* AdBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBanner.swift */; };
 		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
-		9E5257A8234305D6001ECFE1 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A7234305D6001ECFE1 /* Index.swift */; };
 		9E5257AA2343064F001ECFE1 /* IndexSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257A92343064F001ECFE1 /* IndexSelector.swift */; };
 		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
 		9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
@@ -140,7 +139,6 @@
 		9E34B4F72371CDF900B6E600 /* AdBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBanner.swift; sourceTree = "<group>"; };
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		9E5257A7234305D6001ECFE1 /* Index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		9E5257A92343064F001ECFE1 /* IndexSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelector.swift; sourceTree = "<group>"; };
 		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		9E5257AF2344A676001ECFE1 /* Pollutants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pollutants.swift; sourceTree = "<group>"; };
@@ -403,7 +401,6 @@
 			children = (
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
-				9E5257A7234305D6001ECFE1 /* Index.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
 				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
 				9E978F1F235B0CDC00C66A03 /* StationGroups.swift */,
@@ -738,7 +735,6 @@
 				9E671C5223785448002C64A0 /* UIDeviceExtension.swift in Sources */,
 				9E34B4F82371CDF900B6E600 /* AdBanner.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
-				9E5257A8234305D6001ECFE1 /* Index.swift in Sources */,
 				9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */,

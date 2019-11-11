@@ -16,6 +16,10 @@ struct DetailsGroup: View {
         VStack {
             Button(action: {
                 self.isOpen.toggle()
+                TrackingManager.logEvent(eventName: "toggle_history_group", parameters: [
+                    "name": self.stationGroup.name,
+                    "nameLocal": self.stationGroup.nameLocal,
+                ]);
             }) {
                 HStack {
                     Text(Locale.isChinese ? stationGroup.nameLocal : stationGroup.name)

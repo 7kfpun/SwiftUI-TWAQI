@@ -25,8 +25,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
 
         // Initialize the Amplitude SDK.
-        Amplitude.instance().trackingSessionEvents = true
-        Amplitude.instance().initializeApiKey("07e21467800b3fc5a02420ee32c85829")
+        if let amplitudeApiKey = getEnv("AmplitudeApiKey") {
+            Amplitude.instance().trackingSessionEvents = true
+            Amplitude.instance().initializeApiKey(amplitudeApiKey)
+        }
 
         // Initialize the Bugsnag SDK.
         if let bugsnagApiKey = getEnv("BugsnagApiKey") {

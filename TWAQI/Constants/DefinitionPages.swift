@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-enum DefinitionPages: CaseIterable, Identifiable {
+enum DefinitionPages: String, CaseIterable, Identifiable {
     case aqi
     case pm25
     case pm10
