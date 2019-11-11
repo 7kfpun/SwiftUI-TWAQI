@@ -29,7 +29,11 @@ struct DetailsListView: View {
                     } else {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             ForEach(
-                                stationGroup.stations.filter {$0.name.hasPrefix(self.searchText) || self.searchText.isEmpty}, id: \.self
+                                stationGroup.stations.filter {
+                                    $0.name.hasPrefix(self.searchText)
+                                    || $0.nameLocal.hasPrefix(self.searchText)
+                                    || self.searchText.isEmpty
+                                }, id: \.self
                             ) {station in
                                 DetailsRow(station: station)
                             }
