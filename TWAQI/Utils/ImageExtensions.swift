@@ -21,10 +21,10 @@ extension UIImage {
 
         UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
         self.draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext() ?? self
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
 
-        return newImage
+        return newImage!
     }
 
     func addShadow(blurSize: CGFloat = 6.0) -> UIImage {

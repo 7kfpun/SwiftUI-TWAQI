@@ -67,6 +67,11 @@ final class WindDirectionMarker: GMSMarker {
             let dWindSpeed: Double = Double(pollutant.windSpeed) else {
                 return
         }
+
+        if dWindSpeed == 0 {
+            return
+        }
+
         self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
 
         let airStatus = AirStatuses.checkAirStatus(
