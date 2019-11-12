@@ -7,19 +7,19 @@ target 'TWAQI' do
 
   # Pods for TWAQI
   pod 'Alamofire', '~> 5.0.0-rc.3'
-  pod 'SDWebImageSwiftUI', '~> 0.7'
+  pod 'GoogleMaps', '~> 3.6'
+  pod 'SDWebImageSwiftUI', '~> 0.8'
   pod 'SwiftDate', '~> 6.1'
-  pod 'GoogleMaps', '~> 3.5'
 
-  pod 'Firebase', '~> 6.10'
-  pod 'Firebase/Analytics'
+  pod 'Firebase', '~> 6.12'
   pod 'Firebase/AdMob'
+  pod 'Firebase/Analytics'
   pod 'Firebase/InAppMessagingDisplay'
   pod 'Fabric', '~> 1.10.2'
   pod 'Crashlytics', '~> 3.14.0'
 
   pod 'Amplitude-iOS', '~> 4.5'
-  pod 'AppCenter', '~> 2.5.0'
+  pod 'AppCenter', '~> 2.5'
   pod 'AppCenter/Push'
   pod 'Bugsnag', '~> 5.22'
   pod 'OneSignal', '>= 2.11.2', '< 3.0'
