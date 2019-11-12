@@ -18,10 +18,12 @@ HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com
 
 // Services
 AppCenterSecret =
+AppCenterAppSecret =
 BugsnagApiKey =
 GADApplicationIdentifier =
 GMSServicesApiKey =
 OneSignalAppId =
+SentryDSN =
 
 // AdMob AdUnitId
 AdUnitIdMainFooter = ca-app-pub-3940256099942544/2934735716

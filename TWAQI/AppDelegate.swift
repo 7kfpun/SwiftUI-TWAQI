@@ -17,6 +17,7 @@ import Bugsnag
 import Firebase
 import GoogleMaps
 import OneSignal
+import Sentry
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -49,10 +50,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize App Center services.
         if let appCenterAppSecret = getEnv("AppCenterAppSecret") {
             MSAppCenter.start(appCenterAppSecret, withServices: [
-              MSAnalytics.self,
-              MSCrashes.self,
-              MSPush.self,
+                MSAnalytics.self,
+                MSCrashes.self,
+                MSPush.self,
             ])
+        }
+
+        // Initialize Sentry service.
+        do {
+            if let sentryDSN = getEnv("SentryDSN") {
+                Client.shared = try Client(dsn: sentryDSN)
+                try Client.shared?.startCrashHandler()
+            }
+        } catch let error {
+            print("\(error)")
         }
 
         // Initialize OneSignal push services.

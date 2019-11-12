@@ -73,6 +73,8 @@
 	<string>$(PartnerUrlEn)</string>
 	<key>PartnerUrlZh</key>
 	<string>$(PartnerUrlZh)</string>
+	<key>SentryDSN</key>
+	<string>$(SentryDSN)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

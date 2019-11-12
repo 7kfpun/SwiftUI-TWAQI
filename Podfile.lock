@@ -110,12 +110,15 @@ PODS:
   - SDWebImage/Core (5.3.1)
   - SDWebImageSwiftUI (0.8.3):
     - SDWebImage (~> 5.3)
+  - Sentry (4.4.1):
+    - Sentry/Core (= 4.4.1)
+  - Sentry/Core (4.4.1)
   - SwiftDate (6.1.0)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.3)
   - Amplitude-iOS (~> 4.5)
-  - AppCenter (~> 2.5.0)
+  - AppCenter (~> 2.5)
   - AppCenter/Push
   - Bugsnag (~> 5.22)
   - Crashlytics (~> 3.14.0)
@@ -127,6 +130,7 @@ DEPENDENCIES:
   - GoogleMaps (~> 3.6)
   - OneSignal (< 3.0, >= 2.11.2)
   - SDWebImageSwiftUI (~> 0.8)
+  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `4.4.1`)
   - SwiftDate (~> 6.1)
 
 SPEC REPOS:
@@ -158,6 +162,16 @@ SPEC REPOS:
     - SDWebImageSwiftUI
     - SwiftDate
 
+EXTERNAL SOURCES:
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 4.4.1
+
+CHECKOUT OPTIONS:
+  Sentry:
+    :git: https://github.com/getsentry/sentry-cocoa.git
+    :tag: 4.4.1
+
 SPEC CHECKSUMS:
   Alamofire: ca8c0de6906873be89d6deec5c8de279e00bf872
   Amplitude-iOS: 46c8e6e65c49bb1ad1909a9add1a68e1f8562b3f
@@ -184,8 +198,9 @@ SPEC CHECKSUMS:
   OneSignal: 4e3e68bb6c29975286a2fa910cb49132bc6e20bb
   SDWebImage: 7137d57385fb632129838c1e6ab9528a22c666cc
   SDWebImageSwiftUI: b4869720699c355f3b61593c4a80f77d0534e31b
+  Sentry: 5d312a04e369154aeac616214f4dfc3cbcc8b296
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: 805dee6bb1d30b5616e30bce6c2aec0be21478c8
+PODFILE CHECKSUM: dccfbda3b6e43b7b9da8751b50e4b41e123eb0f7
 
 COCOAPODS: 1.8.3
