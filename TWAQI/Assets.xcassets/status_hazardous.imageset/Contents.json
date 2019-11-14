@@ -47,6 +47,11 @@
         }
       ],
       "scale" : "3x"
+    },
+    {
+      "idiom" : "watch",
+      "filename" : "status_hazardous_white@2x-1.png",
+      "scale" : "2x"
     }
   ],
   "info" : {
