@@ -18,6 +18,7 @@ final class SettingsStore: ObservableObject {
         static let dndEnabled = "dndEnabled"
         static let dndStartTime = "dndStartTime"
         static let dndEndTime = "dndEndTime"
+        static let closestStationName = "closestStationName"
     }
 
     private let cancellable: Cancellable
@@ -34,6 +35,7 @@ final class SettingsStore: ObservableObject {
             Keys.dndEnabled: false,
             Keys.dndStartTime: Date(),
             Keys.dndEndTime: Date() + 2.hours,
+            Keys.closestStationName: "松山",
         ])
 
         cancellable = NotificationCenter.default
@@ -161,6 +163,11 @@ final class SettingsStore: ObservableObject {
             ])
         }
         get { defaults.object(forKey: Keys.dndEndTime) as! Date }
+    }
+
+    var closestStationName: String {
+        set { defaults.set(newValue, forKey: Keys.closestStationName) }
+        get { defaults.string(forKey: Keys.closestStationName) ?? "松山" }
     }
 }
 

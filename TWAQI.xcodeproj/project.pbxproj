@@ -16,7 +16,6 @@
 		9E1AC542233F981900AC862D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC541233F981900AC862D /* Assets.xcassets */; };
 		9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC544233F981900AC862D /* Preview Assets.xcassets */; };
 		9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC546233F981900AC862D /* LaunchScreen.storyboard */; };
-		9E1AC552233F99BC00AC862D /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC551233F99BC00AC862D /* Common.swift */; };
 		9E1AC555233F99F600AC862D /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC554233F99F600AC862D /* MainView.swift */; };
 		9E1AC558233F9A1800AC862D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC557233F9A1800AC862D /* SettingsView.swift */; };
 		9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC55A233F9A3900AC862D /* ForecastView.swift */; };
@@ -121,7 +120,6 @@
 		9E1AC544233F981900AC862D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9E1AC547233F981900AC862D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E1AC549233F981900AC862D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9E1AC551233F99BC00AC862D /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		9E1AC554233F99F600AC862D /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		9E1AC557233F9A1800AC862D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9E1AC55A233F9A3900AC862D /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
@@ -287,7 +285,6 @@
 			children = (
 				9E34B4F72371CDF900B6E600 /* AdBanner.swift */,
 				9EC3CF252360A81300F17332 /* BarsView.swift */,
-				9E1AC551233F99BC00AC862D /* Common.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 				9E794A61234083700064D874 /* Indicator.swift */,
 				9EC3CF21235F3B0B00F17332 /* LabelView.swift */,
@@ -692,7 +689,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E1AC552233F99BC00AC862D /* Common.swift in Sources */,
 				9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */,
 				9EAB27F42379180600AEAF5A /* WindModeButton.swift in Sources */,
 				9EF2501523766BC000A731D5 /* ClosestStationView.swift in Sources */,

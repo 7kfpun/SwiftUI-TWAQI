@@ -234,6 +234,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             }
 
             print(closestPollutant)
+            defaults.set(closestPollutant.siteName, forKey: "closestStationName")
 
             closestStationView.stationName = "\(closestPollutant.siteName), \(closestPollutant.county)"
             closestStationView.status = closestPollutant.status
