@@ -9,8 +9,17 @@
 import Combine
 import SwiftUI
 
+let defaultStation = Station(
+    name: "Matsu",
+    nameLocal: "馬祖",
+    lon: 119.949875,
+    lat: 26.160469,
+    imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+)
+
 final class SettingsStore: ObservableObject {
     private enum Keys {
+        static let closestStation = "closestStation"
         static let closestStationName = "closestStationName"
     }
 
@@ -30,6 +39,11 @@ final class SettingsStore: ObservableObject {
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
             .subscribe(objectWillChange)
+    }
+
+    var closestStation: Station {
+        set { defaults.setStruct(newValue, forKey: Keys.closestStation) }
+        get { defaults.structData(Station.self, forKey: Keys.closestStation) ?? defaultStation }
     }
 
     var closestStationName: String {

@@ -21,6 +21,7 @@ struct StationListView: View {
                 ForEach(stationGroup.stations, id: \.self) {station in
                     Button(action: {
                         print(station.nameLocal)
+                        defaults.setStruct(station, forKey: "closestStation")
                         defaults.set(station.nameLocal, forKey: "closestStationName")
                         self.mode.wrappedValue.dismiss()
                     }) {
@@ -56,7 +57,7 @@ struct StationListView_Previews: PreviewProvider {
                 StationGroup(name: "Taipei City", nameLocal: "臺北市", stations: [
                     Station(name: "Yangming", nameLocal: "陽明", lon: 121.529583, lat: 25.182722),
                     Station(name: "Songshan", nameLocal: "松山", lon: 121.578611, lat: 25.050000),
-                ])
+                ]),
             ]
         )
     }

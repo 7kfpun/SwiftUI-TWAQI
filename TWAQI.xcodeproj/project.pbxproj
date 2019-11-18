@@ -10,6 +10,10 @@
 		1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */; };
 		9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F532235C30A400BC3486 /* SettingsViewModel.swift */; };
 		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
+		9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
+		9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E08761E2382D75C0060476E /* ContentViewModel.swift */; };
+		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
+		9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
 		9E1AC540233F981700AC862D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53F233F981700AC862D /* ContentView.swift */; };
@@ -64,6 +68,7 @@
 		9E910C6F2381850B00B8B316 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
 		9E910C702381850E00B8B316 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
 		9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
+		9E910C7223818EC600B8B316 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E942E342372BAB10010915D /* AreaGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E332372BAB10010915D /* AreaGroups.swift */; };
 		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
@@ -91,6 +96,7 @@
 		9EC6BB17235B462B00213041 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB16235B462B00213041 /* SafariView.swift */; };
 		9EC6BB1F235B590500213041 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB1E235B590500213041 /* NotificationService.swift */; };
 		9EC6BB23235B590500213041 /* OneSignalNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9EC8999223828BE1000D986C /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */; };
 		9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */; };
 		9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
@@ -171,6 +177,8 @@
 		437631D7D7C9B18A5CECB5C3 /* Pods-OneSignalNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		9E01F532235C30A400BC3486 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
+		9E08761E2382D75C0060476E /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* TWAQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TWAQI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53D233F981700AC862D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -292,6 +300,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				AEAF311CBA65697B61E2412E /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D2003A195B2687B61D5631C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,6 +474,7 @@
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				9E671C5123785448002C64A0 /* UIDeviceExtension.swift */,
+				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -507,6 +523,7 @@
 			children = (
 				9E910C642381841C00B8B316 /* Utils */,
 				9E910C472381830300B8B316 /* ContentView.swift */,
+				9E08761E2382D75C0060476E /* ContentViewModel.swift */,
 				9E910C492381830400B8B316 /* HostingController.swift */,
 				9E910C4B2381830400B8B316 /* ExtensionDelegate.swift */,
 				9E910C672381848E00B8B316 /* StationListView.swift */,
@@ -614,8 +631,6 @@
 				9E910C592381830500B8B316 /* PBXTargetDependency */,
 			);
 			name = TWAQI;
-			packageProductDependencies = (
-			);
 			productName = TWAQI;
 			productReference = 9E1AC538233F981700AC862D /* TWAQI.app */;
 			productType = "com.apple.product-type.application";
@@ -626,6 +641,7 @@
 			buildPhases = (
 				9E910C34238182FE00B8B316 /* Resources */,
 				9E910C5E2381830500B8B316 /* Embed App Extensions */,
+				D2003A195B2687B61D5631C0 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -706,8 +722,6 @@
 				"zh-Hant",
 			);
 			mainGroup = 9E1AC52F233F981700AC862D;
-			packageReferences = (
-			);
 			productRefGroup = 9E1AC539233F981700AC862D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -747,6 +761,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E910C7223818EC600B8B316 /* Localizable.strings in Resources */,
 				9E910C552381830500B8B316 /* Preview Assets.xcassets in Resources */,
 				9E910C63238183E600B8B316 /* Assets.xcassets in Resources */,
 				9E910C702381850E00B8B316 /* stations.json in Resources */,
@@ -944,6 +959,7 @@
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */,
 				9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */,
+				9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */,
 				9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -952,7 +968,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EC8999223828BE1000D986C /* getEnv.swift in Sources */,
 				9E910C6D238184D900B8B316 /* AirStatusTypes.swift in Sources */,
+				9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */,
+				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,
 				9E910C69238184AC00B8B316 /* StationGroups.swift in Sources */,
 				9E910C4A2381830400B8B316 /* HostingController.swift in Sources */,
 				9E910C6F2381850B00B8B316 /* DataManager.swift in Sources */,
@@ -964,6 +983,7 @@
 				9E910C6A238184B300B8B316 /* Stations.swift in Sources */,
 				9E910C682381848E00B8B316 /* StationListView.swift in Sources */,
 				9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */,
+				9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */,
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
 				9E910C502381830400B8B316 /* NotificationView.swift in Sources */,
 				9E910C6B238184BB00B8B316 /* LabelView.swift in Sources */,
