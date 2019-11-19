@@ -25,7 +25,7 @@ struct StationListView: View {
                         defaults.set(station.nameLocal, forKey: "closestStationName")
                         self.mode.wrappedValue.dismiss()
                     }) {
-                        Text(station.nameLocal)
+                        Text(Locale.isChinese ? station.nameLocal : station.name)
                     }
                 }
             }

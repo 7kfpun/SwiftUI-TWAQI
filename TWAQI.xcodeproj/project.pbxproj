@@ -102,6 +102,7 @@
 		9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
 		9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685623838CDA00B08589 /* MyLocationButton.swift */; };
 		9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685823838CEE00B08589 /* DefaultLocationButton.swift */; };
+		9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E3B2372CA4B0010915D /* LocaleExtension.swift */; };
 		9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EE9E6BD235C8F150046A590 /* SettingsStore.swift */; };
 		9EF2501523766BC000A731D5 /* ClosestStationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF2501423766BC000A731D5 /* ClosestStationView.swift */; };
 		9EF250172376702100A731D5 /* AirStatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF250162376702100A731D5 /* AirStatusBarView.swift */; };
@@ -977,6 +978,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9EC8999223828BE1000D986C /* getEnv.swift in Sources */,
+				9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */,
 				9E910C6D238184D900B8B316 /* AirStatusTypes.swift in Sources */,
 				9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */,
 				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,

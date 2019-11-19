@@ -25,7 +25,7 @@ struct ContentView: View {
             HStack(alignment: .bottom) {
                 NavigationLink(
                     destination: StationListView()) {
-                        Text(settings.closestStation.name)
+                        Text(Locale.isChinese ? settings.closestStation.nameLocal : settings.closestStation.name)
                 }
 
                 Spacer()
