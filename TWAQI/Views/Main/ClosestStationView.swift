@@ -107,7 +107,7 @@ final class ClosestStationView: UIView {
             make.top.equalTo(rightView).offset(6)
             make.centerX.equalTo(rightView.snp.centerX).offset(-4)
             make.height.equalTo(22)
-            make.width.equalTo(58)
+            make.width.greaterThanOrEqualTo(60)
         }
 
         imageView = UIImageView(frame: bounds)

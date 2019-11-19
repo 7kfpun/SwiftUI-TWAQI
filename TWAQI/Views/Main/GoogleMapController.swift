@@ -28,6 +28,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var myLocationButton: MyLocationButton!
     var windModeButton: WindModeButton!
 
+    var currentLatitude: Double = defaultLatitude
+    var currentLongitude: Double = defaultLongitude
+
     var pollutants: Pollutants = []
 
     @objc func toggleIsWindMode() {
@@ -43,6 +46,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 longitude: mylocation.coordinate.longitude,
                 zoom: 13
             )
+            self.currentLatitude = mylocation.coordinate.latitude
+            self.currentLongitude = mylocation.coordinate.longitude
             self.mapView.animate(to: mylocationCamera)
 
             if !isSkipLog {
@@ -67,6 +72,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             for button in indexSelectorView.buttons {
                 button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             }
+
+            loadClosestStationView(latitude: self.currentLatitude, longitude: self.currentLongitude)
 
             TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
         }
@@ -234,12 +241,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             print(closestPollutant)
             defaults.set(closestPollutant.siteName, forKey: "closestStationName")
 
+            let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
+            let isInteger = floor(value) == value
+            let text = value.format(f: isInteger ? ".0" : ".2")
+
             closestStationView.stationName = "\(closestPollutant.siteName), \(closestPollutant.county)"
             closestStationView.status = closestPollutant.status
-            closestStationView.aqi = "AQI \(closestPollutant.aqi)"
+            closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
             let airStatus = AirStatuses.checkAirStatus(
-                airIndexType: AirIndexTypes.aqi,
-                value: Double(closestPollutant.aqi) ?? 0
+                airIndexType: self.airIndexTypeSelected,
+                value: value
             )
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
             closestStationView.aqiForegroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
@@ -327,6 +338,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         print("Camera position", position)
         let latitude = position.target.latitude as Double
         let longitude = position.target.longitude as Double
+        self.currentLatitude = latitude
+        self.currentLongitude = longitude
         loadClosestStationView(latitude: latitude, longitude: longitude)
     }
 
