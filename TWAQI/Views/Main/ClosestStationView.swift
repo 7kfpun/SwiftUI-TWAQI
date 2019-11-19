@@ -59,6 +59,10 @@ final class ClosestStationView: UIView {
         translatesAutoresizingMaskIntoConstraints = false
 
         backgroundColor = .tertiarySystemBackground
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOffset = CGSize(width: 0, height: 4)
+        layer.shadowRadius = 2
+        layer.shadowOpacity = 0.2
         layer.cornerRadius = 5
 
         let leftView = UIView()

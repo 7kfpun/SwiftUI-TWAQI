@@ -30,11 +30,10 @@ final class DefaultLocationButton: UIView {
         button.backgroundColor = .tertiarySystemBackground
         button.layer.cornerRadius = 30
         button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
+        button.layer.shadowOffset = CGSize(width: 0, height: 4)
         button.layer.shadowRadius = 2
-        button.layer.shadowOpacity = 0.1
+        button.layer.shadowOpacity = 0.2
 
         addSubview(button)
     }
 }
-

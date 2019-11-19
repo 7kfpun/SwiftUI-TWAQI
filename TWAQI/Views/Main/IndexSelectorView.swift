@@ -27,7 +27,7 @@ final class IndexSelectorView: UIScrollView {
         translatesAutoresizingMaskIntoConstraints = false
         showsHorizontalScrollIndicator = false
 
-        let height: CGFloat = 50
+        let height: CGFloat = 54
 
         let buttonPadding: CGFloat = 10
         var xOffset: CGFloat = 15
@@ -42,9 +42,9 @@ final class IndexSelectorView: UIScrollView {
             button.backgroundColor = .tertiarySystemBackground
             button.layer.cornerRadius = 25
             button.layer.shadowColor = UIColor.black.cgColor
-            button.layer.shadowOffset = CGSize(width: 0.0, height: 3.0)
+            button.layer.shadowOffset = CGSize(width: 0, height: 4)
             button.layer.shadowRadius = 2
-            button.layer.shadowOpacity = 0.1
+            button.layer.shadowOpacity = 0.2
 
             button.frame = CGRect(x: xOffset, y: 0, width: 75, height: 50)
             xOffset += CGFloat(buttonPadding) + button.frame.size.width

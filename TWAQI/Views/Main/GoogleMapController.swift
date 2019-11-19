@@ -23,10 +23,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     let defaults = UserDefaults.standard
 
     var closestStationView: ClosestStationView!
-    var functionalButtonsView: FunctionalButtonsView!
     var defaultLocationButton: DefaultLocationButton!
-    var myLocationButton: MyLocationButton!
     var indexSelectorView: IndexSelectorView!
+    var myLocationButton: MyLocationButton!
     var windModeButton: WindModeButton!
 
     var pollutants: Pollutants = []
@@ -170,9 +169,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
         view.addSubview(indexSelectorView)
         indexSelectorView.snp.makeConstraints { (make) -> Void in
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -12 : -62)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -10 : -60)
             make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
-            make.height.equalTo(50)
+            make.height.equalTo(54)
             if width > 610 {
                 make.left.equalTo(view.snp.left).offset(width/2 - 305)
             } else {
