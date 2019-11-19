@@ -23,7 +23,8 @@ final class AirStatusBarView: UIView {
         backgroundColor = .tertiarySystemBackground
         layer.cornerRadius = 5
 
-        let imagePadding: CGFloat = (frame.size.width - 10) / 6 - 20
+        let width: CGFloat = 200
+        let imagePadding: CGFloat = (width - 10) / 6 - 20
         var xOffset: CGFloat = 10
 
         for airStatus in AirStatuses.getShowAllCases() {

@@ -27,7 +27,7 @@ final class IndexSelectorView: UIScrollView {
         translatesAutoresizingMaskIntoConstraints = false
         showsHorizontalScrollIndicator = false
 
-        let height = frame.size.height
+        let height: CGFloat = 50
 
         let buttonPadding: CGFloat = 10
         var xOffset: CGFloat = 15

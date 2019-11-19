@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import SnapKit
 import UIKit
 
 final class FunctionalButtonsView: UIView {
@@ -23,16 +24,8 @@ final class FunctionalButtonsView: UIView {
     }
 
     func createSubviews() {
-        let width = frame.size.width
-        let height = frame.size.height
-
         // MARK: Default location button
-        defaultLocationButton = UIButton(frame: CGRect(
-            x: width - 60,
-            y: 0,
-            width: 60,
-            height: 60
-        ))
+        defaultLocationButton = UIButton()
         let defaultLocationIcon = UIImage(systemName: "viewfinder")
         defaultLocationButton.setImage(defaultLocationIcon, for: .normal)
         defaultLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
@@ -43,14 +36,14 @@ final class FunctionalButtonsView: UIView {
         defaultLocationButton.layer.shadowRadius = 2
         defaultLocationButton.layer.shadowOpacity = 0.1
         addSubview(defaultLocationButton)
+        defaultLocationButton.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(self.snp.top)
+            make.height.equalTo(60)
+            make.width.equalTo(60)
+        }
 
         // MARK: My location button
-        myLocationButton = UIButton(frame: CGRect(
-            x: width - 60,
-            y: height - 60,
-            width: 60,
-            height: 60
-        ))
+        myLocationButton = UIButton()
         let myLocationIcon = UIImage(systemName: "paperplane.fill")
         myLocationButton.setImage(myLocationIcon, for: .normal)
         myLocationButton.tintColor = UIColor(rgb: 0x5AC8FA)
@@ -61,5 +54,10 @@ final class FunctionalButtonsView: UIView {
         myLocationButton.layer.shadowRadius = 2
         myLocationButton.layer.shadowOpacity = 0.1
         addSubview(myLocationButton)
+        myLocationButton.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(self.snp.bottom)
+            make.height.equalTo(60)
+            make.width.equalTo(60)
+        }
     }
 }

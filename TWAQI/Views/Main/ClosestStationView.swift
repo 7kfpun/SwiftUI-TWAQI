@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import SnapKit
 import UIKit
 
 final class ClosestStationView: UIView {
@@ -60,27 +61,58 @@ final class ClosestStationView: UIView {
         backgroundColor = .tertiarySystemBackground
         layer.cornerRadius = 5
 
-        let width = frame.size.width
+        let leftView = UIView()
+        addSubview(leftView)
+        leftView.snp.makeConstraints { (make) -> Void in
+            make.top.left.bottom.equalTo(self)
+            make.width.equalToSuperview().multipliedBy(0.66)
+        }
 
-        label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 8), size: CGSize(width: width * 2 / 3, height: 20)))
+        label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textAlignment = NSTextAlignment.center
-        addSubview(label)
+        leftView.addSubview(label)
+        label.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(leftView).offset(8)
+            make.centerX.equalTo(leftView.snp.centerX)
+        }
 
-        subLabel = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 50), size: CGSize(width: width * 2 / 3, height: 20)))
+        subLabel = UILabel()
         subLabel.font = UIFont.systemFont(ofSize: 12)
         subLabel.textAlignment = NSTextAlignment.center
-        addSubview(subLabel)
+        leftView.addSubview(subLabel)
+        subLabel.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(leftView).offset(-8)
+            make.centerX.equalTo(leftView.snp.centerX)
+        }
 
-        aqiLabel = UILabel(frame: CGRect(origin: CGPoint(x: width * 2 / 3, y: 6), size: CGSize(width: width / 3 - 12, height: 20)))
+        let rightView = UIView()
+        addSubview(rightView)
+        rightView.snp.makeConstraints { (make) -> Void in
+            make.top.right.bottom.equalTo(self)
+            make.width.equalToSuperview().multipliedBy(0.33)
+        }
+
+        aqiLabel = UILabel()
         aqiLabel.font = UIFont.systemFont(ofSize: 12)
         aqiLabel.textAlignment = NSTextAlignment.center
         aqiLabel.layer.cornerRadius = 4
         aqiLabel.layer.masksToBounds = true
-        addSubview(aqiLabel)
+        rightView.addSubview(aqiLabel)
+        aqiLabel.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(rightView).offset(6)
+            make.centerX.equalTo(rightView.snp.centerX).offset(-4)
+            make.height.equalTo(22)
+            make.width.equalTo(58)
+        }
 
         imageView = UIImageView(frame: bounds)
-        imageView.frame = CGRect(x: width * 2 / 3 + 13, y: 36, width: 34, height: 34)
-        addSubview(imageView)
+        rightView.addSubview(imageView)
+        imageView.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(rightView).offset(-4)
+            make.centerX.equalTo(rightView.snp.centerX).offset(-4)
+            make.height.equalTo(34)
+            make.width.equalTo(34)
+        }
     }
 }

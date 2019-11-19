@@ -7,6 +7,7 @@
 //
 
 import GoogleMaps
+import SnapKit
 import SwiftUI
 import UIKit
 
@@ -23,6 +24,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var closestStationView: ClosestStationView!
     var functionalButtonsView: FunctionalButtonsView!
+    var defaultLocationButton: DefaultLocationButton!
+    var myLocationButton: MyLocationButton!
     var indexSelectorView: IndexSelectorView!
     var windModeButton: WindModeButton!
 
@@ -39,7 +42,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             let mylocationCamera = GMSCameraPosition.camera(
                 withLatitude: mylocation.coordinate.latitude,
                 longitude: mylocation.coordinate.longitude,
-                zoom: 15
+                zoom: 13
             )
             self.mapView.animate(to: mylocationCamera)
 
@@ -132,80 +135,32 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.backgroundColor = .white
         view.addSubview(mapView)
 
-        // TODO: move to auto-layout
-        let hasNotch = UIDevice.current.hasNotch
-
         // MARK: closestStationView
-        var positionY: CGFloat = isLandscape ? 20 : 50
-        positionY = hasNotch ? positionY : positionY - 30
-        closestStationView = ClosestStationView(frame: CGRect(
-            x: isLandscape ? 55 : 20,
-            y: positionY,
-            width: 200,
-            height: 75
-        ))
+        closestStationView = ClosestStationView()
         view.addSubview(closestStationView)
+        closestStationView.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+            make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
+            make.width.equalTo(200)
+            make.height.equalTo(75)
+        }
 
         // MARK: airStatusesView
-        positionY = isLandscape ? 100 : 130
-        positionY = hasNotch ? positionY : positionY - 30
-        let airStatusesView = AirStatusBarView(frame: CGRect(
-            x: isLandscape ? 55 : 20,
-            y: positionY,
-            width: 200,
-            height: 32
-        ))
+        let airStatusesView = AirStatusBarView()
         view.addSubview(airStatusesView)
+        airStatusesView.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(closestStationView.snp.bottom).offset(8)
+            make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
+            make.width.equalTo(200)
+            make.height.equalTo(32)
+        }
 
         let isPro = defaults.bool(forKey: "pro")
         let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
-        // MARK: functionalButtonsView
-        positionY = isLandscape ? height - 300 : height - 345
-        positionY = hasNotch ? positionY : positionY + 40
-        functionalButtonsView = FunctionalButtonsView(frame: CGRect(
-            x: isLandscape ? width - 110 : width - 75,
-            y: isPro ? positionY + 50 : positionY,
-            width: 60,
-            height: isLandscape ? 125 : 135
-        ))
-        functionalButtonsView.defaultLocationButton.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
-        functionalButtonsView.myLocationButton.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
-        view.addSubview(functionalButtonsView)
-
-        // MARK: Wind button
-        positionY = isLandscape ? height - 235 : height - 270
-        positionY = hasNotch ? positionY : positionY + 40
-        windModeButton = WindModeButton(frame: CGRect(
-            x: isLandscape ? 55 : 15,
-            y: isPro ? positionY + 50 : positionY,
-            width: 60,
-            height: 60
-        ))
-        windModeButton.isWindMode = false
-        windModeButton.button.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
-        view.addSubview(windModeButton)
-
-        // MARK: indexSelectorView
-        positionY = isLandscape ? height - 173 : height - 195
-        positionY = hasNotch ? positionY : positionY + 40
-        if width > 800 {
-            indexSelectorView = IndexSelectorView(frame: CGRect(
-                x: isLandscape ? 40 : 0,
-                y: isPro ? positionY + 50 : positionY,
-                width: 620,
-                height: 50
-            ))
-            indexSelectorView.center.x = width / 2
-        } else {
-            indexSelectorView = IndexSelectorView(frame: CGRect(
-                x: isLandscape ? 40 : 0,
-                y: isPro ? positionY + 50 : positionY,
-                width: width,
-                height: 50
-            ))
-        }
+        // MARK: Index Selector
+        indexSelectorView = IndexSelectorView()
         for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
             indexSelectorView.buttons[i].addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
 
@@ -214,6 +169,46 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             }
         }
         view.addSubview(indexSelectorView)
+        indexSelectorView.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -12 : -62)
+            make.left.equalTo(view.safeAreaLayoutGuide.snp.left)
+            make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
+            make.height.equalTo(50)
+        }
+
+        // MARK: My Location Button
+        myLocationButton = MyLocationButton()
+        view.addSubview(myLocationButton)
+        myLocationButton.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(indexSelectorView.snp.top).offset(-12)
+            make.right.equalTo(view.safeAreaLayoutGuide.snp.right).offset(-15)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
+        myLocationButton.button.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
+
+        // MARK: Default Location Button
+        defaultLocationButton = DefaultLocationButton()
+        view.addSubview(defaultLocationButton)
+        defaultLocationButton.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(myLocationButton.snp.top).offset(-12)
+            make.right.equalTo(view.safeAreaLayoutGuide.snp.right).offset(-15)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
+        defaultLocationButton.button.addTarget(self, action: #selector(goToDefaultLocation), for: .touchUpInside)
+
+        // MARK: Wind button
+        windModeButton = WindModeButton()
+        windModeButton.isWindMode = false
+        windModeButton.button.addTarget(self, action: #selector(toggleIsWindMode), for: .touchUpInside)
+        view.addSubview(windModeButton)
+        windModeButton.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(indexSelectorView.snp.top).offset(-12)
+            make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
 
         self.view = view
     }

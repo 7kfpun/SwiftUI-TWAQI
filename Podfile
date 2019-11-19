@@ -9,6 +9,7 @@ target 'TWAQI' do
   pod 'Alamofire', '~> 5.0.0-rc.3'
   pod 'GoogleMaps', '~> 3.6'
   pod 'SDWebImageSwiftUI', '~> 0.8'
+  pod 'SnapKit', '~> 5.0'
   pod 'SwiftDate', '~> 6.1'
 
   pod 'Firebase', '~> 6.12'

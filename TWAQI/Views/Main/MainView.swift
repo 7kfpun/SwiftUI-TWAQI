@@ -17,12 +17,6 @@ struct MainView: View {
             GoogleMapController()
                 .edgesIgnoringSafeArea(.all)
 
-//            GoogleMapView(
-//                pollutants: viewModel.pollutants,
-//                isWindMode: self.settings.isWindMode
-//            )
-//            .edgesIgnoringSafeArea(.vertical)
-
             AdBanner(adUnitID: getEnv("AdUnitIdMainFooter")!)
         }
     }
