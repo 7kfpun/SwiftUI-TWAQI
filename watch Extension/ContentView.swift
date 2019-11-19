@@ -22,17 +22,15 @@ struct ContentView: View {
         )
 
         return VStack {
-            HStack(alignment: .bottom) {
+            HStack {
                 NavigationLink(
                     destination: StationListView()) {
                         Text(Locale.isChinese ? settings.closestStation.nameLocal : settings.closestStation.name)
                 }
 
-                Spacer()
-
                 VStack {
                     Text("AQI")
-                        .font(.footnote)
+                        .font(.system(size: 10))
                         .multilineTextAlignment(.center)
 
                     LabelView(
@@ -42,21 +40,22 @@ struct ContentView: View {
                 }
             }
 
-            Spacer()
+            Button(action: getData) {
+                Spacer()
 
-            Image("status_\(airStatus)")
+                Image("status_\(airStatus)")
                 .resizable()
                 .frame(width: 50, height: 50)
 
-            Spacer()
+                Text(airStatus.toString())
+                    .font(.footnote)
+                    .multilineTextAlignment(.center)
 
-            Text(airStatus.toString())
-                .font(.footnote)
-                .multilineTextAlignment(.center)
-
-            Text(self.viewModel.historyPollutants.first?.publishTime ?? "-")
-                .fontWeight(.light)
-                .font(.footnote)
+                Text(self.viewModel.historyPollutants.first?.publishTime ?? "-")
+                    .fontWeight(.light)
+                    .font(.system(size: 10))
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .onAppear(perform: getData)
     }
