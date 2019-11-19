@@ -171,9 +171,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(indexSelectorView)
         indexSelectorView.snp.makeConstraints { (make) -> Void in
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -12 : -62)
-            make.left.equalTo(view.safeAreaLayoutGuide.snp.left)
             make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
             make.height.equalTo(50)
+            if width > 610 {
+                make.left.equalTo(view.snp.left).offset(width/2 - 305)
+            } else {
+                make.left.equalTo(view.safeAreaLayoutGuide.snp.left)
+            }
         }
 
         // MARK: My Location Button
