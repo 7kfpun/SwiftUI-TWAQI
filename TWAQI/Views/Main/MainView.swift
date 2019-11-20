@@ -17,8 +17,18 @@ struct MainView: View {
             GoogleMapController()
                 .edgesIgnoringSafeArea(.all)
 
-            AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!)
-        }
+            if !viewModel.isLoading {
+                if viewModel.isShowCustomAd {
+                    CustomAdView(customAd: viewModel.customAd)
+                } else {
+                    AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!)
+                }
+            }
+        }.onAppear(perform: getData)
+    }
+
+    private func getData() {
+        self.viewModel.getData()
     }
 }
 

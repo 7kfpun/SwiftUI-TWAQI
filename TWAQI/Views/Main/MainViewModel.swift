@@ -12,17 +12,35 @@ import Foundation
 class MainViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
-    @Published var pollutants: [Pollutant] = [] {
-        willSet { self.objectWillChange.send() }
+    @Published var isLoading: Bool = true {
+        willSet {
+            self.objectWillChange.send()
+        }
     }
 
+    var isShowCustomAd: Bool = false
+    var customAd: CustomAd?
+
     private(set) lazy var getData: () -> Void = {
-        APIManager.getAQI { result in
+        APIManager.getCustomAd { result in
             switch result {
-            case .success(let pollutants):
-                print("\(pollutants) unread messages.")
-                self.pollutants = pollutants
-                print("Total: \(pollutants.count), first item \(pollutants[0])")
+            case .success(let customAd):
+                self.customAd = customAd
+                self.isShowCustomAd = customAd.impressionRate > Double.random(in: 0 ..< 1)
+                self.isLoading = false
+
+                if self.isShowCustomAd {
+                    var components = URLComponents(string: customAd.imageUrl)!
+                    components.query = nil
+
+                    TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
+                        "name": customAd.name,
+                        "impressionRate": customAd.impressionRate,
+                        "imageUrl": "\(components.url!)",
+                        "destinationUrl": customAd.destinationUrl,
+                    ])
+                }
+
             case .failure(let error):
                 print(error.localizedDescription)
             }

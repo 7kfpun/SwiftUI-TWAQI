@@ -93,4 +93,29 @@ struct APIManager {
                 }
             }
     }
+
+    static func getCustomAd(completionHandler: @escaping (Result<CustomAd, NetworkError>) -> Void) {
+        guard let url = URL(string: getEnv("CUSTOM AD API")!) else {
+            completionHandler(.failure(.badURL))
+            return
+        }
+
+        AF.request(url)
+            .validate(contentType: ["application/json"])
+            .responseData { response in
+                do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
+                    debugPrint(response)
+                    let customAd = try JSONDecoder().decode(CustomAd.self, from: data)
+                    completionHandler(.success(customAd))
+                } catch {
+                    print(error)
+                    completionHandler(.failure(.networkError))
+                }
+            }
+    }
 }

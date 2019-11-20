@@ -39,7 +39,6 @@
 		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
 		9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
 		9E5257B22344AA12001ECFE1 /* Stations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257B12344AA12001ECFE1 /* Stations.swift */; };
-		9E671C5223785448002C64A0 /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E671C5123785448002C64A0 /* UIDeviceExtension.swift */; };
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
@@ -99,6 +98,8 @@
 		9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */; };
 		9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */; };
 		9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
+		9EDD956D2385941200420116 /* CustomAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956C2385941200420116 /* CustomAd.swift */; };
+		9EDD956F2385953700420116 /* CustomAdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956E2385953700420116 /* CustomAdView.swift */; };
 		9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685623838CDA00B08589 /* MyLocationButton.swift */; };
 		9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685823838CEE00B08589 /* DefaultLocationButton.swift */; };
 		9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E3B2372CA4B0010915D /* LocaleExtension.swift */; };
@@ -208,7 +209,6 @@
 		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		9E5257AF2344A676001ECFE1 /* Pollutants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pollutants.swift; sourceTree = "<group>"; };
 		9E5257B12344AA12001ECFE1 /* Stations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stations.swift; sourceTree = "<group>"; };
-		9E671C5123785448002C64A0 /* UIDeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
@@ -266,6 +266,8 @@
 		9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
 		9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalManager.swift; sourceTree = "<group>"; };
 		9EDBA6ED23649079009B4CC4 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
+		9EDD956C2385941200420116 /* CustomAd.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAd.swift; sourceTree = "<group>"; };
+		9EDD956E2385953700420116 /* CustomAdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAdView.swift; sourceTree = "<group>"; };
 		9EDF685623838CDA00B08589 /* MyLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLocationButton.swift; sourceTree = "<group>"; };
 		9EDF685823838CEE00B08589 /* DefaultLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLocationButton.swift; sourceTree = "<group>"; };
 		9EE9E6BD235C8F150046A590 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
@@ -386,6 +388,7 @@
 			isa = PBXGroup;
 			children = (
 				9E34B4F72371CDF900B6E600 /* AdBannerView.swift */,
+				9EDD956E2385953700420116 /* CustomAdView.swift */,
 				9EC3CF252360A81300F17332 /* BarsView.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 				9E794A61234083700064D874 /* Indicator.swift */,
@@ -474,7 +477,6 @@
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
-				9E671C5123785448002C64A0 /* UIDeviceExtension.swift */,
 				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
 			);
 			path = Utils;
@@ -499,6 +501,7 @@
 		9E794A65234099830064D874 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9EDD956C2385941200420116 /* CustomAd.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
@@ -937,11 +940,12 @@
 				9EFE2E0423425053007B7723 /* DetailsGroup.swift in Sources */,
 				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
 				9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */,
-				9E671C5223785448002C64A0 /* UIDeviceExtension.swift in Sources */,
 				9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
+				9EDD956F2385953700420116 /* CustomAdView.swift in Sources */,
 				9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
+				9EDD956D2385941200420116 /* CustomAd.swift in Sources */,
 				9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */,
 				9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */,
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
