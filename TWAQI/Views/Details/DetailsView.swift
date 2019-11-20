@@ -50,7 +50,7 @@ struct DetailsView: View {
                 Spacer().frame(height: 50)
             }
 
-            AdBanner(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
+            AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
         }
         .onAppear {
             self.getData()

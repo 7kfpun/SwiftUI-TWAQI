@@ -34,7 +34,7 @@
 		9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F1237079F400B6E600 /* TrackingManager.swift */; };
 		9E34B4F42371B23600B6E600 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E34B4F32371B23600B6E600 /* StoreKit.framework */; };
 		9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F52371B78600B6E600 /* IAPManager.swift */; };
-		9E34B4F82371CDF900B6E600 /* AdBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBanner.swift */; };
+		9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBannerView.swift */; };
 		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
 		9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
@@ -202,7 +202,7 @@
 		9E34B4F1237079F400B6E600 /* TrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingManager.swift; sourceTree = "<group>"; };
 		9E34B4F32371B23600B6E600 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		9E34B4F52371B78600B6E600 /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
-		9E34B4F72371CDF900B6E600 /* AdBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBanner.swift; sourceTree = "<group>"; };
+		9E34B4F72371CDF900B6E600 /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
@@ -385,7 +385,7 @@
 		9E1AC550233F999B00AC862D /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				9E34B4F72371CDF900B6E600 /* AdBanner.swift */,
+				9E34B4F72371CDF900B6E600 /* AdBannerView.swift */,
 				9EC3CF252360A81300F17332 /* BarsView.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
 				9E794A61234083700064D874 /* Indicator.swift */,
@@ -938,7 +938,7 @@
 				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
 				9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */,
 				9E671C5223785448002C64A0 /* UIDeviceExtension.swift in Sources */,
-				9E34B4F82371CDF900B6E600 /* AdBanner.swift in Sources */,
+				9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,

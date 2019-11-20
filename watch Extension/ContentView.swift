@@ -44,8 +44,10 @@ struct ContentView: View {
                 Spacer()
 
                 Image("status_\(airStatus)")
-                .resizable()
-                .frame(width: 50, height: 50)
+                    .resizable()
+                    .frame(width: 50, height: 50)
+
+                Spacer()
 
                 Text(airStatus.toString())
                     .font(.footnote)

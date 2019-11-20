@@ -17,7 +17,7 @@ struct MainView: View {
             GoogleMapController()
                 .edgesIgnoringSafeArea(.all)
 
-            AdBanner(adUnitID: getEnv("AdUnitIdMainFooter")!)
+            AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!)
         }
     }
 }

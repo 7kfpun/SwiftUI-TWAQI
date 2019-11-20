@@ -42,7 +42,7 @@ struct ForecastView: View {
                     Spacer().frame(height: 50)
                 }
 
-                AdBanner(adUnitID: getEnv("AdUnitIdForecastFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdForecastFooter")!)
             }
             .navigationBarTitle("Forecast.forecast")
         }

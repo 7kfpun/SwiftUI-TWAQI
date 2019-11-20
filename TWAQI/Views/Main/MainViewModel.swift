@@ -15,9 +15,6 @@ class MainViewModel: ObservableObject {
     @Published var pollutants: [Pollutant] = [] {
         willSet { self.objectWillChange.send() }
     }
-    @Published var count: Int = 0 {
-        willSet { self.objectWillChange.send() }
-    }
 
     private(set) lazy var getData: () -> Void = {
         APIManager.getAQI { result in
@@ -25,7 +22,6 @@ class MainViewModel: ObservableObject {
             case .success(let pollutants):
                 print("\(pollutants) unread messages.")
                 self.pollutants = pollutants
-                self.count = pollutants.count
                 print("Total: \(pollutants.count), first item \(pollutants[0])")
             case .failure(let error):
                 print(error.localizedDescription)

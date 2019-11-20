@@ -29,8 +29,8 @@ struct SettingsView: View {
                         ForEach(self.viewModel.stationGroups, id: \.self) {stationGroup in
                             ForEach(
                                 stationGroup.stations.filter {
-                                    $0.name.hasPrefix(self.searchText)
-                                    || $0.nameLocal.hasPrefix(self.searchText)
+                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
+                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
                                     || self.searchText.isEmpty}, id: \.self
                             ) {station in
                                 SettingsRow(station: station)
@@ -41,7 +41,7 @@ struct SettingsView: View {
                     Spacer().frame(height: 50)
                 }
 
-                AdBanner(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdSettingsFooter")!)
             }
             .navigationBarTitle("Settings.notification")
         }

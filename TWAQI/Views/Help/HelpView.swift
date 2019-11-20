@@ -99,7 +99,7 @@ struct HelpView: View {
                     Spacer().frame(height: 50)
                 }
 
-                AdBanner(adUnitID: getEnv("AdUnitIdHelpFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
             .onAppear {
                 IAPManager.shared.fetchAvailableProducts()

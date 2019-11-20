@@ -30,8 +30,8 @@ struct DetailsListView: View {
                         ForEach(stationGroups, id: \.self) {stationGroup in
                             ForEach(
                                 stationGroup.stations.filter {
-                                    $0.name.hasPrefix(self.searchText)
-                                    || $0.nameLocal.hasPrefix(self.searchText)
+                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
+                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
                                     || self.searchText.isEmpty
                                 }, id: \.self
                             ) {station in
@@ -43,7 +43,7 @@ struct DetailsListView: View {
                     Spacer().frame(height: 50)
                 }
 
-                AdBanner(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
             }
             .navigationBarTitle("DetailsList.details")
         }

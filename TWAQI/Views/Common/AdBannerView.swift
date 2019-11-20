@@ -1,5 +1,5 @@
 //
-//  AdBanner.swift
+//  AdBannerView.swift
 //  TWAQI
 //
 //  Created by kf on 5/11/19.
@@ -9,7 +9,7 @@
 import GoogleMobileAds
 import SwiftUI
 
-struct AdBanner: View {
+struct AdBannerView: View {
     @EnvironmentObject var settings: SettingsStore
 
     var adUnitID: String
@@ -25,7 +25,7 @@ struct AdBanner: View {
     }
 }
 
-struct AdBanner_Previews: PreviewProvider {
+struct AdBannerView_Previews: PreviewProvider {
     static var previews: some View {
         Separator().environmentObject(SettingsStore())
     }
