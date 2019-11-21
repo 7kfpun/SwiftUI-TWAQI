@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9E1AC537233F981700AC862D"
-               BuildableName = "TWAQI.app"
+               BuildableName = "Taiwan AQI.app"
                BlueprintName = "TWAQI"
                ReferencedContainer = "container:TWAQI.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9E1AC537233F981700AC862D"
-            BuildableName = "TWAQI.app"
+            BuildableName = "Taiwan AQI.app"
             BlueprintName = "TWAQI"
             ReferencedContainer = "container:TWAQI.xcodeproj">
          </BuildableReference>
@@ -68,7 +68,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9E1AC537233F981700AC862D"
-            BuildableName = "TWAQI.app"
+            BuildableName = "Taiwan AQI.app"
             BlueprintName = "TWAQI"
             ReferencedContainer = "container:TWAQI.xcodeproj">
          </BuildableReference>

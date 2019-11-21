@@ -26,8 +26,6 @@
 	<string>$(BugsnagApiKey)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CUSTOM AD API</key>
-	<string>$(CUSTOM_AD_API)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -42,6 +40,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CUSTOM AD API</key>
+	<string>$(CUSTOM_AD_API)</string>
 	<key>FORECAST API</key>
 	<string>$(FORECAST_API)</string>
 	<key>FeedbackUrlEn</key>

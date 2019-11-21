@@ -53,7 +53,7 @@
 		9E910C502381830400B8B316 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C4F2381830400B8B316 /* NotificationView.swift */; };
 		9E910C522381830500B8B316 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E910C512381830500B8B316 /* Assets.xcassets */; };
 		9E910C552381830500B8B316 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E910C542381830500B8B316 /* Preview Assets.xcassets */; };
-		9E910C5A2381830500B8B316 /* watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 9E910C36238182FE00B8B316 /* watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9E910C5A2381830500B8B316 /* Taiwan AQI.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 9E910C36238182FE00B8B316 /* Taiwan AQI.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9E910C63238183E600B8B316 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC541233F981900AC862D /* Assets.xcassets */; };
 		9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C652381846A00B8B316 /* SettingsStore.swift */; };
 		9E910C682381848E00B8B316 /* StationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C672381848E00B8B316 /* StationListView.swift */; };
@@ -144,7 +144,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				9E910C5A2381830500B8B316 /* watch.app in Embed Watch Content */,
+				9E910C5A2381830500B8B316 /* Taiwan AQI.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -181,7 +181,7 @@
 		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
 		9E08761E2382D75C0060476E /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
-		9E1AC538233F981700AC862D /* TWAQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TWAQI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E1AC538233F981700AC862D /* Taiwan AQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan AQI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53D233F981700AC862D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53F233F981700AC862D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -213,7 +213,7 @@
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		9E9042E92372F73200DDD4D9 /* DateExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
-		9E910C36238182FE00B8B316 /* watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = watch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E910C36238182FE00B8B316 /* Taiwan AQI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan AQI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E910C39238182FE00B8B316 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		9E910C3B2381830300B8B316 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E910C3D2381830300B8B316 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -332,9 +332,9 @@
 		9E1AC539233F981700AC862D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9E1AC538233F981700AC862D /* TWAQI.app */,
+				9E1AC538233F981700AC862D /* Taiwan AQI.app */,
 				9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */,
-				9E910C36238182FE00B8B316 /* watch.app */,
+				9E910C36238182FE00B8B316 /* Taiwan AQI.app */,
 				9E910C422381830300B8B316 /* watch Extension.appex */,
 			);
 			name = Products;
@@ -636,7 +636,7 @@
 			);
 			name = TWAQI;
 			productName = TWAQI;
-			productReference = 9E1AC538233F981700AC862D /* TWAQI.app */;
+			productReference = 9E1AC538233F981700AC862D /* Taiwan AQI.app */;
 			productType = "com.apple.product-type.application";
 		};
 		9E910C35238182FE00B8B316 /* watch */ = {
@@ -654,7 +654,7 @@
 			);
 			name = watch;
 			productName = watch;
-			productReference = 9E910C36238182FE00B8B316 /* watch.app */;
+			productReference = 9E910C36238182FE00B8B316 /* Taiwan AQI.app */;
 			productType = "com.apple.product-type.application.watchapp2";
 		};
 		9E910C412381830300B8B316 /* watch Extension */ = {
@@ -1180,7 +1180,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TWAQI/TWAQI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_ASSET_PATHS = "\"TWAQI/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
@@ -1191,7 +1191,7 @@
 				);
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kfpun.twaqi;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Taiwan AQI";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1205,7 +1205,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TWAQI/TWAQI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_ASSET_PATHS = "\"TWAQI/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
@@ -1216,7 +1216,7 @@
 				);
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kfpun.twaqi;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Taiwan AQI";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1228,13 +1228,13 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				IBSC_MODULE = watch_Extension;
 				INFOPLIST_FILE = watch/Info.plist;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kfpun.twaqi.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Taiwan AQI";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -1249,13 +1249,13 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				IBSC_MODULE = watch_Extension;
 				INFOPLIST_FILE = watch/Info.plist;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kfpun.twaqi.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Taiwan AQI";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -1269,7 +1269,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_ASSET_PATHS = "\"watch Extension/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
@@ -1295,7 +1295,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_ASSET_PATHS = "\"watch Extension/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
@@ -1322,7 +1322,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
@@ -1346,7 +1346,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.2;

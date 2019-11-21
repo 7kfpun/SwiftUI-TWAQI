@@ -43,6 +43,7 @@ class MainViewModel: ObservableObject {
 
             case .failure(let error):
                 print(error.localizedDescription)
+                self.isLoading = false
             }
         }
     }
