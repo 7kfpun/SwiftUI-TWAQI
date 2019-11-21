@@ -61,107 +61,22 @@ final class SettingsStore: ObservableObject {
     }
 
     var isForecastEnabled: Bool {
-        set {
-            defaults.set(newValue, forKey: Keys.forecastEnabled)
-            if newValue {
-                OneSignalManager.enableForecast { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            } else {
-                OneSignalManager.disableForecast { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-
-            TrackingManager.logEvent(eventName: "set_forecast_notification", parameters: ["label": newValue ? "on" : "off"])
-        }
+        set { defaults.set(newValue, forKey: Keys.forecastEnabled) }
         get { defaults.bool(forKey: Keys.forecastEnabled) }
     }
 
     var isDndEnabled: Bool {
-        set {
-            defaults.set(newValue, forKey: Keys.dndEnabled)
-            if newValue {
-                defaults.set(Date(), forKey: Keys.dndStartTime)
-                defaults.set(Date() + 2.hours, forKey: Keys.dndEndTime)
-
-                OneSignalManager.enableDnd(dndStartTime: Date(), dndEndTime: Date() + 2.hours) { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            } else {
-                OneSignalManager.disableDnd { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-
-            TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
-                "label": newValue ? "on" : "off",
-                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
-            ])
-        }
+        set { defaults.set(newValue, forKey: Keys.dndEnabled) }
         get { defaults.bool(forKey: Keys.dndEnabled) }
     }
 
     var dndStartTime: Date {
-        set {
-            defaults.set(newValue, forKey: Keys.dndStartTime)
-            OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-
-            TrackingManager.logEvent(eventName: "set_dnd_notification_start_time", parameters: [
-                "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
-            ])
-        }
+        set { defaults.set(newValue, forKey: Keys.dndStartTime) }
         get { defaults.object(forKey: Keys.dndStartTime) as! Date }
     }
 
     var dndEndTime: Date {
-        set {
-            defaults.set(newValue, forKey: Keys.dndEndTime)
-            OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-
-            TrackingManager.logEvent(eventName: "set_dnd_notification_end_time", parameters: [
-                "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
-            ])
-        }
+        set { defaults.set(newValue, forKey: Keys.dndEndTime) }
         get { defaults.object(forKey: Keys.dndEndTime) as! Date }
     }
 

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
+    @ObservedObject var viewModel: HelpViewModel
 
     @State var linkPage: LinkPages?
     @State var definitionPage: DefinitionPages?
@@ -19,22 +20,22 @@ struct HelpView: View {
             ZStack {
                 Form {
                     Section(header: Text("Help.do_not_disturb")) {
-                        Toggle(isOn: $settings.isDndEnabled.animation()) {
+                        Toggle(isOn: $viewModel.isDndEnabled.animation()) {
                             Text("Help.turn_on_do_not_disturb")
                                 .bold()
                         }
                         .padding(.vertical, 10)
 
-                        if settings.isDndEnabled {
+                        if viewModel.isDndEnabled {
                             DatePicker(
-                                selection: $settings.dndStartTime,
+                                selection: $viewModel.dndStartTime,
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("Help.start_time").fontWeight(.light) }
                             )
                             .padding(.vertical, 10)
 
                             DatePicker(
-                                selection: $settings.dndEndTime,
+                                selection: $viewModel.dndEndTime,
                                 displayedComponents: .hourAndMinute,
                                 label: { Text("Help.end_time").fontWeight(.light) }
                             )
@@ -112,6 +113,6 @@ struct HelpView: View {
 
 struct HelpView_Previews: PreviewProvider {
     static var previews: some View {
-        HelpView().environmentObject(SettingsStore())
+        HelpView(viewModel: .init()).environmentObject(SettingsStore())
     }
 }

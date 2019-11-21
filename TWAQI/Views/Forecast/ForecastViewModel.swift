@@ -11,6 +11,7 @@ import Foundation
 
 class ForecastViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
+    let settings = SettingsStore()
 
     @Published var forecastDetail: String = "" {
         willSet { self.objectWillChange.send() }
@@ -20,9 +21,39 @@ class ForecastViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
+    @Published var isForecastEnabled: Bool {
+        willSet(newValue) {
+            self.objectWillChange.send()
+
+            if newValue {
+                OneSignalManager.enableForecast { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            } else {
+                OneSignalManager.disableForecast { result in
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                    case .failure(let error):
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+            settings.isForecastEnabled = newValue
+
+            TrackingManager.logEvent(eventName: "set_forecast_notification", parameters: ["label": newValue ? "on" : "off"])
+        }
+    }
+
     init(forecastDetail: String = "", forecastAreas: [ForecastArea] = []) {
         self.forecastDetail = forecastDetail
         self.forecastAreas = forecastAreas
+        self.isForecastEnabled = settings.isForecastEnabled
     }
 
     private(set) lazy var getData: () -> Void = {

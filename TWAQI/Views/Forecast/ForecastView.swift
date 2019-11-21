@@ -10,7 +10,6 @@ import SwiftUI
 import SwiftDate
 
 struct ForecastView: View {
-    @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: ForecastViewModel
 
     @State var forecastType = 0
@@ -20,7 +19,7 @@ struct ForecastView: View {
             ZStack {
                 ScrollView {
                     VStack {
-                        Toggle(isOn: $settings.isForecastEnabled) {
+                        Toggle(isOn: $viewModel.isForecastEnabled) {
                             Text("Forecast.forecast_notification_daily")
                                 .bold()
                         }
@@ -302,6 +301,6 @@ struct ForecastView_Previews: PreviewProvider {
                     publishTime: "2019-10-15 22:00"
                 ),
             ]
-        )).environmentObject(SettingsStore())
+        ))
     }
 }

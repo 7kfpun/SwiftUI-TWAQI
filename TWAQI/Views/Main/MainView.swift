@@ -29,6 +29,7 @@ struct MainView: View {
 
     private func getData() {
         self.viewModel.getData()
+        self.viewModel.loadOneSignalSettings()
     }
 }
 

@@ -35,7 +35,7 @@ struct ContentView: View {
                     Text("Tabbar.settings")
                 }
 
-            HelpView()
+            HelpView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "questionmark.circle")
                     Text("Tabbar.help")
