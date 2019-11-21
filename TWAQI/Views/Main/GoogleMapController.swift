@@ -255,6 +255,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
             closestStationView.aqiForegroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
             closestStationView.image = UIImage(named: airStatus.getImage())
+
+            TrackingManager.logEvent(eventName: "load_closest_station", parameters: [
+                "siteId": closestPollutant.siteId,
+                "siteName": closestPollutant.siteName,
+                "county": closestPollutant.county,
+            ])
         }
     }
 
@@ -299,6 +305,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             loadContent(width: size.width, height: size.height, isLandscape: false)
         }
         callApi()
+
+        TrackingManager.logEvent(eventName: "change_device_orientation", parameters: [
+            "label": UIDevice.current.orientation.isLandscape ? "landscape" : "portrait",
+        ])
     }
 
     // MARK: GMSMapViewDelegate
