@@ -60,7 +60,9 @@ struct DetailsListView: View {
         DataManager.getDataFromFileWithSuccess { file in
             do {
                 let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
-                self.stationGroups = data["stationGroups"]!
+                if let stationGroups = data["stationGroups"] {
+                    self.stationGroups = stationGroups
+                }
             } catch {
                 print(error)
             }

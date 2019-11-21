@@ -61,10 +61,28 @@ struct DetailsView: View {
     init(station: Station) {
         self.station = station
         self.viewModel = DetailsViewModel(station: station)
+        loadStationsFromJSON()
     }
 
     private func getData() {
         self.viewModel.getData()
+    }
+
+    private mutating func loadStationsFromJSON() {
+        DataManager.getDataFromFileWithSuccess { file in
+            do {
+                let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
+                if let stationGroups = data["stationGroups"] {
+                    for stationGroup in stationGroups {
+                        for station in stationGroup.stations where station.nameLocal == self.station.name {
+                            self.station = station
+                        }
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        }
     }
 }
 

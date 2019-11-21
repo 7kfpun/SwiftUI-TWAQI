@@ -20,8 +20,9 @@ class SettingsViewModel: ObservableObject {
         DataManager.getDataFromFileWithSuccess { file in
             do {
                 let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
-                self.stationGroups = data["stationGroups"]!
-                print("self.stationGroups", self.stationGroups)
+                if let stationGroups = data["stationGroups"] {
+                    self.stationGroups = stationGroups
+                }
             } catch {
                 print(error)
             }
