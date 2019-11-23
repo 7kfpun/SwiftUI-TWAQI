@@ -69,4 +69,17 @@ enum AirIndexTypes: String, CaseIterable, Hashable {
         ]
         return units[self.rawValue] ?? ""
     }
+
+    func getFormat() -> String {
+        let units = [
+            "aqi": ".0",
+            "pm25": ".0",
+            "pm10": ".0",
+            "o3": ".0",
+            "co": ".2",
+            "so2": ".2",
+            "no2": ".2",
+        ]
+        return units[self.rawValue] ?? ""
+    }
 }

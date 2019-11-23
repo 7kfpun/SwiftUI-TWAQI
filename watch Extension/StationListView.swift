@@ -23,6 +23,7 @@ struct StationListView: View {
                         print(station.nameLocal)
                         defaults.setStruct(station, forKey: "closestStation")
                         defaults.set(station.nameLocal, forKey: "closestStationName")
+                        self.reloadComplications()
                         self.mode.wrappedValue.dismiss()
                     }) {
                         Text(Locale.isChinese ? station.nameLocal : station.name)
@@ -45,6 +46,17 @@ struct StationListView: View {
                 print(self.stationGroups)
             } catch {
                 print(error)
+            }
+        }
+    }
+
+    private func reloadComplications() {
+        if let complications: [CLKComplication] = CLKComplicationServer.sharedInstance().activeComplications {
+            if !complications.isEmpty {
+                for complication in complications {
+                    CLKComplicationServer.sharedInstance().reloadTimeline(for: complication)
+                    print("Reloading complication \(complication.description)...")
+                }
             }
         }
     }

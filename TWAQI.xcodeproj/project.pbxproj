@@ -28,6 +28,8 @@
 		9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC563233F9AC100AC862D /* DetailsListView.swift */; };
 		9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
 		9E1C9B122389576A0052E115 /* HistoryPollutantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */; };
+		9E1C9B14238974120052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
+		9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
 		9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */; };
 		9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
@@ -202,6 +204,7 @@
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutantManager.swift; sourceTree = "<group>"; };
+		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsHistoryView.swift; sourceTree = "<group>"; };
 		9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewModel.swift; sourceTree = "<group>"; };
 		9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutant.swift; sourceTree = "<group>"; };
@@ -490,6 +493,7 @@
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
+				9E1C9B13238974120052E115 /* StringExtension.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -980,6 +984,7 @@
 				9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */,
 				9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
+				9E1C9B14238974120052E115 /* StringExtension.swift in Sources */,
 				9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */,
 				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
@@ -1053,6 +1058,7 @@
 				9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */,
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
 				9E910C502381830400B8B316 /* NotificationView.swift in Sources */,
+				9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */,
 				9E910C6B238184BB00B8B316 /* LabelView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
