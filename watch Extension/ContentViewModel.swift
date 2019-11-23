@@ -27,30 +27,13 @@ class ContentViewModel: ObservableObject {
             return
         }
 
-        let api = getEnv("HISTORY API")!
-        let endpoint = "?station=\(nameLocal)&limit=1"
-
-        var urlString = (api + endpoint).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
-
-        let url = URL(string: urlString)
-
-        var request = URLRequest(url: url!)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let session = URLSession.shared
-        let task = session.dataTask(with: request, completionHandler: { data, _, error -> Void in
-            do {
-                if let data = data {
-                    let jsonResponse = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: data)
-                    self.historyPollutants = jsonResponse["data"]!
-                    print("HistoryPollutant: \(self.historyPollutants)")
-                }
-            } catch {
-                print(error)
+        HistoryPollutantManager.getHistory(nameLocal: nameLocal) { result in
+            switch result {
+            case .success(let historyPollutants):
+                self.historyPollutants = historyPollutants
+            case .failure(let error):
+                print(error.localizedDescription)
             }
-        })
-
-        task.resume()
+        }
     }
 }
