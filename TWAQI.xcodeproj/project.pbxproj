@@ -491,9 +491,9 @@
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
+				9E1C9B13238974120052E115 /* StringExtension.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
-				9E1C9B13238974120052E115 /* StringExtension.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";

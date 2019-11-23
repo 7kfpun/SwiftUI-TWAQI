@@ -75,10 +75,10 @@ enum AirIndexTypes: String, CaseIterable, Hashable {
             "aqi": ".0",
             "pm25": ".0",
             "pm10": ".0",
-            "o3": ".0",
+            "o3": ".1",
             "co": ".2",
-            "so2": ".2",
-            "no2": ".2",
+            "so2": ".1",
+            "no2": ".1",
         ]
         return units[self.rawValue] ?? ""
     }

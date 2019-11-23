@@ -12,13 +12,26 @@ struct ContentView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: ContentViewModel
 
+    @State private var showAqi = true
+
     var airIndexTypes: AirIndexTypes = AirIndexTypes.aqi
     var value: Double = 120
 
     var body: some View {
+        let lastHistoryPollutant = self.viewModel.historyPollutants.last ?? HistoryPollutant(
+            stationId: 0,
+            aqi: 0,
+            pm25: 0,
+            pm10: 0,
+            no2: 0,
+            so2: 0,
+            co: 0,
+            o3: 0,
+            publishTime: "--"
+        )
         let airStatus = AirStatuses.checkAirStatus(
             airIndexType: airIndexTypes,
-            value: self.viewModel.historyPollutants.first?.aqi ?? 0
+            value: lastHistoryPollutant.aqi
         )
 
         return VStack {
@@ -28,16 +41,34 @@ struct ContentView: View {
                         Text(Locale.isChinese ? settings.closestStation.nameLocal : settings.closestStation.name)
                 }
 
-                VStack {
-                    Text("AQI")
-                        .font(.system(size: 10))
-                        .multilineTextAlignment(.center)
+                Button(action: {
+                    self.showAqi.toggle()
+                }) {
+                    if showAqi {
+                        VStack {
+                            Text("AQI")
+                                .font(.system(size: 9))
+                                .multilineTextAlignment(.center)
 
-                    LabelView(
-                        airIndexTypes: AirIndexTypes.aqi,
-                        value: self.viewModel.historyPollutants.first?.aqi ?? 0
-                    )
+                            LabelView(
+                                airIndexTypes: AirIndexTypes.aqi,
+                                value: lastHistoryPollutant.aqi
+                            )
+                        }
+                    } else {
+                        VStack {
+                            Text("PM2.5")
+                                .font(.system(size: 9))
+                                .multilineTextAlignment(.center)
+
+                            LabelView(
+                                airIndexTypes: AirIndexTypes.pm25,
+                                value: lastHistoryPollutant.pm25
+                            )
+                        }
+                    }
                 }
+                .buttonStyle(PlainButtonStyle())
             }
 
             Button(action: getData) {
@@ -53,7 +84,7 @@ struct ContentView: View {
                     .font(.footnote)
                     .multilineTextAlignment(.center)
 
-                Text(self.viewModel.historyPollutants.first?.publishTime ?? "-")
+                Text(lastHistoryPollutant.publishTime)
                     .fontWeight(.light)
                     .font(.system(size: 10))
             }

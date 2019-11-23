@@ -34,8 +34,7 @@ final class PollutantMarker: GMSMarker {
         let color = UIColor(rgb: Int(airStatus.getColor()))
         let foregroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
 
-        let isInteger = floor(value) == value
-        let text = value.format(f: isInteger ? ".0" : ".2")
+        let text = value.format(f: airIndexTypeSelected.getFormat())
 
         let label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
         label.text = text

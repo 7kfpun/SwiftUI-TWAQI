@@ -242,8 +242,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             defaults.set(closestPollutant.siteName, forKey: "closestStationName")
 
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
-            let isInteger = floor(value) == value
-            let text = value.format(f: isInteger ? ".0" : ".2")
+            let text = value.format(f: self.airIndexTypeSelected.getFormat())
 
             closestStationView.stationName = "\(closestPollutant.siteName), \(closestPollutant.county)"
             closestStationView.status = closestPollutant.status

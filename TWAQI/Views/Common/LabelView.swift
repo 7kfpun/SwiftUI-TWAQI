@@ -13,8 +13,7 @@ struct LabelView: View {
     var value: Double
     
     var body: some View {
-        let isInteger = floor(value) == value
-        let text = value.format(f: isInteger ? ".0" : ".2")
+        let text = value.format(f: airIndexTypes.getFormat())
 
         return Text(text)
             .foregroundColor(
