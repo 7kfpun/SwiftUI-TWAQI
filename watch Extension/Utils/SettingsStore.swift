@@ -19,6 +19,7 @@ let defaultStation = Station(
 
 final class SettingsStore: ObservableObject {
     private enum Keys {
+        static let airIndexTypeSelected = "airIndexTypeSelected"
         static let closestStation = "closestStation"
         static let closestStationName = "closestStationName"
     }
@@ -32,6 +33,7 @@ final class SettingsStore: ObservableObject {
         self.defaults = defaults
 
         defaults.register(defaults: [
+            Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
             Keys.closestStationName: "松山",
         ])
 
@@ -39,6 +41,14 @@ final class SettingsStore: ObservableObject {
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
             .subscribe(objectWillChange)
+    }
+
+    var airIndexTypeSelected: AirIndexTypes {
+        set { defaults.set(newValue.rawValue, forKey: Keys.airIndexTypeSelected) }
+        get {
+            return defaults.string(forKey: Keys.airIndexTypeSelected)
+                .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
+        }
     }
 
     var closestStation: Station {

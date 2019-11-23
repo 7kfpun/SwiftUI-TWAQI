@@ -32,4 +32,23 @@ struct HistoryPollutant: Codable {
         case o3 = "O3"
         case publishTime = "publish_time"
     }
+
+    func getValue(airIndexType: AirIndexTypes) -> Double {
+        switch airIndexType {
+        case AirIndexTypes.aqi:
+            return Double(self.aqi)
+        case AirIndexTypes.pm25:
+            return Double(self.pm25)
+        case AirIndexTypes.pm10:
+            return Double(self.pm10)
+        case AirIndexTypes.no2:
+            return Double(self.no2)
+        case AirIndexTypes.so2:
+            return Double(self.so2)
+        case AirIndexTypes.co:
+            return Double(self.co)
+        case AirIndexTypes.o3:
+            return Double(self.o3)
+        }
+    }
 }

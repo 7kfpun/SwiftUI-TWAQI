@@ -12,10 +12,7 @@ struct ContentView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: ContentViewModel
 
-    @State private var showAqi = true
-
     var airIndexTypes: AirIndexTypes = AirIndexTypes.aqi
-    var value: Double = 120
 
     var body: some View {
         let lastHistoryPollutant = self.viewModel.historyPollutants.last ?? HistoryPollutant(
@@ -29,9 +26,11 @@ struct ContentView: View {
             o3: 0,
             publishTime: "--"
         )
+
+        let airIndexTypeSelected = self.settings.airIndexTypeSelected
         let airStatus = AirStatuses.checkAirStatus(
-            airIndexType: airIndexTypes,
-            value: lastHistoryPollutant.aqi
+            airIndexType: airIndexTypeSelected,
+            value: lastHistoryPollutant.getValue(airIndexType: airIndexTypeSelected)
         )
 
         return VStack {
@@ -42,30 +41,21 @@ struct ContentView: View {
                 }
 
                 Button(action: {
-                    self.showAqi.toggle()
-                }) {
-                    if showAqi {
-                        VStack {
-                            Text("AQI")
-                                .font(.system(size: 9))
-                                .multilineTextAlignment(.center)
-
-                            LabelView(
-                                airIndexTypes: AirIndexTypes.aqi,
-                                value: lastHistoryPollutant.aqi
-                            )
-                        }
+                    if airIndexTypeSelected == AirIndexTypes.aqi {
+                        self.settings.airIndexTypeSelected = AirIndexTypes.pm25
                     } else {
-                        VStack {
-                            Text("PM2.5")
-                                .font(.system(size: 9))
-                                .multilineTextAlignment(.center)
+                        self.settings.airIndexTypeSelected = AirIndexTypes.aqi
+                    }
+                }) {
+                    VStack {
+                        Text(airIndexTypeSelected.toString())
+                            .font(.system(size: 9))
+                            .multilineTextAlignment(.center)
 
-                            LabelView(
-                                airIndexTypes: AirIndexTypes.pm25,
-                                value: lastHistoryPollutant.pm25
-                            )
-                        }
+                        LabelView(
+                            airIndexTypes: airIndexTypeSelected,
+                            value: lastHistoryPollutant.getValue(airIndexType: airIndexTypeSelected)
+                        )
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -74,7 +64,7 @@ struct ContentView: View {
             Button(action: getData) {
                 Spacer()
 
-                Image("status_\(airStatus)")
+                Image(airStatus.getImage())
                     .resizable()
                     .frame(width: 50, height: 50)
 
@@ -100,6 +90,8 @@ struct ContentView: View {
     private func getData() {
         self.viewModel.station = settings.closestStation
         self.viewModel.getData()
+
+        ComplicationManager.reloadComplications()
     }
 }
 

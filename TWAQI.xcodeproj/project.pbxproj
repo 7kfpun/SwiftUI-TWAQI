@@ -30,6 +30,7 @@
 		9E1C9B122389576A0052E115 /* HistoryPollutantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */; };
 		9E1C9B14238974120052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
 		9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
+		9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B16238997E30052E115 /* ComplicationManager.swift */; };
 		9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */; };
 		9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
@@ -205,6 +206,7 @@
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutantManager.swift; sourceTree = "<group>"; };
 		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		9E1C9B16238997E30052E115 /* ComplicationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationManager.swift; sourceTree = "<group>"; };
 		9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsHistoryView.swift; sourceTree = "<group>"; };
 		9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewModel.swift; sourceTree = "<group>"; };
 		9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutant.swift; sourceTree = "<group>"; };
@@ -545,8 +547,8 @@
 				9E910C472381830300B8B316 /* ContentView.swift */,
 				9E08761E2382D75C0060476E /* ContentViewModel.swift */,
 				9E96B52A23892C7B00EEA5B9 /* ComplicationController.swift */,
-				9E910C492381830400B8B316 /* HostingController.swift */,
 				9E910C4B2381830400B8B316 /* ExtensionDelegate.swift */,
+				9E910C492381830400B8B316 /* HostingController.swift */,
 				9E910C672381848E00B8B316 /* StationListView.swift */,
 				9E910C4D2381830400B8B316 /* NotificationController.swift */,
 				9E910C4F2381830400B8B316 /* NotificationView.swift */,
@@ -569,8 +571,9 @@
 		9E910C642381841C00B8B316 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				9E910C652381846A00B8B316 /* SettingsStore.swift */,
+				9E1C9B16238997E30052E115 /* ComplicationManager.swift */,
 				9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */,
+				9E910C652381846A00B8B316 /* SettingsStore.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1054,6 +1057,7 @@
 				9E910C6A238184B300B8B316 /* Stations.swift in Sources */,
 				9E910C682381848E00B8B316 /* StationListView.swift in Sources */,
 				9E1C9B122389576A0052E115 /* HistoryPollutantManager.swift in Sources */,
+				9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */,
 				9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */,
 				9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */,
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
