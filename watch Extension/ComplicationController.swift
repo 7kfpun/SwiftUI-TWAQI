@@ -20,10 +20,22 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         handler([.forward, .backward])
     }
 
+    func requestedUpdateDidBegin() {
+        print("requestedUpdateDidBegin")
+        let server = CLKComplicationServer.sharedInstance()
+        guard let complications = server.activeComplications,
+            !complications.isEmpty else {
+                return
+        }
+
+        for complication in complications {
+            server.reloadTimeline(for: complication)
+        }
+    }
+
     func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {
         // Update hourly
-        // https://stackoverflow.com/questions/37819483/watchos-show-realtime-departure-data-on-complication
-        handler(NSDate(timeIntervalSinceNow: 0.01))
+        handler(NSDate(timeIntervalSinceNow: 60 * 60))
     }
 
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
@@ -204,19 +216,6 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             return template
         default:
             return nil
-        }
-    }
-
-    func reloadData() {
-        print("reloadData")
-        let server = CLKComplicationServer.sharedInstance()
-        guard let complications = server.activeComplications,
-            !complications.isEmpty else {
-                return
-        }
-
-        for complication in complications {
-            server.reloadTimeline(for: complication)
         }
     }
 }
