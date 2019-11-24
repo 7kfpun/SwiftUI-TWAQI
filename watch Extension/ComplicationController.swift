@@ -12,41 +12,12 @@ import WatchKit
 
 class ComplicationController: NSObject, CLKComplicationDataSource {
 
-    let defaults = UserDefaults.standard
+    let settingsStore = SettingsStore()
 
     // MARK: - Timeline Configuration
     
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
         handler([.forward, .backward])
-    }
-
-    func requestedUpdateDidBegin() {
-        print("requestedUpdateDidBegin")
-        let server = CLKComplicationServer.sharedInstance()
-        guard let complications = server.activeComplications,
-            !complications.isEmpty else {
-                return
-        }
-
-        for complication in complications {
-            server.reloadTimeline(for: complication)
-        }
-    }
-
-    func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {
-        // Update hourly
-        handler(NSDate(timeIntervalSinceNow: 60 * 60))
-    }
-
-    func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        let currentDate = Date()
-        handler(currentDate)
-    }
-    
-    func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        let currentDate = Date()
-        let endDate = currentDate.addingTimeInterval(1)
-        handler(endDate)
     }
     
     func getPrivacyBehavior(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationPrivacyBehavior) -> Void) {
@@ -55,14 +26,19 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimelineEntry?) -> Void) {
         // Call the handler with the current timeline entry
-        let station = defaults.structData(Station.self, forKey: "closestStation")
-            ?? Station(name: "Matsu", nameLocal: "馬祖", lon: 119.949875, lat: 26.160469)
+        let station = settingsStore.closestStation
+        let airIndexTypeSelected = settingsStore.airIndexTypeSelected
 
         HistoryPollutantManager.getHistory(nameLocal: station.nameLocal) { result in
             switch result {
             case .success(let historyPollutants):
                 if let lastHistoryPollutant = historyPollutants.last,
-                    let template = self.getDummyTemplate(for: complication, station: station, historyPollutant: lastHistoryPollutant) {
+                    let template = self.getDummyTemplate(
+                        for: complication,
+                        station: station,
+                        historyPollutant: lastHistoryPollutant,
+                        airIndexTypeSelected: airIndexTypeSelected
+                    ) {
                     let entry = CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template)
                     handler(entry)
                 } else {
@@ -89,8 +65,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         // This method will be called once per supported complication, and the results will be cached
-        let station = defaults.structData(Station.self, forKey: "closestStation") ??
-            Station(name: "-", nameLocal: "-", lon: 119.949875, lat: 26.160469)
+        let station = settingsStore.closestStation
 
         let historyPollutant = HistoryPollutant(
             stationId: 0,
@@ -104,33 +79,51 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             publishTime: "--"
         )
 
-        if let template = getDummyTemplate(for: complication, station: station, historyPollutant: historyPollutant) {
+        if let template = getDummyTemplate(
+            for: complication, station: station, historyPollutant: historyPollutant, airIndexTypeSelected: AirIndexTypes.aqi
+        ) {
             handler(template)
         } else {
             handler(nil)
         }
     }
 
-    private func getDummyTemplate(for complication: CLKComplication, station: Station, historyPollutant: HistoryPollutant) -> CLKComplicationTemplate? {
+    private func getDummyTemplate(for complication: CLKComplication, station: Station, historyPollutant: HistoryPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
         let template: CLKComplicationTemplate
 
-        let airStatus = AirStatuses.checkAirStatus(
-            airIndexType: AirIndexTypes.aqi,
-            value: historyPollutant.aqi
-        )
-        let airStatusText = "AirStatus.\(airStatus.rawValue)".localized
-        let color = UIColor(rgb: Int(airStatus.getColor()))
         let stationName = Locale.isChinese ? station.nameLocal : station.name
         let aqiDisplayValue = historyPollutant.aqi.format(f: AirIndexTypes.aqi.getFormat())
-        let pm25DisplayValue = historyPollutant.aqi.format(f: AirIndexTypes.pm25.getFormat())
-        let aqiAndPm25 = "AQI \(aqiDisplayValue), PM2.5 \(pm25DisplayValue)"
+        let pm25DisplayValue = historyPollutant.pm25.format(f: AirIndexTypes.pm25.getFormat())
+        let aqiAndPm25 = "\(AirIndexTypes.aqi.toString()) \(aqiDisplayValue), \(AirIndexTypes.pm25.toString()) \(pm25DisplayValue)"
+
+        var airStatus: AirStatuses
+        var displayValue: String
+        var displayFraction: Float
+        if airIndexTypeSelected == AirIndexTypes.aqi {
+            airStatus = AirStatuses.checkAirStatus(
+                airIndexType: AirIndexTypes.aqi,
+                value: historyPollutant.aqi
+            )
+            displayValue = aqiDisplayValue
+            displayFraction = Float(historyPollutant.aqi / 500)
+        } else {
+            airStatus = AirStatuses.checkAirStatus(
+                airIndexType: AirIndexTypes.pm25,
+                value: historyPollutant.pm25
+            )
+            displayValue = pm25DisplayValue
+            displayFraction = Float(historyPollutant.pm25 / 500)
+        }
+
+        let airStatusText = "AirStatus.\(airStatus.rawValue)".localized
+        let color = UIColor(rgb: Int(airStatus.getColor()))
 
         switch complication.family {
         case .modularSmall:
             print("complication.family.modularSmall")
             let modularSmallTemplate = CLKComplicationTemplateModularSmallStackText()
-            modularSmallTemplate.line1TextProvider = CLKSimpleTextProvider(text: "AQI")
-            modularSmallTemplate.line2TextProvider = CLKSimpleTextProvider(text: aqiDisplayValue)
+            modularSmallTemplate.line1TextProvider = CLKSimpleTextProvider(text: airIndexTypeSelected.toString())
+            modularSmallTemplate.line2TextProvider = CLKSimpleTextProvider(text: displayValue)
             template = modularSmallTemplate
             template.tintColor = color
             return template
@@ -146,7 +139,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         case .utilitarianSmall, .utilitarianSmallFlat:
             print("complication.family.utilitarianSmall, .utilitarianSmallFlat")
             let utilitarianSmallTemplate = CLKComplicationTemplateUtilitarianSmallFlat()
-            utilitarianSmallTemplate.textProvider = CLKSimpleTextProvider(text: "AQI \(aqiDisplayValue)")
+            utilitarianSmallTemplate.textProvider = CLKSimpleTextProvider(text: "\(airIndexTypeSelected.toString()) \(displayValue)")
             template = utilitarianSmallTemplate
             template.tintColor = color
             return template
@@ -160,8 +153,8 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         case .circularSmall:
             print("complication.family.circularSmall")
             let circularSmallTemplate = CLKComplicationTemplateCircularSmallStackText()
-            circularSmallTemplate.line1TextProvider = CLKSimpleTextProvider(text: "AQI")
-            circularSmallTemplate.line2TextProvider = CLKSimpleTextProvider(text: aqiDisplayValue)
+            circularSmallTemplate.line1TextProvider = CLKSimpleTextProvider(text: airIndexTypeSelected.toString())
+            circularSmallTemplate.line2TextProvider = CLKSimpleTextProvider(text: displayValue)
             template = circularSmallTemplate
             template.tintColor = color
             return template
@@ -183,11 +176,11 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             return template
         case .graphicBezel:
             print("complication.family.graphicBezel")
-            let gaugeProvider = CLKSimpleGaugeProvider(style: .ring, gaugeColor: color, fillFraction: Float(historyPollutant.aqi / 500))
+            let gaugeProvider = CLKSimpleGaugeProvider(style: .ring, gaugeColor: color, fillFraction: displayFraction)
 
             let graphicCircularTemplate = CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText()
-            graphicCircularTemplate.bottomTextProvider = CLKSimpleTextProvider(text: "AQI")
-            graphicCircularTemplate.centerTextProvider = CLKSimpleTextProvider(text: aqiDisplayValue)
+            graphicCircularTemplate.bottomTextProvider = CLKSimpleTextProvider(text: airIndexTypeSelected.toString())
+            graphicCircularTemplate.centerTextProvider = CLKSimpleTextProvider(text: displayValue)
             graphicCircularTemplate.gaugeProvider = gaugeProvider
 
             let graphicBezelTemplate = CLKComplicationTemplateGraphicBezelCircularText()
@@ -197,10 +190,10 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             return template
         case .graphicCircular:
             print("complication.family.graphicCircular")
-            let gaugeProvider = CLKSimpleGaugeProvider(style: .ring, gaugeColor: color, fillFraction: Float(historyPollutant.aqi / 500))
+            let gaugeProvider = CLKSimpleGaugeProvider(style: .ring, gaugeColor: color, fillFraction: displayFraction)
 
             let template = CLKComplicationTemplateGraphicCircularClosedGaugeText()
-            template.centerTextProvider = CLKSimpleTextProvider(text: aqiDisplayValue)
+            template.centerTextProvider = CLKSimpleTextProvider(text: displayValue)
             template.gaugeProvider = gaugeProvider
             return template
 

@@ -11,17 +11,17 @@ import SwiftUI
 struct StationListView: View {
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
 
+    let defaults = UserDefaults.standard
+
     var stationGroups: StationGroups
 
     var body: some View {
-        let defaults = UserDefaults.standard
-
-        return List {
+        List {
             ForEach(stationGroups, id: \.self) {stationGroup in
                 ForEach(stationGroup.stations, id: \.self) {station in
                     Button(action: {
                         print(station.nameLocal)
-                        defaults.setStruct(station, forKey: "closestStation")
+                        self.defaults.setStruct(station, forKey: "closestStation")
                         ComplicationManager.reloadComplications()
                         self.mode.wrappedValue.dismiss()
                     }) {

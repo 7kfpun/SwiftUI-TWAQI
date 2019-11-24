@@ -46,6 +46,8 @@ struct ContentView: View {
                     } else {
                         self.settings.airIndexTypeSelected = AirIndexTypes.aqi
                     }
+
+                    ComplicationManager.reloadComplications()
                 }) {
                     VStack {
                         Text(airIndexTypeSelected.toString())
