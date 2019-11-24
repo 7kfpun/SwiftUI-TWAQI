@@ -17,6 +17,10 @@ class ContentViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
+    @Published var isLoading: Bool = false {
+        willSet { self.objectWillChange.send() }
+    }
+
     init(station: Station, historyPollutants: [HistoryPollutant] = []) {
         self.station = station
         self.historyPollutants = historyPollutants
@@ -27,6 +31,7 @@ class ContentViewModel: ObservableObject {
             return
         }
 
+        self.isLoading = true
         HistoryPollutantManager.getHistory(nameLocal: nameLocal) { result in
             switch result {
             case .success(let historyPollutants):
@@ -34,6 +39,7 @@ class ContentViewModel: ObservableObject {
             case .failure(let error):
                 print(error.localizedDescription)
             }
+            self.isLoading = false
         }
     }
 }

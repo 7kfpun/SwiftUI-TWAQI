@@ -38,4 +38,5 @@ target 'watch Extension' do
   platform :watchos, '6.0'
 
   pod 'Alamofire', '~> 5.0.0-rc.3'
+  pod 'SwiftDate', '~> 6.1'
 end

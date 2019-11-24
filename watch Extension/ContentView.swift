@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import SwiftDate
 import SwiftUI
 
 struct ContentView: View {
@@ -32,6 +33,7 @@ struct ContentView: View {
             airIndexType: airIndexTypeSelected,
             value: lastHistoryPollutant.getValue(airIndexType: airIndexTypeSelected)
         )
+        let publishTime = lastHistoryPollutant.publishTime.toDate()?.toFormat("HH:mm") ?? ""
 
         return VStack {
             HStack {
@@ -72,13 +74,18 @@ struct ContentView: View {
 
                 Spacer()
 
-                Text(airStatus.toString())
-                    .font(.footnote)
-                    .multilineTextAlignment(.center)
+                if self.viewModel.isLoading {
+                    Image(systemName: "arrow.2.circlepath")
+                    Spacer()
+                } else {
+                    Text(airStatus.toString())
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
 
-                Text(lastHistoryPollutant.publishTime)
-                    .fontWeight(.light)
-                    .font(.system(size: 10))
+                    Text(publishTime)
+                        .fontWeight(.light)
+                        .font(.system(size: 12))
+                }
             }
             .buttonStyle(PlainButtonStyle())
         }
