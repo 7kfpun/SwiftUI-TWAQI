@@ -10,6 +10,28 @@ import WatchKit
 
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
+    var scheduledBackgroundTask = false
+
+    static func scheduleComplicationUpdate() {
+        let currentDate = Date()
+        let scheduleDate = currentDate + TimeInterval(30 * 60)
+        print("Scheduling background refresh task at \(currentDate) for: \(scheduleDate)")
+        WKExtension.shared().scheduleBackgroundRefresh(withPreferredDate: scheduleDate, userInfo: nil) { (error) in
+            if let err = error {
+                print("Failed to schedule background refresh: \(err)")
+            }
+        }
+    }
+
+    static func reloadComplications() {
+        let complicationServer = CLKComplicationServer.sharedInstance()
+        guard let complications = complicationServer.activeComplications else { return }
+        for complication in complications {
+            print("UPDATE COMPLICATION")
+            complicationServer.reloadTimeline(for: complication)
+        }
+    }
+
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
     }
@@ -30,6 +52,11 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
             switch task {
             case let backgroundTask as WKApplicationRefreshBackgroundTask:
                 // Be sure to complete the background task once you’re done.
+                ExtensionDelegate.reloadComplications()
+
+                ExtensionDelegate.scheduleComplicationUpdate()
+                scheduledBackgroundTask = true
+
                 backgroundTask.setTaskCompletedWithSnapshot(false)
             case let snapshotTask as WKSnapshotRefreshBackgroundTask:
                 // Snapshot tasks have a unique completion call, make sure to set your expiration date
