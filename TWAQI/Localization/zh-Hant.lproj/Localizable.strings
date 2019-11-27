@@ -44,6 +44,7 @@
 "Help.feedback_or_contact_us" = "反饋 / 聯絡我們";
 "Help.interested_to_be_our_beta_tester" = "有興趣成為我們的 Beta 測試員？";
 "Help.definition" = "幫助";
+"Help.data_provided_by_government" = "台灣空污即時預報所有數據皆由「行政院環境保護署－空氣品質監測網」(Open Data) 提供。";
 
 "AirIndex.meaning_aqi" = "空氣品質指數";
 "AirIndex.meaning_pm25" = "細懸浮微粒";

@@ -97,8 +97,13 @@ struct HelpView: View {
                         SafariView(url: definitionPage.url)
                     })
 
-                    Spacer().frame(height: 50)
+                    Section {
+                        Text("Help.data_provided_by_government")
+                            .fontWeight(.light)
+                            .padding(.vertical, 10)
+                    }
                 }
+                .padding(.bottom, 50)
 
                 AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
