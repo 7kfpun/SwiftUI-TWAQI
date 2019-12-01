@@ -32,7 +32,7 @@ class ContentViewModel: ObservableObject {
         }
 
         self.isLoading = true
-        HistoryPollutantManager.getHistory(nameLocal: nameLocal) { result in
+        APIManager.getHistory(nameLocal: nameLocal, limit: 1) { result in
             switch result {
             case .success(let historyPollutants):
                 self.historyPollutants = historyPollutants

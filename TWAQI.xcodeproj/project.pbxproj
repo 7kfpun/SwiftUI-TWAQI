@@ -27,7 +27,6 @@
 		9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC560233F9A8500AC862D /* DetailsView.swift */; };
 		9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC563233F9AC100AC862D /* DetailsListView.swift */; };
 		9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
-		9E1C9B122389576A0052E115 /* HistoryPollutantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */; };
 		9E1C9B14238974120052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
 		9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
 		9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B16238997E30052E115 /* ComplicationManager.swift */; };
@@ -115,6 +114,13 @@
 		9EF3D34423939281009CED32 /* Countries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34323939281009CED32 /* Countries.swift */; };
 		9EF3D34623939798009CED32 /* NewStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34523939798009CED32 /* NewStations.swift */; };
 		9EF3D3482393B318009CED32 /* APIResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3472393B318009CED32 /* APIResponses.swift */; };
+		9EF3D3492393B5C8009CED32 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
+		9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3472393B318009CED32 /* APIResponses.swift */; };
+		9EF3D34B2393B631009CED32 /* Countries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34323939281009CED32 /* Countries.swift */; };
+		9EF3D34C2393B636009CED32 /* NewStations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34523939798009CED32 /* NewStations.swift */; };
+		9EF3D34D2393B649009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
+		9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956C2385941200420116 /* CustomAd.swift */; };
+		9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
 		9EF7A32A2386FC8700FF410C /* HelpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7A3292386FC8700FF410C /* HelpViewModel.swift */; };
 		9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */; };
 		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
@@ -207,7 +213,6 @@
 		9E1AC560233F9A8500AC862D /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
-		9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutantManager.swift; sourceTree = "<group>"; };
 		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		9E1C9B16238997E30052E115 /* ComplicationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationManager.swift; sourceTree = "<group>"; };
 		9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsHistoryView.swift; sourceTree = "<group>"; };
@@ -581,7 +586,6 @@
 			isa = PBXGroup;
 			children = (
 				9E1C9B16238997E30052E115 /* ComplicationManager.swift */,
-				9E1C9B112389576A0052E115 /* HistoryPollutantManager.swift */,
 				9E910C652381846A00B8B316 /* SettingsStore.swift */,
 			);
 			path = Utils;
@@ -1056,24 +1060,30 @@
 				9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */,
 				9E910C6D238184D900B8B316 /* AirStatusTypes.swift in Sources */,
 				9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */,
+				9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */,
 				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,
 				9E910C69238184AC00B8B316 /* StationGroups.swift in Sources */,
 				9E910C4A2381830400B8B316 /* HostingController.swift in Sources */,
+				9EF3D34C2393B636009CED32 /* NewStations.swift in Sources */,
 				9E910C6F2381850B00B8B316 /* DataManager.swift in Sources */,
 				9E910C482381830300B8B316 /* ContentView.swift in Sources */,
 				9E910C4E2381830400B8B316 /* NotificationController.swift in Sources */,
 				9E910C6E238184FA00B8B316 /* NumberExtensions.swift in Sources */,
 				9E96B52B23892C7B00EEA5B9 /* ComplicationController.swift in Sources */,
+				9EF3D34D2393B649009CED32 /* Pollutants.swift in Sources */,
 				9E910C4C2381830400B8B316 /* ExtensionDelegate.swift in Sources */,
 				9E910C6C238184D600B8B316 /* AirIndexTypes.swift in Sources */,
 				9E910C6A238184B300B8B316 /* Stations.swift in Sources */,
+				9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */,
 				9E910C682381848E00B8B316 /* StationListView.swift in Sources */,
-				9E1C9B122389576A0052E115 /* HistoryPollutantManager.swift in Sources */,
 				9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */,
 				9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */,
 				9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */,
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
+				9EF3D34B2393B631009CED32 /* Countries.swift in Sources */,
 				9E910C502381830400B8B316 /* NotificationView.swift in Sources */,
+				9EF3D3492393B5C8009CED32 /* APIManager.swift in Sources */,
+				9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */,
 				9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */,
 				9E910C6B238184BB00B8B316 /* LabelView.swift in Sources */,
 			);

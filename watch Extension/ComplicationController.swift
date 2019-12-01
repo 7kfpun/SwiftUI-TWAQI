@@ -29,7 +29,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         let station = settingsStore.closestStation
         let airIndexTypeSelected = settingsStore.airIndexTypeSelected
 
-        HistoryPollutantManager.getHistory(nameLocal: station.nameLocal) { result in
+        APIManager.getHistory(nameLocal: station.nameLocal, limit: 1) { result in
             switch result {
             case .success(let historyPollutants):
                 if let lastHistoryPollutant = historyPollutants.last,

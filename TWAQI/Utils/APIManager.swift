@@ -117,7 +117,7 @@ struct APIManager {
             }
     }
 
-    static func getHistory(nameLocal: String, completionHandler: @escaping (Result<HistoryPollutants, NetworkError>) -> Void) {
+    static func getHistory(nameLocal: String, limit: Int = 24, completionHandler: @escaping (Result<HistoryPollutants, NetworkError>) -> Void) {
         guard let url = URL(string: getEnv("HISTORY API")!) else {
             completionHandler(.failure(.badURL))
             return
@@ -125,6 +125,7 @@ struct APIManager {
 
         let parameters: Parameters = [
             "station": nameLocal,
+            "limit": limit,
         ]
 
         AF.request(url, parameters: parameters)
