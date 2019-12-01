@@ -30,6 +30,9 @@ PODS:
   - Firebase/InAppMessagingDisplay (6.13.0):
     - Firebase/CoreOnly
     - FirebaseInAppMessagingDisplay (~> 0.15.5)
+  - Firebase/Messaging (6.13.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 4.1.9)
   - FirebaseAnalytics (6.1.6):
     - FirebaseCore (~> 6.4)
     - FirebaseInstanceID (~> 4.2)
@@ -64,6 +67,15 @@ PODS:
     - FirebaseCore (~> 6.0)
     - GoogleUtilities/Environment (~> 6.0)
     - GoogleUtilities/UserDefaults (~> 6.0)
+  - FirebaseMessaging (4.1.9):
+    - FirebaseAnalyticsInterop (~> 1.3)
+    - FirebaseCore (~> 6.2)
+    - FirebaseInstanceID (~> 4.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.2)
+    - GoogleUtilities/Environment (~> 6.2)
+    - GoogleUtilities/Reachability (~> 6.2)
+    - GoogleUtilities/UserDefaults (~> 6.2)
+    - Protobuf (>= 3.9.2, ~> 3.9)
   - Google-Mobile-Ads-SDK (7.52.0):
     - GoogleAppMeasurement (~> 6.0)
   - GoogleAppMeasurement (6.1.6):
@@ -105,6 +117,7 @@ PODS:
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
   - OneSignal (2.12.0)
+  - Protobuf (3.11.0)
   - SDWebImage (5.3.2):
     - SDWebImage/Core (= 5.3.2)
   - SDWebImage/Core (5.3.2)
@@ -128,6 +141,7 @@ DEPENDENCIES:
   - Firebase/AdMob
   - Firebase/Analytics
   - Firebase/InAppMessagingDisplay
+  - Firebase/Messaging
   - GoogleMaps (~> 3.6)
   - OneSignal (< 3.0, >= 2.12)
   - SDWebImageSwiftUI (~> 0.8)
@@ -152,6 +166,7 @@ SPEC REPOS:
     - FirebaseInAppMessaging
     - FirebaseInAppMessagingDisplay
     - FirebaseInstanceID
+    - FirebaseMessaging
     - Google-Mobile-Ads-SDK
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -160,6 +175,7 @@ SPEC REPOS:
     - GoogleUtilities
     - nanopb
     - OneSignal
+    - Protobuf
     - SDWebImage
     - SDWebImageSwiftUI
     - SnapKit
@@ -191,6 +207,7 @@ SPEC CHECKSUMS:
   FirebaseInAppMessaging: acbfa8c5582b11ccc0366511d29ef1d288f302fc
   FirebaseInAppMessagingDisplay: 60a65c8277f17675a8a5b92e9a97cd914b45d4ff
   FirebaseInstanceID: ebd2ea79ee38db0cb5f5167b17a0d387e1cc7b6e
+  FirebaseMessaging: e8d71368a5c579083da02203146c953f3386d503
   Google-Mobile-Ads-SDK: 62f6244637306cb60a1b4adda067f53224c7a860
   GoogleAppMeasurement: dfe55efa543e899d906309eaaac6ca26d249862f
   GoogleDataTransport: 8e9b210c97d55fbff306cc5468ff91b9cb32dcf5
@@ -199,12 +216,13 @@ SPEC CHECKSUMS:
   GoogleUtilities: 547a86735c6f0ee30ad17e94df4fc21f616b71cb
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   OneSignal: 910a12186a2d9d8f7412b1d03304b53091f2c421
+  Protobuf: 394b2bf29ec303f4325e3ee4892c09e675647152
   SDWebImage: 6ac2eb96571bff96ecde31a987172c5934a0eb7d
   SDWebImageSwiftUI: eb7eb4f8ce27a4ec735ccbab0eb9a0741378c3cb
   Sentry: bba998b0fb157fdd6596aa73290a9d67ae47be79
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
 
-PODFILE CHECKSUM: dfe921636e3fdebad56c33cc3729f9240a67b264
+PODFILE CHECKSUM: dd8bb9fb225c824e7868134d4882d5747a78997f
 
 COCOAPODS: 1.8.3

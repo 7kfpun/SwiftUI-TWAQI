@@ -16,6 +16,7 @@ target 'TWAQI' do
   pod 'Firebase/AdMob'
   pod 'Firebase/Analytics'
   pod 'Firebase/InAppMessagingDisplay'
+  pod 'Firebase/Messaging'
   pod 'Fabric', '~> 1.10.2'
   pod 'Crashlytics', '~> 3.14.0'
 
