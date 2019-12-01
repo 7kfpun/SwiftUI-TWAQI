@@ -86,8 +86,8 @@ struct Pollutant: Codable {
         return Station(
             name: self.siteName,
             nameLocal: self.siteName,
-            lon: Double(self.longitude) ?? 0,
-            lat: Double(self.latitude) ?? 0
+            lat: Double(self.latitude) ?? 0,
+            lon: Double(self.longitude) ?? 0
         )
     }
 }

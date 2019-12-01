@@ -111,8 +111,8 @@ struct ContentView_Previews: PreviewProvider {
                     station: Station(
                         name: "Matsu",
                         nameLocal: "馬祖",
-                        lon: 119.949875,
-                        lat: 26.160469
+                        lat: 26.160469,
+                        lon: 119.949875
                     )
                 )
                 .previewDevice("Apple Watch Series 4 - 44mm")
@@ -122,8 +122,8 @@ struct ContentView_Previews: PreviewProvider {
                     station: Station(
                         name: "Matsu",
                         nameLocal: "馬祖",
-                        lon: 119.949875,
-                        lat: 26.160469
+                        lat: 26.160469,
+                        lon: 119.949875
                     )
                 )
                 .previewDevice("Apple Watch Series 2 - 38mm")

@@ -12,8 +12,8 @@ import SwiftUI
 let defaultStation = Station(
     name: "Matsu",
     nameLocal: "馬祖",
-    lon: 119.949875,
     lat: 26.160469,
+    lon: 119.949875,
     imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
 )
 

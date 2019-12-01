@@ -14,15 +14,15 @@ struct Station: Hashable, Codable, Identifiable {
     let id = UUID()
     let name: String
     let nameLocal: String
-    let lon: Double
     let lat: Double
+    let lon: Double
     var imageUrl: String?
 
     private enum CodingKeys: String, CodingKey {
         case name = "name"
         case nameLocal = "name_local"
-        case lon = "lon"
         case lat = "lat"
+        case lon = "lon"
         case imageUrl = "image_url"
     }
 }

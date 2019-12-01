@@ -32,8 +32,8 @@ struct DetailsRow: View {
 struct DetailsRow_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            DetailsRow(station: Station(name: "Yangming", nameLocal: "陽明", lon: 121.529583, lat: 25.182722))
-            DetailsRow(station: Station(name: "Songshan", nameLocal: "松山", lon: 121.578611, lat: 25.050000))
+            DetailsRow(station: Station(name: "Yangming", nameLocal: "陽明", lat: 25.182722, lon: 121.529583))
+            DetailsRow(station: Station(name: "Songshan", nameLocal: "松山", lat: 25.050000, lon: 121.578611))
         }
         .previewLayout(.fixed(width: 300, height: 100))
     }

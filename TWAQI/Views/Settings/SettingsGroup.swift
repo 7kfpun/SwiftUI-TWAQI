@@ -59,7 +59,7 @@ struct SettingsGroup_Previews: PreviewProvider {
                     name: "Lianjiang County",
                     nameLocal: "連江縣",
                     stations: [
-                        Station(name: "Lianjiang", nameLocal: "馬祖", lon: 119.949875, lat: 26.160469),
+                        Station(name: "Lianjiang", nameLocal: "馬祖", lat: 26.160469, lon: 119.949875),
                     ]
                 )
             )
@@ -68,8 +68,8 @@ struct SettingsGroup_Previews: PreviewProvider {
                     name: "Taipei City",
                     nameLocal: "臺北市",
                     stations: [
-                        Station(name: "Yangming", nameLocal: "陽明", lon: 121.529583, lat: 25.182722),
-                        Station(name: "Songshan", nameLocal: "松山", lon: 121.578611, lat: 25.050000),
+                        Station(name: "Yangming", nameLocal: "陽明", lat: 25.182722, lon: 121.529583),
+                        Station(name: "Songshan", nameLocal: "松山", lat: 25.050000, lon: 121.578611),
                     ]
                 )
             )
