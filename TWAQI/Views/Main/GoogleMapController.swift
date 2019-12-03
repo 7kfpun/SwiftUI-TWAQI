@@ -177,8 +177,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             if !keyExists {
                 callGetCurrentPollutantsApi(countryCode: closestCountry.code)
             }
-
-//            defaults.set(closestCountry.name, forKey: "closestCountryName")
         }
     }
 
@@ -398,14 +396,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             let mmarker = marker as! WindDirectionMarker
             print("Marker tapped", marker, mmarker.pollutant.stationId)
             detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
+            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+                "name": mmarker.pollutant.name,
+                "nameLocal": mmarker.pollutant.nameLocal,
+                "stationId": mmarker.pollutant.stationId,
+            ])
         } else {
             let mmarker = marker as! PollutantMarker
             print("Marker tapped", marker, mmarker.pollutant.stationId)
             detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
-//            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
-//                // "name": mmarker.pollutant.siteName,
-//                "nameLocal": mmarker.pollutant.siteName,
-//            ])
+            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+                "name": mmarker.pollutant.name,
+                "nameLocal": mmarker.pollutant.nameLocal,
+                "stationId": mmarker.pollutant.stationId,
+            ])
         }
 
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))

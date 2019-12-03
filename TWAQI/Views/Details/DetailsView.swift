@@ -17,10 +17,11 @@ struct DetailsView: View {
         let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
 
         var imageUrl = ""
+
         if let station = self.viewModel.station {
             imageUrl = station.imageUrl ?? ""
         }
-        
+
         return ZStack {
             ScrollView {
                 if !imageUrl.isEmpty {
@@ -34,8 +35,11 @@ struct DetailsView: View {
                         .frame(height: 80)
                 }
 
-//                SettingsRow(station: self.viewModel.station)
-//                Separator()
+                if self.viewModel.station != nil {
+                    SettingsRow(station: self.viewModel.station!)
+
+                    Separator()
+                }
 
                 if !viewModel.historyPollutants.isEmpty {
                     DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)

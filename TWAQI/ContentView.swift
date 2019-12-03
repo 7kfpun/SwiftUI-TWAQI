@@ -29,12 +29,6 @@ struct ContentView: View {
                     Text("Tabbar.forecast")
                 }
 
-            SettingsView(viewModel: .init())
-                .tabItem {
-                    Image(systemName: "bell")
-                    Text("Tabbar.settings")
-                }
-
             HelpView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "questionmark.circle")

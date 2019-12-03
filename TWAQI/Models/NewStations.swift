@@ -13,6 +13,7 @@ typealias NewStations = [NewStation]
 struct NewStation: Codable, Hashable {
     let id: Int
     let countryId: Int
+    let countryCode: String
     let code: String
     let lat: Double
     let lon: Double
@@ -24,6 +25,7 @@ struct NewStation: Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id
         case countryId = "country_id"
+        case countryCode = "country_code"
         case code
         case lat
         case lon
@@ -42,6 +44,7 @@ struct NewStation: Codable, Hashable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         id = try values.decode(Int.self, forKey: .id)
         countryId = try values.decode(Int.self, forKey: .countryId)
+        countryCode = try values.decode(String.self, forKey: .countryCode)
         code = try values.decode(String.self, forKey: .code)
         lat = try values.decode(Double.self, forKey: .lat)
         lon = try values.decode(Double.self, forKey: .lon)

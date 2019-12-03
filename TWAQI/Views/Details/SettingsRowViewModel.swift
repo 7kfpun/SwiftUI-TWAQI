@@ -11,12 +11,20 @@ import Foundation
 
 class SettingsRowViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
-    var station: Station
+    var station: NewStation
 
-    init(station: Station) {
+    init(station: NewStation) {
         self.station = station
+
+        var notificationTagCode: String
+        if station.countryCode == "twn" {
+            notificationTagCode = station.name
+        } else {
+            notificationTagCode = "\(station.countryCode)_\(station.id)"
+        }
+
         self.stationSetting = OneSignalStationSetting(
-            stationName: station.name,
+            stationName: notificationTagCode,
             isPollutionNotificationEnabled: false,
             isCleanlinessNotificationEnabled: false
         )
@@ -25,7 +33,7 @@ class SettingsRowViewModel: ObservableObject {
             switch result {
             case .success(let result):
                 print(result)
-                if let resultStationSetting = result.stationSettings[station.name] {
+                if let resultStationSetting = result.stationSettings[notificationTagCode] {
                     self.stationSetting = resultStationSetting
                 }
             case .failure(let error):

@@ -37,24 +37,6 @@ struct DetailsListView: View {
                         }
                     }
 
-//                    if searchText.isEmpty {
-//                        ForEach(stationGroups, id: \.self) {stationGroup in
-//                            DetailsGroup(stationGroup: stationGroup)
-//                        }
-//                    } else {
-//                        ForEach(stationGroups, id: \.self) {stationGroup in
-//                            ForEach(
-//                                stationGroup.stations.filter {
-//                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
-//                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
-//                                    || self.searchText.isEmpty
-//                                }, id: \.self
-//                            ) {station in
-//                                DetailsRow(station: station)
-//                            }
-//                        }
-//                    }
-
                     Spacer().frame(height: 50)
                 }
 
