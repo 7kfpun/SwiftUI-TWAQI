@@ -11,16 +11,17 @@ import SnapKit
 import SwiftUI
 import UIKit
 
-let defaultLatitude = 23.49
-let defaultLongitude = 120.96
-let camera = GMSCameraPosition.camera(withLatitude: defaultLatitude, longitude: defaultLongitude, zoom: 7.9)
+let defaults = UserDefaults.standard
+let defaultLatitude = defaults.double(forKey: "lastestMapLat")
+let defaultLongitude = defaults.double(forKey: "lastestMapLon")
+let lastestMapZoom = defaults.float(forKey: "lastestMapZoom")
+let camera = GMSCameraPosition.camera(withLatitude: defaultLatitude, longitude: defaultLongitude, zoom: lastestMapZoom)
+
 let screenSize: CGRect = UIScreen.main.bounds
 let isLandscape = UIDevice.current.orientation.isLandscape
 
 class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
-
     let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
-    let defaults = UserDefaults.standard
 
     var closestStationView: ClosestStationView!
     var defaultLocationButton: DefaultLocationButton!
@@ -62,7 +63,18 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     @objc func goToDefaultLocation() {
-        self.mapView.animate(to: camera)
+        if let closestCountry = closestCountry {
+            let defaultCamera = GMSCameraPosition.camera(
+                withLatitude: closestCountry.lat,
+                longitude: closestCountry.lon,
+                zoom: closestCountry.zoom
+            )
+            self.mapView.animate(to: defaultCamera)
+        } else {
+            // Taiwan Location
+            let defaultCamera = GMSCameraPosition.camera(withLatitude: 23.49, longitude: 120.96, zoom: 7.9)
+            self.mapView.animate(to: defaultCamera)
+        }
         TrackingManager.logEvent(eventName: "move_to_default_location")
     }
 
@@ -134,7 +146,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         APIManager.getCurrentPollutants(countryCode: countryCode) { result in
             switch result {
             case .success(let result):
-                print("callGetCurrentPollutantsApi Total: \(result.count), first item \(result[0])")
+                print("callGetCurrentPollutantsApi Total: \(result.count)")
                 self.countryPollutants[countryCode] = result
             case .failure(let error):
                 print(error.localizedDescription)
@@ -412,6 +424,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         print("Camera position", position)
         let latitude = position.target.latitude as Double
         let longitude = position.target.longitude as Double
+        let zoom = position.zoom
+        defaults.set(latitude, forKey: "lastestMapLat")
+        defaults.set(longitude, forKey: "lastestMapLon")
+        defaults.set(zoom, forKey: "lastestMapZoom")
+
         self.currentLatitude = latitude
         self.currentLongitude = longitude
         checkClosestCountry(latitude: latitude, longitude: longitude)

@@ -14,8 +14,6 @@ struct DetailsHistoryView: View {
 
     var historyPollutants: HistoricalPollutants
 
-    @State private var viewType = 0
-
     var body: some View {
         let historyPollutantsMap: [AirIndexTypes: [Double]] = [
             AirIndexTypes.aqi: historyPollutants.map({ $0.aqi }),
@@ -72,15 +70,27 @@ struct DetailsHistoryView: View {
                     VStack {
                         BarsView(bars: bars)
                         HStack {
-                            Text(self.historyPollutants.first?.publishTime.toDate()?.toFormat("yyyy-MM-dd HH:mm") ?? "")
-                                .font(.caption)
-                                .fontWeight(.thin)
+                            VStack {
+                                Text(self.historyPollutants.first?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
+                                    .font(.caption)
+                                    .fontWeight(.thin)
+
+                                Text(self.historyPollutants.first?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
+                                    .font(.caption)
+                                    .fontWeight(.thin)
+                            }
 
                             Spacer()
 
-                            Text(self.historyPollutants.last?.publishTime.toDate()?.toFormat("yyyy-MM-dd HH:mm") ?? "")
-                                .font(.caption)
-                                .fontWeight(.thin)
+                            VStack {
+                                Text(self.historyPollutants.last?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
+                                    .font(.caption)
+                                    .fontWeight(.thin)
+
+                                Text(self.historyPollutants.last?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
+                                    .font(.caption)
+                                    .fontWeight(.thin)
+                            }
                         }
                     }
                 }

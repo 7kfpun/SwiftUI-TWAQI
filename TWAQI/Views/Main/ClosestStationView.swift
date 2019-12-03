@@ -17,12 +17,12 @@ final class ClosestStationView: UIView {
 
     var stationName: String? {
         get { return label?.text }
-        set { label.text = newValue?.maxLength(length: 18) }
+        set { label.text = newValue?.maxLength(length: 16) }
     }
 
     var status: String? {
         get { return subLabel?.text }
-        set { subLabel.text = newValue?.maxLength(length: 18) }
+        set { subLabel.text = newValue?.maxLength(length: 16) }
     }
 
     var aqi: String? {

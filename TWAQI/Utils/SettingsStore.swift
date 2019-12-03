@@ -20,6 +20,9 @@ final class SettingsStore: ObservableObject {
         static let dndEndTime = "dndEndTime"
         static let closestCountryCode = "closestCountryCode"
         static let closestStationName = "closestStationName"
+        static let lastestMapLat = "lastestMapLat"
+        static let lastestMapLon = "lastestMapLon"
+        static let lastestMapZoom = "lastestMapZoom"
     }
 
     private let cancellable: Cancellable
@@ -36,7 +39,11 @@ final class SettingsStore: ObservableObject {
             Keys.dndEnabled: false,
             Keys.dndStartTime: Date(),
             Keys.dndEndTime: Date() + 2.hours,
+            Keys.closestCountryCode: "twn",
             Keys.closestStationName: "松山",
+            Keys.lastestMapLat: 23.49,
+            Keys.lastestMapLon: 120.96,
+            Keys.lastestMapZoom: 7.9,
         ])
 
         cancellable = NotificationCenter.default
@@ -89,6 +96,21 @@ final class SettingsStore: ObservableObject {
     var closestStationName: String {
         set { defaults.set(newValue, forKey: Keys.closestStationName) }
         get { defaults.string(forKey: Keys.closestStationName) ?? "松山" }
+    }
+
+    var lastestMapLat: Double {
+        set { defaults.set(newValue, forKey: Keys.lastestMapLat) }
+        get { defaults.double(forKey: Keys.lastestMapLat) }
+    }
+
+    var lastestMapLon: Double {
+        set { defaults.set(newValue, forKey: Keys.lastestMapLon) }
+        get { defaults.double(forKey: Keys.lastestMapLon) }
+    }
+
+    var lastestMapZoom: Float {
+        set { defaults.set(newValue, forKey: Keys.lastestMapZoom) }
+        get { defaults.float(forKey: Keys.lastestMapZoom) }
     }
 }
 

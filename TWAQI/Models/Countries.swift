@@ -15,6 +15,7 @@ struct Country: Codable {
     let code: String
     let lat: Double
     let lon: Double
+    let zoom: Float
 
     let name: String
     let nameLocal: String
@@ -24,6 +25,7 @@ struct Country: Codable {
         case code
         case lat
         case lon
+        case zoom
         case name
     }
 
@@ -39,6 +41,7 @@ struct Country: Codable {
         code = try values.decode(String.self, forKey: .code)
         lat = try values.decode(Double.self, forKey: .lat)
         lon = try values.decode(Double.self, forKey: .lon)
+        zoom = try values.decode(Float.self, forKey: .zoom)
 
         let names = try values.nestedContainer(keyedBy: NameLangKeys.self, forKey: CodingKeys.name)
         if names.contains(.langEn) {
@@ -60,5 +63,6 @@ struct Country: Codable {
         try container.encode(code, forKey: .code)
         try container.encode(lat, forKey: .lat)
         try container.encode(lon, forKey: .lon)
+        try container.encode(zoom, forKey: .zoom)
     }
 }
