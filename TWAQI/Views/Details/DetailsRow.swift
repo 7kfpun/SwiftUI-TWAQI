@@ -12,7 +12,7 @@ struct DetailsRow: View {
     var station: Station
 
     var body: some View {
-        NavigationLink(destination: DetailsView(station: station)) {
+//        NavigationLink(destination: DetailsView(station: station)) {
             HStack {
                 Text(Locale.isChinese ? station.nameLocal : station.name)
                     .foregroundColor(Color.primary)
@@ -25,7 +25,7 @@ struct DetailsRow: View {
                     .foregroundColor(Color.secondary)
             }
             .padding(.horizontal)
-        }
+//        }
     }
 }
 

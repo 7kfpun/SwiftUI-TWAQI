@@ -10,6 +10,8 @@
 		1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */; };
 		9E01F533235C30A400BC3486 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F532235C30A400BC3486 /* SettingsViewModel.swift */; };
 		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
+		9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
+		9E03DF5F23965CB0002F8DA4 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
 		9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E08761E2382D75C0060476E /* ContentViewModel.swift */; };
 		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
@@ -121,6 +123,9 @@
 		9EF3D34D2393B649009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
 		9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956C2385941200420116 /* CustomAd.swift */; };
 		9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
+		9EF3D3512393B9C6009CED32 /* NewPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* NewPollutants.swift */; };
+		9EF3D3532393E9BF009CED32 /* CountryPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */; };
+		9EF3D3542393EB35009CED32 /* NewPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* NewPollutants.swift */; };
 		9EF7A32A2386FC8700FF410C /* HelpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7A3292386FC8700FF410C /* HelpViewModel.swift */; };
 		9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */; };
 		9EFE2E0223423D74007B7723 /* SettingsGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFE2E0123423D74007B7723 /* SettingsGroup.swift */; };
@@ -196,6 +201,7 @@
 		93EEC8B07FC43D68445B068E /* Pods-watch Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-watch Extension.debug.xcconfig"; path = "Target Support Files/Pods-watch Extension/Pods-watch Extension.debug.xcconfig"; sourceTree = "<group>"; };
 		9E01F532235C30A400BC3486 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
+		9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalPollutants.swift; sourceTree = "<group>"; };
 		9E08761E2382D75C0060476E /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -297,6 +303,8 @@
 		9EF3D34323939281009CED32 /* Countries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Countries.swift; sourceTree = "<group>"; };
 		9EF3D34523939798009CED32 /* NewStations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewStations.swift; sourceTree = "<group>"; };
 		9EF3D3472393B318009CED32 /* APIResponses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResponses.swift; sourceTree = "<group>"; };
+		9EF3D3502393B9C6009CED32 /* NewPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPollutants.swift; sourceTree = "<group>"; };
+		9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryPollutants.swift; sourceTree = "<group>"; };
 		9EF7A3292386FC8700FF410C /* HelpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewModel.swift; sourceTree = "<group>"; };
 		9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelectorView.swift; sourceTree = "<group>"; };
 		9EFE2E0123423D74007B7723 /* SettingsGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroup.swift; sourceTree = "<group>"; };
@@ -532,9 +540,12 @@
 			isa = PBXGroup;
 			children = (
 				9EF3D34323939281009CED32 /* Countries.swift */,
+				9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */,
 				9EDD956C2385941200420116 /* CustomAd.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
+				9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */,
 				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
+				9EF3D3502393B9C6009CED32 /* NewPollutants.swift */,
 				9EF3D34523939798009CED32 /* NewStations.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
 				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
@@ -1013,6 +1024,7 @@
 				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
+				9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
 				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
@@ -1037,8 +1049,10 @@
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
 				9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */,
 				9E1AC540233F981700AC862D /* ContentView.swift in Sources */,
+				9EF3D3532393E9BF009CED32 /* CountryPollutants.swift in Sources */,
 				9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */,
 				9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */,
+				9EF3D3512393B9C6009CED32 /* NewPollutants.swift in Sources */,
 				9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */,
 				9E978F20235B0CDC00C66A03 /* StationGroups.swift in Sources */,
 				9EF250192376B95D00A731D5 /* DefinitionPages.swift in Sources */,
@@ -1082,8 +1096,10 @@
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
 				9EF3D34B2393B631009CED32 /* Countries.swift in Sources */,
 				9E910C502381830400B8B316 /* NotificationView.swift in Sources */,
+				9EF3D3542393EB35009CED32 /* NewPollutants.swift in Sources */,
 				9EF3D3492393B5C8009CED32 /* APIManager.swift in Sources */,
 				9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */,
+				9E03DF5F23965CB0002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E1C9B152389741B0052E115 /* StringExtension.swift in Sources */,
 				9E910C6B238184BB00B8B316 /* LabelView.swift in Sources */,
 			);

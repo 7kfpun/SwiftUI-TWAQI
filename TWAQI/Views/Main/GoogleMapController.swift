@@ -31,6 +31,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var currentLatitude: Double = defaultLatitude
     var currentLongitude: Double = defaultLongitude
 
+    var countries: Countries = []
+    var closestCountry: Country!
+
     var pollutants: Pollutants = []
 
     @objc func toggleIsWindMode() {
@@ -73,8 +76,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
             }
 
-            loadClosestStationView(latitude: self.currentLatitude, longitude: self.currentLongitude)
-
             TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
         }
     }
@@ -86,7 +87,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var isWindMode = false {
         didSet {
             windModeButton.isWindMode = isWindMode
-            update()
+            loadMarkers()
         }
     }
 
@@ -98,35 +99,73 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
         set {
             defaults.set(newValue.rawValue, forKey: "airIndexTypeSelected")
-            update()
+            loadClosestStationView()
+            loadMarkers()
         }
     }
 
-    func update() {
-        self.mapView.clear()
-        self.pollutants.forEach { pollutant in
-            var pollutantMarker: GMSMarker
-            if self.isWindMode {
-                pollutantMarker = WindDirectionMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
-            } else {
-                pollutantMarker = PollutantMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
-            }
-            pollutantMarker.tracksViewChanges = false
-            pollutantMarker.map = self.mapView
+    var countryPollutants: [String: NewPollutants] = [:] {
+        didSet {
+            loadMarkers()
         }
     }
 
-    func callApi() {
-        APIManager.getAQI { result in
+    var closestPollutant: NewPollutant! {
+        didSet {
+            loadClosestStationView()
+        }
+    }
+
+    func callGetCountriesApi() {
+        APIManager.getCountries { result in
             switch result {
             case .success(let result):
-                self.pollutants = result
-                print("Total: \(result.count), first item \(result[0])")
-                self.update()
-                self.loadClosestStationView(latitude: defaultLatitude, longitude: defaultLongitude)
+                self.countries = result
+                self.checkClosestCountry(latitude: defaultLatitude, longitude: defaultLongitude)
+                self.loadMarkers()
+                print("Total Countries: \(result.count), first item \(result[0])")
             case .failure(let error):
                 print(error.localizedDescription)
             }
+        }
+    }
+
+    func callGetCurrentPollutantsApi(countryCode: String) {
+        APIManager.getCurrentPollutants(countryCode: countryCode) { result in
+            switch result {
+            case .success(let result):
+                print("callGetCurrentPollutantsApi Total: \(result.count), first item \(result[0])")
+                self.countryPollutants[countryCode] = result
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    func checkClosestCountry(latitude: Double, longitude: Double) {
+        if !self.countries.isEmpty {
+            var closestCountry: Country = self.countries.first!
+            var distance: Double = .greatestFiniteMagnitude
+            self.countries.forEach { country in
+                let countryLat = country.lat
+                let countryLon = country.lon
+
+                let tempDistance = pow(countryLat - latitude, 2) + pow(countryLon - longitude, 2)
+                if tempDistance < distance {
+                    closestCountry = country
+                    distance = tempDistance
+                }
+            }
+
+            self.closestCountry = closestCountry
+
+            let keyExists = self.countryPollutants[closestCountry.code] != nil
+
+            if !keyExists {
+                callGetCurrentPollutantsApi(countryCode: closestCountry.code)
+            }
+
+//            defaults.set(closestCountry.name, forKey: "closestCountryName")
         }
     }
 
@@ -223,43 +262,63 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.view = view
     }
 
-    func loadClosestStationView(latitude: Double, longitude: Double) {
-        if !self.pollutants.isEmpty {
-            var closestPollutant: Pollutant = self.pollutants.first!
-            var distance: Double = .greatestFiniteMagnitude
-            self.pollutants.forEach { pollutant in
-                print(pollutant.latitude, pollutant.longitude)
-                let platitude = Double(pollutant.latitude) ?? 0
-                let plongitude = Double(pollutant.longitude) ?? 0
+    func loadMarkers() {
+        print("loadMarkers")
+        self.mapView.clear()
+        for (_, pollutants) in self.countryPollutants {
+            pollutants.forEach { pollutant in
+                var pollutantMarker: GMSMarker
+                if self.isWindMode {
+                    pollutantMarker = WindDirectionMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
+                } else {
+                    pollutantMarker = PollutantMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
+                }
+                pollutantMarker.tracksViewChanges = false
+                pollutantMarker.map = self.mapView
+            }
+        }
 
-                if pow(platitude - latitude, 2) + pow(plongitude - longitude, 2) < distance {
-                    closestPollutant = pollutant
-                    distance = pow(platitude - latitude, 2) + pow(plongitude - longitude, 2)
+        self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
+    }
+
+    func checkClosestStation(latitude: Double, longitude: Double) {
+        print("checkClosestStation")
+        var distance: Double = .greatestFiniteMagnitude
+
+        var tempClosestPollutant = self.closestPollutant
+        for (_, pollutants) in self.countryPollutants {
+            pollutants.forEach { pollutant in
+                let tempDistance = pow(pollutant.lat - latitude, 2) + pow(pollutant.lon - longitude, 2)
+                if tempDistance < distance {
+                    tempClosestPollutant = pollutant
+                    distance = tempDistance
                 }
             }
+        }
 
-            print(closestPollutant)
-            defaults.set(closestPollutant.siteName, forKey: "closestStationName")
+        if let closestPollutant = tempClosestPollutant {
+            print("checkClosestStation", closestPollutant)
+            self.closestPollutant = closestPollutant
+        }
+    }
 
+    func loadClosestStationView() {
+        if let closestPollutant = self.closestPollutant {
+            print("loadClosestStationView", closestPollutant)
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
             let text = value.format(f: self.airIndexTypeSelected.getFormat())
-
-            closestStationView.stationName = "\(closestPollutant.siteName), \(closestPollutant.county)"
-            closestStationView.status = closestPollutant.status
-            closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
             let airStatus = AirStatuses.checkAirStatus(
                 airIndexType: self.airIndexTypeSelected,
                 value: value
             )
+
+            closestStationView.stationName = Locale.isChinese ? closestPollutant.nameLocal : closestPollutant.name
+            closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
+            closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
+
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
             closestStationView.aqiForegroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
             closestStationView.image = UIImage(named: airStatus.getImage())
-
-            TrackingManager.logEvent(eventName: "load_closest_station", parameters: [
-                "siteId": closestPollutant.siteId,
-                "siteName": closestPollutant.siteName,
-                "county": closestPollutant.county,
-            ])
         }
     }
 
@@ -279,12 +338,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             }
         }
 
+        self.callGetCountriesApi()
+        self.callGetCurrentPollutantsApi(countryCode: "twn")
+
         mapView.delegate = self
 
-        self.callApi()
-        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
+        Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { (_) in
             // Schedule in seconds
-            self.callApi()
+            for (countryCode, _) in self.countryPollutants {
+                self.callGetCurrentPollutantsApi(countryCode: countryCode)
+            }
         }
 
         loadContent()
@@ -303,7 +366,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             print("Portrait", size, UIDevice.current.orientation, screenSize)
             loadContent(width: size.width, height: size.height, isLandscape: false)
         }
-        callApi()
+
+        self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
 
         TrackingManager.logEvent(eventName: "change_device_orientation", parameters: [
             "label": UIDevice.current.orientation.isLandscape ? "landscape" : "portrait",
@@ -319,16 +383,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         var detailsView: DetailsView
         if isWindMode {
             let mmarker = marker as! WindDirectionMarker
-            print("Marker tapped", marker, mmarker.pollutant.siteName)
-            detailsView = DetailsView(station: mmarker.pollutant.getStation())
+            print("Marker tapped", marker, mmarker.pollutant.stationId)
+            detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
         } else {
             let mmarker = marker as! PollutantMarker
-            print("Marker tapped", marker, mmarker.pollutant.siteName)
-            detailsView = DetailsView(station: mmarker.pollutant.getStation())
-            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
-                // "name": mmarker.pollutant.siteName,
-                "nameLocal": mmarker.pollutant.siteName,
-            ])
+            print("Marker tapped", marker, mmarker.pollutant.stationId)
+            detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
+//            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+//                // "name": mmarker.pollutant.siteName,
+//                "nameLocal": mmarker.pollutant.siteName,
+//            ])
         }
 
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
@@ -349,7 +413,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let longitude = position.target.longitude as Double
         self.currentLatitude = latitude
         self.currentLongitude = longitude
-        loadClosestStationView(latitude: latitude, longitude: longitude)
+        checkClosestCountry(latitude: latitude, longitude: longitude)
+        checkClosestStation(latitude: latitude, longitude: longitude)
     }
 
     override func viewWillAppear(_ animated: Bool) {

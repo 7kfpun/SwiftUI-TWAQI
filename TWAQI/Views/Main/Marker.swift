@@ -11,19 +11,15 @@ import SwiftUI
 import UIKit
 
 final class PollutantMarker: GMSMarker {
-    let pollutant: Pollutant
+    let pollutant: NewPollutant
     let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: NewPollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
         super.init()
 
-        guard let dLatitude: Double = Double(pollutant.latitude),
-            let dLongitude: Double = Double(pollutant.longitude) else {
-                return
-        }
-        self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
+        self.position = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
 
         let value = pollutant.getValue(airIndexType: airIndexTypeSelected)
 
@@ -52,26 +48,21 @@ final class PollutantMarker: GMSMarker {
 }
 
 final class WindDirectionMarker: GMSMarker {
-    let pollutant: Pollutant
+    let pollutant: NewPollutant
     let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: NewPollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
         super.init()
 
-        guard let dLatitude: Double = Double(pollutant.latitude),
-            let dLongitude: Double = Double(pollutant.longitude),
-            let dWindDirection: Double = Double(pollutant.windDirection),
-            let dWindSpeed: Double = Double(pollutant.windSpeed) else {
-                return
-        }
+        let dWindSpeed = pollutant.windSpeed
 
         if dWindSpeed == 0 {
             return
         }
 
-        self.position = CLLocationCoordinate2D(latitude: dLatitude, longitude: dLongitude)
+        self.position = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
 
         let airStatus = AirStatuses.checkAirStatus(
             airIndexType: airIndexTypeSelected,
@@ -86,7 +77,7 @@ final class WindDirectionMarker: GMSMarker {
             .addShadow()
         
         self.icon = icon
-        self.rotation = dWindDirection
+        self.rotation = pollutant.windDirection
         self.isFlat = true
     }
 }

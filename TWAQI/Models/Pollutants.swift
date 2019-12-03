@@ -81,13 +81,4 @@ struct Pollutant: Codable {
             return Double(self.o3) ?? 0
         }
     }
-
-    func getStation() -> Station {
-        return Station(
-            name: self.siteName,
-            nameLocal: self.siteName,
-            lat: Double(self.latitude) ?? 0,
-            lon: Double(self.longitude) ?? 0
-        )
-    }
 }

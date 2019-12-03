@@ -10,7 +10,7 @@ import Foundation
 
 typealias Countries = [Country]
 
-struct Country: Decodable {
+struct Country: Codable {
     let id: Int
     let code: String
     let lat: Double
@@ -52,5 +52,13 @@ struct Country: Decodable {
         } else {
             nameLocal = "Unknown"
         }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(code, forKey: .code)
+        try container.encode(lat, forKey: .lat)
+        try container.encode(lon, forKey: .lon)
     }
 }

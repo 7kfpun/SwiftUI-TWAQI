@@ -15,6 +15,7 @@ enum NetworkError: Error {
 }
 
 struct APIManager {
+    // MARK: - V1 endpoints
     static func getCountries(completionHandler: @escaping (Result<Countries, NetworkError>) -> Void) {
         guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/countries") else {
             completionHandler(.failure(.badURL))
@@ -32,7 +33,6 @@ struct APIManager {
 
                     debugPrint(response)
                     let countriesResponse = try JSONDecoder().decode(CountriesResponse.self, from: data)
-                    print("countriesResponse.data", countriesResponse.data)
                     completionHandler(.success(countriesResponse.data))
                 } catch {
                     print(error)
@@ -42,12 +42,16 @@ struct APIManager {
     }
 
     static func getStations(countryCode: String, completionHandler: @escaping (Result<NewStations, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/stations?country=\(countryCode)") else {
+        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/stations") else {
             completionHandler(.failure(.badURL))
             return
         }
 
-        AF.request(url)
+        let parameters: Parameters = [
+            "country": countryCode,
+        ]
+
+        AF.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
@@ -58,7 +62,6 @@ struct APIManager {
 
                     debugPrint(response)
                     let newStationsResponse = try JSONDecoder().decode(NewStationsResponse.self, from: data)
-                    print("newStationsResponse.data", newStationsResponse.data)
                     completionHandler(.success(newStationsResponse.data))
                 } catch {
                     print(error)
@@ -67,6 +70,70 @@ struct APIManager {
             }
     }
 
+    static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
+        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/current-pollutant") else {
+            completionHandler(.failure(.badURL))
+            return
+        }
+
+        let parameters: Parameters = [
+            "country": countryCode,
+        ]
+
+        AF.request(url, parameters: parameters)
+            .validate(contentType: ["application/json"])
+            .responseData { response in
+                do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
+                    debugPrint(response)
+                    let newPollutantsResponse = try JSONDecoder().decode(NewPollutantsResponse.self, from: data)
+                    completionHandler(.success(newPollutantsResponse.data))
+                } catch {
+                    print(error)
+                    completionHandler(.failure(.networkError))
+                }
+            }
+    }
+
+    static func getHourlyHistorical(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
+        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/historical-pollutants") else {
+            completionHandler(.failure(.badURL))
+            return
+        }
+
+        let parameters: Parameters = [
+            "station_id": stationId,
+            "limit": limit,
+        ]
+
+        AF.request(url, parameters: parameters)
+            .validate(contentType: ["application/json"])
+            .responseData { response in
+                do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
+                    debugPrint(response)
+                    let historicalPollutantsResponse = try JSONDecoder().decode(HistoricalPollutantsResponse.self, from: data)
+                    print("stationstationstation", historicalPollutantsResponse.station)
+                    completionHandler(.success([
+                        "station": historicalPollutantsResponse.station,
+                        "data": historicalPollutantsResponse.data
+                    ]))
+                } catch {
+                    print(error)
+                    completionHandler(.failure(.networkError))
+                }
+            }
+    }
+
+    // MARK: - Legacy endpoints
     static func getAQI(completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
         guard let url = URL(string: getEnv("AQI API")!) else {
             completionHandler(.failure(.badURL))
@@ -147,6 +214,7 @@ struct APIManager {
             }
     }
 
+    // MARK: - Other endpoints
     static func getCustomAd(completionHandler: @escaping (Result<CustomAd, NetworkError>) -> Void) {
         guard let url = URL(string: getEnv("CUSTOM AD API")!) else {
             completionHandler(.failure(.badURL))

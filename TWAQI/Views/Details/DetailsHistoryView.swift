@@ -12,7 +12,7 @@ struct DetailsHistoryView: View {
     @EnvironmentObject var settings: SettingsStore
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
-    var historyPollutants: [HistoryPollutant]
+    var historyPollutants: HistoricalPollutants
 
     @State private var viewType = 0
 
@@ -107,323 +107,323 @@ struct DetailsHistoryView: View {
         .padding(.horizontal, 10)
     }
 
-    init(historyPollutants: [HistoryPollutant]) {
+    init(historyPollutants: HistoricalPollutants) {
         self.historyPollutants = historyPollutants
     }
 }
 
-struct DetailsHistoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        DetailsHistoryView(historyPollutants: [
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 40,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T01:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 20,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T02:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 11,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T03:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 32,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T04:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 40,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T05:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 20,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T06:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 11,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T07:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 14,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T08:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 14,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T09:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 32,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T10:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 40,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T11:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 20,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T12:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 11,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T13:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 14,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T14:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 14,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T14:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 43,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T15:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 32,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T15:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 30,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T16:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 22,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T16:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 25,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T17:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 20,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T17:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 30,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T18:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 56,
-                aqi: 61,
-                pm25: 25,
-                pm10: 26,
-                no2: 5.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T19:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 51,
-                pm25: 26,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T20:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 90,
-                aqi: 61,
-                pm25: 11,
-                pm10: 26,
-                no2: 6.7,
-                so2: 2.3,
-                co: 0.25,
-                o3: 39,
-                publishTime: "2019-10-13T21:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 96,
-                aqi: 51,
-                pm25: 22,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T22:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 96,
-                aqi: 51,
-                pm25: 22,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-13T23:00:00"
-            ),
-            HistoryPollutant(
-                stationId: 80,
-                aqi: 64,
-                pm25: 30,
-                pm10: 36,
-                no2: 6.9,
-                so2: 1.3,
-                co: 0.15,
-                o3: 30,
-                publishTime: "2019-10-14T00:00:00"
-            ),
-        ])
-        .environmentObject(SettingsStore())
-    }
-}
+//struct DetailsHistoryView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        DetailsHistoryView(historyPollutants: [
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 40,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T01:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 20,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T02:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 11,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T03:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 32,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T04:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 40,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T05:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 20,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T06:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 11,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T07:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 14,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T08:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 14,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T09:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 32,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T10:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 40,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T11:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 20,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T12:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 11,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T13:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 14,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T14:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 14,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T14:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 43,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T15:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 32,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T15:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 30,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T16:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 22,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T16:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 25,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T17:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 20,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T17:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 30,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T18:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 56,
+//                aqi: 61,
+//                pm25: 25,
+//                pm10: 26,
+//                no2: 5.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T19:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 51,
+//                pm25: 26,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T20:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 90,
+//                aqi: 61,
+//                pm25: 11,
+//                pm10: 26,
+//                no2: 6.7,
+//                so2: 2.3,
+//                co: 0.25,
+//                o3: 39,
+//                publishTime: "2019-10-13T21:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 96,
+//                aqi: 51,
+//                pm25: 22,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T22:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 96,
+//                aqi: 51,
+//                pm25: 22,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-13T23:00:00"
+//            ),
+//            HistoryPollutant(
+//                stationId: 80,
+//                aqi: 64,
+//                pm25: 30,
+//                pm10: 36,
+//                no2: 6.9,
+//                so2: 1.3,
+//                co: 0.15,
+//                o3: 30,
+//                publishTime: "2019-10-14T00:00:00"
+//            ),
+//        ])
+//        .environmentObject(SettingsStore())
+//    }
+//}

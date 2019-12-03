@@ -12,13 +12,15 @@ import SwiftUI
 struct DetailsView: View {
     @ObservedObject var viewModel: DetailsViewModel
 
-    var station: Station
-
     var body: some View {
         // SDImageCache.shared.config.maxDiskAge = 60 * 5  // This seems not working
-        let imageUrl = self.station.imageUrl ?? ""
         let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
 
+        var imageUrl = ""
+        if let station = self.viewModel.station {
+            imageUrl = station.imageUrl ?? ""
+        }
+        
         return ZStack {
             ScrollView {
                 if !imageUrl.isEmpty {
@@ -32,7 +34,7 @@ struct DetailsView: View {
                         .frame(height: 80)
                 }
 
-                SettingsRow(station: station)
+//                SettingsRow(station: self.viewModel.station)
 
                 Separator()
 
@@ -58,55 +60,36 @@ struct DetailsView: View {
         .edgesIgnoringSafeArea(.top)
     }
 
-    init(station: Station) {
-        self.station = station
-        self.viewModel = DetailsViewModel(station: station)
-        loadStationsFromJSON()
+    init(stationId: Int) {
+        self.viewModel = DetailsViewModel(stationId: stationId)
     }
 
     private func getData() {
         self.viewModel.getData()
     }
-
-    private mutating func loadStationsFromJSON() {
-        DataManager.getDataFromFileWithSuccess { file in
-            do {
-                let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
-                if let stationGroups = data["stationGroups"] {
-                    for stationGroup in stationGroups {
-                        for station in stationGroup.stations where station.nameLocal == self.station.name {
-                            self.station = station
-                        }
-                    }
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
 }
 
-struct DetailsView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            DetailsView(
-                station: Station(
-                    name: "Matsu",
-                    nameLocal: "馬祖",
-                    lat: 26.160469,
-                    lon: 119.949875,
-                    imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
-                )
-            ).environmentObject(SettingsStore())
-
-            DetailsView(
-                station: Station(
-                    name: "Matsu",
-                    nameLocal: "馬祖",
-                    lat: 26.160469,
-                    lon: 119.949875
-                )
-            ).environmentObject(SettingsStore())
-        }
-    }
-}
+//struct DetailsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Group {
+//            DetailsView(
+//                station: Station(
+//                    name: "Matsu",
+//                    nameLocal: "馬祖",
+//                    lat: 26.160469,
+//                    lon: 119.949875,
+//                    imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+//                )
+//            ).environmentObject(SettingsStore())
+//
+//            DetailsView(
+//                station: Station(
+//                    name: "Matsu",
+//                    nameLocal: "馬祖",
+//                    lat: 26.160469,
+//                    lon: 119.949875
+//                )
+//            ).environmentObject(SettingsStore())
+//        }
+//    }
+//}

@@ -10,7 +10,7 @@ import Foundation
 
 typealias NewStations = [NewStation]
 
-struct NewStation: Decodable {
+struct NewStation: Codable {
     let id: Int
     let countryId: Int
     let code: String
@@ -35,7 +35,7 @@ struct NewStation: Decodable {
     private enum NameLangKeys: String, CodingKey {
         case langEn = "en"
         case langZh = "zh"
-        // case langTh = "th"
+        case langTh = "th"
     }
 
     init(from decoder: Decoder) throws {
@@ -56,8 +56,17 @@ struct NewStation: Decodable {
 
         if names.contains(.langZh) {
             nameLocal = try names.decode(String.self, forKey: .langZh)
+        } else if names.contains(.langTh) {
+            nameLocal = try names.decode(String.self, forKey: .langTh)
         } else {
             nameLocal = "Unknown"
         }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(countryId, forKey: .countryId)
+        try container.encode(code, forKey: .code)
     }
 }

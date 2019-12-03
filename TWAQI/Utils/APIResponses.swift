@@ -27,3 +27,25 @@ struct NewStationsResponse: Decodable {
         case data
     }
 }
+
+struct NewPollutantsResponse: Decodable {
+    let success: Bool
+    let data: NewPollutants
+
+    private enum CodingKeys: String, CodingKey {
+        case success
+        case data
+    }
+}
+
+struct HistoricalPollutantsResponse: Decodable {
+    let success: Bool
+    let station: NewStation
+    let data: HistoricalPollutants
+
+    private enum CodingKeys: String, CodingKey {
+        case success
+        case station
+        case data
+    }
+}

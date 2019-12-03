@@ -11,22 +11,28 @@ import Foundation
 
 class DetailsViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
-    var station: Station
 
-    @Published var historyPollutants: HistoryPollutants = [] {
+    var stationId: Int
+
+    @Published var station: NewStation? {
         willSet { self.objectWillChange.send() }
     }
 
-    init(station: Station, historyPollutants: HistoryPollutants = []) {
-        self.station = station
+    @Published var historyPollutants: HistoricalPollutants = [] {
+        willSet { self.objectWillChange.send() }
+    }
+
+    init(stationId: Int, historyPollutants: HistoricalPollutants = []) {
+        self.stationId = stationId
         self.historyPollutants = historyPollutants
     }
 
     private(set) lazy var getData: () -> Void = {
-        APIManager.getHistory(nameLocal: self.station.nameLocal) { result in
+        APIManager.getHourlyHistorical(stationId: self.stationId) { result in
             switch result {
-            case .success(let historyPollutants):
-                self.historyPollutants = historyPollutants
+            case .success(let result):
+                self.station = result["station"] as? NewStation
+                self.historyPollutants = result["data"] as! HistoricalPollutants
             case .failure(let error):
                 print(error.localizedDescription)
             }
