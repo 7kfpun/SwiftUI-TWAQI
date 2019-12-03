@@ -12,6 +12,7 @@
 		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
 		9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		9E03DF5F23965CB0002F8DA4 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
+		9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */; };
 		9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
 		9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E08761E2382D75C0060476E /* ContentViewModel.swift */; };
 		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
@@ -202,6 +203,7 @@
 		9E01F532235C30A400BC3486 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
 		9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalPollutants.swift; sourceTree = "<group>"; };
+		9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListViewModel.swift; sourceTree = "<group>"; };
 		9E08761E2382D75C0060476E /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -489,6 +491,7 @@
 				9EFE2E0323425053007B7723 /* DetailsGroup.swift */,
 				9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */,
 				9E1AC563233F9AC100AC862D /* DetailsListView.swift */,
+				9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */,
 				9E794A632340993C0064D874 /* DetailsRow.swift */,
 				9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */,
 				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
@@ -1015,6 +1018,7 @@
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E1C9B14238974120052E115 /* StringExtension.swift in Sources */,
 				9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */,
+				9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */,
 				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
 				9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */,

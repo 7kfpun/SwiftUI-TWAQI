@@ -158,6 +158,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             }
 
             self.closestCountry = closestCountry
+            defaults.set(closestCountry.code, forKey: "closestCountryCode")
 
             let keyExists = self.countryPollutants[closestCountry.code] != nil
 

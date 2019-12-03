@@ -35,8 +35,7 @@ struct DetailsView: View {
                 }
 
 //                SettingsRow(station: self.viewModel.station)
-
-                Separator()
+//                Separator()
 
                 if !viewModel.historyPollutants.isEmpty {
                     DetailsSuggestionView(lastPollutant: viewModel.historyPollutants.last!)

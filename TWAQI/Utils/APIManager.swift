@@ -15,9 +15,11 @@ enum NetworkError: Error {
 }
 
 struct APIManager {
+    static let apiDomain = getEnv("ApiDomain")!
+
     // MARK: - V1 endpoints
     static func getCountries(completionHandler: @escaping (Result<Countries, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/countries") else {
+        guard let url = URL(string: "\(self.apiDomain)/v1/countries") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -42,7 +44,7 @@ struct APIManager {
     }
 
     static func getStations(countryCode: String, completionHandler: @escaping (Result<NewStations, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/stations") else {
+        guard let url = URL(string: "\(self.apiDomain)/v1/stations") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -71,7 +73,7 @@ struct APIManager {
     }
 
     static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/current-pollutant") else {
+        guard let url = URL(string: "\(self.apiDomain)/v1/current-pollutants") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -100,7 +102,7 @@ struct APIManager {
     }
 
     static func getHourlyHistorical(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
-        guard let url = URL(string: "\(getEnv("ApiDomain")!)/v1/historical-pollutants") else {
+        guard let url = URL(string: "\(self.apiDomain)/v1/historical-pollutants") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -124,7 +126,7 @@ struct APIManager {
                     print("stationstationstation", historicalPollutantsResponse.station)
                     completionHandler(.success([
                         "station": historicalPollutantsResponse.station,
-                        "data": historicalPollutantsResponse.data
+                        "data": historicalPollutantsResponse.data,
                     ]))
                 } catch {
                     print(error)

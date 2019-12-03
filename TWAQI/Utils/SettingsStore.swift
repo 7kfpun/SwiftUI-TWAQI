@@ -18,6 +18,7 @@ final class SettingsStore: ObservableObject {
         static let dndEnabled = "dndEnabled"
         static let dndStartTime = "dndStartTime"
         static let dndEndTime = "dndEndTime"
+        static let closestCountryCode = "closestCountryCode"
         static let closestStationName = "closestStationName"
     }
 
@@ -78,6 +79,11 @@ final class SettingsStore: ObservableObject {
     var dndEndTime: Date {
         set { defaults.set(newValue, forKey: Keys.dndEndTime) }
         get { defaults.object(forKey: Keys.dndEndTime) as! Date }
+    }
+
+    var closestCountryCode: String {
+        set { defaults.set(newValue, forKey: Keys.closestCountryCode) }
+        get { defaults.string(forKey: Keys.closestCountryCode) ?? "twn" }
     }
 
     var closestStationName: String {

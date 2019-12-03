@@ -9,10 +9,9 @@
 import SwiftUI
 
 struct DetailsListView: View {
+    @ObservedObject var viewModel: DetailsListViewModel
 
     @State private var searchText = ""
-
-    var stationGroups: StationGroups
 
     var body: some View {
         NavigationView {
@@ -23,22 +22,38 @@ struct DetailsListView: View {
                         .padding()
 
                     if searchText.isEmpty {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            DetailsGroup(stationGroup: stationGroup)
+                        ForEach(self.viewModel.stations, id: \.self) {station in
+                            DetailsRow(station: station)
                         }
                     } else {
-                        ForEach(stationGroups, id: \.self) {stationGroup in
-                            ForEach(
-                                stationGroup.stations.filter {
-                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
-                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
-                                    || self.searchText.isEmpty
-                                }, id: \.self
-                            ) {station in
-                                DetailsRow(station: station)
-                            }
+                        ForEach(
+                            self.viewModel.stations.filter {
+                                $0.name.localizedCaseInsensitiveContains(self.searchText)
+                                || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
+                                || self.searchText.isEmpty
+                            }, id: \.self
+                        ) {station in
+                            DetailsRow(station: station)
                         }
                     }
+
+//                    if searchText.isEmpty {
+//                        ForEach(stationGroups, id: \.self) {stationGroup in
+//                            DetailsGroup(stationGroup: stationGroup)
+//                        }
+//                    } else {
+//                        ForEach(stationGroups, id: \.self) {stationGroup in
+//                            ForEach(
+//                                stationGroup.stations.filter {
+//                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
+//                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
+//                                    || self.searchText.isEmpty
+//                                }, id: \.self
+//                            ) {station in
+//                                DetailsRow(station: station)
+//                            }
+//                        }
+//                    }
 
                     Spacer().frame(height: 50)
                 }
@@ -48,25 +63,17 @@ struct DetailsListView: View {
             .navigationBarTitle("DetailsList.details")
         }
         .navigationViewStyle(StackNavigationViewStyle())
-    }
-
-    init(stationGroups: StationGroups = [], searchText: String = "") {
-        self.stationGroups = stationGroups
-        self.searchText = searchText
-        loadStationsFromJSON()
-    }
-
-    private mutating func loadStationsFromJSON() {
-        DataManager.getDataFromFileWithSuccess { file in
-            do {
-                let data = try JSONDecoder().decode([String: StationGroups].self, from: file!)
-                if let stationGroups = data["stationGroups"] {
-                    self.stationGroups = stationGroups
-                }
-            } catch {
-                print(error)
-            }
+        .onAppear {
+            self.getData()
         }
+    }
+
+    init() {
+        self.viewModel = DetailsListViewModel()
+    }
+
+    private func getData() {
+        self.viewModel.getData()
     }
 }
 
