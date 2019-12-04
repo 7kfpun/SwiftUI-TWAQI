@@ -17,6 +17,12 @@ struct ContentView: View {
                     Text("Tabbar.main")
             }
 
+            FavouriteListView()
+                .tabItem {
+                    Image(systemName: "heart")
+                    Text("Tabbar.favourites")
+            }
+
             DetailsListView()
                 .tabItem {
                     Image(systemName: "list.bullet")

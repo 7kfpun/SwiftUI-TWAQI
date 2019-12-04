@@ -7,10 +7,14 @@
 */
 
 "Tabbar.main" = "Main";
-"Tabbar.details_list" = "List";
+"Tabbar.favourites" = "Favourites";
+"Tabbar.details_list" = "Search";
 "Tabbar.forecast" = "Forecast";
 "Tabbar.settings" = "Settings";
 "Tabbar.help" = "Help";
+
+"FavouriteList.favourites" = "Favourites";
+"Favourites.cancel_all_notification" = "Cancel station notification";
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";

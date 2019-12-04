@@ -20,7 +20,7 @@ class SettingsRowViewModel: ObservableObject {
         if station.countryCode == "twn" {
             notificationTagCode = station.name
         } else {
-            notificationTagCode = "\(station.countryCode)_\(station.id)"
+            notificationTagCode = "\(station.id)"
         }
 
         self.stationSetting = OneSignalStationSetting(

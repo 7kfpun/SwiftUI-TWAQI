@@ -4,8 +4,6 @@
 <dict>
 	<key>AQI API</key>
 	<string>$(AQI_API)</string>
-	<key>ApiDomain</key>
-	<string>$(API_DOMAIN)</string>
 	<key>AdUnitIdDetailsFooter</key>
 	<string>$(AdUnitIdDetailsFooter)</string>
 	<key>AdUnitIdDetailsListFooter</key>
@@ -20,6 +18,8 @@
 	<string>$(AdUnitIdSettingsFooter)</string>
 	<key>AmplitudeApiKey</key>
 	<string>$(AmplitudeApiKey)</string>
+	<key>ApiDomain</key>
+	<string>$(API_DOMAIN)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
 	<key>BetaTesterUrl</key>

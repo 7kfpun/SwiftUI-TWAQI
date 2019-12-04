@@ -7,10 +7,14 @@
 */
 
 "Tabbar.main" = "首頁";
-"Tabbar.details_list" = "列表";
+"Tabbar.favourites" = "最愛";
+"Tabbar.details_list" = "搜素";
 "Tabbar.forecast" = "預報";
 "Tabbar.settings" = "通知";
 "Tabbar.help" = "幫助";
+
+"FavouriteList.favourites" = "最愛列表";
+"Favourites.cancel_all_notification" = "除消空氣品質通知";
 
 "DetailsList.details" = "空氣品質詳情";
 "DetailsList.search" = "搜素";

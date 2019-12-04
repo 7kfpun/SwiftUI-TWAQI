@@ -10,7 +10,7 @@ import Foundation
 
 typealias NewPollutants = [NewPollutant]
 
-struct NewPollutant: Decodable {
+struct NewPollutant: Decodable, Hashable {
     let stationId: Int
     let lat: Double
     let lon: Double

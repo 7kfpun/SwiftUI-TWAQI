@@ -101,6 +101,35 @@ struct APIManager {
             }
     }
 
+    static func getCurrentPollutantsByStationIds(stationIds: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
+        guard let url = URL(string: "\(self.apiDomain)/v1/current-pollutants") else {
+            completionHandler(.failure(.badURL))
+            return
+        }
+
+        let parameters: Parameters = [
+            "station_ids": stationIds,
+        ]
+
+        AF.request(url, parameters: parameters)
+            .validate(contentType: ["application/json"])
+            .responseData { response in
+                do {
+                    guard let data: Data = response.data else {
+                        completionHandler(.failure(.networkError))
+                        return
+                    }
+
+                    debugPrint(response)
+                    let newPollutantsResponse = try JSONDecoder().decode(NewPollutantsResponse.self, from: data)
+                    completionHandler(.success(newPollutantsResponse.data))
+                } catch {
+                    print(error)
+                    completionHandler(.failure(.networkError))
+                }
+            }
+    }
+
     static func getHourlyHistorical(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
         guard let url = URL(string: "\(self.apiDomain)/v1/historical-pollutants") else {
             completionHandler(.failure(.badURL))

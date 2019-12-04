@@ -29,4 +29,12 @@ struct OneSignalStationSetting: Hashable, Codable {
             "\(stationName)_cleanliness_therhold": isCleanlinessNotificationEnabled ? "\(cleanlinessTherhold)" : "",
         ]
     }
+
+    func getDisabledTags() -> [String: String] {
+        return [
+            "\(stationName)": "",
+            "\(stationName)_pollution_therhold": "",
+            "\(stationName)_cleanliness_therhold": "",
+        ]
+    }
 }
