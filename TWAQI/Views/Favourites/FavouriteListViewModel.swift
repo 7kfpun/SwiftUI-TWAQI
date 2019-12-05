@@ -26,14 +26,18 @@ class FavouriteListViewModel: ObservableObject {
         let stationIds = (self.stationSettings.keys.map { String($0) }).joined(separator: ",")
         print("getFavouritePollutants", stationIds)
 
-        APIManager.getCurrentPollutantsByStationIds(stationIds: stationIds) { result in
-            switch result {
-            case .success(let result):
-                print("getCurrentPollutantsByStationIds Total: \(result.count)")
-                self.favouritePollutants = result
-            case .failure(let error):
-                print(error.localizedDescription)
+        if !stationIds.isEmpty {
+            APIManager.getCurrentPollutantsByStationId(stationId: stationIds) { result in
+                switch result {
+                case .success(let result):
+                    print("getCurrentPollutantsByStationId Total: \(result.count)")
+                    self.favouritePollutants = result
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
             }
+        } else {
+            self.favouritePollutants = []
         }
     }
 

@@ -15,18 +15,22 @@ struct FavouriteListView: View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
-                        FavouriteRow(pollutant: pollutant)
-                    }
-
-                    HStack {
-                        Spacer()
-                        Button(action: self.removeAll) {
-                            Text("Favourites.cancel_all_notification")
+                    if !self.viewModel.favouritePollutants.isEmpty {
+                        ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
+                            FavouriteRow(pollutant: pollutant)
                         }
-                        Spacer()
+
+                        HStack {
+                            Spacer()
+                            Button(action: self.removeAll) {
+                                Text("Favourites.cancel_all_notification")
+                            }
+                            Spacer()
+                        }
+                        .padding(.top, 10)
+                    } else {
+                        Text("Favourites.add_your_first_favourite_station")
                     }
-                    .padding(.top, 10)
 
                     Spacer().frame(height: 50)
                 }
@@ -58,6 +62,7 @@ struct FavouriteListView: View {
                 switch result {
                 case .success(let result):
                     print(result)
+                    self.viewModel.getData()
                 case .failure(let error):
                     print(error.localizedDescription)
                 }

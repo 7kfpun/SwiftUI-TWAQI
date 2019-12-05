@@ -101,14 +101,14 @@ struct APIManager {
             }
     }
 
-    static func getCurrentPollutantsByStationIds(stationIds: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
+    static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
         guard let url = URL(string: "\(self.apiDomain)/v1/current-pollutants") else {
             completionHandler(.failure(.badURL))
             return
         }
 
         let parameters: Parameters = [
-            "station_ids": stationIds,
+            "station_id": stationId,
         ]
 
         AF.request(url, parameters: parameters)
