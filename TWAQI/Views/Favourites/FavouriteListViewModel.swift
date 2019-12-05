@@ -23,7 +23,9 @@ class FavouriteListViewModel: ObservableObject {
     }
 
     func getFavouritePollutants() {
-        let stationIds = (self.stationSettings.keys.map { String($0) }).joined(separator: ",")
+        let stationIds = (self.stationSettings.keys.map {
+            TaiwanStationMapper().toStationId(name: String($0)) != "" ? TaiwanStationMapper().toStationId(name: String($0)) : String($0)
+        }).joined(separator: ",")
         print("getFavouritePollutants", stationIds)
 
         if !stationIds.isEmpty {

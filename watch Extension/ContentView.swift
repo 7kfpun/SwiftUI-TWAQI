@@ -108,26 +108,26 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ContentView(
-                    station: Station(
-                        name: "Matsu",
-                        nameLocal: "馬祖",
-                        lat: 26.160469,
-                        lon: 119.949875
-                    )
+                station: Station(
+                    name: "Matsu",
+                    nameLocal: "馬祖",
+                    lat: 26.160469,
+                    lon: 119.949875
                 )
-                .previewDevice("Apple Watch Series 4 - 44mm")
-                .environmentObject(SettingsStore())
+            )
+            .previewDevice("Apple Watch Series 4 - 44mm")
+            .environmentObject(SettingsStore())
 
             ContentView(
-                    station: Station(
-                        name: "Matsu",
-                        nameLocal: "馬祖",
-                        lat: 26.160469,
-                        lon: 119.949875
-                    )
+                station: Station(
+                    name: "Matsu",
+                    nameLocal: "馬祖",
+                    lat: 26.160469,
+                    lon: 119.949875
                 )
-                .previewDevice("Apple Watch Series 2 - 38mm")
-                .environmentObject(SettingsStore())
+            )
+            .previewDevice("Apple Watch Series 2 - 38mm")
+            .environmentObject(SettingsStore())
         }
     }
 }

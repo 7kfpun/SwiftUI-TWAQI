@@ -15,11 +15,11 @@ struct FavouriteListView: View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    if !self.viewModel.favouritePollutants.isEmpty {
-                        ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
-                            FavouriteRow(pollutant: pollutant)
-                        }
+                    ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
+                        FavouriteRow(pollutant: pollutant)
+                    }
 
+                    if !self.viewModel.favouritePollutants.isEmpty {
                         HStack {
                             Spacer()
                             Button(action: self.removeAll) {
@@ -29,10 +29,15 @@ struct FavouriteListView: View {
                         }
                         .padding(.top, 10)
                     } else {
-                        Text("Favourites.add_your_first_favourite_station")
+                        HStack {
+                            Spacer()
+                            Text("Favourites.add_your_first_favourite_station")
+                            Spacer()
+                        }
+                        .padding(.top, 50)
                     }
 
-                    Spacer().frame(height: 50)
+                    Spacer().frame(height: 80)
                 }
 
                 AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
