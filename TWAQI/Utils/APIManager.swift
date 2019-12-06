@@ -165,31 +165,6 @@ struct APIManager {
     }
 
     // MARK: - Legacy endpoints
-    static func getAQI(completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: getEnv("AQI API")!) else {
-            completionHandler(.failure(.badURL))
-            return
-        }
-
-        AF.request(url)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
-                    }
-
-                    debugPrint(response)
-                    let pollutants = try JSONDecoder().decode(Pollutants.self, from: data)
-                    completionHandler(.success(pollutants))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
-                }
-            }
-    }
-
     static func getForecast(completionHandler: @escaping (Result<ForecastAreas, NetworkError>) -> Void) {
         guard let url = URL(string: getEnv("FORECAST API")!) else {
             completionHandler(.failure(.badURL))

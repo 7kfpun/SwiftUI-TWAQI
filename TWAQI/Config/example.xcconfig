@@ -12,7 +12,8 @@
 // Please copy the file and rename to debug.xcconfig and release.xcconfig
 
 // APIs
-AQI_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqi.json?alt=media&token=1c4ec7d6-a38d-4046-9bca-9bbe9c9761f0
+// TODO: handle for the demo
+API_DOMAIN =
 FORECAST_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqfn.json?alt=media&token=e790ed5f-a6aa-4b50-8473-98e68186d11b
 HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/history.json?alt=media&token=4ff87ac5-e117-4149-9257-4784aea2fdbe
 CUSTOM_AD_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/custom_ad.json?alt=media&token=5164b9ad-e530-48c7-b20f-1dc030b05565
