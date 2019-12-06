@@ -23,6 +23,7 @@ final class SettingsStore: ObservableObject {
         static let lastestMapLat = "lastestMapLat"
         static let lastestMapLon = "lastestMapLon"
         static let lastestMapZoom = "lastestMapZoom"
+        static let savedFavouriteStations = "savedFavouriteStations"
     }
 
     private let cancellable: Cancellable
@@ -44,6 +45,7 @@ final class SettingsStore: ObservableObject {
             Keys.lastestMapLat: 23.49,
             Keys.lastestMapLon: 120.96,
             Keys.lastestMapZoom: 7.9,
+            Keys.savedFavouriteStations: [126],
         ])
 
         cancellable = NotificationCenter.default
@@ -111,6 +113,11 @@ final class SettingsStore: ObservableObject {
     var lastestMapZoom: Float {
         set { defaults.set(newValue, forKey: Keys.lastestMapZoom) }
         get { defaults.float(forKey: Keys.lastestMapZoom) }
+    }
+
+    var savedFavouriteStations: [Int] {
+        set { defaults.set(newValue, forKey: Keys.savedFavouriteStations) }
+        get { defaults.array(forKey: Keys.savedFavouriteStations) as! [Int] }
     }
 }
 

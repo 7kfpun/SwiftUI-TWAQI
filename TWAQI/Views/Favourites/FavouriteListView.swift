@@ -9,21 +9,22 @@
 import SwiftUI
 
 struct FavouriteListView: View {
+    @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: FavouriteListViewModel
 
     var body: some View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
-                        FavouriteRow(pollutant: pollutant)
-                    }
+                    if !settings.savedFavouriteStations.isEmpty {
+                        ForEach(self.viewModel.favouritePollutants, id: \.self) {pollutant in
+                            FavouriteRow(pollutant: pollutant)
+                        }
 
-                    if !self.viewModel.favouritePollutants.isEmpty {
                         HStack {
                             Spacer()
                             Button(action: self.removeAll) {
-                                Text("Favourites.cancel_all_notification")
+                                Text("Favourites.remove_all_saved_stations")
                             }
                             Spacer()
                         }
@@ -59,21 +60,25 @@ struct FavouriteListView: View {
     }
 
     private func removeAll() {
-        print("removeAll", self.viewModel.stationSettings)
-        for (_, stationSetting) in self.viewModel.stationSettings {
-            OneSignalManager.sendTags(
-                tags: stationSetting.getDisabledTags()
-            ) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                    self.viewModel.getData()
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-        }
+        settings.savedFavouriteStations = []
     }
+
+//    private func removeAll() {
+//        print("removeAll", self.viewModel.stationSettings)
+//        for (_, stationSetting) in self.viewModel.stationSettings {
+//            OneSignalManager.sendTags(
+//                tags: stationSetting.getDisabledTags()
+//            ) { result in
+//                switch result {
+//                case .success(let result):
+//                    print(result)
+//                    self.viewModel.getData()
+//                case .failure(let error):
+//                    print(error.localizedDescription)
+//                }
+//            }
+//        }
+//    }
 }
 
 struct FavouritesListView_Previews: PreviewProvider {

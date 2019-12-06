@@ -16,6 +16,7 @@
 "FavouriteList.favourites" = "Favourites";
 "Favourites.cancel_all_notification" = "Cancel station notification";
 "Favourites.add_your_first_favourite_station" = "Add your first favourite station";
+"Favourites.remove_all_your_saved_stations" = "Remove all your saved station";
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";

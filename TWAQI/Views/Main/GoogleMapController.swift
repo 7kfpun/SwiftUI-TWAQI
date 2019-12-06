@@ -413,7 +413,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
-        detailsViewController.navigationItem.rightBarButtonItem = UIBarButtonItem(
+        detailsViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
             action: #selector(dismissModal)

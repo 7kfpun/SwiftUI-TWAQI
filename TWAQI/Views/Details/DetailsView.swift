@@ -61,6 +61,10 @@ struct DetailsView: View {
             self.getData()
         }
         .edgesIgnoringSafeArea(.top)
+        .navigationBarItems(trailing: Button(action: { self.viewModel.favouriteStationToggle() }) {
+            Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
+        }
+        .buttonStyle(PlainButtonStyle()))
     }
 
     init(stationId: Int) {
