@@ -14,7 +14,6 @@
 "Tabbar.help" = "Help";
 
 "FavouriteList.favourites" = "Favourites";
-"Favourites.cancel_all_notification" = "Cancel station notification";
 "Favourites.add_your_first_favourite_station" = "Add your first favourite station";
 "Favourites.remove_all_your_saved_stations" = "Remove all your saved station";
 
@@ -42,6 +41,8 @@
 "Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
 "Help.start_time" = "Start Time";
 "Help.end_time" = "End Time";
+"Help.cancel_site_notification" = "Cancel site notification";
+"Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";
 "Help.ad_free" = "Remove Ads?";
 "Help.restore_purchase" = "Restore purchase";

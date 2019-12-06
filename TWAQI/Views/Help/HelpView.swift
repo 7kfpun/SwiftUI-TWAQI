@@ -41,6 +41,18 @@ struct HelpView: View {
                             )
                             .padding(.vertical, 10)
                         }
+
+                        Button(action: {
+                            self.viewModel.removeAllNotification()
+                        }) {
+                            Text("Help.cancel_site_notification")
+                        }
+                        .alert(isPresented: $viewModel.showingAlert) {
+                            Alert(
+                                title: Text("Help.all_site_notification_has_been_cancelled"),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        }
                     }
 
                     if !settings.isPro {

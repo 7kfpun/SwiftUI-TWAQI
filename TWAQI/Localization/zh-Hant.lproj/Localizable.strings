@@ -14,7 +14,6 @@
 "Tabbar.help" = "幫助";
 
 "FavouriteList.favourites" = "最愛列表";
-"Favourites.cancel_all_notification" = "除消空氣品質通知";
 "Favourites.add_your_first_favourite_station" = "添加您的最愛";
 "Favourites.remove_all_your_saved_stations" = "刪除所有最愛";
 
@@ -42,6 +41,8 @@
 "Help.turn_on_do_not_disturb" = "開啟請勿打擾";
 "Help.start_time" = "開始";
 "Help.end_time" = "結束";
+"Help.cancel_site_notification" = "取消所有空氣品質通知";
+"Help.all_site_notification_has_been_cancelled" = "已經取消所有通知";
 "Help.in_app_purchase" = "應用程式內購買";
 "Help.ad_free" = "想移除廣告？";
 "Help.restore_purchase" = "恢復你的應用內購買";

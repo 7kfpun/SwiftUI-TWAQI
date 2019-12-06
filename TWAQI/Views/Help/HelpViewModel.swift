@@ -91,9 +91,42 @@ class HelpViewModel: ObservableObject {
         }
     }
 
+    @Published var showingAlert: Bool = false {
+        willSet { self.objectWillChange.send() }
+    }
+
     init() {
         self.isDndEnabled = settings.isDndEnabled
         self.dndStartTime = settings.dndStartTime
         self.dndEndTime = settings.dndEndTime
+    }
+
+    func removeAllNotification() {
+        print("")
+        OneSignalManager.getOneSignalSettings { result in
+            switch result {
+            case .success(let result):
+                self.disabledNotification(stationSettings: result.stationSettings)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+
+    private func disabledNotification(stationSettings: [String: OneSignalStationSetting]) {
+        for (_, stationSetting) in stationSettings {
+            OneSignalManager.sendTags(
+                tags: stationSetting.getDisabledTags()
+            ) { result in
+                switch result {
+                case .success(let result):
+                    print(result)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+
+        showingAlert = true
     }
 }
