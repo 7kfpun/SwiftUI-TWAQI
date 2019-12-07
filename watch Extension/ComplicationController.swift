@@ -91,7 +91,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    private func getDummyTemplate(for complication: CLKComplication, station: NewStation, historicalPollutant: HistoricalPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
+    private func getDummyTemplate(for complication: CLKComplication, station: Station, historicalPollutant: HistoricalPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
         let template: CLKComplicationTemplate
 
         let stationName = Locale.isChinese ? station.nameLocal : station.name

@@ -19,7 +19,7 @@ let defaultCountry = Country(
     nameLocal: "台灣"
 )
 
-let defaultStation = NewStation(
+let defaultStation = Station(
     id: 1,
     countryId: 1,
     countryCode: "twn",
@@ -78,9 +78,9 @@ final class SettingsStore: ObservableObject {
         get { defaults.string(forKey: Keys.closestCountryCode) ?? "twn" }
     }
 
-    var closestStation: NewStation {
+    var closestStation: Station {
         set { defaults.setStruct(newValue, forKey: Keys.closestStationNew) }
-        get { defaults.structData(NewStation.self, forKey: Keys.closestStationNew) ?? defaultStation }
+        get { defaults.structData(Station.self, forKey: Keys.closestStationNew) ?? defaultStation }
     }
 
     var closestStationName: String {

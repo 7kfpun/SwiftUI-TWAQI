@@ -11,7 +11,7 @@ import SwiftUI
 struct SettingsRow: View {
     @ObservedObject var viewModel: SettingsRowViewModel
 
-    var station: NewStation
+    var station: Station
 
     let TOO_SMALL_POLLUTION = 110.0
     let TOO_LARGE_CLEANLINESS = 30.0
@@ -78,7 +78,7 @@ struct SettingsRow: View {
         .padding(.horizontal)
     }
 
-    init(station: NewStation) {
+    init(station: Station) {
         self.station = station
         self.viewModel = SettingsRowViewModel(station: station)
     }

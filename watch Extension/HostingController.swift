@@ -13,7 +13,7 @@ import SwiftUI
 class HostingController: WKHostingController<AnyView> {
     override var body: AnyView {
         return AnyView(ContentView(
-            station: NewStation(
+            station: Station(
                 id: 1,
                 countryId: 1,
                 countryCode: "twn",

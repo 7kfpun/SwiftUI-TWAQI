@@ -52,7 +52,7 @@ struct APIManager {
             }
     }
 
-    static func getStations(countryCode: String, completionHandler: @escaping (Result<NewStations, NetworkError>) -> Void) {
+    static func getStations(countryCode: String, completionHandler: @escaping (Result<Stations, NetworkError>) -> Void) {
         guard let url = URL(string: "\(self.apiDomain)\(self.stationsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
@@ -68,9 +68,9 @@ struct APIManager {
                 let json = JSON(response.data as Any)
                 debugPrint("getStations.responseJSON: \(json)")
                 if json["success"] == true {
-                    var stations: NewStations = []
+                    var stations: Stations = []
                     for (_, stationJSON) in json["data"] {
-                        stations.append(NewStation(
+                        stations.append(Station(
                             id: stationJSON["id"].int ?? 0,
                             countryId: stationJSON["countryId"].int ?? 0,
                             countryCode: stationJSON["countryCode"].string ?? "",
@@ -163,7 +163,7 @@ struct APIManager {
                 debugPrint("getHistoricalPollutants.responseJSON: \(json)")
                 if json["success"] == true {
                     let stationJSON = json["station"]
-                    let station: NewStation = NewStation(
+                    let station: Station = Station(
                         id: stationJSON["id"].int ?? 0,
                         countryId: stationJSON["countryId"].int ?? 0,
                         countryCode: stationJSON["countryCode"].string ?? "",
@@ -185,9 +185,9 @@ struct APIManager {
                             so2: historicalPollutantJSON["so2"].double ?? 0,
                             co: historicalPollutantJSON["co"].double ?? 0,
                             o3: historicalPollutantJSON["o3"].double ?? 0,
-                            windDirection: historicalPollutantJSON["windDirection"].double ?? 0,
-                            windSpeed: historicalPollutantJSON["windSpeed"].double ?? 0,
-                            publishTime: historicalPollutantJSON["publishTime"].string ?? ""
+                            windDirection: historicalPollutantJSON["wind_direction"].double ?? 0,
+                            windSpeed: historicalPollutantJSON["wind_speed"].double ?? 0,
+                            publishTime: historicalPollutantJSON["publish_time"].string ?? ""
                         ))
                     }
 
@@ -218,36 +218,6 @@ struct APIManager {
                     debugPrint(response)
                     let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: data)
                     completionHandler(.success(forecastAreas))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
-                }
-            }
-    }
-
-    static func getHistory(nameLocal: String, limit: Int = 24, completionHandler: @escaping (Result<HistoryPollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: getEnv("HISTORY API")!) else {
-            completionHandler(.failure(.badURL))
-            return
-        }
-
-        let parameters: Parameters = [
-            "station": nameLocal,
-            "limit": limit,
-        ]
-
-        AF.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
-                    }
-
-                    debugPrint(response)
-                    let jsonData = try JSONDecoder().decode([String: [HistoryPollutant]].self, from: data)
-                    completionHandler(.success(jsonData["data"]!))
                 } catch {
                     print(error)
                     completionHandler(.failure(.networkError))

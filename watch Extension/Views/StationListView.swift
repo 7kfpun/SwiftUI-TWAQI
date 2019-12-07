@@ -15,7 +15,7 @@ struct StationListView: View {
     let defaults = UserDefaults.standard
 
     var country: Country
-    var stations: NewStations
+    var stations: Stations
 
     var body: some View {
         VStack {
@@ -37,7 +37,7 @@ struct StationListView: View {
         }
     }
 
-    init(country: Country, stations: NewStations = []) {
+    init(country: Country, stations: Stations = []) {
         self.country = country
         self.stations = stations
         self.viewModel = StationListViewModel(country: country)
@@ -61,7 +61,7 @@ struct StationListView_Previews: PreviewProvider {
                 nameLocal: "台灣"
             ),
             stations: [
-                NewStation(
+                Station(
                     id: 0,
                     countryId: 1,
                     countryCode: "twn",
@@ -72,7 +72,7 @@ struct StationListView_Previews: PreviewProvider {
                     name: "Yangming",
                     nameLocal: "陽明"
                 ),
-                NewStation(
+                Station(
                     id: 1,
                     countryId: 1,
                     countryCode: "twn",

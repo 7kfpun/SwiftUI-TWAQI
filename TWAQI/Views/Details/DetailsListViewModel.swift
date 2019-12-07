@@ -12,7 +12,7 @@ import Foundation
 class DetailsListViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
-    @Published var stations: NewStations = [] {
+    @Published var stations: Stations = [] {
         willSet { self.objectWillChange.send() }
     }
 

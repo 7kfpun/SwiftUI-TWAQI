@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct DetailsRow: View {
-    var station: NewStation
+    var station: Station
 
     var body: some View {
         NavigationLink(destination: DetailsView(stationId: station.id)) {

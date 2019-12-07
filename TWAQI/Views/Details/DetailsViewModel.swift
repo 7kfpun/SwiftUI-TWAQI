@@ -15,7 +15,7 @@ class DetailsViewModel: ObservableObject {
 
     var stationId: Int
 
-    @Published var station: NewStation? {
+    @Published var station: Station? {
         willSet { self.objectWillChange.send() }
     }
 
@@ -37,7 +37,7 @@ class DetailsViewModel: ObservableObject {
         APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
             switch result {
             case .success(let result):
-                self.station = result["station"] as? NewStation
+                self.station = result["station"] as? Station
                 self.historyPollutants = result["data"] as! HistoricalPollutants
             case .failure(let error):
                 print(error.localizedDescription)

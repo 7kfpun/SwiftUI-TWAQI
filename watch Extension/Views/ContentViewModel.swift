@@ -11,7 +11,7 @@ import Foundation
 
 class ContentViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
-    var station: NewStation?
+    var station: Station?
 
     @Published var historicalPollutants: HistoricalPollutants = [] {
         willSet { self.objectWillChange.send() }
@@ -21,7 +21,7 @@ class ContentViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    init(station: NewStation, historicalPollutants: HistoricalPollutants = []) {
+    init(station: Station, historicalPollutants: HistoricalPollutants = []) {
         self.station = station
         self.historicalPollutants = historicalPollutants
     }
@@ -32,13 +32,13 @@ class ContentViewModel: ObservableObject {
             APIManager.getHistoricalPollutants(stationId: station.id) { result in
                 switch result {
                 case .success(let result):
-                    self.station = result["station"] as? NewStation
+                    self.station = result["station"] as? Station
                     self.historicalPollutants = result["data"] as! HistoricalPollutants
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
+                self.isLoading = false
             }
-            self.isLoading = false
         }
     }
 }

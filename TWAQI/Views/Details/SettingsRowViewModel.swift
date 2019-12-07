@@ -11,9 +11,9 @@ import Foundation
 
 class SettingsRowViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
-    var station: NewStation
+    var station: Station
 
-    init(station: NewStation) {
+    init(station: Station) {
         self.station = station
 
         var notificationTagCode: String

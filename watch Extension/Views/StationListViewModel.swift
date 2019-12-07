@@ -14,7 +14,7 @@ class StationListViewModel: ObservableObject {
 
     var country: Country
 
-    @Published var stations: NewStations = [] {
+    @Published var stations: Stations = [] {
         willSet { self.objectWillChange.send() }
     }
 

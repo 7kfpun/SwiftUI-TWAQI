@@ -93,7 +93,7 @@ struct ContentView: View {
         .onAppear(perform: getData)
     }
 
-    init(station: NewStation) {
+    init(station: Station) {
         self.viewModel = ContentViewModel(station: station)
     }
 
@@ -109,7 +109,7 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ContentView(
-                station: NewStation(
+                station: Station(
                     id: 1,
                     countryId: 1,
                     countryCode: "twn",
@@ -125,7 +125,7 @@ struct ContentView_Previews: PreviewProvider {
             .environmentObject(SettingsStore())
 
             ContentView(
-                station: NewStation(
+                station: Station(
                     id: 1,
                     countryId: 1,
                     countryCode: "twn",
