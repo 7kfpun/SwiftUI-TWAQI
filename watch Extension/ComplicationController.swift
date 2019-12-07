@@ -29,14 +29,16 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         let station = settingsStore.closestStation
         let airIndexTypeSelected = settingsStore.airIndexTypeSelected
 
-        APIManager.getHistory(nameLocal: station.nameLocal, limit: 1) { result in
+        APIManager.getHistoricalPollutants(stationId: station.id) { result in
             switch result {
-            case .success(let historyPollutants):
-                if let lastHistoryPollutant = historyPollutants.last,
+            case .success(let result):
+                let historicalPollutants = result["data"] as! HistoricalPollutants
+
+                if let lastHistoricalPollutant = historicalPollutants.last,
                     let template = self.getDummyTemplate(
                         for: complication,
                         station: station,
-                        historyPollutant: lastHistoryPollutant,
+                        historicalPollutant: lastHistoricalPollutant,
                         airIndexTypeSelected: airIndexTypeSelected
                     ) {
                     let entry = CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template)
@@ -45,7 +47,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
                     handler(nil)
                 }
             case .failure(let error):
-                print(error)
+                print(error.localizedDescription)
                 handler(nil)
             }
         }
@@ -67,8 +69,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         // This method will be called once per supported complication, and the results will be cached
         let station = settingsStore.closestStation
 
-        let historyPollutant = HistoryPollutant(
-            stationId: 0,
+        let historicalPollutant = HistoricalPollutant(
             aqi: 0,
             pm25: 0,
             pm10: 0,
@@ -76,11 +77,13 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             so2: 0,
             co: 0,
             o3: 0,
+            windDirection: 0,
+            windSpeed: 0,
             publishTime: "--"
         )
 
         if let template = getDummyTemplate(
-            for: complication, station: station, historyPollutant: historyPollutant, airIndexTypeSelected: AirIndexTypes.aqi
+            for: complication, station: station, historicalPollutant: historicalPollutant, airIndexTypeSelected: AirIndexTypes.aqi
         ) {
             handler(template)
         } else {
@@ -88,12 +91,12 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    private func getDummyTemplate(for complication: CLKComplication, station: Station, historyPollutant: HistoryPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
+    private func getDummyTemplate(for complication: CLKComplication, station: NewStation, historicalPollutant: HistoricalPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
         let template: CLKComplicationTemplate
 
         let stationName = Locale.isChinese ? station.nameLocal : station.name
-        let aqiDisplayValue = historyPollutant.aqi.format(f: AirIndexTypes.aqi.getFormat())
-        let pm25DisplayValue = historyPollutant.pm25.format(f: AirIndexTypes.pm25.getFormat())
+        let aqiDisplayValue = historicalPollutant.aqi.format(f: AirIndexTypes.aqi.getFormat())
+        let pm25DisplayValue = historicalPollutant.pm25.format(f: AirIndexTypes.pm25.getFormat())
         let aqiAndPm25 = "\(AirIndexTypes.aqi.toString()) \(aqiDisplayValue), \(AirIndexTypes.pm25.toString()) \(pm25DisplayValue)"
 
         var airStatus: AirStatuses
@@ -102,17 +105,17 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         if airIndexTypeSelected == AirIndexTypes.aqi {
             airStatus = AirStatuses.checkAirStatus(
                 airIndexType: AirIndexTypes.aqi,
-                value: historyPollutant.aqi
+                value: historicalPollutant.aqi
             )
             displayValue = aqiDisplayValue
-            displayFraction = Float(historyPollutant.aqi / 500)
+            displayFraction = Float(historicalPollutant.aqi / 500)
         } else {
             airStatus = AirStatuses.checkAirStatus(
                 airIndexType: AirIndexTypes.pm25,
-                value: historyPollutant.pm25
+                value: historicalPollutant.pm25
             )
             displayValue = pm25DisplayValue
-            displayFraction = Float(historyPollutant.pm25 / 500)
+            displayFraction = Float(historicalPollutant.pm25 / 500)
         }
 
         let airStatusText = "AirStatus.\(airStatus.rawValue)".localized

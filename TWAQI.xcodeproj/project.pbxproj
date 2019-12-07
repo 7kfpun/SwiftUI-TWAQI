@@ -16,6 +16,8 @@
 		9E03DF6623975D4F002F8DA4 /* FavouriteListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */; };
 		9E03DF6823975E21002F8DA4 /* FavouriteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6723975E21002F8DA4 /* FavouriteRow.swift */; };
 		9E03DF6A23994500002F8DA4 /* TaiwanStationsMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6923994500002F8DA4 /* TaiwanStationsMapper.swift */; };
+		9E03DF6D239B8366002F8DA4 /* CountryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6C239B8366002F8DA4 /* CountryListView.swift */; };
+		9E03DF6F239B8E89002F8DA4 /* StationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6E239B8E89002F8DA4 /* StationListViewModel.swift */; };
 		9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
 		9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E08761E2382D75C0060476E /* ContentViewModel.swift */; };
 		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
@@ -207,6 +209,8 @@
 		9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListViewModel.swift; sourceTree = "<group>"; };
 		9E03DF6723975E21002F8DA4 /* FavouriteRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteRow.swift; sourceTree = "<group>"; };
 		9E03DF6923994500002F8DA4 /* TaiwanStationsMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaiwanStationsMapper.swift; sourceTree = "<group>"; };
+		9E03DF6C239B8366002F8DA4 /* CountryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryListView.swift; sourceTree = "<group>"; };
+		9E03DF6E239B8E89002F8DA4 /* StationListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationListViewModel.swift; sourceTree = "<group>"; };
 		9E08761E2382D75C0060476E /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -361,6 +365,18 @@
 				9E03DF6723975E21002F8DA4 /* FavouriteRow.swift */,
 			);
 			path = Favourites;
+			sourceTree = "<group>";
+		};
+		9E03DF6B239B82DC002F8DA4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9E910C472381830300B8B316 /* ContentView.swift */,
+				9E08761E2382D75C0060476E /* ContentViewModel.swift */,
+				9E03DF6C239B8366002F8DA4 /* CountryListView.swift */,
+				9E910C672381848E00B8B316 /* StationListView.swift */,
+				9E03DF6E239B8E89002F8DA4 /* StationListViewModel.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		9E1AC52F233F981700AC862D = {
@@ -570,13 +586,11 @@
 		9E910C462381830300B8B316 /* watch Extension */ = {
 			isa = PBXGroup;
 			children = (
+				9E03DF6B239B82DC002F8DA4 /* Views */,
 				9E910C642381841C00B8B316 /* Utils */,
-				9E910C472381830300B8B316 /* ContentView.swift */,
-				9E08761E2382D75C0060476E /* ContentViewModel.swift */,
 				9E96B52A23892C7B00EEA5B9 /* ComplicationController.swift */,
 				9E910C4B2381830400B8B316 /* ExtensionDelegate.swift */,
 				9E910C492381830400B8B316 /* HostingController.swift */,
-				9E910C672381848E00B8B316 /* StationListView.swift */,
 				9E910C4D2381830400B8B316 /* NotificationController.swift */,
 				9E910C4F2381830400B8B316 /* NotificationView.swift */,
 				9E910C512381830500B8B316 /* Assets.xcassets */,
@@ -1082,6 +1096,7 @@
 				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,
 				9E910C69238184AC00B8B316 /* StationGroups.swift in Sources */,
 				9E910C4A2381830400B8B316 /* HostingController.swift in Sources */,
+				9E03DF6D239B8366002F8DA4 /* CountryListView.swift in Sources */,
 				9EF3D34C2393B636009CED32 /* NewStations.swift in Sources */,
 				9E910C6F2381850B00B8B316 /* DataManager.swift in Sources */,
 				9E910C482381830300B8B316 /* ContentView.swift in Sources */,
@@ -1094,6 +1109,7 @@
 				9E910C6A238184B300B8B316 /* Stations.swift in Sources */,
 				9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */,
 				9E910C682381848E00B8B316 /* StationListView.swift in Sources */,
+				9E03DF6F239B8E89002F8DA4 /* StationListViewModel.swift in Sources */,
 				9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */,
 				9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */,
 				9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */,

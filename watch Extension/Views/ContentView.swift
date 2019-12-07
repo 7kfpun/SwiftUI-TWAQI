@@ -16,8 +16,7 @@ struct ContentView: View {
     var airIndexTypes: AirIndexTypes = AirIndexTypes.aqi
 
     var body: some View {
-        let lastHistoryPollutant = self.viewModel.historyPollutants.last ?? HistoryPollutant(
-            stationId: 0,
+        let lastHistoricalPollutant = self.viewModel.historicalPollutants.last ?? HistoricalPollutant(
             aqi: 0,
             pm25: 0,
             pm10: 0,
@@ -25,20 +24,22 @@ struct ContentView: View {
             so2: 0,
             co: 0,
             o3: 0,
+            windDirection: 0,
+            windSpeed: 0,
             publishTime: "--"
         )
 
         let airIndexTypeSelected = self.settings.airIndexTypeSelected
         let airStatus = AirStatuses.checkAirStatus(
             airIndexType: airIndexTypeSelected,
-            value: lastHistoryPollutant.getValue(airIndexType: airIndexTypeSelected)
+            value: lastHistoricalPollutant.getValue(airIndexType: airIndexTypeSelected)
         )
-        let publishTime = lastHistoryPollutant.publishTime.toDate()?.toFormat("HH:mm") ?? ""
+        let publishTime = lastHistoricalPollutant.publishTime.toDate()?.toFormat("HH:mm") ?? ""
 
         return VStack {
             HStack {
                 NavigationLink(
-                    destination: StationListView()) {
+                    destination: CountryListView()) {
                         Text(Locale.isChinese ? settings.closestStation.nameLocal : settings.closestStation.name)
                 }
 
@@ -58,7 +59,7 @@ struct ContentView: View {
 
                         LabelView(
                             airIndexTypes: airIndexTypeSelected,
-                            value: lastHistoryPollutant.getValue(airIndexType: airIndexTypeSelected)
+                            value: lastHistoricalPollutant.getValue(airIndexType: airIndexTypeSelected)
                         )
                     }
                 }
@@ -92,7 +93,7 @@ struct ContentView: View {
         .onAppear(perform: getData)
     }
 
-    init(station: Station) {
+    init(station: NewStation) {
         self.viewModel = ContentViewModel(station: station)
     }
 
@@ -108,22 +109,32 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ContentView(
-                station: Station(
-                    name: "Matsu",
-                    nameLocal: "馬祖",
-                    lat: 26.160469,
-                    lon: 119.949875
+                station: NewStation(
+                    id: 1,
+                    countryId: 1,
+                    countryCode: "twn",
+                    code: "Songshan",
+                    lat: 25.050000,
+                    lon: 121.578611,
+                    imageUrl: "",
+                    name: "Songshan",
+                    nameLocal: "松山"
                 )
             )
             .previewDevice("Apple Watch Series 4 - 44mm")
             .environmentObject(SettingsStore())
 
             ContentView(
-                station: Station(
-                    name: "Matsu",
-                    nameLocal: "馬祖",
-                    lat: 26.160469,
-                    lon: 119.949875
+                station: NewStation(
+                    id: 1,
+                    countryId: 1,
+                    countryCode: "twn",
+                    code: "Songshan",
+                    lat: 25.050000,
+                    lon: 121.578611,
+                    imageUrl: "",
+                    name: "Songshan",
+                    nameLocal: "松山"
                 )
             )
             .previewDevice("Apple Watch Series 2 - 38mm")

@@ -13,12 +13,16 @@ import SwiftUI
 class HostingController: WKHostingController<AnyView> {
     override var body: AnyView {
         return AnyView(ContentView(
-            station: Station(
-                name: "Matsu",
-                nameLocal: "馬祖",
-                lat: 26.160469,
-                lon: 119.949875,
-                imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+            station: NewStation(
+                id: 1,
+                countryId: 1,
+                countryCode: "twn",
+                code: "Songshan",
+                lat: 25.050000,
+                lon: 121.578611,
+                imageUrl: "",
+                name: "Songshan",
+                nameLocal: "松山"
             )
         ).environmentObject(SettingsStore()))
     }

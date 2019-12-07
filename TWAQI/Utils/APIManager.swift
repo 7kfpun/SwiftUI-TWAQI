@@ -44,7 +44,7 @@ struct APIManager {
                             lon: countryJSON["lon"].double ?? 0,
                             zoom: countryJSON["zoom"].float ?? 0,
                             name: countryJSON["name"]["en"].string ?? "",
-                            nameLocal: countryJSON["name"]["zh"].string ?? countryJSON["name"]["th"].string ?? ""
+                            nameLocal: countryJSON["name"]["zh"].string ?? countryJSON["name"]["th"].string ?? countryJSON["name"]["en"].string ?? ""
                         ))
                     }
                     completionHandler(.success(countries))
@@ -79,7 +79,7 @@ struct APIManager {
                             lon: stationJSON["lon"].double ?? 0,
                             imageUrl: stationJSON["zoom"].string,
                             name: stationJSON["name"]["en"].string ?? "",
-                            nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? ""
+                            nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? stationJSON["name"]["en"].string ?? ""
                         ))
                     }
                     completionHandler(.success(stations))

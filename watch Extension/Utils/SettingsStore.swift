@@ -9,18 +9,34 @@
 import Combine
 import SwiftUI
 
-let defaultStation = Station(
-    name: "Matsu",
-    nameLocal: "馬祖",
-    lat: 26.160469,
-    lon: 119.949875,
-    imageUrl: "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=75&type=l"
+let defaultCountry = Country(
+    id: 0,
+    code: "twn",
+    lat: 12,
+    lon: 123.1,
+    zoom: 12,
+    name: "Taiwan",
+    nameLocal: "台灣"
+)
+
+let defaultStation = NewStation(
+    id: 1,
+    countryId: 1,
+    countryCode: "twn",
+    code: "Songshan",
+    lat: 25.050000,
+    lon: 121.578611,
+    imageUrl: "",
+    name: "Songshan",
+    nameLocal: "松山"
 )
 
 final class SettingsStore: ObservableObject {
     private enum Keys {
         static let airIndexTypeSelected = "airIndexTypeSelected"
-        static let closestStation = "closestStation"
+        static let closestCountry = "closestCountry"
+        static let closestCountryCode = "closestCountryCode"
+        static let closestStationNew = "closestStationNew"
         static let closestStationName = "closestStationName"
     }
 
@@ -34,6 +50,7 @@ final class SettingsStore: ObservableObject {
 
         defaults.register(defaults: [
             Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
+            Keys.closestCountryCode: "twn",
             Keys.closestStationName: "松山",
         ])
 
@@ -51,9 +68,19 @@ final class SettingsStore: ObservableObject {
         }
     }
 
-    var closestStation: Station {
-        set { defaults.setStruct(newValue, forKey: Keys.closestStation) }
-        get { defaults.structData(Station.self, forKey: Keys.closestStation) ?? defaultStation }
+    var closestCountry: Country {
+        set { defaults.setStruct(newValue, forKey: Keys.closestCountry) }
+        get { defaults.structData(Country.self, forKey: Keys.closestCountry) ?? defaultCountry }
+    }
+
+    var closestCountryCode: String {
+        set { defaults.set(newValue, forKey: Keys.closestCountryCode) }
+        get { defaults.string(forKey: Keys.closestCountryCode) ?? "twn" }
+    }
+
+    var closestStation: NewStation {
+        set { defaults.setStruct(newValue, forKey: Keys.closestStationNew) }
+        get { defaults.structData(NewStation.self, forKey: Keys.closestStationNew) ?? defaultStation }
     }
 
     var closestStationName: String {

@@ -38,6 +38,8 @@
 	</array>
 	<key>HISTORY API</key>
 	<string>$(HISTORY_API)</string>
+	<key>ApiDomain</key>
+	<string>$(API_DOMAIN)</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>

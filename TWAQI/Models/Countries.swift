@@ -10,7 +10,7 @@ import Foundation
 
 typealias Countries = [Country]
 
-struct Country {
+struct Country: Codable, Hashable {
     let id: Int
     let code: String
     let lat: Double
