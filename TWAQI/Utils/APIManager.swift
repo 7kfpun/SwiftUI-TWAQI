@@ -8,6 +8,7 @@
 
 import Alamofire
 import Foundation
+import SwiftyJSON
 
 enum NetworkError: Error {
     case badURL
@@ -16,35 +17,43 @@ enum NetworkError: Error {
 
 struct APIManager {
     static let apiDomain = getEnv("ApiDomain")!
+    static let countriesEnpoint = "/v1/countries"
+    static let stationsEnpoint = "/v1/stations"
+    static let currentPollutantsEnpoint = "/v1/current-pollutants"
+    static let historicalPollutantsEnpoint = "/v1/historical-pollutants"
 
     // MARK: - V1 endpoints
     static func getCountries(completionHandler: @escaping (Result<Countries, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)/v1/countries") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.countriesEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
         }
 
         AF.request(url)
             .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
+            .responseJSON { (response) -> Void in
+                let json = JSON(response.data as Any)
+                debugPrint("getCountries.responseJSON: \(json)")
+                if json["success"] == true {
+                    var countries: Countries = []
+                    for (_, countryJSON) in json["data"] {
+                        countries.append(Country(
+                            id: countryJSON["id"].int ?? 0,
+                            code: countryJSON["code"].string ?? "",
+                            lat: countryJSON["lat"].double ?? 0,
+                            lon: countryJSON["lon"].double ?? 0,
+                            zoom: countryJSON["zoom"].float ?? 0,
+                            name: countryJSON["name"]["en"].string ?? "",
+                            nameLocal: countryJSON["name"]["zh"].string ?? countryJSON["name"]["th"].string ?? ""
+                        ))
                     }
-
-                    debugPrint(response)
-                    let countriesResponse = try JSONDecoder().decode(CountriesResponse.self, from: data)
-                    completionHandler(.success(countriesResponse.data))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
+                    completionHandler(.success(countries))
                 }
             }
     }
 
     static func getStations(countryCode: String, completionHandler: @escaping (Result<NewStations, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)/v1/stations") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.stationsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -55,25 +64,31 @@ struct APIManager {
 
         AF.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
+            .responseJSON { (response) -> Void in
+                let json = JSON(response.data as Any)
+                debugPrint("getStations.responseJSON: \(json)")
+                if json["success"] == true {
+                    var stations: NewStations = []
+                    for (_, stationJSON) in json["data"] {
+                        stations.append(NewStation(
+                            id: stationJSON["id"].int ?? 0,
+                            countryId: stationJSON["countryId"].int ?? 0,
+                            countryCode: stationJSON["countryCode"].string ?? "",
+                            code: stationJSON["code"].string ?? "",
+                            lat: stationJSON["lat"].double ?? 0,
+                            lon: stationJSON["lon"].double ?? 0,
+                            imageUrl: stationJSON["zoom"].string,
+                            name: stationJSON["name"]["en"].string ?? "",
+                            nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? ""
+                        ))
                     }
-
-                    debugPrint(response)
-                    let newStationsResponse = try JSONDecoder().decode(NewStationsResponse.self, from: data)
-                    completionHandler(.success(newStationsResponse.data))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
+                    completionHandler(.success(stations))
                 }
             }
     }
 
     static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)/v1/current-pollutants") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -102,7 +117,7 @@ struct APIManager {
     }
 
     static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)/v1/current-pollutants") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -130,8 +145,8 @@ struct APIManager {
             }
     }
 
-    static func getHourlyHistorical(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)/v1/historical-pollutants") else {
+    static func getHistoricalPollutants(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
+        guard let url = URL(string: "\(self.apiDomain)\(self.historicalPollutantsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -143,23 +158,43 @@ struct APIManager {
 
         AF.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
+            .responseJSON { (response) -> Void in
+                let json = JSON(response.data as Any)
+                debugPrint("getHistoricalPollutants.responseJSON: \(json)")
+                if json["success"] == true {
+                    let stationJSON = json["station"]
+                    let station: NewStation = NewStation(
+                        id: stationJSON["id"].int ?? 0,
+                        countryId: stationJSON["countryId"].int ?? 0,
+                        countryCode: stationJSON["countryCode"].string ?? "",
+                        code: stationJSON["code"].string ?? "",
+                        lat: stationJSON["lat"].double ?? 0,
+                        lon: stationJSON["lon"].double ?? 0,
+                        imageUrl: stationJSON["zoom"].string,
+                        name: stationJSON["name"]["en"].string ?? "",
+                        nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? ""
+                    )
+
+                    var historicalPollutants: HistoricalPollutants = []
+                    for (_, historicalPollutantJSON) in json["data"] {
+                        historicalPollutants.append(HistoricalPollutant(
+                            aqi: historicalPollutantJSON["aqi"].double ?? 0,
+                            pm25: historicalPollutantJSON["pm25"].double ?? 0,
+                            pm10: historicalPollutantJSON["pm10"].double ?? 0,
+                            no2: historicalPollutantJSON["no2"].double ?? 0,
+                            so2: historicalPollutantJSON["so2"].double ?? 0,
+                            co: historicalPollutantJSON["co"].double ?? 0,
+                            o3: historicalPollutantJSON["o3"].double ?? 0,
+                            windDirection: historicalPollutantJSON["windDirection"].double ?? 0,
+                            windSpeed: historicalPollutantJSON["windSpeed"].double ?? 0,
+                            publishTime: historicalPollutantJSON["publishTime"].string ?? ""
+                        ))
                     }
 
-                    debugPrint(response)
-                    let historicalPollutantsResponse = try JSONDecoder().decode(HistoricalPollutantsResponse.self, from: data)
-                    print("stationstationstation", historicalPollutantsResponse.station)
                     completionHandler(.success([
-                        "station": historicalPollutantsResponse.station,
-                        "data": historicalPollutantsResponse.data,
+                        "station": station,
+                        "data": historicalPollutants,
                     ]))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
                 }
             }
     }

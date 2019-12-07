@@ -11,6 +11,7 @@ target 'TWAQI' do
   pod 'SDWebImageSwiftUI', '~> 0.8'
   pod 'SnapKit', '~> 5.0'
   pod 'SwiftDate', '~> 6.1'
+  pod 'SwiftyJSON', '~> 5.0'
 
   pod 'Firebase', '~> 6.13'
   pod 'Firebase/AdMob'
@@ -40,4 +41,5 @@ target 'watch Extension' do
 
   pod 'Alamofire', '~> 5.0.0-rc.3'
   pod 'SwiftDate', '~> 6.1'
+  pod 'SwiftyJSON', '~> 5.0'
 end

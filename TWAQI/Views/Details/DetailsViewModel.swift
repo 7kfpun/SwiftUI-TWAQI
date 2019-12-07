@@ -34,7 +34,7 @@ class DetailsViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
-        APIManager.getHourlyHistorical(stationId: self.stationId) { result in
+        APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
             switch result {
             case .success(let result):
                 self.station = result["station"] as? NewStation

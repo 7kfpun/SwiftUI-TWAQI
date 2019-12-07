@@ -8,44 +8,12 @@
 
 import Foundation
 
-struct CountriesResponse: Decodable {
-    let success: Bool
-    let data: Countries
-
-    private enum CodingKeys: String, CodingKey {
-        case success
-        case data
-    }
-}
-
-struct NewStationsResponse: Decodable {
-    let success: Bool
-    let data: NewStations
-
-    private enum CodingKeys: String, CodingKey {
-        case success
-        case data
-    }
-}
-
 struct NewPollutantsResponse: Decodable {
     let success: Bool
     let data: NewPollutants
 
     private enum CodingKeys: String, CodingKey {
         case success
-        case data
-    }
-}
-
-struct HistoricalPollutantsResponse: Decodable {
-    let success: Bool
-    let station: NewStation
-    let data: HistoricalPollutants
-
-    private enum CodingKeys: String, CodingKey {
-        case success
-        case station
         case data
     }
 }

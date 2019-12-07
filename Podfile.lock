@@ -128,6 +128,7 @@ PODS:
   - Sentry/Core (4.4.2)
   - SnapKit (5.0.1)
   - SwiftDate (6.1.0)
+  - SwiftyJSON (5.0.0)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.3)
@@ -148,6 +149,7 @@ DEPENDENCIES:
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `4.4.2`)
   - SnapKit (~> 5.0)
   - SwiftDate (~> 6.1)
+  - SwiftyJSON (~> 5.0)
 
 SPEC REPOS:
   trunk:
@@ -180,6 +182,7 @@ SPEC REPOS:
     - SDWebImageSwiftUI
     - SnapKit
     - SwiftDate
+    - SwiftyJSON
 
 EXTERNAL SOURCES:
   Sentry:
@@ -222,7 +225,8 @@ SPEC CHECKSUMS:
   Sentry: bba998b0fb157fdd6596aa73290a9d67ae47be79
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
+  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: dd8bb9fb225c824e7868134d4882d5747a78997f
+PODFILE CHECKSUM: b3ff256bac6c0117e9c906712c79c16e26e9e8fc
 
 COCOAPODS: 1.8.3
