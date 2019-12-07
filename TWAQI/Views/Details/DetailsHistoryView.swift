@@ -12,20 +12,20 @@ struct DetailsHistoryView: View {
     @EnvironmentObject var settings: SettingsStore
     @Environment(\.colorScheme) var colorScheme: ColorScheme
 
-    var historyPollutants: HistoricalPollutants
+    var historicalPollutants: HistoricalPollutants
 
     var body: some View {
-        let historyPollutantsMap: [AirIndexTypes: [Double]] = [
-            AirIndexTypes.aqi: historyPollutants.map({ $0.aqi }),
-            AirIndexTypes.pm25: historyPollutants.map({ $0.pm25 }),
-            AirIndexTypes.pm10: historyPollutants.map({ $0.pm10 }),
-            AirIndexTypes.o3: historyPollutants.map({ $0.o3 }),
-            AirIndexTypes.co: historyPollutants.map({ $0.co }),
-            AirIndexTypes.so2: historyPollutants.map({ $0.so2 }),
-            AirIndexTypes.no2: historyPollutants.map({ $0.no2 }),
+        let historicalPollutantsMap: [AirIndexTypes: [Double]] = [
+            AirIndexTypes.aqi: historicalPollutants.map({ $0.aqi }),
+            AirIndexTypes.pm25: historicalPollutants.map({ $0.pm25 }),
+            AirIndexTypes.pm10: historicalPollutants.map({ $0.pm10 }),
+            AirIndexTypes.o3: historicalPollutants.map({ $0.o3 }),
+            AirIndexTypes.co: historicalPollutants.map({ $0.co }),
+            AirIndexTypes.so2: historicalPollutants.map({ $0.so2 }),
+            AirIndexTypes.no2: historicalPollutants.map({ $0.no2 }),
         ]
 
-        let bars: [Bar] = historyPollutantsMap[settings.airIndexTypeSelected]!.map {
+        let bars: [Bar] = historicalPollutantsMap[settings.airIndexTypeSelected]!.map {
             Bar(
                 value: $0,
                 color: Color(AirStatuses.checkAirStatus(
@@ -53,7 +53,7 @@ struct DetailsHistoryView: View {
                     VStack {
                         LabelView(
                             airIndexTypes: settings.airIndexTypeSelected,
-                            value: historyPollutantsMap[settings.airIndexTypeSelected]?.last ?? 0
+                            value: historicalPollutantsMap[settings.airIndexTypeSelected]?.last ?? 0
                         )
 
                         Spacer()
@@ -71,11 +71,11 @@ struct DetailsHistoryView: View {
                         BarsView(bars: bars)
                         HStack {
                             VStack {
-                                Text(self.historyPollutants.first?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
+                                Text(self.historicalPollutants.first?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
                                     .font(.caption)
                                     .fontWeight(.thin)
 
-                                Text(self.historyPollutants.first?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
+                                Text(self.historicalPollutants.first?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
                                     .font(.caption)
                                     .fontWeight(.thin)
                             }
@@ -83,11 +83,11 @@ struct DetailsHistoryView: View {
                             Spacer()
 
                             VStack {
-                                Text(self.historyPollutants.last?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
+                                Text(self.historicalPollutants.last?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
                                     .font(.caption)
                                     .fontWeight(.thin)
 
-                                Text(self.historyPollutants.last?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
+                                Text(self.historicalPollutants.last?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
                                     .font(.caption)
                                     .fontWeight(.thin)
                             }
@@ -117,15 +117,15 @@ struct DetailsHistoryView: View {
         .padding(.horizontal, 10)
     }
 
-    init(historyPollutants: HistoricalPollutants) {
-        self.historyPollutants = historyPollutants
+    init(historicalPollutants: HistoricalPollutants) {
+        self.historicalPollutants = historicalPollutants
     }
 }
 
 //struct DetailsHistoryView_Previews: PreviewProvider {
 //    static var previews: some View {
-//        DetailsHistoryView(historyPollutants: [
-//            HistoryPollutant(
+//        DetailsHistoryView(historicalPollutants: [
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 40,
@@ -136,7 +136,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T01:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 20,
@@ -147,7 +147,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T02:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 11,
@@ -158,7 +158,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T03:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 32,
@@ -169,7 +169,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T04:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 40,
@@ -180,7 +180,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T05:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 20,
@@ -191,7 +191,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T06:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 11,
@@ -202,7 +202,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T07:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 14,
@@ -213,7 +213,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T08:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 14,
@@ -224,7 +224,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T09:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 32,
@@ -235,7 +235,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T10:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 40,
@@ -246,7 +246,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T11:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 20,
@@ -257,7 +257,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T12:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 11,
@@ -268,7 +268,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T13:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 14,
@@ -279,7 +279,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T14:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 14,
@@ -290,7 +290,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T14:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 43,
@@ -301,7 +301,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T15:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 32,
@@ -312,7 +312,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T15:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 30,
@@ -323,7 +323,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T16:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 22,
@@ -334,7 +334,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T16:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 25,
@@ -345,7 +345,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T17:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 20,
@@ -356,7 +356,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T17:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 30,
@@ -367,7 +367,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T18:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 56,
 //                aqi: 61,
 //                pm25: 25,
@@ -378,7 +378,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T19:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 51,
 //                pm25: 26,
@@ -389,7 +389,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T20:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 90,
 //                aqi: 61,
 //                pm25: 11,
@@ -400,7 +400,7 @@ struct DetailsHistoryView: View {
 //                o3: 39,
 //                publishTime: "2019-10-13T21:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 96,
 //                aqi: 51,
 //                pm25: 22,
@@ -411,7 +411,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T22:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 96,
 //                aqi: 51,
 //                pm25: 22,
@@ -422,7 +422,7 @@ struct DetailsHistoryView: View {
 //                o3: 30,
 //                publishTime: "2019-10-13T23:00:00"
 //            ),
-//            HistoryPollutant(
+//            HistoricalPollutant(
 //                stationId: 80,
 //                aqi: 64,
 //                pm25: 30,

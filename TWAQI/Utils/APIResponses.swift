@@ -8,9 +8,9 @@
 
 import Foundation
 
-struct NewPollutantsResponse: Decodable {
+struct PollutantsResponse: Decodable {
     let success: Bool
-    let data: NewPollutants
+    let data: Pollutants
 
     private enum CodingKeys: String, CodingKey {
         case success

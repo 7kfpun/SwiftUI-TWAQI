@@ -13,7 +13,7 @@ class FavouriteListViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
     let settings = SettingsStore()
 
-    @Published var favouritePollutants: NewPollutants = [] {
+    @Published var favouritePollutants: Pollutants = [] {
         willSet { self.objectWillChange.send() }
     }
 

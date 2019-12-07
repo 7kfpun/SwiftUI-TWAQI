@@ -87,7 +87,7 @@ struct APIManager {
             }
     }
 
-    static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
+    static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
         guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
@@ -107,8 +107,8 @@ struct APIManager {
                     }
 
                     debugPrint(response)
-                    let newPollutantsResponse = try JSONDecoder().decode(NewPollutantsResponse.self, from: data)
-                    completionHandler(.success(newPollutantsResponse.data))
+                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    completionHandler(.success(pollutantsResponse.data))
                 } catch {
                     print(error)
                     completionHandler(.failure(.networkError))
@@ -116,7 +116,7 @@ struct APIManager {
             }
     }
 
-    static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<NewPollutants, NetworkError>) -> Void) {
+    static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
         guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
             completionHandler(.failure(.badURL))
             return
@@ -136,8 +136,8 @@ struct APIManager {
                     }
 
                     debugPrint(response)
-                    let newPollutantsResponse = try JSONDecoder().decode(NewPollutantsResponse.self, from: data)
-                    completionHandler(.success(newPollutantsResponse.data))
+                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    completionHandler(.success(pollutantsResponse.data))
                 } catch {
                     print(error)
                     completionHandler(.failure(.networkError))

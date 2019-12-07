@@ -97,81 +97,87 @@ struct DetailsSuggestionView: View {
     }
 }
 
-//struct DetailsSuggestionView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        Group {
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 20,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 61,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 141,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 180,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 300,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//
-//            DetailsSuggestionView(lastPollutant: HistoryPollutant(
-//                stationId: 96,
-//                aqi: 500,
-//                pm25: 15,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T22:00:00"
-//            ))
-//        }
-//        .previewLayout(.sizeThatFits)
-//    }
-//}
+struct DetailsSuggestionView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 20.0,
+                pm25: 15.1,
+                pm10: 26.0,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39.0,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 61.4,
+                pm25: 15.4,
+                pm10: 26.4,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39.4,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 141.0,
+                pm25: 15.2,
+                pm10: 26.3,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39.0,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 180.0,
+                pm25: 15.2,
+                pm10: 26.3,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39.0,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 300.0,
+                pm25: 15.2,
+                pm10: 26.3,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39.0,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+
+            DetailsSuggestionView(lastPollutant: HistoricalPollutant(
+                aqi: 500.0,
+                pm25: 15,
+                pm10: 26,
+                no2: 6.7,
+                so2: 2.3,
+                co: 0.25,
+                o3: 39,
+                windDirection: 39.0,
+                windSpeed: 2.1,
+                publishTime: "2019-10-13T22:00:00"
+            ))
+        }
+        .previewLayout(.sizeThatFits)
+    }
+}

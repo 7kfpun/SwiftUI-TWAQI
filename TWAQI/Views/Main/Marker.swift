@@ -11,10 +11,10 @@ import SwiftUI
 import UIKit
 
 final class PollutantMarker: GMSMarker {
-    let pollutant: NewPollutant
+    let pollutant: Pollutant
     let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: NewPollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
         super.init()
@@ -48,10 +48,10 @@ final class PollutantMarker: GMSMarker {
 }
 
 final class WindDirectionMarker: GMSMarker {
-    let pollutant: NewPollutant
+    let pollutant: Pollutant
     let airIndexTypeSelected: AirIndexTypes
 
-    init(pollutant: NewPollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
         super.init()

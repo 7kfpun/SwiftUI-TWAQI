@@ -19,7 +19,7 @@ class DetailsViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    @Published var historyPollutants: HistoricalPollutants = [] {
+    @Published var historicalPollutants: HistoricalPollutants = [] {
         willSet { self.objectWillChange.send() }
     }
 
@@ -27,9 +27,9 @@ class DetailsViewModel: ObservableObject {
         willSet { self.objectWillChange.send() }
     }
 
-    init(stationId: Int, historyPollutants: HistoricalPollutants = []) {
+    init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
         self.stationId = stationId
-        self.historyPollutants = historyPollutants
+        self.historicalPollutants = historicalPollutants
         self.isFavourited = settings.savedFavouriteStations.contains(stationId)
     }
 
@@ -38,7 +38,7 @@ class DetailsViewModel: ObservableObject {
             switch result {
             case .success(let result):
                 self.station = result["station"] as? Station
-                self.historyPollutants = result["data"] as! HistoricalPollutants
+                self.historicalPollutants = result["data"] as! HistoricalPollutants
             case .failure(let error):
                 print(error.localizedDescription)
             }

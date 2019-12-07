@@ -116,13 +116,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
-    var countryPollutants: [String: NewPollutants] = [:] {
+    var countryPollutants: [String: Pollutants] = [:] {
         didSet {
             loadMarkers()
         }
     }
 
-    var closestPollutant: NewPollutant! {
+    var closestPollutant: Pollutant! {
         didSet {
             loadClosestStationView()
         }

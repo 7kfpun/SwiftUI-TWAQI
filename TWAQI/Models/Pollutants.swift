@@ -2,7 +2,7 @@
 //  Pollutants.swift
 //  TWAQI
 //
-//  Created by kf on 2/10/19.
+//  Created by kf on 1/12/19.
 //  Copyright © 2019 kf. All rights reserved.
 //
 
@@ -10,75 +10,97 @@ import Foundation
 
 typealias Pollutants = [Pollutant]
 
-struct Pollutant: Codable {
-    let aqi: String
-    let co: String
-    let co8hr: String
-    let county: String
-    let latitude: String
-    let longitude: String
-    let no: String
-    let no2: String
-    let nox: String
-    let o3: String
-    let o38hr: String
-    let pm10: String
-    let pm10Avg: String
-    let pm25: String
-    let pm25Avg: String
-    let pollutant: String
+struct Pollutant: Decodable, Hashable {
+    let stationId: Int
+    let lat: Double
+    let lon: Double
+    let aqi: Double
+    let pm25: Double
+    let pm10: Double
+    let no2: Double
+    let so2: Double
+    let co: Double
+    let o3: Double
+    let windDirection: Double
+    let windSpeed: Double
     let publishTime: String
-    let so2: String
-    let so2Avg: String
-    let siteId: String
-    let siteName: String
-    let status: String
-    let windDirection: String
-    let windSpeed: String
+    let siteName = "test"
+
+    let name: String
+    let nameLocal: String
 
     private enum CodingKeys: String, CodingKey {
-        case aqi = "AQI"
-        case co = "CO"
-        case co8hr = "CO_8hr"
-        case county = "County"
-        case latitude = "Latitude"
-        case longitude = "Longitude"
-        case no = "NO"
-        case no2 = "NO2"
-        case nox = "NOx"
-        case o3 = "O3"
-        case o38hr = "O3_8hr"
-        case pm10 = "PM10"
-        case pm10Avg = "PM10_AVG"
-        case pm25 = "PM2_5"
-        case pm25Avg = "PM2_5_AVG"
-        case pollutant = "Pollutant"
-        case publishTime = "PublishTime"
-        case so2 = "SO2"
-        case so2Avg = "SO2_AVG"
-        case siteId = "SiteId"
-        case siteName = "SiteName"
-        case status = "Status"
-        case windDirection = "WindDirec"
-        case windSpeed = "WindSpeed"
+        case stationId = "station_id"
+        case lat
+        case lon
+        case aqi
+        case pm25
+        case pm10
+        case no2
+        case so2
+        case co
+        case o3
+        case windDirection = "wind_direction"
+        case windSpeed = "wind_speed"
+        case publishTime = "publish_time"
+
+        case name
+    }
+
+    private enum NameLangKeys: String, CodingKey {
+        case langEn = "en"
+        case langZh = "zh"
+        case langTh = "th"
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        stationId = try values.decode(Int.self, forKey: .stationId)
+        lat = try values.decode(Double.self, forKey: .lat)
+        lon = try values.decode(Double.self, forKey: .lon)
+        aqi = try values.decode(Double.self, forKey: .aqi)
+        pm25 = try values.decode(Double.self, forKey: .pm25)
+        pm10 = try values.decode(Double.self, forKey: .pm10)
+        no2 = try values.decode(Double.self, forKey: .no2)
+        so2 = try values.decode(Double.self, forKey: .so2)
+        co = try values.decode(Double.self, forKey: .co)
+        o3 = try values.decode(Double.self, forKey: .o3)
+        windDirection = try values.decode(Double.self, forKey: .windDirection)
+        windSpeed = try values.decode(Double.self, forKey: .windSpeed)
+        publishTime = try values.decode(String.self, forKey: .publishTime)
+
+        let names = try values.nestedContainer(keyedBy: NameLangKeys.self, forKey: CodingKeys.name)
+        if names.contains(.langEn) {
+            name = try names.decode(String.self, forKey: .langEn)
+        } else {
+            name = "Unknown"
+        }
+
+        if names.contains(.langZh) {
+            nameLocal = try names.decode(String.self, forKey: .langZh)
+        } else if names.contains(.langTh) {
+            nameLocal = try names.decode(String.self, forKey: .langTh)
+        } else {
+            nameLocal = "Unknown"
+        }
     }
 
     func getValue(airIndexType: AirIndexTypes) -> Double {
         switch airIndexType {
         case AirIndexTypes.aqi:
-            return Double(self.aqi) ?? 0
+            return self.aqi
         case AirIndexTypes.pm25:
-            return Double(self.pm25) ?? 0
+            return self.pm25
         case AirIndexTypes.pm10:
-            return Double(self.pm10) ?? 0
+            return self.pm10
         case AirIndexTypes.no2:
-            return Double(self.no2) ?? 0
+            return self.no2
         case AirIndexTypes.so2:
-            return Double(self.so2) ?? 0
+            return self.so2
         case AirIndexTypes.co:
-            return Double(self.co) ?? 0
+            return self.co
         case AirIndexTypes.o3:
-            return Double(self.o3) ?? 0
+            return self.o3
         }
     }
 }

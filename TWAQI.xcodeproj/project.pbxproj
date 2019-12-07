@@ -18,7 +18,6 @@
 		9E03DF6A23994500002F8DA4 /* TaiwanStationsMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6923994500002F8DA4 /* TaiwanStationsMapper.swift */; };
 		9E03DF6D239B8366002F8DA4 /* CountryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6C239B8366002F8DA4 /* CountryListView.swift */; };
 		9E03DF6F239B8E89002F8DA4 /* StationListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6E239B8E89002F8DA4 /* StationListViewModel.swift */; };
-		9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
 		9E08761F2382D75C0060476E /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E08761E2382D75C0060476E /* ContentViewModel.swift */; };
 		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
 		9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
@@ -39,7 +38,6 @@
 		9E1C9B17238997E30052E115 /* ComplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B16238997E30052E115 /* ComplicationManager.swift */; };
 		9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */; };
-		9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */; };
 		9E205FCD2354B5E900C6D3C1 /* DetailsSuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */; };
 		9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F1237079F400B6E600 /* TrackingManager.swift */; };
 		9E34B4F42371B23600B6E600 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E34B4F32371B23600B6E600 /* StoreKit.framework */; };
@@ -48,7 +46,6 @@
 		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E4A2F93239B9B6000FFCD09 /* Stations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34523939798009CED32 /* Stations.swift */; };
 		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
-		9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
@@ -121,12 +118,11 @@
 		9EF3D3492393B5C8009CED32 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
 		9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3472393B318009CED32 /* APIResponses.swift */; };
 		9EF3D34B2393B631009CED32 /* Countries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34323939281009CED32 /* Countries.swift */; };
-		9EF3D34D2393B649009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AF2344A676001ECFE1 /* Pollutants.swift */; };
 		9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956C2385941200420116 /* CustomAd.swift */; };
 		9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
-		9EF3D3512393B9C6009CED32 /* NewPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* NewPollutants.swift */; };
+		9EF3D3512393B9C6009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
 		9EF3D3532393E9BF009CED32 /* CountryPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */; };
-		9EF3D3542393EB35009CED32 /* NewPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* NewPollutants.swift */; };
+		9EF3D3542393EB35009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
 		9EF7A32A2386FC8700FF410C /* HelpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7A3292386FC8700FF410C /* HelpViewModel.swift */; };
 		9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */; };
 		AEAF311CBA65697B61E2412E /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */; };
@@ -227,7 +223,6 @@
 		9E1C9B16238997E30052E115 /* ComplicationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationManager.swift; sourceTree = "<group>"; };
 		9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsHistoryView.swift; sourceTree = "<group>"; };
 		9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewModel.swift; sourceTree = "<group>"; };
-		9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPollutant.swift; sourceTree = "<group>"; };
 		9E205FCC2354B5E900C6D3C1 /* DetailsSuggestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsSuggestionView.swift; sourceTree = "<group>"; };
 		9E34B4F1237079F400B6E600 /* TrackingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingManager.swift; sourceTree = "<group>"; };
 		9E34B4F32371B23600B6E600 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -236,7 +231,6 @@
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
-		9E5257AF2344A676001ECFE1 /* Pollutants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pollutants.swift; sourceTree = "<group>"; };
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A632340993C0064D874 /* DetailsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsRow.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
@@ -305,7 +299,7 @@
 		9EF3D34323939281009CED32 /* Countries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Countries.swift; sourceTree = "<group>"; };
 		9EF3D34523939798009CED32 /* Stations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stations.swift; sourceTree = "<group>"; };
 		9EF3D3472393B318009CED32 /* APIResponses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResponses.swift; sourceTree = "<group>"; };
-		9EF3D3502393B9C6009CED32 /* NewPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPollutants.swift; sourceTree = "<group>"; };
+		9EF3D3502393B9C6009CED32 /* Pollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pollutants.swift; sourceTree = "<group>"; };
 		9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryPollutants.swift; sourceTree = "<group>"; };
 		9EF7A3292386FC8700FF410C /* HelpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewModel.swift; sourceTree = "<group>"; };
 		9EFCDAB6237809CA00EA2203 /* IndexSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexSelectorView.swift; sourceTree = "<group>"; };
@@ -556,10 +550,8 @@
 				9EDD956C2385941200420116 /* CustomAd.swift */,
 				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */,
-				9E205FC723537F7000C6D3C1 /* HistoryPollutant.swift */,
-				9EF3D3502393B9C6009CED32 /* NewPollutants.swift */,
+				9EF3D3502393B9C6009CED32 /* Pollutants.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
-				9E5257AF2344A676001ECFE1 /* Pollutants.swift */,
 				9EF3D34523939798009CED32 /* Stations.swift */,
 			);
 			path = Models;
@@ -1026,10 +1018,8 @@
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
 				9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
-				9E5257B02344A676001ECFE1 /* Pollutants.swift in Sources */,
 				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
-				9E205FC823537F7000C6D3C1 /* HistoryPollutant.swift in Sources */,
 				9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
@@ -1060,7 +1050,7 @@
 				9EF3D3532393E9BF009CED32 /* CountryPollutants.swift in Sources */,
 				9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */,
 				9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */,
-				9EF3D3512393B9C6009CED32 /* NewPollutants.swift in Sources */,
+				9EF3D3512393B9C6009CED32 /* Pollutants.swift in Sources */,
 				9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */,
 				9EF250192376B95D00A731D5 /* DefinitionPages.swift in Sources */,
 				9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */,
@@ -1081,7 +1071,6 @@
 				9EC8999223828BE1000D986C /* getEnv.swift in Sources */,
 				9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */,
 				9E910C6D238184D900B8B316 /* AirStatusTypes.swift in Sources */,
-				9E08761D2382D4780060476E /* HistoryPollutant.swift in Sources */,
 				9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */,
 				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,
 				9E910C4A2381830400B8B316 /* HostingController.swift in Sources */,
@@ -1091,7 +1080,6 @@
 				9E910C4E2381830400B8B316 /* NotificationController.swift in Sources */,
 				9E910C6E238184FA00B8B316 /* NumberExtensions.swift in Sources */,
 				9E96B52B23892C7B00EEA5B9 /* ComplicationController.swift in Sources */,
-				9EF3D34D2393B649009CED32 /* Pollutants.swift in Sources */,
 				9E910C4C2381830400B8B316 /* ExtensionDelegate.swift in Sources */,
 				9E910C6C238184D600B8B316 /* AirIndexTypes.swift in Sources */,
 				9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */,
@@ -1103,7 +1091,7 @@
 				9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */,
 				9EF3D34B2393B631009CED32 /* Countries.swift in Sources */,
 				9E910C502381830400B8B316 /* NotificationView.swift in Sources */,
-				9EF3D3542393EB35009CED32 /* NewPollutants.swift in Sources */,
+				9EF3D3542393EB35009CED32 /* Pollutants.swift in Sources */,
 				9EF3D3492393B5C8009CED32 /* APIManager.swift in Sources */,
 				9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */,
 				9E03DF5F23965CB0002F8DA4 /* HistoricalPollutants.swift in Sources */,

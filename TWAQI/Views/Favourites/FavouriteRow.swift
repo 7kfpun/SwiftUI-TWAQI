@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct FavouriteRow: View {
-    var pollutant: NewPollutant
+    var pollutant: Pollutant
 
     var body: some View {
         let airStatus = AirStatuses.checkAirStatus(
