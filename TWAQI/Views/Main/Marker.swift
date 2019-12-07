@@ -33,7 +33,7 @@ final class PollutantMarker: GMSMarker {
         let text = value.format(f: airIndexTypeSelected.getFormat())
 
         let label = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 40, height: 30)))
-        label.text = text
+        label.text = value != 0 ? text : "-"
         label.textColor = foregroundColor
         label.font = UIFont.systemFont(ofSize: 15.0, weight: .thin)
         label.backgroundColor = color

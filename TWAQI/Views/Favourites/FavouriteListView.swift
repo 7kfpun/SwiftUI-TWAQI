@@ -24,7 +24,7 @@ struct FavouriteListView: View {
                         HStack {
                             Spacer()
                             Button(action: self.removeAll) {
-                                Text("Favourites.remove_all_saved_stations")
+                                Text("Favourites.remove_all_your_saved_stations")
                             }
                             Spacer()
                         }
@@ -62,23 +62,6 @@ struct FavouriteListView: View {
     private func removeAll() {
         settings.savedFavouriteStations = []
     }
-
-//    private func removeAll() {
-//        print("removeAll", self.viewModel.stationSettings)
-//        for (_, stationSetting) in self.viewModel.stationSettings {
-//            OneSignalManager.sendTags(
-//                tags: stationSetting.getDisabledTags()
-//            ) { result in
-//                switch result {
-//                case .success(let result):
-//                    print(result)
-//                    self.viewModel.getData()
-//                case .failure(let error):
-//                    print(error.localizedDescription)
-//                }
-//            }
-//        }
-//    }
 }
 
 struct FavouritesListView_Previews: PreviewProvider {

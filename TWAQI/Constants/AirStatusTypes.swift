@@ -50,7 +50,7 @@ enum AirStatuses: String, CaseIterable, Hashable {
             "veryunhealthy": 0x660098,
             "hazardous": 0x7E2200,
         ]
-        return UInt32(colors[self.rawValue] ?? 0xEEEEEE)
+        return UInt32(colors[self.rawValue] ?? 0x676767)
     }
 
     func getForegroundColor() -> UInt32 {
@@ -103,26 +103,26 @@ enum AirStatuses: String, CaseIterable, Hashable {
                 101..<151: .unhealthyforsensitivegroup,
                 151..<201: .unhealthy,
                 201..<301: .veryunhealthy,
-                301..<501: .hazardous,
+                301..<100*10: .hazardous,
             ],
             AirIndexTypes.pm25: [
-                0.0..<15.5: .good,
+                0.1..<15.5: .good,
                 15.5..<35.5: .moderate,
                 35.5..<54.5: .unhealthyforsensitivegroup,
                 54.5..<150.5: .unhealthy,
                 150.5..<250.5: .veryunhealthy,
-                250.5..<500.5: .hazardous,
+                250.5..<500.5*10: .hazardous,
             ],
             AirIndexTypes.pm10: [
-                0..<55: .good,
+                1..<55: .good,
                 55..<126: .moderate,
                 126..<255: .unhealthyforsensitivegroup,
                 255..<355: .unhealthy,
                 355..<425: .veryunhealthy,
-                425..<605: .hazardous,
+                425..<605*10: .hazardous,
             ],
             AirIndexTypes.o3: [
-                0..<55: .good,
+                1..<55: .good,
                 55..<125: .moderate,
                 125..<165: .unhealthyforsensitivegroup,
                 165..<205: .unhealthy,
@@ -130,7 +130,7 @@ enum AirStatuses: String, CaseIterable, Hashable {
                 405..<605: .hazardous,
             ],
             AirIndexTypes.co: [
-                0.0..<4.5: .good,
+                0.1..<4.5: .good,
                 4.5..<9.5: .moderate,
                 9.5..<12.5: .unhealthyforsensitivegroup,
                 12.5..<15.5: .unhealthy,
@@ -138,7 +138,7 @@ enum AirStatuses: String, CaseIterable, Hashable {
                 30.5..<50.5: .hazardous,
             ],
             AirIndexTypes.so2: [
-                0..<36: .good,
+                1..<36: .good,
                 36..<76: .moderate,
                 76..<186: .unhealthyforsensitivegroup,
                 186..<305: .unhealthy,
@@ -146,7 +146,7 @@ enum AirStatuses: String, CaseIterable, Hashable {
                 605..<1005: .hazardous,
             ],
             AirIndexTypes.no2: [
-                0..<54: .good,
+                1..<54: .good,
                 54..<101: .moderate,
                 101..<361: .unhealthyforsensitivegroup,
                 361..<650: .unhealthy,

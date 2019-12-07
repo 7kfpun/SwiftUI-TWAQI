@@ -317,7 +317,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         if let closestPollutant = self.closestPollutant {
             print("loadClosestStationView", closestPollutant)
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
-            let text = value.format(f: self.airIndexTypeSelected.getFormat())
+            let text = value != 0 ? value.format(f: self.airIndexTypeSelected.getFormat()) : "-" 
             let airStatus = AirStatuses.checkAirStatus(
                 airIndexType: self.airIndexTypeSelected,
                 value: value

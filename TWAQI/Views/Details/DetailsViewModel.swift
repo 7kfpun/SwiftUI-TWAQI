@@ -46,12 +46,15 @@ class DetailsViewModel: ObservableObject {
     }
 
     private(set) lazy var favouriteStationToggle: () -> Void = {
-        if self.isFavourited {
-            self.settings.savedFavouriteStations = self.settings.savedFavouriteStations.filter { $0 != self.stationId }
-        } else {
-            self.settings.savedFavouriteStations.append(self.stationId)
-        }
         self.isFavourited.toggle()
-        print("settings.savedFavouriteStations", self.settings.savedFavouriteStations)
+        if self.isFavourited {
+            self.settings.savedFavouriteStations.append(self.stationId)
+        } else {
+            self.settings.savedFavouriteStations = self.settings.savedFavouriteStations.filter { $0 != self.stationId }
+        }
+        TrackingManager.logEvent(eventName: "save_favourite_station", parameters: [
+            "label": self.isFavourited ? "on" : "off",
+            "stationId": self.stationId,
+        ])
     }
 }
