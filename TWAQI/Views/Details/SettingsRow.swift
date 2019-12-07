@@ -35,6 +35,7 @@ struct SettingsRow: View {
                     value: viewModel.stationSetting.pollutionTherhold
                 )
             }
+            .disabled(viewModel.isDisabled && !viewModel.stationSetting.isPollutionNotificationEnabled)
 
             if viewModel.stationSetting.isPollutionNotificationEnabled {
                 Slider(value: $viewModel.stationSetting.pollutionTherhold, in: 1...500, step: 1)
@@ -60,6 +61,7 @@ struct SettingsRow: View {
                     value: viewModel.stationSetting.cleanlinessTherhold
                 )
             }
+            .disabled(viewModel.isDisabled && !viewModel.stationSetting.isCleanlinessNotificationEnabled)
 
             if viewModel.stationSetting.isCleanlinessNotificationEnabled {
                 Slider(value: $viewModel.stationSetting.cleanlinessTherhold, in: 1...500, step: 1)

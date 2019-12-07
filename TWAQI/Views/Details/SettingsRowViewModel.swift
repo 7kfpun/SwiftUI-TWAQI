@@ -12,6 +12,10 @@ import Foundation
 class SettingsRowViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
     var station: Station
+    
+    @Published var isDisabled: Bool = true {
+        willSet { self.objectWillChange.send() }
+    }
 
     init(station: Station) {
         self.station = station
@@ -32,7 +36,8 @@ class SettingsRowViewModel: ObservableObject {
         OneSignalManager.getOneSignalSettings { result in
             switch result {
             case .success(let result):
-                print(result)
+                print("OneSignalManager.getOneSignalSettings", result)
+                self.isDisabled = result.stationSettings.count >= 2
                 if let resultStationSetting = result.stationSettings[notificationTagCode] {
                     self.stationSetting = resultStationSetting
                 }
