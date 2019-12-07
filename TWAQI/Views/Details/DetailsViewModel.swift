@@ -52,7 +52,7 @@ class DetailsViewModel: ObservableObject {
         } else {
             self.settings.savedFavouriteStations = self.settings.savedFavouriteStations.filter { $0 != self.stationId }
         }
-        TrackingManager.logEvent(eventName: "save_favourite_station", parameters: [
+        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
             "label": self.isFavourited ? "on" : "off",
             "stationId": self.stationId,
         ])

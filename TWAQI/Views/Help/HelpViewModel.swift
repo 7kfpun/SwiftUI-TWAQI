@@ -107,6 +107,7 @@ class HelpViewModel: ObservableObject {
             switch result {
             case .success(let result):
                 self.disabledNotification(stationSettings: result.stationSettings)
+                TrackingManager.logEvent(eventName: "favourite_station_all_removed")
             case .failure(let error):
                 print(error.localizedDescription)
             }

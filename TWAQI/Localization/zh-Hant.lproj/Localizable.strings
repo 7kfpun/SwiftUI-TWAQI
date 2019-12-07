@@ -83,6 +83,7 @@
 "AirStatus.unhealthy" = "對所有族群不良";
 "AirStatus.veryunhealthy" = "非常不良";
 "AirStatus.hazardous" = "有害";
+"AirStatus.unknown" = "-";
 
 "AirStatus.general_public_guidance_good" = "正常戶外活動";
 "AirStatus.general_public_guidance_moderate" = "正常戶外活動";
