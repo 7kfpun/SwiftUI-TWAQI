@@ -1,0 +1,111 @@
+/*
+  Localizable.strings
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "แผนที่";
+"Tabbar.favourites" = "สถานีโปรด";
+"Tabbar.details_list" = "สถานี";
+"Tabbar.forecast" = "พยากรณ์";
+"Tabbar.settings" = "การตั้งค่า";
+"Tabbar.help" = "ช่วยเหลือ";
+
+"FavouriteList.favourites" = "สถานีโปรด";
+"Favourites.add_your_first_favourite_station" = "เพิ่มสถานีแรกที่คุณชื่นชอบ";
+"Favourites.remove_all_your_saved_stations" = "ลบสถานีที่บันทึกไว้ทั้งหมด";
+
+"DetailsList.details" = "รายละเอียด";
+"DetailsList.search" = "ค้นหา";
+
+"Details.general_public" = "ประชาชนทั่วไป";
+"Details.sensitive_group" = "กลุ่มที่ละเอียดอ่อน";
+
+"Forecast.forecast" = "พยากรณ์";
+"Forecast.forecast_notification_daily" = "การแจ้งเตือนการพยากรณ์ (รายวัน)";
+"Forecast.publish_time" = "เวลาเผยแพร่";
+"Forecast.three_days_forecast" = "3 วัน";
+"Forecast.details_forecast" = "รายละเอียด";
+
+"Settings.notification" = "การแจ้งเตือน";
+"Settings.search" = "ค้นหา";
+"Settings.notice_me_when_aqi_is_above" = "แจ้งให้ฉันทราบเมื่อ AQI อยู่เหนือ";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "ค่าน้อยเกินไปคุณจะได้รับการแจ้งเตือนมากมาย";
+"Settings.notice_me_when_aqi_is_below" = "แจ้งให้ฉันทราบเมื่อ AQI อยู่ด้านล่าง";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "ค่ามีขนาดใหญ่เกินไปคุณจะได้รับการแจ้งเตือนจำนวนมาก";
+
+"Help.help" = "ช่วยเหลือ";
+"Help.do_not_disturb" = "ห้ามรบกวน";
+"Help.turn_on_do_not_disturb" = "เปิดใช้ห้ามรบกวน";
+"Help.start_time" = "เวลาเริ่มต้น";
+"Help.end_time" = "เวลาสิ้นสุด";
+"Help.cancel_site_notification" = "ยกเลิกการแจ้งเตือน";
+"Help.all_site_notification_has_been_cancelled" = "การแจ้งเตือนทั้งหมดถูกยกเลิก";
+"Help.in_app_purchase" = "การซื้อในแอป";
+"Help.ad_free" = "ลบโฆษณาหรือไม่";
+"Help.restore_purchase" = "คืนค่าการซื้อ";
+"Help.contact_us" = "ติดต่อเรา";
+"Help.interested_to_be_our_business_partner" = "สนใจที่จะเป็นพันธมิตรทางธุรกิจของเราหรือไม่";
+"Help.feedback_or_contact_us" = "ข้อเสนอแนะ / ติดต่อเรา";
+"Help.interested_to_be_our_beta_tester" = "สนใจที่จะเป็นผู้ทดสอบเบต้าของเราหรือไม่";
+"Help.definition" = "คำอธิบายศัพท์";
+"Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
+
+"AirIndex.meaning_aqi" = "คุณภาพอากาศ (AQI)";
+"AirIndex.meaning_pm25" = "ฝุ่นละออง (PM2.5)";
+"AirIndex.meaning_pm10" = "ฝุ่นละออง (PM10)";
+"AirIndex.meaning_o3" = "โอโซน";
+"AirIndex.meaning_co" = "คาร์บอนมอนอกไซด์";
+"AirIndex.meaning_so2" = "ซัลเฟอร์ไดออกไซด์";
+"AirIndex.meaning_no2" = "ไนโตรเจนไดออกไซด์";
+
+"AirIndex.description_aqi" = "คุณภาพอากาศ (AQI)";
+"AirIndex.description_pm25" = "ฝุ่นละออง (PM2.5)";
+"AirIndex.description_pm10" = "ฝุ่นละออง (PM10)";
+"AirIndex.description_o3" = "โอโซน";
+"AirIndex.description_co" = "คาร์บอนมอนอกไซด์";
+"AirIndex.description_so2" = "ซัลเฟอร์ไดออกไซด์";
+"AirIndex.description_no2" = "ไนโตรเจนไดออกไซด์";
+
+"AirIndex.url_aqi" = "https://en.wikipedia.org/wiki/Air_quality_index";
+"AirIndex.url_pm25" = "https://en.wikipedia.org/wiki/Particulates";
+"AirIndex.url_pm10" = "https://en.wikipedia.org/wiki/Particulates";
+"AirIndex.url_o3" = "https://en.wikipedia.org/wiki/Ozone";
+"AirIndex.url_co" = "https://en.wikipedia.org/wiki/Carbon_monoxide";
+"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
+"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
+
+"AirStatus.good" = "ดี";
+"AirStatus.moderate" = "ปานกลาง";
+"AirStatus.unhealthyforsensitivegroup" = "มีผลกระทบต่อกลุ่มที่มีความอ่อนไหว";
+"AirStatus.unhealthy" = "มีผลกระทบต่อสุขภาพ";
+"AirStatus.veryunhealthy" = "มีผบกระทบต่อสุขภาพมาก";
+"AirStatus.hazardous" = "อันตราย";
+"AirStatus.unknown" = "-";
+
+"AirStatus.general_public_guidance_good" = "คุณภาพอากาศดีมาก เหมาะสำหรับกิจกรรมกลางแจ้งและการท่องเที่ยว";
+"AirStatus.general_public_guidance_moderate" = "สามารถทำกิจกรรมกลางแจ้งได้ตามปกติ";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "ควรเฝ้าระวังสุขภาพ ถ้ามีอาการเบื้องต้น เช่น ไอ หายใจลำบาก ระคายเคืองตา ควรลดระยะเวลาการทำกิจกรรมกลางแจ้ง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น";
+"AirStatus.general_public_guidance_unhealthy" = "ควรเฝ้าระวังสุขภาพ ถ้ามีอาการเบื้องต้น เช่น ไอ หายใจลำบาก ระคายเคืองตา ควรลดระยะเวลาการทำกิจกรรมกลางแจ้ง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น";
+"AirStatus.general_public_guidance_veryunhealthy" = "ทุกคนควรหลีกเลี่ยงกิจกรรมกลางแจ้งหลีกเลี่ยงพื้นที่ที่มีมลพิษทางอากาศสูง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น หากมีอาการทางสุขภาพควรปรึกษาแพทย์";
+"AirStatus.general_public_guidance_hazardous" = "ทุกคนควรหลีกเลี่ยงกิจกรรมกลางแจ้งหลีกเลี่ยงพื้นที่ที่มีมลพิษทางอากาศสูง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น หากมีอาการทางสุขภาพควรปรึกษาแพทย์";
+
+"AirStatus.sensitive_group_guidance_good" = "คุณภาพอากาศดีมาก เหมาะสำหรับกิจกรรมกลางแจ้งและการท่องเที่ยว";
+"AirStatus.sensitive_group_guidance_moderate" = "หากมีอาการเบื้องต้น เช่น ไอ หายใจลำบาก ระคายเคืองตา ควรลดระยะเวลาการทำกิจกรรมกลางแจ้ง";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "ควรลดระยะเวลาการทำกิจกรรมกลางแจ้ง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น ถ้ามีอาการทางสุขภาพ เช่น ไอ หายใจลำบาก ตาอักเสบ แน่นหน้าอก ปวดศีรษะ หัวใจเต้นไม่เป็นปกติ คลื่นไส้ อ่อนเพลีย ควรปรึกษาแพทย์";
+"AirStatus.sensitive_group_guidance_unhealthy" = "ควรลดระยะเวลาการทำกิจกรรมกลางแจ้ง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น ถ้ามีอาการทางสุขภาพ เช่น ไอ หายใจลำบาก ตาอักเสบ แน่นหน้าอก ปวดศีรษะ หัวใจเต้นไม่เป็นปกติ คลื่นไส้ อ่อนเพลีย ควรปรึกษาแพทย์";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "ทุกคนควรหลีกเลี่ยงกิจกรรมกลางแจ้งหลีกเลี่ยงพื้นที่ที่มีมลพิษทางอากาศสูง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น หากมีอาการทางสุขภาพควรปรึกษาแพทย์";
+"AirStatus.sensitive_group_guidance_hazardous" = "ทุกคนควรหลีกเลี่ยงกิจกรรมกลางแจ้งหลีกเลี่ยงพื้นที่ที่มีมลพิษทางอากาศสูง หรือใช้อุปกรณ์ป้องกันตนเองหากมีความจำเป็น หากมีอาการทางสุขภาพควรปรึกษาแพทย์";
+
+"AreaGroup.north" = "North";
+"AreaGroup.chumiao" = "Chu-Miao";
+"AreaGroup.central" = "Central";
+"AreaGroup.yunchianan" = "Yun-Chia-Nan";
+"AreaGroup.kaoping" = "KaoPing";
+"AreaGroup.yilan" = "Yilan";
+"AreaGroup.huatun" = "Hua-Tun";
+"AreaGroup.matsu" = "Matsu";
+"AreaGroup.kinmen" = "Kinmen";
+"AreaGroup.magong" = "Magong";
