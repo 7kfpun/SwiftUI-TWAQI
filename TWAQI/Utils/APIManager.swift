@@ -17,14 +17,14 @@ enum NetworkError: Error {
 
 struct APIManager {
     static let apiDomain = getEnv("ApiDomain")!
-    static let countriesEnpoint = "/v1/countries"
-    static let stationsEnpoint = "/v1/stations"
-    static let currentPollutantsEnpoint = "/v1/current-pollutants"
-    static let historicalPollutantsEnpoint = "/v1/historical-pollutants"
+    static let apiEnpointCountries = getEnv("ApiEnpointCountries")!
+    static let apiEnpointStations = getEnv("ApiEnpointStations")!
+    static let apiEnpointCurrentPollutants = getEnv("ApiEnpointCurrentPollutants")!
+    static let apiEnpointHistoricalPollutants = getEnv("ApiEnpointHistoricalPollutants")!
 
     // MARK: - V1 endpoints
     static func getCountries(completionHandler: @escaping (Result<Countries, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.countriesEnpoint)") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointCountries)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -53,7 +53,7 @@ struct APIManager {
     }
 
     static func getStations(countryCode: String, completionHandler: @escaping (Result<Stations, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.stationsEnpoint)") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointStations)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -88,7 +88,7 @@ struct APIManager {
     }
 
     static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointCurrentPollutants)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -117,7 +117,7 @@ struct APIManager {
     }
 
     static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.currentPollutantsEnpoint)") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointCurrentPollutants)") else {
             completionHandler(.failure(.badURL))
             return
         }
@@ -146,7 +146,7 @@ struct APIManager {
     }
 
     static func getHistoricalPollutants(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.historicalPollutantsEnpoint)") else {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointHistoricalPollutants)") else {
             completionHandler(.failure(.badURL))
             return
         }

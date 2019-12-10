@@ -13,7 +13,13 @@
 
 // APIs
 // TODO: handle for the demo
-API_DOMAIN =
+API_DOMAIN = https:\/\/firebasestorage.googleapis.com
+ApiEnpointCountries = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcountries.json?alt=media&token=96a901ae-6325-4a8f-ae5d-3ae04a21a4e3
+ApiEnpointStations = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fstations.json?alt=media&token=c2937b0e-1391-403e-8db8-0f087f3ebf39
+ApiEnpointCurrentPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcurrent-pollutants.json?alt=media&token=1ba8f3fd-b0fb-44fe-a4a3-e0085a25ba1f
+ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fhistorical-pollutants.json?alt=media&token=63729049-76eb-4836-ab28-c5dd371769ed
+
+// Deprecated
 FORECAST_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqfn.json?alt=media&token=e790ed5f-a6aa-4b50-8473-98e68186d11b
 HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/history.json?alt=media&token=4ff87ac5-e117-4149-9257-4784aea2fdbe
 CUSTOM_AD_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/custom_ad.json?alt=media&token=5164b9ad-e530-48c7-b20f-1dc030b05565
@@ -22,8 +28,8 @@ CUSTOM_AD_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.c
 AppCenterSecret =
 AppCenterAppSecret =
 BugsnagApiKey =
-GADApplicationIdentifier =
-GMSServicesApiKey =
+GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
+GMSServicesApiKey = // Required
 OneSignalAppId =
 SentryDSN =
 
