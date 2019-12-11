@@ -35,6 +35,7 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所設定的值偏低，將會收到很多通知哦";
 "Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "您所設定的值偏高，將會收到很多通知哦";
+"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能啟用 2 個地點";
 
 "Help.help" = "幫助";
 "Help.do_not_disturb" = "請勿打擾";

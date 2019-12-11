@@ -35,6 +35,7 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
+"Settings.you_can_only_enable_at_most_for_two_stations" = "You can only enable at most for 2 stations";
 
 "Help.help" = "Help";
 "Help.do_not_disturb" = "Do Not Disturb";

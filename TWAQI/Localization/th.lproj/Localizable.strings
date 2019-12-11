@@ -35,6 +35,7 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "ค่าน้อยเกินไปคุณจะได้รับการแจ้งเตือนมากมาย";
 "Settings.notice_me_when_aqi_is_below" = "แจ้งให้ฉันทราบเมื่อ AQI อยู่ด้านล่าง";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "ค่ามีขนาดใหญ่เกินไปคุณจะได้รับการแจ้งเตือนจำนวนมาก";
+"Settings.you_can_only_enable_at_most_for_two_stations" = "คุณสามารถเปิดใช้งานได้ไม่เกิน 2 สถานีเท่านั้น";
 
 "Help.help" = "ช่วยเหลือ";
 "Help.do_not_disturb" = "ห้ามรบกวน";

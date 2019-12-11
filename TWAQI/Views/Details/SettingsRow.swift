@@ -76,6 +76,12 @@ struct SettingsRow: View {
                     Spacer()
                 }
             }
+
+            if viewModel.isDisabled {
+                Text("Settings.you_can_only_enable_at_most_for_two_stations")
+                    .font(.caption)
+                    .fontWeight(.thin)
+            }
         }
         .padding(.horizontal)
     }
