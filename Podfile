@@ -7,8 +7,8 @@ target 'TWAQI' do
 
   # Pods for TWAQI
   pod 'Alamofire', '~> 5.0.0-rc.3'
-  pod 'GoogleMaps', '~> 3.6'
-  pod 'SDWebImageSwiftUI', '~> 0.8'
+  pod 'GoogleMaps', '~> 3.7'
+  pod 'SDWebImageSwiftUI', '~> 0.10'
   pod 'SnapKit', '~> 5.0'
   pod 'SwiftDate', '~> 6.1'
   pod 'SwiftyJSON', '~> 5.0'
@@ -24,9 +24,9 @@ target 'TWAQI' do
   pod 'Amplitude-iOS', '~> 4.9'
   pod 'AppCenter', '~> 2.5'
   pod 'AppCenter/Push'
-  pod 'Bugsnag', '~> 5.22'
+  pod 'Bugsnag', '~> 5.23'
   pod 'OneSignal', '>= 2.12', '< 3.0'
-  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '4.4.2'
+  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '4.4.3'
 
 end
 
