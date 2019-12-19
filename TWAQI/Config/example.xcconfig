@@ -12,7 +12,6 @@
 // Please copy the file and rename to debug.xcconfig and release.xcconfig
 
 // APIs
-// TODO: handle for the demo
 API_DOMAIN = https:\/\/firebasestorage.googleapis.com
 ApiEnpointCountries = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcountries.json?alt=media&token=96a901ae-6325-4a8f-ae5d-3ae04a21a4e3
 ApiEnpointStations = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fstations.json?alt=media&token=c2937b0e-1391-403e-8db8-0f087f3ebf39

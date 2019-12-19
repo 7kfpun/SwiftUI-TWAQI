@@ -1,0 +1,112 @@
+/*
+  Localizable.strings
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "首页";
+"Tabbar.favourites" = "最爱";
+"Tabbar.details_list" = "搜索";
+"Tabbar.forecast" = "预报";
+"Tabbar.settings" = "通知";
+"Tabbar.help" = "帮助";
+
+"FavouriteList.favourites" = "最爱列表";
+"Favourites.add_your_first_favourite_station" = "添加您的最爱";
+"Favourites.remove_all_your_saved_stations" = "删除所有最爱";
+
+"DetailsList.details" = "空气品质详情";
+"DetailsList.search" = "搜索";
+
+"Details.general_public" = "一般族群";
+"Details.sensitive_group" = "敏感族群";
+
+"Forecast.forecast" = "空气品质预报";
+"Forecast.forecast_notification_daily" = "空气品质预报通知（每日）";
+"Forecast.publish_time" = "发布时间";
+"Forecast.three_days_forecast" = "3 天预测";
+"Forecast.details_forecast" = "详细预测";
+
+"Settings.notification" = "空气品质通知";
+"Settings.search" = "搜索";
+"Settings.notice_me_when_aqi_is_above" = "当空气品质明显恶化时，请通知我";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所设定的值偏低，将会收到很多通知哦";
+"Settings.notice_me_when_aqi_is_below" = "当空气品质优良时，请通知我";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "您所设定的值偏高，将会收到很多通知哦";
+"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能启用 2 个地点";
+
+"Help.help" = "帮助";
+"Help.do_not_disturb" = "请勿打扰";
+"Help.turn_on_do_not_disturb" = "开启请勿打扰";
+"Help.start_time" = "开始";
+"Help.end_time" = "结束";
+"Help.cancel_site_notification" = "取消所有空气品质通知";
+"Help.all_site_notification_has_been_cancelled" = "已经取消所有通知";
+"Help.in_app_purchase" = "应用程式内购买";
+"Help.ad_free" = "想移除广告？";
+"Help.restore_purchase" = "恢复你的应用内购买";
+"Help.contact_us" = "联络我们";
+"Help.interested_to_be_our_business_partner" = "想成为我们合作伙伴吗？";
+"Help.feedback_or_contact_us" = "反馈 / 联络我们";
+"Help.interested_to_be_our_beta_tester" = "有兴趣成为我们的 Beta 测试员？";
+"Help.definition" = "帮助";
+"Help.data_provided_by_government" = "台湾空污即时预报所有数据皆由「行政院环境保护署－空气品质监测网」(Open Data) 提供。 ";
+
+"AirIndex.meaning_aqi" = "空气品质指数";
+"AirIndex.meaning_pm25" = "细悬浮微粒";
+"AirIndex.meaning_pm10" = "悬浮微粒";
+"AirIndex.meaning_o3" = "臭氧";
+"AirIndex.meaning_co" = "一氧化碳";
+"AirIndex.meaning_so2" = "二氧化硫";
+"AirIndex.meaning_no2" = "二氧化氮";
+
+"AirIndex.description_aqi" = "综合各项污染的空气指标，数值愈高，空气愈脏";
+"AirIndex.description_pm25" = "对心血管、神经系统伤害大，可能含有重金属等重度污染物";
+"AirIndex.description_pm10" = "颗粒较大的悬浮微粒，过量可形成雾霾";
+"AirIndex.description_o3" = "对眼睛、呼吸道等有侵蚀和损害作用";
+"AirIndex.description_co" = "主要由燃烧化石燃料或火山爆发产生，通常在大气少量存在";
+"AirIndex.description_so2" = "过量接触将有眼睛疼痛、肺部伤害";
+"AirIndex.description_no2" = "来自于车辆废气、火力发电厂或其他工业染料，过量吸收伤害肺部";
+
+"AirIndex.url_aqi" = "https://zh.wikipedia.org/wiki/%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E6%8C%87% E6%95%B0";
+"AirIndex.url_pm25" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
+"AirIndex.url_pm10" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
+"AirIndex.url_o3" = "https://zh.wikipedia.org/wiki/%E8%87%AD%E6%B0%A7";
+"AirIndex.url_co" = "https://zh.wikipedia.org/wiki/%E4%B8%80%E6%B0%A7%E5%8C%96%E7%A2%B3";
+"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
+"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
+
+"AirStatus.good" = "良好";
+"AirStatus.moderate" = "普通";
+"AirStatus.unhealthyforsensitivegroup" = "对敏感族群不良";
+"AirStatus.unhealthy" = "对所有族群不良";
+"AirStatus.veryunhealthy" = "非常不良";
+"AirStatus.hazardous" = "有害";
+"AirStatus.unknown" = "-";
+
+"AirStatus.general_public_guidance_good" = "正常户外活动";
+"AirStatus.general_public_guidance_moderate" = "正常户外活动";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "考虑减少户外活动";
+"AirStatus.general_public_guidance_unhealthy" = "减少体力消耗，特别是减少户外活动";
+"AirStatus.general_public_guidance_veryunhealthy" = "减少户外活动";
+"AirStatus.general_public_guidance_hazardous" = "避免户外活动";
+
+"AirStatus.sensitive_group_guidance_good" = "正常户外活动";
+"AirStatus.sensitive_group_guidance_moderate" = "仍可正常户外活动";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "减少体力消耗活动及户外活动";
+"AirStatus.sensitive_group_guidance_unhealthy" = "留在室内并减少体力消耗活动";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "留在室内并减少体力消耗活动";
+"AirStatus.sensitive_group_guidance_hazardous" = "留在室内并避免体力消耗活动";
+
+"AreaGroup.north" = "北部";
+"AreaGroup.chumiao" = "竹苗";
+"AreaGroup.central" = "中部";
+"AreaGroup.yunchianan" = "云嘉南";
+"AreaGroup.kaoping" = "高屏";
+"AreaGroup.yilan" = "宜兰";
+"AreaGroup.huatun" = "花东";
+"AreaGroup.matsu" = "马祖";
+"AreaGroup.kinmen" = "金门";
+"AreaGroup.magong" = "澎湖";

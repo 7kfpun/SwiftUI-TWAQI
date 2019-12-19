@@ -8,7 +8,7 @@
 
 "Tabbar.main" = "首頁";
 "Tabbar.favourites" = "最愛";
-"Tabbar.details_list" = "搜素";
+"Tabbar.details_list" = "搜索";
 "Tabbar.forecast" = "預報";
 "Tabbar.settings" = "通知";
 "Tabbar.help" = "幫助";
@@ -18,7 +18,7 @@
 "Favourites.remove_all_your_saved_stations" = "刪除所有最愛";
 
 "DetailsList.details" = "空氣品質詳情";
-"DetailsList.search" = "搜素";
+"DetailsList.search" = "搜索";
 
 "Details.general_public" = "一般族群";
 "Details.sensitive_group" = "敏感族群";
@@ -30,7 +30,7 @@
 "Forecast.details_forecast" = "詳細預測";
 
 "Settings.notification" = "空氣品質通知";
-"Settings.search" = "搜素";
+"Settings.search" = "搜索";
 "Settings.notice_me_when_aqi_is_above" = "當空氣品質明顯惡化時，請通知我";
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所設定的值偏低，將會收到很多通知哦";
 "Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
