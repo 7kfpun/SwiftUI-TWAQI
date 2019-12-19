@@ -22,16 +22,33 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     static func reloadComplications() {
-        let complicationServer = CLKComplicationServer.sharedInstance()
-        guard let complications = complicationServer.activeComplications else { return }
-        for complication in complications {
-            print("UPDATE COMPLICATION")
-            complicationServer.reloadTimeline(for: complication)
+        let settingsStore = SettingsStore()
+        let station = settingsStore.closestStation
+
+        APIManager.getHistoricalPollutants(stationId: station.id) { result in
+            switch result {
+            case .success(let result):
+                let historicalPollutants = result["data"] as! HistoricalPollutants
+
+                if let latestHistoricalPollutant = historicalPollutants.last {
+                    settingsStore.latestHistoricalPollutant = latestHistoricalPollutant
+                }
+
+                let complicationServer = CLKComplicationServer.sharedInstance()
+                guard let complications = complicationServer.activeComplications else { return }
+                for complication in complications {
+                    print("UPDATE COMPLICATION")
+                    complicationServer.reloadTimeline(for: complication)
+                }
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
         }
     }
 
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
+        ExtensionDelegate.reloadComplications()
         ExtensionDelegate.scheduleComplicationUpdate()
     }
 
@@ -52,7 +69,6 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
             case let backgroundTask as WKApplicationRefreshBackgroundTask:
                 // Be sure to complete the background task once you’re done.
                 ExtensionDelegate.reloadComplications()
-
                 ExtensionDelegate.scheduleComplicationUpdate()
 
                 backgroundTask.setTaskCompletedWithSnapshot(false)
@@ -77,5 +93,4 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate {
             }
         }
     }
-
 }

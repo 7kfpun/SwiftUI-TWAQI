@@ -31,6 +31,19 @@ let defaultStation = Station(
     nameLocal: "松山"
 )
 
+let defaultHistoricalPollutant = HistoricalPollutant(
+    aqi: 0,
+    pm25: 0,
+    pm10: 0,
+    no2: 0,
+    so2: 0,
+    co: 0,
+    o3: 0,
+    windDirection: 0,
+    windSpeed: 0,
+    publishTime: "--"
+)
+
 final class SettingsStore: ObservableObject {
     private enum Keys {
         static let airIndexTypeSelected = "airIndexTypeSelected"
@@ -38,6 +51,7 @@ final class SettingsStore: ObservableObject {
         static let closestCountryCode = "closestCountryCode"
         static let closestStationNew = "closestStationNew"
         static let closestStationName = "closestStationName"
+        static let latestHistoricalPollutant = "latestHistoricalPollutant"
     }
 
     private let cancellable: Cancellable
@@ -86,5 +100,10 @@ final class SettingsStore: ObservableObject {
     var closestStationName: String {
         set { defaults.set(newValue, forKey: Keys.closestStationName) }
         get { defaults.string(forKey: Keys.closestStationName) ?? "松山" }
+    }
+
+    var latestHistoricalPollutant: HistoricalPollutant {
+        set { defaults.setStruct(newValue, forKey: Keys.latestHistoricalPollutant) }
+        get { defaults.structData(HistoricalPollutant.self, forKey: Keys.latestHistoricalPollutant) ?? defaultHistoricalPollutant }
     }
 }

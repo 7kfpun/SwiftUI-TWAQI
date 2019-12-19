@@ -15,7 +15,6 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     let settingsStore = SettingsStore()
 
     // MARK: - Timeline Configuration
-    
     func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
         handler([.forward, .backward])
     }
@@ -34,17 +33,20 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             case .success(let result):
                 let historicalPollutants = result["data"] as! HistoricalPollutants
 
-                if let lastHistoricalPollutant = historicalPollutants.last,
-                    let template = self.getDummyTemplate(
+                if let latestHistoricalPollutant = historicalPollutants.last {
+                    self.settingsStore.latestHistoricalPollutant = latestHistoricalPollutant
+
+                    if let template = self.getDummyTemplate(
                         for: complication,
                         station: station,
-                        historicalPollutant: lastHistoricalPollutant,
+                        historicalPollutant: latestHistoricalPollutant,
                         airIndexTypeSelected: airIndexTypeSelected
                     ) {
-                    let entry = CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template)
-                    handler(entry)
-                } else {
-                    handler(nil)
+                        let entry = CLKComplicationTimelineEntry(date: Date(), complicationTemplate: template)
+                        handler(entry)
+                    } else {
+                        handler(nil)
+                    }
                 }
             case .failure(let error):
                 print(error.localizedDescription)
@@ -68,19 +70,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         // This method will be called once per supported complication, and the results will be cached
         let station = settingsStore.closestStation
-
-        let historicalPollutant = HistoricalPollutant(
-            aqi: 0,
-            pm25: 0,
-            pm10: 0,
-            no2: 0,
-            so2: 0,
-            co: 0,
-            o3: 0,
-            windDirection: 0,
-            windSpeed: 0,
-            publishTime: "--"
-        )
+        let historicalPollutant = settingsStore.latestHistoricalPollutant
 
         if let template = getDummyTemplate(
             for: complication, station: station, historicalPollutant: historicalPollutant, airIndexTypeSelected: AirIndexTypes.aqi
@@ -91,7 +81,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    private func getDummyTemplate(for complication: CLKComplication, station: Station, historicalPollutant: HistoricalPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
+    func getDummyTemplate(for complication: CLKComplication, station: Station, historicalPollutant: HistoricalPollutant, airIndexTypeSelected: AirIndexTypes) -> CLKComplicationTemplate? {
         let template: CLKComplicationTemplate
 
         let stationName = Locale.isChinese ? station.nameLocal : station.name
