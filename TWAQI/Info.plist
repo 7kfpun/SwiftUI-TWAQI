@@ -6,6 +6,8 @@
 	<string>$(AdUnitIdDetailsFooter)</string>
 	<key>AdUnitIdDetailsListFooter</key>
 	<string>$(AdUnitIdDetailsListFooter)</string>
+	<key>AdUnitIdFavouritesFooter</key>
+	<string>$(AdUnitIdFavouritesFooter)</string>
 	<key>AdUnitIdForecastFooter</key>
 	<string>$(AdUnitIdForecastFooter)</string>
 	<key>AdUnitIdHelpFooter</key>

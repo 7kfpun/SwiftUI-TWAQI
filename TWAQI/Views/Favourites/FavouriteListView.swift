@@ -41,7 +41,7 @@ struct FavouriteListView: View {
                     Spacer().frame(height: 80)
                 }
 
-                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
             }
             .navigationBarTitle("FavouriteList.favourites")
         }
