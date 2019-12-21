@@ -45,6 +45,7 @@
 		9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBannerView.swift */; };
 		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E4A2F93239B9B6000FFCD09 /* Stations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34523939798009CED32 /* Stations.swift */; };
+		9E51276E23AC6DDB00DEA45D /* StoreReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */; };
 		9E5257AC23449FD1001ECFE1 /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */; };
 		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A642340993C0064D874 /* DetailsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A632340993C0064D874 /* DetailsRow.swift */; };
@@ -231,6 +232,7 @@
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E4A2F94239EB60900FFCD09 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
+		9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReviewManager.swift; sourceTree = "<group>"; };
 		9E5257AB23449FD1001ECFE1 /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		9E65658923AB2E73003EFB87 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
@@ -521,6 +523,7 @@
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
+				9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */,
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
@@ -1013,6 +1016,7 @@
 				9EF3D34623939798009CED32 /* Stations.swift in Sources */,
 				9EF250172376702100A731D5 /* AirStatusBarView.swift in Sources */,
 				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
+				9E51276E23AC6DDB00DEA45D /* StoreReviewManager.swift in Sources */,
 				9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E1C9B14238974120052E115 /* StringExtension.swift in Sources */,

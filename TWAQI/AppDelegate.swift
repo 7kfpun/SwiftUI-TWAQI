@@ -139,6 +139,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        StoreReviewHelper.incrementAppOpenedCount()
+        StoreReviewHelper.checkAndAskForReview()
+
         return true
     }
 
