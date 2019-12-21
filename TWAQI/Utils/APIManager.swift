@@ -19,6 +19,8 @@ struct APIManager {
     static let apiDomain = getEnv("ApiDomain")!
     static let apiEnpointCountries = getEnv("ApiEnpointCountries")!
     static let apiEnpointStations = getEnv("ApiEnpointStations")!
+    static let apiEnpointSuccessAds = getEnv("ApiEnpointSuccessAds")!
+
     static let apiEnpointCurrentPollutants = getEnv("ApiEnpointCurrentPollutants")!
     static let apiEnpointHistoricalPollutants = getEnv("ApiEnpointHistoricalPollutants")!
 
@@ -226,13 +228,17 @@ struct APIManager {
     }
 
     // MARK: - Other endpoints
-    static func getCustomAd(completionHandler: @escaping (Result<CustomAd, NetworkError>) -> Void) {
-        guard let url = URL(string: getEnv("CUSTOM AD API")!) else {
+    static func getCustomAd(position: String, completionHandler: @escaping (Result<CustomAd, NetworkError>) -> Void) {
+        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointSuccessAds)") else {
             completionHandler(.failure(.badURL))
             return
         }
 
-        AF.request(url)
+        let parameters: Parameters = [
+            "position": position,
+        ]
+
+        AF.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
@@ -242,8 +248,8 @@ struct APIManager {
                     }
 
                     debugPrint(response)
-                    let customAd = try JSONDecoder().decode(CustomAd.self, from: data)
-                    completionHandler(.success(customAd))
+                    let adResponse = try JSONDecoder().decode(AdResponse.self, from: data)
+                    completionHandler(.success(adResponse.data))
                 } catch {
                     print(error)
                     completionHandler(.failure(.networkError))

@@ -12,7 +12,7 @@ import Foundation
 class MainViewModel: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
-    @Published var isLoading: Bool = true {
+    @Published var isCustomAdLoading: Bool = true {
         willSet {
             self.objectWillChange.send()
         }
@@ -21,29 +21,18 @@ class MainViewModel: ObservableObject {
     var isShowCustomAd: Bool = false
     var customAd: CustomAd?
 
-    private(set) lazy var getData: () -> Void = {
-        APIManager.getCustomAd { result in
+    private(set) lazy var getCustomAd: () -> Void = {
+        APIManager.getCustomAd(position: "main") { result in
             switch result {
             case .success(let customAd):
                 self.customAd = customAd
-                self.isShowCustomAd = customAd.impressionRate > Double.random(in: 0 ..< 1)
-                self.isLoading = false
-
-                if self.isShowCustomAd {
-                    var components = URLComponents(string: customAd.imageUrl)!
-                    components.query = nil
-
-                    TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
-                        "name": customAd.name,
-                        "impressionRate": customAd.impressionRate,
-                        "imageUrl": "\(components.url!)",
-                        "destinationUrl": customAd.destinationUrl,
-                    ])
-                }
+                self.isShowCustomAd = true
             case .failure(let error):
                 print(error.localizedDescription)
-                self.isLoading = false
+                self.isShowCustomAd = false
             }
+
+            self.isCustomAdLoading = false
         }
     }
 }

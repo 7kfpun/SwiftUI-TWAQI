@@ -28,6 +28,8 @@
 	<string>$(ApiEnpointHistoricalPollutants)</string>
 	<key>ApiEnpointStations</key>
 	<string>$(ApiEnpointStations)</string>
+	<key>ApiEnpointSuccessAds</key>
+	<string>$(ApiEnpointSuccessAds)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
 	<key>BetaTesterUrl</key>

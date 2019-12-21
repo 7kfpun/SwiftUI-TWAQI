@@ -41,7 +41,14 @@ struct FavouriteListView: View {
                     Spacer().frame(height: 80)
                 }
 
-                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
+                if !viewModel.isCustomAdLoading {
+                    if viewModel.isShowCustomAd {
+                        CustomAdView(customAd: viewModel.customAd)
+                            .onAppear(perform: submitImpressionEvent)
+                    } else {
+                        AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
+                    }
+                }
             }
             .navigationBarTitle("FavouriteList.favourites")
         }
@@ -57,6 +64,25 @@ struct FavouriteListView: View {
 
     private func getData() {
         self.viewModel.getData()
+        self.viewModel.getCustomAd()
+    }
+
+    private func submitImpressionEvent() {
+        if viewModel.isShowCustomAd {
+            if let customAd = viewModel.customAd {
+                var components = URLComponents(string: customAd.imageUrl)!
+                components.query = nil
+
+                TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
+                    "name": customAd.name,
+                    "position": customAd.position,
+                    "impressionRate": customAd.impressionRate,
+                    "imageUrl": "\(components.url!)",
+                    "destinationUrl": customAd.destinationUrl,
+                    "cpc": customAd.cpc,
+                ])
+            }
+        }
     }
 
     private func removeAll() {

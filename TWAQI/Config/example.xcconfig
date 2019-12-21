@@ -18,10 +18,11 @@ ApiEnpointStations = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fstations.js
 ApiEnpointCurrentPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcurrent-pollutants.json?alt=media&token=1ba8f3fd-b0fb-44fe-a4a3-e0085a25ba1f
 ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fhistorical-pollutants.json?alt=media&token=63729049-76eb-4836-ab28-c5dd371769ed
 
+ApiEnpointSuccessAds = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fsuccess-ads.json?alt=media&token=5c134e38-e654-46ac-a044-9730cd3eb221
+
 // Deprecated
 FORECAST_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqfn.json?alt=media&token=e790ed5f-a6aa-4b50-8473-98e68186d11b
 HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/history.json?alt=media&token=4ff87ac5-e117-4149-9257-4784aea2fdbe
-CUSTOM_AD_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/custom_ad.json?alt=media&token=5164b9ad-e530-48c7-b20f-1dc030b05565
 
 // Services
 AppCenterSecret =
