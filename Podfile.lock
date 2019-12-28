@@ -133,7 +133,7 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.3)
   - Amplitude-iOS (~> 4.9)
-  - AppCenter (~> 2.5.3)
+  - AppCenter (~> 2.5)
   - AppCenter/Push
   - Bugsnag (~> 5.23)
   - Crashlytics (~> 3.14.0)
@@ -227,6 +227,6 @@ SPEC CHECKSUMS:
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 33606aa3b316c618be78cdd70b3f105ee1768410
+PODFILE CHECKSUM: 154390af0914853a75e9e531c9b56b76fa50d962
 
 COCOAPODS: 1.8.3
