@@ -40,14 +40,19 @@ struct DetailsListView: View {
                     Spacer().frame(height: 50)
                 }
 
-                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+                if !viewModel.isCustomAdLoading {
+                    if viewModel.isShowCustomAd {
+                        CustomAdView(customAd: viewModel.customAd)
+                            .onAppear(perform: submitImpressionEvent)
+                    } else {
+                        AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+                    }
+                }
             }
             .navigationBarTitle("DetailsList.details")
         }
         .navigationViewStyle(StackNavigationViewStyle())
-        .onAppear {
-            self.getData()
-        }
+        .onAppear(perform: getData)
     }
 
     init() {
@@ -56,6 +61,34 @@ struct DetailsListView: View {
 
     private func getData() {
         self.viewModel.getData()
+        self.viewModel.getCustomAd()
+    }
+
+    private func submitImpressionEvent() {
+        if viewModel.isShowCustomAd {
+            if let customAd = viewModel.customAd {
+                var components = URLComponents(string: customAd.imageUrl)!
+                components.query = nil
+
+                TrackingManager.logEvent(eventName: "ad_custom_impression", parameters: [
+                    "name": customAd.name,
+                    "position": customAd.position,
+                    "impressionRate": customAd.impressionRate,
+                    "imageUrl": "\(components.url!)",
+                    "destinationUrl": customAd.destinationUrl,
+                    "cpc": customAd.cpc,
+                ])
+
+                TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
+                    "name": customAd.name,
+                    "position": customAd.position,
+                    "impressionRate": customAd.impressionRate,
+                    "imageUrl": "\(components.url!)",
+                    "destinationUrl": customAd.destinationUrl,
+                    "cpc": customAd.cpc,
+                ])
+            }
+        }
     }
 }
 

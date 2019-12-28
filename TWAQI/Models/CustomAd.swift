@@ -12,7 +12,7 @@ struct CustomAd: Codable, Hashable {
     let id = UUID()
     let name: String
     let position: String
-    let impressionRate: Double
+    let impressionRate: Int
     let imageUrl: String
     let destinationUrl: String
     let cpc: Double
