@@ -33,9 +33,11 @@ struct CustomAdView: View {
 
     private func openUrl() {
         if let name = customAd?.name,
+            let position = customAd?.position,
             let impressionRate = customAd?.impressionRate,
             let imageUrl = customAd?.imageUrl,
-            let destinationUrl = customAd?.destinationUrl {
+            let destinationUrl = customAd?.destinationUrl,
+            let cpc = customAd?.cpc {
             print("destinationUrl", destinationUrl)
             if let url = URL(string: destinationUrl) {
                 UIApplication.shared.open(url)
@@ -43,11 +45,22 @@ struct CustomAdView: View {
                 var components = URLComponents(string: imageUrl)!
                 components.query = nil
 
-                TrackingManager.logEvent(eventName: "ad_custom_\(name)_click", parameters: [
+                TrackingManager.logEvent(eventName: "ad_custom_click", parameters: [
                     "name": name,
+                    "position": position,
                     "impressionRate": impressionRate,
                     "imageUrl": "\(components.url!)",
                     "destinationUrl": destinationUrl,
+                    "cpc": cpc,
+                ])
+
+                TrackingManager.logEvent(eventName: "ad_custom_\(name)_click", parameters: [
+                    "name": name,
+                    "position": position,
+                    "impressionRate": impressionRate,
+                    "imageUrl": "\(components.url!)",
+                    "destinationUrl": destinationUrl,
+                    "cpc": cpc,
                 ])
             }
         }

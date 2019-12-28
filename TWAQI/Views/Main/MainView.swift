@@ -37,6 +37,15 @@ struct MainView: View {
                 var components = URLComponents(string: customAd.imageUrl)!
                 components.query = nil
 
+                TrackingManager.logEvent(eventName: "ad_custom_impression", parameters: [
+                    "name": customAd.name,
+                    "position": customAd.position,
+                    "impressionRate": customAd.impressionRate,
+                    "imageUrl": "\(components.url!)",
+                    "destinationUrl": customAd.destinationUrl,
+                    "cpc": customAd.cpc,
+                ])
+
                 TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
                     "name": customAd.name,
                     "position": customAd.position,
