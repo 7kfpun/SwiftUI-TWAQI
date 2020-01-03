@@ -137,6 +137,10 @@ struct HelpView: View {
 
     private func getData() {
         self.viewModel.getCustomAd()
+        Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { (_) in
+            // Schedule in seconds
+            self.viewModel.getCustomAd()
+        }
     }
 
     private func submitImpressionEvent() {
