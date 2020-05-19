@@ -6,34 +6,36 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SDWebImageSwiftUI
+//import SDWebImageSwiftUI
 import SwiftUI
 
 struct DetailsView: View {
     @ObservedObject var viewModel: DetailsViewModel
 
     var body: some View {
-        // SDImageCache.shared.config.maxDiskAge = 60 * 5  // This seems not working
-        let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
-
-        var imageUrl = ""
-
-        if let station = self.viewModel.station {
-            imageUrl = station.imageUrl ?? ""
-        }
+//        // SDImageCache.shared.config.maxDiskAge = 60 * 5  // This seems not working
+//        let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
+//
+//        var imageUrl = ""
+//
+//        if let station = self.viewModel.station {
+//            imageUrl = station.imageUrl ?? ""
+//        }
 
         return ZStack {
             ScrollView {
-                if !imageUrl.isEmpty {
-                    WebImage(url: URL(string: "\(imageUrl)?\(cacheKey)"))
-                        .resizable()
-                        .indicator(.activity)
-                        .transition(.fade)
-                        .aspectRatio(contentMode: .fill)
-                } else {
-                    Spacer()
-                        .frame(height: 80)
-                }
+                Spacer()
+                    .frame(height: 80)
+//                if !imageUrl.isEmpty {
+//                    WebImage(url: URL(string: "\(imageUrl)?\(cacheKey)"))
+//                        .resizable()
+//                        .indicator(.activity)
+//                        .transition(.fade)
+//                        .aspectRatio(contentMode: .fill)
+//                } else {
+//                    Spacer()
+//                        .frame(height: 80)
+//                }
 
                 if self.viewModel.station != nil {
                     SettingsRow(station: self.viewModel.station!)
