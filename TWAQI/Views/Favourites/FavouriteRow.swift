@@ -17,7 +17,7 @@ struct FavouriteRow: View {
             value: Double(self.pollutant.aqi)
         )
 
-        return NavigationLink(destination: DetailsView(stationId: pollutant.stationId)) {
+        return NavigationLink(destination: DetailsView(stationId: pollutant.stationId).environmentObject(SettingsStore())) {
             VStack {
                 HStack {
                     Text(Locale.isChinese ? self.pollutant.nameLocal : self.pollutant.name)
