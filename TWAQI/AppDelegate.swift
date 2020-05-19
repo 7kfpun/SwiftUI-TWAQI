@@ -79,13 +79,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Initialize Sentry service.
-        do {
-            if let sentryDSN = getEnv("SentryDSN") {
-                Client.shared = try Client(dsn: sentryDSN)
-                try Client.shared?.startCrashHandler()
-            }
-        } catch let error {
-            print("\(error)")
+        if let sentryDSN = getEnv("SentryDSN") {
+            SentrySDK.start(options: [
+                "dsn": sentryDSN,
+                "debug": true,
+            ])
         }
 
         // Initialize OneSignal push services.
