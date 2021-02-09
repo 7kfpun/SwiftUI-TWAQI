@@ -88,18 +88,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Initialize OneSignal push services.
         if let oneSignalAppId = getEnv("OneSignalAppId") {
-            let onesignalInitSettings = [kOSSettingsKeyAutoPrompt: false]
-            OneSignal.initWithLaunchOptions(
-                launchOptions,
-                appId: oneSignalAppId,
-                handleNotificationAction: nil,
-                settings: onesignalInitSettings
-            )
+            OneSignal.initWithLaunchOptions(launchOptions)
+            OneSignal.setAppId(oneSignalAppId)
 
-            OneSignal.inFocusDisplayType = OSNotificationDisplayType.notification
-
-            // TODO: Recommend moving the below line to prompt for push after informing the user about
-            // how your app will use them.
             OneSignal.promptForPushNotifications(userResponse: { accepted in
                 print("User accepted notifications: \(accepted)")
             })
