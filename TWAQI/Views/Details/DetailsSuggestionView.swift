@@ -17,6 +17,18 @@ struct DetailsSuggestionView: View {
             value: Double(self.lastPollutant.aqi)
         )
 
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        
+        let dateFormatterPrint = DateFormatter()
+        dateFormatterPrint.dateFormat = "HH:mm"
+        
+        var printString: String = ""
+        
+        if let date = dateFormatterGet.date(from: self.lastPollutant.publishTime) {
+            printString = dateFormatterPrint.string(from: date)
+        }
+        
         return GeometryReader { geometry in
             HStack {
                 VStack {
@@ -49,6 +61,10 @@ struct DetailsSuggestionView: View {
                         .lineLimit(2)
                         .background(Color(airStatus.getColor()))
                         .cornerRadius(6)
+                    
+                    Text(printString)
+                        .font(.footnote)
+                        .fontWeight(.thin)
                 }
                 .frame(width: geometry.size.width / 3)
 
