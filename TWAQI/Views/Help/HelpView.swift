@@ -12,9 +12,6 @@ struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: HelpViewModel
 
-    @State var linkPage: LinkPages?
-    @State var definitionPage: DefinitionPages?
-
     var body: some View {
         NavigationView {
             ZStack {
@@ -74,9 +71,7 @@ struct HelpView: View {
                     Section(header: Text("Help.contact_us")) {
                         ForEach(LinkPages.allCases) { linkPage in
                             Button(action: {
-                                // setting a new value to self.linkPage
-                                // this is used for triggering the SafariView presentation through .sheet()
-                                self.linkPage = linkPage
+                                UIApplication.shared.open(linkPage.url)
                                 TrackingManager.logEvent(eventName: "open_contact_us_link", parameters: ["label": linkPage.rawValue])
                             }) {
                                 Text(linkPage.title)
@@ -86,16 +81,11 @@ struct HelpView: View {
                             }
                         }
                     }
-                    .sheet(item: $linkPage, content: { linkPage in
-                        SafariView(url: linkPage.url)
-                    })
 
                     Section(header: Text("Help.definition")) {
                         ForEach(DefinitionPages.allCases) { definitionPage in
                             Button(action: {
-                                // setting a new value to self.linkPage
-                                // this is used for triggering the SafariView presentation through .sheet()
-                                self.definitionPage = definitionPage
+                                UIApplication.shared.open(definitionPage.url)
                                 TrackingManager.logEvent(eventName: "open_definition_link", parameters: ["label": definitionPage.rawValue])
                             }) {
                                 Text(definitionPage.title)
@@ -105,9 +95,6 @@ struct HelpView: View {
                             }
                         }
                     }
-                    .sheet(item: $definitionPage, content: { definitionPage in
-                        SafariView(url: definitionPage.url)
-                    })
 
                     Section {
                         Text("Help.data_provided_by_government")

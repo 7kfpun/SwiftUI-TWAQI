@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import ClockKit
 import WatchKit
 
 class ExtensionDelegate: NSObject, WKExtensionDelegate {
