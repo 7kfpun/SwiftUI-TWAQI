@@ -140,7 +140,7 @@ DEPENDENCIES:
   - Firebase/InAppMessagingDisplay
   - Firebase/Messaging
   - GoogleMaps (~> 3.8)
-  - OneSignal (< 3.0, >= 2.12)
+  - OneSignal (< 3.1, >= 2.12)
   - SDWebImageSwiftUI (~> 1.4.0)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `5.0.4`)
   - SnapKit (~> 5.0)
@@ -221,6 +221,6 @@ SPEC CHECKSUMS:
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 2ab3aae8bfb62c194a421a3a50bae09bdac7e1a2
+PODFILE CHECKSUM: 2fdeb2ede41fe00f534fde57c6447eef63c26bf8
 
 COCOAPODS: 1.10.0
