@@ -41,14 +41,7 @@ struct ForecastView: View {
                     Spacer().frame(height: 50)
                 }
 
-                if !viewModel.isCustomAdLoading {
-                    if viewModel.isShowCustomAd {
-                        CustomAdView(customAd: viewModel.customAd)
-                            .onAppear(perform: submitImpressionEvent)
-                    } else {
-                        AdBannerView(adUnitID: getEnv("AdUnitIdForecastFooter")!)
-                    }
-                }
+                AdBannerView(adUnitID: getEnv("AdUnitIdForecastFooter")!)
             }
             .navigationBarTitle("Forecast.forecast")
         }
@@ -58,11 +51,6 @@ struct ForecastView: View {
 
     private func getData() {
         self.viewModel.getData()
-//        self.viewModel.getCustomAd()
-//        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
-//            // Schedule in seconds
-//            self.viewModel.getCustomAd()
-//        }
     }
 
     private func submitImpressionEvent() {

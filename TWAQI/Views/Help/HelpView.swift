@@ -104,30 +104,14 @@ struct HelpView: View {
                 }
                 .padding(.bottom, 50)
 
-                if !viewModel.isCustomAdLoading {
-                    if viewModel.isShowCustomAd {
-                        CustomAdView(customAd: viewModel.customAd)
-                            .onAppear(perform: submitImpressionEvent)
-                    } else {
-                        AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
-                    }
-                }
+                AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
             .onAppear {
                 IAPManager.shared.fetchAvailableProducts()
             }
             .navigationBarTitle("Help.help")
-            .onAppear(perform: getData)
         }
         .navigationViewStyle(StackNavigationViewStyle())
-    }
-
-    private func getData() {
-//        self.viewModel.getCustomAd()
-//        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
-//            // Schedule in seconds
-//            self.viewModel.getCustomAd()
-//        }
     }
 
     private func submitImpressionEvent() {

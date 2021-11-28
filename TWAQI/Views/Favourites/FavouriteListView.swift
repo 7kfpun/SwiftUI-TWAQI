@@ -41,14 +41,7 @@ struct FavouriteListView: View {
                     Spacer().frame(height: 80)
                 }
 
-                if !viewModel.isCustomAdLoading {
-                    if viewModel.isShowCustomAd {
-                        CustomAdView(customAd: viewModel.customAd)
-                            .onAppear(perform: submitImpressionEvent)
-                    } else {
-                        AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
-                    }
-                }
+                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
             }
             .navigationBarTitle("FavouriteList.favourites")
         }
@@ -64,11 +57,6 @@ struct FavouriteListView: View {
 
     private func getData() {
         self.viewModel.getData()
-//        self.viewModel.getCustomAd()
-//        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
-//            // Schedule in seconds
-//            self.viewModel.getCustomAd()
-//        }
     }
 
     private func submitImpressionEvent() {
