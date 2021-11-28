@@ -31,6 +31,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window = window
             window.makeKeyAndVisible()
         }
+
+        UITabBar.appearance().backgroundColor = UIColor.systemBackground
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
