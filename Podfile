@@ -13,13 +13,13 @@ target 'TWAQI' do
   pod 'SwiftDate', '~> 6.1'
   pod 'SwiftyJSON', '~> 5.0'
 
-  pod 'Firebase', '~> 6.24'
+  pod 'Firebase', '~> 6.34'
   pod 'Firebase/AdMob'
   pod 'Firebase/Analytics'
-  pod 'Firebase/InAppMessagingDisplay'
+  pod 'Firebase/InAppMessaging'
   pod 'Firebase/Messaging'
-  pod 'Fabric', '~> 1.10.2'
-  pod 'Crashlytics', '~> 3.14.0'
+  pod 'Firebase/Crashlytics'
+
 
   pod 'Amplitude-iOS', '~> 4.10'
   pod 'AppCenter', '~> 3.1'

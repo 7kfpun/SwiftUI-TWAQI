@@ -12,9 +12,6 @@ PODS:
   - AppCenter/Push (3.3.4):
     - AppCenter/Core
   - Bugsnag (5.23.5)
-  - Crashlytics (3.14.0):
-    - Fabric (~> 1.10.2)
-  - Fabric (1.10.2)
   - Firebase (6.34.0):
     - Firebase/Core (= 6.34.0)
   - Firebase/AdMob (6.34.0):
@@ -27,12 +24,17 @@ PODS:
     - FirebaseAnalytics (= 6.9.0)
   - Firebase/CoreOnly (6.34.0):
     - FirebaseCore (= 6.10.4)
-  - Firebase/InAppMessagingDisplay (6.34.0):
+  - Firebase/Crashlytics (6.34.0):
     - Firebase/CoreOnly
-    - FirebaseInAppMessagingDisplay (~> 0.17.0)
+    - FirebaseCrashlytics (~> 4.6.2)
+  - Firebase/InAppMessaging (6.34.0):
+    - Firebase/CoreOnly
+    - FirebaseInAppMessaging (~> 0.24.0)
   - Firebase/Messaging (6.34.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 4.7.1)
+  - FirebaseABTesting (4.2.0):
+    - FirebaseCore (~> 6.10)
   - FirebaseAnalytics (6.9.0):
     - FirebaseCore (~> 6.10)
     - FirebaseInstallations (~> 1.7)
@@ -51,7 +53,18 @@ PODS:
     - GoogleUtilities/Environment (~> 6.7)
     - GoogleUtilities/Logger (~> 6.7)
     - nanopb (~> 1.30906.0)
-  - FirebaseInAppMessagingDisplay (0.17.0)
+  - FirebaseCrashlytics (4.6.2):
+    - FirebaseCore (~> 6.10)
+    - FirebaseInstallations (~> 1.6)
+    - GoogleDataTransport (~> 7.2)
+    - nanopb (~> 1.30906.0)
+    - PromisesObjC (~> 1.2)
+  - FirebaseInAppMessaging (0.24.0):
+    - FirebaseABTesting (~> 4.2)
+    - FirebaseCore (~> 6.10)
+    - FirebaseInstallations (~> 1.6)
+    - GoogleUtilities/Environment (~> 6.7)
+    - nanopb (~> 1.30906.0)
   - FirebaseInstallations (1.7.0):
     - FirebaseCore (~> 6.10)
     - GoogleUtilities/Environment (~> 6.7)
@@ -113,7 +126,7 @@ PODS:
   - nanopb/encode (1.30906.0)
   - OneSignal (3.1.1)
   - PromisesObjC (1.2.12)
-  - Protobuf (3.14.0)
+  - Protobuf (3.15.8)
   - SDWebImage (5.10.4):
     - SDWebImage/Core (= 5.10.4)
   - SDWebImage/Core (5.10.4)
@@ -132,12 +145,11 @@ DEPENDENCIES:
   - AppCenter (~> 3.1)
   - AppCenter/Push
   - Bugsnag (~> 5.23)
-  - Crashlytics (~> 3.14.0)
-  - Fabric (~> 1.10.2)
   - Firebase (~> 6.24)
   - Firebase/AdMob
   - Firebase/Analytics
-  - Firebase/InAppMessagingDisplay
+  - Firebase/Crashlytics
+  - Firebase/InAppMessaging
   - Firebase/Messaging
   - GoogleMaps (~> 3.8)
   - OneSignal (< 4.0, >= 3.0.0)
@@ -153,13 +165,13 @@ SPEC REPOS:
     - Amplitude-iOS
     - AppCenter
     - Bugsnag
-    - Crashlytics
-    - Fabric
     - Firebase
+    - FirebaseABTesting
     - FirebaseAnalytics
     - FirebaseCore
     - FirebaseCoreDiagnostics
-    - FirebaseInAppMessagingDisplay
+    - FirebaseCrashlytics
+    - FirebaseInAppMessaging
     - FirebaseInstallations
     - FirebaseInstanceID
     - FirebaseMessaging
@@ -194,13 +206,13 @@ SPEC CHECKSUMS:
   Amplitude-iOS: 7d8cdc3408ba35c2e68368fc7c692cd104606b94
   AppCenter: 0487be185c038ed2ecc5ed38219af1dcd280af23
   Bugsnag: 5c3f9d33e88c824a0038e1b14629045929182cbb
-  Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
-  Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
   Firebase: c23a36d9e4cdf7877dfcba8dd0c58add66358999
+  FirebaseABTesting: 8a9d8df3acc2b43f4a22014ddf9f601bca6af699
   FirebaseAnalytics: 3bb096873ee0d7fa4b6c70f5e9166b6da413cc7f
   FirebaseCore: d3a978a3cfa3240bf7e4ba7d137fdf5b22b628ec
   FirebaseCoreDiagnostics: 770ac5958e1372ce67959ae4b4f31d8e127c3ac1
-  FirebaseInAppMessagingDisplay: b55300a5353ed570ee18e7be6d853feccb17e4aa
+  FirebaseCrashlytics: 1a747c9cc084a24dc6d9511c991db1cd078154eb
+  FirebaseInAppMessaging: 9da48721c6ad1b5bdc2b1108f2d3d561eb2245ca
   FirebaseInstallations: 466c7b4d1f58fe16707693091da253726a731ed2
   FirebaseInstanceID: bd3ffc24367f901a43c063b36c640b345a4a5dd1
   FirebaseMessaging: 5eca4ef173de76253352511aafef774caa1cba2a
@@ -213,7 +225,7 @@ SPEC CHECKSUMS:
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
   OneSignal: 33b0a463bb510db7c8e04fa6df70680ee0eb3d0f
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
-  Protobuf: 0cde852566359049847168e51bd1c690e0f70056
+  Protobuf: adb85cd18a15bd1a777c158af9fd6e612a0e6d69
   SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   SDWebImageSwiftUI: 034806fc7e19e0a36157fb8ecb9fc0437cc75230
   Sentry: 4531afa474771d2c21c2605f05125cd1dc36a072
@@ -221,6 +233,6 @@ SPEC CHECKSUMS:
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: e963bc153d9451efb11a8b056eb3e637d7c2c091
+PODFILE CHECKSUM: 02432a4e861fe06d6011af25623dd708592c1ca4
 
 COCOAPODS: 1.10.0
