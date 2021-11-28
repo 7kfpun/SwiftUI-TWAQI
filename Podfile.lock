@@ -124,7 +124,7 @@ PODS:
     - nanopb/encode (= 1.30906.0)
   - nanopb/decode (1.30906.0)
   - nanopb/encode (1.30906.0)
-  - OneSignal (3.1.1)
+  - OneSignalXCFramework (3.9.1)
   - PromisesObjC (1.2.12)
   - Protobuf (3.15.8)
   - SDWebImage (5.10.4):
@@ -145,14 +145,14 @@ DEPENDENCIES:
   - AppCenter (~> 3.1)
   - AppCenter/Push
   - Bugsnag (~> 5.23)
-  - Firebase (~> 6.24)
+  - Firebase (~> 6.34)
   - Firebase/AdMob
   - Firebase/Analytics
   - Firebase/Crashlytics
   - Firebase/InAppMessaging
   - Firebase/Messaging
   - GoogleMaps (~> 3.8)
-  - OneSignal (< 4.0, >= 3.0.0)
+  - OneSignalXCFramework (< 4.0, >= 3.0.0)
   - SDWebImageSwiftUI (~> 1.4.0)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `5.0.4`)
   - SnapKit (~> 5.0)
@@ -182,7 +182,7 @@ SPEC REPOS:
     - GoogleUserMessagingPlatform
     - GoogleUtilities
     - nanopb
-    - OneSignal
+    - OneSignalXCFramework
     - PromisesObjC
     - Protobuf
     - SDWebImage
@@ -223,7 +223,7 @@ SPEC CHECKSUMS:
   GoogleUserMessagingPlatform: b168e8c46cd8f92aa3e34b584c4ca78a411ce367
   GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
-  OneSignal: 33b0a463bb510db7c8e04fa6df70680ee0eb3d0f
+  OneSignalXCFramework: 27159b0a150cdfe528c85325215c9d78b2f973c7
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Protobuf: adb85cd18a15bd1a777c158af9fd6e612a0e6d69
   SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
@@ -233,6 +233,6 @@ SPEC CHECKSUMS:
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 02432a4e861fe06d6011af25623dd708592c1ca4
+PODFILE CHECKSUM: 8e0e60c43628dff447ab787b689c29dc3a4bc2e9
 
 COCOAPODS: 1.10.0

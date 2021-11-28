@@ -25,7 +25,7 @@ target 'TWAQI' do
   pod 'AppCenter', '~> 3.1'
   pod 'AppCenter/Push'
   pod 'Bugsnag', '~> 5.23'
-  pod 'OneSignal', '>= 3.0.0', '< 4.0'
+  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
 end
@@ -33,7 +33,7 @@ end
 target 'OneSignalNotificationServiceExtension' do
   platform :ios, '13.0'
 
-  pod 'OneSignal', '>= 3.0.0', '< 4.0'
+  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
 end
 
 target 'watch Extension' do
