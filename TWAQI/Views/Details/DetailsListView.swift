@@ -17,7 +17,7 @@ struct DetailsListView: View {
         NavigationView {
             ZStack {
                 ScrollView {
-                    TextField("DetailsList.search", text: $searchText)
+                    TextField(LocalizedStringKey("DetailsList.search"), text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
 
