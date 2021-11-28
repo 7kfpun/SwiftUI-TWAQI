@@ -58,11 +58,11 @@ struct ForecastView: View {
 
     private func getData() {
         self.viewModel.getData()
-        self.viewModel.getCustomAd()
-        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
-            // Schedule in seconds
-            self.viewModel.getCustomAd()
-        }
+//        self.viewModel.getCustomAd()
+//        Timer.scheduledTimer(withTimeInterval: 60 * 5, repeats: true) { (_) in
+//            // Schedule in seconds
+//            self.viewModel.getCustomAd()
+//        }
     }
 
     private func submitImpressionEvent() {
