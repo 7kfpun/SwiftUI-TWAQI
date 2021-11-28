@@ -21,19 +21,21 @@ struct DetailsListView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
 
-                    if searchText.isEmpty {
-                        ForEach(self.viewModel.stations, id: \.self) {station in
-                            DetailsRow(station: station)
-                        }
-                    } else {
-                        ForEach(
-                            self.viewModel.stations.filter {
-                                $0.name.localizedCaseInsensitiveContains(self.searchText)
-                                || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
-                                || self.searchText.isEmpty
-                            }, id: \.self
-                        ) {station in
-                            DetailsRow(station: station)
+                    if self.viewModel.stations.count > 0 {
+                        if searchText.isEmpty {
+                            ForEach(self.viewModel.stations, id: \.self) {station in
+                                DetailsRow(station: station)
+                            }
+                        } else {
+                            ForEach(
+                                self.viewModel.stations.filter {
+                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
+                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
+                                    || self.searchText.isEmpty
+                                }, id: \.self
+                            ) {station in
+                                DetailsRow(station: station)
+                            }
                         }
                     }
 
