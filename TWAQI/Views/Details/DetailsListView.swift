@@ -9,85 +9,91 @@
 import SwiftUI
 
 struct DetailsListView: View {
-    @ObservedObject var viewModel: DetailsListViewModel
+    @EnvironmentObject var settings: SettingsStore
+    // Owns its view model — see the note in DetailsView.
+    @StateObject private var viewModel: DetailsListViewModel
 
     @State private var searchText = ""
 
     var body: some View {
         NavigationView {
-            ZStack {
-                ScrollView {
-                    TextField(LocalizedStringKey("DetailsList.search"), text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-
-                    if self.viewModel.stations.count > 0 {
-                        if searchText.isEmpty {
-                            ForEach(self.viewModel.stations, id: \.self) {station in
-                                DetailsRow(station: station)
-                            }
-                        } else {
-                            ForEach(
-                                self.viewModel.stations.filter {
-                                    $0.name.localizedCaseInsensitiveContains(self.searchText)
-                                    || $0.nameLocal.localizedCaseInsensitiveContains(self.searchText)
-                                    || self.searchText.isEmpty
-                                }, id: \.self
-                            ) {station in
-                                DetailsRow(station: station)
-                            }
-                        }
-                    }
-
-                    Spacer().frame(height: 50)
+            Group {
+                if viewModel.stations.isEmpty {
+                    EmptyStateView(icon: "list.bullet", message: "Details.no_data")
+                } else {
+                    list
                 }
-
-                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
             }
             .navigationBarTitle("DetailsList.details")
+            .safeAreaInset(edge: .bottom) {
+                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        // Native search field: replaces the hand-rolled TextField and gives
+        // scroll-to-reveal, a cancel button, and keyboard dismissal for free.
+        .searchable(text: $searchText, prompt: Text("DetailsList.search"))
         .onAppear(perform: getData)
     }
 
+    private var list: some View {
+        List {
+            ForEach(groupedStations, id: \.title) { group in
+                Section(header: Text(group.title)) {
+                    ForEach(group.stations, id: \.self) { station in
+                        NavigationLink(
+                            destination: DetailsView(stationId: station.id)
+                                .environmentObject(settings)
+                        ) {
+                            StationRow(
+                                title: station.displayName,
+                                subtitle: station.displayLocality,
+                                reading: nil
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        .listStyle(InsetGroupedListStyle())
+    }
+
+    /// Matched stations bucketed by air-quality region, regions in first-seen
+    /// (roughly north-to-south) order rather than alphabetically.
+    private var groupedStations: [(title: String, stations: Stations)] {
+        let matches = searchText.isEmpty
+            ? viewModel.stations
+            : viewModel.stations.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText)
+                    || $0.nameLocal.localizedCaseInsensitiveContains(searchText)
+                    || ($0.displayLocality?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+
+        var order: [String] = []
+        var buckets: [String: Stations] = [:]
+        for station in matches {
+            let key = station.displayArea ?? ""
+            if buckets[key] == nil {
+                buckets[key] = []
+                order.append(key)
+            }
+            buckets[key]?.append(station)
+        }
+
+        return order.map { (title: $0, stations: buckets[$0] ?? []) }
+    }
+
     init() {
-        self.viewModel = DetailsListViewModel()
+        _viewModel = StateObject(wrappedValue: DetailsListViewModel())
     }
 
     private func getData() {
         self.viewModel.getData()
     }
-
-    private func submitImpressionEvent() {
-        if viewModel.isShowCustomAd {
-            if let customAd = viewModel.customAd {
-                var components = URLComponents(string: customAd.imageUrl)!
-                components.query = nil
-
-                TrackingManager.logEvent(eventName: "ad_custom_impression", parameters: [
-                    "name": customAd.name,
-                    "position": customAd.position,
-                    "impressionRate": customAd.impressionRate,
-                    "imageUrl": "\(components.url!)",
-                    "destinationUrl": customAd.destinationUrl,
-                    "cpc": customAd.cpc,
-                ])
-
-                TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
-                    "name": customAd.name,
-                    "position": customAd.position,
-                    "impressionRate": customAd.impressionRate,
-                    "imageUrl": "\(components.url!)",
-                    "destinationUrl": customAd.destinationUrl,
-                    "cpc": customAd.cpc,
-                ])
-            }
-        }
-    }
 }
 
 struct DetailsListView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailsListView()
+        DetailsListView().environmentObject(SettingsStore())
     }
 }

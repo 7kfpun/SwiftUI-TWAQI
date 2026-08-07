@@ -19,7 +19,6 @@ struct APIManager {
     static let apiDomain = getEnv("ApiDomain")!
     static let apiEnpointCountries = getEnv("ApiEnpointCountries")!
     static let apiEnpointStations = getEnv("ApiEnpointStations")!
-    static let apiEnpointSuccessAds = getEnv("ApiEnpointSuccessAds")!
 
     static let apiEnpointCurrentPollutants = getEnv("ApiEnpointCurrentPollutants")!
     static let apiEnpointHistoricalPollutants = getEnv("ApiEnpointHistoricalPollutants")!
@@ -76,17 +75,7 @@ struct APIManager {
                 if json["success"] == true {
                     var stations: Stations = []
                     for (_, stationJSON) in json["data"] {
-                        stations.append(Station(
-                            id: stationJSON["id"].int ?? 0,
-                            countryId: stationJSON["countryId"].int ?? 0,
-                            countryCode: stationJSON["countryCode"].string ?? "",
-                            code: stationJSON["code"].string ?? "",
-                            lat: stationJSON["lat"].double ?? 0,
-                            lon: stationJSON["lon"].double ?? 0,
-                            imageUrl: stationJSON["zoom"].string,
-                            name: stationJSON["name"]["en"].string ?? "",
-                            nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? stationJSON["name"]["en"].string ?? ""
-                        ))
+                        stations.append(Station.make(from: stationJSON))
                     }
                     completionHandler(.success(stations))
                 }
@@ -168,18 +157,7 @@ struct APIManager {
                 let json = JSON(response.data as Any)
                 debugPrint("getHistoricalPollutants.responseJSON: \(json)")
                 if json["success"] == true {
-                    let stationJSON = json["station"]
-                    let station: Station = Station(
-                        id: stationJSON["id"].int ?? 0,
-                        countryId: stationJSON["countryId"].int ?? 0,
-                        countryCode: stationJSON["countryCode"].string ?? "",
-                        code: stationJSON["code"].string ?? "",
-                        lat: stationJSON["lat"].double ?? 0,
-                        lon: stationJSON["lon"].double ?? 0,
-                        imageUrl: stationJSON["zoom"].string,
-                        name: stationJSON["name"]["en"].string ?? "",
-                        nameLocal: stationJSON["name"]["zh"].string ?? stationJSON["name"]["th"].string ?? ""
-                    )
+                    let station = Station.make(from: json["station"])
 
                     var historicalPollutants: HistoricalPollutants = []
                     for (_, historicalPollutantJSON) in json["data"] {
@@ -201,36 +179,6 @@ struct APIManager {
                         "station": station,
                         "data": historicalPollutants,
                     ]))
-                }
-            }
-    }
-
-    // MARK: - Other endpoints
-    static func getCustomAd(position: String, completionHandler: @escaping (Result<CustomAd, NetworkError>) -> Void) {
-        guard let url = URL(string: "\(self.apiDomain)\(self.apiEnpointSuccessAds)") else {
-            completionHandler(.failure(.badURL))
-            return
-        }
-
-        let parameters: Parameters = [
-            "position": position,
-        ]
-
-        AF.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
-                    }
-
-                    debugPrint(response)
-                    let adResponse = try JSONDecoder().decode(AdResponse.self, from: data)
-                    completionHandler(.success(adResponse.data))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
                 }
             }
     }

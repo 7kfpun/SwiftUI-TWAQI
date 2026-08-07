@@ -19,7 +19,10 @@ extension UserDefaults {
             return nil
         }
 
-        return try! JSONDecoder().decode(type, from: encodedData)
+        // Cached JSON written by an older build may no longer match the type.
+        // Returning nil lets the caller fall back to its default rather than
+        // trapping on every launch until the app is reinstalled.
+        return try? JSONDecoder().decode(type, from: encodedData)
     }
 
     open func setStructArray<T: Codable>(_ value: [T], forKey defaultName: String) {

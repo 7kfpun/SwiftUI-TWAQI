@@ -11,7 +11,7 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         TabView {
-            MainView(viewModel: .init())
+            MainView()
                 .tabItem {
                     Image(systemName: "map.fill")
                     Text("Tabbar.main")

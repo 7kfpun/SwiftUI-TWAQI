@@ -1,6 +1,5 @@
 PODS:
   - Alamofire (5.2.2)
-  - Amplitude-iOS (4.10.0)
   - Bugsnag (5.23.5)
   - Firebase (12.17.0):
     - Firebase/Core (= 12.17.0)
@@ -14,9 +13,6 @@ PODS:
   - Firebase/Crashlytics (12.17.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 12.17.0)
-  - Firebase/Messaging (12.17.0):
-    - Firebase/CoreOnly
-    - FirebaseMessaging (~> 12.17.0)
   - FirebaseAnalytics (12.17.0):
     - FirebaseAnalytics/Default (= 12.17.0)
     - FirebaseCore (~> 12.17.0)
@@ -57,15 +53,6 @@ PODS:
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (12.17.0):
-    - FirebaseCore (~> 12.17.0)
-    - FirebaseInstallations (~> 12.17.0)
-    - GoogleDataTransport (~> 10.1)
-    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
-    - GoogleUtilities/Environment (~> 8.1)
-    - GoogleUtilities/Reachability (~> 8.1)
-    - GoogleUtilities/UserDefaults (~> 8.1)
-    - nanopb (~> 3.30910.0)
   - FirebaseRemoteConfigInterop (12.17.0)
   - FirebaseSessions (12.17.0):
     - FirebaseCore (~> 12.17.0)
@@ -162,12 +149,10 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 5.2.0)
-  - Amplitude-iOS (~> 4.10)
   - Bugsnag (~> 5.23)
   - Firebase (~> 12.17)
   - Firebase/Analytics
   - Firebase/Crashlytics
-  - Firebase/Messaging
   - Google-Mobile-Ads-SDK (~> 12.5)
   - GoogleMaps (~> 9.4)
   - OneSignalXCFramework (< 4.0, >= 3.0.0)
@@ -180,7 +165,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
-    - Amplitude-iOS
     - Bugsnag
     - Firebase
     - FirebaseAnalytics
@@ -189,7 +173,6 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseCrashlytics
     - FirebaseInstallations
-    - FirebaseMessaging
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - Google-Mobile-Ads-SDK
@@ -221,7 +204,6 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
-  Amplitude-iOS: 7d8cdc3408ba35c2e68368fc7c692cd104606b94
   Bugsnag: 5c3f9d33e88c824a0038e1b14629045929182cbb
   Firebase: 404f00acde38c0150a63134b523c7c3f05dbf1ce
   FirebaseAnalytics: 652858a1424ca8c549b62261876814ff56dff650
@@ -230,7 +212,6 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 93b8b0e8fb0e1146adcbf818f22af04b93077810
   FirebaseCrashlytics: 5137de1a48363806a03513cb4cca7b0876606711
   FirebaseInstallations: ff8961f8b30ffa9fa500176073920931f65328e4
-  FirebaseMessaging: ac6f2c832dbd5699554c2744020a78c6a7e91967
   FirebaseRemoteConfigInterop: c65ee4094a79f848cf971ab391f77dc7a63f8fc5
   FirebaseSessions: 0ef3285954cba5a6bd9fdf41c2b3097148bb7f70
   Google-Mobile-Ads-SDK: 6df9aadcee32bce0ff05bcad56ef2c88a4a5e82b
@@ -251,6 +232,6 @@ SPEC CHECKSUMS:
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 2faac9ccc106fe9ed140e62f178230113c49642e
+PODFILE CHECKSUM: dcc4875291ced11315810df6607add62780d366b
 
 COCOAPODS: 1.15.2

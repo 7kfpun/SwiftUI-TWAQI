@@ -4,46 +4,50 @@
 
   Created by kf on 6/11/19.
   Copyright © 2019 kf. All rights reserved.
+
+  臺灣繁體中文。用語以環境部空氣品質監測網及 Apple 臺灣在地化慣例為準
+  （搜尋而非搜索、說明而非幫助、新增而非添加、意見回饋而非反饋）。
+  空氣品質分級名稱採用環境部官方用語。
 */
 
 "Tabbar.main" = "首頁";
 "Tabbar.favourites" = "最愛";
-"Tabbar.details_list" = "搜索";
-"Tabbar.help" = "幫助";
+"Tabbar.details_list" = "搜尋";
+"Tabbar.help" = "說明";
 
-"FavouriteList.favourites" = "最愛列表";
-"Favourites.add_your_first_favourite_station" = "添加您的最愛";
-"Favourites.remove_all_your_saved_stations" = "刪除所有最愛";
+"FavouriteList.favourites" = "我的最愛";
+"Favourites.add_your_first_favourite_station" = "新增第一個常用測站";
+"Favourites.remove_all_your_saved_stations" = "移除所有已儲存的測站";
 
-"DetailsList.details" = "空氣品質詳情";
-"DetailsList.search" = "搜索";
+"DetailsList.details" = "測站列表";
+"DetailsList.search" = "搜尋";
 
-"Details.general_public" = "一般族群";
+"Details.general_public" = "一般民眾";
 "Details.sensitive_group" = "敏感族群";
 
-"Settings.notice_me_when_aqi_is_above" = "當空氣品質明顯惡化時，請通知我";
-"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所設定的值偏低，將會收到很多通知哦";
-"Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
-"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "您所設定的值偏高，將會收到很多通知哦";
-"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能啟用 2 個地點";
+"Settings.notice_me_when_aqi_is_above" = "當 AQI 高於此數值時通知我";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "數值設定偏低，可能會收到大量通知";
+"Settings.notice_me_when_aqi_is_below" = "當 AQI 低於此數值時通知我";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "數值設定偏高，可能會收到大量通知";
+"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能設定 2 個測站";
 
-"Help.help" = "幫助";
-"Help.do_not_disturb" = "請勿打擾";
-"Help.turn_on_do_not_disturb" = "開啟請勿打擾";
-"Help.start_time" = "開始";
-"Help.end_time" = "結束";
-"Help.cancel_site_notification" = "取消所有空氣品質通知";
-"Help.all_site_notification_has_been_cancelled" = "已經取消所有通知";
-"Help.in_app_purchase" = "應用程式內購買";
-"Help.ad_free" = "想移除廣告？";
-"Help.restore_purchase" = "恢復你的應用內購買";
+"Help.help" = "說明";
+"Help.do_not_disturb" = "勿擾模式";
+"Help.turn_on_do_not_disturb" = "開啟勿擾模式";
+"Help.start_time" = "開始時間";
+"Help.end_time" = "結束時間";
+"Help.cancel_site_notification" = "取消所有測站通知";
+"Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
+"Help.in_app_purchase" = "App 內購買";
+"Help.ad_free" = "移除廣告";
+"Help.restore_purchase" = "回復購買項目";
 "Help.contact_us" = "聯絡我們";
-"Help.interested_to_be_our_business_partner" = "想成為我們合作夥伴嗎？";
-"Help.feedback_or_contact_us" = "反饋 / 聯絡我們";
-"Help.definition" = "幫助";
-"Help.data_provided_by_government" = "台灣空污即時預報所有數據皆由「行政院環境保護署－空氣品質監測網」(Open Data) 提供。";
+"Help.interested_to_be_our_business_partner" = "想成為我們的合作夥伴嗎？";
+"Help.feedback_or_contact_us" = "意見回饋 / 聯絡我們";
+"Help.definition" = "名詞解釋";
+"Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
-"AirIndex.meaning_aqi" = "空氣品質指數";
+"AirIndex.meaning_aqi" = "空氣品質指標";
 "AirIndex.meaning_pm25" = "細懸浮微粒";
 "AirIndex.meaning_pm10" = "懸浮微粒";
 "AirIndex.meaning_o3" = "臭氧";
@@ -51,35 +55,35 @@
 "AirIndex.meaning_so2" = "二氧化硫";
 "AirIndex.meaning_no2" = "二氧化氮";
 
-"AirIndex.description_aqi" = "綜合各項污染的空氣指標，數值愈高，空氣愈髒";
-"AirIndex.description_pm25" = "對心血管、神經系統傷害大，可能含有重金屬等重度污染物";
-"AirIndex.description_pm10" = "顆粒較大的懸浮微粒，過量可形成霧霾";
-"AirIndex.description_o3" = "對眼睛、呼吸道等有侵蝕和損害作用";
-"AirIndex.description_co" = "主要由燃燒化石燃料或火山爆發產生，通常在大氣少量存在";
-"AirIndex.description_so2" = "過量接觸將有眼睛疼痛、肺部傷害";
-"AirIndex.description_no2" = "來自於車輛廢氣、火力發電廠或其他工業染料，過量吸收傷害肺部";
+"AirIndex.description_aqi" = "綜合各項污染物的空氣品質指標，數值愈高表示空氣品質愈差";
+"AirIndex.description_pm25" = "對心血管及神經系統傷害大，可能含有重金屬等污染物";
+"AirIndex.description_pm10" = "顆粒較大的懸浮微粒，濃度過高時容易形成霾害";
+"AirIndex.description_o3" = "對眼睛及呼吸道具有刺激與損害作用";
+"AirIndex.description_co" = "主要來自化石燃料燃燒或火山活動，通常在大氣中含量甚微";
+"AirIndex.description_so2" = "過量接觸可能造成眼睛疼痛及肺部損傷";
+"AirIndex.description_no2" = "來自車輛廢氣、火力發電廠及工業排放，過量吸入會傷害肺部";
 
 "AirStatus.good" = "良好";
 "AirStatus.moderate" = "普通";
-"AirStatus.unhealthyforsensitivegroup" = "對敏感族群不良";
-"AirStatus.unhealthy" = "對所有族群不良";
-"AirStatus.veryunhealthy" = "非常不良";
-"AirStatus.hazardous" = "有害";
-"AirStatus.unknown" = "-";
+"AirStatus.unhealthyforsensitivegroup" = "對敏感族群不健康";
+"AirStatus.unhealthy" = "對所有族群不健康";
+"AirStatus.veryunhealthy" = "非常不健康";
+"AirStatus.hazardous" = "危害";
+"AirStatus.unknown" = "－";
 
-"AirStatus.general_public_guidance_good" = "正常戶外活動";
-"AirStatus.general_public_guidance_moderate" = "正常戶外活動";
-"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "考慮減少戶外活動";
-"AirStatus.general_public_guidance_unhealthy" = "減少體力消耗，特別是減少戶外活動";
-"AirStatus.general_public_guidance_veryunhealthy" = "減少戶外活動";
-"AirStatus.general_public_guidance_hazardous" = "避免戶外活動";
+"AirStatus.general_public_guidance_good" = "可正常從事戶外活動";
+"AirStatus.general_public_guidance_moderate" = "可正常從事戶外活動";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "建議減少戶外活動";
+"AirStatus.general_public_guidance_unhealthy" = "建議減少體力消耗活動，尤其是戶外活動";
+"AirStatus.general_public_guidance_veryunhealthy" = "建議減少戶外活動";
+"AirStatus.general_public_guidance_hazardous" = "避免戶外活動，並緊閉門窗";
 
-"AirStatus.sensitive_group_guidance_good" = "正常戶外活動";
-"AirStatus.sensitive_group_guidance_moderate" = "仍可正常戶外活動";
-"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "減少體力消耗活動及戶外活動";
-"AirStatus.sensitive_group_guidance_unhealthy" = "留在室內並減少體力消耗活動";
-"AirStatus.sensitive_group_guidance_veryunhealthy" = "留在室內並減少體力消耗活動";
-"AirStatus.sensitive_group_guidance_hazardous" = "留在室內並避免體力消耗活動";
+"AirStatus.sensitive_group_guidance_good" = "可正常從事戶外活動";
+"AirStatus.sensitive_group_guidance_moderate" = "仍可從事戶外活動";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "建議減少體力消耗及戶外活動";
+"AirStatus.sensitive_group_guidance_unhealthy" = "建議留在室內並減少體力消耗活動";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "建議留在室內並減少體力消耗活動";
+"AirStatus.sensitive_group_guidance_hazardous" = "應留在室內並避免體力消耗活動";
 
 "Details.station" = "測站";
 "Details.last_updated" = "最後更新";
@@ -87,7 +91,7 @@
 "Details.coordinates" = "座標";
 "Details.wind" = "風向風速";
 "Details.location" = "位置";
-"Details.conditions" = "目前狀況";
+"Details.conditions" = "即時狀況";
 "Details.no_data" = "無資料";
 
 "StationType.general" = "一般測站";
@@ -95,7 +99,7 @@
 "StationType.industrial" = "工業測站";
 "StationType.background" = "背景測站";
 "StationType.national_park" = "國家公園測站";
-"StationType.other" = "其他";
+"StationType.other" = "其他測站";
 
 "Wind.calm" = "無風";
 "Wind.light_air" = "軟風";
@@ -103,3 +107,19 @@
 "Wind.gentle_breeze" = "微風";
 "Wind.moderate_breeze" = "和風";
 "Wind.strong_breeze" = "清勁風";
+
+/* 24 小時 AQI 趨勢 */
+"Details.trend_improving" = "正在好轉";
+"Details.trend_worsening" = "正在變差";
+"Details.trend_steady" = "大致持平";
+"Details.trend_improving_detail" = "近幾小時 AQI 下降 %d";
+"Details.trend_worsening_detail" = "近幾小時 AQI 上升 %d";
+"Details.trend_steady_detail" = "維持在 AQI %d 左右";
+"Details.now" = "現在";
+"Details.low" = "最低";
+"Details.high" = "最高";
+"Details.average" = "平均";
+"Details.no_trend_data" = "資料還不夠，無法顯示趨勢";
+"Details.pollutants" = "污染物";
+"Details.health_advice" = "健康建議";
+"Details.notifications" = "通知";

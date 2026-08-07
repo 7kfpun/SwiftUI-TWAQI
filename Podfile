@@ -15,30 +15,25 @@ target 'TWAQI' do
 
   pod 'Firebase', '~> 12.17'
   pod 'Firebase/Analytics'
-  pod 'Firebase/Messaging'
   pod 'Firebase/Crashlytics'
   # Google decoupled AdMob from the Firebase pod bundle; it's a standalone pod now.
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
-  pod 'Amplitude-iOS', '~> 4.10'
   pod 'Bugsnag', '~> 5.23'
   pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
+  # Host-app tests: they link against the app, so they only need the pods'
+  # header and framework search paths, not another copy of every pod.
+  target 'TWAQITests' do
+    inherit! :search_paths
+  end
 end
 
 target 'OneSignalNotificationServiceExtension' do
   platform :ios, '15.0'
 
   pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
-end
-
-target 'watch Extension' do
-  platform :watchos, '6.0'
-
-  pod 'Alamofire', '~> 5.2.0'
-  pod 'SwiftDate', '~> 6.1'
-  pod 'SwiftyJSON', '~> 5.0'
 end
 
 post_install do |installer|

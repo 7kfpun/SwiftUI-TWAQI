@@ -9,45 +9,68 @@
 import SwiftUI
 
 struct DetailsView: View {
-    @ObservedObject var viewModel: DetailsViewModel
+    // `@StateObject`, not `@ObservedObject`: this view builds its own view model
+    // in `init`, and SwiftUI re-runs `init` on every parent re-render. With
+    // `@ObservedObject` each of those rebuilt an empty model and discarded the
+    // fetched station, leaving the screen permanently blank because `onAppear`
+    // had already fired. `@StateObject` constructs it once per view identity.
+    @StateObject private var viewModel: DetailsViewModel
+
+    /// Which pollutant the 24-hour chart is showing. Local to this screen on
+    /// purpose — the old picker wrote to the global `airIndexTypeSelected`,
+    /// which silently re-scored every marker on the map.
+    @State private var selectedPollutant: AirIndexTypes = .aqi
 
     var body: some View {
-        ZStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    header
+        ScrollView {
+            // Ordered as a reader's questions: what is it, where does that sit
+            // on the scale, what is actually in the air, which way is that
+            // heading, where is this station, what should I do, tell me next
+            // time. The pollutant grid sits immediately above the chart it
+            // drives, so tapping one visibly changes the other.
+            VStack(alignment: .leading, spacing: 0) {
+                header
+
+                AqiScaleView(aqi: currentAqi)
+                    .padding(.top, 4)
+                    .padding(.bottom, 16)
+
+                Separator().frame(height: 8)
+
+                if let pollutant = viewModel.pollutant {
+                    PollutantGridView(pollutant: pollutant, selected: $selectedPollutant)
+                        .padding(.top, 16)
+                        .padding(.bottom, 4)
+                }
+
+                DetailsHistoryView(
+                    historicalPollutants: viewModel.historicalPollutants,
+                    airIndexType: selectedPollutant
+                )
+
+                Separator().frame(height: 8)
+
+                if let pollutant = viewModel.pollutant {
+                    StationInfoView(pollutant: pollutant)
+                        .padding(.vertical, 16)
 
                     Separator().frame(height: 8)
+                }
 
-                    if let pollutant = viewModel.pollutant {
-                        StationInfoView(pollutant: pollutant)
-                            .padding(.vertical, 16)
-
-                        Separator().frame(height: 8)
-                    }
-
-                    if let lastPollutant = viewModel.historicalPollutants.last {
-                        DetailsSuggestionView(lastPollutant: lastPollutant)
-
-                        Separator().frame(height: 8)
-                    }
-
-                    Indicator()
-                        .padding(.top, 8)
-
-                    DetailsHistoryView(historicalPollutants: viewModel.historicalPollutants)
+                if currentAqi > 0 {
+                    HealthGuidanceView(aqi: currentAqi)
+                        .padding(.vertical, 16)
 
                     Separator().frame(height: 8)
+                }
 
-                    if let station = viewModel.station {
-                        SettingsRow(station: station)
-                            .padding(.vertical, 12)
-                    }
-
-                    Spacer().frame(height: 60)
+                if let station = viewModel.station {
+                    SettingsRow(station: station)
+                        .padding(.vertical, 12)
                 }
             }
-
+        }
+        .safeAreaInset(edge: .bottom) {
             AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
         }
         .onAppear {
@@ -57,6 +80,11 @@ struct DetailsView: View {
             Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
         }
         .buttonStyle(PlainButtonStyle()))
+    }
+
+    /// Live reading when available, else the newest history point.
+    private var currentAqi: Double {
+        viewModel.pollutant?.aqi ?? viewModel.historicalPollutants.last?.aqi ?? 0
     }
 
     private var header: some View {
@@ -75,7 +103,7 @@ struct DetailsView: View {
     }
 
     init(stationId: Int) {
-        self.viewModel = DetailsViewModel(stationId: stationId)
+        _viewModel = StateObject(wrappedValue: DetailsViewModel(stationId: stationId))
     }
 
     private func getData() {

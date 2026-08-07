@@ -6,434 +6,252 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import SwiftDate
 import SwiftUI
 
+/// Last 24 hours of air quality, answering one question: is it getting better
+/// or worse?
+///
+/// Defaults to AQI and follows whichever pollutant the reader taps in
+/// `StationInfoView`. That selection is passed in and held by the station
+/// screen — unlike the old segmented picker, which wrote to the *global*
+/// `airIndexTypeSelected` and so silently re-scored every marker on the map.
 struct DetailsHistoryView: View {
-    @EnvironmentObject var settings: SettingsStore
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
-
     var historicalPollutants: HistoricalPollutants
+    var airIndexType: AirIndexTypes = .aqi
 
     var body: some View {
-        let historicalPollutantsMap: [AirIndexTypes: [Double]] = [
-            AirIndexTypes.aqi: historicalPollutants.map({ $0.aqi }),
-            AirIndexTypes.pm25: historicalPollutants.map({ $0.pm25 }),
-            AirIndexTypes.pm10: historicalPollutants.map({ $0.pm10 }),
-            AirIndexTypes.o3: historicalPollutants.map({ $0.o3 }),
-            AirIndexTypes.co: historicalPollutants.map({ $0.co }),
-            AirIndexTypes.so2: historicalPollutants.map({ $0.so2 }),
-            AirIndexTypes.no2: historicalPollutants.map({ $0.no2 }),
-        ]
+        VStack(alignment: .leading, spacing: 16) {
+            if points.count >= 2 {
+                // Names what the chart is showing — without it, tapping a
+                // pollutant above changes the bars with nothing to say why.
+                Text(verbatim: airIndexType.toString())
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
 
-        let bars: [Bar] = historicalPollutantsMap[settings.airIndexTypeSelected]!.map {
-            Bar(
-                value: $0,
-                color: Color(AirStatuses.checkAirStatus(
-                    airIndexType: settings.airIndexTypeSelected,
-                    value: $0
-                ).getColor())
+                headline
+                chart
+                footnote
+            } else {
+                Text("Details.no_trend_data")
+                    .font(.callout)
+                    .fontWeight(.light)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    // MARK: - Verdict
+
+    private var headline: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: trend.symbol)
+                .font(.headline)
+                .foregroundColor(trend.tint)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(trend.title)
+                    .font(.headline)
+                    .foregroundColor(trend.tint)
+
+                Text(trend.detail)
+                    .font(.caption)
+                    .fontWeight(.light)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Chart
+
+    private var chart: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(Array(points.enumerated()), id: \.offset) { _, point in
+                    RoundedRectangle(cornerRadius: 2.5)
+                        .fill(Color(AirStatuses.checkAirStatus(
+                            airIndexType: airIndexType,
+                            value: point.value
+                        ).getColor()))
+                        .frame(height: barHeight(for: point.value))
+                }
+            }
+            .frame(height: maxBarHeight, alignment: .bottom)
+
+            // Three anchors only — a label per hour is noise.
+            HStack {
+                Text(label(at: 0))
+                Spacer()
+                Text(label(at: points.count / 2))
+                Spacer()
+                Text("Details.now")
+            }
+            // `.font(_:.weight)` rather than `.fontWeight`, which is iOS 16+.
+            .font(.caption2.weight(.light))
+            .foregroundColor(.secondary)
+        }
+    }
+
+    private var footnote: some View {
+        HStack(spacing: 12) {
+            summaryItem("Details.low", value: lowest)
+            summaryItem("Details.high", value: highest)
+            summaryItem("Details.average", value: average)
+            Spacer()
+        }
+    }
+
+    private func summaryItem(_ key: LocalizedStringKey, value: Double) -> some View {
+        HStack(spacing: 4) {
+            Text(key)
+                .font(.caption)
+                .fontWeight(.light)
+                .foregroundColor(.secondary)
+
+            Text(value.format(f: airIndexType.getFormat()))
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(Color(AirStatuses.checkAirStatus(
+                    airIndexType: airIndexType,
+                    value: value
+                ).getColor()))
+        }
+    }
+
+    // MARK: - Data
+
+    private struct Point {
+        var value: Double
+        var time: String
+    }
+
+    /// Newest last, capped at 24 hours.
+    private var points: [Point] {
+        let all = historicalPollutants.map {
+            Point(value: $0.getValue(airIndexType: airIndexType), time: $0.publishTime)
+        }
+        return all.count > 24 ? Array(all.suffix(24)) : all
+    }
+
+    private var values: [Double] { points.map { $0.value } }
+
+    private var lowest: Double { values.min() ?? 0 }
+    private var highest: Double { values.max() ?? 0 }
+    private var average: Double {
+        values.isEmpty ? 0 : values.reduce(0, +) / Double(values.count)
+    }
+
+    // MARK: - Trend
+
+    private struct TrendVerdict {
+        var title: LocalizedStringKey
+        var detail: String
+        var symbol: String
+        var tint: Color
+    }
+
+    /// Presentation for the computed trend. The judgement itself lives in
+    /// `AqiTrend` so it can be tested.
+    private var trend: TrendVerdict {
+        // AQI has a meaningful absolute threshold; every other pollutant needs
+        // one scaled to its own units.
+        let threshold = airIndexType == .aqi
+            ? AqiTrend.steadyThreshold
+            : AqiTrend.relativeThreshold(for: values)
+
+        guard let result = AqiTrend.from(values: values, steadyThreshold: threshold) else {
+            return TrendVerdict(
+                title: "Details.trend_steady",
+                detail: "",
+                symbol: "arrow.right",
+                tint: .secondary
             )
         }
 
-        return VStack {
-            Picker(
-                selection: $settings.airIndexTypeSelected,
-                label: Text("Air Index Type").fontWeight(.light)
-            ) {
-                ForEach(AirIndexTypes.allCases, id: \.self) {
-                    Text($0.toString())
-                        .tag($0)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.bottom)
+        switch result.direction {
+        case .steady:
+            return TrendVerdict(
+                title: "Details.trend_steady",
+                detail: steadyDetail(result),
+                symbol: "arrow.right",
+                tint: .secondary
+            )
 
-            if !bars.isEmpty {
-                HStack {
-                    VStack {
-                        LabelView(
-                            airIndexTypes: settings.airIndexTypeSelected,
-                            value: historicalPollutantsMap[settings.airIndexTypeSelected]?.last ?? 0
-                        )
+        case .improving:
+            return TrendVerdict(
+                title: "Details.trend_improving",
+                detail: changeDetail("Details.trend_improving_detail", result),
+                symbol: "arrow.down.right",
+                tint: Color(AirStatuses.good.getColor())
+            )
 
-                        Spacer()
-
-                        Text(self.settings.airIndexTypeSelected.toString())
-                            .font(.caption)
-                            .fontWeight(.regular)
-                        Text(self.settings.airIndexTypeSelected.getUnit())
-                            .font(.caption)
-                            .fontWeight(.thin)
-                    }
-                    .padding()
-
-                    VStack {
-                        BarsView(bars: bars)
-                        HStack {
-                            VStack {
-                                Text(self.historicalPollutants.first?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
-                                    .font(.caption)
-                                    .fontWeight(.thin)
-
-                                Text(self.historicalPollutants.first?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
-                                    .font(.caption)
-                                    .fontWeight(.thin)
-                            }
-
-                            Spacer()
-
-                            VStack {
-                                Text(self.historicalPollutants.last?.publishTime.toDate()?.toFormat("HH:mm") ?? "")
-                                    .font(.caption)
-                                    .fontWeight(.thin)
-
-                                Text(self.historicalPollutants.last?.publishTime.toDate()?.toFormat("MM/dd") ?? "")
-                                    .font(.caption)
-                                    .fontWeight(.thin)
-                            }
-                        }
-                    }
-                }
-            }
-
-            HStack(alignment: .top) {
-                Text(settings.airIndexTypeSelected.toString())
-                    .fontWeight(.light)
-                    .font(.caption)
-
-                Text("-")
-                    .fontWeight(.light)
-                    .font(.caption)
-
-                Text(settings.airIndexTypeSelected.getDescription())
-                    .fontWeight(.light)
-                    .font(.caption)
-
-                Spacer()
-            }
-            .padding(.leading, 5)
-            .padding(.vertical, 10)
+        case .worsening:
+            return TrendVerdict(
+                title: "Details.trend_worsening",
+                detail: changeDetail("Details.trend_worsening_detail", result),
+                symbol: "arrow.up.right",
+                tint: Color(AirStatuses.checkAirStatus(
+                    airIndexType: airIndexType,
+                    value: result.current
+                ).getColor())
+            )
         }
-        .padding(.horizontal, 10)
     }
 
-    init(historicalPollutants: HistoricalPollutants) {
+    /// The localized detail strings are phrased in whole AQI points, so they
+    /// only apply to AQI. Anything measured in ppm rounds to zero there, and is
+    /// shown as a value in its own unit instead.
+    private func changeDetail(_ key: String, _ result: AqiTrend) -> String {
+        guard airIndexType == .aqi else {
+            return "\(result.magnitude.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+        }
+        return String(format: NSLocalizedString(key, comment: ""), result.change)
+    }
+
+    private func steadyDetail(_ result: AqiTrend) -> String {
+        guard airIndexType == .aqi else {
+            return "\(result.current.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+        }
+        return String(
+            format: NSLocalizedString("Details.trend_steady_detail", comment: ""),
+            Int(result.current.rounded())
+        )
+    }
+
+    // MARK: - Geometry
+
+    private let maxBarHeight: CGFloat = 72
+    private let minBarHeight: CGFloat = 10
+
+    /// Scaled to the day's own range, padded a little. A zero-baseline axis
+    /// renders a 60–89 day as a flat wall of identical bars, which is exactly
+    /// what this view is meant to stop doing.
+    ///
+    /// The padding is a fraction of the range rather than a fixed number of
+    /// points: CO spans hundredths of a ppm, so a flat ±5 would swamp the whole
+    /// series and flatten every bar.
+    private func barHeight(for value: Double) -> CGFloat {
+        let range = highest - lowest
+        let pad = range > 0 ? range * 0.15 : max(highest * 0.05, 0.001)
+        let lower = max(0, lowest - pad)
+        let upper = max(highest + pad, lower + 0.001)
+        let fraction = (value - lower) / (upper - lower)
+        return minBarHeight + (maxBarHeight - minBarHeight) * CGFloat(max(0, min(1, fraction)))
+    }
+
+    private func label(at index: Int) -> String {
+        guard points.indices.contains(index) else { return "" }
+        return points[index].time.toDate()?.toFormat("HH:mm") ?? ""
+    }
+
+    init(historicalPollutants: HistoricalPollutants, airIndexType: AirIndexTypes = .aqi) {
         self.historicalPollutants = historicalPollutants
+        self.airIndexType = airIndexType
     }
 }
-
-//struct DetailsHistoryView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        DetailsHistoryView(historicalPollutants: [
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 40,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T01:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 20,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T02:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 11,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T03:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 32,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T04:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 40,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T05:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 20,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T06:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 11,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T07:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 14,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T08:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 14,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T09:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 32,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T10:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 40,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T11:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 20,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T12:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 11,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T13:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 14,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T14:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 14,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T14:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 43,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T15:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 32,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T15:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 30,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T16:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 22,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T16:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 25,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T17:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 20,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T17:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 30,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T18:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 56,
-//                aqi: 61,
-//                pm25: 25,
-//                pm10: 26,
-//                no2: 5.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T19:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 51,
-//                pm25: 26,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T20:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 90,
-//                aqi: 61,
-//                pm25: 11,
-//                pm10: 26,
-//                no2: 6.7,
-//                so2: 2.3,
-//                co: 0.25,
-//                o3: 39,
-//                publishTime: "2019-10-13T21:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 96,
-//                aqi: 51,
-//                pm25: 22,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T22:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 96,
-//                aqi: 51,
-//                pm25: 22,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-13T23:00:00"
-//            ),
-//            HistoricalPollutant(
-//                stationId: 80,
-//                aqi: 64,
-//                pm25: 30,
-//                pm10: 36,
-//                no2: 6.9,
-//                so2: 1.3,
-//                co: 0.15,
-//                o3: 30,
-//                publishTime: "2019-10-14T00:00:00"
-//            ),
-//        ])
-//        .environmentObject(SettingsStore())
-//    }
-//}

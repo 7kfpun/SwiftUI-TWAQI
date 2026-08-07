@@ -8,7 +8,6 @@
 
 import UIKit
 
-import Amplitude_iOS
 import Bugsnag
 import Firebase
 import GoogleMaps
@@ -23,40 +22,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
-        // Initialize the Amplitude SDK.
-        if let amplitudeApiKey = getEnv("AmplitudeApiKey") {
-            Amplitude.instance().trackingSessionEvents = true
-            Amplitude.instance().initializeApiKey(amplitudeApiKey)
-        }
-
         // Initialize the Bugsnag SDK.
         if let bugsnagApiKey = getEnv("BugsnagApiKey") {
             Bugsnag.start(withApiKey: bugsnagApiKey)
         }
 
-        // Use Firebase library to configure APIs.
+        // Use Firebase library to configure APIs (Analytics and Crashlytics).
         FirebaseApp.configure()
-        // [START set_messaging_delegate]
-        Messaging.messaging().delegate = self as? MessagingDelegate
-        // [END set_messaging_delegate]
-        // Register for remote notifications. This shows a permission dialog on first run, to
-        // show the dialog at a more appropriate time move this registration accordingly.
-        // [START register_for_notifications]
-        if #available(iOS 10.0, *) {
-            // For iOS 10 display notification (sent via APNS)
-            UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
 
-            let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-            UNUserNotificationCenter.current().requestAuthorization(
-                options: authOptions,
-                completionHandler: {_, _ in })
-        } else {
-            let settings: UIUserNotificationSettings =
-            UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-            application.registerUserNotificationSettings(settings)
-        }
-        application.registerForRemoteNotifications()
-        // [END register_for_notifications]
+        // Push is owned entirely by OneSignal below — it prompts for permission
+        // and registers with APNs itself. Firebase Messaging was a second,
+        // redundant path to the same thing.
 
         // Initialize the Google Mobile Ads SDK.
         MobileAds.shared.start(completionHandler: nil)

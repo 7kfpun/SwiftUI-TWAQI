@@ -98,3 +98,10 @@ GoogleService-Info.plist
 # Generated files
 .codegraph/
 context/
+fastlane/.frameit_work/
+
+# Firebase Hosting
+.firebase/
+
+# fastlane secrets
+fastlane/.env

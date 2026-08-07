@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Amplitude_iOS
 import Firebase
 import Foundation
 
@@ -18,9 +17,6 @@ struct TrackingManager {
 
     static func logEvent(eventName: String, parameters: [String: Any] = [:]) {
         print("LogEvent", eventName, parameters)
-
-        // Amplitude log event.
-        Amplitude.instance().logEvent(eventName, withEventProperties: parameters)
 
         // Google Analytics log event.
         Analytics.logEvent(eventName, parameters: parameters)

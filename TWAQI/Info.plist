@@ -12,8 +12,6 @@
 	<string>$(AdUnitIdHelpFooter)</string>
 	<key>AdUnitIdMainFooter</key>
 	<string>$(AdUnitIdMainFooter)</string>
-	<key>AmplitudeApiKey</key>
-	<string>$(AmplitudeApiKey)</string>
 	<key>ApiDomain</key>
 	<string>$(API_DOMAIN)</string>
 	<key>ApiEnpointCountries</key>
@@ -24,8 +22,6 @@
 	<string>$(ApiEnpointHistoricalPollutants)</string>
 	<key>ApiEnpointStations</key>
 	<string>$(ApiEnpointStations)</string>
-	<key>ApiEnpointSuccessAds</key>
-	<string>$(ApiEnpointSuccessAds)</string>
 	<key>AppCenterAppSecret</key>
 	<string>$(AppCenterAppSecret)</string>
 	<key>BetaTesterUrl</key>
@@ -48,8 +44,6 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>CUSTOM AD API</key>
-	<string>$(CUSTOM_AD_API)</string>
 	<key>FeedbackUrlEn</key>
 	<string>$(FeedbackUrlEn)</string>
 	<key>FeedbackUrlZh</key>
@@ -58,8 +52,6 @@
 	<string>$(GADApplicationIdentifier)</string>
 	<key>GMSServicesApiKey</key>
 	<string>$(GMSServicesApiKey)</string>
-	<key>HISTORY API</key>
-	<string>$(HISTORY_API)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>InAppPurchaseProductId</key>

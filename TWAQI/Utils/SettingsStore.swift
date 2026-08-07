@@ -50,6 +50,12 @@ final class SettingsStore: ObservableObject {
         cancellable = NotificationCenter.default
             .publisher(for: UserDefaults.didChangeNotification)
             .map { _ in () }
+            // This notification fires for *any* write to the shared defaults, and
+            // the ad/analytics/push SDKs write constantly — sometimes from inside
+            // a SwiftUI view update, which made `objectWillChange` fire mid-update.
+            // Delivering on the next run-loop pass moves the send out of the
+            // current update and coalesces the storm into a single refresh.
+            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
             .subscribe(objectWillChange)
     }
 

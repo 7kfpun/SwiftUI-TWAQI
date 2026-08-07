@@ -10,6 +10,10 @@ import SwiftUI
 
 /// Wind + location facts for a station. Everything is optional in the API, so
 /// each row disappears rather than rendering an empty placeholder.
+///
+/// The pollutant readings moved to `PollutantGridView`, which sits directly
+/// above the chart it drives — tapping a reading here to change a chart two
+/// sections away read as unrelated.
 struct StationInfoView: View {
     var pollutant: Pollutant
 
@@ -92,7 +96,9 @@ struct StationInfoView: View {
     }
 }
 
-private struct SectionLabel: View {
+/// Small uppercase heading above a group of rows. Shared across the station
+/// screen's sections so they all sit on the same visual rhythm.
+struct SectionLabel: View {
     var text: LocalizedStringKey
 
     var body: some View {

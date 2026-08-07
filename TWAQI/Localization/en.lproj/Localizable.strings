@@ -103,3 +103,19 @@
 "Wind.gentle_breeze" = "Gentle breeze";
 "Wind.moderate_breeze" = "Moderate breeze";
 "Wind.strong_breeze" = "Strong breeze";
+
+/* 24-hour AQI trend */
+"Details.trend_improving" = "Improving";
+"Details.trend_worsening" = "Getting worse";
+"Details.trend_steady" = "Steady";
+"Details.trend_improving_detail" = "AQI down %d over the last few hours";
+"Details.trend_worsening_detail" = "AQI up %d over the last few hours";
+"Details.trend_steady_detail" = "Holding around AQI %d";
+"Details.now" = "Now";
+"Details.low" = "Low";
+"Details.high" = "High";
+"Details.average" = "Average";
+"Details.no_trend_data" = "Not enough readings yet to show a trend";
+"Details.pollutants" = "Pollutants";
+"Details.health_advice" = "Health advice";
+"Details.notifications" = "Notifications";

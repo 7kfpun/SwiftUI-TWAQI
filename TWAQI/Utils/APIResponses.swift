@@ -17,13 +17,3 @@ struct PollutantsResponse: Decodable {
         case data
     }
 }
-
-struct AdResponse: Decodable {
-    let success: Bool
-    let data: CustomAd
-
-    private enum CodingKeys: String, CodingKey {
-        case success
-        case data
-    }
-}

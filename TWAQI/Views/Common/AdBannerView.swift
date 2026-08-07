@@ -15,12 +15,14 @@ struct AdBannerView: View {
     var adUnitID: String
 
     var body: some View {
-        VStack {
-            Spacer()
-            if !settings.isPro {
-                GADBannerViewController(adUnitID: adUnitID)
-                    .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
-            }
+        // Sized to the banner and nothing more. This is used as a
+        // `.safeAreaInset(edge: .bottom)`, which measures the inset view's own
+        // content — an enclosing `VStack { Spacer() ... }` reported maximal
+        // height, so the inset claimed the whole screen and a full-screen
+        // transparent view sat over the list swallowing every tap.
+        if !settings.isPro {
+            GADBannerViewController(adUnitID: adUnitID)
+                .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
         }
     }
 }
