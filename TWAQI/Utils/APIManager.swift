@@ -39,14 +39,18 @@ struct APIManager {
                 if json["success"] == true {
                     var countries: Countries = []
                     for (_, countryJSON) in json["data"] {
+                        let code = countryJSON["code"].string ?? ""
+                        let nameEn = countryJSON["name"]["en"].string
+                        let nameZh = countryJSON["name"]["zh"].string
+                        let nameTh = countryJSON["name"]["th"].string
                         countries.append(Country(
                             id: countryJSON["id"].int ?? 0,
-                            code: countryJSON["code"].string ?? "",
+                            code: code,
                             lat: countryJSON["lat"].double ?? 0,
                             lon: countryJSON["lon"].double ?? 0,
                             zoom: countryJSON["zoom"].float ?? 0,
-                            name: countryJSON["name"]["en"].string ?? "",
-                            nameLocal: countryJSON["name"]["zh"].string ?? countryJSON["name"]["th"].string ?? countryJSON["name"]["en"].string ?? ""
+                            name: nameEn ?? nameZh ?? nameTh ?? code.uppercased(),
+                            nameLocal: nameZh ?? nameTh ?? nameEn ?? code.uppercased()
                         ))
                     }
                     completionHandler(.success(countries))
@@ -197,32 +201,6 @@ struct APIManager {
                         "station": station,
                         "data": historicalPollutants,
                     ]))
-                }
-            }
-    }
-
-    // MARK: - Legacy endpoints
-    static func getForecast(completionHandler: @escaping (Result<ForecastAreas, NetworkError>) -> Void) {
-        guard let url = URL(string: getEnv("FORECAST API")!) else {
-            completionHandler(.failure(.badURL))
-            return
-        }
-
-        AF.request(url)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
-                        completionHandler(.failure(.networkError))
-                        return
-                    }
-
-                    debugPrint(response)
-                    let forecastAreas = try JSONDecoder().decode([ForecastArea].self, from: data)
-                    completionHandler(.success(forecastAreas))
-                } catch {
-                    print(error)
-                    completionHandler(.failure(.networkError))
                 }
             }
     }

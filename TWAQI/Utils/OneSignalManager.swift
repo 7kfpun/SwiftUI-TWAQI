@@ -20,28 +20,6 @@ enum NotificationTypes: String {
 }
 
 struct OneSignalManager {
-    static func enableForecast(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
-        let tags = ["isForecastEnabled": "true"]
-        OneSignal.sendTags(tags, onSuccess: { result in
-            print("Tags sent, \(tags) - \(result!)")
-            completionHandler(.success(true))
-        }) { error in
-            print("Error sending tags: \(error?.localizedDescription ?? "None")")
-            completionHandler(.failure(.oneSignalError))
-        }
-    }
-
-    static func disableForecast(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
-        let tags = ["isForecastEnabled"]
-        OneSignal.deleteTags(tags, onSuccess: { result in
-            print("Tags deleted, \(tags) - \(result!)")
-            completionHandler(.success(true))
-        }) { error in
-            print("Error sending tags: \(error?.localizedDescription ?? "None")")
-            completionHandler(.failure(.oneSignalError))
-        }
-    }
-
     static func enableDnd(dndStartTime: Date, dndEndTime: Date, completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         let dndStartTimeCurrentRegion = dndStartTime.convertTo(region: .current)
         let dndEndTimeCurrentRegion = dndEndTime.convertTo(region: .current)
@@ -99,8 +77,6 @@ struct OneSignalManager {
                 switch key {
                 case "isDndEnabled":
                     oneSignalSettings.isDndEnabled = value == "true"
-                case "isForecastEnabled":
-                    oneSignalSettings.isForecastEnabled = value == "true"
                 case "dndStartTime":
                     oneSignalSettings.dndStartTime = Int(value)
                 case "dndEndTime":

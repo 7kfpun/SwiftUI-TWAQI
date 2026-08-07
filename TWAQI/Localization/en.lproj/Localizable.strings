@@ -9,8 +9,6 @@
 "Tabbar.main" = "Main";
 "Tabbar.favourites" = "Favourites";
 "Tabbar.details_list" = "Search";
-"Tabbar.forecast" = "Forecast";
-"Tabbar.settings" = "Settings";
 "Tabbar.help" = "Help";
 
 "FavouriteList.favourites" = "Favourites";
@@ -23,14 +21,6 @@
 "Details.general_public" = "General public";
 "Details.sensitive_group" = "Sensitive group";
 
-"Forecast.forecast" = "Forecast";
-"Forecast.forecast_notification_daily" = "Forecast Notification (daily)";
-"Forecast.publish_time" = "Publish Time";
-"Forecast.three_days_forecast" = "3 Days";
-"Forecast.details_forecast" = "Details";
-
-"Settings.notification" = "Notification";
-"Settings.search" = "Search";
 "Settings.notice_me_when_aqi_is_above" = "Notice me when AQI is above";
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
@@ -69,14 +59,6 @@
 "AirIndex.description_so2" = "Sulfur dioxide";
 "AirIndex.description_no2" = "Nitrogen dioxide";
 
-"AirIndex.url_aqi" = "https://en.wikipedia.org/wiki/Air_quality_index";
-"AirIndex.url_pm25" = "https://en.wikipedia.org/wiki/Particulates";
-"AirIndex.url_pm10" = "https://en.wikipedia.org/wiki/Particulates";
-"AirIndex.url_o3" = "https://en.wikipedia.org/wiki/Ozone";
-"AirIndex.url_co" = "https://en.wikipedia.org/wiki/Carbon_monoxide";
-"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
-"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
-
 "AirStatus.good" = "Good";
 "AirStatus.moderate" = "Moderate";
 "AirStatus.unhealthyforsensitivegroup" = "Unhealthy for sensitive groups";
@@ -99,13 +81,25 @@
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "Stay indoors and reduce physical exertion";
 "AirStatus.sensitive_group_guidance_hazardous" = "Stay indoors and avoid physical exertion";
 
-"AreaGroup.north" = "North";
-"AreaGroup.chumiao" = "Chu-Miao";
-"AreaGroup.central" = "Central";
-"AreaGroup.yunchianan" = "Yun-Chia-Nan";
-"AreaGroup.kaoping" = "KaoPing";
-"AreaGroup.yilan" = "Yilan";
-"AreaGroup.huatun" = "Hua-Tun";
-"AreaGroup.matsu" = "Matsu";
-"AreaGroup.kinmen" = "Kinmen";
-"AreaGroup.magong" = "Magong";
+"Details.station" = "Station";
+"Details.last_updated" = "Last updated";
+"Details.address" = "Address";
+"Details.coordinates" = "Coordinates";
+"Details.wind" = "Wind";
+"Details.location" = "Location";
+"Details.conditions" = "Conditions";
+"Details.no_data" = "No data";
+
+"StationType.general" = "General";
+"StationType.traffic" = "Roadside";
+"StationType.industrial" = "Industrial";
+"StationType.background" = "Background";
+"StationType.national_park" = "National park";
+"StationType.other" = "Other";
+
+"Wind.calm" = "Calm";
+"Wind.light_air" = "Light air";
+"Wind.light_breeze" = "Light breeze";
+"Wind.gentle_breeze" = "Gentle breeze";
+"Wind.moderate_breeze" = "Moderate breeze";
+"Wind.strong_breeze" = "Strong breeze";

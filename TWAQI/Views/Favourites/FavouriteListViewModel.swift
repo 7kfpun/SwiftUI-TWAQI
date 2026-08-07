@@ -10,12 +10,9 @@ import Combine
 import Foundation
 
 class FavouriteListViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
     let settings = SettingsStore()
 
-    @Published var favouritePollutants: Pollutants = [] {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var favouritePollutants: Pollutants = []
 
     private(set) lazy var getData: () -> Void = {
         let stationIds = (self.settings.savedFavouriteStations.map { String($0) }).joined(separator: ",")
@@ -36,11 +33,7 @@ class FavouriteListViewModel: ObservableObject {
         }
     }
 
-    @Published var isCustomAdLoading: Bool = true {
-        willSet {
-            self.objectWillChange.send()
-        }
-    }
+    @Published var isCustomAdLoading: Bool = true
 
     var isShowCustomAd: Bool = false
     var customAd: CustomAd?

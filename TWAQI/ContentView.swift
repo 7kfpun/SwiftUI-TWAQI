@@ -17,12 +17,6 @@ struct ContentView: View {
                     Text("Tabbar.main")
             }
 
-            ForecastView(viewModel: .init())
-                .tabItem {
-                    Image(systemName: "calendar")
-                    Text("Tabbar.forecast")
-                }
-
             FavouriteListView()
                 .tabItem {
                     Image(systemName: "heart")

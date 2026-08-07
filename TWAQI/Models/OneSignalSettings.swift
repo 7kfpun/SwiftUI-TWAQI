@@ -10,7 +10,6 @@ import Foundation
 
 struct OneSignalSettings: Hashable, Codable {
     var isDndEnabled: Bool?
-    var isForecastEnabled: Bool?
     var dndStartTime: Int?
     var dndEndTime: Int?
     var stationSettings: [String: OneSignalStationSetting]

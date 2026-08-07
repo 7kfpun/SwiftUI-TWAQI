@@ -3,10 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6BA4E440C564190DFC9F3EE7 /* MapHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40B2DC84D8B11D8CC74CDAF /* MapHome.swift */; };
+		5548D6CFD8D39DAAAAEA82D0 /* StationInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0147099128E9FE82778941DE /* StationInfoView.swift */; };
+		31E5674C08F39AF35DA29D65 /* StationHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4960C340833CD7D23354E4 /* StationHeaderView.swift */; };
+		15940BF40144627E6E108ABD /* WindExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346558AFF08D2DD24C5AE502 /* WindExtensions.swift */; };
+		008E0301089673EC7D242C1D /* StationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB601F7471823C2024AB3D6 /* StationTypes.swift */; };
 		1FC52EFA1B593F93F7CD83DC /* Pods_TWAQI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */; };
 		2A94CD999844F549EA21FA7A /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */; };
 		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
@@ -29,7 +34,6 @@
 		9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC544233F981900AC862D /* Preview Assets.xcassets */; };
 		9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC546233F981900AC862D /* LaunchScreen.storyboard */; };
 		9E1AC555233F99F600AC862D /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC554233F99F600AC862D /* MainView.swift */; };
-		9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC55A233F9A3900AC862D /* ForecastView.swift */; };
 		9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC55D233F9A5000AC862D /* HelpView.swift */; };
 		9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC560233F9A8500AC862D /* DetailsView.swift */; };
 		9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC563233F9AC100AC862D /* DetailsListView.swift */; };
@@ -73,7 +77,6 @@
 		9E910C702381850E00B8B316 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
 		9E910C7123818B0100B8B316 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
 		9E910C7223818EC600B8B316 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
-		9E942E342372BAB10010915D /* AreaGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E332372BAB10010915D /* AreaGroups.swift */; };
 		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
 		9E942E3A2372C3B20010915D /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
@@ -83,8 +86,6 @@
 		9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F17235780D900C66A03 /* GADBannerView.swift */; };
 		9E978F1C235AFA7000C66A03 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E978F1B235AFA7000C66A03 /* DataManager.swift */; };
 		9E978F1E235B0A0300C66A03 /* stations.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E978F1D235B0A0300C66A03 /* stations.json */; };
-		9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */; };
-		9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */; };
 		9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */; };
 		9EA1BC6F236D870C008C3942 /* GoogleMapController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */; };
@@ -95,8 +96,6 @@
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
-		9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */; };
-		9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
 		9EC6BB17235B462B00213041 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB16235B462B00213041 /* SafariView.swift */; };
 		9EC6BB1F235B590500213041 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB1E235B590500213041 /* NotificationService.swift */; };
 		9EC6BB23235B590500213041 /* OneSignalNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -120,7 +119,6 @@
 		9EF3D34A2393B5CB009CED32 /* APIResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3472393B318009CED32 /* APIResponses.swift */; };
 		9EF3D34B2393B631009CED32 /* Countries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D34323939281009CED32 /* Countries.swift */; };
 		9EF3D34E2393B64C009CED32 /* CustomAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD956C2385941200420116 /* CustomAd.swift */; };
-		9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC596122351CF4400B8AA99 /* ForecastArea.swift */; };
 		9EF3D3512393B9C6009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
 		9EF3D3532393E9BF009CED32 /* CountryPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */; };
 		9EF3D3542393EB35009CED32 /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
@@ -182,6 +180,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F40B2DC84D8B11D8CC74CDAF /* MapHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHome.swift; sourceTree = "<group>"; };
+		0147099128E9FE82778941DE /* StationInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationInfoView.swift; sourceTree = "<group>"; };
+		FD4960C340833CD7D23354E4 /* StationHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationHeaderView.swift; sourceTree = "<group>"; };
+		346558AFF08D2DD24C5AE502 /* WindExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindExtensions.swift; sourceTree = "<group>"; };
+		0BB601F7471823C2024AB3D6 /* StationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationTypes.swift; sourceTree = "<group>"; };
 		2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TWAQI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OneSignalNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		437631D7D7C9B18A5CECB5C3 /* Pods-OneSignalNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
@@ -206,7 +209,6 @@
 		9E1AC547233F981900AC862D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E1AC549233F981900AC862D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E1AC554233F99F600AC862D /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		9E1AC55A233F9A3900AC862D /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
 		9E1AC55D233F9A5000AC862D /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		9E1AC560233F9A8500AC862D /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
@@ -246,7 +248,6 @@
 		9E910C572381830500B8B316 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		9E910C652381846A00B8B316 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		9E910C672381848E00B8B316 /* StationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationListView.swift; sourceTree = "<group>"; };
-		9E942E332372BAB10010915D /* AreaGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaGroups.swift; sourceTree = "<group>"; };
 		9E942E352372BFDA0010915D /* AirIndexTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirIndexTypes.swift; sourceTree = "<group>"; };
 		9E942E372372C0380010915D /* AirStatusTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusTypes.swift; sourceTree = "<group>"; };
 		9E942E392372C3B20010915D /* LinkPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkPages.swift; sourceTree = "<group>"; };
@@ -256,8 +257,6 @@
 		9E978F17235780D900C66A03 /* GADBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GADBannerView.swift; sourceTree = "<group>"; };
 		9E978F1B235AFA7000C66A03 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		9E978F1D235B0A0300C66A03 /* stations.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = stations.json; sourceTree = "<group>"; };
-		9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast3DaysView.swift; sourceTree = "<group>"; };
-		9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDetailView.swift; sourceTree = "<group>"; };
 		9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberExtensions.swift; sourceTree = "<group>"; };
 		9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRowViewModel.swift; sourceTree = "<group>"; };
 		9EA1BC6E236D870C008C3942 /* GoogleMapController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleMapController.swift; sourceTree = "<group>"; };
@@ -271,9 +270,7 @@
 		9EC3CF252360A81300F17332 /* BarsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarsView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
-		9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastViewModel.swift; sourceTree = "<group>"; };
 		9EC596112351C94900B8AA99 /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = debug.xcconfig; sourceTree = "<group>"; };
-		9EC596122351CF4400B8AA99 /* ForecastArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastArea.swift; sourceTree = "<group>"; };
 		9EC6BB16235B462B00213041 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OneSignalNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EC6BB1E235B590500213041 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -423,7 +420,6 @@
 				9E1AC550233F999B00AC862D /* Common */,
 				9E1AC55F233F9A7300AC862D /* Details */,
 				9E03DF6223975C5A002F8DA4 /* Favourites */,
-				9E1AC559233F9A2A00AC862D /* Forecast */,
 				9E1AC55C233F9A4400AC862D /* Help */,
 				9E1AC553233F99CE00AC862D /* Main */,
 			);
@@ -462,17 +458,6 @@
 			path = Main;
 			sourceTree = "<group>";
 		};
-		9E1AC559233F9A2A00AC862D /* Forecast */ = {
-			isa = PBXGroup;
-			children = (
-				9EA1BC6423657D73008C3942 /* Forecast3DaysView.swift */,
-				9EA1BC6623657EC8008C3942 /* ForecastDetailView.swift */,
-				9E1AC55A233F9A3900AC862D /* ForecastView.swift */,
-				9EC5960F2351C87100B8AA99 /* ForecastViewModel.swift */,
-			);
-			path = Forecast;
-			sourceTree = "<group>";
-		};
 		9E1AC55C233F9A4400AC862D /* Help */ = {
 			isa = PBXGroup;
 			children = (
@@ -485,6 +470,8 @@
 		9E1AC55F233F9A7300AC862D /* Details */ = {
 			isa = PBXGroup;
 			children = (
+				0147099128E9FE82778941DE /* StationInfoView.swift */,
+				FD4960C340833CD7D23354E4 /* StationHeaderView.swift */,
 				9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */,
 				9E1AC563233F9AC100AC862D /* DetailsListView.swift */,
 				9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */,
@@ -501,6 +488,7 @@
 		9E1AC565233FB09000AC862D /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				9EF3D3472393B318009CED32 /* APIResponses.swift */,
 				9E1AC566233FB0A400AC862D /* ColorExtensions.swift */,
@@ -544,7 +532,6 @@
 				9EF3D34323939281009CED32 /* Countries.swift */,
 				9EF3D3522393E9BF009CED32 /* CountryPollutants.swift */,
 				9EDD956C2385941200420116 /* CustomAd.swift */,
-				9EC596122351CF4400B8AA99 /* ForecastArea.swift */,
 				9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */,
 				9EF3D3502393B9C6009CED32 /* Pollutants.swift */,
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
@@ -601,9 +588,10 @@
 		9E942E322372BA810010915D /* Constants */ = {
 			isa = PBXGroup;
 			children = (
+				F40B2DC84D8B11D8CC74CDAF /* MapHome.swift */,
+				0BB601F7471823C2024AB3D6 /* StationTypes.swift */,
 				9E942E352372BFDA0010915D /* AirIndexTypes.swift */,
 				9E942E372372C0380010915D /* AirStatusTypes.swift */,
-				9E942E332372BAB10010915D /* AreaGroups.swift */,
 				9EF250182376B95D00A731D5 /* DefinitionPages.swift */,
 				9E942E392372C3B20010915D /* LinkPages.swift */,
 				9E03DF6923994500002F8DA4 /* TaiwanStationsMapper.swift */,
@@ -989,6 +977,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6BA4E440C564190DFC9F3EE7 /* MapHome.swift in Sources */,
+				5548D6CFD8D39DAAAAEA82D0 /* StationInfoView.swift in Sources */,
+				31E5674C08F39AF35DA29D65 /* StationHeaderView.swift in Sources */,
+				15940BF40144627E6E108ABD /* WindExtensions.swift in Sources */,
+				008E0301089673EC7D242C1D /* StationTypes.swift in Sources */,
 				9EAB27F42379180600AEAF5A /* WindModeButton.swift in Sources */,
 				9EF2501523766BC000A731D5 /* ClosestStationView.swift in Sources */,
 				9E794A62234083700064D874 /* Indicator.swift in Sources */,
@@ -999,8 +992,6 @@
 				9EF3D3482393B318009CED32 /* APIResponses.swift in Sources */,
 				9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */,
 				9E942E3C2372CA4B0010915D /* LocaleExtension.swift in Sources */,
-				9E942E342372BAB10010915D /* AreaGroups.swift in Sources */,
-				9EC596102351C87100B8AA99 /* ForecastViewModel.swift in Sources */,
 				9EA1BC6D2369B907008C3942 /* SettingsRowViewModel.swift in Sources */,
 				9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */,
 				9EF3D34623939798009CED32 /* Stations.swift in Sources */,
@@ -1014,14 +1005,11 @@
 				9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */,
 				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9E794A642340993C0064D874 /* DetailsRow.swift in Sources */,
-				9EA1BC6723657EC8008C3942 /* ForecastDetailView.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
-				9EA1BC6523657D73008C3942 /* Forecast3DaysView.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
-				9E1AC55B233F9A3900AC862D /* ForecastView.swift in Sources */,
 				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
 				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */,
@@ -1031,7 +1019,6 @@
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				9EF3D34423939281009CED32 /* Countries.swift in Sources */,
 				9EDD956F2385953700420116 /* CustomAdView.swift in Sources */,
-				9EC596132351CF4400B8AA99 /* ForecastArea.swift in Sources */,
 				9E03DF6A23994500002F8DA4 /* TaiwanStationsMapper.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9E03DF6423975CF9002F8DA4 /* FavouriteListView.swift in Sources */,
@@ -1069,7 +1056,6 @@
 				9EC8999223828BE1000D986C /* getEnv.swift in Sources */,
 				9EDF685A23843B1400B08589 /* LocaleExtension.swift in Sources */,
 				9E910C6D238184D900B8B316 /* AirStatusTypes.swift in Sources */,
-				9EF3D34F2393B65B009CED32 /* ForecastArea.swift in Sources */,
 				9E0876222382DAB00060476E /* UserDefaultsExtension.swift in Sources */,
 				9E910C4A2381830400B8B316 /* HostingController.swift in Sources */,
 				9E03DF6D239B8366002F8DA4 /* CountryListView.swift in Sources */,
@@ -1288,6 +1274,7 @@
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = TWAQI/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1315,6 +1302,7 @@
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = TWAQI/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

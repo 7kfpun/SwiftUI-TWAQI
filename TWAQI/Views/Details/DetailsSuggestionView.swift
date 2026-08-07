@@ -44,10 +44,12 @@ struct DetailsSuggestionView: View {
 
                     Spacer()
 
-                    Image("status_\(airStatus)")
-                        .resizable()
-                        .frame(width: 65, height: 65)
-                        .padding(.top, 10)
+                    if airStatus.hasFaceImage {
+                        Image(airStatus.getImage())
+                            .resizable()
+                            .frame(width: 65, height: 65)
+                            .padding(.top, 10)
+                    }
 
                     Spacer()
 

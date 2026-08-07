@@ -8,14 +8,10 @@
 	<string>$(AdUnitIdDetailsListFooter)</string>
 	<key>AdUnitIdFavouritesFooter</key>
 	<string>$(AdUnitIdFavouritesFooter)</string>
-	<key>AdUnitIdForecastFooter</key>
-	<string>$(AdUnitIdForecastFooter)</string>
 	<key>AdUnitIdHelpFooter</key>
 	<string>$(AdUnitIdHelpFooter)</string>
 	<key>AdUnitIdMainFooter</key>
 	<string>$(AdUnitIdMainFooter)</string>
-	<key>AdUnitIdSettingsFooter</key>
-	<string>$(AdUnitIdSettingsFooter)</string>
 	<key>AmplitudeApiKey</key>
 	<string>$(AmplitudeApiKey)</string>
 	<key>ApiDomain</key>
@@ -54,8 +50,6 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CUSTOM AD API</key>
 	<string>$(CUSTOM_AD_API)</string>
-	<key>FORECAST API</key>
-	<string>$(FORECAST_API)</string>
 	<key>FeedbackUrlEn</key>
 	<string>$(FeedbackUrlEn)</string>
 	<key>FeedbackUrlZh</key>

@@ -71,6 +71,13 @@ enum AirStatuses: String, CaseIterable, Hashable {
         "status_\(self.rawValue)"
     }
 
+    /// There is no `status_unknown` asset — a reading of 0 (or outside every
+    /// band) has no face to show. Call sites must skip the image entirely
+    /// rather than asking the catalog for one that doesn't exist.
+    var hasFaceImage: Bool {
+        self != .unknown
+    }
+
     func getGeneralPublicGuidance() -> LocalizedStringKey {
         let readableStrings = [
             "good": "AirStatus.general_public_guidance_good" as LocalizedStringKey,

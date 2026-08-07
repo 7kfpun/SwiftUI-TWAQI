@@ -27,7 +27,7 @@ final class AirStatusBarView: UIView {
         layer.shadowOpacity = 0.1
         layer.cornerRadius = 5
 
-        let width: CGFloat = 200
+        let width: CGFloat = ClosestStationView.preferredSize.width
         let imagePadding: CGFloat = (width - 10) / 6 - 20
         var xOffset: CGFloat = 10
 

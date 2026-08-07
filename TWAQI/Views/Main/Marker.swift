@@ -10,14 +10,29 @@ import GoogleMaps
 import SwiftUI
 import UIKit
 
-final class PollutantMarker: GMSMarker {
+/// A map marker backed by a station reading. Only markers from the supported
+/// country can be opened; the rest are drawn for context only.
+protocol StationMarker: AnyObject {
+    var pollutant: Pollutant { get }
+    var isInteractive: Bool { get }
+}
+
+/// Opacity applied to markers outside the supported country, so it reads as
+/// "context, not tappable" rather than "broken".
+private let mutedMarkerOpacity: Float = 0.4
+
+final class PollutantMarker: GMSMarker, StationMarker {
     let pollutant: Pollutant
     let airIndexTypeSelected: AirIndexTypes
+    let isInteractive: Bool
 
-    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes, isInteractive: Bool = true) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
+        self.isInteractive = isInteractive
         super.init()
+
+        self.opacity = isInteractive ? 1 : mutedMarkerOpacity
 
         self.position = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
 
@@ -47,14 +62,18 @@ final class PollutantMarker: GMSMarker {
     }
 }
 
-final class WindDirectionMarker: GMSMarker {
+final class WindDirectionMarker: GMSMarker, StationMarker {
     let pollutant: Pollutant
     let airIndexTypeSelected: AirIndexTypes
+    let isInteractive: Bool
 
-    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes) {
+    init(pollutant: Pollutant, airIndexTypeSelected: AirIndexTypes, isInteractive: Bool = true) {
         self.pollutant = pollutant
         self.airIndexTypeSelected = airIndexTypeSelected
+        self.isInteractive = isInteractive
         super.init()
+
+        self.opacity = isInteractive ? 1 : mutedMarkerOpacity
 
         let dWindSpeed = pollutant.windSpeed
 

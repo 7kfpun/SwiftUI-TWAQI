@@ -12,16 +12,27 @@ import SwiftUI
 import UIKit
 
 let defaults = UserDefaults.standard
-let defaultLatitude = defaults.double(forKey: "lastestMapLat")
-let defaultLongitude = defaults.double(forKey: "lastestMapLon")
-let lastestMapZoom = defaults.float(forKey: "lastestMapZoom")
-let camera = GMSCameraPosition.camera(withLatitude: defaultLatitude, longitude: defaultLongitude, zoom: lastestMapZoom)
 
 let screenSize: CGRect = UIScreen.main.bounds
 let isLandscape = UIDevice.current.orientation.isLandscape
 
 class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
-    let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
+    /// The camera the user last left the map at, or `MapHome` on first launch.
+    ///
+    /// Evaluated per instance rather than once at process start, so a camera
+    /// saved during this session is honoured if the controller is rebuilt.
+    static var initialCamera: GMSCameraPosition {
+        let settings = SettingsStore()
+        let hasSavedPosition = !(settings.lastestMapLat == 0 && settings.lastestMapLon == 0)
+
+        return GMSCameraPosition.camera(
+            withLatitude: hasSavedPosition ? settings.lastestMapLat : MapHome.latitude,
+            longitude: hasSavedPosition ? settings.lastestMapLon : MapHome.longitude,
+            zoom: settings.lastestMapZoom > 0 ? settings.lastestMapZoom : MapHome.zoom
+        )
+    }
+
+    let mapView = GMSMapView.map(withFrame: .zero, camera: GoogleMapViewController.initialCamera)
 
     var closestStationView: ClosestStationView!
     var defaultLocationButton: DefaultLocationButton!
@@ -29,11 +40,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var myLocationButton: MyLocationButton!
     var windModeButton: WindModeButton!
 
-    var currentLatitude: Double = defaultLatitude
-    var currentLongitude: Double = defaultLongitude
+    var currentLatitude: Double = GoogleMapViewController.initialCamera.target.latitude
+    var currentLongitude: Double = GoogleMapViewController.initialCamera.target.longitude
 
     var countries: Countries = []
     var closestCountry: Country!
+
+    /// Code of the country whose markers are openable. Resolved from the
+    /// countries endpoint so the id -> code mapping stays server-driven.
+    var supportedCountryCode: String?
 
     var pollutants: Pollutants = []
 
@@ -63,18 +78,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     @objc func goToDefaultLocation() {
-        if let closestCountry = closestCountry {
-            let defaultCamera = GMSCameraPosition.camera(
-                withLatitude: closestCountry.lat,
-                longitude: closestCountry.lon,
-                zoom: closestCountry.zoom
-            )
-            self.mapView.animate(to: defaultCamera)
-        } else {
-            // Taiwan Location
-            let defaultCamera = GMSCameraPosition.camera(withLatitude: 23.49, longitude: 120.96, zoom: 7.9)
-            self.mapView.animate(to: defaultCamera)
-        }
+        // Always the supported country, not whichever happens to be nearest.
+        let supported = countries.first { $0.isSupported && $0.hasValidLocation }
+        let zoom = supported.map { $0.zoom > 0 ? $0.zoom : MapHome.zoom } ?? MapHome.zoom
+
+        let defaultCamera = GMSCameraPosition.camera(
+            withLatitude: supported?.lat ?? MapHome.latitude,
+            longitude: supported?.lon ?? MapHome.longitude,
+            zoom: zoom
+        )
+        self.mapView.animate(to: defaultCamera)
         TrackingManager.logEvent(eventName: "move_to_default_location")
     }
 
@@ -84,9 +97,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             print(tag, airIndexTypes)
             self.airIndexTypeSelected = airIndexTypes
 
-            for button in indexSelectorView.buttons {
-                button.setTitleColor(button.tag == tag ? UIColor(rgb: 0x5AC8FA) : .label, for: .normal)
-            }
+            indexSelectorView.setSelected(tag: tag)
 
             TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
         }
@@ -133,7 +144,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             switch result {
             case .success(let result):
                 self.countries = result
-                self.checkClosestCountry(latitude: defaultLatitude, longitude: defaultLongitude)
+
+                if let supported = result.first(where: { $0.isSupported }) {
+                    self.supportedCountryCode = supported.code
+                    // The search tab lists stations for this country rather than
+                    // whichever country the map happens to be panned over.
+                    defaults.set(supported.code, forKey: "supportedCountryCode")
+                    self.callGetCurrentPollutantsApi(countryCode: supported.code)
+                }
+
+                self.checkClosestCountry(latitude: self.currentLatitude, longitude: self.currentLongitude)
                 self.loadMarkers()
                 print("Total Countries: \(result.count), first item \(result[0])")
             case .failure(let error):
@@ -155,10 +175,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func checkClosestCountry(latitude: Double, longitude: Double) {
-        if !self.countries.isEmpty {
-            var closestCountry: Country = self.countries.first!
+        // Placeholder rows (no name, 0/0 coordinates) would otherwise win the
+        // nearest search for anywhere near the Gulf of Guinea.
+        let locatableCountries = self.countries.filter { $0.hasValidLocation }
+
+        if !locatableCountries.isEmpty {
+            var closestCountry: Country = locatableCountries.first!
             var distance: Double = .greatestFiniteMagnitude
-            self.countries.forEach { country in
+            locatableCountries.forEach { country in
                 let countryLat = country.lat
                 let countryLon = country.lon
 
@@ -195,10 +219,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         closestStationView = ClosestStationView()
         view.addSubview(closestStationView)
         closestStationView.snp.makeConstraints { (make) -> Void in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
             make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
-            make.width.equalTo(200)
-            make.height.equalTo(75)
+            make.width.equalTo(ClosestStationView.preferredSize.width)
+            make.height.equalTo(ClosestStationView.preferredSize.height)
         }
 
         // MARK: airStatusesView
@@ -207,7 +231,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         airStatusesView.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(closestStationView.snp.bottom).offset(8)
             make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
-            make.width.equalTo(200)
+            make.width.equalTo(ClosestStationView.preferredSize.width)
             make.height.equalTo(32)
         }
 
@@ -221,14 +245,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             indexSelectorView.buttons[i].addTarget(self, action: #selector(changeIndex), for: .touchUpInside)
 
             if airIndexTypeSelected == airIndexType {
-                indexSelectorView.buttons[i].setTitleColor(UIColor(rgb: 0x5AC8FA), for: .normal)
+                indexSelectorView.setSelected(tag: i)
             }
         }
         view.addSubview(indexSelectorView)
         indexSelectorView.snp.makeConstraints { (make) -> Void in
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -10 : -60)
             make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
-            make.height.equalTo(54)
+            make.height.equalTo(IndexSelectorView.preferredHeight)
             if width > 610 {
                 make.left.equalTo(view.snp.left).offset(width/2 - 305)
             } else {
@@ -276,13 +300,22 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     func loadMarkers() {
         print("loadMarkers")
         self.mapView.clear()
-        for (_, pollutants) in self.countryPollutants {
+        for (countryCode, pollutants) in self.countryPollutants {
+            let isInteractive = countryCode == self.supportedCountryCode
             pollutants.forEach { pollutant in
                 var pollutantMarker: GMSMarker
                 if self.isWindMode {
-                    pollutantMarker = WindDirectionMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
+                    pollutantMarker = WindDirectionMarker(
+                        pollutant: pollutant,
+                        airIndexTypeSelected: self.airIndexTypeSelected,
+                        isInteractive: isInteractive
+                    )
                 } else {
-                    pollutantMarker = PollutantMarker(pollutant: pollutant, airIndexTypeSelected: self.airIndexTypeSelected)
+                    pollutantMarker = PollutantMarker(
+                        pollutant: pollutant,
+                        airIndexTypeSelected: self.airIndexTypeSelected,
+                        isInteractive: isInteractive
+                    )
                 }
                 pollutantMarker.tracksViewChanges = false
                 pollutantMarker.map = self.mapView
@@ -323,13 +356,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 value: value
             )
 
-            closestStationView.stationName = Locale.isChinese ? closestPollutant.nameLocal : closestPollutant.name
+            closestStationView.stationName = closestPollutant.displayName
+            closestStationView.locality = closestPollutant.displayLocality
+            closestStationView.publishTime = closestPollutant.publishTime
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
             closestStationView.aqiForegroundColor = UIColor(rgb: Int(airStatus.getForegroundColor()))
-            closestStationView.image = UIImage(named: airStatus.getImage())
+            closestStationView.image = airStatus.hasFaceImage ? UIImage(named: airStatus.getImage()) : nil
         }
     }
 
@@ -350,7 +385,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         self.callGetCountriesApi()
-        self.callGetCurrentPollutantsApi(countryCode: "twn")
 
         mapView.delegate = self
 
@@ -362,10 +396,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         loadContent()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            self.goToMyLocation(isSkipLog: true)
-        }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -391,27 +421,24 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
-        var detailsView: DetailsView
-        if isWindMode {
-            let mmarker = marker as! WindDirectionMarker
-            print("Marker tapped", marker, mmarker.pollutant.stationId)
-            detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
-            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
-                "name": mmarker.pollutant.name,
-                "nameLocal": mmarker.pollutant.nameLocal,
-                "stationId": mmarker.pollutant.stationId,
-            ])
-        } else {
-            let mmarker = marker as! PollutantMarker
-            print("Marker tapped", marker, mmarker.pollutant.stationId)
-            detailsView = DetailsView(stationId: mmarker.pollutant.stationId)
-            TrackingManager.logEvent(eventName: "check_main_details", parameters: [
-                "name": mmarker.pollutant.name,
-                "nameLocal": mmarker.pollutant.nameLocal,
-                "stationId": mmarker.pollutant.stationId,
-            ])
+        guard let stationMarker = marker as? StationMarker else { return true }
+
+        // Markers outside the supported country are context only.
+        guard stationMarker.isInteractive else {
+            print("Marker tapped but not openable (outside supported country)", stationMarker.pollutant.stationId)
+            return true
         }
 
+        let pollutant = stationMarker.pollutant
+        print("Marker tapped", pollutant.stationId)
+
+        TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+            "name": pollutant.name,
+            "nameLocal": pollutant.nameLocal,
+            "stationId": pollutant.stationId,
+        ])
+
+        let detailsView = DetailsView(stationId: pollutant.stationId)
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
         detailsViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,

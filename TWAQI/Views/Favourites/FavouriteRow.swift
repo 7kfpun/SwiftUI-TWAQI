@@ -20,7 +20,7 @@ struct FavouriteRow: View {
         return NavigationLink(destination: DetailsView(stationId: pollutant.stationId).environmentObject(SettingsStore())) {
             VStack {
                 HStack {
-                    Text(Locale.isChinese ? self.pollutant.nameLocal : self.pollutant.name)
+                    Text(self.pollutant.displayName)
                         .foregroundColor(Color.primary)
                         .padding(.top, 10)
                         .padding(.horizontal, 12)
@@ -46,10 +46,12 @@ struct FavouriteRow: View {
 
                                     Spacer()
 
-                                    Image("status_\(airStatus)")
-                                        .resizable()
-                                        .frame(width: 65, height: 65)
-                                        .padding(.top, 10)
+                                    if airStatus.hasFaceImage {
+                                        Image(airStatus.getImage())
+                                            .resizable()
+                                            .frame(width: 65, height: 65)
+                                            .padding(.top, 10)
+                                    }
 
                                     Spacer()
 

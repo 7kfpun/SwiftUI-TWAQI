@@ -69,9 +69,11 @@ struct ContentView: View {
             Button(action: getData) {
                 Spacer()
 
-                Image(airStatus.getImage())
-                    .resizable()
-                    .frame(width: 50, height: 50)
+                if airStatus.hasFaceImage {
+                    Image(airStatus.getImage())
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                }
 
                 Spacer()
 

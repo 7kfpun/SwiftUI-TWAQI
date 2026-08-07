@@ -21,7 +21,6 @@ ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2
 ApiEnpointSuccessAds = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fsuccess-ads.json?alt=media&token=5c134e38-e654-46ac-a044-9730cd3eb221
 
 // Deprecated
-FORECAST_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/aqfn.json?alt=media&token=e790ed5f-a6aa-4b50-8473-98e68186d11b
 HISTORY_API = https:\/\/firebasestorage.googleapis.com/v0/b/kf-twaqi.appspot.com/o/history.json?alt=media&token=4ff87ac5-e117-4149-9257-4784aea2fdbe
 
 // Services
@@ -37,9 +36,7 @@ SentryDSN =
 AdUnitIdMainFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdDetailsListFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdDetailsFooter = ca-app-pub-3940256099942544/2934735716
-AdUnitIdForecastFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdFavouritesFooter = ca-app-pub-3940256099942544/2934735716
-AdUnitIdSettingsFooter = ca-app-pub-3940256099942544/2934735716
 AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
 
 // In-App Purchase

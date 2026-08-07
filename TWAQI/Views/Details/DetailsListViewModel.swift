@@ -10,15 +10,16 @@ import Combine
 import Foundation
 
 class DetailsListViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
 
-    @Published var stations: Stations = [] {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var stations: Stations = []
 
     private(set) lazy var getData: () -> Void = {
         let settings = SettingsStore()
-        let countryCode = settings.closestCountryCode
+        // Scoped to the supported country: those are the only stations whose
+        // detail screen and notifications work.
+        let countryCode = settings.supportedCountryCode.isEmpty
+            ? settings.closestCountryCode
+            : settings.supportedCountryCode
         APIManager.getStations(countryCode: countryCode) { result in
             switch result {
             case .success(let stations):
@@ -29,11 +30,7 @@ class DetailsListViewModel: ObservableObject {
         }
     }
 
-    @Published var isCustomAdLoading: Bool = true {
-        willSet {
-            self.objectWillChange.send()
-        }
-    }
+    @Published var isCustomAdLoading: Bool = true
 
     var isShowCustomAd: Bool = false
     var customAd: CustomAd?

@@ -6,55 +6,46 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-//import SDWebImageSwiftUI
 import SwiftUI
 
 struct DetailsView: View {
     @ObservedObject var viewModel: DetailsViewModel
 
     var body: some View {
-//        // SDImageCache.shared.config.maxDiskAge = 60 * 5  // This seems not working
-//        let cacheKey = Date.currentTimeStamp / (1000 * 60 * 5)  // For caching images for 5 min
-//
-//        var imageUrl = ""
-//
-//        if let station = self.viewModel.station {
-//            imageUrl = station.imageUrl ?? ""
-//        }
-
-        return ZStack {
+        ZStack {
             ScrollView {
-                Spacer()
-                    .frame(height: 80)
-//                if !imageUrl.isEmpty {
-//                    WebImage(url: URL(string: "\(imageUrl)?\(cacheKey)"))
-//                        .resizable()
-//                        .indicator(.activity)
-//                        .transition(.fade)
-//                        .aspectRatio(contentMode: .fill)
-//                } else {
-//                    Spacer()
-//                        .frame(height: 80)
-//                }
+                VStack(alignment: .leading, spacing: 0) {
+                    header
 
-                if self.viewModel.station != nil {
-                    SettingsRow(station: self.viewModel.station!)
+                    Separator().frame(height: 8)
 
-                    Separator()
+                    if let pollutant = viewModel.pollutant {
+                        StationInfoView(pollutant: pollutant)
+                            .padding(.vertical, 16)
+
+                        Separator().frame(height: 8)
+                    }
+
+                    if let lastPollutant = viewModel.historicalPollutants.last {
+                        DetailsSuggestionView(lastPollutant: lastPollutant)
+
+                        Separator().frame(height: 8)
+                    }
+
+                    Indicator()
+                        .padding(.top, 8)
+
+                    DetailsHistoryView(historicalPollutants: viewModel.historicalPollutants)
+
+                    Separator().frame(height: 8)
+
+                    if let station = viewModel.station {
+                        SettingsRow(station: station)
+                            .padding(.vertical, 12)
+                    }
+
+                    Spacer().frame(height: 60)
                 }
-
-                if !viewModel.historicalPollutants.isEmpty {
-                    DetailsSuggestionView(lastPollutant: viewModel.historicalPollutants.last!)
-                    Separator()
-                }
-
-                Indicator()
-
-                DetailsHistoryView(historicalPollutants: viewModel.historicalPollutants)
-
-                Separator()
-
-                Spacer().frame(height: 50)
             }
 
             AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
@@ -62,11 +53,25 @@ struct DetailsView: View {
         .onAppear {
             self.getData()
         }
-        .edgesIgnoringSafeArea(.top)
         .navigationBarItems(trailing: Button(action: { self.viewModel.favouriteStationToggle() }) {
             Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
         }
         .buttonStyle(PlainButtonStyle()))
+    }
+
+    private var header: some View {
+        let pollutant = viewModel.pollutant
+
+        return StationHeaderView(
+            title: pollutant?.displayName
+                ?? viewModel.station.map { Locale.isChinese ? $0.nameLocal : $0.name }
+                ?? "",
+            locality: pollutant?.displayLocality,
+            area: pollutant?.displayArea,
+            stationType: pollutant?.stationType ?? .unknown,
+            aqi: pollutant?.aqi ?? viewModel.historicalPollutants.last?.aqi ?? 0,
+            publishTime: viewModel.latestPublishTime
+        )
     }
 
     init(stationId: Int) {
@@ -76,41 +81,10 @@ struct DetailsView: View {
     private func getData() {
         self.viewModel.getData()
     }
-
-    private func submitImpressionEvent() {
-        if viewModel.isShowCustomAd {
-            if let customAd = viewModel.customAd {
-                var components = URLComponents(string: customAd.imageUrl)!
-                components.query = nil
-
-                TrackingManager.logEvent(eventName: "ad_custom_impression", parameters: [
-                    "name": customAd.name,
-                    "position": customAd.position,
-                    "impressionRate": customAd.impressionRate,
-                    "imageUrl": "\(components.url!)",
-                    "destinationUrl": customAd.destinationUrl,
-                    "cpc": customAd.cpc,
-                ])
-
-                TrackingManager.logEvent(eventName: "ad_custom_\(customAd.name)_impression", parameters: [
-                    "name": customAd.name,
-                    "position": customAd.position,
-                    "impressionRate": customAd.impressionRate,
-                    "imageUrl": "\(components.url!)",
-                    "destinationUrl": customAd.destinationUrl,
-                    "cpc": customAd.cpc,
-                ])
-            }
-        }
-    }
 }
 
 struct DetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            DetailsView(stationId: 1).environmentObject(SettingsStore())
-
-            DetailsView(stationId: 2).environmentObject(SettingsStore())
-        }
+        DetailsView(stationId: 91).environmentObject(SettingsStore())
     }
 }

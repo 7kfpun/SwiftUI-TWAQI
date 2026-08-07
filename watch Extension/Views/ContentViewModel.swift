@@ -10,16 +10,11 @@ import Combine
 import Foundation
 
 class ContentViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
     var station: Station?
 
-    @Published var historicalPollutants: HistoricalPollutants = [] {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var historicalPollutants: HistoricalPollutants = []
 
-    @Published var isLoading: Bool = false {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var isLoading: Bool = false
 
     init(station: Station, historicalPollutants: HistoricalPollutants = []) {
         self.station = station

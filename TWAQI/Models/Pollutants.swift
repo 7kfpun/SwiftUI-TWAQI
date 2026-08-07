@@ -12,6 +12,7 @@ typealias Pollutants = [Pollutant]
 
 struct Pollutant: Decodable, Hashable {
     let stationId: Int
+    let code: String
     let lat: Double
     let lon: Double
     let aqi: Double
@@ -24,13 +25,23 @@ struct Pollutant: Decodable, Hashable {
     let windDirection: Double
     let windSpeed: Double
     let publishTime: String
-    let siteName = "test"
 
     let name: String
     let nameLocal: String
 
+    // Location detail. All optional — newer micro-sensor stations send `{}`.
+    let address: String?
+    let area: String?
+    let areaLocal: String?
+    let county: String?
+    let countyLocal: String?
+    let township: String?
+    let stationType: StationTypes
+    let imageUrl: String?
+
     private enum CodingKeys: String, CodingKey {
         case stationId = "station_id"
+        case code
         case lat
         case lon
         case aqi
@@ -43,19 +54,30 @@ struct Pollutant: Decodable, Hashable {
         case windDirection = "wind_direction"
         case windSpeed = "wind_speed"
         case publishTime = "publish_time"
+        case imageUrl = "image_url"
+        case stationType = "station_type"
 
         case name
+        case address
+        case area
+        case additionalInfo = "additional_info"
     }
 
-    private enum NameLangKeys: String, CodingKey {
+    private enum LangKeys: String, CodingKey {
         case langEn = "en"
         case langZh = "zh"
         case langTh = "th"
     }
 
+    private enum AdditionalInfoKeys: String, CodingKey {
+        case county
+        case township
+    }
+
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         stationId = try values.decode(Int.self, forKey: .stationId)
+        code = try values.decodeIfPresent(String.self, forKey: .code) ?? ""
         lat = try values.decode(Double.self, forKey: .lat)
         lon = try values.decode(Double.self, forKey: .lon)
         aqi = try values.decode(Double.self, forKey: .aqi)
@@ -69,19 +91,52 @@ struct Pollutant: Decodable, Hashable {
         windSpeed = try values.decode(Double.self, forKey: .windSpeed)
         publishTime = try values.decode(String.self, forKey: .publishTime)
 
-        let names = try values.nestedContainer(keyedBy: NameLangKeys.self, forKey: CodingKeys.name)
-        if names.contains(.langEn) {
-            name = try names.decode(String.self, forKey: .langEn)
+        let rawImageUrl = try values.decodeIfPresent(String.self, forKey: .imageUrl)
+        imageUrl = (rawImageUrl?.isEmpty ?? true) ? nil : rawImageUrl
+
+        stationType = StationTypes(apiValue: try values.decodeIfPresent(String.self, forKey: .stationType))
+
+        // Names. `en` is missing for some stations, so fall back to the Chinese
+        // name rather than the literal "Unknown" the old decoder produced.
+        let names = try values.nestedContainer(keyedBy: LangKeys.self, forKey: .name)
+        let nameZh = try names.decodeIfPresent(String.self, forKey: .langZh)
+        let nameTh = try names.decodeIfPresent(String.self, forKey: .langTh)
+        let nameEn = try names.decodeIfPresent(String.self, forKey: .langEn)
+        name = nameEn ?? nameZh ?? nameTh ?? ""
+        nameLocal = nameZh ?? nameTh ?? nameEn ?? ""
+
+        // `address` / `area` / `additional_info` may be `{}`.
+        if let addresses = try? values.nestedContainer(keyedBy: LangKeys.self, forKey: .address) {
+            address = try addresses.decodeIfPresent(String.self, forKey: .langZh)
         } else {
-            name = "Unknown"
+            address = nil
         }
 
-        if names.contains(.langZh) {
-            nameLocal = try names.decode(String.self, forKey: .langZh)
-        } else if names.contains(.langTh) {
-            nameLocal = try names.decode(String.self, forKey: .langTh)
+        if let areas = try? values.nestedContainer(keyedBy: LangKeys.self, forKey: .area) {
+            area = try areas.decodeIfPresent(String.self, forKey: .langEn)
+            areaLocal = try areas.decodeIfPresent(String.self, forKey: .langZh)
         } else {
-            nameLocal = "Unknown"
+            area = nil
+            areaLocal = nil
+        }
+
+        if let info = try? values.nestedContainer(keyedBy: AdditionalInfoKeys.self, forKey: .additionalInfo) {
+            if let counties = try? info.nestedContainer(keyedBy: LangKeys.self, forKey: .county) {
+                county = try counties.decodeIfPresent(String.self, forKey: .langEn)
+                countyLocal = try counties.decodeIfPresent(String.self, forKey: .langZh)
+            } else {
+                county = nil
+                countyLocal = nil
+            }
+            if let townships = try? info.nestedContainer(keyedBy: LangKeys.self, forKey: .township) {
+                township = try townships.decodeIfPresent(String.self, forKey: .langZh)
+            } else {
+                township = nil
+            }
+        } else {
+            county = nil
+            countyLocal = nil
+            township = nil
         }
     }
 
@@ -102,5 +157,36 @@ struct Pollutant: Decodable, Hashable {
         case AirIndexTypes.o3:
             return self.o3
         }
+    }
+}
+
+extension Pollutant {
+    /// Name in the reader's language, with a fallback that is never "Unknown".
+    var displayName: String {
+        let preferred = Locale.isChinese ? nameLocal : name
+        return preferred.isEmpty ? (code.isEmpty ? "#\(stationId)" : code) : preferred
+    }
+
+    /// "Xinyi District, Keelung City" — whichever parts the API supplied.
+    var displayLocality: String? {
+        let parts = Locale.isChinese
+            ? [township, countyLocal]
+            : [township, county]
+        let joined = parts.compactMap { $0 }.filter { !$0.isEmpty }
+        return joined.isEmpty ? nil : joined.joined(separator: ", ")
+    }
+
+    var displayArea: String? {
+        let value = Locale.isChinese ? areaLocal : area
+        return (value?.isEmpty ?? true) ? nil : value
+    }
+
+    var wind: Wind {
+        Wind(direction: windDirection, speed: windSpeed)
+    }
+
+    /// `"25.129167, 121.760056"`
+    var coordinateText: String {
+        String(format: "%.6f, %.6f", lat, lon)
     }
 }

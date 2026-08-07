@@ -84,34 +84,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             })
 
             OneSignalManager.getOneSignalSettings { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                    let settings = SettingsStore()
-                    if let isForecastEnabled = result.isForecastEnabled, isForecastEnabled != settings.isForecastEnabled {
-                        settings.isForecastEnabled = isForecastEnabled
-                    }
+                // OneSignal calls back off the main thread; writing UserDefaults
+                // here fires SettingsStore's publisher on that thread too.
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let result):
+                        print(result)
+                        let settings = SettingsStore()
+                        if let isDndEnabled = result.isDndEnabled, isDndEnabled != settings.isDndEnabled {
+                            settings.isDndEnabled = isDndEnabled
+                        }
 
-                    if let isDndEnabled = result.isDndEnabled, isDndEnabled != settings.isDndEnabled {
-                        settings.isDndEnabled = isDndEnabled
-                    }
+                        if let dndStartTime = result.dndStartTime {
+                            var components = DateComponents()
+                            components.hour = Int(dndStartTime / 60)
+                            components.minute = dndStartTime % 60
+                            settings.dndStartTime = NSCalendar.current.date(from: components) ?? Date()
+                        }
 
-                    if let dndStartTime = result.dndStartTime {
-                        var components = DateComponents()
-                        components.hour = Int(dndStartTime / 60)
-                        components.minute = dndStartTime % 60
-                        settings.dndStartTime = NSCalendar.current.date(from: components) ?? Date()
-                    }
+                        if let dndEndTime = result.dndEndTime {
+                            var components = DateComponents()
+                            components.hour = Int(dndEndTime / 60)
+                            components.minute = dndEndTime % 60
+                            settings.dndEndTime = NSCalendar.current.date(from: components) ?? Date() + 2.hours
+                        }
 
-                    if let dndEndTime = result.dndEndTime {
-                        var components = DateComponents()
-                        components.hour = Int(dndEndTime / 60)
-                        components.minute = dndEndTime % 60
-                        settings.dndEndTime = NSCalendar.current.date(from: components) ?? Date() + 2.hours
+                    case .failure(let error):
+                        print(error.localizedDescription)
                     }
-
-                case .failure(let error):
-                    print(error.localizedDescription)
                 }
             }
         }

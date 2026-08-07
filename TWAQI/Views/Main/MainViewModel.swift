@@ -10,13 +10,8 @@ import Combine
 import Foundation
 
 class MainViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
 
-    @Published var isCustomAdLoading: Bool = true {
-        willSet {
-            self.objectWillChange.send()
-        }
-    }
+    @Published var isCustomAdLoading: Bool = true
 
     var isShowCustomAd: Bool = false
     var customAd: CustomAd?

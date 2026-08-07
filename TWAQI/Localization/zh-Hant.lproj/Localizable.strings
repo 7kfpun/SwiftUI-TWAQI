@@ -9,8 +9,6 @@
 "Tabbar.main" = "首頁";
 "Tabbar.favourites" = "最愛";
 "Tabbar.details_list" = "搜索";
-"Tabbar.forecast" = "預報";
-"Tabbar.settings" = "通知";
 "Tabbar.help" = "幫助";
 
 "FavouriteList.favourites" = "最愛列表";
@@ -23,14 +21,6 @@
 "Details.general_public" = "一般族群";
 "Details.sensitive_group" = "敏感族群";
 
-"Forecast.forecast" = "空氣品質預報";
-"Forecast.forecast_notification_daily" = "空氣品質預報通知（每日）";
-"Forecast.publish_time" = "發布時間";
-"Forecast.three_days_forecast" = "3 天預測";
-"Forecast.details_forecast" = "詳細預測";
-
-"Settings.notification" = "空氣品質通知";
-"Settings.search" = "搜索";
 "Settings.notice_me_when_aqi_is_above" = "當空氣品質明顯惡化時，請通知我";
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "您所設定的值偏低，將會收到很多通知哦";
 "Settings.notice_me_when_aqi_is_below" = "當空氣品質優良時，請通知我";
@@ -69,14 +59,6 @@
 "AirIndex.description_so2" = "過量接觸將有眼睛疼痛、肺部傷害";
 "AirIndex.description_no2" = "來自於車輛廢氣、火力發電廠或其他工業染料，過量吸收傷害肺部";
 
-"AirIndex.url_aqi" = "https://zh.wikipedia.org/wiki/%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E6%8C%87%E6%95%B0";
-"AirIndex.url_pm25" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
-"AirIndex.url_pm10" = "https://zh.wikipedia.org/wiki/%E6%87%B8%E6%B5%AE%E7%B2%92%E5%AD%90";
-"AirIndex.url_o3" = "https://zh.wikipedia.org/wiki/%E8%87%AD%E6%B0%A7";
-"AirIndex.url_co" = "https://zh.wikipedia.org/wiki/%E4%B8%80%E6%B0%A7%E5%8C%96%E7%A2%B3";
-"AirIndex.url_so2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E7%A1%AB";
-"AirIndex.url_no2" = "https://zh.wikipedia.org/wiki/%E4%BA%8C%E6%B0%A7%E5%8C%96%E6%B0%AE";
-
 "AirStatus.good" = "良好";
 "AirStatus.moderate" = "普通";
 "AirStatus.unhealthyforsensitivegroup" = "對敏感族群不良";
@@ -99,13 +81,25 @@
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "留在室內並減少體力消耗活動";
 "AirStatus.sensitive_group_guidance_hazardous" = "留在室內並避免體力消耗活動";
 
-"AreaGroup.north" = "北部";
-"AreaGroup.chumiao" = "竹苗";
-"AreaGroup.central" = "中部";
-"AreaGroup.yunchianan" = "雲嘉南";
-"AreaGroup.kaoping" = "高屏";
-"AreaGroup.yilan" = "宜蘭";
-"AreaGroup.huatun" = "花東";
-"AreaGroup.matsu" = "馬祖";
-"AreaGroup.kinmen" = "金門";
-"AreaGroup.magong" = "澎湖";
+"Details.station" = "測站";
+"Details.last_updated" = "最後更新";
+"Details.address" = "地址";
+"Details.coordinates" = "座標";
+"Details.wind" = "風向風速";
+"Details.location" = "位置";
+"Details.conditions" = "目前狀況";
+"Details.no_data" = "無資料";
+
+"StationType.general" = "一般測站";
+"StationType.traffic" = "交通測站";
+"StationType.industrial" = "工業測站";
+"StationType.background" = "背景測站";
+"StationType.national_park" = "國家公園測站";
+"StationType.other" = "其他";
+
+"Wind.calm" = "無風";
+"Wind.light_air" = "軟風";
+"Wind.light_breeze" = "輕風";
+"Wind.gentle_breeze" = "微風";
+"Wind.moderate_breeze" = "和風";
+"Wind.strong_breeze" = "清勁風";

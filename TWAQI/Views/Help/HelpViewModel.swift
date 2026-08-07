@@ -11,66 +11,44 @@ import Foundation
 import SwiftDate
 
 class HelpViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
     let settings = SettingsStore()
 
-    @Published var dndStartTime: Date {
-        willSet(newValue) {
-            self.objectWillChange.send()
+    // These are bound directly to Toggles and DatePickers, so their side effects
+    // run in `didSet` — a `willSet` would fire while SwiftUI is still evaluating
+    // the view that owns the binding ("Publishing changes from within view updates").
 
-            OneSignalManager.enableDnd(dndStartTime: newValue, dndEndTime: dndEndTime) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-            settings.dndStartTime = newValue
+    @Published var dndStartTime: Date {
+        didSet {
+            settings.dndStartTime = dndStartTime
+            pushDndWindow()
 
             TrackingManager.logEvent(eventName: "set_dnd_notification_start_time", parameters: [
                 "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
+                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
             ])
         }
     }
 
     @Published var dndEndTime: Date {
-        willSet(newValue) {
-            self.objectWillChange.send()
-
-            OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: newValue) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-            settings.dndEndTime = newValue
+        didSet {
+            settings.dndEndTime = dndEndTime
+            pushDndWindow()
 
             TrackingManager.logEvent(eventName: "set_dnd_notification_end_time", parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": newValue.convertTo(region: .current).toFormat("HH:mm"),
+                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
             ])
         }
     }
 
     @Published var isDndEnabled: Bool {
-        willSet(newValue) {
-            self.objectWillChange.send()
+        didSet {
+            settings.isDndEnabled = isDndEnabled
 
-            if newValue {
-                OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
+            if isDndEnabled {
+                pushDndWindow()
             } else {
                 OneSignalManager.disableDnd { result in
                     switch result {
@@ -81,19 +59,16 @@ class HelpViewModel: ObservableObject {
                     }
                 }
             }
-            settings.isDndEnabled = newValue
 
             TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
-                "label": newValue ? "on" : "off",
+                "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
             ])
         }
     }
 
-    @Published var showingAlert: Bool = false {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var showingAlert: Bool = false
 
     init() {
         self.isDndEnabled = settings.isDndEnabled
@@ -101,24 +76,36 @@ class HelpViewModel: ObservableObject {
         self.dndEndTime = settings.dndEndTime
     }
 
-    func removeAllNotification() {
-        print("")
-        OneSignalManager.getOneSignalSettings { result in
+    private func pushDndWindow() {
+        OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
             switch result {
             case .success(let result):
-                self.disabledNotification(stationSettings: result.stationSettings)
-                TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+                print(result)
             case .failure(let error):
                 print(error.localizedDescription)
             }
         }
     }
 
+    func removeAllNotification() {
+        OneSignalManager.getOneSignalSettings { [weak self] result in
+            // OneSignal calls back off the main thread.
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                switch result {
+                case .success(let settings):
+                    self.disabledNotification(stationSettings: settings.stationSettings)
+                    TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+    }
+
     private func disabledNotification(stationSettings: [String: OneSignalStationSetting]) {
         for (_, stationSetting) in stationSettings {
-            OneSignalManager.sendTags(
-                tags: stationSetting.getDisabledTags()
-            ) { result in
+            OneSignalManager.sendTags(tags: stationSetting.getDisabledTags()) { result in
                 switch result {
                 case .success(let result):
                     print(result)
@@ -129,29 +116,5 @@ class HelpViewModel: ObservableObject {
         }
 
         showingAlert = true
-    }
-
-    @Published var isCustomAdLoading: Bool = true {
-        willSet {
-            self.objectWillChange.send()
-        }
-    }
-
-    var isShowCustomAd: Bool = false
-    var customAd: CustomAd?
-
-    private(set) lazy var getCustomAd: () -> Void = {
-        APIManager.getCustomAd(position: "help") { result in
-            switch result {
-            case .success(let customAd):
-                self.customAd = customAd
-                self.isShowCustomAd = true
-            case .failure(let error):
-                print(error.localizedDescription)
-                self.isShowCustomAd = false
-            }
-
-            self.isCustomAdLoading = false
-        }
     }
 }

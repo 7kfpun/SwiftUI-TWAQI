@@ -14,11 +14,11 @@ final class SettingsStore: ObservableObject {
     private enum Keys {
         static let pro = "pro"
         static let airIndexTypeSelected = "airIndexTypeSelected"
-        static let forecastEnabled = "forecastEnabled"
         static let dndEnabled = "dndEnabled"
         static let dndStartTime = "dndStartTime"
         static let dndEndTime = "dndEndTime"
         static let closestCountryCode = "closestCountryCode"
+        static let supportedCountryCode = "supportedCountryCode"
         static let closestStationName = "closestStationName"
         static let lastestMapLat = "lastestMapLat"
         static let lastestMapLon = "lastestMapLon"
@@ -36,15 +36,14 @@ final class SettingsStore: ObservableObject {
 
         defaults.register(defaults: [
             Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
-            Keys.forecastEnabled: false,
             Keys.dndEnabled: false,
             Keys.dndStartTime: Date(),
             Keys.dndEndTime: Date() + 2.hours,
             Keys.closestCountryCode: "twn",
             Keys.closestStationName: "松山",
-            Keys.lastestMapLat: 23.49,
-            Keys.lastestMapLon: 120.96,
-            Keys.lastestMapZoom: 7.9,
+            Keys.lastestMapLat: MapHome.latitude,
+            Keys.lastestMapLon: MapHome.longitude,
+            Keys.lastestMapZoom: MapHome.zoom,
             Keys.savedFavouriteStations: [126],
         ])
 
@@ -70,11 +69,6 @@ final class SettingsStore: ObservableObject {
         }
     }
 
-    var isForecastEnabled: Bool {
-        set { defaults.set(newValue, forKey: Keys.forecastEnabled) }
-        get { defaults.bool(forKey: Keys.forecastEnabled) }
-    }
-
     var isDndEnabled: Bool {
         set { defaults.set(newValue, forKey: Keys.dndEnabled) }
         get { defaults.bool(forKey: Keys.dndEnabled) }
@@ -88,6 +82,13 @@ final class SettingsStore: ObservableObject {
     var dndEndTime: Date {
         set { defaults.set(newValue, forKey: Keys.dndEndTime) }
         get { defaults.object(forKey: Keys.dndEndTime) as! Date }
+    }
+
+    /// Country whose data the app fully supports, resolved from the countries
+    /// endpoint by `Country.supportedId`. Empty until the map has loaded once.
+    var supportedCountryCode: String {
+        set { defaults.set(newValue, forKey: Keys.supportedCountryCode) }
+        get { defaults.string(forKey: Keys.supportedCountryCode) ?? "" }
     }
 
     var closestCountryCode: String {

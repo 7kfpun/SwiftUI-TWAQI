@@ -10,22 +10,20 @@ import Combine
 import Foundation
 
 class DetailsViewModel: ObservableObject {
-    let objectWillChange = ObservableObjectPublisher()
     let settings = SettingsStore()
 
     var stationId: Int
 
-    @Published var station: Station? {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var station: Station?
 
-    @Published var historicalPollutants: HistoricalPollutants = [] {
-        willSet { self.objectWillChange.send() }
-    }
+    /// Current conditions for this station. Carries the location detail
+    /// (address, area, county, station type) and wind that the historical
+    /// endpoint does not return.
+    @Published var pollutant: Pollutant?
 
-    @Published var isFavourited: Bool = false {
-        willSet { self.objectWillChange.send() }
-    }
+    @Published var historicalPollutants: HistoricalPollutants = []
+
+    @Published var isFavourited: Bool = false
 
     init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
         self.stationId = stationId
@@ -38,7 +36,16 @@ class DetailsViewModel: ObservableObject {
             switch result {
             case .success(let result):
                 self.station = result["station"] as? Station
-                self.historicalPollutants = result["data"] as! HistoricalPollutants
+                self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+
+        APIManager.getCurrentPollutantsByStationId(stationId: "\(self.stationId)") { result in
+            switch result {
+            case .success(let pollutants):
+                self.pollutant = pollutants.first
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -58,27 +65,8 @@ class DetailsViewModel: ObservableObject {
         ])
     }
 
-    @Published var isCustomAdLoading: Bool = true {
-        willSet {
-            self.objectWillChange.send()
-        }
-    }
-
-    var isShowCustomAd: Bool = false
-    var customAd: CustomAd?
-
-    private(set) lazy var getCustomAd: () -> Void = {
-        APIManager.getCustomAd(position: "details") { result in
-            switch result {
-            case .success(let customAd):
-                self.customAd = customAd
-                self.isShowCustomAd = true
-            case .failure(let error):
-                print(error.localizedDescription)
-                self.isShowCustomAd = false
-            }
-
-            self.isCustomAdLoading = false
-        }
+    /// Most recent reading, preferring live current conditions over history.
+    var latestPublishTime: String? {
+        pollutant?.publishTime ?? historicalPollutants.last?.publishTime
     }
 }
