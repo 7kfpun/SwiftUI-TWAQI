@@ -94,3 +94,7 @@ iOSInjectionProject/
 **/release.xcconfig
 Pods
 GoogleService-Info.plist
+
+# Generated files
+.codegraph/
+context/

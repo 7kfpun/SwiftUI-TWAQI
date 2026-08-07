@@ -9,13 +9,10 @@
 import UIKit
 
 import Amplitude_iOS
-import AppCenter
-import AppCenterAnalytics
-import AppCenterCrashes
-import AppCenterPush
 import Bugsnag
 import Firebase
 import GoogleMaps
+import GoogleMobileAds
 import OneSignal
 import Sentry
 import SwiftDate
@@ -62,20 +59,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // [END register_for_notifications]
 
         // Initialize the Google Mobile Ads SDK.
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        MobileAds.shared.start(completionHandler: nil)
 
         // Initialize Google Map Service
         if let gmsServicesApiKey = getEnv("GMSServicesApiKey") {
             GMSServices.provideAPIKey(gmsServicesApiKey)
-        }
-
-        // Initialize App Center services.
-        if let appCenterAppSecret = getEnv("AppCenterAppSecret") {
-            MSAppCenter.start(appCenterAppSecret, withServices: [
-                MSAnalytics.self,
-                MSCrashes.self,
-                MSPush.self,
-            ])
         }
 
         // Initialize Sentry service.

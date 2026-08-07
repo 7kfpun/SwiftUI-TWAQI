@@ -62,7 +62,6 @@
 		9E910C502381830400B8B316 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C4F2381830400B8B316 /* NotificationView.swift */; };
 		9E910C522381830500B8B316 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E910C512381830500B8B316 /* Assets.xcassets */; };
 		9E910C552381830500B8B316 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E910C542381830500B8B316 /* Preview Assets.xcassets */; };
-		9E910C5A2381830500B8B316 /* Taiwan Air.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 9E910C36238182FE00B8B316 /* Taiwan Air.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9E910C63238183E600B8B316 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E1AC541233F981900AC862D /* Assets.xcassets */; };
 		9E910C662381846A00B8B316 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C652381846A00B8B316 /* SettingsStore.swift */; };
 		9E910C682381848E00B8B316 /* StationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E910C672381848E00B8B316 /* StationListView.swift */; };
@@ -138,13 +137,6 @@
 			remoteGlobalIDString = 9E910C412381830300B8B316;
 			remoteInfo = "watch Extension";
 		};
-		9E910C582381830500B8B316 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9E1AC530233F981700AC862D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9E910C35238182FE00B8B316;
-			remoteInfo = watch;
-		};
 		9EC6BB21235B590500213041 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9E1AC530233F981700AC862D /* Project object */;
@@ -161,7 +153,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				9E910C5A2381830500B8B316 /* Taiwan Air.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -686,7 +677,6 @@
 			);
 			dependencies = (
 				9EC6BB22235B590500213041 /* PBXTargetDependency */,
-				9E910C592381830500B8B316 /* PBXTargetDependency */,
 			);
 			name = TWAQI;
 			productName = TWAQI;
@@ -1125,12 +1115,6 @@
 			target = 9E910C412381830300B8B316 /* watch Extension */;
 			targetProxy = 9E910C442381830300B8B316 /* PBXContainerItemProxy */;
 		};
-		9E910C592381830500B8B316 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			platformFilter = ios;
-			target = 9E910C35238182FE00B8B316 /* watch */;
-			targetProxy = 9E910C582381830500B8B316 /* PBXContainerItemProxy */;
-		};
 		9EC6BB22235B590500213041 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9EC6BB1B235B590500213041 /* OneSignalNotificationServiceExtension */;
@@ -1209,7 +1193,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1224,7 +1207,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1281,7 +1264,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -1304,7 +1287,6 @@
 				DEVELOPMENT_ASSET_PATHS = "\"TWAQI/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				INFOPLIST_FILE = TWAQI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1450,9 +1432,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 129;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1477,7 +1458,7 @@
 				CURRENT_PROJECT_VERSION = 129;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

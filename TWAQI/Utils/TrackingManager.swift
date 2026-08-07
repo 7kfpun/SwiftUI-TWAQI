@@ -7,7 +7,6 @@
 //
 
 import Amplitude_iOS
-import AppCenterAnalytics
 import Firebase
 import Foundation
 
@@ -25,11 +24,5 @@ struct TrackingManager {
 
         // Google Analytics log event.
         Analytics.logEvent(eventName, parameters: parameters)
-
-        // App Center Analytics log event.
-        let msParameters = parameters.mapValues { value in
-            return "\(value)"
-        }
-        MSAnalytics.trackEvent(eventName, withProperties: msParameters)
     }
 }

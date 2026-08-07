@@ -19,7 +19,7 @@ struct AdBannerView: View {
             Spacer()
             if !settings.isPro {
                 GADBannerViewController(adUnitID: adUnitID)
-                    .frame(width: kGADAdSizeBanner.size.width, height: kGADAdSizeBanner.size.height)
+                    .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
             }
         }
     }
