@@ -35,7 +35,7 @@
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";
-"Help.ad_free" = "Remove Ads?";
+"Help.ad_free" = "Remove ads & unlock Apple Watch";
 "Help.restore_purchase" = "Restore purchase";
 "Help.contact_us" = "Contact us";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
@@ -119,3 +119,19 @@
 "Details.pollutants" = "Pollutants";
 "Details.health_advice" = "Health advice";
 "Details.notifications" = "Notifications";
+
+/* Watch */
+"Watch.stations" = "Stations";
+"Watch.loading_failed" = "Couldn't load readings";
+"Watch.retry" = "Retry";
+"Watch.widget_name" = "Air quality";
+"Watch.widget_description" = "AQI at the station you chose in the app.";
+"Watch.no_station" = "Open the app to choose a station";
+"Watch.history" = "Past 12 hours";
+"Watch.closest" = "Closest station";
+"Watch.default_station" = "Default · no location";
+"Watch.pro_title" = "Taiwan Air Pro";
+"Watch.pro_body" = "Unlock the watch app and watch-face complications. The same purchase removes ads on iPhone.";
+"Watch.pro_buy %@" = "Unlock for %@";
+"Watch.pro_failed" = "Purchase not found. Try again, or restore.";
+"Watch.pro_locked" = "Unlock in the app";

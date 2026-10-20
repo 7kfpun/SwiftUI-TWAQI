@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ApiDomain</key>
+	<string>$(API_DOMAIN)</string>
+	<key>ApiEnpointCurrentPollutants</key>
+	<string>$(ApiEnpointCurrentPollutants)</string>
+	<key>ApiEnpointHistoricalPollutants</key>
+	<string>$(ApiEnpointHistoricalPollutants)</string>
+	<key>InAppPurchaseProductId</key>
+	<string>$(InAppPurchaseProductId)</string>
+	<key>WKApplication</key>
+	<true/>
+</dict>
+</plist>
