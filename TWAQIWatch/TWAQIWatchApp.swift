@@ -51,14 +51,12 @@ final class WatchModel: ObservableObject {
     var isHome: Bool { source != .pinned }
 
     /// Re-asks StoreKit; a purchase or refund on any device lands here.
+    /// The app itself is free; only the complications depend on the answer.
     func checkPro() async {
         let unlocked = await WatchPro.refresh()
         guard unlocked != isPro else { return }
         isPro = unlocked
         WidgetCenter.shared.reloadAllTimelines()
-        if unlocked {
-            await refresh()
-        }
     }
 
     /// Purchases completed outside the paywall: Ask to Buy approvals, or a
@@ -73,8 +71,7 @@ final class WatchModel: ObservableObject {
     }
 
     func refresh() async {
-        // Locked: nothing is shown, so nothing is fetched.
-        guard isPro, !isLoading else { return }
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
 
@@ -145,11 +142,7 @@ struct RootView: View {
 
     var body: some View {
         NavigationStack {
-            if model.isPro {
-                ReadingView(model: model)
-            } else {
-                PaywallView(model: model)
-            }
+            ReadingView(model: model)
         }
         .task { await model.observeTransactions() }
         .task {

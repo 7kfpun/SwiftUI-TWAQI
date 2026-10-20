@@ -39,7 +39,7 @@
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
 "Help.in_app_purchase" = "App 內購買";
-"Help.ad_free" = "移除廣告並解鎖 Apple Watch";
+"Help.ad_free" = "移除廣告並解鎖錶面複雜功能";
 "Help.restore_purchase" = "回復購買項目";
 "Help.contact_us" = "聯絡我們";
 "Help.interested_to_be_our_business_partner" = "想成為我們的合作夥伴嗎？";
@@ -134,8 +134,30 @@
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";
 "Watch.default_station" = "預設測站（未定位）";
-"Watch.pro_title" = "Taiwan Air Pro";
-"Watch.pro_body" = "解鎖手錶 App 與錶面複雜功能。同一項購買也會移除 iPhone 上的廣告。";
-"Watch.pro_buy %@" = "以 %@ 解鎖";
+"Watch.pro_title" = "錶面複雜功能・Pro";
 "Watch.pro_failed" = "找不到購買項目，請再試一次或回復購買。";
 "Watch.pro_locked" = "請在 App 中解鎖";
+
+/* Pro */
+"Pro.title" = "Taiwan Air Pro";
+"Pro.subtitle" = "畫面更清爽，空氣品質直接顯示在錶面。";
+"Pro.features" = "Pro 包含";
+"Pro.feature_no_ads" = "移除廣告";
+"Pro.feature_no_ads_detail" = "所有畫面都不再顯示廣告，包含地圖。";
+"Pro.feature_complications" = "錶面複雜功能";
+"Pro.feature_complications_detail" = "AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。手錶 App 本身免費。";
+"Pro.feature_support" = "支持獨立開發";
+"Pro.feature_support_detail" = "讓 App 持續維護、資料持續更新。";
+"Pro.choose_plan" = "選擇方案";
+"Pro.best_value" = "最划算";
+"Pro.per_month %@" = "每月 %@";
+"Pro.billed_monthly" = "按月計費";
+"Pro.lifetime_detail" = "一次購買，永久使用";
+"Pro.renewal_terms" = "訂閱會自動續訂，除非在當期結束前至少 24 小時取消。可在「設定 › Apple ID › 訂閱項目」中管理。";
+"Pro.terms_of_use" = "使用條款";
+"Pro.privacy_policy" = "隱私權政策";
+"Pro.purchase_failed" = "無法完成購買，請再試一次。";
+"Watch.pro_feature_complications" = "空氣品質顯示在錶面";
+"Watch.pro_feature_no_ads" = "iPhone 無廣告";
+"Watch.pro_feature_indices" = "AQI、PM2.5 等 7 項指標";
+"Watch.pro_complications_cta" = "加到錶面";

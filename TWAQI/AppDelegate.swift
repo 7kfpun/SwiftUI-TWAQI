@@ -22,13 +22,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
+        SettingsStore.observeProTransactions()
+        Task { await SettingsStore.refreshPro() }
+
+        // A device excluded from reporting (Help's hidden version toggle, or any
+        // DEBUG run) starts none of the crash reporters.
+        let reportsThisLaunch = !TrackingManager.isExcludedThisLaunch
+
         // Initialize the Bugsnag SDK.
-        if let bugsnagApiKey = getEnv("BugsnagApiKey") {
+        if reportsThisLaunch, let bugsnagApiKey = getEnv("BugsnagApiKey") {
             Bugsnag.start(withApiKey: bugsnagApiKey)
         }
 
         // Use Firebase library to configure APIs (Analytics and Crashlytics).
         FirebaseApp.configure()
+        TrackingManager.applyExclusionAtLaunch()
 
         // Push is owned entirely by OneSignal below — it prompts for permission
         // and registers with APNs itself. Firebase Messaging was a second,
@@ -43,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Initialize Sentry service.
-        if let sentryDSN = getEnv("SentryDSN") {
+        if reportsThisLaunch, let sentryDSN = getEnv("SentryDSN") {
             SentrySDK.start(options: [
                 "dsn": sentryDSN,
                 "debug": true,

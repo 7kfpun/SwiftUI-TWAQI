@@ -65,6 +65,18 @@ struct ReadingView: View {
                         row(type, reading: reading)
                     }
                 }
+
+                // The app is free; complications are Pro. Last, so it never
+                // pushes a reading off screen.
+                if !model.isPro {
+                    Section {
+                        NavigationLink {
+                            PaywallView(model: model)
+                        } label: {
+                            Label("Watch.pro_complications_cta", systemImage: "watchface.applewatch.case")
+                        }
+                    }
+                }
             } else if model.failed {
                 failure
             } else {

@@ -6,113 +6,117 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import Foundation
 import StoreKit
 
-enum IAPManagerAlertType {
-    case disabled
-    case restored
-    case purchased
-
-    func message() -> String {
-        switch self {
-        case .disabled: return "Purchases are disabled in your device!"
-        case .restored: return "You've successfully restored your purchase!"
-        case .purchased: return "You've successfully bought this purchase!"
-        }
+/// What counts as Pro, shared by the phone, the watch and its complications.
+///
+/// Pro is either the original one-time ad-free purchase, which existing buyers
+/// keep for life, or an active subscription. Both are read from StoreKit rather
+/// than a stored flag, so a subscription that lapses or is refunded turns Pro
+/// off, and a purchase on one device counts on the others.
+enum IAPManager {
+    /// The original non-consumable, still sold as the lifetime option.
+    static var lifetimeProductId: String? {
+        getEnv("InAppPurchaseProductId")
     }
-}
 
-class IAPManager: NSObject {
-    static let shared = IAPManager()
+    /// Subscription group 22497426, highest level of service last as App Store
+    /// Connect orders it.
+    static let subscriptionProductIds = [
+        "com.kfpun.twaqi.subscription.adfree.1m",
+        "com.kfpun.twaqi.subscription.adfree.6m",
+        "com.kfpun.twaqi.subscription.adfree.12m",
+    ]
 
-//    let CONSUMABLE_PURCHASE_PRODUCT_ID = ""
-    let NON_CONSUMABLE_PURCHASE_PRODUCT_ID = getEnv("InAppPurchaseProductId")!
+    static var productIds: [String] {
+        subscriptionProductIds + [lifetimeProductId].compactMap { $0 }
+    }
 
-    fileprivate var productID = ""
-    fileprivate var productsRequest = SKProductsRequest()
-    fileprivate var iapProducts = [SKProduct]()
-
-    var purchaseStatusBlock: ((IAPManagerAlertType) -> Void)?
-
-    // MARK: - MAKE PURCHASE OF A PRODUCT
-    func canMakePurchases() -> Bool {  return SKPaymentQueue.canMakePayments()  }
-
-    func purchaseMyProduct(index: Int) {
-        if iapProducts.isEmpty { return }
-        print("iapProducts", iapProducts)
-
-        if self.canMakePurchases() {
-            let product = iapProducts[index]
-            let payment = SKPayment(product: product)
-            SKPaymentQueue.default().add(self)
-            SKPaymentQueue.default().add(payment)
-
-            print("PRODUCT TO PURCHASE: \(product.productIdentifier)")
-            productID = product.productIdentifier
-        } else {
-            purchaseStatusBlock?(.disabled)
+    /// Products in display order: subscriptions shortest first, then lifetime.
+    static func products() async throws -> [Product] {
+        let ids = productIds
+        let products = try await Product.products(for: ids)
+        return products.sorted {
+            (ids.firstIndex(of: $0.id) ?? .max) < (ids.firstIndex(of: $1.id) ?? .max)
         }
     }
 
-    // MARK: - RESTORE PURCHASE
-    func restorePurchase() {
-        SKPaymentQueue.default().add(self)
-        SKPaymentQueue.default().restoreCompletedTransactions()
+    /// `currentEntitlements` already drops expired subscriptions; the revocation
+    /// check covers refunds.
+    static func isEntitled() async -> Bool {
+        if let forced = proOverride.forcedValue, await isTestEnvironment() {
+            return forced
+        }
+
+        let ids = Set(productIds)
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result,
+               ids.contains(transaction.productID),
+               transaction.revocationDate == nil {
+                return true
+            }
+        }
+        return false
     }
 
-    // MARK: - FETCH AVAILABLE IAP PRODUCTS
-    func fetchAvailableProducts() {
+    // MARK: - Developer override
 
-        // Put here your IAP Products ID's
-        let productIdentifiers = NSSet(objects: NON_CONSUMABLE_PURCHASE_PRODUCT_ID)
-        print("productIdentifiers", productIdentifiers)
+    /// Forces Pro on or off for testing, from the hidden developer section.
+    enum ProOverride: String, CaseIterable {
+        case appStore
+        case forcePro
+        case forceFree
 
-        productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers as! Set<String>)
-        productsRequest.delegate = self
-        productsRequest.start()
-    }
-}
-
-extension IAPManager: SKProductsRequestDelegate, SKPaymentTransactionObserver {
-    // MARK: - REQUEST IAP PRODUCTS
-    func productsRequest (_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-
-        if !response.products.isEmpty {
-            iapProducts = response.products
-            for product in iapProducts {
-                let numberFormatter = NumberFormatter()
-                numberFormatter.formatterBehavior = .behavior10_4
-                numberFormatter.numberStyle = .currency
-                numberFormatter.locale = product.priceLocale
-                let price1Str = numberFormatter.string(from: product.price)
-                print(product.localizedDescription + "\nfor just \(price1Str!)")
+        var forcedValue: Bool? {
+            switch self {
+            case .appStore: return nil
+            case .forcePro: return true
+            case .forceFree: return false
             }
         }
     }
 
-    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
-        purchaseStatusBlock?(.restored)
+    /// Kept in the app group so the watch's complications see the watch app's
+    /// choice. Each device has its own: the phone's doesn't reach the watch.
+    private static var overrideDefaults: UserDefaults {
+        UserDefaults(suiteName: "group.com.kfpun.twaqi") ?? .standard
     }
 
-    // MARK: - IAP PAYMENT QUEUE
-    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        for transaction: AnyObject in transactions {
-            if let trans = transaction as? SKPaymentTransaction {
-                switch trans.transactionState {
-                case .purchased:
-                    print("purchased")
-                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
-                    purchaseStatusBlock?(.purchased)
+    static var proOverride: ProOverride {
+        get {
+            overrideDefaults.string(forKey: "proOverride").flatMap(ProOverride.init) ?? .appStore
+        }
+        set { overrideDefaults.set(newValue.rawValue, forKey: "proOverride") }
+    }
 
-                case .failed:
-                    print("failed")
-                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
+    /// Debug, TestFlight and sandbox builds. The override is ignored anywhere
+    /// else, so a customer who finds the hidden section can't unlock Pro.
+    static func isTestEnvironment() async -> Bool {
+        #if DEBUG
+        return true
+        #else
+        if #available(iOS 16.0, watchOS 9.0, *) {
+            guard case .verified(let transaction)? = try? await AppTransaction.shared else { return false }
+            return transaction.environment != .production
+        }
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
 
-                case .restored:
-                    print("restored")
-                    SKPaymentQueue.default().finishTransaction(transaction as! SKPaymentTransaction)
+    enum PurchaseOutcome {
+        case purchased
+        /// Cancelled, or waiting on Ask to Buy; `Transaction.updates` delivers
+        /// the approval later.
+        case notCompleted
+    }
 
-                default: break
-                }}}
+    static func purchase(_ product: Product) async throws -> PurchaseOutcome {
+        guard case .success(let verification) = try await product.purchase(),
+              case .verified(let transaction) = verification
+        else { return .notCompleted }
+
+        await transaction.finish()
+        return .purchased
     }
 }

@@ -12,6 +12,15 @@ struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: HelpViewModel
 
+    @State private var showingPro = false
+    @State private var versionTapCount = 0
+    @State private var analyticsExcluded = TrackingManager.isExcluded
+    @State private var proOverride = IAPManager.proOverride
+    @State private var isTestEnvironment = false
+
+    /// Revealed by tapping the version row 7 times; per device, not synced.
+    @AppStorage("developerMode") private var developerMode = false
+
     var body: some View {
         NavigationView {
             Form {
@@ -24,16 +33,20 @@ struct HelpView: View {
                 contactSection
                 definitionSection
                 aboutSection
+
+                if developerMode {
+                    developerSection
+                }
             }
             .navigationBarTitle("Help.help")
             .safeAreaInset(edge: .bottom) {
                 AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
-            .onAppear {
-                IAPManager.shared.fetchAvailableProducts()
-            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .sheet(isPresented: $showingPro) {
+            ProView()
+        }
     }
 
     private var doNotDisturbSection: some View {
@@ -71,13 +84,10 @@ struct HelpView: View {
 
     private var purchaseSection: some View {
         Section(header: Label("Help.in_app_purchase", systemImage: "sparkles")) {
-            Button(action: settings.unlockPro) {
+            Button {
+                showingPro = true
+            } label: {
                 Text("Help.ad_free")
-            }
-
-            Button(action: settings.restorePurchase) {
-                Text("Help.restore_purchase")
-                    .foregroundColor(.secondary)
             }
         }
     }
@@ -117,7 +127,55 @@ struct HelpView: View {
                 Text(verbatim: appVersion)
                     .foregroundColor(.secondary)
             }
+            .contentShape(Rectangle())
+            // Tap 7 times to show or hide the developer section.
+            .onTapGesture {
+                versionTapCount += 1
+                guard versionTapCount >= 7 else { return }
+                versionTapCount = 0
+                developerMode.toggle()
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
         }
+    }
+
+    /// For the developer's own devices, so unlocalized. Hidden until the version
+    /// row is tapped 7 times.
+    private var developerSection: some View {
+        Section(
+            header: Label(title: { Text(verbatim: "Developer") }, icon: { Image(systemName: "hammer") }),
+            footer: Text(verbatim: isTestEnvironment
+                ? "Pro override applies to this device only; the watch has its own."
+                : "Pro override is only available in Debug and TestFlight builds.")
+        ) {
+            Toggle(isOn: Binding(
+                get: { analyticsExcluded },
+                set: { excluded in
+                    analyticsExcluded = excluded
+                    TrackingManager.setExcluded(excluded)
+                }
+            )) {
+                Text(verbatim: "Exclude this device from analytics")
+            }
+
+            if isTestEnvironment {
+                Picker(selection: Binding(
+                    get: { proOverride },
+                    set: { value in
+                        proOverride = value
+                        IAPManager.proOverride = value
+                        Task { await SettingsStore.refreshPro() }
+                    }
+                )) {
+                    Text(verbatim: "App Store").tag(IAPManager.ProOverride.appStore)
+                    Text(verbatim: "Force Pro").tag(IAPManager.ProOverride.forcePro)
+                    Text(verbatim: "Force Free").tag(IAPManager.ProOverride.forceFree)
+                } label: {
+                    Text(verbatim: "Pro")
+                }
+            }
+        }
+        .task { isTestEnvironment = await IAPManager.isTestEnvironment() }
     }
 
     /// Row that opens a web page, with a consistent trailing affordance.

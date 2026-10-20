@@ -35,7 +35,7 @@
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";
-"Help.ad_free" = "Remove ads & unlock Apple Watch";
+"Help.ad_free" = "Remove ads & get watch complications";
 "Help.restore_purchase" = "Restore purchase";
 "Help.contact_us" = "Contact us";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
@@ -130,8 +130,30 @@
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";
 "Watch.default_station" = "Default · no location";
-"Watch.pro_title" = "Taiwan Air Pro";
-"Watch.pro_body" = "Unlock the watch app and watch-face complications. The same purchase removes ads on iPhone.";
-"Watch.pro_buy %@" = "Unlock for %@";
+"Watch.pro_title" = "Complications · Pro";
 "Watch.pro_failed" = "Purchase not found. Try again, or restore.";
 "Watch.pro_locked" = "Unlock in the app";
+
+/* Pro */
+"Pro.title" = "Taiwan Air Pro";
+"Pro.subtitle" = "Cleaner screens, and air quality on your watch face.";
+"Pro.features" = "What you get";
+"Pro.feature_no_ads" = "No ads";
+"Pro.feature_no_ads_detail" = "Every screen, the map included.";
+"Pro.feature_complications" = "Watch-face complications";
+"Pro.feature_complications_detail" = "AQI, PM2.5 or any of 7 indices, right on your watch face. The watch app itself is free.";
+"Pro.feature_support" = "Support an independent app";
+"Pro.feature_support_detail" = "Keeps the app maintained and the readings coming.";
+"Pro.choose_plan" = "Choose a plan";
+"Pro.best_value" = "Best value";
+"Pro.per_month %@" = "%@ / month";
+"Pro.billed_monthly" = "Billed monthly";
+"Pro.lifetime_detail" = "Pay once, keep Pro forever";
+"Pro.renewal_terms" = "Subscriptions renew automatically unless cancelled at least 24 hours before the period ends. Manage them in Settings › Apple ID › Subscriptions.";
+"Pro.terms_of_use" = "Terms of Use";
+"Pro.privacy_policy" = "Privacy Policy";
+"Pro.purchase_failed" = "The purchase couldn't be completed. Please try again.";
+"Watch.pro_feature_complications" = "Air quality on your watch face";
+"Watch.pro_feature_no_ads" = "No ads on iPhone";
+"Watch.pro_feature_indices" = "AQI, PM2.5 and 5 more indices";
+"Watch.pro_complications_cta" = "Add to watch face";

@@ -14,6 +14,12 @@ struct StationPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
 
+    @State private var versionTapCount = 0
+    @State private var proOverride = IAPManager.proOverride
+    @State private var isTestEnvironment = false
+    /// Revealed by tapping the version 7 times, as on the phone.
+    @AppStorage("developerMode") private var developerMode = false
+
     var body: some View {
         List {
             // Home: the closest station, or the 中正 default without a location.
@@ -50,7 +56,16 @@ struct StationPickerView: View {
                     row(pollutant)
                 }
             }
+
+            if query.isEmpty {
+                if developerMode && isTestEnvironment {
+                    developerSection
+                }
+
+                version
+            }
         }
+        .task { isTestEnvironment = await IAPManager.isTestEnvironment() }
         .overlay {
             if model.stations.isEmpty {
                 if model.failed {
@@ -72,6 +87,46 @@ struct StationPickerView: View {
         .task {
             if model.stations.isEmpty {
                 await model.loadStations()
+            }
+        }
+    }
+
+    /// Tap 7 times to show or hide the developer section.
+    private var version: some View {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+
+        return Text(verbatim: "\(short) (\(build))")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .listRowBackground(Color.clear)
+            .onTapGesture {
+                versionTapCount += 1
+                guard versionTapCount >= 7 else { return }
+                versionTapCount = 0
+                developerMode.toggle()
+            }
+    }
+
+    /// The watch keeps its own override: the phone's setting doesn't reach it.
+    /// Only offered in Debug and TestFlight builds.
+    private var developerSection: some View {
+        Section {
+            Picker(selection: Binding(
+                get: { proOverride },
+                set: { value in
+                    proOverride = value
+                    IAPManager.proOverride = value
+                    Task { await model.checkPro() }
+                }
+            )) {
+                Text(verbatim: "App Store").tag(IAPManager.ProOverride.appStore)
+                Text(verbatim: "Force Pro").tag(IAPManager.ProOverride.forcePro)
+                Text(verbatim: "Force Free").tag(IAPManager.ProOverride.forceFree)
+            } label: {
+                Text(verbatim: "Pro (developer)")
             }
         }
     }

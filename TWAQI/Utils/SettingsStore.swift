@@ -7,6 +7,7 @@
 //
 
 import Combine
+import StoreKit
 import SwiftDate
 import SwiftUI
 
@@ -135,32 +136,27 @@ final class SettingsStore: ObservableObject {
 }
 
 extension SettingsStore {
-    func unlockPro() {
-        TrackingManager.logEvent(eventName: "user_premium_buy_product_started")
-        IAPManager.shared.purchaseMyProduct(index: 0)
-        IAPManager.shared.purchaseStatusBlock = { type in
-            if type == .purchased {
-                print("Purchased")
-                self.isPro = true
-                TrackingManager.logEvent(eventName: "user_premium_buy_product_done")
-            } else {
-                print(type)
-                TrackingManager.logEvent(eventName: "user_premium_buy_product_failed")
-            }
+    /// Re-reads Pro from StoreKit into the flag the ad code reads.
+    ///
+    /// The flag used to be set once on purchase and never cleared. With
+    /// subscriptions it has to follow StoreKit: a lapsed or refunded
+    /// subscription turns ads back on.
+    static func refreshPro() async {
+        let entitled = await IAPManager.isEntitled()
+        await MainActor.run {
+            UserDefaults.standard.set(entitled, forKey: Keys.pro)
         }
     }
 
-    func restorePurchase() {
-        TrackingManager.logEvent(eventName: "user_premium_restore_purchase_started")
-        IAPManager.shared.restorePurchase()
-        IAPManager.shared.purchaseStatusBlock = { type in
-            if type == .restored {
-                print("Restored")
-                self.isPro = true
-                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_done")
-            } else {
-                print(type)
-                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_failed")
+    /// Purchases completed outside the Pro screen: renewals, refunds, Ask to
+    /// Buy approvals, a purchase made on another device. Started once at launch.
+    static func observeProTransactions() {
+        Task.detached {
+            for await update in Transaction.updates {
+                if case .verified(let transaction) = update {
+                    await transaction.finish()
+                }
+                await refreshPro()
             }
         }
     }
