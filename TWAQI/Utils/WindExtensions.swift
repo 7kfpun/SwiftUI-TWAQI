@@ -55,6 +55,21 @@ struct Wind {
     var arrowRotation: Angle {
         .degrees(direction)
     }
+
+    /// Where this speed sits in the range the app names, `0` at calm through
+    /// `1` at strong breeze and above.
+    ///
+    /// Drives how long the compass arrow is drawn and how fast it drifts, so a
+    /// glance reads strength without going via the number. Clamped at the top:
+    /// past a strong breeze the arrow would outgrow the compass, and the
+    /// difference between a gale and a storm isn't what this screen is for.
+    var strengthFraction: Double {
+        guard speed > 0 else { return 0 }
+        return min(speed / Wind.strongBreezeThreshold, 1)
+    }
+
+    /// Bottom of the `Wind.strong_breeze` band — the top of the named range.
+    static let strongBreezeThreshold = 8.0
 }
 
 extension Date {
@@ -85,6 +100,10 @@ extension String {
     var asPublishDateTime: String {
         guard let date = Date.fromApi(self) else { return self }
         let formatter = DateFormatter()
+        // Pinned to the Gregorian calendar. A bare DateFormatter follows the
+        // device's calendar preference, which rendered this reading's timestamp
+        // as 佛曆 2569 for anyone on the Buddhist calendar.
+        formatter.calendar = Calendar(identifier: .gregorian)
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)

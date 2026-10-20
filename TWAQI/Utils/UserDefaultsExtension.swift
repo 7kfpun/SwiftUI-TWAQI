@@ -36,6 +36,10 @@ extension UserDefaults {
             return []
         }
 
-        return encodedData.map { try! JSONDecoder().decode(type, from: $0) }
+        // Same reasoning as `structData` above, which was already made safe:
+        // JSON written by an older build may no longer match the type, and
+        // `try!` turned that into a trap on every launch until reinstall.
+        // Dropping the unreadable entries degrades instead of crashing.
+        return encodedData.compactMap { try? JSONDecoder().decode(type, from: $0) }
     }
 }

@@ -1,0 +1,316 @@
+require "shellwords"
+
+default_platform(:ios)
+
+APP_VERSION = "3.0.0"
+
+# fastlane runs with the working directory set to fastlane/, not the repo root,
+# and `sh` inherits that. Anchor every path to an absolute root so nothing
+# depends on which directory a command happens to start in — a relative `rm`
+# against the wrong root fails silently.
+ROOT = begin
+  here = File.expand_path(Dir.pwd)
+  File.basename(here) == "fastlane" ? File.expand_path("..", here) : here
+end
+
+# Raw simulator captures, one directory per App Store locale, kept pristine.
+# Never written to by these lanes.
+#
+#   fastlane/screenshots_raw/en-US/*.png
+#   fastlane/screenshots_raw/zh-Hant/*.png
+#
+# Capture them ad-free and in the right language. No code change is needed —
+# NSUserDefaults' argument domain overrides those keys for one launch only, and
+# AdBannerView renders nothing when isPro is true:
+#
+#   xcrun simctl launch <udid> com.kfpun.twaqi -pro YES
+#   xcrun simctl launch <udid> com.kfpun.twaqi -AppleLanguages "(zh-Hant)" \
+#       -AppleLocale zh_TW -pro YES
+RAW_ROOT = File.join(ROOT, "fastlane/screenshots_raw")
+# Scratch area frameit works in. Wiped and rebuilt on every run.
+WORK_ROOT = File.join(ROOT, "fastlane/.frameit_work")
+# What deliver uploads.
+SCREENSHOTS_DIR = File.join(ROOT, "fastlane/screenshots")
+METADATA_DIR = File.join(ROOT, "fastlane/metadata")
+
+# --- Marketing banner styling -------------------------------------------------
+# The canvas is a vertical gradient in the app's sky blue, so the iPhone
+# captures (which are that same blue edge to edge) bleed into it.
+GRADIENT_TOP    = "#A6E7F6"
+GRADIENT_BOTTOM = "#5CC4E3"
+HEADLINE_COLOR  = "#0B3A49"
+SUBTITLE_COLOR  = "#1A5D71"
+
+# Real font files rather than family names: `magick -list font` is empty on a
+# Homebrew ImageMagick, so -weight/-family do nothing and a family name would
+# silently fall back to the default face.
+#
+# Latin: Arial, whose bold ships as its own .ttf (a .ttc collection resolves to
+# its first face only, which is Regular).
+# CJK:   Arial has no Han glyphs and would render tofu. STHeiti ships Medium and
+# Light as separate .ttc files, and unlike PingFang.ttc — which ImageMagick
+# cannot read at all — FreeType opens them fine.
+FONT_LATIN_BOLD    = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT_LATIN_REGULAR = "/System/Library/Fonts/Supplemental/Arial.ttf"
+FONT_CJK_BOLD      = "/System/Library/Fonts/STHeiti Medium.ttc"
+FONT_CJK_REGULAR   = "/System/Library/Fonts/STHeiti Light.ttc"
+
+# Per-locale banner copy and fonts, keyed by App Store locale code. Add a locale
+# here and drop its captures in fastlane/screenshots_raw/<locale>/ — the lane
+# picks it up automatically and skips locales with no captures yet.
+LOCALES = {
+  "en-US" => {
+    bold: FONT_LATIN_BOLD,
+    regular: FONT_LATIN_REGULAR,
+    titles: {
+      "iPhone_6.9_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPhone_6.9_02" => ["Know before you go out.", "AQI, pollutants and health advice."],
+      "iPad_13_01"    => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPad_13_02"    => ["Know before you go out.", "AQI, pollutants and health advice."]
+    }
+  },
+  "zh-Hant" => {
+    bold: FONT_CJK_BOLD,
+    regular: FONT_CJK_REGULAR,
+    titles: {
+      "iPhone_6.9_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPhone_6.9_02" => ["出門前，先看空氣", "AQI、污染物與健康建議"],
+      "iPad_13_01"    => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPad_13_02"    => ["出門前，先看空氣", "AQI、污染物與健康建議"]
+    }
+  }
+}.freeze
+
+# App Store Connect only accepts a fixed set of pixel sizes. frameit does NOT
+# size its output to the Framefile background — Frameit::Editor#generate_background
+# resizes the background down to the *source screenshot's* resolution, so a
+# 1320x2868 background still yields a 1206x2622 file. The framing therefore
+# happens in two steps: frameit draws the real bezel, then ImageMagick fits the
+# framed image onto an exactly-sized, opaque canvas.
+IPHONE_TARGET = [1320, 2868] # 6.9" display
+IPAD_TARGET   = [2048, 2732] # 13" display
+
+platform :ios do
+  desc "Frame the raw captures in #{RAW_ROOT}/<locale> into App Store sized PNGs"
+  desc "Requires ImageMagick (brew install imagemagick)"
+  lane :frame_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    sh("rm -rf '#{WORK_ROOT}'")
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      raw_dir = File.join(RAW_ROOT, locale)
+      sources = Dir["#{raw_dir}/*.png"].sort
+
+      if sources.empty?
+        UI.important("#{locale}: no captures in #{raw_dir} — skipping")
+        next
+      end
+
+      UI.message("#{locale}: framing #{sources.count} capture(s)")
+      produced += frame_locale(locale, config, sources)
+    end
+
+    UI.user_error!("No captures found under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Upload screenshots only to App Store Connect for #{APP_VERSION}"
+  desc "Does not touch the binary, the metadata, or the review submission"
+  lane :upload_screenshots do
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      screenshots_path: SCREENSHOTS_DIR,
+
+      # Screenshots and nothing else.
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+
+      # Replace whatever is currently attached to this version, so a partial
+      # previous upload can't leave stale images behind.
+      overwrite_screenshots: true,
+
+      # Never submit for review from a lane — that is a separate, deliberate act.
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+
+      # Default false: deliver opens an HTML preview and waits for confirmation.
+      # That prompt can't be answered on a non-TTY, so DELIVER_FORCE=true skips
+      # it for scripted runs.
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Upload text metadata only to App Store Connect for #{APP_VERSION}"
+  desc "Does not touch the binary, the screenshots, or the review submission"
+  lane :upload_metadata do
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      metadata_path: METADATA_DIR,
+
+      # Text and nothing else. Screenshots are deliberately excluded rather than
+      # merely absent: the live listing carries 7 images per device and this
+      # repo holds 2, and deliver replaces a device's whole set when it uploads
+      # one — so bundling them here would quietly shrink the product page.
+      skip_binary_upload: true,
+      skip_screenshots: true,
+
+      # Left on (the default) so deliver creates the 3.0.0 version if App Store
+      # Connect doesn't have it yet — without that there is nothing to attach
+      # this metadata to.
+      skip_app_version_update: false,
+
+      # Never submit for review from a lane — that is a separate, deliberate act.
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+
+      # Default false: deliver opens an HTML preview and waits for confirmation.
+      # That prompt can't be answered on a non-TTY, so DELIVER_FORCE=true skips
+      # it for scripted runs.
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Frame, then upload"
+  lane :screenshots do
+    frame_screenshots
+    upload_screenshots
+  end
+end
+
+# Builds the App Store Connect API key from the environment, failing loudly
+# rather than dropping into an interactive Apple ID prompt on a machine that has
+# no credentials. Returns nil when only an Apple ID is configured, which lets
+# deliver fall back to its own username handling.
+def asc_api_key
+  has_api_key = ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_PATH"]
+  unless has_api_key || ENV["FASTLANE_APPLE_ID"]
+    UI.user_error!(
+      "No App Store Connect credentials in the environment. Set either\n" \
+      "  ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH   (API key, no 2FA — preferred)\n" \
+      "or\n" \
+      "  FASTLANE_APPLE_ID / FASTLANE_ITC_TEAM_ID / FASTLANE_TEAM_ID"
+    )
+  end
+  return nil unless has_api_key
+
+  # The path is written with a leading ~ in .env; fastlane opens it verbatim.
+  app_store_connect_api_key(
+    key_id: ENV["ASC_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_filepath: File.expand_path(ENV["ASC_KEY_PATH"])
+  )
+end
+
+# Frames one locale's captures. Returns how many images it wrote.
+def frame_locale(locale, config, sources)
+  work_dir = File.join(WORK_ROOT, locale)
+  out_dir = File.join(SCREENSHOTS_DIR, locale)
+  sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+
+  # Stage the captures under names frameit can resolve to a device.
+  #
+  # Frameit::Device.detect_device matches on resolution first and then prefers a
+  # device whose name or id appears in the filename.
+  #
+  #   iPhone 17 / 17 Pro  1206x2622  matches as-is.
+  #   iPad Pro 13" M5     2064x2752  is not a size frameit knows, and
+  #                                  detect_device calls UI.user_error! on an
+  #                                  unknown size, aborting the whole run. It is
+  #                                  resampled to 2048x2732 (also a valid App
+  #                                  Store size) and named "ipadPro129" so it
+  #                                  picks up the 4th-gen 12.9" iPad Pro bezel —
+  #                                  the closest frame frameit-frames publishes.
+  counters = Hash.new(0)
+  sources.each do |src|
+    is_ipad = File.basename(src).include?("iPad")
+    counters[is_ipad] += 1
+    idx = format("%02d", counters[is_ipad])
+    if is_ipad
+      sh("magick '#{src}' -resize #{IPAD_TARGET[0]}x#{IPAD_TARGET[1]}! '#{work_dir}/ipadPro129 #{idx}.png'")
+    else
+      sh("cp '#{src}' '#{work_dir}/iPhone 17 Pro #{idx}.png'")
+    end
+  end
+
+  # Easy mode: bezel only. frameit's own complex mode (background + title)
+  # composites at the *source* resolution — Editor#generate_background resizes
+  # the background down to screenshot.size — so its text would be laid out at
+  # 1206px wide and then upscaled, softening every glyph. The gradient and the
+  # marketing copy are drawn below instead, at the final canvas size.
+  frameit(path: work_dir, use_platform: "IOS")
+
+  sh("rm -f '#{out_dir}'/*.png")
+
+  written = 0
+  Dir["#{work_dir}/*_framed.png"].sort.each do |framed|
+    is_ipad = File.basename(framed).include?("ipadPro129")
+    w, h = is_ipad ? IPAD_TARGET : IPHONE_TARGET
+    n = File.basename(framed)[/(\d+)_framed\.png\z/, 1]
+    # Nothing in the output name may say "2nd generation" or "app_ipad_pro_129",
+    # or Deliver::AppScreenshot would file the 2048x2732 images under the old
+    # 12.9" slot instead of the 13" one.
+    name = is_ipad ? "iPad_13_#{n}" : "iPhone_6.9_#{n}"
+    out = File.join(out_dir, "#{name}.png")
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    # Everything scales off the canvas width/height so the iPhone and iPad
+    # banners come out visually identical despite different pixel sizes.
+    side       = (w * 0.083).round # left/right text + device margin
+    top_pad    = (h * 0.052).round # canvas top to headline
+    line_gap   = (w * 0.026).round # headline to subtitle
+    text_gap   = (h * 0.024).round # subtitle to device
+    bottom_pad = (h * 0.021).round # device to canvas bottom
+    text_width = w - side * 2
+
+    tmp = File.join(work_dir, name)
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    # caption: wraps to the given width on its own, so long copy degrades to two
+    # lines instead of overflowing the canvas.
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(w * 0.070).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(w * 0.038).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    device_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_h = h - device_top - bottom_pad
+
+    # Fit the framed device inside what the copy left over, then flatten: App
+    # Store Connect rejects PNGs with an alpha channel and the bezel corners are
+    # transparent.
+    sh("magick '#{framed}' -filter Lanczos -resize #{text_width}x#{box_h} '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{device_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+    written += 1
+  end
+
+  written
+end

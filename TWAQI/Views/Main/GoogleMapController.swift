@@ -162,8 +162,22 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    /// Country codes with a `getCurrentPollutants` request already on the wire.
+    ///
+    /// `countryPollutants` only records responses that have *arrived*, so it
+    /// cannot stop a second request going out while the first is still in
+    /// flight. That response is ~65KB and takes over a second, and
+    /// `mapView(_:idleAt:)` fires repeatedly while the camera settles — launch
+    /// was sending this same request four times.
+    private var pollutantRequestsInFlight: Set<String> = []
+
     func callGetCurrentPollutantsApi(countryCode: String) {
+        guard !pollutantRequestsInFlight.contains(countryCode) else { return }
+        pollutantRequestsInFlight.insert(countryCode)
+
         APIManager.getCurrentPollutants(countryCode: countryCode) { result in
+            self.pollutantRequestsInFlight.remove(countryCode)
+
             switch result {
             case .success(let result):
                 print("callGetCurrentPollutantsApi Total: \(result.count)")

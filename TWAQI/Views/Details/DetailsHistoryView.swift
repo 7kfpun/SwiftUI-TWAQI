@@ -158,6 +158,11 @@ struct DetailsHistoryView: View {
 
     /// Presentation for the computed trend. The judgement itself lives in
     /// `AqiTrend` so it can be tested.
+    ///
+    /// The icons carry good-or-bad, not up-or-down. Direction arrows read
+    /// backwards here: falling AQI is *good* news, so a down arrow beside
+    /// "Improving" made readers double-take. The title and the detail line
+    /// already state the direction in words.
     private var trend: TrendVerdict {
         // AQI has a meaningful absolute threshold; every other pollutant needs
         // one scaled to its own units.
@@ -169,7 +174,7 @@ struct DetailsHistoryView: View {
             return TrendVerdict(
                 title: "Details.trend_steady",
                 detail: "",
-                symbol: "arrow.right",
+                symbol: "equal.circle.fill",
                 tint: .secondary
             )
         }
@@ -179,7 +184,7 @@ struct DetailsHistoryView: View {
             return TrendVerdict(
                 title: "Details.trend_steady",
                 detail: steadyDetail(result),
-                symbol: "arrow.right",
+                symbol: "equal.circle.fill",
                 tint: .secondary
             )
 
@@ -187,7 +192,7 @@ struct DetailsHistoryView: View {
             return TrendVerdict(
                 title: "Details.trend_improving",
                 detail: changeDetail("Details.trend_improving_detail", result),
-                symbol: "arrow.down.right",
+                symbol: "checkmark.circle.fill",
                 tint: Color(AirStatuses.good.getColor())
             )
 
@@ -195,7 +200,7 @@ struct DetailsHistoryView: View {
             return TrendVerdict(
                 title: "Details.trend_worsening",
                 detail: changeDetail("Details.trend_worsening_detail", result),
-                symbol: "arrow.up.right",
+                symbol: "exclamationmark.circle.fill",
                 tint: Color(AirStatuses.checkAirStatus(
                     airIndexType: airIndexType,
                     value: result.current
@@ -209,7 +214,17 @@ struct DetailsHistoryView: View {
     /// shown as a value in its own unit instead.
     private func changeDetail(_ key: String, _ result: AqiTrend) -> String {
         guard airIndexType == .aqi else {
-            return "\(result.magnitude.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+            // A bare "0.1 ppb" is true but unreadable — a tenth of a ppb means
+            // nothing without the baseline it moved from. Its share of the
+            // reading carries the same fact and needs no reference point.
+            let baseline = result.direction == .improving
+                ? result.current + result.magnitude
+                : result.current - result.magnitude
+            guard baseline > 0 else {
+                return "\(result.magnitude.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+            }
+            let percent = Int((result.magnitude / baseline * 100).rounded())
+            return result.direction == .improving ? "−\(percent)%" : "+\(percent)%"
         }
         return String(format: NSLocalizedString(key, comment: ""), result.change)
     }

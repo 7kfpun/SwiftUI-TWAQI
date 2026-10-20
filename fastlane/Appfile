@@ -1,0 +1,14 @@
+app_identifier("com.kfpun.twaqi")
+
+# Set these in your shell (or a .env fastlane picks up) rather than committing
+# them — this file is tracked.
+#
+#   export FASTLANE_APPLE_ID="you@example.com"
+#   export FASTLANE_ITC_TEAM_ID="1234567"
+#   export FASTLANE_TEAM_ID="ABCDE12345"
+#
+# Preferred alternative: an App Store Connect API key, which avoids 2FA
+# prompts entirely. See the api_key_path comment in the Fastfile.
+apple_id(ENV["FASTLANE_APPLE_ID"])
+itc_team_id(ENV["FASTLANE_ITC_TEAM_ID"])
+team_id(ENV["FASTLANE_TEAM_ID"])

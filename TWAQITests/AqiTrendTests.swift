@@ -114,4 +114,72 @@ final class AqiTrendTests: XCTestCase {
     func testTwoReadingsProduceATrend() {
         XCTAssertNotNil(AqiTrend.from(values: [100, 40]))
     }
+
+    // MARK: - Magnitude vs rounded change
+
+    /// `change` rounds to whole AQI points, which is right for AQI and useless
+    /// for CO — a 0.04 ppm move rounds to zero. `magnitude` keeps the real
+    /// delta so per-pollutant views can format it themselves.
+    func testMagnitudeSurvivesSubPointChanges() {
+        let values = [0.20, 0.20, 0.20, 0.20, 0.20, 0.20, 0.16, 0.16, 0.16]
+        let trend = AqiTrend.from(values: values, steadyThreshold: 0.01)
+
+        XCTAssertEqual(trend?.direction, .improving)
+        XCTAssertEqual(trend?.magnitude ?? 0, 0.04, accuracy: 0.0001)
+        XCTAssertEqual(trend?.change, 0, "a 0.04 move rounds away in whole points")
+    }
+
+    func testChangeIsMagnitudeRounded() {
+        let values = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 52.0, 52.0, 52.0]
+        let trend = AqiTrend.from(values: values)
+
+        XCTAssertEqual(trend?.change, 12)
+        XCTAssertEqual(trend?.magnitude ?? 0, 12, accuracy: 0.0001)
+    }
+
+    // MARK: - Custom thresholds
+
+    /// The same series reads as steady or worsening depending on the threshold
+    /// it is judged against — that is the whole point of passing one in.
+    func testThresholdDecidesSteadyVersusMoving() {
+        let values = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 14.0, 14.0, 14.0]
+
+        XCTAssertEqual(AqiTrend.from(values: values, steadyThreshold: 5)?.direction, .steady)
+        XCTAssertEqual(AqiTrend.from(values: values, steadyThreshold: 1)?.direction, .worsening)
+    }
+
+    func testDefaultThresholdIsTheAqiOne() {
+        let values = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 14.0, 14.0, 14.0]
+
+        XCTAssertEqual(
+            AqiTrend.from(values: values)?.direction,
+            AqiTrend.from(values: values, steadyThreshold: AqiTrend.steadyThreshold)?.direction
+        )
+    }
+
+    // MARK: - Relative threshold
+
+    func testRelativeThresholdIsATenthOfTheAverage() {
+        XCTAssertEqual(AqiTrend.relativeThreshold(for: [10, 20, 30]), 2.0, accuracy: 0.0001)
+    }
+
+    func testRelativeThresholdScalesWithUnits() {
+        // CO in ppm and PM10 in µg/m³ get thresholds three orders apart.
+        let co = AqiTrend.relativeThreshold(for: [0.16, 0.20, 0.18])
+        let pm10 = AqiTrend.relativeThreshold(for: [16, 20, 18])
+
+        XCTAssertEqual(co, 0.018, accuracy: 0.0001)
+        XCTAssertEqual(pm10, 1.8, accuracy: 0.0001)
+    }
+
+    /// A station reporting 0.0 for a pollutant it doesn't measure must never be
+    /// called "improving" — an unreachable threshold forces steady.
+    func testAllZeroReadingsAreNeverATrend() {
+        let threshold = AqiTrend.relativeThreshold(for: [0, 0, 0])
+        XCTAssertEqual(AqiTrend.from(values: [0, 0, 0, 0], steadyThreshold: threshold)?.direction, .steady)
+    }
+
+    func testRelativeThresholdOfEmptySeriesIsUnreachable() {
+        XCTAssertEqual(AqiTrend.relativeThreshold(for: []), .greatestFiniteMagnitude)
+    }
 }

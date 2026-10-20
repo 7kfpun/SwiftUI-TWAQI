@@ -82,12 +82,16 @@ final class SettingsStore: ObservableObject {
 
     var dndStartTime: Date {
         set { defaults.set(newValue, forKey: Keys.dndStartTime) }
-        get { defaults.object(forKey: Keys.dndStartTime) as! Date }
+        // `as?`, not `as!`. `register(defaults:)` writes to the *registration*
+        // domain, which is volatile — it exists only after a SettingsStore has
+        // been constructed in this process. A read that beats construction, or
+        // a value an older build stored as a different type, used to trap.
+        get { defaults.object(forKey: Keys.dndStartTime) as? Date ?? Date() }
     }
 
     var dndEndTime: Date {
         set { defaults.set(newValue, forKey: Keys.dndEndTime) }
-        get { defaults.object(forKey: Keys.dndEndTime) as! Date }
+        get { defaults.object(forKey: Keys.dndEndTime) as? Date ?? Date() + 2.hours }
     }
 
     /// Country whose data the app fully supports, resolved from the countries
@@ -124,7 +128,9 @@ final class SettingsStore: ObservableObject {
 
     var savedFavouriteStations: [Int] {
         set { defaults.set(newValue, forKey: Keys.savedFavouriteStations) }
-        get { defaults.array(forKey: Keys.savedFavouriteStations) as! [Int] }
+        // A stored array containing anything other than Int — from an older
+        // build, or a partially written value — used to trap the whole app.
+        get { defaults.array(forKey: Keys.savedFavouriteStations) as? [Int] ?? [] }
     }
 }
 

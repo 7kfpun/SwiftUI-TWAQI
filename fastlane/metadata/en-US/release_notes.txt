@@ -1,0 +1,15 @@
+A redesigned station screen that tells you, in one line, whether the air is getting better or worse.
+
+24-HOUR AIR QUALITY TREND
+Open any station and see its last 24 hours of AQI, colour-coded hour by hour, with a plain-language verdict above the chart: improving, getting worse, or holding steady. The day's low, high and average sit underneath. The verdict compares averages rather than single readings, so one bad hour doesn't flip the answer.
+
+A NEW STATION SCREEN
+Station name, township, county and air quality zone now sit together in one header. All six pollutants are listed at once — no more switching between them one at a time. Wind, address, coordinates and health advice each have their own place, and every reading shows how many hours old it is.
+
+BETTER SEARCH
+Stations are grouped by air quality zone and ordered roughly north to south, and you can now search by township or county name instead of only by station name.
+
+FASTER AND MORE STABLE
+Rebuilt with the latest tooling, with updated maps and components throughout, plus a range of stability and performance fixes.
+
+Questions or suggestions? Write to info@dllm.io — we read every one.

@@ -21,6 +21,9 @@ struct DetailsView: View {
     /// which silently re-scored every marker on the map.
     @State private var selectedPollutant: AirIndexTypes = .aqi
 
+    /// Needed to know whether the ad banner is taking space at the bottom.
+    @EnvironmentObject var settings: SettingsStore
+
     var body: some View {
         ScrollView {
             // Ordered as a reader's questions: what is it, where does that sit
@@ -51,7 +54,7 @@ struct DetailsView: View {
                 Separator().frame(height: 8)
 
                 if let pollutant = viewModel.pollutant {
-                    StationInfoView(pollutant: pollutant)
+                    WindView(wind: pollutant.wind, tint: selectedTint(for: pollutant))
                         .padding(.vertical, 16)
 
                     Separator().frame(height: 8)
@@ -66,11 +69,36 @@ struct DetailsView: View {
 
                 if let station = viewModel.station {
                     SettingsRow(station: station)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 16)
+
+                    Separator().frame(height: 8)
+                }
+
+                // Fixed metadata last: it never changes, so it has no claim on
+                // the space above the fold.
+                if let pollutant = viewModel.pollutant {
+                    let location = StationLocationView(pollutant: pollutant)
+                    if location.hasContent {
+                        location.padding(.vertical, 16)
+                    }
                 }
             }
+            // A readable measure. Left unbounded, every row stretched the full
+            // width of an iPad, which turned six pollutant cards into six
+            // near-empty banners and the chart into a mural.
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
+            // Clearance for the banner, reserved inside the scroll content.
+            //
+            // This screen is presented two ways: pushed inside the tab's
+            // NavigationView, and modally from a map marker as a
+            // UIHostingController wrapped in a UINavigationController. The
+            // modal path did not apply the bottom `.safeAreaInset`, so the
+            // banner sat on top of the last section instead of below it.
+            // Reserving the space in the content works in both.
+            .padding(.bottom, settings.isPro ? 0 : AdBannerView.height)
         }
-        .safeAreaInset(edge: .bottom) {
+        .overlay(alignment: .bottom) {
             AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
         }
         .onAppear {
@@ -80,6 +108,16 @@ struct DetailsView: View {
             Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
         }
         .buttonStyle(PlainButtonStyle()))
+    }
+
+    /// Band colour of the pollutant the page is currently showing, so the wind
+    /// arrow matches the highlighted reading and the chart above it.
+    private func selectedTint(for pollutant: Pollutant) -> Color {
+        let status = AirStatuses.checkAirStatus(
+            airIndexType: selectedPollutant,
+            value: pollutant.getValue(airIndexType: selectedPollutant)
+        )
+        return Color(status.getColor())
     }
 
     /// Live reading when available, else the newest history point.

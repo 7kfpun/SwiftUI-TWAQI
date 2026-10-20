@@ -1,0 +1,37 @@
+Taiwan Air shows you the air you are actually breathing, right now, measured by the government monitoring stations across Taiwan.
+
+IS IT GETTING BETTER OR WORSE?
+Every station screen answers the question you actually have. A 24-hour AQI chart, colour-coded hour by hour, with a one-line verdict above it: improving, getting worse, or steady. The day's low, high and average sit underneath. No chart-reading required.
+
+A LIVE MAP OF EVERY STATION
+• Every official monitoring station on one map, each pinned with its current reading and coloured by health band
+• Switch the whole map between AQI, PM2.5, PM10, O3, CO, SO2 and NO2
+• Wind mode turns every marker into an arrow — which way the pollution is blowing, and how hard
+• The station nearest you stays on screen with its reading and the time it was measured
+• Readings refresh automatically; the map reopens exactly where you left it
+
+EVERY NUMBER, FOR EVERY STATION
+• AQI plus all six pollutants: PM2.5, PM10, ozone, carbon monoxide, sulphur dioxide and nitrogen dioxide
+• Wind direction and speed, in plain words
+• Health guidance for the general public and for sensitive groups
+• Station address, coordinates, station type and air-quality region
+• Exactly when the reading was published, and how long ago that was
+
+ALERTS THAT RESPECT YOUR SLEEP
+• Get a push notification when AQI at a station you care about rises above your threshold
+• Or when it drops below one — so you know when it is safe to open the windows again
+• Set a Do Not Disturb window and nothing arrives overnight
+
+BUILT FOR EVERY DAY
+• Save home, work and school as favourites and check them all at a glance
+• Search every station by name, town or county, grouped by air-quality region
+• Available in English and 繁體中文
+• A single in-app purchase removes every ad, permanently
+
+WHY IT MATTERS
+Air pollution is not only a respiratory problem. It raises the risk of cardiovascular disease, stroke and other chronic illness, and in 2013 the International Agency for Research on Cancer classified outdoor air pollution as a Group 1 carcinogen. Children and older adults are affected most. Thirty seconds before you leave the house tells you whether to take the mask, or to run the purifier instead of opening the window.
+
+WHERE THE DATA COMES FROM
+Every reading is open data published by Taiwan's Ministry of Environment air quality monitoring network. We display it; we do not adjust it.
+
+Questions, problems or ideas? Write to info@dllm.io — we read everything.

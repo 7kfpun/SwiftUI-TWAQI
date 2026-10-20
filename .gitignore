@@ -105,3 +105,6 @@ fastlane/.frameit_work/
 
 # fastlane secrets
 fastlane/.env
+
+# macOS
+.DS_Store

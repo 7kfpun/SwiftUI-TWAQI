@@ -1,0 +1,1 @@
+Every station shows its last 24 hours of AQI and says plainly whether the air is improving, getting worse, or holding steady.

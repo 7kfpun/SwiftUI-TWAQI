@@ -14,6 +14,11 @@ struct AdBannerView: View {
 
     var adUnitID: String
 
+    /// The space the banner occupies. Scroll views that pin the banner over
+    /// their own bounds — rather than handing it to `.safeAreaInset` — reserve
+    /// this much at the end of their content so the last row can clear it.
+    static let height = AdSizeBanner.size.height
+
     var body: some View {
         // Sized to the banner and nothing more. This is used as a
         // `.safeAreaInset(edge: .bottom)`, which measures the inset view's own
