@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import WatchKit
 
 /// Every station with its current AQI, so the list doubles as an overview.
 struct StationPickerView: View {
@@ -58,7 +59,7 @@ struct StationPickerView: View {
             }
 
             if query.isEmpty {
-                if developerMode && isTestEnvironment {
+                if developerMode {
                     developerSection
                 }
 
@@ -97,37 +98,55 @@ struct StationPickerView: View {
         let short = info?["CFBundleShortVersionString"] as? String ?? "—"
         let build = info?["CFBundleVersion"] as? String ?? "—"
 
-        return Text(verbatim: "\(short) (\(build))")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity)
-            .listRowBackground(Color.clear)
-            .onTapGesture {
-                versionTapCount += 1
-                guard versionTapCount >= 7 else { return }
-                versionTapCount = 0
-                developerMode.toggle()
-            }
+        // A real button, not a tap gesture: watchOS list rows don't reliably
+        // pass plain taps through, so the count never reached 7.
+        return Button {
+            versionTapCount += 1
+            guard versionTapCount >= 7 else { return }
+            versionTapCount = 0
+            developerMode.toggle()
+            WKInterfaceDevice.current().play(.success)
+        } label: {
+            Text(verbatim: "\(short) (\(build))")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(Color.clear)
     }
 
     /// The watch keeps its own override: the phone's setting doesn't reach it.
-    /// Only offered in Debug and TestFlight builds.
+    /// Only offered in Debug and TestFlight builds; elsewhere the section says
+    /// so, so unlocking it is never a silent no-op.
     private var developerSection: some View {
         Section {
-            Picker(selection: Binding(
-                get: { proOverride },
-                set: { value in
-                    proOverride = value
-                    IAPManager.proOverride = value
-                    Task { await model.checkPro() }
-                }
-            )) {
-                Text(verbatim: "App Store").tag(IAPManager.ProOverride.appStore)
-                Text(verbatim: "Force Pro").tag(IAPManager.ProOverride.forcePro)
-                Text(verbatim: "Force Free").tag(IAPManager.ProOverride.forceFree)
-            } label: {
-                Text(verbatim: "Pro (developer)")
+            if isTestEnvironment {
+                proOverridePicker
+            } else {
+                Text(verbatim: "Pro override is only available in Debug and TestFlight builds.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
+        } header: {
+            Text(verbatim: "Developer")
+        }
+    }
+
+    private var proOverridePicker: some View {
+        Picker(selection: Binding(
+            get: { proOverride },
+            set: { value in
+                proOverride = value
+                IAPManager.proOverride = value
+                Task { await model.checkPro() }
+            }
+        )) {
+            Text(verbatim: "App Store").tag(IAPManager.ProOverride.appStore)
+            Text(verbatim: "Force Pro").tag(IAPManager.ProOverride.forcePro)
+            Text(verbatim: "Force Free").tag(IAPManager.ProOverride.forceFree)
+        } label: {
+            Text(verbatim: "Pro")
         }
     }
 

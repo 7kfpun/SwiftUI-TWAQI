@@ -31,9 +31,19 @@ Requires ImageMagick (brew install imagemagick)
 [bundle exec] fastlane ios upload_screenshots
 ```
 
-Upload screenshots only to App Store Connect for 3.0.0
+Upload screenshots only to App Store Connect for 3.0.1
 
 Does not touch the binary, the metadata, or the review submission
+
+### ios upload_watch_screenshots
+
+```sh
+[bundle exec] fastlane ios upload_watch_screenshots
+```
+
+Upload the Apple Watch screenshots only to App Store Connect for 3.0.1
+
+Leaves the iPhone and iPad screenshots already on the version alone
 
 ### ios upload_metadata
 
@@ -41,7 +51,7 @@ Does not touch the binary, the metadata, or the review submission
 [bundle exec] fastlane ios upload_metadata
 ```
 
-Upload text metadata only to App Store Connect for 3.0.0
+Upload text metadata only to App Store Connect for 3.0.1
 
 Does not touch the binary, the screenshots, or the review submission
 

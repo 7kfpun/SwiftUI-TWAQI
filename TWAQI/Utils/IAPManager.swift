@@ -96,10 +96,12 @@ enum IAPManager {
         #if DEBUG
         return true
         #else
-        if #available(iOS 16.0, watchOS 9.0, *) {
-            guard case .verified(let transaction)? = try? await AppTransaction.shared else { return false }
+        if #available(iOS 16.0, watchOS 9.0, *),
+           case .verified(let transaction)? = try? await AppTransaction.shared {
             return transaction.environment != .production
         }
+        // AppTransaction can fail offline or on the watch; the receipt's name
+        // still tells TestFlight and sandbox apart from the App Store.
         return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
         #endif
     }

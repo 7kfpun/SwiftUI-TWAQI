@@ -108,11 +108,9 @@ struct HelpView: View {
     private var definitionSection: some View {
         Section(header: Label("Help.definition", systemImage: "book")) {
             ForEach(DefinitionPages.allCases) { definitionPage in
-                externalLink(title: definitionPage.title, url: definitionPage.url) {
-                    TrackingManager.logEvent(
-                        eventName: "open_definition_link",
-                        parameters: ["label": definitionPage.rawValue]
-                    )
+                NavigationLink(destination: IndexGuideView(page: definitionPage)) {
+                    Text(definitionPage.title)
+                        .fontWeight(.light)
                 }
             }
         }

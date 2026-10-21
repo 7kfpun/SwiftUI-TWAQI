@@ -10,6 +10,41 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
+        if #available(iOS 26.0, *) {
+            glassTabs
+        } else {
+            classicTabs
+        }
+    }
+
+    /// Liquid Glass: the bar floats over content and shrinks while scrolling.
+    /// Same order as the classic bar, Help last. The station list keeps its
+    /// own search field rather than taking the system search role, which
+    /// would pin it apart at the end of the bar after Help.
+    @available(iOS 26.0, *)
+    private var glassTabs: some View {
+        TabView {
+            Tab("Tabbar.main", systemImage: "map.fill") {
+                MainView()
+            }
+
+            Tab("Tabbar.favourites", systemImage: "heart") {
+                FavouriteListView()
+            }
+
+            Tab("Tabbar.details_list", systemImage: "list.bullet") {
+                DetailsListView()
+            }
+
+            Tab("Tabbar.help", systemImage: "questionmark.circle") {
+                HelpView(viewModel: .init())
+            }
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tint(Color(0x5AC8FA))
+    }
+
+    private var classicTabs: some View {
         TabView {
             MainView()
                 .tabItem {

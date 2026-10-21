@@ -32,7 +32,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.makeKeyAndVisible()
         }
 
-        UITabBar.appearance().backgroundColor = UIColor.systemBackground
+        // An opaque background would cover the Liquid Glass tab bar on iOS 26.
+        if #unavailable(iOS 26.0) {
+            UITabBar.appearance().backgroundColor = UIColor.systemBackground
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -102,71 +102,69 @@ enum AirStatuses: String, CaseIterable, Hashable {
         return readableStrings[self.rawValue] ?? ""
     }
 
-    static func checkAirStatus(airIndexType: AirIndexTypes, value: Double) -> AirStatuses {
-        let rangeMaps: [AirIndexTypes: [Range<Double>: AirStatuses]] = [
-            AirIndexTypes.aqi: [
-                1..<51: .good,
-                51..<101: .moderate,
-                101..<151: .unhealthyforsensitivegroup,
-                151..<201: .unhealthy,
-                201..<301: .veryunhealthy,
-                301..<100*10: .hazardous,
-            ],
-            AirIndexTypes.pm25: [
-                0.1..<15.5: .good,
-                15.5..<35.5: .moderate,
-                35.5..<54.5: .unhealthyforsensitivegroup,
-                54.5..<150.5: .unhealthy,
-                150.5..<250.5: .veryunhealthy,
-                250.5..<500.5*10: .hazardous,
-            ],
-            AirIndexTypes.pm10: [
-                1..<55: .good,
-                55..<126: .moderate,
-                126..<255: .unhealthyforsensitivegroup,
-                255..<355: .unhealthy,
-                355..<425: .veryunhealthy,
-                425..<605*10: .hazardous,
-            ],
-            AirIndexTypes.o3: [
-                1..<55: .good,
-                55..<125: .moderate,
-                125..<165: .unhealthyforsensitivegroup,
-                165..<205: .unhealthy,
-                205..<405: .veryunhealthy,
-                405..<605: .hazardous,
-            ],
-            AirIndexTypes.co: [
-                0.1..<4.5: .good,
-                4.5..<9.5: .moderate,
-                9.5..<12.5: .unhealthyforsensitivegroup,
-                12.5..<15.5: .unhealthy,
-                15.5..<30.5: .veryunhealthy,
-                30.5..<50.5: .hazardous,
-            ],
-            AirIndexTypes.so2: [
-                1..<36: .good,
-                36..<76: .moderate,
-                76..<186: .unhealthyforsensitivegroup,
-                186..<305: .unhealthy,
-                305..<605: .veryunhealthy,
-                605..<1005: .hazardous,
-            ],
-            AirIndexTypes.no2: [
-                1..<54: .good,
-                54..<101: .moderate,
-                101..<361: .unhealthyforsensitivegroup,
-                361..<650: .unhealthy,
-                650..<1250: .veryunhealthy,
-                1250..<2050: .hazardous,
-            ],
-        ]
+    /// Colour bands for each index, lowest first: the thresholds every
+    /// reading in the app is scored against. Ordered so the guide pages can
+    /// list them; a dictionary had no order to show.
+    static let bands: [AirIndexTypes: [(range: Range<Double>, status: AirStatuses)]] = [
+        AirIndexTypes.aqi: [
+            (1..<51, .good),
+            (51..<101, .moderate),
+            (101..<151, .unhealthyforsensitivegroup),
+            (151..<201, .unhealthy),
+            (201..<301, .veryunhealthy),
+            (301..<100*10, .hazardous),
+        ],
+        AirIndexTypes.pm25: [
+            (0.1..<15.5, .good),
+            (15.5..<35.5, .moderate),
+            (35.5..<54.5, .unhealthyforsensitivegroup),
+            (54.5..<150.5, .unhealthy),
+            (150.5..<250.5, .veryunhealthy),
+            (250.5..<500.5*10, .hazardous),
+        ],
+        AirIndexTypes.pm10: [
+            (1..<55, .good),
+            (55..<126, .moderate),
+            (126..<255, .unhealthyforsensitivegroup),
+            (255..<355, .unhealthy),
+            (355..<425, .veryunhealthy),
+            (425..<605*10, .hazardous),
+        ],
+        AirIndexTypes.o3: [
+            (1..<55, .good),
+            (55..<125, .moderate),
+            (125..<165, .unhealthyforsensitivegroup),
+            (165..<205, .unhealthy),
+            (205..<405, .veryunhealthy),
+            (405..<605, .hazardous),
+        ],
+        AirIndexTypes.co: [
+            (0.1..<4.5, .good),
+            (4.5..<9.5, .moderate),
+            (9.5..<12.5, .unhealthyforsensitivegroup),
+            (12.5..<15.5, .unhealthy),
+            (15.5..<30.5, .veryunhealthy),
+            (30.5..<50.5, .hazardous),
+        ],
+        AirIndexTypes.so2: [
+            (1..<36, .good),
+            (36..<76, .moderate),
+            (76..<186, .unhealthyforsensitivegroup),
+            (186..<305, .unhealthy),
+            (305..<605, .veryunhealthy),
+            (605..<1005, .hazardous),
+        ],
+        AirIndexTypes.no2: [
+            (1..<54, .good),
+            (54..<101, .moderate),
+            (101..<361, .unhealthyforsensitivegroup),
+            (361..<650, .unhealthy),
+            (650..<1250, .veryunhealthy),
+            (1250..<2050, .hazardous),
+        ],
+    ]
 
-        for (range, airStatus) in rangeMaps[airIndexType] ?? [:] {
-            if range.contains(value) {
-                return airStatus
-            }
-        }
-        return .unknown
+    static func checkAirStatus(airIndexType: AirIndexTypes, value: Double) -> AirStatuses {
+        bands[airIndexType]?.first { $0.range.contains(value) }?.status ?? .unknown
     }
 }

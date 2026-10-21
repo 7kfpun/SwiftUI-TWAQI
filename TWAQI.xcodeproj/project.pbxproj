@@ -20,6 +20,7 @@
 		2A94CD999844F549EA21FA7A /* Pods_OneSignalNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31DB7B3D7441B51A8F0D30E5 /* Pods_OneSignalNotificationServiceExtension.framework */; };
 		2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E010BE4EF22BFDE16E305BC /* WindTests.swift */; };
 		31E5674C08F39AF35DA29D65 /* StationHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4960C340833CD7D23354E4 /* StationHeaderView.swift */; };
+		3A06016CAA3F954513296957 /* Faces.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B24479F966EFE547F09CCC2 /* Faces.xcassets */; };
 		423BDD42D0EA523375D85CF8 /* Pods_TWAQITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AA560C8E2EC7A68755DB9D5 /* Pods_TWAQITests.framework */; };
 		4374CEED1A1FC9B86CDB6C6C /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		4456899E76DFBCF8C5D22EDE /* StationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB601F7471823C2024AB3D6 /* StationTypes.swift */; };
@@ -27,6 +28,7 @@
 		47328332214A050FF47B3717 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		4A86C8B42555F0665B7BDA86 /* HealthGuidanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86FA45BEECC6913EE327B3C3 /* HealthGuidanceView.swift */; };
 		4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */; };
+		4ECF6A287399ED28643C187D /* IndexGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */; };
 		544575DF41EE812F4CD38B77 /* AqiScaleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E239BC52520B8A358AAADBB9 /* AqiScaleView.swift */; };
 		544D5ABACA27365614E1C400 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */; };
@@ -123,6 +125,7 @@
 		CC5A20F3EC2BC86C4BAFDAEC /* APIResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3472393B318009CED32 /* APIResponses.swift */; };
 		D4307F75BEBEA6931C58CE82 /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
 		DB10FBCCA8F474B8F2A7C858 /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
+		DF1DF889F6EF2E7F4FC6D521 /* Faces.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B24479F966EFE547F09CCC2 /* Faces.xcassets */; };
 		E50C6954A9796E3809DEDFA3 /* PollutantGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA857C0653969296C45E53AE /* PollutantGridView.swift */; };
 		E55CC5B527165474BB49EE6B /* WatchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6886E6C0535290420A0F52DA /* WatchStore.swift */; };
 		E697D1D7FAEB50207772B74C /* StationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39DE548B9EE93C9F7CCC0794 /* StationPickerView.swift */; };
@@ -207,6 +210,8 @@
 		0BB601F7471823C2024AB3D6 /* StationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationTypes.swift; sourceTree = "<group>"; };
 		137AA5506D82FA067FB434C8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		178721325D33D2D77344F3F5 /* StationParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationParsing.swift; sourceTree = "<group>"; };
+		17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IndexGuideView.swift; sourceTree = "<group>"; };
+		1B24479F966EFE547F09CCC2 /* Faces.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Faces.xcassets; sourceTree = "<group>"; };
 		1F1DBA113E56554E40786D3D /* Pods-TWAQITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQITests.release.xcconfig"; path = "Target Support Files/Pods-TWAQITests/Pods-TWAQITests.release.xcconfig"; sourceTree = "<group>"; };
 		22AC396AA9587B43DC0464B2 /* TWAQIWatchWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TWAQIWatchWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		272BB792F0EDC20873E7A119 /* TWAQIWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TWAQIWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -528,6 +533,7 @@
 				9E1AC55D233F9A5000AC862D /* HelpView.swift */,
 				9EF7A3292386FC8700FF410C /* HelpViewModel.swift */,
 				9BBB3B8DA8D6029AE4AFADA9 /* ProView.swift */,
+				17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */,
 			);
 			path = Help;
 			sourceTree = "<group>";
@@ -656,6 +662,7 @@
 				6886E6C0535290420A0F52DA /* WatchStore.swift */,
 				A93D2C90EF31D7DA04FB6444 /* WatchAPI.swift */,
 				D92DB7F473AB70324C3565E8 /* WatchPro.swift */,
+				1B24479F966EFE547F09CCC2 /* Faces.xcassets */,
 			);
 			name = Shared;
 			path = Shared;
@@ -852,6 +859,7 @@
 			files = (
 				456E83BBE81025F86C599CB2 /* Assets.xcassets in Resources */,
 				C0F2458C317128BC1DC48BD3 /* Localizable.strings in Resources */,
+				3A06016CAA3F954513296957 /* Faces.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -860,6 +868,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				47328332214A050FF47B3717 /* Localizable.strings in Resources */,
+				DF1DF889F6EF2E7F4FC6D521 /* Faces.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1164,6 +1173,7 @@
 				84D7C82DBEE6A091FDCF2DEF /* WindView.swift in Sources */,
 				A9256CB47861F785FF09CAF3 /* StationLocationView.swift in Sources */,
 				EC7DDD4C178C6465EA19C6C1 /* ProView.swift in Sources */,
+				4ECF6A287399ED28643C187D /* IndexGuideView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1231,7 +1241,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TWAQIWatchWidget/TWAQIWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TWAQIWatchWidget/Info.plist;
@@ -1281,7 +1291,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = TWAQIWatch/TWAQIWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1314,7 +1324,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TWAQIWatchWidget/TWAQIWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TWAQIWatchWidget/Info.plist;
@@ -1465,7 +1475,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TWAQI/TWAQI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"TWAQI/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
@@ -1493,7 +1503,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = TWAQI/TWAQI.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"TWAQI/Preview Content\"";
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
@@ -1519,7 +1529,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1544,7 +1554,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = OneSignalNotificationServiceExtension/OneSignalNotificationServiceExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				INFOPLIST_FILE = OneSignalNotificationServiceExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -1590,7 +1600,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = TWAQIWatch/TWAQIWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 132;
+				CURRENT_PROJECT_VERSION = 134;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

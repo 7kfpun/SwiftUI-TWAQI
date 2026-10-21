@@ -40,6 +40,17 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var myLocationButton: MyLocationButton!
     var windModeButton: WindModeButton!
 
+    /// The index bar sits above the ad banner, which SwiftUI lays out outside
+    /// this map. Kept so the bar can drop down when the banner goes away.
+    private var indexSelectorBottom: Constraint?
+    private var proObserver: NSObjectProtocol?
+    private var isProLayout = false
+
+    /// Gap between the index bar and the tab bar, plus the banner when shown.
+    private static func bannerClearance(isPro: Bool) -> CGFloat {
+        isPro ? -10 : -(AdBannerView.height + 10)
+    }
+
     var currentLatitude: Double = GoogleMapViewController.initialCamera.target.latitude
     var currentLongitude: Double = GoogleMapViewController.initialCamera.target.longitude
 
@@ -250,6 +261,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         let isPro = defaults.bool(forKey: "pro")
+        isProLayout = isPro
         let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
@@ -264,7 +276,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
         view.addSubview(indexSelectorView)
         indexSelectorView.snp.makeConstraints { (make) -> Void in
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(isPro ? -10 : -60)
+            indexSelectorBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+                .offset(Self.bannerClearance(isPro: isPro)).constraint
             make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
             make.height.equalTo(IndexSelectorView.preferredHeight)
             if width > 610 {
@@ -402,6 +415,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
         mapView.delegate = self
 
+        // Pro is re-checked with StoreKit after launch and can change at any
+        // time (a purchase, a lapsed subscription, the developer override).
+        // Reading it once here left a banner-sized gap once the ads went away.
+        proObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.updateBannerClearance()
+        }
+
         Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { (_) in
             // Schedule in seconds
             for (countryCode, _) in self.countryPollutants {
@@ -410,6 +432,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         loadContent()
+    }
+
+    private func updateBannerClearance() {
+        let isPro = defaults.bool(forKey: "pro")
+        guard isPro != isProLayout else { return }
+        isProLayout = isPro
+        indexSelectorBottom?.update(offset: Self.bannerClearance(isPro: isPro))
+        UIView.animate(withDuration: 0.25) { self.view.layoutIfNeeded() }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

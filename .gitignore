@@ -99,6 +99,7 @@ GoogleService-Info.plist
 .codegraph/
 context/
 fastlane/.frameit_work/
+fastlane/.watch_upload/
 
 # Firebase Hosting
 .firebase/

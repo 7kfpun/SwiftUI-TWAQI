@@ -40,7 +40,7 @@
 "Help.contact_us" = "Contact us";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
 "Help.feedback_or_contact_us" = "Feedback / Contact us";
-"Help.definition" = "Terms";
+"Help.definition" = "Understanding the readings";
 "Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
 
 "AirIndex.meaning_aqi" = "Air quality index";
@@ -126,6 +126,10 @@
 "Watch.retry" = "Retry";
 "Watch.widget_name" = "Air quality";
 "Watch.widget_description" = "AQI at the station you chose in the app.";
+"Watch.widget_short %@" = "%@ (number only)";
+"Watch.widget_face %@" = "%@ (face)";
+"Watch.widget_status %@" = "%@ (status)";
+"Watch.widget_no_station %@" = "%@, no station";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";
@@ -157,3 +161,54 @@
 "Watch.pro_feature_no_ads" = "No ads on iPhone";
 "Watch.pro_feature_indices" = "AQI, PM2.5 and 5 more indices";
 "Watch.pro_complications_cta" = "Add to watch face";
+
+/* Guide */
+"Guide.section_what" = "What it is";
+"Guide.section_sources" = "Where it comes from";
+"Guide.section_health" = "Health effects";
+"Guide.section_measure" = "How it's measured";
+"Guide.section_tips" = "What you can do";
+"Guide.section_bands" = "Colour bands in this app";
+"Guide.bands_footer" = "Every reading on the map, the station pages and the watch is coloured by these bands.";
+"Guide.further_reading" = "Read more on Wikipedia";
+"Guide.sources_footer" = "Sources: Ministry of Environment (Taiwan); World Health Organization, Global Air Quality Guidelines (2021).";
+
+"Guide.aqi.what" = "A single number from 0 to 500 that sums up the air. Each of the six pollutants is converted onto the same 0–500 scale, and the AQI is the highest of the six; that pollutant is reported as the main pollutant. A reading of 160 driven by ozone calls for different precautions from one driven by PM2.5, so it's worth checking which pollutant is behind it.";
+"Guide.aqi.measure" = "Taiwan's Ministry of Environment publishes the AQI every hour. It isn't a snapshot of that hour: particulates use a weighted moving average (half the last 12 hours, half the last 4), ozone and carbon monoxide use 8-hour averages, and sulfur dioxide and nitrogen dioxide use the latest hour. A sudden spike therefore shows in the individual pollutant readings before it moves the AQI.";
+"Guide.aqi.tips" = "Look at the trend as well as the number: a rising AQI in the morning often keeps rising until the weather changes. Above 100, sensitive groups (children, older adults, and people with heart or lung disease) should cut back on long or strenuous time outdoors; above 150, everyone should.";
+
+"Guide.pm25.what" = "Particles 2.5 micrometres across or smaller, about a thirtieth of the width of a human hair. They are small enough to reach deep into the lungs, and the finest can pass into the bloodstream.";
+"Guide.pm25.sources" = "Vehicle exhaust, power stations, factories and burning of all kinds, plus particles that form in the air itself from sulfur dioxide, nitrogen oxides and ammonia. In Taiwan, levels usually climb from autumn to spring, when weaker winds trap local pollution and the northeast monsoon carries in haze from the Asian mainland. The central and southern west coast is often worst.";
+"Guide.pm25.health" = "Long-term exposure is linked to heart disease, stroke, lung cancer and slower lung development in children; short spikes can trigger asthma attacks and heart problems. The WHO guideline is 15 µg/m³ averaged over 24 hours and 5 µg/m³ over a year.";
+"Guide.pm25.measure" = "Micrograms per cubic metre (µg/m³), measured hourly. The AQI uses a moving average, so the hourly reading reacts first.";
+"Guide.pm25.tips" = "On high days, close the windows and run an air purifier with a HEPA filter. Outdoors, a well-fitted N95 or KN95 mask filters fine particles; ordinary surgical masks fit too loosely to do much.";
+
+"Guide.pm10.what" = "Particles up to 10 micrometres across, PM2.5 included. The coarser part is mostly caught in the nose, throat and upper airways rather than the deep lung.";
+"Guide.pm10.sources" = "Road and construction dust, bare ground, sea salt, and in spring, dust storms blown from northern China and Mongolia. On windy days in autumn and winter, the dry bed of the Zhuoshui River raises dust across Yunlin and Changhua.";
+"Guide.pm10.health" = "Irritates the eyes, nose and throat and aggravates asthma and bronchitis. The WHO guideline is 45 µg/m³ averaged over 24 hours.";
+"Guide.pm10.measure" = "Micrograms per cubic metre (µg/m³), measured hourly; the AQI uses the same moving average as PM2.5.";
+"Guide.pm10.tips" = "On dusty days keep the windows shut and wipe surfaces with a damp cloth rather than dry-dusting. Masks work better against coarse dust than against PM2.5.";
+
+"Guide.o3.what" = "Ozone at ground level, not the protective layer high in the atmosphere. Nothing emits it directly: it forms when nitrogen oxides and volatile organic compounds react in sunlight.";
+"Guide.o3.sources" = "The ingredients come mostly from traffic, industry and solvents. Because ozone takes hours to form, it usually peaks in the early-to-mid afternoon on sunny, warm days, and is often higher downwind of cities than in them.";
+"Guide.o3.health" = "Irritates the airways, causing coughing, chest tightness and shortness of breath, and lowers lung function, especially during exercise. People with asthma are affected most.";
+"Guide.o3.measure" = "Parts per billion (ppb), measured hourly. The AQI uses an 8-hour average, so it lags the afternoon peak.";
+"Guide.o3.tips" = "On high-ozone days, exercise in the morning or evening. Ozone breaks down quickly indoors, so staying inside works well; masks don't filter gases.";
+
+"Guide.co.what" = "A colourless, odourless gas produced when fuel burns without enough oxygen.";
+"Guide.co.sources" = "Mainly vehicle exhaust, so levels are highest beside busy roads at rush hour. Outdoors in Taiwan it rarely leaves the good band.";
+"Guide.co.health" = "Carbon monoxide takes the place of oxygen in the blood. At outdoor levels it mainly matters for people with heart disease; at high concentrations it causes headache, dizziness, confusion and death.";
+"Guide.co.measure" = "Parts per million (ppm), measured hourly, with an 8-hour average in the AQI.";
+"Guide.co.tips" = "The real danger is indoors. Gas water heaters in enclosed balconies or bathrooms cause carbon monoxide poisoning in Taiwan every winter: keep them well ventilated and fit a CO alarm.";
+
+"Guide.so2.what" = "A pungent gas released when fuel containing sulfur is burned.";
+"Guide.so2.sources" = "Coal- and oil-fired power stations, refineries, heavy industry and shipping. Volcanic vents emit it too, so stations near the Datun volcanoes around Yangmingshan can read higher.";
+"Guide.so2.health" = "Irritates the airways and can set off asthma within minutes. In the air it turns into sulfate particles, which add to PM2.5, and it contributes to acid rain.";
+"Guide.so2.measure" = "Parts per billion (ppb), as the latest hourly value in the AQI.";
+"Guide.so2.tips" = "If you have asthma, keep your reliever inhaler with you when levels rise, especially near industrial areas or volcanic vents.";
+
+"Guide.no2.what" = "A reddish-brown gas formed during high-temperature combustion.";
+"Guide.no2.sources" = "Mostly road traffic, then power stations and industry. Levels are highest beside busy roads and at rush hour, and drop off within a few hundred metres.";
+"Guide.no2.health" = "Inflames the airways and lowers resistance to respiratory infection; long-term exposure is linked to children developing asthma. It also helps form ozone and PM2.5.";
+"Guide.no2.measure" = "Parts per billion (ppb), as the latest hourly value in the AQI.";
+"Guide.no2.tips" = "Walk, run or cycle a block away from main roads where you can, and avoid rush hours.";

@@ -117,10 +117,20 @@ struct ReadingView: View {
                     .tint(tint)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(status.toString())
-                            .font(.headline)
-                            .foregroundStyle(tint)
-                            .fixedSize(horizontal: false, vertical: true)
+                        // The same faces as the phone, so a glance reads the
+                        // mood before the words.
+                        HStack(spacing: 4) {
+                            if status.hasFaceImage {
+                                Image(status.getImage())
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                            }
+
+                            Text(status.toString())
+                                .font(.headline)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .foregroundStyle(tint)
 
                         if !reading.publishTime.isEmpty {
                             Text(reading.publishTime.asPublishTime)
