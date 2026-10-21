@@ -14,7 +14,7 @@ struct FavouriteListView: View {
     @StateObject private var viewModel: FavouriteListViewModel
 
     var body: some View {
-        NavigationView {
+        AdaptiveNavigation {
             Group {
                 if settings.savedFavouriteStations.isEmpty {
                     EmptyStateView(
@@ -33,7 +33,6 @@ struct FavouriteListView: View {
                 AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear(perform: getData)
     }
 

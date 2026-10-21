@@ -89,6 +89,7 @@
 "Details.location" = "Location";
 "Details.conditions" = "Conditions";
 "Details.no_data" = "No data";
+"Details.select_a_station" = "Select a station";
 
 "StationType.general" = "General";
 "StationType.traffic" = "Roadside";

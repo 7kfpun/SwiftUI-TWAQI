@@ -93,6 +93,7 @@
 "Details.location" = "位置";
 "Details.conditions" = "即時狀況";
 "Details.no_data" = "無資料";
+"Details.select_a_station" = "選擇一個測站";
 
 "StationType.general" = "一般測站";
 "StationType.traffic" = "交通測站";

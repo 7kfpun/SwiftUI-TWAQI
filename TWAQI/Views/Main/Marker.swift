@@ -33,6 +33,9 @@ final class PollutantMarker: GMSMarker, StationMarker {
         super.init()
 
         self.opacity = isInteractive ? 1 : mutedMarkerOpacity
+        // Read by VoiceOver (and found by UI tests). No info window opens:
+        // the map delegate handles every tap itself.
+        self.title = pollutant.displayName
 
         self.position = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
 
@@ -86,6 +89,9 @@ final class WindDirectionMarker: GMSMarker, StationMarker {
         super.init()
 
         self.opacity = isInteractive ? 1 : mutedMarkerOpacity
+        // Read by VoiceOver (and found by UI tests). No info window opens:
+        // the map delegate handles every tap itself.
+        self.title = pollutant.displayName
 
         // Set unconditionally. The old version returned early for calm stations
         // *before* assigning a position, leaving them on GMSMarker's default

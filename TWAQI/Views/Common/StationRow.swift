@@ -89,6 +89,54 @@ struct EmptyStateView: View {
     }
 }
 
+/// Navigation for the station lists. In a wide window — iPad, an unfolded
+/// foldable, a large split-screen window — the list and the chosen station sit
+/// side by side; in a narrow one it is the usual push stack. Follows the
+/// window as it resizes.
+struct AdaptiveNavigation<Sidebar: View>: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private let sidebar: Sidebar
+
+    init(@ViewBuilder sidebar: () -> Sidebar) {
+        self.sidebar = sidebar()
+    }
+
+    var body: some View {
+        if horizontalSizeClass == .regular {
+            if #available(iOS 16.0, *) {
+                // Both columns always: a hideable list would leave an iPad in
+                // portrait opening on an empty "select a station" page.
+                NavigationSplitView(columnVisibility: .constant(.all)) {
+                    if #available(iOS 17.0, *) {
+                        sidebar.toolbar(removing: .sidebarToggle)
+                    } else {
+                        sidebar
+                    }
+                } detail: {
+                    noSelection
+                }
+                .navigationSplitViewStyle(.balanced)
+            } else {
+                NavigationView {
+                    sidebar
+                    noSelection
+                }
+                .navigationViewStyle(DoubleColumnNavigationViewStyle())
+            }
+        } else {
+            NavigationView {
+                sidebar
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
+    }
+
+    private var noSelection: some View {
+        EmptyStateView(icon: "aqi.medium", message: "Details.select_a_station")
+    }
+}
+
 struct StationRow_Previews: PreviewProvider {
     static var previews: some View {
         List {

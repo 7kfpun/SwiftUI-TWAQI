@@ -16,7 +16,7 @@ struct DetailsListView: View {
     @State private var searchText = ""
 
     var body: some View {
-        NavigationView {
+        AdaptiveNavigation {
             Group {
                 if viewModel.stations.isEmpty {
                     EmptyStateView(icon: "list.bullet", message: "Details.no_data")
@@ -25,14 +25,15 @@ struct DetailsListView: View {
                 }
             }
             .navigationBarTitle("DetailsList.details")
+            // Native search field: replaces the hand-rolled TextField and gives
+            // scroll-to-reveal, a cancel button, and keyboard dismissal for free.
+            // On the list itself so it stays in the list column when the
+            // window is wide enough for two.
+            .searchable(text: $searchText, prompt: Text("DetailsList.search"))
             .safeAreaInset(edge: .bottom) {
                 AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
-        // Native search field: replaces the hand-rolled TextField and gives
-        // scroll-to-reveal, a cancel button, and keyboard dismissal for free.
-        .searchable(text: $searchText, prompt: Text("DetailsList.search"))
         .onAppear(perform: getData)
     }
 

@@ -24,7 +24,30 @@ struct DetailsView: View {
     /// Needed to know whether the ad banner is taking space at the bottom.
     @EnvironmentObject var settings: SettingsStore
 
+    /// Set when shown in the panel beside the map, which has no back button.
+    private let onClose: (() -> Void)?
+
     var body: some View {
+        // One `navigationBarItems` call per branch: a second call replaces the
+        // first rather than adding to it.
+        if let onClose = onClose {
+            page.navigationBarItems(
+                leading: Button(action: onClose) { Image(systemName: "xmark") },
+                trailing: favouriteButton
+            )
+        } else {
+            page.navigationBarItems(trailing: favouriteButton)
+        }
+    }
+
+    private var favouriteButton: some View {
+        Button(action: { self.viewModel.favouriteStationToggle() }) {
+            Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private var page: some View {
         ScrollView {
             // Ordered as a reader's questions: what is it, where does that sit
             // on the scale, what is actually in the air, which way is that
@@ -104,10 +127,6 @@ struct DetailsView: View {
         .onAppear {
             self.getData()
         }
-        .navigationBarItems(trailing: Button(action: { self.viewModel.favouriteStationToggle() }) {
-            Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
-        }
-        .buttonStyle(PlainButtonStyle()))
     }
 
     /// Band colour of the pollutant the page is currently showing, so the wind
@@ -140,8 +159,9 @@ struct DetailsView: View {
         )
     }
 
-    init(stationId: Int) {
+    init(stationId: Int, onClose: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: DetailsViewModel(stationId: stationId))
+        self.onClose = onClose
     }
 
     private func getData() {

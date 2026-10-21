@@ -13,9 +13,6 @@ import UIKit
 
 let defaults = UserDefaults.standard
 
-let screenSize: CGRect = UIScreen.main.bounds
-let isLandscape = UIDevice.current.orientation.isLandscape
-
 class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// The camera the user last left the map at, or `MapHome` on first launch.
     ///
@@ -62,6 +59,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var supportedCountryCode: String?
 
     var pollutants: Pollutants = []
+
+    /// Set while the map shares a wide window with a station panel. A tapped
+    /// station goes to the panel instead of a sheet over the map.
+    var onStationSelected: ((Int) -> Void)?
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
@@ -229,15 +230,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
-    func loadContent(
-        width: CGFloat = UIScreen.main.bounds.width,
-        height: CGFloat = UIScreen.main.bounds.height,
-        isLandscape: Bool = UIDevice.current.orientation.isLandscape
-    ) {
-        mapView.frame = CGRect(x: 0, y: 0, width: width, height: height)
-
+    /// Built once. Everything is pinned to the view, so the map follows the
+    /// window as it rotates, folds or unfolds, splits, or makes room for the
+    /// station panel beside it, rather than being rebuilt from the screen size
+    /// (which is not the window size in split screen).
+    func loadContent() {
         let view = UIView()
         view.backgroundColor = .white
+        mapView.frame = view.bounds
+        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(mapView)
 
         // MARK: closestStationView
@@ -278,13 +279,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         indexSelectorView.snp.makeConstraints { (make) -> Void in
             indexSelectorBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
                 .offset(Self.bannerClearance(isPro: isPro)).constraint
-            make.width.equalTo(view.safeAreaLayoutGuide.snp.width)
             make.height.equalTo(IndexSelectorView.preferredHeight)
-            if width > 610 {
-                make.left.equalTo(view.snp.left).offset(width/2 - 305)
-            } else {
-                make.left.equalTo(view.safeAreaLayoutGuide.snp.left)
-            }
+            // Centred at its natural width when there is room, otherwise the
+            // full width and scrolling.
+            make.centerX.equalTo(view.safeAreaLayoutGuide.snp.centerX)
+            make.width.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.width)
+            make.width.equalTo(indexSelectorView.contentSize.width).priority(.high)
         }
 
         // MARK: My Location Button
@@ -399,6 +399,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         // Prepare a map
         mapView.isMyLocationEnabled = true
         mapView.settings.compassButton = true
+        // Exposes the markers, by their titles, to VoiceOver.
+        mapView.accessibilityElementsHidden = false
         // mapView.settings.myLocationButton = true
 
         if self.traitCollection.userInterfaceStyle == .dark {
@@ -444,14 +446,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        if UIDevice.current.orientation.isLandscape {
-            print("Landscape", size.width, UIDevice.current.orientation, screenSize)
-            loadContent(width: size.width, height: size.height, isLandscape: true)
-        } else {
-            print("Portrait", size, UIDevice.current.orientation, screenSize)
-            loadContent(width: size.width, height: size.height, isLandscape: false)
-        }
-
         self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
 
         TrackingManager.logEvent(eventName: "change_device_orientation", parameters: [
@@ -481,6 +475,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             "nameLocal": pollutant.nameLocal,
             "stationId": pollutant.stationId,
         ])
+
+        if let onStationSelected = onStationSelected {
+            onStationSelected(pollutant.stationId)
+            return true
+        }
 
         let detailsView = DetailsView(stationId: pollutant.stationId)
         let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
@@ -520,12 +519,14 @@ struct GoogleMapController: UIViewControllerRepresentable {
 
     typealias UIViewControllerType = GoogleMapViewController
 
+    var onStationSelected: ((Int) -> Void)?
+
     func makeUIViewController(context: UIViewControllerRepresentableContext<GoogleMapController>) -> GoogleMapViewController {
         // Create the `GoogleMapViewController`.
         return GoogleMapViewController()
     }
 
     func updateUIViewController(_ uiViewController: GoogleMapViewController, context: UIViewControllerRepresentableContext<GoogleMapController>) {
-        // Update the view controller.
+        uiViewController.onStationSelected = onStationSelected
     }
 }
