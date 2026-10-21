@@ -61,8 +61,14 @@ enum DefinitionPages: String, CaseIterable, Identifiable {
         let keys = self == .aqi
             ? ["what", "measure", "tips"]
             : ["what", "sources", "health", "measure", "tips"]
+        // Built as Strings first. An interpolated literal passed straight to
+        // LocalizedStringKey becomes a format key ("Guide.%@.%@") with the
+        // values as arguments, which matches nothing in Localizable.strings
+        // and shows the raw key on screen.
         return keys.map { key in
-            (LocalizedStringKey("Guide.section_\(key)"), LocalizedStringKey("Guide.\(rawValue).\(key)"))
+            let header = "Guide.section_\(key)"
+            let body = "Guide.\(rawValue).\(key)"
+            return (LocalizedStringKey(header), LocalizedStringKey(body))
         }
     }
 
