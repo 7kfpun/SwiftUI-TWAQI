@@ -75,6 +75,16 @@ Upload text metadata only to App Store Connect for 3.0.1
 
 Does not touch the binary, the screenshots, or the review submission
 
+### ios release_build
+
+```sh
+[bundle exec] fastlane ios release_build
+```
+
+Archive a Release build of 3.0.1 and upload it to App Store Connect
+
+Bumps every target's build number past the latest one on TestFlight. Never submits for review
+
 ### ios screenshots
 
 ```sh
