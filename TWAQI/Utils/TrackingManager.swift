@@ -6,7 +6,9 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Firebase
+import FirebaseAnalytics
+import FirebaseCore
+import FirebaseCrashlytics
 import Foundation
 
 struct TrackingManager {

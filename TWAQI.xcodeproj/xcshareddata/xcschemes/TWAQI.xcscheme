@@ -52,6 +52,16 @@
                ReferencedContainer = "container:TWAQI.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AAAF37BA48D83925FEB0B63F"
+               BuildableName = "TWAQIUITests.xctest"
+               BlueprintName = "TWAQIUITests"
+               ReferencedContainer = "container:TWAQI.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -13,10 +13,9 @@ target 'TWAQI' do
   pod 'SwiftDate', '~> 6.1'
   pod 'SwiftyJSON', '~> 5.0'
 
-  pod 'Firebase', '~> 12.17'
-  pod 'Firebase/Analytics'
-  pod 'Firebase/Crashlytics'
-  # Google decoupled AdMob from the Firebase pod bundle; it's a standalone pod now.
+  # Firebase (Analytics, Crashlytics) comes from Swift Package Manager, added
+  # in the Xcode project: Firebase stopped publishing to CocoaPods after
+  # October 2026. Nothing left here shares a dependency with it.
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
   pod 'Bugsnag', '~> 5.23'

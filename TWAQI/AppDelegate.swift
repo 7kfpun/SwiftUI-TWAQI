@@ -9,7 +9,7 @@
 import UIKit
 
 import Bugsnag
-import Firebase
+import FirebaseCore
 import GoogleMaps
 import GoogleMobileAds
 import OneSignal
