@@ -100,6 +100,7 @@ GoogleService-Info.plist
 context/
 fastlane/.frameit_work/
 fastlane/.watch_upload/
+fastlane/.duo_upload/
 
 # Firebase Hosting
 .firebase/

@@ -40,6 +40,8 @@ WORK_ROOT = File.join(ROOT, "fastlane/.frameit_work")
 SCREENSHOTS_DIR = File.join(ROOT, "fastlane/screenshots")
 # Just the watch images, staged for upload_watch_screenshots. Wiped on every run.
 WATCH_UPLOAD_DIR = File.join(ROOT, "fastlane/.watch_upload")
+# Just the iPhone Duo images, staged for upload_duo_screenshots. Wiped on every run.
+DUO_UPLOAD_DIR = File.join(ROOT, "fastlane/.duo_upload")
 METADATA_DIR = File.join(ROOT, "fastlane/metadata")
 
 # --- Marketing banner styling -------------------------------------------------
@@ -75,7 +77,10 @@ LOCALES = {
       "iPhone_6.9_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPhone_6.9_02" => ["Know before you go out.", "AQI, pollutants and health advice."],
       "iPad_13_01"    => ["Every station. One map.", "Live AQI from across Taiwan."],
-      "iPad_13_02"    => ["Know before you go out.", "AQI, pollutants and health advice."]
+      "iPad_13_02"    => ["Know before you go out.", "AQI, pollutants and health advice."],
+      "iPhone_Duo_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPhone_Duo_02" => ["Map and station, side by side.", "Unfold to see every reading at a glance."],
+      "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."]
     }
   },
   "zh-Hant" => {
@@ -85,7 +90,10 @@ LOCALES = {
       "iPhone_6.9_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPhone_6.9_02" => ["出門前，先看空氣", "AQI、污染物與健康建議"],
       "iPad_13_01"    => ["全台測站，一眼掌握", "即時空氣品質地圖"],
-      "iPad_13_02"    => ["出門前，先看空氣", "AQI、污染物與健康建議"]
+      "iPad_13_02"    => ["出門前，先看空氣", "AQI、污染物與健康建議"],
+      "iPhone_Duo_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPhone_Duo_02" => ["展開手機，地圖與測站並排", "一眼看完所有數據"],
+      "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"]
     }
   }
 }.freeze
@@ -99,6 +107,10 @@ LOCALES = {
 IPHONE_TARGET = [1320, 2868] # 6.9" display
 IPAD_TARGET   = [2048, 2732] # 13" display
 WATCH_TARGET  = [416, 496]   # 46mm, filed by deliver as Series 10
+# iPhone Duo, unfolded, landscape. App Store Connect also takes 2853x2007, the
+# inner display's native size, but fastlane 2.241 only files 2034x1398 and
+# 1398x2034 under APP_IPHONE_DUO and would reject anything else.
+DUO_TARGET    = [2034, 1398]
 
 platform :ios do
   desc "Frame the raw captures in #{RAW_ROOT}/<locale> into App Store sized PNGs"
@@ -124,6 +136,26 @@ platform :ios do
 
     UI.user_error!("No captures found under #{RAW_ROOT}/<locale>/") if produced.zero?
     UI.success("#{produced} screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Frame only the iPhone Duo captures (fastlane/screenshots_raw/<locale>/iPhone Duo NN.png)"
+  desc "Leaves the iPhone, iPad and watch screenshots already framed alone"
+  lane :frame_duo_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      sources = Dir["#{RAW_ROOT}/#{locale}/iPhone Duo *.png"].sort
+      next if sources.empty?
+
+      work_dir = File.join(WORK_ROOT, locale)
+      out_dir = File.join(SCREENSHOTS_DIR, locale)
+      sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+      produced += frame_duo(locale, config, sources, work_dir, out_dir)
+    end
+
+    UI.user_error!("No 'iPhone Duo NN.png' captures under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} iPhone Duo screenshot(s) written under #{SCREENSHOTS_DIR}")
   end
 
   desc "Upload screenshots only to App Store Connect for #{APP_VERSION}"
@@ -182,6 +214,41 @@ platform :ios do
       # set for each locale it touches, iPhone and iPad included, and this
       # directory only holds the watch. Images already uploaded are matched by
       # checksum and skipped, so a rerun doesn't duplicate them.
+      overwrite_screenshots: false,
+
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Upload the iPhone Duo screenshots only to App Store Connect for #{APP_VERSION}"
+  desc "Leaves the iPhone, iPad and watch screenshots already on the version alone"
+  lane :upload_duo_screenshots do
+    sh("rm -rf '#{DUO_UPLOAD_DIR}'")
+    staged = 0
+    LOCALES.each_key do |locale|
+      duo = Dir["#{SCREENSHOTS_DIR}/#{locale}/iPhone_Duo_*.png"].sort
+      next if duo.empty?
+
+      sh("mkdir -p '#{DUO_UPLOAD_DIR}/#{locale}'")
+      duo.each { |png| sh("cp '#{png}' '#{DUO_UPLOAD_DIR}/#{locale}/'") }
+      staged += duo.count
+    end
+    UI.user_error!("No iPhone_Duo_*.png under #{SCREENSHOTS_DIR}: run frame_duo_screenshots first") if staged.zero?
+
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      screenshots_path: DUO_UPLOAD_DIR,
+
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+
+      # Off for the same reason as upload_watch_screenshots: overwrite deletes
+      # every display type's set in each locale it touches, and this directory
+      # only holds the Duo.
       overwrite_screenshots: false,
 
       submit_for_review: false,
@@ -259,6 +326,9 @@ def frame_locale(locale, config, sources)
   sh("mkdir -p '#{work_dir}' '#{out_dir}'")
 
   watch_sources, sources = sources.partition { |src| File.basename(src).start_with?("Apple Watch") }
+  # frameit has no iPhone Duo bezel and no Duo screen size, so those are framed
+  # separately below.
+  duo_sources, sources = sources.partition { |src| File.basename(src).start_with?("iPhone Duo") }
 
   # Stage the captures under names frameit can resolve to a device.
   #
@@ -360,7 +430,89 @@ def frame_locale(locale, config, sources)
     written += 1
   end
 
+  written += frame_duo(locale, config, duo_sources, work_dir, out_dir) unless duo_sources.empty?
   written + copy_watch(locale, watch_sources, out_dir)
+end
+
+# Frames one locale's iPhone Duo captures onto the same gradient and copy as
+# the other devices. frameit publishes no Duo bezel, so the device is drawn
+# here: the capture with rounded corners inside a dark rounded body, with a
+# soft shadow. Returns how many images it wrote.
+def frame_duo(locale, config, sources, work_dir, out_dir)
+  w, h = DUO_TARGET
+  sh("rm -f '#{out_dir}'/iPhone_Duo_*.png")
+
+  sources.each_with_index do |src, i|
+    name = format("iPhone_Duo_%02d", i + 1)
+    out = File.join(out_dir, "#{name}.png")
+    tmp = File.join(work_dir, name)
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    # Landscape canvas: the copy takes less of the height than on the
+    # portrait devices, so the device stays as large as possible.
+    side       = (w * 0.06).round
+    top_pad    = (h * 0.05).round
+    line_gap   = (h * 0.015).round
+    text_gap   = (h * 0.035).round
+    bottom_pad = (h * 0.05).round
+    text_width = w - side * 2
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(h * 0.062).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(h * 0.034).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    device_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_w = text_width
+    box_h = h - device_top - bottom_pad
+
+    # The body adds a bezel on every side; size the screen so the whole device
+    # fits the box.
+    bezel = (box_h * 0.025).round
+    sh("magick '#{src}' -auto-orient -filter Lanczos " \
+       "-resize #{box_w - bezel * 2}x#{box_h - bezel * 2} '#{tmp}_screen.png'")
+    sw, shh = `magick identify -format '%w %h' '#{tmp}_screen.png'`.strip.split.map(&:to_i)
+    radius = (shh * 0.045).round
+
+    sh("magick -size #{sw}x#{shh} xc:black -fill white " \
+       "-draw 'roundrectangle 0,0,#{sw - 1},#{shh - 1},#{radius},#{radius}' '#{tmp}_mask.png'")
+    sh("magick '#{tmp}_screen.png' '#{tmp}_mask.png' -alpha off -compose CopyOpacity -composite '#{tmp}_rs.png'")
+
+    dw = sw + bezel * 2
+    dh = shh + bezel * 2
+    sh("magick -size #{dw}x#{dh} xc:none -fill '#1C1C1E' " \
+       "-draw 'roundrectangle 0,0,#{dw - 1},#{dh - 1},#{radius + bezel},#{radius + bezel}' " \
+       "'#{tmp}_rs.png' -geometry +#{bezel}+#{bezel} -composite '#{tmp}_body.png'")
+    sh("magick '#{tmp}_body.png' \\( +clone -background black -shadow 35x#{(bezel * 0.8).round}+0+#{(bezel * 0.5).round} \\) " \
+       "+swap -background none -layers merge +repage '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{device_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+  end
+  sources.count
 end
 
 # Watch captures need no bezel or copy, only the alpha channel dropped: App
