@@ -131,6 +131,9 @@
 "Watch.widget_face %@" = "%@ (face)";
 "Watch.widget_status %@" = "%@ (status)";
 "Watch.widget_no_station %@" = "%@, no station";
+
+"Widget.widget_name" = "Air quality";
+"Widget.widget_description" = "Current AQI at your nearest or pinned station.";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";

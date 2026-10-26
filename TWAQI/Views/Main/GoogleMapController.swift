@@ -194,6 +194,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             case .success(let result):
                 print("callGetCurrentPollutantsApi Total: \(result.count)")
                 self.countryPollutants[countryCode] = result
+                WidgetBridge.publish(
+                    pollutants: self.countryPollutants.values.flatMap { $0 },
+                    closest: self.closestPollutant
+                )
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -370,6 +374,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         if let closestPollutant = tempClosestPollutant {
             print("checkClosestStation", closestPollutant)
             self.closestPollutant = closestPollutant
+            WidgetBridge.publish(
+                pollutants: self.countryPollutants.values.flatMap { $0 },
+                closest: closestPollutant
+            )
         }
     }
 

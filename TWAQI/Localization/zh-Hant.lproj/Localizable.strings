@@ -135,6 +135,9 @@
 "Watch.widget_face %@" = "%@（表情）";
 "Watch.widget_status %@" = "%@（狀態）";
 "Watch.widget_no_station %@" = "%@，不含測站";
+
+"Widget.widget_name" = "空氣品質";
+"Widget.widget_description" = "顯示最近或已選測站的目前 AQI。";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";

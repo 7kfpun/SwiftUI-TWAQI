@@ -1,0 +1,52 @@
+//
+//  WidgetBridge.swift
+//  TWAQI
+//
+//  Created by kf on 26/10/26.
+//  Copyright © 2026 kf. All rights reserved.
+//
+
+import Foundation
+import WidgetKit
+
+/// Publishes the phone's current station reading into the app group so Home
+/// Screen and Lock Screen widgets (and, via the same keys, Watch complications)
+/// can show it offline.
+///
+/// **Keys (reused from `WatchStore`, not a parallel `WidgetStore`):**
+/// - `pinnedStationId` — left alone here; the Watch app owns an explicit pin.
+/// - `latestReading` — last reading the phone wants widgets to show (closest,
+///   or the pinned station when it matches).
+/// - `homeReading` — the closest station the map last resolved.
+enum WidgetBridge {
+    static func publish(closest pollutant: Pollutant?) {
+        guard let pollutant else { return }
+
+        let reading = WatchReading(pollutant)
+        WatchStore.homeReading = reading
+
+        if let pinned = WatchStore.pinnedStationId, pinned != pollutant.stationId {
+            // A Watch-chosen pin differs from the map's closest station: keep
+            // home updated, leave latestReading for the widget timeline fetch.
+        } else {
+            WatchStore.latestReading = reading
+        }
+
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// When pollutants reload, refresh the cached reading for a pinned station
+    /// if that station is in the payload.
+    static func publish(pollutants: Pollutants, closest: Pollutant?) {
+        if let pinned = WatchStore.pinnedStationId,
+           let match = pollutants.first(where: { $0.stationId == pinned }) {
+            WatchStore.latestReading = WatchReading(match)
+            if let closest {
+                WatchStore.homeReading = WatchReading(closest)
+            }
+            WidgetCenter.shared.reloadAllTimelines()
+            return
+        }
+        publish(closest: closest)
+    }
+}
