@@ -6,6 +6,7 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
+import LinkPresentation
 import SwiftUI
 import UIKit
 
@@ -30,7 +31,7 @@ enum ShareCardSharing {
             "AirStatus.\(status.rawValue)".localized
         )
 
-        present(items: [image, "\(message)\n\(appStoreURL.absoluteString)"])
+        present(items: [CardItemSource(image: image, title: message), "\(message)\n\(appStoreURL.absoluteString)"])
 
         TrackingManager.logEvent(eventName: "share_card", parameters: [
             "stationId": stationId,
@@ -89,5 +90,37 @@ enum ShareCardSharing {
             top = presented
         }
         return top
+    }
+}
+
+/// The card as a share-sheet item. Handing over a bare `UIImage` alongside the
+/// text let the sheet pick the text for its header, which showed a generic
+/// text icon; this supplies the card itself as the preview.
+private final class CardItemSource: NSObject, UIActivityItemSource {
+    private let image: UIImage
+    private let title: String
+
+    init(image: UIImage, title: String) {
+        self.image = image
+        self.title = title
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        image
+    }
+
+    func activityViewController(
+        _ activityViewController: UIActivityViewController,
+        itemForActivityType activityType: UIActivity.ActivityType?
+    ) -> Any? {
+        image
+    }
+
+    func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
+        let metadata = LPLinkMetadata()
+        metadata.title = title
+        metadata.imageProvider = NSItemProvider(object: image)
+        metadata.iconProvider = NSItemProvider(object: image)
+        return metadata
     }
 }
