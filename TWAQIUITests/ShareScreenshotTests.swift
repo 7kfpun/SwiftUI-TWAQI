@@ -72,6 +72,13 @@ final class ShareScreenshotTests: XCTestCase {
         settle()
 
         share.tap()
+        // The share sheet's own list of actions; its accessibility identifier
+        // has been "ActivityListView" since iOS 13.
+        let sheet = app.otherElements["ActivityListView"].firstMatch
+        if !sheet.waitForExistence(timeout: 15) {
+            print("SHARE-DEBUG\n\(app.debugDescription)")
+            XCTFail("Share sheet did not open")
+        }
         settle()
         snapshot()
     }
