@@ -51,6 +51,7 @@
 		7F3ECAFC997F89C40EAC1870 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		8249C2C83B32D720E58F53D6 /* TWAQIWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */; };
 		836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */; };
 		84D7C82DBEE6A091FDCF2DEF /* WindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE775C56385FDE2BC07B4BB /* WindView.swift */; };
 		86F92823879FB3432595D812 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 369428456E755810656C6624 /* Foundation.framework */; };
 		889DDC5B1F30E2ED74BA565B /* WatchAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93D2C90EF31D7DA04FB6444 /* WatchAPI.swift */; };
@@ -77,6 +78,8 @@
 		9E1AC555233F99F600AC862D /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC554233F99F600AC862D /* MainView.swift */; };
 		9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC55D233F9A5000AC862D /* HelpView.swift */; };
 		9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC560233F9A8500AC862D /* DetailsView.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E12 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E14 /* ShareCardSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */; };
 		9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC563233F9AC100AC862D /* DetailsListView.swift */; };
 		9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
 		9E1C9B14238974120052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
@@ -159,6 +162,7 @@
 		F72539BC90E373EA047A4FEF /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
 		F84590CCFCE369C4F2850862 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3A29346F1E1C85233A4C40C9 /* FirebaseCrashlytics */; };
 		F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */; };
 		FA00031F472BB3EEFB8D525F /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		FA5DA2BD0F7DC4F1239EA042 /* StationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA61685800F418B19D88A /* StationRow.swift */; };
 		FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A225060AF021643D29C12E0 /* StationParsingTests.swift */; };
@@ -280,6 +284,7 @@
 		86FA45BEECC6913EE327B3C3 /* HealthGuidanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthGuidanceView.swift; sourceTree = "<group>"; };
 		89FC168EDE496D71C4BDD43B /* TWAQIWatchWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TWAQIWatchWidget.entitlements; sourceTree = "<group>"; };
 		908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiTrendTests.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardTests.swift; sourceTree = "<group>"; };
 		912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIWatchWidget.swift; sourceTree = "<group>"; };
 		913DCC07EB40441B55E33524 /* TWAQIWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIWatchApp.swift; sourceTree = "<group>"; };
 		93FB56415FD83DC84897131A /* TWAQITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TWAQITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -303,6 +308,8 @@
 		9E1AC554233F99F600AC862D /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		9E1AC55D233F9A5000AC862D /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		9E1AC560233F9A8500AC862D /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardSharing.swift; sourceTree = "<group>"; };
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
@@ -366,6 +373,7 @@
 		C010742C26EB22699FF566A3 /* PaywallView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		CD383AA3C04F105BD89983D7 /* Locator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Locator.swift; sourceTree = "<group>"; };
 		CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuoScreenshotTests.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareScreenshotTests.swift; sourceTree = "<group>"; };
 		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
 		D92DB7F473AB70324C3565E8 /* WatchPro.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchPro.swift; sourceTree = "<group>"; };
 		DF13A9AEE12BB503E5C3EA73 /* Pods-TWAQI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.debug.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.debug.xcconfig"; sourceTree = "<group>"; };
@@ -460,6 +468,7 @@
 			children = (
 				64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */,
 				908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */,
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
@@ -626,6 +635,7 @@
 				9E1AC563233F9AC100AC862D /* DetailsListView.swift */,
 				9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */,
 				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */,
 				9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */,
 				9E794A682340A6090064D874 /* SettingsRow.swift */,
 				9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */,
@@ -657,6 +667,7 @@
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
 				32CD323794AA44C233EB7C35 /* WidgetBridge.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -740,6 +751,7 @@
 			isa = PBXGroup;
 			children = (
 				CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */,
 			);
 			path = TWAQIUITests;
 			sourceTree = "<group>";
@@ -1227,6 +1239,7 @@
 			files = (
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */,
 				FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */,
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
 				56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */,
@@ -1297,6 +1310,8 @@
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9EF7A32A2386FC8700FF410C /* HelpViewModel.swift in Sources */,
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E12 /* ShareCardView.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E14 /* ShareCardSharing.swift in Sources */,
 				9EF3D3482393B318009CED32 /* APIResponses.swift in Sources */,
 				9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */,
 				9E942E3C2372CA4B0010915D /* LocaleExtension.swift in Sources */,
@@ -1371,6 +1386,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

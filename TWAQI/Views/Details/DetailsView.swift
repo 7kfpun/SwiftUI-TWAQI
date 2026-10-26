@@ -33,11 +33,41 @@ struct DetailsView: View {
         if let onClose = onClose {
             page.navigationBarItems(
                 leading: Button(action: onClose) { Image(systemName: "xmark") },
-                trailing: favouriteButton
+                trailing: trailingButtons
             )
         } else {
-            page.navigationBarItems(trailing: favouriteButton)
+            page.navigationBarItems(trailing: trailingButtons)
         }
+    }
+
+    private var trailingButtons: some View {
+        HStack(spacing: 20) {
+            shareButton
+            favouriteButton
+        }
+    }
+
+    /// Disabled until there is a reading: a card saying "—" is not worth
+    /// sending anyone.
+    private var shareButton: some View {
+        Button(action: { ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId) }) {
+            Image(systemName: "square.and.arrow.up")
+        }
+        .buttonStyle(PlainButtonStyle())
+        .disabled(currentAqi <= 0)
+        .accessibilityLabel(Text("Share.share"))
+    }
+
+    private var shareCard: ShareCardView {
+        let pollutant = viewModel.pollutant
+
+        return ShareCardView(
+            title: stationTitle,
+            locality: pollutant?.displayLocality,
+            aqi: currentAqi,
+            pollutant: pollutant,
+            publishTime: viewModel.latestPublishTime
+        )
     }
 
     private var favouriteButton: some View {
@@ -144,13 +174,17 @@ struct DetailsView: View {
         viewModel.pollutant?.aqi ?? viewModel.historicalPollutants.last?.aqi ?? 0
     }
 
+    private var stationTitle: String {
+        viewModel.pollutant?.displayName
+            ?? viewModel.station.map { Locale.isChinese ? $0.nameLocal : $0.name }
+            ?? ""
+    }
+
     private var header: some View {
         let pollutant = viewModel.pollutant
 
         return StationHeaderView(
-            title: pollutant?.displayName
-                ?? viewModel.station.map { Locale.isChinese ? $0.nameLocal : $0.name }
-                ?? "",
+            title: stationTitle,
             locality: pollutant?.displayLocality,
             area: pollutant?.displayArea,
             stationType: pollutant?.stationType ?? .unknown,

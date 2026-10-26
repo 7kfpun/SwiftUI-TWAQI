@@ -125,6 +125,10 @@
 "Details.health_advice" = "健康建議";
 "Details.notifications" = "通知";
 
+/* Share card */
+"Share.share" = "分享";
+"Share.message" = "%1$@：AQI %2$d，%3$@ — 來自 Taiwan Air";
+
 /* Watch */
 "Watch.stations" = "測站";
 "Watch.loading_failed" = "無法載入資料";
