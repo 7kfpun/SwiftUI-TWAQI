@@ -1,0 +1,52 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      github.event.pull_request.draft == false &&
+      startsWith(github.head_ref, 'feature/') &&
+      github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Claude PR review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request for a SwiftUI iOS app (Taiwan air quality, with WidgetKit widgets).
+            Focus on, in priority order:
+            1. Correctness bugs and crashes: force unwraps, optional handling, off-by-one, bad date/time-zone logic, Codable decoding mismatches.
+            2. Concurrency: main-actor UI updates, async/await and Task misuse, data races, Sendable issues.
+            3. SwiftUI: state ownership (@State/@StateObject/@ObservedObject/@Observable), unnecessary view re-renders, memory/retain cycles in closures.
+            4. Widgets/extensions: timeline reload policy, App Group data sharing, memory limits.
+            5. Networking/security: error handling, hardcoded secrets or keys, insecure HTTP.
+            6. Localization (strings not hardcoded) and accessibility.
+
+            Be concise. Only flag real issues — no style nitpicks a linter would catch.
+            Use inline comments (mcp__github_inline_comment__create_inline_comment) for specific lines,
+            and `gh pr comment` for a short top-level summary.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
