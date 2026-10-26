@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Unit tests
+    if: >-
+      github.event.pull_request.draft == false &&
+      startsWith(github.head_ref, 'feature/') &&
+      github.base_ref == 'master'
+    runs-on: macos-latest
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      COCOAPODS_DISABLE_STATS: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Xcode
+        run: xcodebuild -version
+
+      - name: Prepare gitignored config
+        run: |
+          set -euo pipefail
+          # The project will not build without these, and they are gitignored
+          # because they hold local API keys. Example values are enough to
+          # compile and launch the host app for unit tests.
+          cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
+          cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
+          cat > TWAQI/GoogleService-Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>API_KEY</key>
+            <string>ci-placeholder</string>
+            <key>GCM_SENDER_ID</key>
+            <string>123456789012</string>
+            <key>PLIST_VERSION</key>
+            <string>1</string>
+            <key>BUNDLE_ID</key>
+            <string>com.kfpun.twaqi</string>
+            <key>PROJECT_ID</key>
+            <string>ci-placeholder</string>
+            <key>STORAGE_BUCKET</key>
+            <string>ci-placeholder.appspot.com</string>
+            <key>IS_ADS_ENABLED</key>
+            <false/>
+            <key>IS_ANALYTICS_ENABLED</key>
+            <false/>
+            <key>IS_APPINVITE_ENABLED</key>
+            <true/>
+            <key>IS_GCM_ENABLED</key>
+            <true/>
+            <key>IS_SIGNIN_ENABLED</key>
+            <true/>
+            <key>GOOGLE_APP_ID</key>
+            <string>1:123456789012:ios:abcdefabcdefabcdefabcdef</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Install CocoaPods dependencies
+        run: |
+          set -euo pipefail
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods -N
+          fi
+          pod install
+
+      - name: Run unit tests
+        run: |
+          set -euo pipefail
+          # generic/platform=iOS Simulator cannot execute tests. Pick an
+          # installed iPhone simulator instead of pinning a model name.
+          device="$(
+            xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          names = []
+          for runtime, devices in data.get("devices", {}).items():
+              if "iOS" not in runtime:
+                  continue
+              for device in devices:
+                  name = device.get("name", "")
+                  if device.get("isAvailable") and name.startswith("iPhone"):
+                      names.append(name)
+          plain = [name for name in names if len(name.split()) == 2]
+          pool = plain or names
+          if not pool:
+              sys.exit("No available iPhone simulator")
+          def model(name):
+              try:
+                  return int(name.split()[1])
+              except (IndexError, ValueError):
+                  return -1
+          print(sorted(pool, key=model)[-1])
+          '
+          )"
+          echo "Using iOS Simulator: ${device}"
+          xcodebuild test \
+            -workspace TWAQI.xcworkspace \
+            -scheme TWAQI \
+            -destination "platform=iOS Simulator,name=${device},OS=latest" \
+            -only-testing:TWAQITests \
+            -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+  vulnerability-checks:
+    name: Vulnerability checks
+    if: >-
+      github.event.pull_request.draft == false &&
+      startsWith(github.head_ref, 'feature/') &&
+      github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret scan
+        uses: trufflesecurity/trufflehog@v3.99.7
+        with:
+          # Pin the image. The action already passes --fail. TruffleHog has
+          # no severity gate, so any finding (verified, unknown, or
+          # unverified) fails the job. On pull_request it scans commits
+          # between the base and head SHAs.
+          version: v3.99.7
+
+      - name: Install osv-scanner
+        run: |
+          set -euo pipefail
+          version=v2.7.0
+          case "$(uname -m)" in
+            x86_64)
+              asset=osv-scanner_linux_amd64
+              sum=160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b
+              ;;
+            aarch64)
+              asset=osv-scanner_linux_arm64
+              sum=4061ef4c021ed3c47f203b818f337e351336cc5cd67c0274fc36bd1dfc728dd7
+              ;;
+            *)
+              echo "Unsupported architecture: $(uname -m)" >&2
+              exit 1
+              ;;
+          esac
+          curl -sSfL -o osv-scanner "https://github.com/google/osv-scanner/releases/download/${version}/${asset}"
+          echo "${sum}  osv-scanner" | sha256sum -c -
+          chmod +x osv-scanner
+          sudo mv osv-scanner /usr/local/bin/osv-scanner
+
+      - name: Scan CocoaPods and Swift Package lockfiles
+        run: |
+          set -euo pipefail
+          # osv-scanner exits 1 when it finds a known vulnerable package.
+          # It has no severity gate, so low findings fail the job too.
+          # The table it prints is the report.
+          osv-scanner scan source \
+            --lockfile=Podfile.lock \
+            --lockfile=TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
