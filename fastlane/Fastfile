@@ -76,11 +76,14 @@ LOCALES = {
     titles: {
       "iPhone_6.9_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPhone_6.9_02" => ["Know before you go out.", "AQI, pollutants and health advice."],
+      "iPhone_6.9_03" => ["Share the air you breathe.", "Send any station's reading as a card."],
       "iPad_13_01"    => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPad_13_02"    => ["Know before you go out.", "AQI, pollutants and health advice."],
+      "iPad_13_03"    => ["Share the air you breathe.", "Send any station's reading as a card."],
       "iPhone_Duo_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPhone_Duo_02" => ["Map and station, side by side.", "Unfold to see every reading at a glance."],
-      "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."]
+      "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."],
+      "iPhone_Duo_04" => ["Share the air you breathe.", "Send any station's reading as a card."]
     }
   },
   "zh-Hant" => {
@@ -89,11 +92,14 @@ LOCALES = {
     titles: {
       "iPhone_6.9_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPhone_6.9_02" => ["出門前，先看空氣", "AQI、污染物與健康建議"],
+      "iPhone_6.9_03" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
       "iPad_13_01"    => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPad_13_02"    => ["出門前，先看空氣", "AQI、污染物與健康建議"],
+      "iPad_13_03"    => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
       "iPhone_Duo_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPhone_Duo_02" => ["展開手機，地圖與測站並排", "一眼看完所有數據"],
-      "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"]
+      "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"],
+      "iPhone_Duo_04" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"]
     }
   }
 }.freeze
