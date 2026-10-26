@@ -121,6 +121,10 @@
 "Details.health_advice" = "Health advice";
 "Details.notifications" = "Notifications";
 
+/* Share card */
+"Share.share" = "Share";
+"Share.message" = "%1$@: AQI %2$d, %3$@ — via Taiwan Air";
+
 /* Watch */
 "Watch.stations" = "Stations";
 "Watch.loading_failed" = "Couldn't load readings";
