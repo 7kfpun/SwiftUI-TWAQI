@@ -45,7 +45,9 @@ jobs:
           <plist version="1.0">
           <dict>
             <key>API_KEY</key>
-            <string>ci-placeholder</string>
+            <!-- 39 chars, starts with A, not an AIza key. Firebase Installations
+                 rejects anything else and crashes the test host at launch. -->
+            <string>AciPlaceholderKeyForUnitTests0000000000</string>
             <key>GCM_SENDER_ID</key>
             <string>123456789012</string>
             <key>PLIST_VERSION</key>
@@ -136,11 +138,10 @@ jobs:
       - name: Secret scan
         uses: trufflesecurity/trufflehog@v3.99.7
         with:
-          # Pin the image. The action already passes --fail. TruffleHog has
-          # no severity gate, so any finding (verified, unknown, or
-          # unverified) fails the job. On pull_request it scans commits
-          # between the base and head SHAs.
-          version: v3.99.7
+          # GHCR tags have no v prefix (3.99.7, not v3.99.7). The action
+          # already passes --fail. TruffleHog has no severity gate, so any
+          # finding fails the job. On pull_request it scans base..head.
+          version: "3.99.7"
 
       - name: Install osv-scanner
         run: |
