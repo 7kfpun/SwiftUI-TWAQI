@@ -224,3 +224,25 @@
 "Guide.no2.health" = "使呼吸道發炎、降低對呼吸道感染的抵抗力；長期暴露與兒童罹患氣喘有關。它也會參與生成臭氧與 PM2.5。";
 "Guide.no2.measure" = "單位為 ppb（十億分之一），AQI 採最新一小時的數值。";
 "Guide.no2.tips" = "盡量在離大馬路一個街區外的巷道步行、跑步或騎車，並避開尖峰時段。";
+
+/* visionOS */
+"Vision.map_unavailable" = "無法顯示地圖";
+"Vision.offline" = "離線";
+"Vision.refresh" = "重新整理";
+"Vision.index" = "指標";
+"Vision.tabletop" = "桌面模式";
+"Vision.wind" = "風向";
+"Vision.stations" = "測站";
+"Vision.nearest" = "最近";
+"Vision.nearest_station" = "最近的測站";
+"Vision.find_nearest" = "尋找最近的測站";
+"Vision.close" = "關閉";
+"Vision.details" = "詳細資料";
+"Vision.pin" = "釘選";
+"Vision.unpin" = "取消釘選";
+"Vision.show_on_map" = "在地圖上顯示";
+"Vision.open_in_new_window" = "在新視窗開啟";
+"Vision.drag_to_pin" = "拖出即可釘選在你的空間";
+"Vision.about" = "關於";
+"Vision.version" = "版本";
+"Vision.map_data" = "海岸線：Natural Earth。地形高度：Mapzen Terrain Tiles（SRTM、GMTED、ETOPO1 等），經由 AWS Open Data 提供。";

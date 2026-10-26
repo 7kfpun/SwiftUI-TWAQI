@@ -6,7 +6,6 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import SwiftDate
 import SwiftUI
 
 /// Last 24 hours of air quality, answering one question: is it getting better
@@ -261,8 +260,10 @@ struct DetailsHistoryView: View {
     }
 
     private func label(at index: Int) -> String {
-        guard points.indices.contains(index) else { return "" }
-        return points[index].time.toDate()?.toFormat("HH:mm") ?? ""
+        // Same formatter as the watch, so this view needs no SwiftDate and can
+        // be shared with the visionOS app.
+        guard points.indices.contains(index), Date.fromApi(points[index].time) != nil else { return "" }
+        return points[index].time.asPublishTime
     }
 
     init(historicalPollutants: HistoricalPollutants, airIndexType: AirIndexTypes = .aqi) {
