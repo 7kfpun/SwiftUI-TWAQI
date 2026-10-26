@@ -2,7 +2,7 @@ require "shellwords"
 
 default_platform(:ios)
 
-APP_VERSION = "3.0.1"
+APP_VERSION = "3.1.0"
 
 # fastlane runs with the working directory set to fastlane/, not the repo root,
 # and `sh` inherits that. Anchor every path to an absolute root so nothing

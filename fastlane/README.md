@@ -41,7 +41,7 @@ Leaves the iPhone, iPad and watch screenshots already framed alone
 [bundle exec] fastlane ios upload_screenshots
 ```
 
-Upload screenshots only to App Store Connect for 3.0.1
+Upload screenshots only to App Store Connect for 3.1.0
 
 Does not touch the binary, the metadata, or the review submission
 
@@ -51,7 +51,7 @@ Does not touch the binary, the metadata, or the review submission
 [bundle exec] fastlane ios upload_watch_screenshots
 ```
 
-Upload the Apple Watch screenshots only to App Store Connect for 3.0.1
+Upload the Apple Watch screenshots only to App Store Connect for 3.1.0
 
 Leaves the iPhone and iPad screenshots already on the version alone
 
@@ -61,7 +61,7 @@ Leaves the iPhone and iPad screenshots already on the version alone
 [bundle exec] fastlane ios upload_duo_screenshots
 ```
 
-Upload the iPhone Duo screenshots only to App Store Connect for 3.0.1
+Upload the iPhone Duo screenshots only to App Store Connect for 3.1.0
 
 Leaves the iPhone, iPad and watch screenshots already on the version alone
 
@@ -71,7 +71,7 @@ Leaves the iPhone, iPad and watch screenshots already on the version alone
 [bundle exec] fastlane ios upload_metadata
 ```
 
-Upload text metadata only to App Store Connect for 3.0.1
+Upload text metadata only to App Store Connect for 3.1.0
 
 Does not touch the binary, the screenshots, or the review submission
 
@@ -81,7 +81,7 @@ Does not touch the binary, the screenshots, or the review submission
 [bundle exec] fastlane ios release_build
 ```
 
-Archive a Release build of 3.0.1 and upload it to App Store Connect
+Archive a Release build of 3.1.0 and upload it to App Store Connect
 
 Bumps every target's build number past the latest one on TestFlight. Never submits for review
 
