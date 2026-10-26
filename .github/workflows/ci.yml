@@ -129,19 +129,14 @@ jobs:
       startsWith(github.head_ref, 'feature/') &&
       github.base_ref == 'master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Secret scan
-        uses: trufflesecurity/trufflehog@v3.99.7
-        with:
-          # GHCR tags have no v prefix (3.99.7, not v3.99.7). The action
-          # already passes --fail. TruffleHog has no severity gate, so any
-          # finding fails the job. On pull_request it scans base..head.
-          version: "3.99.7"
 
       - name: Install osv-scanner
         run: |
@@ -166,12 +161,159 @@ jobs:
           chmod +x osv-scanner
           sudo mv osv-scanner /usr/local/bin/osv-scanner
 
-      - name: Scan CocoaPods and Swift Package lockfiles
+      - name: Scan and comment
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          # osv-scanner exits 1 when it finds a known vulnerable package.
-          # It has no severity gate, so low findings fail the job too.
-          # The table it prints is the report.
+          set -uo pipefail
+          secrets_json="$RUNNER_TEMP/trufflehog.json"
+          secrets_err="$RUNNER_TEMP/trufflehog.err"
+          deps_log="$RUNNER_TEMP/osv.txt"
+          # GHCR tags have no v prefix. Omit --fail so findings do not fail
+          # the step. JSON stays in a file so raw secrets are not echoed.
+          docker run --rm -v "$PWD:/tmp" -w /tmp \
+            ghcr.io/trufflesecurity/trufflehog:3.99.7 \
+            git file:///tmp/ \
+            --since-commit "$BASE_SHA" \
+            --branch "$HEAD_SHA" \
+            --no-update \
+            --json >"$secrets_json" 2>"$secrets_err"
+          echo $? >"$RUNNER_TEMP/trufflehog.exit"
           osv-scanner scan source \
             --lockfile=Podfile.lock \
-            --lockfile=TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
+            --lockfile=TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved \
+            >"$deps_log" 2>&1
+          echo $? >"$RUNNER_TEMP/osv.exit"
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          runner = pathlib.Path(os.environ["RUNNER_TEMP"])
+          marker = "<!-- vulnerability-checks -->"
+          secrets_exit = int((runner / "trufflehog.exit").read_text().strip() or "1")
+          deps_exit = int((runner / "osv.exit").read_text().strip() or "1")
+          secrets_err = (runner / "trufflehog.err").read_text(errors="replace")[-2000:]
+          deps_text = (runner / "osv.txt").read_text(errors="replace")
+          findings = []
+          parse_errors = 0
+          for line in (runner / "trufflehog.json").read_text(errors="replace").splitlines():
+              line = line.strip()
+              if not line:
+                  continue
+              try:
+                  item = json.loads(line)
+              except json.JSONDecodeError:
+                  parse_errors += 1
+                  continue
+              data = item.get("SourceMetadata", {}).get("Data", {})
+              git = data.get("Git") or {}
+              filesystem = data.get("Filesystem") or {}
+              findings.append({
+                  "detector": str(item.get("DetectorName") or "unknown"),
+                  "verified": "yes" if item.get("Verified") else "no",
+                  "file": str(git.get("file") or filesystem.get("file") or "(unknown file)"),
+                  "line": git.get("line") or filesystem.get("line") or "",
+                  "commit": str(git.get("commit") or "")[:7],
+              })
+
+          def cell(value):
+              return str(value).replace("|", "\\|").replace("\n", " ")
+
+          lines = [
+              marker,
+              "## Vulnerability checks",
+              "",
+              "Warning only. These results do not fail the pull request.",
+              "",
+              "### Secrets",
+              "",
+          ]
+          warnings = []
+          if secrets_exit != 0:
+              lines.append(f"TruffleHog did not finish (exit {secrets_exit}).")
+              lines.append("")
+              lines.append("```")
+              lines.append(secrets_err.strip() or "(no error output)")
+              lines.append("```")
+              warnings.append(f"TruffleHog did not finish (exit {secrets_exit}). See the pull request comment.")
+          elif not findings:
+              lines.append("No secrets found between the base and head commits.")
+          else:
+              shown = findings[:30]
+              lines.append("| Detector | Verified | File | Line | Commit |")
+              lines.append("| --- | --- | --- | --- | --- |")
+              for item in shown:
+                  lines.append("| {detector} | {verified} | {file} | {line} | {commit} |".format(
+                      detector=cell(item["detector"]),
+                      verified=cell(item["verified"]),
+                      file=cell(item["file"]),
+                      line=cell(item["line"]),
+                      commit=cell(item["commit"]),
+                  ))
+              if len(findings) > len(shown):
+                  lines.append("")
+                  lines.append(f"{len(findings) - len(shown)} more findings omitted.")
+              lines.append("")
+              lines.append("Secret values are left out of this comment.")
+              warnings.append(
+                  f"TruffleHog reported {len(findings)} secret finding(s). Details are in the pull request comment."
+              )
+          if parse_errors:
+              lines.append("")
+              lines.append(f"{parse_errors} secret-scan lines were not JSON and were skipped.")
+
+          lines.extend(["", "### Dependencies", ""])
+          if deps_exit not in (0, 1):
+              lines.append(f"osv-scanner did not finish (exit {deps_exit}).")
+              lines.append("")
+              lines.append("```")
+              lines.append(deps_text.strip()[:12000] or "(no output)")
+              lines.append("```")
+              warnings.append(f"osv-scanner did not finish (exit {deps_exit}). See the pull request comment.")
+          elif deps_exit == 0:
+              lines.append("No known vulnerable dependencies in `Podfile.lock` or `Package.resolved`.")
+              if deps_text.strip():
+                  lines.append("")
+                  lines.append("```")
+                  lines.append(deps_text.strip()[:4000])
+                  lines.append("```")
+          else:
+              lines.append("Known vulnerable dependencies:")
+              lines.append("")
+              lines.append("```")
+              lines.append(deps_text.strip()[:12000] or "(no output)")
+              lines.append("```")
+              warnings.append("osv-scanner found known vulnerable dependencies. Details are in the pull request comment.")
+
+          body = "\n".join(lines) + "\n"
+          if len(body) > 60000:
+              body = body[:60000] + "\n\n(truncated)\n"
+          comment_path = runner / "vuln-comment.md"
+          comment_path.write_text(body)
+          for message in warnings:
+              print(f"::warning::{message.replace(chr(10), ' ')}", flush=True)
+          if not warnings:
+              print("Vulnerability checks reported nothing to warn about.", flush=True)
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          pr = os.environ["PR_NUMBER"]
+          listed = subprocess.check_output([
+              "gh", "api", "--paginate",
+              f"repos/{repo}/issues/{pr}/comments",
+              "--jq", f'.[] | select(.body | startswith("{marker}")) | .id',
+          ], text=True).split()
+          payload = runner / "vuln-comment.json"
+          payload.write_text(json.dumps({"body": body}))
+          if listed:
+              endpoint = f"repos/{repo}/issues/comments/{listed[-1]}"
+              method = "PATCH"
+          else:
+              endpoint = f"repos/{repo}/issues/{pr}/comments"
+              method = "POST"
+          subprocess.check_call(["gh", "api", "--method", method, endpoint, "--input", str(payload)])
+          PY
