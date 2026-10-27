@@ -47,6 +47,31 @@
 "Help.definition" = "認識空氣品質指標";
 "Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
+"Help.widgets_and_watch" = "小工具與 Apple Watch";
+"Help.widgets_title" = "主畫面與鎖定畫面小工具";
+"Help.widgets_shows_header" = "顯示內容";
+"Help.widgets_shows_body" = "顯示最近測站，或你在 Apple Watch 上選定的測站，目前的數值。";
+"Help.widgets_index_header" = "選擇指標";
+"Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
+"Help.widgets_sizes_header" = "尺寸";
+"Help.widgets_home_sizes" = "主畫面：小、中、大。";
+"Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
+"Help.widgets_add_header" = "如何加入";
+"Help.widgets_add_1" = "1. 按住主畫面或鎖定畫面，點一下「加入小工具」。";
+"Help.widgets_add_2" = "2. 搜尋 Taiwan Air、TWAQI 或「空氣品質」。";
+"Help.widgets_add_3" = "3. 按住小工具，點「編輯小工具」，選擇要顯示的指標。";
+"Help.widgets_footer" = "請先開啟本 App 一次，讓測站與數值準備好。";
+
+"Help.watch_title" = "Apple Watch";
+"Help.watch_app_header" = "手錶 App";
+"Help.watch_app_body" = "免費。顯示最近測站或你選定的測站目前數值，以及過去 12 小時。";
+"Help.watch_complications_header" = "錶面複雜功能";
+"Help.watch_complications_body" = "屬於 Pro。AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。樣式包含指標名稱加數值、僅數值、表情，以及狀態文字。手錶 App 本身免費。";
+"Help.watch_add_header" = "如何加入複雜功能";
+"Help.watch_add_1" = "1. 編輯錶面，加入複雜功能。";
+"Help.watch_add_2" = "2. 選擇 Taiwan Air、TWAQI 或「空氣品質」。";
+"Help.watch_footer" = "請先開啟 iPhone 上的 App 或手錶 App 一次，讓測站與數值就緒。";
+
 "AirIndex.meaning_aqi" = "空氣品質指標";
 "AirIndex.meaning_pm25" = "細懸浮微粒";
 "AirIndex.meaning_pm10" = "懸浮微粒";

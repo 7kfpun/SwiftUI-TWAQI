@@ -43,6 +43,31 @@
 "Help.definition" = "Understanding the readings";
 "Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
 
+"Help.widgets_and_watch" = "Widgets & Apple Watch";
+"Help.widgets_title" = "Home Screen & Lock Screen widgets";
+"Help.widgets_shows_header" = "What it shows";
+"Help.widgets_shows_body" = "The current reading for your nearest station, or a station you chose on Apple Watch.";
+"Help.widgets_index_header" = "Which index";
+"Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
+"Help.widgets_sizes_header" = "Sizes";
+"Help.widgets_home_sizes" = "Home Screen: small, medium, and large.";
+"Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
+"Help.widgets_add_header" = "How to add";
+"Help.widgets_add_1" = "1. Touch and hold the Home Screen or Lock Screen, then tap Add Widget.";
+"Help.widgets_add_2" = "2. Search for Taiwan Air, TWAQI, or Air quality.";
+"Help.widgets_add_3" = "3. Touch and hold the widget and tap Edit Widget to choose the index.";
+"Help.widgets_footer" = "Open this app once so a station and a reading are ready.";
+
+"Help.watch_title" = "Apple Watch";
+"Help.watch_app_header" = "The watch app";
+"Help.watch_app_body" = "Free. It shows the current reading for the closest station, or one you pick, and the past 12 hours.";
+"Help.watch_complications_header" = "Watch-face complications";
+"Help.watch_complications_body" = "Part of Pro. AQI, PM2.5 or any of 7 indices, on your watch face. Styles include a label with the number, number only, the status face, and the status in words. The watch app itself is free.";
+"Help.watch_add_header" = "How to add a complication";
+"Help.watch_add_1" = "1. Edit your watch face and add a complication.";
+"Help.watch_add_2" = "2. Choose Taiwan Air, TWAQI, or Air quality.";
+"Help.watch_footer" = "Open this app or the watch app once so a station and a reading are available.";
+
 "AirIndex.meaning_aqi" = "Air quality index";
 "AirIndex.meaning_pm25" = "Particulates (PM2.5)";
 "AirIndex.meaning_pm10" = "Particulates (PM10)";
