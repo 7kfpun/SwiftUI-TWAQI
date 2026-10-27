@@ -17,7 +17,7 @@ enum MapLayout {
     /// Life-size-ish on a virtual table in the immersive space.
     case tabletop
 
-    /// North–south size of the model, Matsu to Orchid Island.
+    /// Diameter of the round ocean base the island stands on.
     var mapDepth: Float {
         switch self {
         case .volume: return 0.8
@@ -96,14 +96,21 @@ final class MapScene {
         self.terrain = terrain
 
         let model = try await TaiwanMeshBuilder.makeDiorama(terrain)
-        // Thick enough to catch a pinch anywhere over the map, island included.
-        model.ocean.components.set(CollisionComponent(shapes: [
-            .generateBox(width: terrain.width, height: 0.01, depth: terrain.depth),
-        ]))
+        // A thin disc matching the ocean, thick enough to catch a pinch
+        // anywhere over the map, island included, and nowhere past its rim.
+        model.ocean.components.set(CollisionComponent(shapes: [Self.discShape(radius: terrain.discRadius)]))
         model.ocean.components.set(InputTargetComponent())
         diorama.addChild(model.ocean)
         diorama.addChild(model.island)
         playOpening(island: model.island)
+    }
+
+    private static func discShape(radius: Float, segments: Int = 48) -> ShapeResource {
+        let rim = (0..<segments).map { i -> SIMD2<Float> in
+            let angle = Float(i) / Float(segments) * 2 * .pi
+            return SIMD2(radius * cos(angle), radius * sin(angle))
+        }
+        return .generateConvex(from: rim.flatMap { [SIMD3($0.x, 0.005, $0.y), SIMD3($0.x, -0.005, $0.y)] })
     }
 
     // MARK: Opening

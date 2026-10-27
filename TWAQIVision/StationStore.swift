@@ -23,7 +23,6 @@ final class StationStore {
 
     private(set) var stations: Pollutants = []
     private(set) var loadState = LoadState.idle
-    private(set) var lastRefreshed: Date?
     var index = AirIndexTypes.aqi
     var selectedStationId: Int?
     /// Pins become arrows showing where each station's air is heading, like
@@ -78,7 +77,6 @@ final class StationStore {
         do {
             // The API includes stations without coordinates; they can't be placed.
             stations = try await WatchAPI.currentPollutants().filter { $0.lat != 0 && $0.lon != 0 }
-            lastRefreshed = Date()
             loadState = .idle
             if let id = selectedStationId, !stations.contains(where: { $0.stationId == id }) {
                 selectedStationId = nil

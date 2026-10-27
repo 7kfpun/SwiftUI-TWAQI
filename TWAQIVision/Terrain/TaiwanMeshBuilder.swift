@@ -16,7 +16,7 @@ import UIKit
 enum TaiwanMeshBuilder {
     /// How far the carved island reaches below the waterline.
     static let baseDepth: Float = 0.012
-    /// The ocean slab's thickness: deeper than the island's base, so the two
+    /// The ocean base's thickness: deeper than the island's base, so the two
     /// bottoms never share a plane.
     static let oceanDepth: Float = 0.016
     /// The sea surface sits just under the coastal plain so they never z-fight.

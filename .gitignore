@@ -115,3 +115,8 @@ fastlane/.env
 # tools/capture_vision_screenshots.sh; only their framed output is uploaded.
 fastlane/screenshots_raw/**/Vision Pro *.png
 fastlane/.vision_upload/
+
+# Building from TWAQI.xcodeproj directly (as the visionOS target can) makes
+# Xcode write a second Package.resolved here. The one that counts is
+# TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved.
+TWAQI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
