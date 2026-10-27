@@ -20,18 +20,79 @@ jobs:
       startsWith(github.head_ref, 'feature/') &&
       github.base_ref == 'master'
     runs-on: macos-latest
+    permissions:
+      contents: read
+      pull-requests: read
     env:
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
       COCOAPODS_DISABLE_STATS: "true"
     steps:
+      - name: Skip unrelated file changes
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Shallow checkout does not contain the base commit, so use the
+          # pull request file list. An empty list or an API error must not
+          # skip the tests.
+          gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+            --jq '.[].filename' > "$RUNNER_TEMP/pr-files.txt"
+          python3 - <<'PY'
+          import os
+          import pathlib
+
+          files = [
+              line.strip()
+              for line in pathlib.Path(os.environ["RUNNER_TEMP"], "pr-files.txt").read_text().splitlines()
+              if line.strip()
+          ]
+          # These do not feed TWAQITests. Any other path still runs the job.
+          media = {
+              ".m4a", ".mp3", ".wav", ".aac", ".caf", ".aiff", ".aif", ".m4b", ".flac", ".ogg",
+              ".mp4", ".mov", ".m4v", ".avi", ".webm",
+              ".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic", ".svg", ".pdf",
+          }
+          docs = {".md", ".markdown"}
+          prefixes = ("assets/", "fastlane/", "web/")
+
+          def unrelated(path):
+              normalized = path.replace("\\", "/").lower()
+              if normalized.startswith(prefixes):
+                  return True
+              suffix = pathlib.PurePosixPath(normalized).suffix
+              return suffix in media or suffix in docs
+
+          if not files:
+              print("No changed files were listed. Running unit tests.")
+              decision = "true"
+          else:
+              related = [path for path in files if not unrelated(path)]
+              if related:
+                  print("Running unit tests. Related files:")
+                  print("\n".join(f"  {path}" for path in related))
+                  decision = "true"
+              else:
+                  print("Skipping unit tests. Changed files are media, docs, or marketing:")
+                  print("\n".join(f"  {path}" for path in files))
+                  decision = "false"
+          with pathlib.Path(os.environ["GITHUB_OUTPUT"]).open("a") as handle:
+              handle.write(f"run={decision}\n")
+          PY
+
       - name: Checkout repository
+        if: steps.scope.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Show Xcode
+        if: steps.scope.outputs.run == 'true'
         run: xcodebuild -version
 
       - name: Prepare gitignored config
+        if: steps.scope.outputs.run == 'true'
         run: |
           set -euo pipefail
           # The project will not build without these, and they are gitignored
@@ -39,6 +100,27 @@ jobs:
           # compile and launch the host app for unit tests.
           cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
           cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
+          # example.xcconfig sets GMSServicesApiKey to an empty value
+          # (`= // Required` is a comment). An empty key skips meaningful
+          # GMSServices.provideAPIKey, and creating GMSMapView then crashes
+          # the test host with GMSServicesException.
+          python3 - <<'PY'
+          from pathlib import Path
+          key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
+          for name in ("debug.xcconfig", "release.xcconfig"):
+              path = Path("TWAQI/Config") / name
+              lines = path.read_text().splitlines()
+              out, replaced = [], False
+              for line in lines:
+                  if line.strip().startswith("GMSServicesApiKey"):
+                      out.append(key_line)
+                      replaced = True
+                  else:
+                      out.append(line)
+              if not replaced:
+                  out.append(key_line)
+              path.write_text("\n".join(out) + "\n")
+          PY
           cat > TWAQI/GoogleService-Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -75,6 +157,7 @@ jobs:
           EOF
 
       - name: Install CocoaPods dependencies
+        if: steps.scope.outputs.run == 'true'
         run: |
           set -euo pipefail
           if ! command -v pod >/dev/null 2>&1; then
@@ -83,6 +166,7 @@ jobs:
           pod install
 
       - name: Run unit tests
+        if: steps.scope.outputs.run == 'true'
         run: |
           set -euo pipefail
           # generic/platform=iOS Simulator cannot execute tests. Pick an
@@ -167,31 +251,74 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        # Warning only: never fail the pull request for scan findings or tool issues.
+        continue-on-error: true
         run: |
+          set +e
           set -uo pipefail
           secrets_json="$RUNNER_TEMP/trufflehog.json"
           secrets_err="$RUNNER_TEMP/trufflehog.err"
           deps_log="$RUNNER_TEMP/osv.txt"
-          # GHCR tags have no v prefix. Omit --fail so findings do not fail
-          # the step. JSON stays in a file so raw secrets are not echoed.
-          docker run --rm -v "$PWD:/tmp" -w /tmp \
-            ghcr.io/trufflesecurity/trufflehog:3.99.7 \
-            git file:///tmp/ \
-            --since-commit "$BASE_SHA" \
-            --branch "$HEAD_SHA" \
-            --no-update \
-            --json >"$secrets_json" 2>"$secrets_err"
-          echo $? >"$RUNNER_TEMP/trufflehog.exit"
+          : >"$secrets_json"
+          : >"$secrets_err"
+          : >"$deps_log"
+          echo 1 >"$RUNNER_TEMP/trufflehog.exit"
+          echo 1 >"$RUNNER_TEMP/osv.exit"
+
+          # Prefer a binary TruffleHog so the job does not depend on docker.
+          # Fall back to docker when the binary install fails; either way a
+          # missing tool becomes a warning, not a red check.
+          install_trufflehog() {
+            version=3.99.7
+            case "$(uname -m)" in
+              x86_64) arch=amd64 ;;
+              aarch64|arm64) arch=arm64 ;;
+              *) echo "Unsupported arch for TruffleHog: $(uname -m)" >&2; return 1 ;;
+            esac
+            url="https://github.com/trufflesecurity/trufflehog/releases/download/v${version}/trufflehog_${version}_linux_${arch}.tar.gz"
+            curl -sSfL "$url" -o "$RUNNER_TEMP/trufflehog.tgz" || return 1
+            tar -xzf "$RUNNER_TEMP/trufflehog.tgz" -C "$RUNNER_TEMP" trufflehog || return 1
+            chmod +x "$RUNNER_TEMP/trufflehog"
+            return 0
+          }
+
+          if install_trufflehog; then
+            "$RUNNER_TEMP/trufflehog" git file://"$PWD" \
+              --since-commit "$BASE_SHA" \
+              --branch "$HEAD_SHA" \
+              --no-update \
+              --json >"$secrets_json" 2>"$secrets_err"
+            echo $? >"$RUNNER_TEMP/trufflehog.exit"
+          elif command -v docker >/dev/null 2>&1; then
+            # GHCR tags have no v prefix. Omit --fail so findings do not fail
+            # the step. JSON stays in a file so raw secrets are not echoed.
+            docker run --rm -v "$PWD:/tmp" -w /tmp \
+              ghcr.io/trufflesecurity/trufflehog:3.99.7 \
+              git file:///tmp/ \
+              --since-commit "$BASE_SHA" \
+              --branch "$HEAD_SHA" \
+              --no-update \
+              --json >"$secrets_json" 2>"$secrets_err"
+            echo $? >"$RUNNER_TEMP/trufflehog.exit"
+          else
+            echo "TruffleHog binary install failed and docker is unavailable." >"$secrets_err"
+            echo 127 >"$RUNNER_TEMP/trufflehog.exit"
+          fi
+
           osv-scanner scan source \
             --lockfile=Podfile.lock \
             --lockfile=TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved \
             >"$deps_log" 2>&1
           echo $? >"$RUNNER_TEMP/osv.exit"
+
           python3 - <<'PY'
           import json
           import os
           import pathlib
           import subprocess
+          import urllib.error
+          import urllib.request
 
           runner = pathlib.Path(os.environ["RUNNER_TEMP"])
           marker = "<!-- vulnerability-checks -->"
@@ -302,18 +429,57 @@ jobs:
 
           repo = os.environ["GITHUB_REPOSITORY"]
           pr = os.environ["PR_NUMBER"]
-          listed = subprocess.check_output([
-              "gh", "api", "--paginate",
-              f"repos/{repo}/issues/{pr}/comments",
-              "--jq", f'.[] | select(.body | startswith("{marker}")) | .id',
-          ], text=True).split()
-          payload = runner / "vuln-comment.json"
-          payload.write_text(json.dumps({"body": body}))
-          if listed:
-              endpoint = f"repos/{repo}/issues/comments/{listed[-1]}"
-              method = "PATCH"
-          else:
-              endpoint = f"repos/{repo}/issues/{pr}/comments"
-              method = "POST"
-          subprocess.check_call(["gh", "api", "--method", method, endpoint, "--input", str(payload)])
+          token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
+
+          def api(method, endpoint, payload=None):
+              url = f"https://api.github.com/{endpoint}"
+              data = None if payload is None else json.dumps(payload).encode()
+              req = urllib.request.Request(url, data=data, method=method)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("X-GitHub-Api-Version", "2022-11-28")
+              if token:
+                  req.add_header("Authorization", f"Bearer {token}")
+              if data is not None:
+                  req.add_header("Content-Type", "application/json")
+              with urllib.request.urlopen(req) as resp:
+                  return json.load(resp)
+
+          listed = []
+          try:
+              # Prefer gh when present; fall back to curl-equivalent urllib.
+              if subprocess.call(["bash", "-lc", "command -v gh >/dev/null"]) == 0:
+                  listed = subprocess.check_output([
+                      "gh", "api", "--paginate",
+                      f"repos/{repo}/issues/{pr}/comments",
+                      "--jq", f'.[] | select(.body | startswith("{marker}")) | .id',
+                  ], text=True).split()
+                  payload = runner / "vuln-comment.json"
+                  payload.write_text(json.dumps({"body": body}))
+                  if listed:
+                      endpoint = f"repos/{repo}/issues/comments/{listed[-1]}"
+                      method = "PATCH"
+                  else:
+                      endpoint = f"repos/{repo}/issues/{pr}/comments"
+                      method = "POST"
+                  subprocess.check_call(["gh", "api", "--method", method, endpoint, "--input", str(payload)])
+              else:
+                  page = 1
+                  while True:
+                      batch = api("GET", f"repos/{repo}/issues/{pr}/comments?per_page=100&page={page}")
+                      if not batch:
+                          break
+                      for item in batch:
+                          if str(item.get("body") or "").startswith(marker):
+                              listed.append(str(item["id"]))
+                      if len(batch) < 100:
+                          break
+                      page += 1
+                  if listed:
+                      api("PATCH", f"repos/{repo}/issues/comments/{listed[-1]}", {"body": body})
+                  else:
+                      api("POST", f"repos/{repo}/issues/{pr}/comments", {"body": body})
+          except Exception as exc:
+              print(f"::warning::Could not post vulnerability comment: {exc}", flush=True)
           PY
+          # Always green: findings and tool failures are warnings/comments only.
+          exit 0
