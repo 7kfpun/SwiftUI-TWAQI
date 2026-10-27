@@ -24,11 +24,10 @@ struct TWAQIVisionApp: App {
         // First, so it's what the app opens with: the map is the iOS app's
         // first tab too.
         //
-        // The map and the browser are one of a kind. A plain WindowGroup
-        // opens another copy on every `openWindow`, and `Window` needs
-        // visionOS 26; a group keyed by a fixed value brings the open one
-        // forward instead. See `OpenWindowAction.callAsFunction(single:)`.
-        WindowGroup(id: Self.mapId, for: String.self) { _ in
+        // A plain group, unlike the browser's: keyed by a value, the launch
+        // volume never got its content and sat on the system placeholder.
+        // `StationStore.isMapOpen` keeps it to one instead.
+        WindowGroup(id: Self.mapId) {
             TaiwanMapView(layout: .volume)
                 #if DEBUG
                 .modifier(ScreenshotLaunchModifier())
@@ -41,8 +40,8 @@ struct TWAQIVisionApp: App {
                 }
                 // Owned by the volume: it's the scene that's always open.
                 .task { await store.keepFresh() }
-        } defaultValue: {
-            Self.mapId
+                .onAppear { store.isMapOpen = true }
+                .onDisappear { store.isMapOpen = false }
         }
         .windowStyle(.volumetric)
         .defaultSize(
@@ -52,6 +51,10 @@ struct TWAQIVisionApp: App {
         // Dropped stations go to their own windows, never into the map.
         .handlesExternalEvents(matching: [])
 
+        // One of a kind: a plain WindowGroup opens another copy on every
+        // `openWindow`, and `Window` needs visionOS 26. Keyed by a fixed
+        // value, opening it again brings the open one forward. See
+        // `OpenWindowAction.callAsFunction(single:)`.
         WindowGroup(id: BrowserView.id, for: String.self) { _ in
             BrowserView()
                 .environment(store)
@@ -82,8 +85,8 @@ struct TWAQIVisionApp: App {
 }
 
 extension OpenWindowAction {
-    /// Opens a one-of-a-kind window — the map or the browser — or brings the
-    /// open one forward. Its group is keyed by a value that never changes, so
+    /// Opens a one-of-a-kind window keyed by its own id, or brings the open
+    /// one forward. Its group is keyed by a value that never changes, so
     /// there is only ever one window to match.
     @MainActor
     func callAsFunction(single id: String) {

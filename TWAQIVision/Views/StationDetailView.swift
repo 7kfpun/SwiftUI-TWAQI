@@ -91,7 +91,9 @@ struct StationDetailView: View {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     store.selectedStationId = stationId
-                    openWindow(single: TWAQIVisionApp.mapId)
+                    if !store.isMapOpen {
+                        openWindow(id: TWAQIVisionApp.mapId)
+                    }
                 } label: {
                     Label("Vision.show_on_map", systemImage: "map")
                 }

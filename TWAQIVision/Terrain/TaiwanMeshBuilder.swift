@@ -6,57 +6,161 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
-import CoreGraphics
 import RealityKit
 import UIKit
 
-/// Turns `TaiwanTerrain` into a diorama: a relief surface for the land, cut
-/// out along the coast and extruded down like a carved block, standing in a
-/// translucent sea.
+/// Turns `TaiwanTerrain` into a diorama: a round base of ocean shaded by depth, with
+/// the island's relief rising out of it, cut along the coast like a carved
+/// block. Both are painted with the one texture baked alongside the terrain,
+/// `TaiwanRelief.png`, so land and sea meet exactly.
 enum TaiwanMeshBuilder {
-    /// How far the carved block reaches below the waterline.
+    /// How far the carved island reaches below the waterline.
     static let baseDepth: Float = 0.012
+    /// The ocean slab's thickness: deeper than the island's base, so the two
+    /// bottoms never share a plane.
+    static let oceanDepth: Float = 0.016
+    /// The sea surface sits just under the coastal plain so they never z-fight.
+    static let seaLevel: Float = -0.0005
 
-    @MainActor
-    static func makeIsland(_ terrain: TaiwanTerrain) async throws -> ModelEntity {
-        // ~30k vertices and a 0.7-megapixel texture: keep it off the main actor.
-        let (descriptors, image) = await Task.detached(priority: .userInitiated) {
-            let geometry = Geometry(terrain)
-            return ([geometry.surface(), geometry.sides()], reliefImage(terrain))
-        }.value
-        let mesh = try await MeshResource(from: descriptors)
+    enum LoadError: Error {
+        case missingTexture
+    }
 
-        var surface = PhysicallyBasedMaterial()
-        let texture = try await TextureResource(image: image, options: .init(semantic: .color))
-        surface.baseColor = .init(texture: .init(texture))
-        surface.roughness = 0.85
-        surface.metallic = 0.0
-
-        var sides = PhysicallyBasedMaterial()
-        sides.baseColor = .init(tint: UIColor(red: 0.38, green: 0.34, blue: 0.30, alpha: 1))
-        sides.roughness = 1.0
-
-        let island = ModelEntity(mesh: mesh, materials: [surface, sides])
-        island.name = "taiwan"
-        return island
+    struct Diorama {
+        let island: ModelEntity
+        let ocean: ModelEntity
     }
 
     @MainActor
-    static func makeSea(_ terrain: TaiwanTerrain) -> ModelEntity {
-        let margin: Float = 0.02
-        let mesh = MeshResource.generateBox(
-            width: terrain.width + margin * 2, height: 0.001, depth: terrain.depth + margin * 2,
-            cornerRadius: 0.0005
-        )
-        var material = PhysicallyBasedMaterial()
-        material.baseColor = .init(tint: UIColor(red: 0.10, green: 0.32, blue: 0.48, alpha: 1))
-        material.roughness = 0.25
-        material.blending = .transparent(opacity: .init(floatLiteral: 0.55))
-        let sea = ModelEntity(mesh: mesh, materials: [material])
-        sea.name = "sea"
-        // Sits just under the coastal plain so the two never z-fight.
-        sea.position.y = -0.0005
-        return sea
+    static func makeDiorama(_ terrain: TaiwanTerrain, bundle: Bundle = .main) async throws -> Diorama {
+        guard let textureURL = bundle.url(forResource: "TaiwanRelief", withExtension: "png") else {
+            throw LoadError.missingTexture
+        }
+        // ~30k vertices: built off the main actor.
+        let islandDescriptors = await Task.detached(priority: .userInitiated) {
+            let geometry = Geometry(terrain)
+            return [geometry.surface(), geometry.sides()]
+        }.value
+        let islandMesh = try await MeshResource(from: islandDescriptors)
+        let oceanMesh = try await MeshResource(from: Ocean(terrain).descriptors())
+        let texture = try await TextureResource(contentsOf: textureURL, options: .init(semantic: .color))
+
+        var land = PhysicallyBasedMaterial()
+        land.baseColor = .init(texture: .init(texture))
+        land.roughness = 0.85
+        land.metallic = 0.0
+
+        var cliffs = PhysicallyBasedMaterial()
+        cliffs.baseColor = .init(tint: UIColor(red: 0.38, green: 0.34, blue: 0.30, alpha: 1))
+        cliffs.roughness = 1.0
+
+        // Smooth, with a clear coat, so the room's light glints off the water.
+        var water = PhysicallyBasedMaterial()
+        water.baseColor = .init(texture: .init(texture))
+        water.roughness = 0.35
+        water.clearcoat = 0.6
+        water.clearcoatRoughness = 0.1
+
+        var depths = PhysicallyBasedMaterial()
+        depths.baseColor = .init(tint: UIColor(red: 0.04, green: 0.14, blue: 0.30, alpha: 1))
+        depths.roughness = 0.6
+
+        let island = ModelEntity(mesh: islandMesh, materials: [land, cliffs])
+        island.name = "taiwan"
+        let ocean = ModelEntity(mesh: oceanMesh, materials: [water, depths])
+        ocean.name = "sea"
+        return Diorama(island: island, ocean: ocean)
+    }
+
+    // MARK: Ocean
+
+    /// The round base the island stands in: a disc of sea textured with the
+    /// same UVs as the island, a curved side and a flat bottom.
+    private struct Ocean {
+        let top: Float = seaLevel
+        let bottom: Float = -oceanDepth
+        let radius: Float
+        let halfWidth: Float
+        let halfDepth: Float
+        /// Enough that the rim reads as a circle, not a polygon, at arm's length.
+        let segments = 160
+
+        init(_ terrain: TaiwanTerrain) {
+            radius = terrain.discRadius
+            halfWidth = terrain.width / 2
+            halfDepth = terrain.depth / 2
+        }
+
+        /// Point on the rim, angle measured clockwise seen from above.
+        private func rim(_ i: Int) -> SIMD2<Float> {
+            let angle = Float(i) / Float(segments) * 2 * .pi
+            return SIMD2(radius * cos(angle), radius * sin(angle))
+        }
+
+        /// Same convention as the island: u east, v north.
+        private func uv(_ point: SIMD2<Float>) -> SIMD2<Float> {
+            SIMD2((point.x + halfWidth) / (2 * halfWidth), 1 - (point.y + halfDepth) / (2 * halfDepth))
+        }
+
+        func descriptors() -> [MeshDescriptor] {
+            // Top: a fan around the centre. Rim points run with +x towards +z,
+            // clockwise from above, so each triangle is (centre, next, this) to
+            // face up.
+            var topPositions: [SIMD3<Float>] = [[0, top, 0]]
+            var topUVs: [SIMD2<Float>] = [uv(.zero)]
+            for i in 0..<segments {
+                let point = rim(i)
+                topPositions.append([point.x, top, point.y])
+                topUVs.append(uv(point))
+            }
+            var topTriangles: [UInt32] = []
+            for i in 0..<segments {
+                let this = UInt32(1 + i), next = UInt32(1 + (i + 1) % segments)
+                topTriangles += [0, next, this]
+            }
+            var surface = MeshDescriptor(name: "ocean-surface")
+            surface.positions = MeshBuffers.Positions(topPositions)
+            surface.normals = MeshBuffers.Normals(Array(repeating: [0, 1, 0], count: topPositions.count))
+            surface.textureCoordinates = MeshBuffers.TextureCoordinates(topUVs)
+            surface.primitives = .triangles(topTriangles)
+            surface.materials = .allFaces(0)
+
+            // Side: smooth outward normals so the rim catches light like a
+            // turned edge; then the bottom, facing down.
+            var positions: [SIMD3<Float>] = []
+            var normals: [SIMD3<Float>] = []
+            var triangles: [UInt32] = []
+            for i in 0..<segments {
+                let point = rim(i)
+                let outward = simd_normalize(SIMD3(point.x, 0, point.y))
+                positions += [[point.x, top, point.y], [point.x, bottom, point.y]]
+                normals += [outward, outward]
+            }
+            for i in 0..<segments {
+                let a = UInt32(2 * i), b = UInt32(2 * ((i + 1) % segments))
+                // a/b top, a+1/b+1 bottom; wound to face outward.
+                triangles += [a, b, a + 1, b, b + 1, a + 1]
+            }
+            let centre = UInt32(positions.count)
+            positions.append([0, bottom, 0])
+            normals.append([0, -1, 0])
+            for i in 0..<segments {
+                let point = rim(i)
+                positions.append([point.x, bottom, point.y])
+                normals.append([0, -1, 0])
+            }
+            for i in 0..<segments {
+                let this = centre + 1 + UInt32(i), next = centre + 1 + UInt32((i + 1) % segments)
+                triangles += [centre, this, next]
+            }
+
+            var sides = MeshDescriptor(name: "ocean-sides")
+            sides.positions = MeshBuffers.Positions(positions)
+            sides.normals = MeshBuffers.Normals(normals)
+            sides.primitives = .triangles(triangles)
+            sides.materials = .allFaces(1)
+            return [surface, sides]
+        }
     }
 
     // MARK: Geometry
@@ -199,82 +303,5 @@ enum TaiwanMeshBuilder {
             let slopeZ = (height(column, row + 1) - height(column, row - 1)) / (2 * dz)
             return simd_normalize(SIMD3(-slopeX, 1, -slopeZ))
         }
-    }
-
-    // MARK: Texture
-
-    /// Hypsometric tint with a soft hillshade from the north-west, at twice
-    /// the grid resolution. Kept muted so the AQI colours stay the loudest
-    /// thing on the island.
-    static func reliefImage(_ terrain: TaiwanTerrain, oversample: Int = 2) -> CGImage {
-        let width = (terrain.columns - 1) * oversample + 1
-        let height = (terrain.rows - 1) * oversample + 1
-        var pixels = [UInt8](repeating: 0, count: width * height * 4)
-
-        func metres(_ column: Double, _ row: Double) -> Double {
-            let c0 = Int(column), r0 = Int(row)
-            let fx = column - Double(c0), fy = row - Double(r0)
-            func at(_ c: Int, _ r: Int) -> Double {
-                Double(terrain.metres(column: min(c, terrain.columns - 1), row: min(r, terrain.rows - 1)) ?? 0)
-            }
-            let top = at(c0, r0) * (1 - fx) + at(c0 + 1, r0) * fx
-            let bottom = at(c0, r0 + 1) * (1 - fx) + at(c0 + 1, r0 + 1) * fx
-            return top * (1 - fy) + bottom * fy
-        }
-
-        // Ground spacing of one texel, in metres, with the same exaggeration as
-        // the mesh so shading agrees with the geometry.
-        let texelMetres = Double(terrain.depth / Float(terrain.rows - 1) / terrain.horizontalScale) * 1000
-            / Double(oversample)
-        let exaggeration = Double(terrain.verticalExaggeration)
-        let light = simd_normalize(SIMD3<Double>(-1, 1.4, -1))
-
-        for y in 0..<height {
-            for x in 0..<width {
-                let column = Double(x) / Double(oversample), row = Double(y) / Double(oversample)
-                let elevation = metres(column, row)
-                let step = 1 / Double(oversample)
-                let east = metres(min(column + step, Double(terrain.columns - 1)), row)
-                let west = metres(max(column - step, 0), row)
-                let south = metres(column, min(row + step, Double(terrain.rows - 1)))
-                let north = metres(column, max(row - step, 0))
-                let normal = simd_normalize(SIMD3(
-                    -(east - west) * exaggeration / (2 * texelMetres),
-                    1,
-                    -(south - north) * exaggeration / (2 * texelMetres)
-                ))
-                let shade = 0.72 + 0.4 * max(0, simd_dot(normal, light))
-                let tint = hypsometric(elevation)
-                let offset = (y * width + x) * 4
-                pixels[offset] = UInt8(min(255, tint.x * shade * 255))
-                pixels[offset + 1] = UInt8(min(255, tint.y * shade * 255))
-                pixels[offset + 2] = UInt8(min(255, tint.z * shade * 255))
-                pixels[offset + 3] = 255
-            }
-        }
-
-        let provider = CGDataProvider(data: Data(pixels) as CFData)!
-        return CGImage(
-            width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
-            space: CGColorSpace(name: CGColorSpace.sRGB)!,
-            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
-            provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent
-        )!
-    }
-
-    private static let ramp: [(metres: Double, color: SIMD3<Double>)] = [
-        (0, SIMD3(0.56, 0.62, 0.52)),
-        (400, SIMD3(0.64, 0.67, 0.55)),
-        (1200, SIMD3(0.72, 0.69, 0.60)),
-        (2400, SIMD3(0.80, 0.78, 0.74)),
-        (3600, SIMD3(0.96, 0.96, 0.96)),
-    ]
-
-    private static func hypsometric(_ metres: Double) -> SIMD3<Double> {
-        guard let upper = ramp.firstIndex(where: { $0.metres >= metres }) else { return ramp.last!.color }
-        guard upper > 0 else { return ramp[0].color }
-        let low = ramp[upper - 1], high = ramp[upper]
-        let t = (metres - low.metres) / (high.metres - low.metres)
-        return low.color + (high.color - low.color) * t
     }
 }

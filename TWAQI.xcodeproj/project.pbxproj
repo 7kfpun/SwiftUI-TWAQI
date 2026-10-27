@@ -192,6 +192,7 @@
 		D92FF74A293E4C8BC5262E67 /* MapScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C16553B9090A9C5B69BF28B /* MapScene.swift */; };
 		DB10FBCCA8F474B8F2A7C858 /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		DF1DF889F6EF2E7F4FC6D521 /* Faces.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B24479F966EFE547F09CCC2 /* Faces.xcassets */; };
+		E4B5E433403ABD0A7D214FD9 /* TaiwanRelief.png in Resources */ = {isa = PBXBuildFile; fileRef = 1B028BBA2D077D2F99531647 /* TaiwanRelief.png */; };
 		E50C6954A9796E3809DEDFA3 /* PollutantGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA857C0653969296C45E53AE /* PollutantGridView.swift */; };
 		E55CC5B527165474BB49EE6B /* WatchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6886E6C0535290420A0F52DA /* WatchStore.swift */; };
 		E697D1D7FAEB50207772B74C /* StationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39DE548B9EE93C9F7CCC0794 /* StationPickerView.swift */; };
@@ -306,6 +307,7 @@
 		137AA5506D82FA067FB434C8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		178721325D33D2D77344F3F5 /* StationParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationParsing.swift; sourceTree = "<group>"; };
 		17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IndexGuideView.swift; sourceTree = "<group>"; };
+		1B028BBA2D077D2F99531647 /* TaiwanRelief.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = TaiwanRelief.png; sourceTree = "<group>"; };
 		1B1309A4E6CA95CD7B3FD445 /* TaiwanTerrain.bin */ = {isa = PBXFileReference; includeInIndex = 1; path = TaiwanTerrain.bin; sourceTree = "<group>"; };
 		1B24479F966EFE547F09CCC2 /* Faces.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Faces.xcassets; sourceTree = "<group>"; };
 		1F1DBA113E56554E40786D3D /* Pods-TWAQITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQITests.release.xcconfig"; path = "Target Support Files/Pods-TWAQITests/Pods-TWAQITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -598,6 +600,7 @@
 			isa = PBXGroup;
 			children = (
 				1B1309A4E6CA95CD7B3FD445 /* TaiwanTerrain.bin */,
+				1B028BBA2D077D2F99531647 /* TaiwanRelief.png */,
 			);
 			name = Resources;
 			path = Resources;
@@ -1202,6 +1205,7 @@
 				95947315E1BE1CBF25D6F112 /* TaiwanTerrain.bin in Resources */,
 				1193D26FF6613F45876F3BBF /* Localizable.strings in Resources */,
 				07483877742E742C1A1424CA /* Assets.xcassets in Resources */,
+				E4B5E433403ABD0A7D214FD9 /* TaiwanRelief.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1839,7 +1843,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 138;
+				CURRENT_PROJECT_VERSION = 140;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1897,7 +1901,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 138;
+				CURRENT_PROJECT_VERSION = 140;
 				DEVELOPMENT_TEAM = CC4C8V8BXN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

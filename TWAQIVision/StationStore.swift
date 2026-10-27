@@ -32,6 +32,9 @@ final class StationStore {
     /// While the tabletop is out, the volume's island hides so there aren't
     /// two maps in the room; its controls stay.
     var isTabletopOpen = false
+    /// The map volume reports this itself, so "Show on Map" can bring up a
+    /// closed map without opening a second one.
+    var isMapOpen = false
 
     /// The reader's rough position, once they've allowed it.
     private(set) var userLocation: CLLocation?

@@ -28,13 +28,15 @@ struct TaiwanTerrain {
     let maxLon: Double
     let maxLat: Double
 
-    /// Metres above sea level per vertex, row 0 north; `nil` is sea.
+    /// Metres per vertex, row 0 north: 0 or more is land, negative is sea
+    /// depth.
     private let heights: [Int16]
-    static let sea = Int16.min
 
     /// Model metres per kilometre on the ground.
     let horizontalScale: Float
     /// Relief is barely visible at true scale: 3,952 m over a 400 km island.
+    /// The baked texture's hillshading assumes the default, 8
+    /// (`reliefExaggeration` in the bake tool).
     let verticalExaggeration: Float
     /// Coastal plain sits this far above the water so it reads as land.
     static let landLift: Float = 0.002
@@ -44,6 +46,9 @@ struct TaiwanTerrain {
 
     var width: Float { Float(eastKm) * horizontalScale }
     var depth: Float { Float(northKm) * horizontalScale }
+    /// The round ocean base. The grid is baked as the square around it, so
+    /// this is the disc that square was drawn around.
+    var discRadius: Float { min(width, depth) / 2 }
 
     private var centerLon: Double { (minLon + maxLon) / 2 }
     private var centerLat: Double { (minLat + maxLat) / 2 }
@@ -66,7 +71,7 @@ struct TaiwanTerrain {
             Double(bitPattern: read(UInt64.self, at: offset))
         }
 
-        guard read(UInt32.self, at: 4) == 1 else { throw LoadError.badFormat }
+        guard read(UInt32.self, at: 4) == 2 else { throw LoadError.badFormat }
         columns = Int(read(UInt32.self, at: 8))
         rows = Int(read(UInt32.self, at: 12))
         minLon = readDouble(at: 16)
@@ -90,7 +95,7 @@ struct TaiwanTerrain {
     func metres(column: Int, row: Int) -> Int16? {
         guard (0..<columns).contains(column), (0..<rows).contains(row) else { return nil }
         let value = heights[row * columns + column]
-        return value == Self.sea ? nil : value
+        return value < 0 ? nil : value
     }
 
     func isLand(column: Int, row: Int) -> Bool {
