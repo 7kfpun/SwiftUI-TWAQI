@@ -42,6 +42,8 @@ SCREENSHOTS_DIR = File.join(ROOT, "fastlane/screenshots")
 WATCH_UPLOAD_DIR = File.join(ROOT, "fastlane/.watch_upload")
 # Just the iPhone Duo images, staged for upload_duo_screenshots. Wiped on every run.
 DUO_UPLOAD_DIR = File.join(ROOT, "fastlane/.duo_upload")
+# Just the Vision Pro images, staged for upload_vision_screenshots. Wiped on every run.
+VISION_UPLOAD_DIR = File.join(ROOT, "fastlane/.vision_upload")
 METADATA_DIR = File.join(ROOT, "fastlane/metadata")
 
 # --- Marketing banner styling -------------------------------------------------
@@ -83,7 +85,11 @@ LOCALES = {
       "iPhone_Duo_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPhone_Duo_02" => ["Map and station, side by side.", "Unfold to see every reading at a glance."],
       "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."],
-      "iPhone_Duo_04" => ["Share the air you breathe.", "Send any station's reading as a card."]
+      "iPhone_Duo_04" => ["Share the air you breathe.", "Send any station's reading as a card."],
+      "Vision_Pro_01" => ["All of Taiwan, in 3D.", "Live AQI from every station, on the island's real terrain."],
+      "Vision_Pro_02" => ["Pinch a pin to read it.", "AQI, every pollutant and the wind, right where it's measured."],
+      "Vision_Pro_03" => ["See where the air is going.", "Wind mode turns every station into an arrow."],
+      "Vision_Pro_04" => ["Pin a station anywhere.", "Its 24-hour trend and health advice, in your room."]
     }
   },
   "zh-Hant" => {
@@ -99,7 +105,11 @@ LOCALES = {
       "iPhone_Duo_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPhone_Duo_02" => ["展開手機，地圖與測站並排", "一眼看完所有數據"],
       "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"],
-      "iPhone_Duo_04" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"]
+      "iPhone_Duo_04" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
+      "Vision_Pro_01" => ["立體台灣，全台測站", "以真實地形呈現即時空氣品質"],
+      "Vision_Pro_02" => ["捏一下，立即讀取", "AQI、各項污染物與風向，就在測站上方"],
+      "Vision_Pro_03" => ["看見空污往哪裡吹", "風向模式把每個測站變成箭頭"],
+      "Vision_Pro_04" => ["把測站釘選在任何地方", "24 小時趨勢與健康建議，就在你身邊"]
     }
   }
 }.freeze
@@ -117,6 +127,19 @@ WATCH_TARGET  = [416, 496]   # 46mm, filed by deliver as Series 10
 # inner display's native size, but fastlane 2.241 only files 2034x1398 and
 # 1398x2034 under APP_IPHONE_DUO and would reject anything else.
 DUO_TARGET    = [2034, 1398]
+# Apple Vision Pro: the simulator's own capture size.
+VISION_TARGET = [3840, 2160]
+
+# Each Vision Pro capture is the whole simulated room; the map takes up only
+# the middle of it. Crop each shot to its subject before framing, as
+# [x, y, width, height] in the 3840x2160 capture. These assume the viewpoint
+# described in tools/capture_vision_screenshots.sh.
+VISION_CROPS = {
+  "Vision_Pro_01" => [1040, 1000, 1800, 822], # the round island diorama
+  "Vision_Pro_02" => [1040, 830, 1884, 860],  # the island with Hualien's card
+  "Vision_Pro_03" => [1040, 1000, 1800, 822], # wind mode
+  "Vision_Pro_04" => [620, 0, 2892, 1320]    # Hualien's window, over the map
+}.freeze
 
 platform :ios do
   desc "Frame the raw captures in #{RAW_ROOT}/<locale> into App Store sized PNGs"
@@ -263,6 +286,63 @@ platform :ios do
     )
   end
 
+  desc "Frame only the Vision Pro captures (fastlane/screenshots_raw/<locale>/Vision Pro NN.png)"
+  desc "Capture them first with tools/capture_vision_screenshots.sh"
+  lane :frame_vision_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      sources = Dir["#{RAW_ROOT}/#{locale}/Vision Pro *.png"].sort
+      next if sources.empty?
+
+      work_dir = File.join(WORK_ROOT, locale)
+      out_dir = File.join(SCREENSHOTS_DIR, locale)
+      sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+      produced += frame_vision(locale, config, sources, work_dir, out_dir)
+    end
+
+    UI.user_error!("No 'Vision Pro NN.png' captures under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} Vision Pro screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Upload the Vision Pro screenshots only to the visionOS #{APP_VERSION} version"
+  desc "Replaces the Vision Pro set in each locale; leaves every other platform alone"
+  lane :upload_vision_screenshots do
+    key = asc_api_key
+    UI.user_error!("upload_vision_screenshots needs the App Store Connect API key") unless key
+
+    sh("rm -rf '#{VISION_UPLOAD_DIR}'")
+    staged = {}
+    LOCALES.each_key do |locale|
+      framed = Dir["#{SCREENSHOTS_DIR}/#{locale}/Vision_Pro_*.png"].sort
+      staged[locale] = framed unless framed.empty?
+    end
+    UI.user_error!("No Vision_Pro_*.png under #{SCREENSHOTS_DIR}: run frame_vision_screenshots first") if staged.empty?
+
+    # deliver in fastlane 2.241 has no Vision Pro display type, so this talks
+    # to the App Store Connect API directly.
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: key)
+    app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+    version = Spaceship::ConnectAPI.get_app_store_versions(
+      app_id: app.id, filter: { platform: "VISION_OS", versionString: APP_VERSION }
+    ).to_models.first
+    UI.user_error!("No visionOS #{APP_VERSION} version on App Store Connect") unless version
+
+    Spaceship::ConnectAPI.get_app_store_version_localizations(app_store_version_id: version.id).to_models.each do |loc|
+      images = staged[loc.locale]
+      next unless images
+
+      set = loc.get_app_screenshot_sets.find { |s| s.screenshot_display_type == "APP_APPLE_VISION_PRO" } ||
+            loc.create_app_screenshot_set(attributes: { screenshotDisplayType: "APP_APPLE_VISION_PRO" })
+      (set.app_screenshots || []).each(&:delete!)
+      images.each do |path|
+        Spaceship::ConnectAPI::AppScreenshot.create(app_screenshot_set_id: set.id, path: path, wait_for_processing: false)
+        UI.success("#{loc.locale}: #{File.basename(path)}")
+      end
+    end
+  end
+
   desc "Upload text metadata only to App Store Connect for #{APP_VERSION}"
   desc "Does not touch the binary, the screenshots, or the review submission"
   lane :upload_metadata do
@@ -377,6 +457,9 @@ def frame_locale(locale, config, sources)
   # frameit has no iPhone Duo bezel and no Duo screen size, so those are framed
   # separately below.
   duo_sources, sources = sources.partition { |src| File.basename(src).start_with?("iPhone Duo") }
+  # Vision Pro has its own lane, frame_vision_screenshots; frameit would take
+  # its 3840x2160 captures for an unknown device and abort.
+  sources = sources.reject { |src| File.basename(src).start_with?("Vision Pro") }
 
   # Stage the captures under names frameit can resolve to a device.
   #
@@ -551,6 +634,77 @@ def frame_duo(locale, config, sources, work_dir, out_dir)
     compose = ["magick '#{tmp}_bg.png'"]
     compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
     compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{device_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+  end
+  sources.count
+end
+
+# Vision Pro has no device to draw: the capture already shows the app in a
+# room. Each is cropped to its subject, rounded and shadowed like a window,
+# then set under the copy on the same gradient as the other devices.
+# Returns how many images it wrote.
+def frame_vision(locale, config, sources, work_dir, out_dir)
+  w, h = VISION_TARGET
+  sh("rm -f '#{out_dir}'/Vision_Pro_*.png")
+
+  sources.each_with_index do |src, i|
+    name = format("Vision_Pro_%02d", i + 1)
+    out = File.join(out_dir, "#{name}.png")
+    tmp = File.join(work_dir, name)
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    side       = (w * 0.06).round
+    top_pad    = (h * 0.055).round
+    line_gap   = (h * 0.018).round
+    text_gap   = (h * 0.04).round
+    bottom_pad = (h * 0.055).round
+    text_width = w - side * 2
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(h * 0.062).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(h * 0.032).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    panel_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_h = h - panel_top - bottom_pad
+
+    cx, cy, cw, ch = VISION_CROPS.fetch(name, [0, 0, w, h])
+    sh("magick '#{src}' -crop #{cw}x#{ch}+#{cx}+#{cy} +repage -filter Lanczos " \
+       "-resize #{text_width}x#{box_h} '#{tmp}_screen.png'")
+    sw, shh = `magick identify -format '%w %h' '#{tmp}_screen.png'`.strip.split.map(&:to_i)
+    radius = (shh * 0.04).round
+
+    sh("magick -size #{sw}x#{shh} xc:black -fill white " \
+       "-draw 'roundrectangle 0,0,#{sw - 1},#{shh - 1},#{radius},#{radius}' '#{tmp}_mask.png'")
+    sh("magick '#{tmp}_screen.png' '#{tmp}_mask.png' -alpha off -compose CopyOpacity -composite '#{tmp}_rs.png'")
+    shadow = (shh * 0.02).round
+    sh("magick '#{tmp}_rs.png' \\( +clone -background black -shadow 40x#{shadow}+0+#{(shadow * 0.6).round} \\) " \
+       "+swap -background none -layers merge +repage '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{panel_top} -composite"
     compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
     sh(compose.join(" "))
 

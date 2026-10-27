@@ -65,6 +65,26 @@ Upload the iPhone Duo screenshots only to App Store Connect for 3.1.0
 
 Leaves the iPhone, iPad and watch screenshots already on the version alone
 
+### ios frame_vision_screenshots
+
+```sh
+[bundle exec] fastlane ios frame_vision_screenshots
+```
+
+Frame only the Vision Pro captures (fastlane/screenshots_raw/<locale>/Vision Pro NN.png)
+
+Capture them first with tools/capture_vision_screenshots.sh
+
+### ios upload_vision_screenshots
+
+```sh
+[bundle exec] fastlane ios upload_vision_screenshots
+```
+
+Upload the Vision Pro screenshots only to the visionOS 3.1.0 version
+
+Replaces the Vision Pro set in each locale; leaves every other platform alone
+
 ### ios upload_metadata
 
 ```sh

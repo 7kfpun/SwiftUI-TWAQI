@@ -23,7 +23,6 @@ struct WindView: View {
     /// the highlighted reading and the chart above it.
     var tint: Color = Color(0x5AC8FA)
 
-    @State private var drifting = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -76,23 +75,31 @@ struct WindView: View {
     /// It drifts along its own axis, faster in stronger wind, so direction
     /// reads without having to work out which end is the head.
     private var arrow: some View {
-        WindArrow(length: arrowLength)
-            .stroke(
-                tint,
-                style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
-            )
-            .frame(width: 72, height: 72)
-            // Wavers around the bearing rather than sliding along it — a vane
-            // in real wind hunts either side of the true direction, and a
-            // sliding arrow read as the whole dial drifting off-centre.
-            .rotationEffect(wind.arrowRotation + .degrees(drifting ? wobble : -wobble))
-            .animation(
-                reduceMotion
-                    ? nil
-                    : .easeInOut(duration: driftDuration).repeatForever(autoreverses: true),
-                value: drifting
-            )
-            .onAppear { drifting = true }
+        // The sway is computed from the clock, not run as a repeating
+        // animation. A `repeatForever` started in `onAppear` also captured
+        // whatever layout change landed in the same transaction — on visionOS
+        // the window is still settling then — so the arrow swung about the
+        // compass instead of turning a few degrees in place.
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: reduceMotion)) { context in
+            WindArrow(length: arrowLength)
+                .stroke(
+                    tint,
+                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                )
+                .frame(width: 72, height: 72)
+                // Wavers around the bearing rather than sliding along it — a
+                // vane in real wind hunts either side of the true direction,
+                // and a sliding arrow read as the whole dial drifting off-centre.
+                .rotationEffect(wind.arrowRotation + .degrees(sway(at: context.date)))
+        }
+    }
+
+    /// Degrees either side of the bearing at `date`: a slow sine, so the
+    /// arrow eases through each turn rather than snapping back.
+    private func sway(at date: Date) -> Double {
+        guard !reduceMotion else { return 0 }
+        let period = 2 * driftDuration
+        return wobble * sin(date.timeIntervalSinceReferenceDate / period * 2 * .pi)
     }
 
     private var arrowLength: CGFloat {
@@ -103,15 +110,16 @@ struct WindView: View {
         return shortest + (longest - shortest) * CGFloat(wind.strengthFraction)
     }
 
-    /// Stronger wind wavers faster.
+    /// Seconds per swing. Stronger wind wavers faster, but never quickly:
+    /// it's a hint of life, not something to watch.
     private var driftDuration: Double {
-        1.5 - 0.9 * wind.strengthFraction
+        2.4 - 1.0 * wind.strengthFraction
     }
 
     /// Half the sweep, in degrees. Kept small: past a few degrees the arrow
     /// stops reading as "roughly WSW" and starts looking like it can't decide.
     private var wobble: Double {
-        3 + 4 * wind.strengthFraction
+        1.5 + 2.5 * wind.strengthFraction
     }
 
     private var readings: some View {

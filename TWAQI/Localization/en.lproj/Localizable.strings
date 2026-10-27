@@ -220,3 +220,25 @@
 "Guide.no2.health" = "Inflames the airways and lowers resistance to respiratory infection; long-term exposure is linked to children developing asthma. It also helps form ozone and PM2.5.";
 "Guide.no2.measure" = "Parts per billion (ppb), as the latest hourly value in the AQI.";
 "Guide.no2.tips" = "Walk, run or cycle a block away from main roads where you can, and avoid rush hours.";
+
+/* visionOS */
+"Vision.map_unavailable" = "Map unavailable";
+"Vision.offline" = "Offline";
+"Vision.refresh" = "Refresh";
+"Vision.index" = "Index";
+"Vision.tabletop" = "Tabletop";
+"Vision.wind" = "Wind";
+"Vision.stations" = "Stations";
+"Vision.nearest" = "Nearest";
+"Vision.nearest_station" = "Nearest station";
+"Vision.find_nearest" = "Find nearest station";
+"Vision.close" = "Close";
+"Vision.details" = "Details";
+"Vision.pin" = "Pin";
+"Vision.unpin" = "Unpin";
+"Vision.show_on_map" = "Show on Map";
+"Vision.open_in_new_window" = "Open in New Window";
+"Vision.drag_to_pin" = "Drag out to pin it in your space";
+"Vision.about" = "About";
+"Vision.version" = "Version";
+"Vision.map_data" = "Coastline: Natural Earth. Elevation: Mapzen Terrain Tiles (SRTM, GMTED, ETOPO1 and others), via AWS Open Data.";
