@@ -111,9 +111,6 @@ fastlane/.env
 # macOS
 .DS_Store
 
-# Vision Pro raw captures are 4K and regenerable with
-# tools/capture_vision_screenshots.sh; only their framed output is uploaded.
-fastlane/screenshots_raw/**/Vision Pro *.png
 fastlane/.vision_upload/
 
 # Building from TWAQI.xcodeproj directly (as the visionOS target can) makes
