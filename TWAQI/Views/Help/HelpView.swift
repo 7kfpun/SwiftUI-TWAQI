@@ -31,6 +31,7 @@ struct HelpView: View {
                 }
 
                 contactSection
+                widgetsAndWatchSection
                 definitionSection
                 aboutSection
 
@@ -101,6 +102,20 @@ struct HelpView: View {
                         parameters: ["label": linkPage.rawValue]
                     )
                 }
+            }
+        }
+    }
+
+    private var widgetsAndWatchSection: some View {
+        Section(header: Label("Help.widgets_and_watch", systemImage: "square.grid.2x2")) {
+            NavigationLink(destination: WidgetGuideView()) {
+                Text("Help.widgets_title")
+                    .fontWeight(.light)
+            }
+
+            NavigationLink(destination: WatchGuideView()) {
+                Text("Help.watch_title")
+                    .fontWeight(.light)
             }
         }
     }

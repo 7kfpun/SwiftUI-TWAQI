@@ -45,6 +45,7 @@
 		4B3A9AD56DCC8F7DDB3B9748 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
 		4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */; };
 		4ECF6A287399ED28643C187D /* IndexGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */; };
+		D5F9B2C04A3E5F7B9C1D2E3F /* WidgetWatchGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E8A1B93F2D4E6A8B0C1D2E /* WidgetWatchGuideView.swift */; };
 		53F3699E568D61F587BA6FB3 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		544575DF41EE812F4CD38B77 /* AqiScaleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E239BC52520B8A358AAADBB9 /* AqiScaleView.swift */; };
 		544D5ABACA27365614E1C400 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
@@ -307,6 +308,7 @@
 		137AA5506D82FA067FB434C8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		178721325D33D2D77344F3F5 /* StationParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationParsing.swift; sourceTree = "<group>"; };
 		17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IndexGuideView.swift; sourceTree = "<group>"; };
+		C4E8A1B93F2D4E6A8B0C1D2E /* WidgetWatchGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetWatchGuideView.swift; sourceTree = "<group>"; };
 		1B028BBA2D077D2F99531647 /* TaiwanRelief.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = TaiwanRelief.png; sourceTree = "<group>"; };
 		1B1309A4E6CA95CD7B3FD445 /* TaiwanTerrain.bin */ = {isa = PBXFileReference; includeInIndex = 1; path = TaiwanTerrain.bin; sourceTree = "<group>"; };
 		1B24479F966EFE547F09CCC2 /* Faces.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Faces.xcassets; sourceTree = "<group>"; };
@@ -755,6 +757,7 @@
 				9EF7A3292386FC8700FF410C /* HelpViewModel.swift */,
 				9BBB3B8DA8D6029AE4AFADA9 /* ProView.swift */,
 				17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */,
+				C4E8A1B93F2D4E6A8B0C1D2E /* WidgetWatchGuideView.swift */,
 			);
 			path = Help;
 			sourceTree = "<group>";
@@ -1540,6 +1543,7 @@
 				A9256CB47861F785FF09CAF3 /* StationLocationView.swift in Sources */,
 				EC7DDD4C178C6465EA19C6C1 /* ProView.swift in Sources */,
 				4ECF6A287399ED28643C187D /* IndexGuideView.swift in Sources */,
+				D5F9B2C04A3E5F7B9C1D2E3F /* WidgetWatchGuideView.swift in Sources */,
 				F02377E8D2576C4CC30143F9 /* WatchAPI.swift in Sources */,
 				BE58CDECFDF2BFE363A75CFC /* WatchReading.swift in Sources */,
 				744683163E0F08C262FB03B1 /* WatchStore.swift in Sources */,
