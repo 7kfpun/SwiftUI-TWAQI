@@ -51,10 +51,14 @@
 "Help.widgets_title" = "主畫面與鎖定畫面小工具";
 "Help.widgets_shows_header" = "顯示內容";
 "Help.widgets_shows_body" = "顯示最近測站，或你在 Apple Watch 上選定的測站，目前的數值。";
+"Help.widgets_favourites_header" = "最愛測站";
+"Help.widgets_favourites_body" = "小與中尺寸的小工具，會在目前測站下方列出你其他的最愛測站。大尺寸需 Pro 才會列出。";
+"Help.widgets_favourites_add" = "開啟測站並點一下愛心，即可加入最愛。小工具會依加入的順序列出。";
+"Help.widgets_favourites_offline" = "沒有網路時，小工具會顯示最後一次儲存的數值。";
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
 "Help.widgets_sizes_header" = "尺寸";
-"Help.widgets_home_sizes" = "主畫面：小、中、大。小與中尺寸也會列出你的最愛測站；大尺寸需 Pro。";
+"Help.widgets_home_sizes" = "主畫面：小、中、大。";
 "Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
 "Help.widgets_add_header" = "如何加入";
 "Help.widgets_add_1" = "1. 按住主畫面或鎖定畫面，點一下「加入小工具」。";

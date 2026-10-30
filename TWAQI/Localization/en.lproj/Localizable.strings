@@ -47,10 +47,14 @@
 "Help.widgets_title" = "Home Screen & Lock Screen widgets";
 "Help.widgets_shows_header" = "What it shows";
 "Help.widgets_shows_body" = "The current reading for your nearest station, or a station you chose on Apple Watch.";
+"Help.widgets_favourites_header" = "Favourite stations";
+"Help.widgets_favourites_body" = "Small and medium widgets list your other favourite stations under the current one. Large lists them with Pro.";
+"Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget lists them in the order you saved them.";
+"Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
 "Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
 "Help.widgets_sizes_header" = "Sizes";
-"Help.widgets_home_sizes" = "Home Screen: small, medium, and large. Small and medium also list your favourite stations; large does with Pro.";
+"Help.widgets_home_sizes" = "Home Screen: small, medium, and large.";
 "Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
 "Help.widgets_add_header" = "How to add";
 "Help.widgets_add_1" = "1. Touch and hold the Home Screen or Lock Screen, then tap Add Widget.";
