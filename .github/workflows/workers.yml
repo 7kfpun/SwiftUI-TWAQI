@@ -119,6 +119,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck --if-present
 
+      - name: Test
+        run: npm test --if-present
+
       - name: Build without deploying
         run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/dist"
 
@@ -163,6 +166,12 @@ jobs:
         env:
           MOENV_API_KEY: ${{ secrets.MOENV_API_KEY }}
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+          APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
+          APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+          DIRECTUS_TOKEN: ${{ secrets.DIRECTUS_TOKEN }}
+          AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: |
           set -euo pipefail
           # Copy only the names this Worker lists under secrets.required, and

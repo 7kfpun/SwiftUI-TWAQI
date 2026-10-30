@@ -47,6 +47,9 @@
 		4ECF6A287399ED28643C187D /* IndexGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */; };
 		D5F9B2C04A3E5F7B9C1D2E3F /* WidgetWatchGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E8A1B93F2D4E6A8B0C1D2E /* WidgetWatchGuideView.swift */; };
 		7D3E5A1C2B4F4E6A9C0D1E31 /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E21 /* FeedbackService.swift */; };
+		8A4F2C6E1B3D4E5F6A7B8C11 /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4F2C6E1B3D4E5F6A7B8C01 /* PushService.swift */; };
+		8A4F2C6E1B3D4E5F6A7B8C12 /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4F2C6E1B3D4E5F6A7B8C02 /* PushManager.swift */; };
+		8A4F2C6E1B3D4E5F6A7B8C13 /* PushServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4F2C6E1B3D4E5F6A7B8C03 /* PushServiceTests.swift */; };
 		7D3E5A1C2B4F4E6A9C0D1E32 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E22 /* FeedbackView.swift */; };
 		7D3E5A1C2B4F4E6A9C0D1E33 /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E21 /* FeedbackService.swift */; };
 		7D3E5A1C2B4F4E6A9C0D1E34 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E22 /* FeedbackView.swift */; };
@@ -101,7 +104,6 @@
 		9BB59ED9C5B7A054408BDB93 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		9C09E01068E50E4354C2BAE1 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9DED7839DF79975331B4A47B /* StationLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF2D9DEA8C6744210C4D3F8C /* StationLocationView.swift */; };
-		9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */; };
 		9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */; };
 		9E03DF6423975CF9002F8DA4 /* FavouriteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6323975CF9002F8DA4 /* FavouriteListView.swift */; };
@@ -151,7 +153,6 @@
 		9EC6BB1F235B590500213041 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB1E235B590500213041 /* NotificationService.swift */; };
 		9EC6BB23235B590500213041 /* OneSignalNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */; };
-		9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */; };
 		9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
 		9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685623838CDA00B08589 /* MyLocationButton.swift */; };
 		9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685823838CEE00B08589 /* DefaultLocationButton.swift */; };
@@ -319,6 +320,9 @@
 		17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IndexGuideView.swift; sourceTree = "<group>"; };
 		C4E8A1B93F2D4E6A8B0C1D2E /* WidgetWatchGuideView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetWatchGuideView.swift; sourceTree = "<group>"; };
 		7D3E5A1C2B4F4E6A9C0D1E21 /* FeedbackService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackService.swift; sourceTree = "<group>"; };
+		8A4F2C6E1B3D4E5F6A7B8C01 /* PushService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
+		8A4F2C6E1B3D4E5F6A7B8C02 /* PushManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
+		8A4F2C6E1B3D4E5F6A7B8C03 /* PushServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushServiceTests.swift; sourceTree = "<group>"; };
 		7D3E5A1C2B4F4E6A9C0D1E22 /* FeedbackView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackServiceTests.swift; sourceTree = "<group>"; };
 		1B028BBA2D077D2F99531647 /* TaiwanRelief.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = TaiwanRelief.png; sourceTree = "<group>"; };
@@ -368,7 +372,6 @@
 		96A46181C1E12824CB176C23 /* TWAQIWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIWidget.swift; sourceTree = "<group>"; };
 		9BBB3B8DA8D6029AE4AFADA9 /* ProView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProView.swift; sourceTree = "<group>"; };
 		9BE775C56385FDE2BC07B4BB /* WindView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindView.swift; sourceTree = "<group>"; };
-		9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalSettings.swift; sourceTree = "<group>"; };
 		9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoricalPollutants.swift; sourceTree = "<group>"; };
 		9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListViewModel.swift; sourceTree = "<group>"; };
 		9E03DF6323975CF9002F8DA4 /* FavouriteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListView.swift; sourceTree = "<group>"; };
@@ -429,7 +432,6 @@
 		9EC6BB28235B5AD800213041 /* OneSignalNotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneSignalNotificationServiceExtension.entitlements; sourceTree = "<group>"; };
 		9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TWAQI.entitlements; sourceTree = "<group>"; };
 		9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
-		9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalManager.swift; sourceTree = "<group>"; };
 		9EDBA6ED23649079009B4CC4 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		9EDF685623838CDA00B08589 /* MyLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLocationButton.swift; sourceTree = "<group>"; };
 		9EDF685823838CEE00B08589 /* DefaultLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultLocationButton.swift; sourceTree = "<group>"; };
@@ -608,6 +610,7 @@
 				908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */,
 				7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */,
+				8A4F2C6E1B3D4E5F6A7B8C03 /* PushServiceTests.swift */,
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
@@ -812,12 +815,13 @@
 				9E9042E92372F73200DDD4D9 /* DateExtension.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				7D3E5A1C2B4F4E6A9C0D1E21 /* FeedbackService.swift */,
+				8A4F2C6E1B3D4E5F6A7B8C02 /* PushManager.swift */,
+				8A4F2C6E1B3D4E5F6A7B8C01 /* PushService.swift */,
 				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
 				9E942E3B2372CA4B0010915D /* LocaleExtension.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
-				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */,
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
@@ -851,7 +855,6 @@
 				9EF3D34323939281009CED32 /* Countries.swift */,
 				9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */,
 				9EF3D3502393B9C6009CED32 /* Pollutants.swift */,
-				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
 				9EF3D34523939798009CED32 /* Stations.swift */,
 				51BAAB62CFA3EB870547CDDC /* StationCams.swift */,
 				39D50685ABB6D7832C10DAFD /* AqiTrend.swift */,
@@ -1442,6 +1445,7 @@
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */,
 				7D3E5A1C2B4F4E6A9C0D1E35 /* FeedbackServiceTests.swift in Sources */,
+				8A4F2C6E1B3D4E5F6A7B8C13 /* PushServiceTests.swift in Sources */,
 				FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */,
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
 				56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */,
@@ -1540,12 +1544,13 @@
 				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
 				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */,
-				9E01F535235C3E1900BC3486 /* OneSignalSettings.swift in Sources */,
 				9E34B4F62371B78600B6E600 /* IAPManager.swift in Sources */,
 				9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */,
 				9E1AC55E233F9A5000AC862D /* HelpView.swift in Sources */,
 				7D3E5A1C2B4F4E6A9C0D1E32 /* FeedbackView.swift in Sources */,
 				7D3E5A1C2B4F4E6A9C0D1E31 /* FeedbackService.swift in Sources */,
+				8A4F2C6E1B3D4E5F6A7B8C11 /* PushService.swift in Sources */,
+				8A4F2C6E1B3D4E5F6A7B8C12 /* PushManager.swift in Sources */,
 				9EF3D34423939281009CED32 /* Countries.swift in Sources */,
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9E03DF6423975CF9002F8DA4 /* FavouriteListView.swift in Sources */,
@@ -1562,7 +1567,6 @@
 				9EF3D3512393B9C6009CED32 /* Pollutants.swift in Sources */,
 				9EF250192376B95D00A731D5 /* DefinitionPages.swift in Sources */,
 				9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */,
-				9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */,
 				9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */,

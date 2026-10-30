@@ -1,0 +1,38 @@
+// AQI threshold alerts for the TWAQI iOS app, sent straight to APNs.
+// Every 10 minutes: read enabled subscriptions from Directus, read current AQI
+// from the app's API, and alert devices whose station just crossed their
+// threshold. Deployed by GitHub Actions (.github/workflows/workers.yml).
+//
+// Secrets (never in git) are listed in secrets.required; CI uploads them from
+// GitHub repository secrets of the same names on every deploy. See README.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twaqi-push-sender",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": true,
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
+  "vars": {
+    "APNS_BUNDLE_ID": "com.kfpun.twaqi",
+    "DIRECTUS_URL": "https://cms.wahthefox.com",
+    "AQI_COUNTRIES": "twn",
+    // Minimum gap between two alerts for one subscription, in case the value
+    // bounces around the threshold.
+    "COOLDOWN_MINUTES": "180",
+    // Readings older than this are ignored rather than alerted on.
+    "MAX_DATA_AGE_MINUTES": "180"
+  },
+  "secrets": {
+    "required": [
+      "APNS_KEY_ID",
+      "APNS_TEAM_ID",
+      "APNS_KEY_P8",
+      "DIRECTUS_TOKEN",
+      "AQI_API_BASE",
+      "ADMIN_TOKEN"
+    ]
+  },
+  "observability": { "enabled": true }
+}

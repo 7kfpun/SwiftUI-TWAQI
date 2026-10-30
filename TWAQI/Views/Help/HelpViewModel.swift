@@ -47,18 +47,7 @@ class HelpViewModel: ObservableObject {
         didSet {
             settings.isDndEnabled = isDndEnabled
 
-            if isDndEnabled {
-                pushDndWindow()
-            } else {
-                OneSignalManager.disableDnd { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            }
+            pushDndWindow()
 
             TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
                 "label": isDndEnabled ? "on" : "off",
@@ -76,45 +65,21 @@ class HelpViewModel: ObservableObject {
         self.dndEndTime = settings.dndEndTime
     }
 
+    /// Quiet hours live on this device's Directus row, where the Worker
+    /// checks them before each alert.
     private func pushDndWindow() {
-        OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-            switch result {
-            case .success(let result):
-                print(result)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
+        PushManager.shared.syncDevice(force: true)
     }
 
     func removeAllNotification() {
-        OneSignalManager.getOneSignalSettings { [weak self] result in
-            // OneSignal calls back off the main thread.
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let settings):
-                    self.disabledNotification(stationSettings: settings.stationSettings)
-                    TrackingManager.logEvent(eventName: "favourite_station_all_removed")
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
+        Task { @MainActor in
+            do {
+                try await PushManager.shared.cancelAllAlerts()
+                TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+                showingAlert = true
+            } catch {
+                print("Cancelling alerts failed: \(error)")
             }
         }
-    }
-
-    private func disabledNotification(stationSettings: [String: OneSignalStationSetting]) {
-        for (_, stationSetting) in stationSettings {
-            OneSignalManager.sendTags(tags: stationSetting.getDisabledTags()) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-        }
-
-        showingAlert = true
     }
 }

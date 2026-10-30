@@ -26,7 +26,6 @@ AppCenterAppSecret =
 BugsnagApiKey =
 GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
 GMSServicesApiKey = // Required
-OneSignalAppId =
 SentryDSN =
 
 // AdMob AdUnitId
@@ -48,3 +47,8 @@ BetaTesterUrl = http:\/\/example.com/
 // real value in debug.xcconfig / release.xcconfig, which are gitignored.
 DirectusUrl = https:\/\/cms.wahthefox.com
 DirectusFeedbackToken =
+
+// AQI alerts (Directus twaqi_push_devices / twaqi_push_subscriptions): a token
+// that may create, read and update those collections. Optional: when empty the
+// app uses DirectusFeedbackToken, whose TWAQI App role already has that access.
+DirectusPushToken =

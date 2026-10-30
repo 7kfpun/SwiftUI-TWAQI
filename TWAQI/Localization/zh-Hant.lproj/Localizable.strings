@@ -29,7 +29,9 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "數值設定偏低，可能會收到大量通知";
 "Settings.notice_me_when_aqi_is_below" = "當 AQI 低於此數值時通知我";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "數值設定偏高，可能會收到大量通知";
-"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能設定 2 個測站";
+"Settings.notifications_are_off" = "通知已關閉，請到「設定」開啟本 App 的通知，才能收到 AQI 提醒。";
+"Settings.open_notification_settings" = "前往設定";
+"Settings.alert_could_not_be_saved" = "無法儲存提醒設定，請確認網路連線後再試一次。";
 
 "Help.help" = "說明";
 "Help.do_not_disturb" = "勿擾模式";
@@ -317,3 +319,11 @@
 "Vision.about" = "關於";
 "Vision.version" = "版本";
 "Vision.map_data" = "海岸線：Natural Earth。地形高度：Mapzen Terrain Tiles（SRTM、GMTED、ETOPO1 等），經由 AWS Open Data 提供。";
+
+/* AQI alerts. Sent by the push Worker as loc-keys, so iOS localizes them on the device. */
+"Push.aqi_above_title" = "%@ 空氣品質變差";
+"Push.aqi_above_body" = "%1$@ 的 AQI 目前為 %2$@，已高於你設定的 %3$@。";
+"Push.aqi_below_title" = "%@ 空氣品質變好";
+"Push.aqi_below_body" = "%1$@ 的 AQI 目前為 %2$@，已低於你設定的 %3$@。";
+"Push.test_title" = "測試通知";
+"Push.test_body" = "通知設定正常，點一下即可開啟測站。";

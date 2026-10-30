@@ -9,62 +9,138 @@
 import Combine
 import Foundation
 
+/// The two alerts a station can have, as the row shows them.
+struct StationAlertSetting: Equatable {
+    var isAboveEnabled = false
+    var aboveThreshold: Double = 120
+    var isBelowEnabled = false
+    var belowThreshold: Double = 30
+}
+
 class SettingsRowViewModel: ObservableObject {
+    enum Notice: Equatable {
+        /// Notifications are off for the app in iOS Settings.
+        case denied
+        case saveFailed
+    }
+
     let station: Station
 
-    /// OneSignal tag key for this station: the English name for Taiwan,
-    /// the numeric id everywhere else.
-    private let notificationTagCode: String
+    @Published var setting = StationAlertSetting()
+    @Published var notice: Notice?
 
-    /// Guards the write-back loop while values fetched from OneSignal are applied.
+    /// What Directus holds, so only real changes are written.
+    private var saved = StationAlertSetting()
+    private var aboveId: Int?
+    private var belowId: Int?
+    /// MOENV SiteId of this station's cam, stored alongside for the cams.
+    private var siteId: String?
+
+    /// Guards the write-back while values read from Directus are applied.
     private var isApplyingRemoteSettings = false
+    private var cancellables = Set<AnyCancellable>()
 
-    @Published var isDisabled: Bool = true
+    init(station: Station) {
+        self.station = station
 
-    @Published var stationSetting: OneSignalStationSetting {
-        // `didSet` rather than `willSet`: the side effect must not run while
-        // SwiftUI is still evaluating the view that owns the binding.
-        didSet {
-            guard !isApplyingRemoteSettings else { return }
+        // A slider sends a value per step; save once it settles.
+        $setting
+            .dropFirst()
+            .filter { [weak self] _ in self?.isApplyingRemoteSettings == false }
+            .debounce(for: .milliseconds(600), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in self?.save() }
+            .store(in: &cancellables)
 
-            OneSignalManager.sendTags(tags: stationSetting.getTags()) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
+        StationCamStore.shared.cams { [weak self] cams in
+            guard let self = self else { return }
+            self.siteId = StationCamMatcher.match(name: station.nameLocal, lat: station.lat, lon: station.lon, in: cams)?.siteId
+        }
+
+        Task { @MainActor [weak self] in
+            await self?.load()
+        }
+    }
+
+    @MainActor
+    private func load() async {
+        if PushManager.shared.authorization == .denied {
+            notice = .denied
+        }
+        do {
+            let subscriptions = try await PushManager.shared.subscriptions(stationId: station.id)
+            var remote = StationAlertSetting()
+            for subscription in subscriptions {
+                switch subscription.direction {
+                case .above:
+                    aboveId = subscription.id
+                    remote.isAboveEnabled = subscription.enabled
+                    remote.aboveThreshold = subscription.threshold
+                case .below:
+                    belowId = subscription.id
+                    remote.isBelowEnabled = subscription.enabled
+                    remote.belowThreshold = subscription.threshold
                 }
+            }
+            apply(remote)
+        } catch {
+            print("Loading alerts failed: \(error)")
+        }
+    }
+
+    private func apply(_ remote: StationAlertSetting) {
+        saved = remote
+        isApplyingRemoteSettings = true
+        setting = remote
+        isApplyingRemoteSettings = false
+    }
+
+    private func save() {
+        let wanted = setting
+        Task { @MainActor in
+            do {
+                if wanted.isAboveEnabled != saved.isAboveEnabled || wanted.aboveThreshold != saved.aboveThreshold {
+                    aboveId = try await write(id: aboveId, direction: .above, threshold: wanted.aboveThreshold, enabled: wanted.isAboveEnabled)
+                    saved.isAboveEnabled = wanted.isAboveEnabled
+                    saved.aboveThreshold = wanted.aboveThreshold
+                }
+                if wanted.isBelowEnabled != saved.isBelowEnabled || wanted.belowThreshold != saved.belowThreshold {
+                    belowId = try await write(id: belowId, direction: .below, threshold: wanted.belowThreshold, enabled: wanted.isBelowEnabled)
+                    saved.isBelowEnabled = wanted.isBelowEnabled
+                    saved.belowThreshold = wanted.belowThreshold
+                }
+                notice = nil
+            } catch PushError.notAuthorized {
+                // The switch can't do anything without permission; put it back.
+                notice = .denied
+                apply(saved)
+            } catch {
+                print("Saving alert failed: \(error)")
+                notice = .saveFailed
+                apply(saved)
             }
         }
     }
 
-    init(station: Station) {
-        self.station = station
-        self.notificationTagCode = station.countryCode == "twn" ? station.name : "\(station.id)"
+    /// Nothing to write for an alert that was never on.
+    @MainActor
+    private func write(id: Int?, direction: PushDirection, threshold: Double, enabled: Bool) async throws -> Int? {
+        if id == nil && !enabled { return nil }
 
-        self.stationSetting = OneSignalStationSetting(
-            stationName: notificationTagCode,
-            isPollutionNotificationEnabled: false,
-            isCleanlinessNotificationEnabled: false
-        )
+        let id = try await PushManager.shared.save(PushSubscription(
+            id: id,
+            stationId: String(station.id),
+            siteId: siteId,
+            direction: direction,
+            threshold: threshold,
+            enabled: enabled
+        ))
 
-        OneSignalManager.getOneSignalSettings { [weak self] result in
-            // OneSignal calls back off the main thread; @Published must not be
-            // mutated there.
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let settings):
-                    self.isApplyingRemoteSettings = true
-                    self.isDisabled = settings.stationSettings.count >= 2
-                    if let remote = settings.stationSettings[self.notificationTagCode] {
-                        self.stationSetting = remote
-                    }
-                    self.isApplyingRemoteSettings = false
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-        }
+        TrackingManager.logEvent(eventName: "set_station_alert", parameters: [
+            "stationId": station.id,
+            "direction": direction.rawValue,
+            "label": enabled ? "on" : "off",
+            "threshold": Int(threshold),
+        ])
+        return id
     }
 }

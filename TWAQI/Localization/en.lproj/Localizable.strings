@@ -25,7 +25,9 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
-"Settings.you_can_only_enable_at_most_for_two_stations" = "You can only enable at most for 2 stations";
+"Settings.notifications_are_off" = "Notifications are off for this app. Turn them on in Settings to get AQI alerts.";
+"Settings.open_notification_settings" = "Open Settings";
+"Settings.alert_could_not_be_saved" = "Couldn't save the alert. Check your connection and try again.";
 
 "Help.help" = "Help";
 "Help.do_not_disturb" = "Do Not Disturb";
@@ -313,3 +315,11 @@
 "Vision.about" = "About";
 "Vision.version" = "Version";
 "Vision.map_data" = "Coastline: Natural Earth. Elevation: Mapzen Terrain Tiles (SRTM, GMTED, ETOPO1 and others), via AWS Open Data.";
+
+/* AQI alerts. Sent by the push Worker as loc-keys, so iOS localizes them on the device. */
+"Push.aqi_above_title" = "Air quality worsening at %@";
+"Push.aqi_above_body" = "AQI at %1$@ is now %2$@, above your alert level of %3$@.";
+"Push.aqi_below_title" = "Air quality improving at %@";
+"Push.aqi_below_body" = "AQI at %1$@ is now %2$@, below your alert level of %3$@.";
+"Push.test_title" = "Test notification";
+"Push.test_body" = "Notifications are working. Tap to open the station.";

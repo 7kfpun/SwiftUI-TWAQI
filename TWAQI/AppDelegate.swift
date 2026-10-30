@@ -12,9 +12,7 @@ import Bugsnag
 import FirebaseCore
 import GoogleMaps
 import GoogleMobileAds
-import OneSignal
 import Sentry
-import SwiftDate
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -42,9 +40,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         TrackingManager.applyExclusionAtLaunch()
 
-        // Push is owned entirely by OneSignal below — it prompts for permission
-        // and registers with APNs itself. Firebase Messaging was a second,
-        // redundant path to the same thing.
+        // AQI alerts go straight through APNs: the device row lives in Directus
+        // and workers/twaqi-push-sender sends. The delegate is set here so a
+        // tap that launched the app is not missed; permission is only asked
+        // for when an alert is first switched on.
+        PushManager.shared.start()
 
         // Initialize the Google Mobile Ads SDK.
         MobileAds.shared.start(completionHandler: nil)
@@ -62,52 +62,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             ])
         }
 
-        // Initialize OneSignal push services.
-        if let oneSignalAppId = getEnv("OneSignalAppId") {
-            OneSignal.initWithLaunchOptions(launchOptions)
-            OneSignal.setAppId(oneSignalAppId)
-
-            OneSignal.promptForPushNotifications(userResponse: { accepted in
-                print("User accepted notifications: \(accepted)")
-            })
-
-            OneSignalManager.getOneSignalSettings { result in
-                // OneSignal calls back off the main thread; writing UserDefaults
-                // here fires SettingsStore's publisher on that thread too.
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                        let settings = SettingsStore()
-                        if let isDndEnabled = result.isDndEnabled, isDndEnabled != settings.isDndEnabled {
-                            settings.isDndEnabled = isDndEnabled
-                        }
-
-                        if let dndStartTime = result.dndStartTime {
-                            var components = DateComponents()
-                            components.hour = Int(dndStartTime / 60)
-                            components.minute = dndStartTime % 60
-                            settings.dndStartTime = NSCalendar.current.date(from: components) ?? Date()
-                        }
-
-                        if let dndEndTime = result.dndEndTime {
-                            var components = DateComponents()
-                            components.hour = Int(dndEndTime / 60)
-                            components.minute = dndEndTime % 60
-                            settings.dndEndTime = NSCalendar.current.date(from: components) ?? Date() + 2.hours
-                        }
-
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-        }
-
         StoreReviewHelper.incrementAppOpenedCount()
         StoreReviewHelper.checkAndAskForReview()
 
         return true
+    }
+
+    // MARK: Remote notifications
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        PushManager.shared.didRegister(deviceToken: deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        PushManager.shared.didFailToRegister(error: error)
     }
 
     // MARK: UISceneSession Lifecycle

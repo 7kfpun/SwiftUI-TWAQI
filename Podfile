@@ -19,7 +19,6 @@ target 'TWAQI' do
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
   pod 'Bugsnag', '~> 5.23'
-  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
   # Host-app tests: they link against the app, so they only need the pods'
@@ -29,6 +28,10 @@ target 'TWAQI' do
   end
 end
 
+# Push is sent by our own Worker (workers/twaqi-push-sender) straight to APNs,
+# so the app no longer links OneSignal. This extension target still does until
+# it is removed from the project and the release lanes; its payloads never set
+# mutable-content, so it is not run for ours.
 target 'OneSignalNotificationServiceExtension' do
   platform :ios, '15.0'
 

@@ -26,31 +26,48 @@ struct SettingsRow: View {
 
             threshold(
                 title: "Settings.notice_me_when_aqi_is_above",
-                isOn: $viewModel.stationSetting.isPollutionNotificationEnabled,
-                value: $viewModel.stationSetting.pollutionTherhold,
-                warning: viewModel.stationSetting.pollutionTherhold < TOO_SMALL_POLLUTION
+                isOn: $viewModel.setting.isAboveEnabled,
+                value: $viewModel.setting.aboveThreshold,
+                warning: viewModel.setting.aboveThreshold < TOO_SMALL_POLLUTION
                     ? "Settings.the_value_is_too_small_you_would_get_lots_of_notifications"
                     : nil
             )
 
             threshold(
                 title: "Settings.notice_me_when_aqi_is_below",
-                isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled,
-                value: $viewModel.stationSetting.cleanlinessTherhold,
-                warning: viewModel.stationSetting.cleanlinessTherhold > TOO_LARGE_CLEANLINESS
+                isOn: $viewModel.setting.isBelowEnabled,
+                value: $viewModel.setting.belowThreshold,
+                warning: viewModel.setting.belowThreshold > TOO_LARGE_CLEANLINESS
                     ? "Settings.the_value_is_too_large_you_would_get_lots_of_notifications"
                     : nil
             )
 
-            if viewModel.isDisabled {
-                Text("Settings.you_can_only_enable_at_most_for_two_stations")
+            switch viewModel.notice {
+            case .denied:
+                VStack(alignment: .leading, spacing: 8) {
+                    caption("Settings.notifications_are_off")
+                    Button("Settings.open_notification_settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
                     .font(.caption)
-                    .fontWeight(.light)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                }
+            case .saveFailed:
+                caption("Settings.alert_could_not_be_saved")
+            case nil:
+                EmptyView()
             }
         }
         .padding(.horizontal)
+    }
+
+    private func caption(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.caption)
+            .fontWeight(.light)
+            .foregroundColor(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     /// One alert threshold: a switch, and — only once it's on — the value and
@@ -62,22 +79,17 @@ struct SettingsRow: View {
         value: Binding<Double>,
         warning: LocalizedStringKey?
     ) -> some View {
-        // Only the *other* toggle being at the two-station limit should lock
-        // this one; a row that is already on must stay switchable off.
-        let locked = viewModel.isDisabled && !isOn.wrappedValue
-
-        return VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(locked ? .secondary : .primary)
+                    .foregroundColor(.primary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
                 Toggle("", isOn: isOn)
                     .labelsHidden()
-                    .disabled(locked)
             }
 
             if isOn.wrappedValue {
