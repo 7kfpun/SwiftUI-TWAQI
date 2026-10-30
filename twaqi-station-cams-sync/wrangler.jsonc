@@ -1,0 +1,24 @@
+// Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes.
+// Deploy from this folder: `npx wrangler deploy`.
+// Secrets (never in git): MOENV_API_KEY, SYNC_TOKEN — set with `wrangler secret put`.
+//
+// Public URLs:
+//   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
+//     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
+//     https://twaqi.app.wahthefox.com/manifest.json
+//   Worker (health, manual sync, and the same image routes):
+//     https://twaqi-station-cams-sync.710kfpun.workers.dev
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twaqi-station-cams-sync",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": true,
+  "r2_buckets": [
+    { "binding": "CAMS", "bucket_name": "twaqi-station-cams" }
+  ],
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
+  "observability": { "enabled": true }
+}
