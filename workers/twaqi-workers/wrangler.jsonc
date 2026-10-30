@@ -7,7 +7,7 @@
 //   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
 //     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
 //     https://twaqi.app.wahthefox.com/manifest.json
-//   Worker (health, manual sync, and the same image routes):
+//   Worker (health, and webcam status, manual sync and reads under /station-cams):
 //     https://twaqi-workers.710kfpun.workers.dev
 {
   "$schema": "node_modules/wrangler/config-schema.json",

@@ -13,14 +13,15 @@ Public images are served straight from R2 via the bucket's custom domain — no 
 - `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg`
 - `https://twaqi.app.wahthefox.com/manifest.json`
 
-The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev` (health, manual sync, and the same read routes below).
+The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev`. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
 
 | Route | |
 | --- | --- |
-| `GET /` | Health: last sync time, source zip, station count |
-| `GET /manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key } } }` — `max-age=60` |
-| `GET /stations/{siteId}.jpg` | Latest JPEG — `max-age=300`, ETag / 304 |
-| `POST /sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN`; `?force` re-uploads everything |
+| `GET /` | Worker health |
+| `GET /station-cams` | Webcam sync status: last sync time, source zip, station count |
+| `GET /station-cams/manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key } } }` — `max-age=60` |
+| `GET /station-cams/stations/{siteId}.jpg` | Latest JPEG — `max-age=300`, ETag / 304 |
+| `POST /station-cams/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN`; `?force` re-uploads everything |
 
 ## Deploy
 

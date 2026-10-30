@@ -53,7 +53,8 @@ export default {
     const url = new URL(request.url)
     const path = url.pathname
 
-    if (path === '/sync') {
+    // Each feature lives under its own prefix; this one is /station-cams.
+    if (path === '/station-cams/sync') {
       if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
       if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
       try {
@@ -68,21 +69,25 @@ export default {
     }
 
     if (path === '/') {
+      return json({ ok: true, service: 'twaqi-workers' }, 200, { 'Cache-Control': 'no-store' })
+    }
+
+    if (path === '/station-cams') {
       const m = await readManifest(env)
       return json({
         ok: true,
-        service: 'twaqi-workers',
+        service: 'station-cams',
         updatedAt: m?.updatedAt ?? null,
         source: m?.source?.filename ?? null,
         stations: m ? Object.keys(m.stations).length : 0,
       }, 200, { 'Cache-Control': 'no-store' })
     }
 
-    if (path === '/manifest.json') {
+    if (path === '/station-cams/manifest.json') {
       return serveObject(request, env, MANIFEST_KEY, 'application/json; charset=utf-8', 'public, max-age=60')
     }
 
-    const m = path.match(/^\/stations\/([0-9A-Za-z]+)\.jpg$/)
+    const m = path.match(/^\/station-cams\/stations\/([0-9A-Za-z]+)\.jpg$/)
     if (m) return serveObject(request, env, `stations/${m[1]}.jpg`, 'image/jpeg', 'public, max-age=300')
 
     return json({ error: 'not found' }, 404)
