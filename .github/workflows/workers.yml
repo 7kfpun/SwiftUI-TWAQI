@@ -16,9 +16,7 @@ on:
     branches: [master]
     paths: ["workers/**", ".github/workflows/workers.yml"]
   push:
-    # TEMPORARY: feature/twaqi-station-cams-worker deploys before merge so the
-    # first GitHub deploy can be checked. Remove it here and in the deploy job.
-    branches: [master, feature/twaqi-station-cams-worker]
+    branches: [master]
     paths: ["workers/**", ".github/workflows/workers.yml"]
   workflow_dispatch:
     inputs:
@@ -129,7 +127,7 @@ jobs:
     needs: changes
     if: >-
       github.event_name != 'pull_request' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/feature/twaqi-station-cams-worker') &&
+      github.ref == 'refs/heads/master' &&
       needs.changes.outputs.workers != '[]'
     runs-on: ubuntu-latest
     # Never cancel a deploy halfway; queue the next one behind it.
