@@ -2,22 +2,24 @@ name: Workers
 
 # Cloudflare Workers under workers/<name>/. Each folder is its own npm package
 # with its own wrangler config. Pull requests typecheck and dry-run the Workers
-# they change; a merge to master deploys only the Workers it changed.
+# they change; a merge to master deploys only the Workers it changed. A change
+# to this file checks or deploys every Worker.
 #
 # Repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, plus every
 # name a Worker lists in its wrangler config under secrets.required. Those are
 # uploaded with each deploy, so a new or recreated Worker works straight away.
+# A new runtime secret also needs a line in the "Collect Worker secrets" env.
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [master]
-    paths: ["workers/**"]
+    paths: ["workers/**", ".github/workflows/workers.yml"]
   push:
     # TEMPORARY: feature/twaqi-station-cams-worker deploys before merge so the
     # first GitHub deploy can be checked. Remove it here and in the deploy job.
     branches: [master, feature/twaqi-station-cams-worker]
-    paths: ["workers/**"]
+    paths: ["workers/**", ".github/workflows/workers.yml"]
   workflow_dispatch:
     inputs:
       worker:
@@ -62,13 +64,18 @@ jobs:
               fi
               ;;
             pull_request)
-              names="$(git diff --name-only "$PR_BASE...$PR_HEAD" -- workers/ | cut -d/ -f2)"
+              if git diff --quiet "$PR_BASE...$PR_HEAD" -- .github/workflows/workers.yml; then
+                names="$(git diff --name-only "$PR_BASE...$PR_HEAD" -- workers/ | cut -d/ -f2)"
+              else
+                names="$(all)"
+              fi
               ;;
             push)
               # A first push or a force push may leave no usable base. Deploy
               # everything rather than silently skipping a changed Worker.
               if [ "$PUSH_BEFORE" = 0000000000000000000000000000000000000000 ] \
-                || ! git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
+                || ! git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null \
+                || ! git diff --quiet "$PUSH_BEFORE" "$PUSH_AFTER" -- .github/workflows/workers.yml; then
                 names="$(all)"
               else
                 names="$(git diff --name-only "$PUSH_BEFORE" "$PUSH_AFTER" -- workers/ | cut -d/ -f2)"
@@ -154,8 +161,10 @@ jobs:
         run: npm run typecheck --if-present
 
       - name: Collect Worker secrets
+        # Map each runtime secret by name so this step only sees what it needs.
         env:
-          REPO_SECRETS: ${{ toJSON(secrets) }}
+          MOENV_API_KEY: ${{ secrets.MOENV_API_KEY }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
           set -euo pipefail
           # Copy only the names this Worker lists under secrets.required, and
@@ -170,13 +179,12 @@ jobs:
             .replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*|\/\*[\s\S]*?\*\//g, (m, str) => str ?? '')
             .replace(/("(?:\\.|[^"\\])*")|,(\s*[}\]])/g, (m, str, end) => str ?? end)
           const required = JSON.parse(text).secrets?.required ?? []
-          const all = JSON.parse(process.env.REPO_SECRETS)
-          const missing = required.filter((name) => !all[name])
+          const missing = required.filter((name) => !process.env[name])
           if (missing.length) {
-            console.error(`Missing repository secrets: ${missing.join(', ')}`)
+            console.error(`Missing secrets (add the repository secret and map it in this step's env): ${missing.join(', ')}`)
             process.exit(1)
           }
-          fs.writeFileSync(out, JSON.stringify(Object.fromEntries(required.map((n) => [n, all[n]]))), { mode: 0o600 })
+          fs.writeFileSync(out, JSON.stringify(Object.fromEntries(required.map((n) => [n, process.env[n]]))), { mode: 0o600 })
           console.log(`Secrets to upload: ${required.join(', ') || '(none)'}`)
           JS
 
