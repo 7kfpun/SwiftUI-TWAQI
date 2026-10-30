@@ -128,7 +128,10 @@ final class SettingsStore: ObservableObject {
     }
 
     var savedFavouriteStations: [Int] {
-        set { defaults.set(newValue, forKey: Keys.savedFavouriteStations) }
+        set {
+            defaults.set(newValue, forKey: Keys.savedFavouriteStations)
+            WidgetBridge.publish(favouriteStationIds: newValue)
+        }
         // A stored array containing anything other than Int — from an older
         // build, or a partially written value — used to trap the whole app.
         get { defaults.array(forKey: Keys.savedFavouriteStations) as? [Int] ?? [] }
@@ -145,6 +148,7 @@ extension SettingsStore {
         let entitled = await IAPManager.isEntitled()
         await MainActor.run {
             UserDefaults.standard.set(entitled, forKey: Keys.pro)
+            WidgetBridge.publish(isPro: entitled)
         }
     }
 

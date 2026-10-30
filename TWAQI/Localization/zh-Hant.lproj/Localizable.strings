@@ -54,7 +54,7 @@
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
 "Help.widgets_sizes_header" = "尺寸";
-"Help.widgets_home_sizes" = "主畫面：小、中、大。";
+"Help.widgets_home_sizes" = "主畫面：小、中、大。小與中尺寸也會列出你的最愛測站；大尺寸需 Pro。";
 "Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
 "Help.widgets_add_header" = "如何加入";
 "Help.widgets_add_1" = "1. 按住主畫面或鎖定畫面，點一下「加入小工具」。";
@@ -166,7 +166,9 @@
 "Watch.widget_no_station %@" = "%@，不含測站";
 
 "Widget.widget_name" = "空氣品質";
-"Widget.widget_description" = "顯示最近或已選測站的目前 AQI。";
+"Widget.widget_description" = "顯示最近或已選測站的目前 AQI，並列出你的最愛測站。";
+"Widget.favourites" = "最愛";
+"Widget.no_favourites" = "在「最愛」加入測站，即可在此顯示。";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";
