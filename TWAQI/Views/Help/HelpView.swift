@@ -95,6 +95,11 @@ struct HelpView: View {
 
     private var contactSection: some View {
         Section(header: Label("Help.contact_us", systemImage: "envelope")) {
+            NavigationLink(destination: FeedbackView()) {
+                Text("Help.feedback_or_contact_us")
+                    .fontWeight(.light)
+            }
+
             ForEach(LinkPages.allCases) { linkPage in
                 externalLink(title: linkPage.title, url: linkPage.url) {
                     TrackingManager.logEvent(

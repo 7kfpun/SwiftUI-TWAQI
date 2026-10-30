@@ -43,6 +43,33 @@
 "Help.definition" = "Understanding the readings";
 "Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
 
+"Feedback.title" = "Feedback";
+"Feedback.platform" = "Phone platform";
+"Feedback.platform_ios" = "iOS";
+"Feedback.platform_android" = "Android";
+"Feedback.platform_other" = "Other";
+"Feedback.rating_header" = "How satisfied are you with the app?";
+"Feedback.rating_stars %lld" = "%lld stars";
+"Feedback.message_header" = "Suggestions";
+"Feedback.message_placeholder" = "Which feature do you think we need to improve?";
+"Feedback.other_header" = "Other feedback / questions";
+"Feedback.optional" = "Optional";
+"Feedback.interview" = "Interested in our user interviews?";
+"Feedback.interview_footer" = "We hold user interviews in Taipei from time to time. Turn this on and we may email you to invite you.";
+"Feedback.name_placeholder" = "Name (optional)";
+"Feedback.email_placeholder" = "Email *";
+"Feedback.email_footer" = "So we can reply to you.";
+"Feedback.email_invalid" = "Please check the email address.";
+"Feedback.privacy_footer" = "To help us look into it, the app version, device model, OS version and language are sent with your feedback.";
+"Feedback.send" = "Send";
+"Feedback.sent_title" = "Thank you!";
+"Feedback.sent_message" = "Your feedback has been sent.";
+"Feedback.error_title" = "Couldn't send feedback";
+"Feedback.error_offline" = "You seem to be offline. Check your connection and try again.";
+"Feedback.error_generic" = "Something went wrong. Please try again later.";
+"Feedback.try_again" = "Try Again";
+"Feedback.cancel" = "Cancel";
+
 "Help.widgets_and_watch" = "Widgets & Apple Watch";
 "Help.widgets_title" = "Home Screen & Lock Screen widgets";
 "Help.widgets_shows_header" = "What it shows";

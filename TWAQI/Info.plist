@@ -44,10 +44,10 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>FeedbackUrlEn</key>
-	<string>$(FeedbackUrlEn)</string>
-	<key>FeedbackUrlZh</key>
-	<string>$(FeedbackUrlZh)</string>
+	<key>DirectusFeedbackToken</key>
+	<string>$(DirectusFeedbackToken)</string>
+	<key>DirectusUrl</key>
+	<string>$(DirectusUrl)</string>
 	<key>GADApplicationIdentifier</key>
 	<string>$(GADApplicationIdentifier)</string>
 	<key>GMSServicesApiKey</key>

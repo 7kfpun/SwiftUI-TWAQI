@@ -47,6 +47,33 @@
 "Help.definition" = "認識空氣品質指標";
 "Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
+"Feedback.title" = "意見回饋";
+"Feedback.platform" = "手機平台";
+"Feedback.platform_ios" = "iOS";
+"Feedback.platform_android" = "Android";
+"Feedback.platform_other" = "其他";
+"Feedback.rating_header" = "您對應用程序的滿意程度如何？";
+"Feedback.rating_stars %lld" = "%lld 顆星";
+"Feedback.message_header" = "建議";
+"Feedback.message_placeholder" = "哪個功能您覺得我們須要改善？";
+"Feedback.other_header" = "其他反饋/問題？";
+"Feedback.optional" = "選填";
+"Feedback.interview" = "對我們的用戶訪談有興趣嗎？";
+"Feedback.interview_footer" = "我們不定期在台北舉辦用戶訪談。開啟後，我們可能會以電子郵件邀請您參加。";
+"Feedback.name_placeholder" = "名字（選填）";
+"Feedback.email_placeholder" = "電子郵件 *";
+"Feedback.email_footer" = "方便我們回覆您。";
+"Feedback.email_invalid" = "請確認電子郵件地址。";
+"Feedback.privacy_footer" = "為協助我們查明問題，App 版本、裝置型號、系統版本與語言會隨內容一併送出。";
+"Feedback.send" = "送出";
+"Feedback.sent_title" = "謝謝您！";
+"Feedback.sent_message" = "已收到您的意見回饋。";
+"Feedback.error_title" = "無法送出意見回饋";
+"Feedback.error_offline" = "目前似乎沒有網路連線，請確認後再試一次。";
+"Feedback.error_generic" = "發生錯誤，請稍後再試。";
+"Feedback.try_again" = "再試一次";
+"Feedback.cancel" = "取消";
+
 "Help.widgets_and_watch" = "小工具與 Apple Watch";
 "Help.widgets_title" = "主畫面與鎖定畫面小工具";
 "Help.widgets_shows_header" = "顯示內容";

@@ -40,8 +40,11 @@ AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
 InAppPurchaseProductId = test
 
 // Links
-FeedbackUrlZh = http:\/\/example.com/
-FeedbackUrlEn = http:\/\/example.com/
 PartnerUrlZh = http:\/\/example.com/
 PartnerUrlEn = http:\/\/example.com/
 BetaTesterUrl = http:\/\/example.com/
+
+// In-app feedback (Directus). The token is a create-only static token; keep the
+// real value in debug.xcconfig / release.xcconfig, which are gitignored.
+DirectusUrl = https:\/\/cms.wahthefox.com
+DirectusFeedbackToken =
