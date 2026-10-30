@@ -176,6 +176,11 @@
 "Details.pollutants" = "Pollutants";
 "Details.health_advice" = "Health advice";
 "Details.notifications" = "Notifications";
+"Details.live_cam" = "Live camera";
+"Details.cam_captured %@" = "Captured %@";
+"Details.cam_source" = "Image: MOENV";
+"Details.no_cam" = "This station has no camera";
+"Details.cam_unavailable" = "Couldn't load the camera image";
 
 /* Share card */
 "Share.share" = "Share";
