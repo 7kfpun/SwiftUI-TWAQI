@@ -23,6 +23,8 @@ enum WatchStore {
         static let latestReading = "latestReading"
         static let homeReading = "homeReading"
         static let isProUnlocked = "isProUnlocked"
+        static let favouriteStationIds = "favouriteStationIds"
+        static let favouriteReadings = "favouriteReadings"
     }
 
     private static var defaults: UserDefaults {
@@ -51,7 +53,34 @@ enum WatchStore {
         set { setReading(newValue, forKey: Keys.homeReading) }
     }
 
-    /// Cache of `WatchPro.refresh()`; StoreKit is the source of truth.
+    /// Mirror of the iOS app's saved favourites, in the reader's order, for the
+    /// medium and large Home Screen widgets. `SettingsStore` on the phone is
+    /// the source of truth; only `WidgetBridge` writes this.
+    static var favouriteStationIds: [Int] {
+        get { defaults.array(forKey: Keys.favouriteStationIds) as? [Int] ?? [] }
+        set { defaults.set(newValue, forKey: Keys.favouriteStationIds) }
+    }
+
+    /// Last reading fetched for each favourite, so the widget lists them
+    /// offline. Unordered; look rows up by `stationId`.
+    static var favouriteReadings: [WatchReading] {
+        get {
+            defaults.data(forKey: Keys.favouriteReadings)
+                .flatMap { try? JSONDecoder().decode([WatchReading].self, from: $0) } ?? []
+        }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.favouriteReadings) }
+    }
+
+    /// Merges freshly fetched favourite readings into `favouriteReadings`,
+    /// replacing older readings of the same stations.
+    static func cacheFavouriteReadings(_ fresh: [WatchReading]) {
+        guard !fresh.isEmpty else { return }
+        let freshIds = Set(fresh.map(\.stationId))
+        favouriteReadings = favouriteReadings.filter { !freshIds.contains($0.stationId) } + fresh
+    }
+
+    /// Cache of `WatchPro.refresh()` on the watch, and of `SettingsStore.refreshPro()`
+    /// (via `WidgetBridge`) on the phone; StoreKit is the source of truth.
     static var isProUnlocked: Bool {
         get { defaults.bool(forKey: Keys.isProUnlocked) }
         set { defaults.set(newValue, forKey: Keys.isProUnlocked) }

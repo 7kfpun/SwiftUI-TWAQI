@@ -38,6 +38,16 @@ enum WatchAPI {
         return response.data.first
     }
 
+    /// Several stations in one request; the endpoint takes a comma-separated
+    /// list, as the iOS Favourites tab sends it.
+    static func currentPollutants(stationIds: [Int]) async throws -> Pollutants {
+        guard !stationIds.isEmpty else { return [] }
+        let response: PollutantsResponse = try await fetch(
+            "ApiEnpointCurrentPollutants", ["station_id": stationIds.map(String.init).joined(separator: ",")]
+        )
+        return response.data
+    }
+
     /// Hourly readings, oldest first.
     static func history(stationId: Int, limit: Int = 24) async throws -> HistoricalPollutants {
         let response: HistoryResponse = try await fetch(

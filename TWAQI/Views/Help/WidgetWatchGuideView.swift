@@ -16,6 +16,12 @@ struct WidgetGuideView: View {
                 guideText("Help.widgets_shows_body")
             }
 
+            Section(header: Text("Help.widgets_favourites_header")) {
+                guideText("Help.widgets_favourites_body")
+                guideText("Help.widgets_favourites_add")
+                guideText("Help.widgets_favourites_offline")
+            }
+
             Section(header: Text("Help.widgets_index_header")) {
                 guideText("Help.widgets_index_body")
             }

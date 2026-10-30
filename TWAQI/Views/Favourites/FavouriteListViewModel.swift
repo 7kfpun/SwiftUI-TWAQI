@@ -24,6 +24,7 @@ class FavouriteListViewModel: ObservableObject {
                 case .success(let result):
                     print("getCurrentPollutantsByStationId Total: \(result.count)")
                     self.favouritePollutants = result
+                    WidgetBridge.cacheFavourites(from: result)
                 case .failure(let error):
                     print(error.localizedDescription)
                 }

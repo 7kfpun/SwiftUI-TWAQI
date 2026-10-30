@@ -25,6 +25,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         SettingsStore.observeProTransactions()
         Task { await SettingsStore.refreshPro() }
 
+        // Favourites saved before the widget listed them, or by an older
+        // build, only reach the app group once they're mirrored.
+        WidgetBridge.publish(favouriteStationIds: SettingsStore().savedFavouriteStations)
+
         // A device excluded from reporting (Help's hidden version toggle, or any
         // DEBUG run) starts none of the crash reporters.
         let reportsThisLaunch = !TrackingManager.isExcludedThisLaunch

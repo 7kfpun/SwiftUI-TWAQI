@@ -52,6 +52,25 @@ struct WatchReading: Codable, Equatable {
         windDirection: 247, windSpeed: 2.6, publishTime: ""
     )
 
+    /// Favourites shown in the Home Screen widget gallery.
+    static let placeholderFavourites = [
+        WatchReading(
+            stationId: -1, code: "Banqiao", name: "Banqiao", nameLocal: "板橋",
+            aqi: 58, pm25: 17, pm10: 34, o3: 38.5, co: 0.41, so2: 1.9, no2: 16.1,
+            windDirection: 210, windSpeed: 1.8, publishTime: ""
+        ),
+        WatchReading(
+            stationId: -2, code: "Hsinchu", name: "Hsinchu", nameLocal: "新竹",
+            aqi: 35, pm25: 8, pm10: 19, o3: 29.7, co: 0.25, so2: 1.1, no2: 9.4,
+            windDirection: 30, windSpeed: 4.2, publishTime: ""
+        ),
+        WatchReading(
+            stationId: -3, code: "Tainan", name: "Tainan", nameLocal: "臺南",
+            aqi: 104, pm25: 37, pm10: 61, o3: 52.3, co: 0.48, so2: 2.6, no2: 18.8,
+            windDirection: 340, windSpeed: 2.1, publishTime: ""
+        ),
+    ]
+
     private init(
         stationId: Int, code: String, name: String, nameLocal: String,
         aqi: Double, pm25: Double, pm10: Double, o3: Double, co: Double, so2: Double, no2: Double,

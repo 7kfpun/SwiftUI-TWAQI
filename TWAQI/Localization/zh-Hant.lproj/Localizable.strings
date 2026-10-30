@@ -78,6 +78,10 @@
 "Help.widgets_title" = "主畫面與鎖定畫面小工具";
 "Help.widgets_shows_header" = "顯示內容";
 "Help.widgets_shows_body" = "顯示最近測站，或你在 Apple Watch 上選定的測站，目前的數值。";
+"Help.widgets_favourites_header" = "最愛測站";
+"Help.widgets_favourites_body" = "小與中尺寸的小工具，會在目前測站下方列出你其他的最愛測站。大尺寸需 Pro 才會列出。";
+"Help.widgets_favourites_add" = "開啟測站並點一下愛心，即可加入最愛。小工具會依加入的順序列出。";
+"Help.widgets_favourites_offline" = "沒有網路時，小工具會顯示最後一次儲存的數值。";
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
 "Help.widgets_sizes_header" = "尺寸";
@@ -193,7 +197,9 @@
 "Watch.widget_no_station %@" = "%@，不含測站";
 
 "Widget.widget_name" = "空氣品質";
-"Widget.widget_description" = "顯示最近或已選測站的目前 AQI。";
+"Widget.widget_description" = "顯示最近或已選測站的目前 AQI，並列出你的最愛測站。";
+"Widget.favourites" = "最愛";
+"Widget.no_favourites" = "在「最愛」加入測站，即可在此顯示。";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";

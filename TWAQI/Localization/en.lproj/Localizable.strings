@@ -74,6 +74,10 @@
 "Help.widgets_title" = "Home Screen & Lock Screen widgets";
 "Help.widgets_shows_header" = "What it shows";
 "Help.widgets_shows_body" = "The current reading for your nearest station, or a station you chose on Apple Watch.";
+"Help.widgets_favourites_header" = "Favourite stations";
+"Help.widgets_favourites_body" = "Small and medium widgets list your other favourite stations under the current one. Large lists them with Pro.";
+"Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget lists them in the order you saved them.";
+"Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
 "Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
 "Help.widgets_sizes_header" = "Sizes";
@@ -189,7 +193,9 @@
 "Watch.widget_no_station %@" = "%@, no station";
 
 "Widget.widget_name" = "Air quality";
-"Widget.widget_description" = "Current AQI at your nearest or pinned station.";
+"Widget.widget_description" = "Current AQI at your nearest or pinned station, plus your favourite stations.";
+"Widget.favourites" = "Favourites";
+"Widget.no_favourites" = "Save stations in Favourites to list them here.";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";
