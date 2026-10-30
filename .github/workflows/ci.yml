@@ -57,7 +57,8 @@ jobs:
               ".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic", ".svg", ".pdf",
           }
           docs = {".md", ".markdown"}
-          prefixes = ("assets/", "fastlane/", "web/")
+          # workers/ is checked by the Workers workflow.
+          prefixes = ("assets/", "fastlane/", "web/", "workers/")
 
           def unrelated(path):
               normalized = path.replace("\\", "/").lower()
@@ -76,7 +77,7 @@ jobs:
                   print("\n".join(f"  {path}" for path in related))
                   decision = "true"
               else:
-                  print("Skipping unit tests. Changed files are media, docs, or marketing:")
+                  print("Skipping unit tests. Changed files are media, docs, marketing, or Workers:")
                   print("\n".join(f"  {path}" for path in files))
                   decision = "false"
           with pathlib.Path(os.environ["GITHUB_OUTPUT"]).open("a") as handle:

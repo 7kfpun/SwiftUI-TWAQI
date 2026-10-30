@@ -1,0 +1,28 @@
+// Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes.
+// Deployed by GitHub Actions (.github/workflows/workers.yml) on merge to master.
+// Secrets (never in git) are listed in secrets.required; CI uploads them from
+// GitHub repository secrets of the same names on every deploy.
+//
+// Public URLs:
+//   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
+//     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
+//     https://twaqi.app.wahthefox.com/manifest.json
+//   Worker (health, and webcam status, manual sync and reads under /station-cams):
+//     https://twaqi-workers.710kfpun.workers.dev
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twaqi-workers",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": true,
+  "r2_buckets": [
+    { "binding": "CAMS", "bucket_name": "twaqi-station-cams" }
+  ],
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
+  "secrets": {
+    "required": ["MOENV_API_KEY", "SYNC_TOKEN"]
+  },
+  "observability": { "enabled": true }
+}
