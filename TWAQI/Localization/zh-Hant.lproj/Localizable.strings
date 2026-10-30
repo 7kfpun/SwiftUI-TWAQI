@@ -149,6 +149,11 @@
 "Details.pollutants" = "污染物";
 "Details.health_advice" = "健康建議";
 "Details.notifications" = "通知";
+"Details.live_cam" = "即時影像";
+"Details.cam_captured %@" = "拍攝於 %@";
+"Details.cam_source" = "影像來源：環境部";
+"Details.no_cam" = "此測站沒有即時影像";
+"Details.cam_unavailable" = "目前無法載入影像";
 
 /* Share card */
 "Share.share" = "分享";

@@ -91,6 +91,10 @@ struct DetailsView: View {
                     .padding(.top, 4)
                     .padding(.bottom, 16)
 
+                // What that number looks like outside.
+                StationCamView(state: viewModel.cam)
+                    .padding(.bottom, 16)
+
                 Separator().frame(height: 8)
 
                 if let pollutant = viewModel.pollutant {
