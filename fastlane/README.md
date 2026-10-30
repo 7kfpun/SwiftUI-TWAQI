@@ -41,7 +41,7 @@ Leaves the iPhone, iPad and watch screenshots already framed alone
 [bundle exec] fastlane ios upload_screenshots
 ```
 
-Upload screenshots only to App Store Connect for 3.1.0
+Upload screenshots only to App Store Connect for 3.1.2
 
 Does not touch the binary, the metadata, or the review submission
 
@@ -51,7 +51,7 @@ Does not touch the binary, the metadata, or the review submission
 [bundle exec] fastlane ios upload_watch_screenshots
 ```
 
-Upload the Apple Watch screenshots only to App Store Connect for 3.1.0
+Upload the Apple Watch screenshots only to App Store Connect for 3.1.2
 
 Leaves the iPhone and iPad screenshots already on the version alone
 
@@ -61,7 +61,7 @@ Leaves the iPhone and iPad screenshots already on the version alone
 [bundle exec] fastlane ios upload_duo_screenshots
 ```
 
-Upload the iPhone Duo screenshots only to App Store Connect for 3.1.0
+Upload the iPhone Duo screenshots only to App Store Connect for 3.1.2
 
 Leaves the iPhone, iPad and watch screenshots already on the version alone
 
@@ -81,7 +81,7 @@ Capture them first with tools/capture_vision_screenshots.sh
 [bundle exec] fastlane ios upload_vision_screenshots
 ```
 
-Upload the Vision Pro screenshots only to the visionOS 3.1.0 version
+Upload the Vision Pro screenshots only to the visionOS 3.1.2 version
 
 Replaces the Vision Pro set in each locale; leaves every other platform alone
 
@@ -91,7 +91,7 @@ Replaces the Vision Pro set in each locale; leaves every other platform alone
 [bundle exec] fastlane ios upload_metadata
 ```
 
-Upload text metadata only to App Store Connect for 3.1.0
+Upload text metadata only to App Store Connect for 3.1.2
 
 Does not touch the binary, the screenshots, or the review submission
 
@@ -101,7 +101,7 @@ Does not touch the binary, the screenshots, or the review submission
 [bundle exec] fastlane ios release_build
 ```
 
-Archive a Release build of 3.1.0 and upload it to App Store Connect
+Archive a Release build of 3.1.2 and upload it to App Store Connect
 
 Bumps every target's build number past the latest one on TestFlight. Never submits for review
 
