@@ -4,9 +4,9 @@ name: Workers
 # with its own wrangler config. Pull requests typecheck and dry-run the Workers
 # they change; a merge to master deploys only the Workers it changed.
 #
-# Repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
-# Runtime secrets (MOENV_API_KEY, SYNC_TOKEN, ...) stay on each Worker in
-# Cloudflare and are kept across deploys.
+# Repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, plus every
+# name a Worker lists in its wrangler config under secrets.required. Those are
+# uploaded with each deploy, so a new or recreated Worker works straight away.
 
 on:
   pull_request:
@@ -14,7 +14,9 @@ on:
     branches: [master]
     paths: ["workers/**"]
   push:
-    branches: [master]
+    # TEMPORARY: feature/twaqi-station-cams-worker deploys before merge so the
+    # first GitHub deploy can be checked. Remove it here and in the deploy job.
+    branches: [master, feature/twaqi-station-cams-worker]
     paths: ["workers/**"]
   workflow_dispatch:
     inputs:
@@ -120,7 +122,7 @@ jobs:
     needs: changes
     if: >-
       github.event_name != 'pull_request' &&
-      github.ref == 'refs/heads/master' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/feature/twaqi-station-cams-worker') &&
       needs.changes.outputs.workers != '[]'
     runs-on: ubuntu-latest
     # Never cancel a deploy halfway; queue the next one behind it.
@@ -151,8 +153,39 @@ jobs:
       - name: Typecheck
         run: npm run typecheck --if-present
 
+      - name: Collect Worker secrets
+        env:
+          REPO_SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          set -euo pipefail
+          # Copy only the names this Worker lists under secrets.required, and
+          # fail if any is missing rather than deploying a Worker that can't run.
+          node - "$RUNNER_TEMP/worker-secrets.json" <<'JS'
+          const fs = require('fs')
+          const out = process.argv[2]
+          const file = ['wrangler.jsonc', 'wrangler.json'].find((f) => fs.existsSync(f))
+          if (!file) throw new Error('No wrangler.jsonc or wrangler.json')
+          // Drop JSONC comments and trailing commas, leaving string contents alone.
+          const text = fs.readFileSync(file, 'utf8')
+            .replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*|\/\*[\s\S]*?\*\//g, (m, str) => str ?? '')
+            .replace(/("(?:\\.|[^"\\])*")|,(\s*[}\]])/g, (m, str, end) => str ?? end)
+          const required = JSON.parse(text).secrets?.required ?? []
+          const all = JSON.parse(process.env.REPO_SECRETS)
+          const missing = required.filter((name) => !all[name])
+          if (missing.length) {
+            console.error(`Missing repository secrets: ${missing.join(', ')}`)
+            process.exit(1)
+          }
+          fs.writeFileSync(out, JSON.stringify(Object.fromEntries(required.map((n) => [n, all[n]]))), { mode: 0o600 })
+          console.log(`Secrets to upload: ${required.join(', ') || '(none)'}`)
+          JS
+
       - name: Deploy to Cloudflare
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy
+        run: npx wrangler deploy --secrets-file "$RUNNER_TEMP/worker-secrets.json"
+
+      - name: Remove secrets file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/worker-secrets.json"

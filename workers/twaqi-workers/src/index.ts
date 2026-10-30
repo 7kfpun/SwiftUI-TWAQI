@@ -71,7 +71,7 @@ export default {
       const m = await readManifest(env)
       return json({
         ok: true,
-        service: 'twaqi-station-cams-sync',
+        service: 'twaqi-workers',
         updatedAt: m?.updatedAt ?? null,
         source: m?.source?.filename ?? null,
         stations: m ? Object.keys(m.stations).length : 0,

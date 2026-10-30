@@ -1,4 +1,4 @@
-# twaqi-station-cams-sync
+# twaqi-workers
 
 Cloudflare Worker that mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the R2 custom domain `twaqi.app.wahthefox.com`.
 
@@ -13,7 +13,7 @@ Public images are served straight from R2 via the bucket's custom domain — no 
 - `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg`
 - `https://twaqi.app.wahthefox.com/manifest.json`
 
-The Worker has no custom-domain route; it runs on `https://twaqi-station-cams-sync.710kfpun.workers.dev` (health, manual sync, and the same read routes below).
+The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev` (health, manual sync, and the same read routes below).
 
 | Route | |
 | --- | --- |
@@ -24,10 +24,18 @@ The Worker has no custom-domain route; it runs on `https://twaqi-station-cams-sy
 
 ## Deploy
 
+GitHub Actions deploys this Worker when a merge to master changes `workers/twaqi-workers/` (see `.github/workflows/workers.yml`). Run the **Workers** workflow by hand to redeploy.
+
+Secrets are listed in `secrets.required` in `wrangler.jsonc`. CI uploads them from GitHub repository secrets of the same names on every deploy:
+
+```sh
+gh secret set MOENV_API_KEY -R 7kfpun/SwiftUI-TWAQI
+gh secret set SYNC_TOKEN -R 7kfpun/SwiftUI-TWAQI
+```
+
+Local development:
+
 ```sh
 npm install
-npx wrangler deploy
-# secrets (stdin only, never in git)
-npx wrangler secret put MOENV_API_KEY
-npx wrangler secret put SYNC_TOKEN
+npx wrangler dev
 ```
