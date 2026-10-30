@@ -11,11 +11,13 @@ import SwiftUI
 import WidgetKit
 
 /// Home Screen and Lock Screen widgets for the station the iOS app last
-/// resolved (closest / pinned). Shares `WatchStore` keys in the app group so
-/// a reading written by the phone is what the extension shows offline.
+/// resolved (closest / pinned), or the reader's first favourite. Shares
+/// `WatchStore` keys in the app group so a reading written by the phone is
+/// what the extension shows offline.
 ///
-/// Small and medium also list the reader's other favourite stations; large
-/// does with Pro. The Lock Screen families stay single-station.
+/// Home Screen families also list the reader's other favourite stations.
+/// Medium and large are Pro; without it they say so instead. The Lock Screen
+/// families stay single-station.
 @main
 struct TWAQIWidget: Widget {
     var body: some WidgetConfiguration {
@@ -58,15 +60,32 @@ enum IndexOption: String, AppEnum {
     }
 }
 
+/// Which station a widget leads with. The rest of the favourites are listed
+/// under it either way.
+enum StationOption: String, AppEnum {
+    case closest, firstFavourite
+
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Widget.station"
+
+    static var caseDisplayRepresentations: [StationOption: DisplayRepresentation] = [
+        .closest: "Widget.station_closest",
+        .firstFavourite: "Widget.station_first_favourite",
+    ]
+}
+
 struct SelectIndexIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Index"
+
+    @Parameter(title: "Widget.station", default: .closest)
+    var station: StationOption
 
     @Parameter(title: "Index", default: .aqi)
     var index: IndexOption
 
     init() {}
 
-    init(index: IndexOption) {
+    init(station: StationOption = .closest, index: IndexOption) {
+        self.station = station
         self.index = index
     }
 
@@ -85,9 +104,12 @@ struct ReadingEntry: TimelineEntry {
     var listsFavourites = false
     /// Saved favourites other than `reading`, in the reader's order.
     var favourites: [WatchReading] = []
+    /// A Pro family placed without Pro: stations are shown, their numbers
+    /// blurred under a line selling Pro.
+    var isLocked = false
 
     var tintColor: Color {
-        guard let reading else { return Color(0x676767) }
+        guard let reading, !isLocked else { return Color(0x676767) }
         return Color(reading.status(airIndexType).getColor())
     }
 }
@@ -97,13 +119,30 @@ struct ReadingProvider: AppIntentTimelineProvider {
     /// publish behind without spending the refresh budget.
     private static let refreshInterval: TimeInterval = 30 * 60
 
-    /// Small and medium list favourites for everyone, large only with Pro.
+    /// Home Screen families list favourites; Lock Screen ones have no room.
     static func listsFavourites(in family: WidgetFamily) -> Bool {
         switch family {
-        case .systemSmall, .systemMedium: return true
-        case .systemLarge: return WatchStore.isProUnlocked
+        case .systemSmall, .systemMedium, .systemLarge: return true
         default: return false
         }
+    }
+
+    /// Medium and large are Pro. The gallery still previews them unlocked.
+    static func isLocked(in context: Context) -> Bool {
+        switch context.family {
+        case .systemMedium, .systemLarge: return !WatchStore.isProUnlocked && !context.isPreview
+        default: return false
+        }
+    }
+
+    /// The favourite a widget leads with, when it's set to. `nil` means the
+    /// closest station, also the fallback while no favourite is saved.
+    private static func leadingFavouriteId(for configuration: SelectIndexIntent) -> Int? {
+        configuration.station == .firstFavourite ? WatchStore.favouriteStationIds.first : nil
+    }
+
+    private static func cachedFavourite(_ stationId: Int) -> WatchReading? {
+        WatchStore.favouriteReadings.first { $0.stationId == stationId }
     }
 
     /// Favourites in the reader's order, minus the primary station, from the
@@ -128,7 +167,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: SelectIndexIntent, in context: Context) async -> ReadingEntry {
-        let reading = WatchStore.latestReading ?? .placeholder
+        let reading = Self.leadingFavouriteId(for: configuration).flatMap(Self.cachedFavourite)
+            ?? WatchStore.latestReading ?? .placeholder
         let lists = Self.listsFavourites(in: context.family)
         var favourites: [WatchReading] = []
         if lists {
@@ -140,7 +180,7 @@ struct ReadingProvider: AppIntentTimelineProvider {
         }
         return ReadingEntry(
             date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites
+            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context)
         )
     }
 
@@ -150,41 +190,51 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let lists = Self.listsFavourites(in: context.family)
         let favouriteIds = lists ? WatchStore.favouriteStationIds : []
 
-        // The app resolves home from the reader's location; the extension
-        // can't, so it follows whichever station the app last showed. Before
-        // the app has ever run, that is the 中正 default.
-        let pollutant: Pollutant?
         var fetched: Pollutants = []
-        if let stationId = WatchStore.pinnedStationId ?? reading?.stationId {
-            if favouriteIds.isEmpty {
-                pollutant = try? await WatchAPI.currentPollutant(stationId: stationId)
-            } else {
-                // One request for the primary station and the favourites.
-                fetched = (try? await WatchAPI.currentPollutants(stationIds: [stationId] + favouriteIds)) ?? []
-                pollutant = fetched.first { $0.stationId == stationId }
-            }
+        if let leadingId = Self.leadingFavouriteId(for: configuration) {
+            // The first favourite is one of the favourites, so one request
+            // covers both. Its reading goes to the favourite cache only:
+            // `latestReading` tracks the closest station.
+            let ids = favouriteIds.isEmpty ? [leadingId] : favouriteIds
+            fetched = (try? await WatchAPI.currentPollutants(stationIds: ids)) ?? []
+            reading = fetched.first { $0.stationId == leadingId }.map(WatchReading.init)
+                ?? Self.cachedFavourite(leadingId) ?? reading
         } else {
-            // Every station, so favourites come along for free.
-            fetched = (try? await WatchAPI.currentPollutants()) ?? []
-            pollutant = WatchAPI.closest(to: WatchAPI.defaultLocation, in: fetched)
-        }
-        // Falls back to the cached reading when offline rather than blanking
-        // the widget.
-        if let pollutant {
-            reading = WatchReading(pollutant)
-            WatchStore.latestReading = reading
+            // The app resolves home from the reader's location; the extension
+            // can't, so it follows whichever station the app last showed.
+            // Before the app has ever run, that is the 中正 default.
+            let pollutant: Pollutant?
+            if let stationId = WatchStore.pinnedStationId ?? reading?.stationId {
+                if favouriteIds.isEmpty {
+                    pollutant = try? await WatchAPI.currentPollutant(stationId: stationId)
+                } else {
+                    // One request for the primary station and the favourites.
+                    fetched = (try? await WatchAPI.currentPollutants(stationIds: [stationId] + favouriteIds)) ?? []
+                    pollutant = fetched.first { $0.stationId == stationId }
+                }
+            } else {
+                // Every station, so favourites come along for free.
+                fetched = (try? await WatchAPI.currentPollutants()) ?? []
+                pollutant = WatchAPI.closest(to: WatchAPI.defaultLocation, in: fetched)
+            }
+            // Falls back to the cached reading when offline rather than
+            // blanking the widget.
+            if let pollutant {
+                reading = WatchReading(pollutant)
+                WatchStore.latestReading = reading
+            }
         }
 
-        var favourites: [WatchReading] = []
-        if !favouriteIds.isEmpty {
-            let ids = Set(favouriteIds)
-            WatchStore.cacheFavouriteReadings(fetched.filter { ids.contains($0.stationId) }.map(WatchReading.init))
-            favourites = Self.cachedFavourites(excluding: reading?.stationId)
-        }
+        let savedIds = Set(WatchStore.favouriteStationIds)
+        WatchStore.cacheFavouriteReadings(fetched.filter { savedIds.contains($0.stationId) }.map(WatchReading.init))
+        // The leading station is never listed again under itself.
+        let favourites = lists ? Self.cachedFavourites(excluding: reading?.stationId) : []
 
+        // Locked widgets still fetch, so the stations they tease are current.
+        // Buying Pro reloads every timeline (`WidgetBridge.publish(isPro:)`).
         let entry = ReadingEntry(
             date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites
+            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context)
         )
         return Timeline(entries: [entry], policy: .after(next))
     }
@@ -199,7 +249,14 @@ struct ReadingWidgetView: View {
 
     var body: some View {
         if let reading = entry.reading {
-            content(reading)
+            if entry.isLocked {
+                content(reading)
+                    .overlay(alignment: .bottom) { proBanner }
+            } else {
+                content(reading)
+            }
+        } else if entry.isLocked {
+            proOnly
         } else {
             empty
         }
@@ -218,8 +275,8 @@ struct ReadingWidgetView: View {
         case .systemMedium where !entry.favourites.isEmpty:
             mediumWithFavourites(reading)
 
-        // With Pro and nothing saved, large says how to add favourites rather
-        // than falling back to the plain layout.
+        // With nothing saved, large says how to add favourites rather than
+        // falling back to the plain layout.
         case .systemLarge where entry.listsFavourites:
             largeWithFavourites(reading)
 
@@ -257,6 +314,7 @@ struct ReadingWidgetView: View {
                     if family == .systemLarge {
                         Text(verbatim: "\(type.toString()) \(value) \(type.getUnit())".trimmingCharacters(in: .whitespaces))
                             .font(.title2.monospacedDigit().weight(.semibold))
+                            .proBlurred(entry.isLocked)
                         Spacer(minLength: 0)
                         if !reading.publishTime.isEmpty {
                             Text(verbatim: reading.publishTime)
@@ -266,6 +324,7 @@ struct ReadingWidgetView: View {
                     } else {
                         Text(verbatim: "\(type.toString()) \(value)")
                             .font(.title3.monospacedDigit().weight(.semibold))
+                            .proBlurred(entry.isLocked)
                     }
                 }
                 Spacer(minLength: 0)
@@ -280,6 +339,7 @@ struct ReadingWidgetView: View {
                     } else {
                         Text(verbatim: value)
                             .font(.title.weight(.bold))
+                            .proBlurred(entry.isLocked)
                             .monospacedDigit()
                             .foregroundStyle(tint)
                     }
@@ -381,6 +441,7 @@ struct ReadingWidgetView: View {
                 HStack(alignment: .center, spacing: 6) {
                     Text(verbatim: "\(type.toString()) \(reading.formatted(type))")
                         .font(.title3.monospacedDigit().weight(.semibold))
+                        .proBlurred(entry.isLocked)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 0)
@@ -418,6 +479,7 @@ struct ReadingWidgetView: View {
                         .minimumScaleFactor(0.7)
                     Text(verbatim: "\(type.toString()) \(value) \(type.getUnit())".trimmingCharacters(in: .whitespaces))
                         .font(.title2.monospacedDigit().weight(.semibold))
+                        .proBlurred(entry.isLocked)
                 }
                 Spacer(minLength: 0)
                 face(status, value: value, size: 72)
@@ -471,6 +533,7 @@ struct ReadingWidgetView: View {
             Spacer(minLength: 4)
             Text(verbatim: reading.formatted(type))
                 .font(.caption.weight(.semibold))
+                .proBlurred(entry.isLocked)
                 .monospacedDigit()
                 .foregroundStyle(Color(status.getForegroundColor()))
                 .padding(.horizontal, 6)
@@ -495,6 +558,7 @@ struct ReadingWidgetView: View {
             } else {
                 Text(verbatim: value)
                     .font(.system(size: size * 0.4, weight: .bold))
+                    .proBlurred(entry.isLocked)
                     .monospacedDigit()
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(tint)
@@ -530,9 +594,48 @@ struct ReadingWidgetView: View {
             }
         }
     }
+
+    /// Over a locked widget's blurred numbers. Tapping opens the app, where
+    /// Pro is.
+    private var proBanner: some View {
+        Label {
+            Text("Widget.pro_unlock")
+        } icon: {
+            Image(systemName: "lock.fill")
+        }
+        .font(.caption.weight(.semibold))
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(Color(.systemBackground).opacity(0.9), in: Capsule())
+    }
+
+    /// Medium and large without Pro and with no reading yet to tease.
+    private var proOnly: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label {
+                Text("Widget.pro_only_title")
+            } icon: {
+                Image(systemName: "lock.fill")
+            }
+            .font(.headline)
+            Text("Widget.pro_only_body")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(12)
+    }
 }
 
 private extension View {
+    /// Blurs a reading on a locked widget, and keeps VoiceOver from reading it.
+    func proBlurred(_ isLocked: Bool) -> some View {
+        blur(radius: isLocked ? 6 : 0)
+            .accessibilityHidden(isLocked)
+    }
+
     /// iOS 17+ container background; older Home Screen widgets keep a clear fill.
     @ViewBuilder
     func widgetContainerBackground(tint: Color) -> some View {
@@ -548,10 +651,10 @@ private extension View {
 
 #if DEBUG
 private extension ReadingEntry {
-    static func preview(listsFavourites: Bool = true, favourites: [WatchReading] = WatchReading.placeholderFavourites) -> ReadingEntry {
+    static func preview(favourites: [WatchReading] = WatchReading.placeholderFavourites, isLocked: Bool = false) -> ReadingEntry {
         ReadingEntry(
             date: Date(), reading: .placeholder, airIndexType: .aqi,
-            listsFavourites: listsFavourites, favourites: favourites
+            listsFavourites: true, favourites: favourites, isLocked: isLocked
         )
     }
 }
@@ -570,16 +673,24 @@ private extension ReadingEntry {
     ReadingEntry.preview(favourites: [])
 }
 
-#Preview("Large · Pro", as: .systemLarge) {
+#Preview("Large", as: .systemLarge) {
     TWAQIWidget()
 } timeline: {
     ReadingEntry.preview()
     ReadingEntry.preview(favourites: [])
 }
 
+#Preview("Medium · no Pro", as: .systemMedium) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry.preview(isLocked: true)
+    ReadingEntry(date: Date(), reading: nil, airIndexType: .aqi, isLocked: true)
+}
+
 #Preview("Large · no Pro", as: .systemLarge) {
     TWAQIWidget()
 } timeline: {
-    ReadingEntry.preview(listsFavourites: false, favourites: [])
+    ReadingEntry.preview(isLocked: true)
+    ReadingEntry(date: Date(), reading: nil, airIndexType: .aqi, isLocked: true)
 }
 #endif

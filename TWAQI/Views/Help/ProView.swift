@@ -179,6 +179,7 @@ struct ProView: View {
 enum ProFeature: String, CaseIterable, Identifiable {
     case noAds
     case complications
+    case widgets
     case support
 
     var id: String { rawValue }
@@ -187,6 +188,7 @@ enum ProFeature: String, CaseIterable, Identifiable {
         switch self {
         case .noAds: return "rectangle.slash"
         case .complications: return "watchface.applewatch.case"
+        case .widgets: return "rectangle.grid.1x2"
         case .support: return "heart"
         }
     }
@@ -195,6 +197,7 @@ enum ProFeature: String, CaseIterable, Identifiable {
         switch self {
         case .noAds: return "Pro.feature_no_ads"
         case .complications: return "Pro.feature_complications"
+        case .widgets: return "Pro.feature_widgets"
         case .support: return "Pro.feature_support"
         }
     }
@@ -203,6 +206,7 @@ enum ProFeature: String, CaseIterable, Identifiable {
         switch self {
         case .noAds: return "Pro.feature_no_ads_detail"
         case .complications: return "Pro.feature_complications_detail"
+        case .widgets: return "Pro.feature_widgets_detail"
         case .support: return "Pro.feature_support_detail"
         }
     }

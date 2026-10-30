@@ -23,7 +23,12 @@ class FavouriteListViewModel: ObservableObject {
                 switch result {
                 case .success(let result):
                     print("getCurrentPollutantsByStationId Total: \(result.count)")
-                    self.favouritePollutants = result
+                    // The API returns stations by ID; list them in the
+                    // reader's order, the one the widget follows too.
+                    let order = self.settings.savedFavouriteStations
+                    self.favouritePollutants = result.sorted {
+                        (order.firstIndex(of: $0.stationId) ?? .max) < (order.firstIndex(of: $1.stationId) ?? .max)
+                    }
                     WidgetBridge.cacheFavourites(from: result)
                 case .failure(let error):
                     print(error.localizedDescription)

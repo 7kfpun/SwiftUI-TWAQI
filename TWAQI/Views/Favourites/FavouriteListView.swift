@@ -26,7 +26,7 @@ struct FavouriteListView: View {
                 }
             }
             .navigationBarTitle("FavouriteList.favourites")
-            .navigationBarItems(trailing: removeAllButton)
+            .navigationBarItems(leading: editButton, trailing: removeAllButton)
             // Insets the scroll content so the last row clears the banner,
             // instead of padding the content by a guessed height.
             .safeAreaInset(edge: .bottom) {
@@ -51,8 +51,16 @@ struct FavouriteListView: View {
                 }
             }
             .onDelete(perform: remove)
+            .onMove(perform: move)
         }
         .listStyle(InsetGroupedListStyle())
+    }
+
+    @ViewBuilder
+    private var editButton: some View {
+        if !settings.savedFavouriteStations.isEmpty {
+            EditButton()
+        }
     }
 
     @ViewBuilder
@@ -82,6 +90,15 @@ struct FavouriteListView: View {
             "label": "off",
             "stationId": removedIds.first ?? 0,
         ])
+    }
+
+    /// Saves the new order, which the widget's first favourite follows.
+    private func move(from source: IndexSet, to destination: Int) {
+        viewModel.favouritePollutants.move(fromOffsets: source, toOffset: destination)
+        let listed = viewModel.favouritePollutants.map(\.stationId)
+        // Saved stations the API didn't return keep their place after the rest.
+        settings.savedFavouriteStations = listed + settings.savedFavouriteStations.filter { !listed.contains($0) }
+        TrackingManager.logEvent(eventName: "favourite_station_reordered")
     }
 
     private func removeAll() {

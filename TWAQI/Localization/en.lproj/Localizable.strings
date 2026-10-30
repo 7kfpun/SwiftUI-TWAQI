@@ -73,10 +73,10 @@
 "Help.widgets_and_watch" = "Widgets & Apple Watch";
 "Help.widgets_title" = "Home Screen & Lock Screen widgets";
 "Help.widgets_shows_header" = "What it shows";
-"Help.widgets_shows_body" = "The current reading for your nearest station, or a station you chose on Apple Watch.";
+"Help.widgets_shows_body" = "The current reading for your nearest station, or your first favourite. Edit the widget to choose.";
 "Help.widgets_favourites_header" = "Favourite stations";
-"Help.widgets_favourites_body" = "Small and medium widgets list your other favourite stations under the current one. Large lists them with Pro.";
-"Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget lists them in the order you saved them.";
+"Help.widgets_favourites_body" = "Home Screen widgets list your other favourite stations under the main one, without repeating it. Medium and large widgets are part of Pro.";
+"Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.";
 "Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
 "Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
@@ -86,7 +86,7 @@
 "Help.widgets_add_header" = "How to add";
 "Help.widgets_add_1" = "1. Touch and hold the Home Screen or Lock Screen, then tap Add Widget.";
 "Help.widgets_add_2" = "2. Search for Taiwan Air, TWAQI, or Air quality.";
-"Help.widgets_add_3" = "3. Touch and hold the widget and tap Edit Widget to choose the index.";
+"Help.widgets_add_3" = "3. Touch and hold the widget and tap Edit Widget to choose the station and the index.";
 "Help.widgets_footer" = "Open this app once so a station and a reading are ready.";
 
 "Help.watch_title" = "Apple Watch";
@@ -198,9 +198,15 @@
 "Watch.widget_no_station %@" = "%@, no station";
 
 "Widget.widget_name" = "Air quality";
-"Widget.widget_description" = "Current AQI at your nearest or pinned station, plus your favourite stations.";
+"Widget.widget_description" = "Current AQI at your nearest station or first favourite, plus your other favourites.";
 "Widget.favourites" = "Favourites";
 "Widget.no_favourites" = "Save stations in Favourites to list them here.";
+"Widget.station" = "Station";
+"Widget.station_closest" = "Closest station";
+"Widget.station_first_favourite" = "First favourite";
+"Widget.pro_only_title" = "Pro widget";
+"Widget.pro_only_body" = "Medium and large widgets are for Pro users. Open the app to upgrade.";
+"Widget.pro_unlock" = "Unlock every reading with Pro";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";
@@ -217,6 +223,8 @@
 "Pro.feature_no_ads_detail" = "Every screen, the map included.";
 "Pro.feature_complications" = "Watch-face complications";
 "Pro.feature_complications_detail" = "AQI, PM2.5 or any of 7 indices, right on your watch face. The watch app itself is free.";
+"Pro.feature_widgets" = "Medium and large widgets";
+"Pro.feature_widgets_detail" = "Your station and favourite stations on the Home Screen.";
 "Pro.feature_support" = "Support an independent app";
 "Pro.feature_support_detail" = "Keeps the app maintained and the readings coming.";
 "Pro.choose_plan" = "Choose a plan";
