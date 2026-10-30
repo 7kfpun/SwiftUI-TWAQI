@@ -187,6 +187,8 @@ private struct HelpTab: View {
         NavigationStack {
             Form {
                 Section {
+                    NavigationLink("Help.feedback_or_contact_us") { FeedbackView() }
+
                     ForEach(LinkPages.allCases) { page in
                         Link(destination: page.url) {
                             HStack {

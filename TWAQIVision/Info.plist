@@ -8,10 +8,10 @@
 	<string>$(ApiEnpointCurrentPollutants)</string>
 	<key>ApiEnpointHistoricalPollutants</key>
 	<string>$(ApiEnpointHistoricalPollutants)</string>
-	<key>FeedbackUrlEn</key>
-	<string>$(FeedbackUrlEn)</string>
-	<key>FeedbackUrlZh</key>
-	<string>$(FeedbackUrlZh)</string>
+	<key>DirectusFeedbackToken</key>
+	<string>$(DirectusFeedbackToken)</string>
+	<key>DirectusUrl</key>
+	<string>$(DirectusUrl)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
