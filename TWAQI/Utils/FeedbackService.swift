@@ -72,18 +72,6 @@ struct FeedbackSubmission: Encodable, Equatable {
         bundle: Bundle = .main
     ) -> FeedbackSubmission {
         let info = bundle.infoDictionary
-
-        var meta: [String: String] = [:]
-        meta["bundle_id"] = bundle.bundleIdentifier
-        meta["build"] = info?["CFBundleVersion"] as? String
-        meta["app_platform"] = appPlatform
-        meta["device_idiom"] = deviceIdiom
-        meta["app_language"] = bundle.preferredLocalizations.first
-        meta["preferred_languages"] = Locale.preferredLanguages.prefix(3).joined(separator: ",")
-        meta["time_zone"] = TimeZone.current.identifier
-        // Per-install and per-vendor; resets when every app from us is removed.
-        meta["anonymous_id"] = UIDevice.current.identifierForVendor?.uuidString
-
         return FeedbackSubmission(
             platform: FeedbackPlatform.suggested.rawValue,
             rating: min(max(rating, 1), 5),
@@ -96,11 +84,29 @@ struct FeedbackSubmission: Encodable, Equatable {
             deviceModel: currentDeviceModel,
             osVersion: UIDevice.current.systemVersion,
             locale: Locale.current.identifier,
-            metaJson: meta
+            metaJson: clientMeta(bundle: bundle)
         )
     }
 
-    private static func trimmed(_ text: String?) -> String? {
+    /// The `meta_json` details sent with every form the app posts to
+    /// Directus (feedback and cooperate).
+    static func clientMeta(bundle: Bundle = .main) -> [String: String] {
+        var meta: [String: String] = [:]
+        meta["bundle_id"] = bundle.bundleIdentifier
+        meta["build"] = bundle.infoDictionary?["CFBundleVersion"] as? String
+        meta["app_platform"] = appPlatform
+        meta["device_idiom"] = deviceIdiom
+        meta["app_language"] = bundle.preferredLocalizations.first
+        meta["preferred_languages"] = Locale.preferredLanguages.prefix(3).joined(separator: ",")
+        meta["time_zone"] = TimeZone.current.identifier
+        // Per-install and per-vendor; resets when every app from us is removed.
+        meta["anonymous_id"] = UIDevice.current.identifierForVendor?.uuidString
+        return meta
+    }
+
+    /// Trimmed text, or nil when blank, so optional fields are left out of
+    /// the JSON rather than sent as "".
+    static func trimmed(_ text: String?) -> String? {
         guard let value = text?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
             return nil
         }
@@ -162,6 +168,7 @@ struct FeedbackSubmission: Encodable, Equatable {
     }
 }
 
+/// Why a create-only Directus form (feedback or cooperate) wasn't sent.
 enum FeedbackError: Error, Equatable {
     /// The Directus URL or token is missing from the build's xcconfig.
     case notConfigured
@@ -177,11 +184,33 @@ enum FeedbackService {
         _ submission: FeedbackSubmission,
         session: URLSession = .shared
     ) async throws {
-        guard let request = makeRequest(
-            baseURL: getEnv("DirectusUrl"),
-            token: getEnv("DirectusFeedbackToken"),
-            submission: submission
-        ) else {
+        try await createItem(
+            makeRequest(
+                baseURL: getEnv("DirectusUrl"),
+                token: getEnv("DirectusFeedbackToken"),
+                submission: submission
+            ),
+            session: session
+        )
+    }
+
+    static func makeRequest(
+        baseURL: String?,
+        token: String?,
+        submission: FeedbackSubmission
+    ) -> URLRequest? {
+        makeCreateRequest(baseURL: baseURL, token: token, path: collectionPath, body: submission)
+    }
+
+    // MARK: - Shared create-only POST
+
+    /// Sends a request built by `makeCreateRequest`; nil means the build has
+    /// no Directus URL or token.
+    static func createItem(
+        _ request: URLRequest?,
+        session: URLSession = .shared
+    ) async throws {
+        guard let request = request else {
             throw FeedbackError.notConfigured
         }
 
@@ -196,7 +225,7 @@ enum FeedbackService {
         }
 
         // Directus answers 200 with the item, or 204 when the token cannot
-        // read the collection back, which this create-only one cannot.
+        // read the collection back, which a create-only one cannot.
         guard let http = response as? HTTPURLResponse else {
             throw FeedbackError.network
         }
@@ -205,26 +234,28 @@ enum FeedbackService {
         }
     }
 
-    static func makeRequest(
+    /// POST `body` as JSON to `path` under `baseURL` with a bearer token.
+    static func makeCreateRequest<Body: Encodable>(
         baseURL: String?,
         token: String?,
-        submission: FeedbackSubmission
+        path: String,
+        body: Body
     ) -> URLRequest? {
         guard let baseURL = baseURL?.trimmingCharacters(in: .whitespaces), !baseURL.isEmpty,
               let token = token?.trimmingCharacters(in: .whitespaces), !token.isEmpty,
               let base = URL(string: baseURL),
-              let body = try? JSONEncoder().encode(submission)
+              let data = try? JSONEncoder().encode(body)
         else {
             return nil
         }
 
-        var request = URLRequest(url: base.appendingPathComponent(collectionPath))
+        var request = URLRequest(url: base.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.timeoutInterval = 20
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = body
+        request.httpBody = data
         return request
     }
 }

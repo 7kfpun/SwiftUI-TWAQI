@@ -181,18 +181,7 @@ private struct HelpTab: View {
             Form {
                 Section {
                     NavigationLink("Help.feedback_or_contact_us") { FeedbackView() }
-
-                    ForEach(LinkPages.allCases) { page in
-                        Link(destination: page.url) {
-                            HStack {
-                                Text(page.title)
-                                Spacer()
-                                Image(systemName: "arrow.up.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
+                    NavigationLink("Help.interested_to_be_our_business_partner") { CooperateView() }
                 } header: {
                     Label("Help.contact_us", systemImage: "envelope")
                 }

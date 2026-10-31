@@ -123,13 +123,9 @@ struct HelpView: View {
                     .fontWeight(.light)
             }
 
-            ForEach(LinkPages.allCases) { linkPage in
-                externalLink(title: linkPage.title, url: linkPage.url) {
-                    TrackingManager.logEvent(
-                        eventName: "open_contact_us_link",
-                        parameters: ["label": linkPage.rawValue]
-                    )
-                }
+            NavigationLink(destination: CooperateView()) {
+                Text("Help.interested_to_be_our_business_partner")
+                    .fontWeight(.light)
             }
         }
     }
@@ -217,30 +213,6 @@ struct HelpView: View {
             }
         }
         .task { isTestEnvironment = await IAPManager.isTestEnvironment() }
-    }
-
-    /// Row that opens a web page, with a consistent trailing affordance.
-    private func externalLink(
-        title: LocalizedStringKey,
-        url: URL,
-        onOpen: @escaping () -> Void
-    ) -> some View {
-        Button(action: {
-            UIApplication.shared.open(url)
-            onOpen()
-        }) {
-            HStack {
-                Text(title)
-                    .foregroundColor(.primary)
-                    .fontWeight(.light)
-
-                Spacer()
-
-                Image(systemName: "arrow.up.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
     }
 
     private var appVersion: String {

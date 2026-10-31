@@ -40,7 +40,7 @@ $ open TWAQI/Config/debug.xcconfig
 # Create a Firebase project and download the config file, GoogleService-Info.plist, to the folder, https://firebase.google.com/docs/ios/setup
 $ cp ~/GoogleService-Info.plist TWAQI/GoogleService-Info.plist
 
-# Directus: set DirectusFeedbackToken (and optionally DirectusPushToken) in debug.xcconfig — see the comments in example.xcconfig
+# Directus: set DirectusFeedbackToken (and optionally DirectusPushToken / DirectusCooperateToken) in debug.xcconfig — see the comments in example.xcconfig
 
 # Open Xcode and run with Command (⌘)-R
 $ open TWAQI.xcworkspace
@@ -57,7 +57,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | Air-quality readings | MOENV open data, served to the app from the `API_DOMAIN` endpoints in the xcconfig |
 | In-app feedback (Help → Feedback / Contact us) | Directus on `https://cms.wahthefox.com`, collection `twaqi_feedback`, with the app's static token (`DirectusFeedbackToken`) |
 | 空品區 AQI forecast | Directus `twaqi_aqi_forecast`, filled hourly from MOENV `AQF_P_01` by [`workers/twaqi-workers`](workers/twaqi-workers/README.md); the app only reads it |
-| "Interested to be our Business Partner?" (cooperate) | Still an external link (`PartnerUrlZh` / `PartnerUrlEn`). Moving it to a Directus form is FOX-22 |
+| Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
 | Station webcams | R2 bucket `twaqi-station-cams` behind `https://twaqi.app.wahthefox.com`, synced every 10 min by `workers/twaqi-workers` |
 | Push alerts | OneSignal, with settings dual-written to Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |

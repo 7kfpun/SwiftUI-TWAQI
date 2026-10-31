@@ -7,8 +7,9 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 ## Facts that are easy to get wrong
 
 - **Backend is Directus on `https://cms.wahthefox.com`**, not Airtable. In-app feedback
-  writes `twaqi_feedback`; the 空品區 forecast is read from `twaqi_aqi_forecast`.
-  The "business partner" (cooperate) row is still an external `PartnerUrl*` link on master.
+  writes `twaqi_feedback` and the business partner form (`CooperateView`) writes
+  `twaqi_cooperate`, both create-only with soft delete via `archived`; the 空品區 forecast
+  is read from `twaqi_aqi_forecast`.
 - **Push is OneSignal**, dual-written to Directus (`twaqi_push_devices`,
   `twaqi_push_subscriptions`) by `DirectusPushMirror`, always *after* the OneSignal write
   and best-effort. The FCM cutover (`feature/twaqi-fcm-cutover`) is not merged.
