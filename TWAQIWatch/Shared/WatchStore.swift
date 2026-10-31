@@ -53,6 +53,43 @@ enum WatchStore {
         set { setReading(newValue, forKey: Keys.homeReading) }
     }
 
+    /// Readings older than this are not shown, and are removed by
+    /// `purgeExpiredReadings`: past a week a cached reading says more about
+    /// when the device was last online than about the air. The same ceiling as
+    /// the phone app's `OfflineCacheRetention.maxAge`.
+    static let maxReadingAge: TimeInterval = 7 * 24 * 60 * 60
+
+    /// True when `reading` was published more than `maxReadingAge` ago. A
+    /// publish time that doesn't parse (the gallery placeholders) is kept.
+    static func isExpired(_ reading: WatchReading, now: Date = Date()) -> Bool {
+        guard let published = publishTimeFormatter.date(from: reading.publishTime) else { return false }
+        return now.timeIntervalSince(published) > maxReadingAge
+    }
+
+    /// Deletes cached readings older than `maxReadingAge`. Reads already skip
+    /// them; this frees the space and keeps the app group tidy.
+    static func purgeExpiredReadings(now: Date = Date()) {
+        for key in [Keys.latestReading, Keys.homeReading] {
+            if let stored = storedReading(forKey: key), isExpired(stored, now: now) {
+                defaults.removeObject(forKey: key)
+            }
+        }
+        let favourites = storedFavouriteReadings
+        let kept = favourites.filter { !isExpired($0, now: now) }
+        if kept.count != favourites.count {
+            favouriteReadings = kept
+        }
+    }
+
+    /// `publish_time` is Taiwan local time with no zone.
+    private static let publishTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Taipei")
+        return formatter
+    }()
+
     /// Mirror of the iOS app's saved favourites, in the reader's order, for the
     /// medium and large Home Screen widgets. `SettingsStore` on the phone is
     /// the source of truth; only `WidgetBridge` writes this.
@@ -62,13 +99,16 @@ enum WatchStore {
     }
 
     /// Last reading fetched for each favourite, so the widget lists them
-    /// offline. Unordered; look rows up by `stationId`.
+    /// offline. Unordered; look rows up by `stationId`. Readings older than
+    /// `maxReadingAge` are left out.
     static var favouriteReadings: [WatchReading] {
-        get {
-            defaults.data(forKey: Keys.favouriteReadings)
-                .flatMap { try? JSONDecoder().decode([WatchReading].self, from: $0) } ?? []
-        }
+        get { storedFavouriteReadings.filter { !isExpired($0) } }
         set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.favouriteReadings) }
+    }
+
+    private static var storedFavouriteReadings: [WatchReading] {
+        defaults.data(forKey: Keys.favouriteReadings)
+            .flatMap { try? JSONDecoder().decode([WatchReading].self, from: $0) } ?? []
     }
 
     /// Merges freshly fetched favourite readings into `favouriteReadings`,
@@ -86,7 +126,12 @@ enum WatchStore {
         set { defaults.set(newValue, forKey: Keys.isProUnlocked) }
     }
 
+    /// The cached reading, unless it is older than `maxReadingAge`.
     private static func reading(forKey key: String) -> WatchReading? {
+        storedReading(forKey: key).flatMap { isExpired($0) ? nil : $0 }
+    }
+
+    private static func storedReading(forKey key: String) -> WatchReading? {
         defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(WatchReading.self, from: $0) }
     }
 

@@ -232,6 +232,7 @@
 		F569AFF1D3B7F9DE11F6BCA0 /* StationCams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BAAB62CFA3EB870547CDDC /* StationCams.swift */; };
 		F714AF684AD9625E01855394 /* AqiForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B92A7319F203C7207887169 /* AqiForecast.swift */; };
 		48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F15F0DF067304D6744238CD /* StationCamStore.swift */; };
+		575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */; };
 		4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */; };
 		B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7601D6C9CFBFEDB76837949B /* PollutantCache.swift */; };
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
@@ -240,6 +241,7 @@
 		01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4423A411B7699945286E1E56 /* ForecastTranslation.swift */; };
 		408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */; };
 		6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */; };
+		1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */; };
 		5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -490,6 +492,7 @@
 		51BAAB62CFA3EB870547CDDC /* StationCams.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCams.swift; sourceTree = "<group>"; };
 		7B92A7319F203C7207887169 /* AqiForecast.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecast.swift; sourceTree = "<group>"; };
 		2F15F0DF067304D6744238CD /* StationCamStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamStore.swift; sourceTree = "<group>"; };
+		DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamFrameCache.swift; sourceTree = "<group>"; };
 		CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetention.swift; sourceTree = "<group>"; };
 		7601D6C9CFBFEDB76837949B /* PollutantCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCache.swift; sourceTree = "<group>"; };
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
@@ -498,6 +501,7 @@
 		4423A411B7699945286E1E56 /* ForecastTranslation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastTranslation.swift; sourceTree = "<group>"; };
 		8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamTests.swift; sourceTree = "<group>"; };
 		4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCacheTests.swift; sourceTree = "<group>"; };
+		B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetentionTests.swift; sourceTree = "<group>"; };
 		5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -638,6 +642,7 @@
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
+				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
 				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
@@ -840,6 +845,7 @@
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				2F15F0DF067304D6744238CD /* StationCamStore.swift */,
+				DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
 				7601D6C9CFBFEDB76837949B /* PollutantCache.swift */,
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
@@ -1478,6 +1484,7 @@
 			files = (
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
+				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
 				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
@@ -1544,6 +1551,7 @@
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
 				01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
+				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
 				B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,

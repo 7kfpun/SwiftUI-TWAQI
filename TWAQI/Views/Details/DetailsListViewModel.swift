@@ -52,8 +52,13 @@ class DetailsListViewModel: ObservableObject {
         return directory.appendingPathComponent("stations-\(countryCode).json")
     }
 
+    /// Nothing older than `OfflineCacheRetention.maxAge`.
     private static func cachedStations(countryCode: String) -> Stations {
-        guard let data = try? Data(contentsOf: cacheFile(countryCode: countryCode)) else { return [] }
+        let file = cacheFile(countryCode: countryCode)
+        guard
+            !OfflineCacheRetention.isExpired(OfflineCacheRetention.modificationDate(of: file)),
+            let data = try? Data(contentsOf: file)
+        else { return [] }
         // A file an older build wrote may no longer decode; refetch instead.
         return (try? JSONDecoder().decode(Stations.self, from: data)) ?? []
     }

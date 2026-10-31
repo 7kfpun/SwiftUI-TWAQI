@@ -132,14 +132,18 @@ final class AqiForecastStore {
         return request
     }
 
+    /// A file older than `OfflineCacheRetention.maxAge` is not used, even as
+    /// a last good copy.
     private func loadFromDisk() {
+        let modified = OfflineCacheRetention.modificationDate(of: cacheFile)
         guard
+            !OfflineCacheRetention.isExpired(modified),
             let data = try? Data(contentsOf: cacheFile),
             let decoded = try? JSONDecoder().decode(AqiForecastResponse.self, from: data),
             !decoded.data.isEmpty
         else { return }
 
         forecasts = decoded.data
-        fetchedAt = (try? FileManager.default.attributesOfItem(atPath: cacheFile.path))?[.modificationDate] as? Date
+        fetchedAt = modified
     }
 }

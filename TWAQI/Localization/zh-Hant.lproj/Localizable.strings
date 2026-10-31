@@ -185,6 +185,7 @@
 "Details.cam_source" = "影像來源：環境部";
 "Details.no_cam" = "此測站沒有即時影像";
 "Details.cam_unavailable" = "目前無法載入影像";
+"Details.cam_showing_saved" = "無法載入最新影像，顯示最後儲存的畫面";
 
 /* Share card */
 "Share.share" = "分享";
