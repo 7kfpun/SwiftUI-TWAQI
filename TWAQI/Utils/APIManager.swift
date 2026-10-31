@@ -179,6 +179,10 @@ struct APIManager {
                         "station": station,
                         "data": historicalPollutants,
                     ]))
+                } else {
+                    // Without this a failed request never called back, and the
+                    // map timeline's request queue waited on it for good.
+                    completionHandler(.failure(.networkError))
                 }
             }
     }

@@ -35,11 +35,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var defaultLocationButton: DefaultLocationButton!
     var indexSelectorView: IndexSelectorView!
     var myLocationButton: MyLocationButton!
+    var timelineView: MapTimelineView!
     var windModeButton: WindModeButton!
 
-    /// The index bar sits above the ad banner, which SwiftUI lays out outside
-    /// this map. Kept so the bar can drop down when the banner goes away.
-    private var indexSelectorBottom: Constraint?
+    /// The timeline bar sits above the ad banner, which SwiftUI lays out
+    /// outside this map, with the index bar on top of it. Kept so both can drop
+    /// down when the banner goes away.
+    private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
     private var isProLayout = false
 
@@ -142,8 +144,32 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var countryPollutants: [String: Pollutants] = [:] {
         didSet {
             loadMarkers()
+            updateTimelineAnchor()
+            // A new publish hour moves the window; top up what's in view.
+            if timelineHoursAgo > 0 {
+                requestVisibleHistory()
+            }
         }
     }
+
+    // MARK: Timeline
+
+    let historyStore = MapHistoryStore()
+
+    /// Hours before the latest reading the map is showing. 0 is live, and
+    /// draws exactly what it did before the timeline existed.
+    var timelineHoursAgo = 0 {
+        didSet {
+            guard timelineHoursAgo != oldValue else { return }
+            timelineView.hoursAgo = timelineHoursAgo
+            // Markers and the card only. `checkClosestStation` would also
+            // republish to the widgets, which must keep the live reading.
+            renderMarkers()
+            loadClosestStationView()
+        }
+    }
+
+    private var playTimer: Timer?
 
     var closestPollutant: Pollutant! {
         didSet {
@@ -270,6 +296,32 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
+        // MARK: Timeline
+        timelineView = MapTimelineView()
+        timelineView.onInteractionBegan = { [weak self] in
+            guard let self else { return }
+            self.stopPlaying()
+            self.requestVisibleHistory()
+        }
+        timelineView.onChange = { [weak self] hoursAgo in
+            self?.timelineHoursAgo = hoursAgo
+        }
+        timelineView.onPlayTapped = { [weak self] in
+            self?.togglePlay()
+        }
+        historyStore.onChange = { [weak self] in
+            self?.historyDidChange()
+        }
+        view.addSubview(timelineView)
+        timelineView.snp.makeConstraints { (make) -> Void in
+            bottomBarBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+                .offset(Self.bannerClearance(isPro: isPro)).constraint
+            make.height.equalTo(MapTimelineView.preferredHeight)
+            make.centerX.equalTo(view.safeAreaLayoutGuide.snp.centerX)
+            make.width.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.width).offset(-30)
+            make.width.equalTo(560).priority(.high)
+        }
+
         // MARK: Index Selector
         indexSelectorView = IndexSelectorView()
         for (i, airIndexType) in AirIndexTypes.allCases.enumerated() {
@@ -281,8 +333,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
         view.addSubview(indexSelectorView)
         indexSelectorView.snp.makeConstraints { (make) -> Void in
-            indexSelectorBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-                .offset(Self.bannerClearance(isPro: isPro)).constraint
+            make.bottom.equalTo(timelineView.snp.top)
             make.height.equalTo(IndexSelectorView.preferredHeight)
             // Centred at its natural width when there is room, otherwise the
             // full width and scrolling.
@@ -329,11 +380,19 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func loadMarkers() {
-        print("loadMarkers")
+        renderMarkers()
+        self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
+    }
+
+    /// Redraws every marker at the timeline's hour.
+    func renderMarkers() {
+        print("renderMarkers", timelineHoursAgo)
         self.mapView.clear()
         for (countryCode, pollutants) in self.countryPollutants {
             let isInteractive = countryCode == self.supportedCountryCode
-            pollutants.forEach { pollutant in
+            let anchor = Self.anchor(of: pollutants)
+            pollutants.forEach { livePollutant in
+                let (pollutant, hasData) = displayedPollutant(livePollutant, anchor: anchor)
                 var pollutantMarker: GMSMarker
                 if self.isWindMode {
                     pollutantMarker = WindDirectionMarker(
@@ -348,12 +407,117 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                         isInteractive: isInteractive
                     )
                 }
+                if !hasData {
+                    // Not loaded yet, or no reading that hour: grey "-", faded
+                    // so it reads as missing rather than as a reading.
+                    pollutantMarker.opacity = min(pollutantMarker.opacity, 0.55)
+                }
                 pollutantMarker.tracksViewChanges = false
                 pollutantMarker.map = self.mapView
             }
         }
+    }
 
-        self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
+    /// The latest publish hour among a country's stations — "now" on the
+    /// timeline. Per country, since each publishes in its own wall-clock time.
+    private static func anchor(of pollutants: Pollutants) -> String? {
+        pollutants.lazy.map(\.publishTime).max()
+    }
+
+    private func anchor(forStation stationId: Int) -> String? {
+        countryPollutants.values
+            .first { $0.contains { $0.stationId == stationId } }
+            .flatMap(Self.anchor(of:))
+    }
+
+    /// What a station shows at the timeline's hour, and whether there is a
+    /// reading behind it. Live at "now"; that hour's history otherwise.
+    private func displayedPollutant(_ live: Pollutant, anchor: String? = nil) -> (pollutant: Pollutant, hasData: Bool) {
+        guard timelineHoursAgo > 0,
+              let anchor = anchor ?? self.anchor(forStation: live.stationId),
+              let target = MapTimeline.publishTime(anchor, hoursAgo: timelineHoursAgo) else {
+            return (live, true)
+        }
+
+        let reading = historyStore.reading(stationId: live.stationId, publishTime: target)
+        return (Pollutant(live, reading: reading, publishTime: target), reading != nil)
+    }
+
+    /// The timeline is labelled in the supported country's clock (Taiwan).
+    private func updateTimelineAnchor() {
+        let pollutants = supportedCountryCode.flatMap { countryPollutants[$0] }
+            ?? countryPollutants.values.first
+        timelineView?.anchor = pollutants.flatMap(Self.anchor(of:))
+    }
+
+    /// Queues history for the stations in view, nearest the centre first.
+    /// Stations off screen wait until the map is panned to them.
+    private func requestVisibleHistory() {
+        let bounds = GMSCoordinateBounds(region: mapView.projection.visibleRegion())
+        let center = mapView.camera.target
+
+        var wanted: [(stationId: Int, anchor: String, distance: Double)] = []
+        for pollutants in countryPollutants.values {
+            guard let anchor = Self.anchor(of: pollutants) else { continue }
+            for pollutant in pollutants {
+                let coordinate = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
+                guard bounds.contains(coordinate) else { continue }
+                let distance = pow(pollutant.lat - center.latitude, 2) + pow(pollutant.lon - center.longitude, 2)
+                wanted.append((pollutant.stationId, anchor, distance))
+            }
+        }
+
+        historyStore.request(wanted.sorted { $0.distance < $1.distance }.map { ($0.stationId, $0.anchor) })
+    }
+
+    /// History arrived for some stations. Coalesced, so a burst of responses
+    /// is one redraw rather than one per station.
+    private var historyRedrawScheduled = false
+
+    private func historyDidChange() {
+        let progress = historyStore.progress
+        timelineView.progress = historyStore.isLoading ? progress : nil
+
+        guard timelineHoursAgo > 0, !historyRedrawScheduled else { return }
+        historyRedrawScheduled = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
+            self.historyRedrawScheduled = false
+            self.renderMarkers()
+            self.loadClosestStationView()
+        }
+    }
+
+    /// Steps forward an hour at a time to "now". From "now", starts 24 hours back.
+    private func togglePlay() {
+        if playTimer != nil {
+            stopPlaying()
+            return
+        }
+
+        requestVisibleHistory()
+        if timelineHoursAgo == 0 {
+            timelineHoursAgo = MapHistoryStore.hours
+        }
+        timelineView.isPlaying = true
+        TrackingManager.logEvent(eventName: "map_timeline_play")
+
+        playTimer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            // Holds while the hour on screen is still filling in, so playback
+            // doesn't race ahead of a cold cache.
+            if self.historyStore.isLoading, self.historyStore.progress.done == 0 { return }
+            self.timelineHoursAgo = max(self.timelineHoursAgo - 1, 0)
+            if self.timelineHoursAgo == 0 {
+                self.stopPlaying()
+            }
+        }
+    }
+
+    private func stopPlaying() {
+        playTimer?.invalidate()
+        playTimer = nil
+        timelineView.isPlaying = false
     }
 
     func checkClosestStation(latitude: Double, longitude: Double) {
@@ -382,7 +546,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func loadClosestStationView() {
-        if let closestPollutant = self.closestPollutant {
+        if let livePollutant = self.closestPollutant {
+            let closestPollutant = displayedPollutant(livePollutant).pollutant
             print("loadClosestStationView", closestPollutant)
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
             let text = value != 0 ? value.format(f: self.airIndexTypeSelected.getFormat()) : "-" 
@@ -394,6 +559,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             closestStationView.stationName = closestPollutant.displayName
             closestStationView.locality = closestPollutant.displayLocality
             closestStationView.publishTime = closestPollutant.publishTime
+            closestStationView.timelineContext = timelineHoursAgo > 0
+                ? anchor(forStation: livePollutant.stationId)
+                    .flatMap { MapTimeline.describe(anchor: $0, hoursAgo: timelineHoursAgo) }
+                    .map { "\($0.clock)・\($0.relative)" }
+                : nil
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 
@@ -448,7 +618,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let isPro = defaults.bool(forKey: "pro")
         guard isPro != isProLayout else { return }
         isProLayout = isPro
-        indexSelectorBottom?.update(offset: Self.bannerClearance(isPro: isPro))
+        bottomBarBottom?.update(offset: Self.bannerClearance(isPro: isPro))
         UIView.animate(withDuration: 0.25) { self.view.layoutIfNeeded() }
     }
 
@@ -515,11 +685,21 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.currentLongitude = longitude
         checkClosestCountry(latitude: latitude, longitude: longitude)
         checkClosestStation(latitude: latitude, longitude: longitude)
+
+        // Panned back in time and on to new stations: fetch theirs too.
+        if timelineHoursAgo > 0 {
+            requestVisibleHistory()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        stopPlaying()
     }
 }
 

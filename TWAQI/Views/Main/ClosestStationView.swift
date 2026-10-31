@@ -44,15 +44,32 @@ final class ClosestStationView: UIView {
 
     /// Raw API `publish_time`; rendered as "Updated HH:mm".
     var publishTime: String? {
-        didSet {
-            guard let publishTime = publishTime, !publishTime.isEmpty else {
-                updatedLabel.text = nil
-                updatedLabel.isHidden = true
-                return
-            }
+        didSet { updateUpdatedLabel() }
+    }
+
+    /// Set while the map timeline is scrubbed back, e.g. 「昨天 17:00・24 小時前」.
+    /// Replaces the clock-only "Updated HH:mm", which reads the same 24 hours
+    /// ago as it does now.
+    var timelineContext: String? {
+        didSet { updateUpdatedLabel() }
+    }
+
+    private func updateUpdatedLabel() {
+        if let timelineContext, !timelineContext.isEmpty {
             updatedLabel.isHidden = false
-            updatedLabel.text = "\("Details.last_updated".localized) \(publishTime.asPublishTime)"
+            updatedLabel.text = timelineContext
+            updatedLabel.textColor = .label
+            return
         }
+
+        updatedLabel.textColor = .secondaryLabel
+        guard let publishTime = publishTime, !publishTime.isEmpty else {
+            updatedLabel.text = nil
+            updatedLabel.isHidden = true
+            return
+        }
+        updatedLabel.isHidden = false
+        updatedLabel.text = "\("Details.last_updated".localized) \(publishTime.asPublishTime)"
     }
 
     var aqi: String? {
