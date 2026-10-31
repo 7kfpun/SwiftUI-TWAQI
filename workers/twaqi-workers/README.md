@@ -8,6 +8,7 @@ Cloudflare Worker that:
 ## Station webcams
 
 - **Cron** `*/10 * * * *`: latest `aqx_p_01` zip → unzip (fflate) → `stations/{siteId}.jpg` + `manifest.json`. A zip already synced (same source URL) is skipped, and images whose timestamp hasn't changed aren't re-uploaded.
+- The same sync files **one frame per clock hour** per site under `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (see [Hourly history](#hourly-history)).
 - `siteId` is the MOENV image site id from the filename (`001-202610302200.jpg` → `001`), **not** a TWAQI station id.
 - Station name and lat/lon come from `info.xml` (`site`, `TWD97Lat`, `TWD97Lon`), falling back to `Data.csv`.
 
@@ -16,6 +17,7 @@ Cloudflare Worker that:
 Public images are served straight from R2 via the bucket's custom domain — no Worker in the path:
 
 - `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg`
+- `https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (hourly history)
 - `https://twaqi.app.wahthefox.com/manifest.json`
 
 The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev`. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
@@ -24,9 +26,39 @@ The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpu
 | --- | --- |
 | `GET /` | Worker health |
 | `GET /station-cams` | Webcam sync status: last sync time, source zip, station count |
-| `GET /station-cams/manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key } } }` — `max-age=60` |
+| `GET /station-cams/manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key, hourKey } } }` — `max-age=60` |
 | `GET /station-cams/stations/{siteId}.jpg` | Latest JPEG — `max-age=300`, ETag / 304 |
-| `POST /station-cams/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN`; `?force` re-uploads everything |
+| `GET /station-cams/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` | That hour's JPEG — `max-age=86400`, ETag / 304; 404 if none was filed |
+| `POST /station-cams/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN`; `?force` re-uploads every latest frame (hourly frames already filed are left alone) |
+
+### Hourly history
+
+The app's station screen scrubs back through the past 24 clock hours of a cam. For that the sync keeps **one frame per site per hour**, not every 10-minute frame (24 a day, not ~144):
+
+```
+stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg      e.g. stations/001/2026-10-30/22.jpg
+```
+
+- `yyyy-MM-dd` and `HH` are **Taiwan local time** (UTC+8, no DST), read straight off the MOENV filename stamp (`001-202610302200.jpg` → `2026-10-30/22`).
+- The first frame a sync sees in each hour is filed: the `:00` frame whenever a sync catches it, otherwise the earliest after it (a missed sync, or a site that skipped `:00`). Later frames in that hour are not. The manifest's per-site `hourKey` records the hour last filed, so nothing has to `HEAD` or list R2.
+- An hour's object never changes once written (`Cache-Control: public, max-age=86400`); its `customMetadata.time` is the actual capture time.
+- The app builds the URL from the site id and the hour. An hour with no frame (cam down, or not filed yet) is a plain 404.
+- **Retention: 7 days** (`HISTORY_DAYS` in `src/history.ts`). As each hour is filed, the same site's object for that hour 7 days earlier is deleted, so R2 holds a rolling week without listing the bucket. Frames left behind by a site that stopped reporting, or by a failed delete, are not swept; an R2 lifecycle rule on the bucket would catch those (follow-up).
+
+Logic tests (`node --test`, no extra dependencies, Node 23.6+):
+
+```sh
+npm test
+```
+
+Checking a deploy by hand:
+
+```sh
+curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" https://twaqi-workers.710kfpun.workers.dev/station-cams/sync
+# → { …, "hours": 81, "expired": 81, … } on the first sync of an hour, then "hours": 0 until the next hour
+curl -s https://twaqi.app.wahthefox.com/manifest.json | jq '.stations["001"].hourKey'
+curl -sI "https://twaqi.app.wahthefox.com/$(curl -s https://twaqi.app.wahthefox.com/manifest.json | jq -r '.stations["001"].hourKey')"
+```
 
 ## AQI forecast (`aqf_p_01`)
 
