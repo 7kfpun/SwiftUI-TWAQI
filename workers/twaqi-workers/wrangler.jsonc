@@ -1,4 +1,5 @@
-// Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes.
+// Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes,
+// and the MOENV air-quality forecast (aqf_p_01) into Directus hourly at :35.
 // Deployed by GitHub Actions (.github/workflows/workers.yml) on merge to master.
 // Secrets (never in git) are listed in secrets.required; CI uploads them from
 // GitHub repository secrets of the same names on every deploy.
@@ -7,7 +8,7 @@
 //   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
 //     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
 //     https://twaqi.app.wahthefox.com/manifest.json
-//   Worker (health, and webcam status, manual sync and reads under /station-cams):
+//   Worker (health, webcam status/sync/reads under /station-cams, forecast status/sync under /forecast):
 //     https://twaqi-workers.710kfpun.workers.dev
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -19,10 +20,13 @@
     { "binding": "CAMS", "bucket_name": "twaqi-station-cams" }
   ],
   "triggers": {
-    "crons": ["*/10 * * * *"]
+    "crons": ["*/10 * * * *", "35 * * * *"]
+  },
+  "vars": {
+    "DIRECTUS_URL": "https://cms.wahthefox.com"
   },
   "secrets": {
-    "required": ["MOENV_API_KEY", "SYNC_TOKEN"]
+    "required": ["MOENV_API_KEY", "SYNC_TOKEN", "DIRECTUS_FORECAST_TOKEN"]
   },
   "observability": { "enabled": true }
 }

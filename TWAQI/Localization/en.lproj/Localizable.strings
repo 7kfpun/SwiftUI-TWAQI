@@ -324,3 +324,15 @@
 "Timeline.play" = "Play the past 24 hours";
 "Timeline.pause" = "Pause";
 "Timeline.accessibility_label" = "Timeline";
+
+/* Area forecast (MOENV AQF_P_01) */
+"Forecast.title" = "Regional forecast";
+"Forecast.today" = "Today";
+"Forecast.tomorrow" = "Tomorrow";
+"Forecast.day_after_tomorrow" = "In 2 days";
+"Forecast.major_pollutant %@" = "Main pollutant: %@";
+"Forecast.no_value" = "No forecast value";
+"Forecast.published %@" = "Issued %@";
+"Forecast.source" = "Source: MOENV";
+"Forecast.more" = "Show more";
+"Forecast.less" = "Show less";

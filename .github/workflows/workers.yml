@@ -163,6 +163,7 @@ jobs:
         env:
           MOENV_API_KEY: ${{ secrets.MOENV_API_KEY }}
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          DIRECTUS_FORECAST_TOKEN: ${{ secrets.DIRECTUS_FORECAST_TOKEN }}
         run: |
           set -euo pipefail
           # Copy only the names this Worker lists under secrets.required, and

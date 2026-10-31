@@ -328,3 +328,15 @@
 "Timeline.play" = "播放過去 24 小時";
 "Timeline.pause" = "暫停";
 "Timeline.accessibility_label" = "時間軸";
+
+/* Area forecast (MOENV AQF_P_01) */
+"Forecast.title" = "空品區預報";
+"Forecast.today" = "今天";
+"Forecast.tomorrow" = "明天";
+"Forecast.day_after_tomorrow" = "後天";
+"Forecast.major_pollutant %@" = "主要污染物：%@";
+"Forecast.no_value" = "尚無預報值";
+"Forecast.published %@" = "發布 %@";
+"Forecast.source" = "資料來源：環境部";
+"Forecast.more" = "顯示更多";
+"Forecast.less" = "收合";

@@ -44,8 +44,9 @@ PartnerUrlZh = http:\/\/example.com/
 PartnerUrlEn = http:\/\/example.com/
 BetaTesterUrl = http:\/\/example.com/
 
-// In-app feedback (Directus). The token is a create-only static token; keep the
-// real value in debug.xcconfig / release.xcconfig, which are gitignored.
+// Directus (in-app feedback, and the 空品區 forecast read from twaqi_aqi_forecast).
+// The TWAQI App static token: create on twaqi_feedback, read on twaqi_aqi_forecast.
+// Keep the real value in debug.xcconfig / release.xcconfig, which are gitignored.
 DirectusUrl = https:\/\/cms.wahthefox.com
 DirectusFeedbackToken =
 

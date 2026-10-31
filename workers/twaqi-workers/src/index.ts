@@ -1,12 +1,20 @@
 // MOENV station webcam sync: aqx_p_01 zip -> R2 `stations/{siteId}.jpg` + `manifest.json`.
 // Object keys use the MOENV site id from the JPEG filename (e.g. 001), not a TWAQI station id.
+//
+// MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
 import { unzipSync } from 'fflate'
+import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
 
-interface Env {
+interface Env extends ForecastEnv {
   CAMS: R2Bucket
   MOENV_API_KEY: string
   SYNC_TOKEN: string
 }
+
+/** Must match `triggers.crons` in wrangler.jsonc. */
+const CAMS_CRON = '*/10 * * * *'
+const FORECAST_CRON = '35 * * * *'
+const FORECAST_STATUS_KEY = 'forecast/last-sync.json'
 
 interface Station {
   name: string | null
@@ -37,7 +45,12 @@ const JPEG_NAME = /^(?:.*\/)?([0-9A-Za-z]+)-(\d{12})\.jpe?g$/i
 const UPLOAD_BATCH = 8
 
 export default {
-  async scheduled(_controller, env, ctx) {
+  async scheduled(controller, env, ctx) {
+    if (controller.cron === FORECAST_CRON) {
+      ctx.waitUntil(runForecastSync(env))
+      return
+    }
+    if (controller.cron !== CAMS_CRON) console.warn('unknown cron, running cam sync', controller.cron)
     ctx.waitUntil(
       sync(env).then(
         (r) => console.log('sync ok', JSON.stringify(r)),
@@ -64,6 +77,14 @@ export default {
       }
     }
 
+    // Forecast: /forecast (last sync status) and POST /forecast/sync (manual run).
+    if (path === '/forecast/sync') {
+      if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
+      if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
+      const status = await runForecastSync(env)
+      return json(status, status.ok ? 200 : 502)
+    }
+
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return json({ error: 'method not allowed' }, 405, { Allow: 'GET, HEAD' })
     }
@@ -83,6 +104,12 @@ export default {
       }, 200, { 'Cache-Control': 'no-store' })
     }
 
+    if (path === '/forecast') {
+      const obj = await env.CAMS.get(FORECAST_STATUS_KEY)
+      const last = obj ? await obj.json() : null
+      return json({ ok: true, service: 'forecast', last }, 200, { 'Cache-Control': 'no-store' })
+    }
+
     if (path === '/station-cams/manifest.json') {
       return serveObject(request, env, MANIFEST_KEY, 'application/json; charset=utf-8', 'public, max-age=60')
     }
@@ -93,6 +120,35 @@ export default {
     return json({ error: 'not found' }, 404)
   },
 } satisfies ExportedHandler<Env>
+
+interface ForecastStatus {
+  ok: boolean
+  at: string
+  result?: ForecastSyncResult
+  error?: string
+}
+
+/** Runs the forecast sync, logs it, and records the outcome in R2 for GET /forecast. Never throws. */
+async function runForecastSync(env: Env): Promise<ForecastStatus> {
+  let status: ForecastStatus
+  try {
+    const result = await syncForecast(env)
+    console.log('forecast sync ok', JSON.stringify(result))
+    status = { ok: true, at: new Date().toISOString(), result }
+  } catch (e) {
+    // Directus keeps the last good rows; nothing to undo.
+    console.error('forecast sync failed', e)
+    status = { ok: false, at: new Date().toISOString(), error: String(e) }
+  }
+  try {
+    await env.CAMS.put(FORECAST_STATUS_KEY, JSON.stringify(status), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' },
+    })
+  } catch (e) {
+    console.error('forecast status write failed', e)
+  }
+  return status
+}
 
 async function sync(env: Env, force = false): Promise<SyncResult> {
   const listRes = await fetch(`${MOENV_LIST}&api_key=${encodeURIComponent(env.MOENV_API_KEY)}`)
