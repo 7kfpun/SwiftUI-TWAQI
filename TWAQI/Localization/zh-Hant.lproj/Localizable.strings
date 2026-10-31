@@ -191,6 +191,9 @@
 "Details.no_cam" = "此測站沒有即時影像";
 "Details.cam_unavailable" = "目前無法載入影像";
 "Details.cam_showing_saved" = "無法載入最新影像，顯示最後儲存的畫面";
+"Details.cam_live" = "即時";
+"Details.cam_timeline" = "過去 24 小時影像";
+"Details.cam_hour_missing" = "這個小時沒有影像";
 
 /* Share card */
 "Share.share" = "分享";

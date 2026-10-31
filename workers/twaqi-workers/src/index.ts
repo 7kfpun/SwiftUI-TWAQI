@@ -1,9 +1,11 @@
-// MOENV station webcam sync: aqx_p_01 zip -> R2 `stations/{siteId}.jpg` + `manifest.json`.
+// MOENV station webcam sync: aqx_p_01 zip -> R2 `stations/{siteId}.jpg` + `manifest.json`,
+// plus one frame per Taiwan clock hour at `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (see history.ts).
 // Object keys use the MOENV site id from the JPEG filename (e.g. 001), not a TWAQI station id.
 //
 // MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
+import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, expiredHourKey, hourKey, shouldWriteHour } from './history'
 
 interface Env extends ForecastEnv {
   CAMS: R2Bucket
@@ -22,6 +24,8 @@ interface Station {
   lon: number | null
   time: string // ISO 8601, Asia/Taipei offset
   key: string
+  /** Hourly history object last written for this site, e.g. `stations/001/2026-10-30/22.jpg`. */
+  hourKey?: string
 }
 
 interface Manifest {
@@ -36,6 +40,10 @@ interface SyncResult {
   images: number
   uploaded: number
   unchanged: number
+  /** Hourly history objects written this run. */
+  hours: number
+  /** Hourly objects past `HISTORY_DAYS` deleted this run. */
+  expired: number
   stations: number
 }
 
@@ -43,6 +51,8 @@ const MOENV_LIST = 'https://data.moenv.gov.tw/api/v2/aqx_p_01?format=JSON&limit=
 const MANIFEST_KEY = 'manifest.json'
 const JPEG_NAME = /^(?:.*\/)?([0-9A-Za-z]+)-(\d{12})\.jpe?g$/i
 const UPLOAD_BATCH = 8
+/** R2 `delete` takes at most 1000 keys per call. */
+const DELETE_BATCH = 1000
 
 export default {
   async scheduled(controller, env, ctx) {
@@ -117,6 +127,9 @@ export default {
     const m = path.match(/^\/station-cams\/stations\/([0-9A-Za-z]+)\.jpg$/)
     if (m) return serveObject(request, env, `stations/${m[1]}.jpg`, 'image/jpeg', 'public, max-age=300')
 
+    const h = path.match(HISTORY_ROUTE)
+    if (h) return serveObject(request, env, h[1], 'image/jpeg', HISTORY_CACHE_CONTROL)
+
     return json({ error: 'not found' }, 404)
   },
 } satisfies ExportedHandler<Env>
@@ -159,7 +172,7 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   const prev = await readManifest(env)
   if (!force && prev?.source?.url === row.url) {
-    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, stations: Object.keys(prev.stations).length }
+    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, hours: 0, expired: 0, stations: Object.keys(prev.stations).length }
   }
 
   const zipRes = await fetch(row.url)
@@ -190,6 +203,9 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   const stations: Record<string, Station> = { ...(prev?.stations ?? {}) }
   const pending: Array<() => Promise<unknown>> = []
+  const expired: string[] = []
+  let uploaded = 0
+  let hours = 0
   let unchanged = 0
   for (const [siteId, { file, stamp }] of latest) {
     const base = file.split('/').pop()!
@@ -197,18 +213,38 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
     const key = `stations/${siteId}.jpg`
     const time = stampToIso(stamp)
     const old = stations[siteId]
+    const body = files[file]
     stations[siteId] = {
       name: info?.name ?? old?.name ?? null,
       lat: info?.lat ?? old?.lat ?? null,
       lon: info?.lon ?? old?.lon ?? null,
       time,
       key,
+      hourKey: old?.hourKey,
     }
+
+    // History: the first frame of each clock hour (the :00 one when a sync
+    // catches it), never the other 10-minute frames. Checked before the
+    // unchanged test so the first deploy also files the frame it finds.
+    const hour = hourKey(siteId, stamp)
+    if (shouldWriteHour(hour, old?.hourKey)) {
+      stations[siteId].hourKey = hour
+      hours++
+      pending.push(() =>
+        env.CAMS.put(hour, body, {
+          httpMetadata: { contentType: 'image/jpeg', cacheControl: HISTORY_CACHE_CONTROL },
+          customMetadata: { siteId, time, source: base },
+        }),
+      )
+      const gone = expiredHourKey(siteId, stamp)
+      if (gone) expired.push(gone)
+    }
+
     if (!force && old?.time === time) {
       unchanged++
       continue
     }
-    const body = files[file]
+    uploaded++
     pending.push(() =>
       env.CAMS.put(key, body, {
         httpMetadata: { contentType: 'image/jpeg', cacheControl: 'public, max-age=300' },
@@ -219,6 +255,16 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   for (let i = 0; i < pending.length; i += UPLOAD_BATCH) {
     await Promise.all(pending.slice(i, i + UPLOAD_BATCH).map((run) => run()))
+  }
+
+  // Rolling retention: as each hour is filed, the same hour HISTORY_DAYS ago
+  // goes. Missing keys are fine. A failure here only leaves old frames behind.
+  for (let i = 0; i < expired.length; i += DELETE_BATCH) {
+    try {
+      await env.CAMS.delete(expired.slice(i, i + DELETE_BATCH))
+    } catch (e) {
+      console.error('history expiry failed', e)
+    }
   }
 
   const manifest: Manifest = {
@@ -234,8 +280,10 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
     skipped: false,
     source: row.filename ?? row.url,
     images: latest.size,
-    uploaded: pending.length,
+    uploaded,
     unchanged,
+    hours,
+    expired: expired.length,
     stations: Object.keys(stations).length,
   }
 }

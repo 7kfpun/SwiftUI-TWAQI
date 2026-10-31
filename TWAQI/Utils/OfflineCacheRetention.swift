@@ -44,7 +44,8 @@ enum OfflineCacheRetention {
 
     /// Deletes every offline cache file last written more than `maxAge` ago:
     /// the station lists, last good pollutants, the area forecast, the cam
-    /// manifest and saved cam frames in `directory` (Application Support).
+    /// manifest, saved cam frames and saved hourly cam frames (the scrubber's)
+    /// in `directory` (Application Support).
     /// Returns the files removed.
     ///
     /// Each store also ignores an expired file when it reads one, so this is
@@ -66,8 +67,10 @@ enum OfflineCacheRetention {
             return isExpired(values.contentModificationDate, now: now)
         }
 
+        let cams = directory.appendingPathComponent(StationCamFrameCache.directoryName, isDirectory: true)
         let candidates = contents(of: directory).filter { isCacheFile(named: $0.lastPathComponent) }
-            + contents(of: directory.appendingPathComponent(StationCamFrameCache.directoryName, isDirectory: true))
+            + contents(of: cams)
+            + contents(of: cams.appendingPathComponent(StationCamHistoryCache.directoryName, isDirectory: true))
 
         var removed: [URL] = []
         for file in candidates where isExpiredFile(file) {

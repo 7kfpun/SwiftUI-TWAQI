@@ -187,6 +187,9 @@
 "Details.no_cam" = "This station has no camera";
 "Details.cam_unavailable" = "Couldn't load the camera image";
 "Details.cam_showing_saved" = "Couldn't load the latest image — showing the last one saved";
+"Details.cam_live" = "Live";
+"Details.cam_timeline" = "Camera, past 24 hours";
+"Details.cam_hour_missing" = "No image for this hour";
 
 /* Share card */
 "Share.share" = "Share";

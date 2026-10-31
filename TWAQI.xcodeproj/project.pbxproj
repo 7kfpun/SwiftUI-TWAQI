@@ -234,6 +234,7 @@
 		F714AF684AD9625E01855394 /* AqiForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B92A7319F203C7207887169 /* AqiForecast.swift */; };
 		48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F15F0DF067304D6744238CD /* StationCamStore.swift */; };
 		575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */; };
+		89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28105738488F92DC053659E1 /* StationCamHistoryCache.swift */; };
 		4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */; };
 		B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7601D6C9CFBFEDB76837949B /* PollutantCache.swift */; };
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
@@ -495,6 +496,7 @@
 		7B92A7319F203C7207887169 /* AqiForecast.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecast.swift; sourceTree = "<group>"; };
 		2F15F0DF067304D6744238CD /* StationCamStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamStore.swift; sourceTree = "<group>"; };
 		DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamFrameCache.swift; sourceTree = "<group>"; };
+		28105738488F92DC053659E1 /* StationCamHistoryCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamHistoryCache.swift; sourceTree = "<group>"; };
 		CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetention.swift; sourceTree = "<group>"; };
 		7601D6C9CFBFEDB76837949B /* PollutantCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCache.swift; sourceTree = "<group>"; };
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
@@ -848,6 +850,7 @@
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				2F15F0DF067304D6744238CD /* StationCamStore.swift */,
 				DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */,
+				28105738488F92DC053659E1 /* StationCamHistoryCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
 				7601D6C9CFBFEDB76837949B /* PollutantCache.swift */,
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
@@ -1556,6 +1559,7 @@
 				01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
+				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
 				B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,
