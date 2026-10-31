@@ -123,3 +123,85 @@ enum StationCamState: Equatable {
     /// No cam joins to this station — most micro-sensor sites.
     case missing
 }
+
+/// One clock hour of a cam's history: `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
+///
+/// The Worker files the first frame of each Taiwan clock hour (the :00 one
+/// whenever a sync catches it) under that key and keeps a week of them, so
+/// the app builds the URL itself; nothing lists the bucket.
+struct StationCamHour: Hashable {
+    let siteId: String
+    /// Start of the hour.
+    let hour: Date
+
+    /// MOENV capture times are Taiwan clock time (UTC+8, no DST).
+    static let timeZone = TimeZone(identifier: "Asia/Taipei")!
+
+    /// The 24 hours the scrubber offers.
+    static let count = 24
+
+    /// Slots fetched around the one on screen: it and two either side.
+    static let neighbors = 2
+
+    private static let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        return calendar
+    }()
+
+    init(siteId: String, hour: Date) {
+        self.siteId = siteId
+        self.hour = Self.startOfHour(hour)
+    }
+
+    /// `"2026-10-30"`
+    var day: String {
+        let c = Self.calendar.dateComponents([.year, .month, .day], from: hour)
+        return String(format: "%04d-%02d-%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
+    }
+
+    /// `"22"`
+    var hourOfDay: String {
+        String(format: "%02d", Self.calendar.component(.hour, from: hour))
+    }
+
+    /// `stations/001/2026-10-30/22.jpg` — the R2 key.
+    var objectKey: String {
+        "stations/\(siteId)/\(day)/\(hourOfDay).jpg"
+    }
+
+    /// Not versioned: an hour's frame never changes once filed.
+    var imageURL: URL {
+        StationCam.baseURL.appendingPathComponent(objectKey)
+    }
+
+    /// `001-2026-10-30-22.jpg` — flat, so the offline purge needn't recurse.
+    var cacheFileName: String {
+        "\(siteId)-\(day)-\(hourOfDay).jpg"
+    }
+
+    static func startOfHour(_ date: Date) -> Date {
+        calendar.dateInterval(of: .hour, for: date)?.start ?? date
+    }
+
+    /// The 24 clock hours up to and including the one `anchor` falls in,
+    /// oldest first.
+    ///
+    /// The anchor is the live frame's capture time rather than the clock: MOENV
+    /// frames land about half an hour late, so the hour that's just begun
+    /// would almost always be an empty slot.
+    static func slots(siteId: String, anchor: Date) -> [StationCamHour] {
+        let last = startOfHour(anchor)
+        return (0..<count).reversed().map {
+            StationCamHour(siteId: siteId, hour: last.addingTimeInterval(-Double($0) * 3600))
+        }
+    }
+
+    /// Indices to load around `index`, nearest first: it, then ±1, then ±2,
+    /// clamped to `0..<count`. Nothing further out is fetched or decoded.
+    static func window(around index: Int, count: Int = count, radius: Int = neighbors) -> [Int] {
+        guard (0..<count).contains(index) else { return [] }
+        let neighbors = (0..<max(radius, 0)).flatMap { [index - $0 - 1, index + $0 + 1] }
+        return [index] + neighbors.filter { (0..<count).contains($0) }
+    }
+}
