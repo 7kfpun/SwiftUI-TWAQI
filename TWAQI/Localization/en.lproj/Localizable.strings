@@ -313,3 +313,14 @@
 "Vision.about" = "About";
 "Vision.version" = "Version";
 "Vision.map_data" = "Coastline: Natural Earth. Elevation: Mapzen Terrain Tiles (SRTM, GMTED, ETOPO1 and others), via AWS Open Data.";
+
+/* Map timeline */
+"Timeline.title" = "Past 24 hours";
+"Timeline.now" = "Now";
+"Timeline.latest" = "Latest";
+"Timeline.hours_ago" = "%d h ago";
+"Timeline.yesterday" = "Yesterday";
+"Timeline.loading" = "Loading %d/%d";
+"Timeline.play" = "Play the past 24 hours";
+"Timeline.pause" = "Pause";
+"Timeline.accessibility_label" = "Timeline";

@@ -317,3 +317,14 @@
 "Vision.about" = "關於";
 "Vision.version" = "版本";
 "Vision.map_data" = "海岸線：Natural Earth。地形高度：Mapzen Terrain Tiles（SRTM、GMTED、ETOPO1 等），經由 AWS Open Data 提供。";
+
+/* 地圖時間軸 */
+"Timeline.title" = "過去 24 小時";
+"Timeline.now" = "現在";
+"Timeline.latest" = "最新";
+"Timeline.hours_ago" = "%d 小時前";
+"Timeline.yesterday" = "昨天";
+"Timeline.loading" = "載入中 %d/%d";
+"Timeline.play" = "播放過去 24 小時";
+"Timeline.pause" = "暫停";
+"Timeline.accessibility_label" = "時間軸";
