@@ -336,3 +336,9 @@
 "Forecast.source" = "Source: MOENV";
 "Forecast.more" = "Show more";
 "Forecast.less" = "Show less";
+
+/* Offline: last good readings */
+"Offline.showing_saved_readings" = "Offline — showing the last saved readings";
+"Offline.updated_ago %@" = "Offline · updated %@";
+"Offline.nothing_saved" = "Can't connect, and there's nothing saved to show. Check your connection and try again.";
+"Offline.retry" = "Try Again";

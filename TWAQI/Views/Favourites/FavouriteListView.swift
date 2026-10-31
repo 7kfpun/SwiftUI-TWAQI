@@ -21,6 +21,16 @@ struct FavouriteListView: View {
                         icon: "heart",
                         message: "Favourites.add_your_first_favourite_station"
                     )
+                } else if viewModel.favouritePollutants.isEmpty {
+                    // Favourites are saved but none can be shown yet: say
+                    // why, rather than look like there are none.
+                    if viewModel.loadFailed {
+                        OfflineEmptyStateView(retry: getData)
+                    } else {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 64)
+                    }
                 } else {
                     list
                 }
@@ -38,20 +48,28 @@ struct FavouriteListView: View {
 
     private var list: some View {
         List {
-            ForEach(viewModel.favouritePollutants, id: \.self) { pollutant in
-                NavigationLink(
-                    destination: DetailsView(stationId: pollutant.stationId)
-                        .environmentObject(settings)
-                ) {
-                    StationRow(
-                        title: pollutant.displayName,
-                        subtitle: pollutant.displayLocality,
-                        reading: .init(aqi: pollutant.aqi, publishTime: pollutant.publishTime)
-                    )
+            if viewModel.isShowingLastGood {
+                Section {
+                    OfflineNotice()
                 }
             }
-            .onDelete(perform: remove)
-            .onMove(perform: move)
+
+            Section {
+                ForEach(viewModel.favouritePollutants, id: \.self) { pollutant in
+                    NavigationLink(
+                        destination: DetailsView(stationId: pollutant.stationId)
+                            .environmentObject(settings)
+                    ) {
+                        StationRow(
+                            title: pollutant.displayName,
+                            subtitle: pollutant.displayLocality,
+                            reading: .init(aqi: pollutant.aqi, publishTime: pollutant.publishTime)
+                        )
+                    }
+                }
+                .onDelete(perform: remove)
+                .onMove(perform: move)
+            }
         }
         .listStyle(InsetGroupedListStyle())
     }

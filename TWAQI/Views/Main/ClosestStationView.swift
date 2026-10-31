@@ -54,11 +54,28 @@ final class ClosestStationView: UIView {
         didSet { updateUpdatedLabel() }
     }
 
+    /// The reading is the last good one saved, because the latest request
+    /// failed. Says so with its age instead of a bare clock time, which could
+    /// be any day this week.
+    var isLastGood = false {
+        didSet {
+            guard isLastGood != oldValue else { return }
+            updateUpdatedLabel()
+        }
+    }
+
     private func updateUpdatedLabel() {
         if let timelineContext, !timelineContext.isEmpty {
             updatedLabel.isHidden = false
             updatedLabel.text = timelineContext
             updatedLabel.textColor = .label
+            return
+        }
+
+        if isLastGood, let publishTime, !publishTime.isEmpty {
+            updatedLabel.isHidden = false
+            updatedLabel.text = String(format: "Offline.updated_ago %@".localized, publishTime.asRelativeAge)
+            updatedLabel.textColor = .systemOrange
             return
         }
 

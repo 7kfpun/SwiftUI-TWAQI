@@ -13,6 +13,9 @@ class DetailsListViewModel: ObservableObject {
 
     @Published var stations: Stations = []
 
+    /// The latest request failed and there was no saved list to show.
+    @Published var loadFailed = false
+
     private(set) lazy var getData: () -> Void = {
         let settings = SettingsStore()
         // Scoped to the supported country: those are the only stations whose
@@ -27,6 +30,7 @@ class DetailsListViewModel: ObservableObject {
             self.stations = Self.cachedStations(countryCode: countryCode)
         }
 
+        self.loadFailed = false
         APIManager.getStations(countryCode: countryCode) { result in
             switch result {
             case .success(let stations):
@@ -35,6 +39,7 @@ class DetailsListViewModel: ObservableObject {
                 Self.cache(stations, countryCode: countryCode)
             case .failure(let error):
                 print(error.localizedDescription)
+                self.loadFailed = self.stations.isEmpty
             }
         }
     }
