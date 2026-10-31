@@ -30,6 +30,14 @@ class DetailsViewModel: ObservableObject {
     /// Unfavouriting waits on the reader: it would also turn alerts off.
     @Published var isConfirmingUnfavourite = false
 
+    /// Why favouriting just now left the station's alerts off, when the
+    /// reader can do something about it. Nil otherwise.
+    @Published var favouriteAlertsHint: FavouriteAlertsHint?
+
+    /// Favourited before the station record — which says which OneSignal tag
+    /// the alerts go under — had loaded: switched on once it has.
+    private var enablesAlertsWhenStationLoads = false
+
     private var alertsObserver: NSObjectProtocol?
 
     /// `pollutant` is the last good reading saved, because the latest
@@ -98,6 +106,10 @@ class DetailsViewModel: ObservableObject {
             case .success(let result):
                 self.station = result["station"] as? Station
                 self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
+                if self.enablesAlertsWhenStationLoads, self.station != nil {
+                    self.enablesAlertsWhenStationLoads = false
+                    self.enableAlertsForNewFavourite()
+                }
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
@@ -154,6 +166,7 @@ class DetailsViewModel: ObservableObject {
         if !isFavourited {
             settings.savedFavouriteStations.append(stationId)
             logFavourite(on: true)
+            enableAlertsForNewFavourite()
         } else if hasAlerts {
             isConfirmingUnfavourite = true
         } else {
@@ -167,8 +180,48 @@ class DetailsViewModel: ObservableObject {
         if hasAlerts {
             FavouriteAlerts.clear(stationId: stationId, tagCodes: alertTagCodes)
         }
+        enablesAlertsWhenStationLoads = false
         settings.savedFavouriteStations.removeAll { $0 == stationId }
         logFavourite(on: false)
+    }
+
+    /// A new favourite gets alerts, so favouriting is the one step to being
+    /// told when the air turns (FOX-31). The favourite stands whatever
+    /// happens here; at the two-station cap or with notifications off the
+    /// reader is told why the alerts stayed off.
+    private func enableAlertsForNewFavourite() {
+        guard let station = station else {
+            enablesAlertsWhenStationLoads = true
+            return
+        }
+        let stationId = stationId
+        var siteId: String?
+        if case .available(let cam) = cam {
+            siteId = cam.siteId
+        }
+
+        FavouriteAlerts.enableForNewFavourite(
+            stationId: stationId,
+            tagCode: FavouriteAlerts.tagCode(countryCode: station.countryCode, name: station.name, stationId: stationId),
+            siteId: siteId,
+            isStillFavourite: { [weak self] in self?.isFavourited ?? false }
+        ) { [weak self] outcome in
+            guard let self = self else { return }
+            switch outcome {
+            case .enabled:
+                // Unfavourited while OneSignal was writing: don't leave an
+                // alert on a station that isn't a favourite.
+                if !self.isFavourited {
+                    FavouriteAlerts.clear(stationId: stationId, tagCodes: self.alertTagCodes)
+                }
+            case .capReached:
+                self.favouriteAlertsHint = .capReached
+            case .notificationsDenied:
+                self.favouriteAlertsHint = .notificationsDenied
+            case .alreadyOn, .notChanged:
+                break
+            }
+        }
     }
 
     /// Where OneSignal has this station's alerts: exact once the station
@@ -235,4 +288,12 @@ class DetailsViewModel: ObservableObject {
     var latestPublishTime: String? {
         pollutant?.publishTime ?? historicalPollutants.last?.publishTime
     }
+}
+
+/// Why a station just favourited has no alerts, as told to the reader.
+enum FavouriteAlertsHint: Equatable {
+    /// Two other stations already have alerts on.
+    case capReached
+    /// Notifications are turned off for the app in Settings.
+    case notificationsDenied
 }

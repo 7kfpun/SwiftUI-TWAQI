@@ -20,6 +20,11 @@
 "Favourites.remove_station_with_alerts_message" = "This station has AQI alerts on. Removing it from Favourites also turns its alerts off.";
 "Favourites.remove_and_turn_off_alerts" = "Remove and Turn Off Alerts";
 "Favourites.cancel" = "Cancel";
+"Favourites.added_to_favourites" = "Added to Favourites";
+"Favourites.alerts_cap_reached_message" = "Alerts are already on for 2 stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.";
+"Favourites.notifications_off_message" = "Notifications are off for Taiwan Air, so alerts for this station stay off. Turn them on in Settings, then switch alerts on below.";
+"Favourites.open_settings" = "Open Settings";
+"Favourites.ok" = "OK";
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";
