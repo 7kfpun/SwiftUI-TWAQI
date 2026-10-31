@@ -73,8 +73,6 @@
 	<string>Use location to select your nearest air quality monitoring station</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Saves air quality cards you choose to share to your photo library.</string>
-	<key>OneSignalAppId</key>
-	<string>$(OneSignalAppId)</string>
 	<key>PartnerUrlEn</key>
 	<string>$(PartnerUrlEn)</string>
 	<key>PartnerUrlZh</key>

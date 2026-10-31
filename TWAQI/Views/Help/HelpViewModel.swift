@@ -46,20 +46,7 @@ class HelpViewModel: ObservableObject {
     @Published var isDndEnabled: Bool {
         didSet {
             settings.isDndEnabled = isDndEnabled
-
-            if isDndEnabled {
-                pushDndWindow()
-            } else {
-                OneSignalManager.disableDnd { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-                mirrorDnd()
-            }
+            pushDndWindow()
 
             TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
                 "label": isDndEnabled ? "on" : "off",
@@ -77,60 +64,21 @@ class HelpViewModel: ObservableObject {
         self.dndEndTime = settings.dndEndTime
     }
 
+    /// Directus reads the window (and whether it's on) from `SettingsStore`,
+    /// already saved above.
     private func pushDndWindow() {
-        OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-            switch result {
-            case .success(let result):
-                print(result)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-        mirrorDnd()
-    }
-
-    /// Dual-write: Directus gets a copy of the window from `SettingsStore`,
-    /// after OneSignal has been sent it.
-    private func mirrorDnd() {
         Task { @MainActor in
             DirectusPushMirror.shared.dndChanged()
         }
     }
 
     func removeAllNotification() {
-        // Not tied to OneSignal's answer: the Directus copy is cleared even if
-        // reading the tags fails.
+        // Cleared locally at once; Directus is archived in the background and
+        // retried until it takes.
         Task { @MainActor in
             DirectusPushMirror.shared.cancelAll()
         }
-
-        OneSignalManager.getOneSignalSettings { [weak self] result in
-            // OneSignal calls back off the main thread.
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                switch result {
-                case .success(let settings):
-                    self.disabledNotification(stationSettings: settings.stationSettings)
-                    TrackingManager.logEvent(eventName: "favourite_station_all_removed")
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-        }
-    }
-
-    private func disabledNotification(stationSettings: [String: OneSignalStationSetting]) {
-        for (_, stationSetting) in stationSettings {
-            OneSignalManager.sendTags(tags: stationSetting.getDisabledTags()) { result in
-                switch result {
-                case .success(let result):
-                    print(result)
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
-        }
-
+        TrackingManager.logEvent(eventName: "favourite_station_all_removed")
         showingAlert = true
     }
 }

@@ -44,10 +44,16 @@ enum PushEnvironment: String, Codable {
     }
 }
 
+/// The station page's two alerts, by the names its settings have always used.
+enum NotificationTypes: String {
+    case pollution
+    case cleanliness
+}
+
 enum PushDirection: String, Codable, CaseIterable {
-    /// AQI more than the threshold. OneSignal's `pollution` alert.
+    /// AQI more than the threshold: the `pollution` alert.
     case above
-    /// AQI less than the threshold. OneSignal's `cleanliness` alert.
+    /// AQI less than the threshold: the `cleanliness` alert.
     case below
 
     init(_ type: NotificationTypes) {
@@ -65,16 +71,18 @@ struct PushDevicePayload: Encodable, Equatable {
     static let deviceIdField = CodingKeys.deviceId.rawValue
 
     /// Stable per device (a Keychain UUID, kept across reinstalls), unlike
-    /// the APNs token, which rotates.
+    /// the APNs and FCM tokens, which rotate.
     var deviceId: String
+    /// The APNs token, hex. Kept alongside the FCM token so a row is still
+    /// matched to the phone, and reachable directly over APNs if need be.
     var deviceToken: String
+    /// The Firebase Cloud Messaging registration token: what the sender
+    /// addresses. Nil until Messaging has one; left out rather than cleared.
+    var fcmToken: String?
     var environment: PushEnvironment
     var appVersion: String?
     var locale: String?
     var lastSeenAt: String
-    /// OneSignal's player id while OneSignal still sends; lets the two be
-    /// matched up at cutover.
-    var externalId: String?
     var dndEnabled: Bool
     /// "HH:mm", wall-clock time in `timezone`.
     var dndStart: String
@@ -88,25 +96,26 @@ struct PushDevicePayload: Encodable, Equatable {
         /// See `deviceIdField`.
         case deviceId = "device_id"
         case deviceToken = "device_token"
+        case fcmToken = "fcm_token"
         case appVersion = "app_version"
         case lastSeenAt = "last_seen_at"
-        case externalId = "external_id"
         case dndEnabled = "dnd_enabled"
         case dndStart = "dnd_start"
         case dndEnd = "dnd_end"
     }
 
-    // Leaves external_id alone rather than clearing it when OneSignal has no
-    // player id yet.
+    // Never writes `external_id`: that held OneSignal's player id and is left
+    // as it was. Leaves `fcm_token` alone, rather than clearing it, until
+    // Messaging has one.
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(deviceId, forKey: .deviceId)
         try values.encode(deviceToken, forKey: .deviceToken)
+        try values.encodeIfPresent(fcmToken, forKey: .fcmToken)
         try values.encode(environment, forKey: .environment)
         try values.encodeIfPresent(appVersion, forKey: .appVersion)
         try values.encodeIfPresent(locale, forKey: .locale)
         try values.encode(lastSeenAt, forKey: .lastSeenAt)
-        try values.encodeIfPresent(externalId, forKey: .externalId)
         try values.encode(dndEnabled, forKey: .dndEnabled)
         try values.encode(dndStart, forKey: .dndStart)
         try values.encode(dndEnd, forKey: .dndEnd)
@@ -117,7 +126,7 @@ struct PushDevicePayload: Encodable, Equatable {
     static func make(
         deviceId: String,
         deviceToken: String,
-        externalId: String?,
+        fcmToken: String?,
         dndEnabled: Bool,
         dndStart: Date,
         dndEnd: Date,
@@ -129,12 +138,12 @@ struct PushDevicePayload: Encodable, Equatable {
         PushDevicePayload(
             deviceId: deviceId,
             deviceToken: deviceToken,
+            fcmToken: fcmToken,
             environment: environment,
             appVersion: bundle.infoDictionary?["CFBundleShortVersionString"] as? String,
             // The app's language, not the region: alert text follows it.
             locale: bundle.preferredLocalizations.first ?? Locale.current.identifier,
             lastSeenAt: ISO8601DateFormatter().string(from: now),
-            externalId: externalId,
             dndEnabled: dndEnabled,
             dndStart: hourMinute(dndStart, calendar: calendar),
             dndEnd: hourMinute(dndEnd, calendar: calendar),
@@ -214,7 +223,7 @@ struct PushSubscription: Codable, Equatable {
     }
 }
 
-/// A station's two alerts as OneSignal holds them: a threshold when on, nil
+/// A station's two alerts as Directus holds them: a threshold when on, nil
 /// when off.
 struct StationAlerts: Codable, Equatable {
     var above: Int?
@@ -227,14 +236,30 @@ struct StationAlerts: Codable, Equatable {
         self.below = below
     }
 
-    /// From the tags the station row writes: `<station>_pollution_therhold`
-    /// is the above alert, `<station>_cleanliness_therhold` the below one.
-    init(_ setting: OneSignalStationSetting) {
+    /// From the station row's switches: pollution is the above alert,
+    /// cleanliness the below one.
+    init(_ setting: StationAlertSetting) {
         above = setting.isPollutionNotificationEnabled ? Int(setting.pollutionTherhold.rounded()) : nil
         below = setting.isCleanlinessNotificationEnabled ? Int(setting.cleanlinessTherhold.rounded()) : nil
     }
 
     var isOff: Bool { above == nil && below == nil }
+
+    /// Live subscriptions grouped by station. Of several rows for one
+    /// direction (an earlier race), the first wins, as in `reconcile`.
+    static func byStation(_ subscriptions: [PushSubscription]) -> [String: StationAlerts] {
+        var result: [String: StationAlerts] = [:]
+        for item in subscriptions where item.enabled {
+            var alerts = result[item.stationId] ?? .off
+            switch item.direction {
+            case .above where alerts.above == nil: alerts.above = item.threshold
+            case .below where alerts.below == nil: alerts.below = item.threshold
+            default: break
+            }
+            result[item.stationId] = alerts
+        }
+        return result.filter { !$0.value.isOff }
+    }
 
     func threshold(_ direction: PushDirection) -> Int? {
         switch direction {
@@ -331,6 +356,44 @@ enum PushService {
         ])
         let data = try await send(request, session: session)
         return try JSONDecoder().decode(Items<IdOnly>.self, from: data).data.first?.id
+    }
+
+    /// The first row whose `field` equals `value`, with its do-not-disturb
+    /// window: what a reinstall restores from.
+    static func storedDevice(field: String, value: String, config: Config, session: URLSession = .shared) async throws -> StoredDevice? {
+        let request = makeRequest(config: config, method: "GET", path: devicesPath, query: [
+            ("fields", "id,dnd_enabled,dnd_start,dnd_end"),
+            ("filter[\(field)][_eq]", value),
+            ("sort", "id"),
+            ("limit", "1"),
+        ])
+        let data = try await send(request, session: session)
+        return try JSONDecoder().decode(Items<StoredDevice>.self, from: data).data.first
+    }
+
+    struct StoredDevice: Decodable, Equatable {
+        let id: Int
+        let dndEnabled: Bool?
+        /// "HH:mm" (Directus may add seconds).
+        let dndStart: String?
+        let dndEnd: String?
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case dndEnabled = "dnd_enabled"
+            case dndStart = "dnd_start"
+            case dndEnd = "dnd_end"
+        }
+
+        /// "HH:mm" or "HH:mm:ss" as today's date at that time.
+        static func time(_ text: String?, calendar: Calendar = .current, now: Date = Date()) -> Date? {
+            guard let parts = text?.split(separator: ":").compactMap({ Int($0) }),
+                  parts.count >= 2, (0..<24).contains(parts[0]), (0..<60).contains(parts[1])
+            else {
+                return nil
+            }
+            return calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: now)
+        }
     }
 
     // MARK: - Subscriptions

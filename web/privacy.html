@@ -13,7 +13,7 @@
 </head>
 <body><main><h1>Privacy Policy</h1>Privacy Policy
 
-Last updated: August 8, 2026
+Last updated: October 31, 2026
 
 Taiwan Air (&quot;the App&quot;, App Store ID 1286516443, bundle com.kfpun.twaqi) shows air quality readings from government monitoring stations in Taiwan. It is made by an independent developer. We respect your privacy and keep data collection to a minimum. This policy explains what is collected, why, and who it is shared with.
 
@@ -33,8 +33,9 @@ Location
 • If you decline location access the App still works; it falls back to a default station and to whichever station you choose on the map.
 
 Notifications
-• Push notifications are handled by OneSignal. If you turn on alerts for a station, the station name, your chosen threshold and your quiet-hours window are stored with OneSignal as tags on your device&#x27;s push record so the alert can be delivered.
-• OneSignal receives a push token and standard device information. Turning alerts off removes those tags; deleting the App stops delivery.
+• Push notifications are delivered through Google Firebase Cloud Messaging and Apple Push Notification service, which receive your device&#x27;s push tokens.
+• If you turn on alerts for a station, we store on our own server a random identifier created for this device, its push tokens, the station, your chosen thresholds, your quiet-hours window and time zone, and the App&#x27;s version and language, so the alert can be sent. This is not linked to your name or contacts.
+• Turning an alert off marks it inactive and it is no longer used; deleting the App stops delivery.
 
 Analytics and crash reporting
 • Google Firebase Analytics records anonymous usage events — for example which air index you select, opening a station, or starting and completing a purchase — together with standard device and app information.
@@ -54,12 +55,12 @@ Apple Watch
 • The Apple Watch companion fetches the same public air quality readings from our API. It does not collect anything additional.
 
 Who your data is shared with
-• Google (Firebase Analytics, Firebase Crashlytics, AdMob, Google Maps), OneSignal, Bugsnag, Sentry and Apple, each acting under its own privacy policy for the purposes described above.
+• Google (Firebase Analytics, Firebase Crashlytics, Firebase Cloud Messaging, AdMob, Google Maps), Bugsnag, Sentry and Apple, each acting under its own privacy policy for the purposes described above.
 • We do not sell your data and we do not share it with data brokers.
 
 Data retention
 • On-device settings and favourites stay on your device until you delete the App.
-• OneSignal tags stay until you turn the relevant alerts off or delete the App.
+• Alert settings on our server are kept so they can be restored if you reinstall the App. To have them removed, contact us through &quot;Feedback / Contact us&quot;.
 • Analytics and crash reports are kept by those providers under their own standard retention schedules; we do not keep a separate copy.
 • Our API serves public air quality data and does not store personal data. Ordinary server logs may record request metadata such as IP addresses for a short period for security and troubleshooting.
 
