@@ -10,26 +10,14 @@ import Foundation
 import SwiftUI
 import UIKit
 
-/// The phone the user says they use, as asked by the old feedback form.
-enum FeedbackPlatform: String, CaseIterable, Identifiable {
+/// The Directus `platform` value. The app sets it from the build it runs in;
+/// the user is never asked. `android` stays so the enum mirrors the field.
+enum FeedbackPlatform: String, CaseIterable {
     case ios
     case android
     case other
 
-    var id: String { rawValue }
-
-    var title: LocalizedStringKey {
-        switch self {
-        case .ios:
-            return "Feedback.platform_ios"
-        case .android:
-            return "Feedback.platform_android"
-        case .other:
-            return "Feedback.platform_other"
-        }
-    }
-
-    /// iPhone and iPad builds preselect iOS; the user can still change it.
+    /// iPhone and iPad builds send `ios`; visionOS builds send `other`.
     static var suggested: FeedbackPlatform {
         #if os(visionOS)
         return .other
@@ -43,8 +31,10 @@ enum FeedbackPlatform: String, CaseIterable, Identifiable {
 /// creates items; `status` and `archived` are preset on the server.
 /// Nil fields are left out of the JSON.
 struct FeedbackSubmission: Encodable, Equatable {
-    // What the user fills in.
+    // Set by the app from the build, never shown.
     var platform: String
+
+    // What the user fills in.
     var rating: Int
     var message: String
     var otherFeedback: String?
@@ -69,10 +59,10 @@ struct FeedbackSubmission: Encodable, Equatable {
         case metaJson = "meta_json"
     }
 
-    /// Adds the app and device fields to what the user typed. Text is trimmed,
-    /// and blank optional text is sent as absent rather than as "".
+    /// Adds the app and device fields, including `platform`, to what the user
+    /// typed. Text is trimmed, and blank optional text is sent as absent
+    /// rather than as "".
     static func make(
-        platform: FeedbackPlatform,
         rating: Int,
         message: String,
         otherFeedback: String?,
@@ -95,7 +85,7 @@ struct FeedbackSubmission: Encodable, Equatable {
         meta["anonymous_id"] = UIDevice.current.identifierForVendor?.uuidString
 
         return FeedbackSubmission(
-            platform: platform.rawValue,
+            platform: FeedbackPlatform.suggested.rawValue,
             rating: min(max(rating, 1), 5),
             message: trimmed(message) ?? "",
             otherFeedback: trimmed(otherFeedback),
@@ -117,8 +107,8 @@ struct FeedbackSubmission: Encodable, Equatable {
         return value
     }
 
-    /// The OS this build runs on, which may differ from the phone the user
-    /// picked in the form.
+    /// The OS this build runs on. Finer than `platform`, which has no
+    /// visionOS value.
     static var appPlatform: String {
         #if os(visionOS)
         return "visionos"
