@@ -25,7 +25,7 @@ enum ShareCardSharing {
 
         let status = AirStatuses.checkAirStatus(airIndexType: .aqi, value: card.aqi)
         let message = String(
-            format: NSLocalizedString("Share.message", comment: ""),
+            format: "Share.message".localized,
             card.title,
             Int(card.aqi),
             "AirStatus.\(status.rawValue)".localized
@@ -40,6 +40,8 @@ enum ShareCardSharing {
     }
 
     static func render(_ card: ShareCardView) -> UIImage? {
+        // Rendered outside the SwiftUI tree, so the Help language is passed in.
+        let card = card.environment(\.locale, .app)
         if #available(iOS 16.0, *) {
             let renderer = ImageRenderer(content: card)
             renderer.scale = scale

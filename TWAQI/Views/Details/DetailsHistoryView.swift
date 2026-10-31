@@ -225,7 +225,7 @@ struct DetailsHistoryView: View {
             let percent = Int((result.magnitude / baseline * 100).rounded())
             return result.direction == .improving ? "−\(percent)%" : "+\(percent)%"
         }
-        return String(format: NSLocalizedString(key, comment: ""), result.change)
+        return String(format: NSLocalizedString(key, bundle: .appLanguage, comment: ""), result.change)
     }
 
     private func steadyDetail(_ result: AqiTrend) -> String {
@@ -233,7 +233,7 @@ struct DetailsHistoryView: View {
             return "\(result.current.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
         }
         return String(
-            format: NSLocalizedString("Details.trend_steady_detail", comment: ""),
+            format: NSLocalizedString("Details.trend_steady_detail", bundle: .appLanguage, comment: ""),
             Int(result.current.rounded())
         )
     }

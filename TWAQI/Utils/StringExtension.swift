@@ -9,8 +9,9 @@
 import Foundation
 
 extension String {
+    /// Localized in the app's language (the Help choice, else the system's).
     var localized: String {
-        return NSLocalizedString(self, comment: "")
+        return NSLocalizedString(self, bundle: .appLanguage, comment: "")
     }
 
     func maxLength(length: Int) -> String {

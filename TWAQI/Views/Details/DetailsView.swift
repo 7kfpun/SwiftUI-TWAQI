@@ -27,6 +27,9 @@ struct DetailsView: View {
     /// Set when shown in the panel beside the map, which has no back button.
     private let onClose: (() -> Void)?
 
+    /// Bumped when an on-device translation of the township or address lands.
+    @State private var translationRevision = 0
+
     var body: some View {
         // One `navigationBarItems` call per branch: a second call replaces the
         // first rather than adding to it.
@@ -63,7 +66,7 @@ struct DetailsView: View {
 
         return ShareCardView(
             title: stationTitle,
-            locality: pollutant?.displayLocality ?? viewModel.station?.displayLocality,
+            locality: displayLocality,
             aqi: currentAqi,
             pollutant: pollutant,
             publishTime: viewModel.latestPublishTime
@@ -185,6 +188,7 @@ struct DetailsView: View {
         .onAppear {
             self.getData()
         }
+        .translatesOnDevice(translatableLocation, revision: $translationRevision)
     }
 
     /// Band colour of the pollutant the page is currently showing, so the wind
@@ -209,9 +213,21 @@ struct DetailsView: View {
 
     /// From the live reading, else the station record — fixed metadata, so a
     /// station with no reading still says where it is.
+    /// The street address is translated on device outside Chinese.
     private var location: StationLocationView? {
-        if let pollutant = viewModel.pollutant { return StationLocationView(pollutant: pollutant) }
-        return viewModel.station.map { StationLocationView(station: $0) }
+        // Read so a finished translation redraws.
+        _ = translationRevision
+        var location: StationLocationView
+        if let pollutant = viewModel.pollutant {
+            location = StationLocationView(pollutant: pollutant)
+        } else if let station = viewModel.station {
+            location = StationLocationView(station: station)
+        } else {
+            return nil
+        }
+        let address = location.address
+        location.displayAddress = address.map(OnDeviceTranslation.display)
+        return location
     }
 
     private var stationTitle: String {
@@ -220,13 +236,32 @@ struct DetailsView: View {
             ?? ""
     }
 
+    /// Township and street address come from the API in Chinese only; outside
+    /// Chinese they are translated on device when the language is installed.
+    /// From the live reading, else the station record, like `location`.
+    private var translatableLocation: [String] {
+        if let pollutant = viewModel.pollutant {
+            return [pollutant.township, pollutant.address].compactMap { $0 }
+        }
+        guard let station = viewModel.station else { return [] }
+        return [station.township, station.address].compactMap { $0 }
+    }
+
+    /// "Banqiao District, New Taipei City": the township translated on device.
+    private var displayLocality: String? {
+        // Read so a finished translation redraws.
+        _ = translationRevision
+        return viewModel.pollutant?.displayLocality(township: OnDeviceTranslation.display)
+            ?? viewModel.station?.displayLocality(township: OnDeviceTranslation.display)
+    }
+
     private var header: some View {
         let pollutant = viewModel.pollutant
         let station = viewModel.station
 
         return StationHeaderView(
             title: stationTitle,
-            locality: pollutant?.displayLocality ?? station?.displayLocality,
+            locality: displayLocality,
             area: pollutant?.displayArea ?? station?.displayArea,
             stationType: pollutant?.stationType ?? station?.stationType ?? .unknown,
             aqi: currentAqi,

@@ -36,6 +36,9 @@
 "Help.turn_on_do_not_disturb" = "開啟勿擾模式";
 "Help.start_time" = "開始時間";
 "Help.end_time" = "結束時間";
+"Help.language" = "語言";
+"Help.language_system" = "跟隨系統";
+"Help.language_footer" = "政府提供的地址與預報內容為中文。選擇其他語言時，若已在「設定」下載該翻譯語言，會在本機上翻譯。";
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
 "Help.in_app_purchase" = "App 內購買";

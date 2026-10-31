@@ -742,10 +742,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         let detailsView = DetailsView(stationId: pollutant.stationId)
+        // Outside the SwiftUI tree, so the Help language has to be passed in.
         let detailsViewController = UIHostingController(
             // The fallback only for a controller built outside SwiftUI; every
             // store reads the same defaults, so it behaves the same.
-            rootView: detailsView.environmentObject(settings ?? SettingsStore())
+            rootView: detailsView
+                .environmentObject(settings ?? SettingsStore())
+                .environment(\.locale, .app)
         )
         detailsViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,

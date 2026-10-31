@@ -25,6 +25,7 @@ struct HelpView: View {
         NavigationView {
             Form {
                 doNotDisturbSection
+                languageSection
 
                 if !settings.isPro {
                     purchaseSection
@@ -79,6 +80,27 @@ struct HelpView: View {
                     title: Text("Help.all_site_notification_has_been_cancelled"),
                     dismissButton: .default(Text("OK"))
                 )
+            }
+        }
+    }
+
+    /// Overrides the system language for this app. The root view applies it
+    /// at once; see `ContentView`.
+    private var languageSection: some View {
+        Section(
+            header: Label("Help.language", systemImage: "globe"),
+            footer: Text("Help.language_footer").fontWeight(.light)
+        ) {
+            Picker(selection: Binding(
+                get: { settings.appLanguage },
+                set: { settings.appLanguage = $0 }
+            )) {
+                Text("Help.language_system").tag(AppLanguage.system)
+                // Each language in its own name, whatever the UI language.
+                Text(verbatim: "繁體中文").tag(AppLanguage.traditionalChinese)
+                Text(verbatim: "English").tag(AppLanguage.english)
+            } label: {
+                Text("Help.language")
             }
         }
     }

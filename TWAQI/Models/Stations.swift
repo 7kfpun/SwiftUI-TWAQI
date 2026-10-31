@@ -42,6 +42,13 @@ extension Station {
 
     /// "Xinyi District, Keelung City" — whichever parts the API supplied.
     var displayLocality: String? {
+        displayLocality(township: { $0 })
+    }
+
+    /// `displayLocality` with the township — which the API has only in
+    /// Chinese — passed through `township` first (on-device translation).
+    func displayLocality(township translate: (String) -> String) -> String? {
+        let township = self.township.map(translate)
         let parts = Locale.isChinese ? [township, countyLocal] : [township, county]
         let joined = parts.compactMap { $0 }.filter { !$0.isEmpty }
         return joined.isEmpty ? nil : joined.joined(separator: ", ")

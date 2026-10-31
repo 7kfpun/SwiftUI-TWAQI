@@ -226,6 +226,7 @@
 		FA00031F472BB3EEFB8D525F /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		FA5DA2BD0F7DC4F1239EA042 /* StationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA61685800F418B19D88A /* StationRow.swift */; };
 		FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A225060AF021643D29C12E0 /* StationParsingTests.swift */; };
+		3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */; };
 		FD65596098C2443A3132468F /* TWAQIWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 272BB792F0EDC20873E7A119 /* TWAQIWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FD82CBFCB443469ECC82845D /* Faces.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B24479F966EFE547F09CCC2 /* Faces.xcassets */; };
 		FD8DFBB207CC9497466F5457 /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
@@ -238,7 +239,7 @@
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
 		D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */; };
 		8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02741CF262046B02509EB59F /* AreaForecastView.swift */; };
-		01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4423A411B7699945286E1E56 /* ForecastTranslation.swift */; };
+		01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */; };
 		408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */; };
 		6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */; };
 		1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */; };
@@ -358,6 +359,7 @@
 		421856691F0C71D8CC7E0BD5 /* ReadingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadingView.swift; sourceTree = "<group>"; };
 		437631D7D7C9B18A5CECB5C3 /* Pods-OneSignalNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OneSignalNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-OneSignalNotificationServiceExtension/Pods-OneSignalNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		4A225060AF021643D29C12E0 /* StationParsingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationParsingTests.swift; sourceTree = "<group>"; };
+		B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
 		5AAC5E1DF9D0DE1459435C5E /* TaiwanMeshBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TaiwanMeshBuilder.swift; sourceTree = "<group>"; };
 		614B29C0846D2EB65B85CDB9 /* StationDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationDetailView.swift; sourceTree = "<group>"; };
 		618E38CBCD0ADFF6CA88C345 /* TWAQIVisionApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIVisionApp.swift; sourceTree = "<group>"; };
@@ -498,7 +500,7 @@
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
 		37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamView.swift; sourceTree = "<group>"; };
 		02741CF262046B02509EB59F /* AreaForecastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AreaForecastView.swift; sourceTree = "<group>"; };
-		4423A411B7699945286E1E56 /* ForecastTranslation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastTranslation.swift; sourceTree = "<group>"; };
+		4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnDeviceTranslation.swift; sourceTree = "<group>"; };
 		8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamTests.swift; sourceTree = "<group>"; };
 		4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCacheTests.swift; sourceTree = "<group>"; };
 		B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetentionTests.swift; sourceTree = "<group>"; };
@@ -640,6 +642,7 @@
 				7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */,
 				B7E1D2A40C5F4A6B8D9E0F03 /* PushServiceTests.swift */,
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
+				B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
@@ -834,7 +837,6 @@
 				EF2D9DEA8C6744210C4D3F8C /* StationLocationView.swift */,
 				37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */,
 				02741CF262046B02509EB59F /* AreaForecastView.swift */,
-				4423A411B7699945286E1E56 /* ForecastTranslation.swift */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -858,6 +860,7 @@
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
 				9E942E3B2372CA4B0010915D /* LocaleExtension.swift */,
+				4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */,
@@ -1492,6 +1495,7 @@
 				7D3E5A1C2B4F4E6A9C0D1E35 /* FeedbackServiceTests.swift in Sources */,
 				B7E1D2A40C5F4A6B8D9E0F13 /* PushServiceTests.swift in Sources */,
 				FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */,
+				3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */,
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
 				56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */,
 			);
@@ -1549,7 +1553,7 @@
 			files = (
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
-				01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */,
+				01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,

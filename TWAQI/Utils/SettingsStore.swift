@@ -76,6 +76,20 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    /// Language chosen under Help; `.system` follows iOS. Read through
+    /// `Locale.app` / `Bundle.appLanguage` everywhere text is produced.
+    var appLanguage: AppLanguage {
+        set {
+            if let identifier = newValue.localeIdentifier {
+                defaults.set(identifier, forKey: AppLanguage.defaultsKey)
+            } else {
+                defaults.removeObject(forKey: AppLanguage.defaultsKey)
+            }
+            TrackingManager.logEvent(eventName: "select_language", parameters: ["label": newValue.rawValue])
+        }
+        get { AppLanguage.stored(in: defaults) }
+    }
+
     var isDndEnabled: Bool {
         set { defaults.set(newValue, forKey: Keys.dndEnabled) }
         get { defaults.bool(forKey: Keys.dndEnabled) }
