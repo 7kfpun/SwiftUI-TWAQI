@@ -6,31 +6,35 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
+import Combine
 import Foundation
-import OneSignal
 import Security
 
-/// Copies the push settings OneSignal holds as tags — each station's alerts
-/// and the do-not-disturb window — into Directus (`twaqi_push_devices`,
-/// `twaqi_push_subscriptions`), ready for the app's own sender to take over.
+/// Keeps the push settings — each station's alerts and the do-not-disturb
+/// window — in Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`),
+/// where the FCM sender reads them.
 ///
-/// OneSignal is still the live sender and the source of truth. Everything here
-/// is best-effort and runs after, never before, the OneSignal write: a Directus
-/// failure is logged and retried on the next change or launch, and never
-/// reaches the user.
+/// The station page and Help write here; this is the only store for alerts.
+/// Changes are kept in `UserDefaults` first and written to Directus after:
+/// a failure is logged and retried on the next change, launch or token
+/// change, and never reaches the user.
 ///
-/// The device row is keyed by `PushDeviceIdentity` (a Keychain UUID), and
-/// carries the APNs token OneSignal registered plus OneSignal's player id, so
-/// this adds no permission prompt or registration of its own. A row is only
-/// made once the device has an alert switched on.
+/// The device row is keyed by `PushDeviceIdentity` (a Keychain UUID) and
+/// carries the APNs token and the FCM registration token, both handed over
+/// by `AppDelegate`. A row is only made once the device has an alert switched
+/// on; after that it follows every token change.
 @MainActor
-final class DirectusPushMirror: NSObject {
+final class DirectusPushMirror: ObservableObject {
     static let shared = DirectusPushMirror()
 
     /// A launch refreshes `last_seen_at` at most this often.
-    static let deviceRefreshInterval: TimeInterval = 6 * 60 * 60
+    nonisolated static let deviceRefreshInterval: TimeInterval = 6 * 60 * 60
     /// Sliders send a value per step; write once they settle.
     static let debounce: UInt64 = 800_000_000
+
+    /// Changes when alerts are restored from Directus, so an open station
+    /// page can show them.
+    @Published private(set) var restoredAt: Date?
 
     private let defaults: UserDefaults
     private let settings = SettingsStore()
@@ -38,15 +42,21 @@ final class DirectusPushMirror: NSObject {
     private enum Keys {
         static let deviceId = "directusPushDeviceId"
         static let deviceToken = "directusPushDeviceToken"
+        static let fcmToken = "directusPushFcmToken"
         static let lastDeviceSyncAt = "directusPushLastDeviceSyncAt"
-        /// Station id → alerts as OneSignal has them.
+        /// Station id → alerts as the user set them (or as restored).
         static let wanted = "directusPushWantedAlerts"
-        /// Station id → alerts as last written to Directus.
+        /// Station id → alerts as last written to (or read from) Directus.
         static let synced = "directusPushSyncedAlerts"
         static let siteIds = "directusPushSiteIds"
         /// Help's "cancel all" is still to reach Directus.
         static let archiveAll = "directusPushArchiveAll"
+        /// This install has looked for a row an earlier install left.
+        static let restored = "directusPushRestored"
     }
+
+    private var apnsToken: String?
+    private var fcmToken: String?
 
     private var isFlushing = false
     private var flushAgain = false
@@ -55,20 +65,43 @@ final class DirectusPushMirror: NSObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        super.init()
     }
 
     // MARK: - Entry points
 
-    /// After OneSignal is initialised: follows its token, and catches up on
-    /// anything an earlier launch couldn't write.
+    /// At launch: catches up on anything an earlier launch couldn't write,
+    /// once the tokens arrive.
     func start() {
-        OneSignal.add(self as OSSubscriptionObserver)
         flush()
     }
 
-    /// The station row's alerts, after OneSignal has been sent the same.
-    /// `settled` skips the wait, for values read rather than dragged.
+    /// From `didRegisterForRemoteNotificationsWithDeviceToken`.
+    func apnsTokenChanged(_ token: Data) {
+        let hex = token.map { String(format: "%02x", $0) }.joined()
+        guard hex != apnsToken else { return }
+        apnsToken = hex
+        flush()
+    }
+
+    /// From Messaging's delegate, at launch and whenever FCM rotates it.
+    func fcmTokenChanged(_ token: String?) {
+        guard let token = token, !token.isEmpty, token != fcmToken else { return }
+        fcmToken = token
+        flush()
+    }
+
+    /// A station's alerts as the user last set them, written or not.
+    func alerts(stationId: Int) -> StationAlerts {
+        load([String: StationAlerts].self, Keys.wanted)?[String(stationId)] ?? .off
+    }
+
+    /// Stations with at least one alert on, written or not.
+    var stationIdsWithAlerts: Set<String> {
+        Set((load([String: StationAlerts].self, Keys.wanted) ?? [:]).filter { !$0.value.isOff }.keys)
+    }
+
+    /// The station row's alerts. `settled` skips the wait, for values read
+    /// rather than dragged.
     func stationChanged(stationId: Int, siteId: String?, alerts: StationAlerts, settled: Bool = false) {
         let key = String(stationId)
         if let siteId = siteId {
@@ -118,7 +151,7 @@ final class DirectusPushMirror: NSObject {
         load([String: StationAlerts].self, Keys.synced) ?? [:]
     }
 
-    /// Writes whatever differs between OneSignal's settings and Directus.
+    /// Writes whatever differs between the local settings and Directus.
     /// One at a time; a call while one runs makes it go round again.
     private func flush() {
         if isFlushing {
@@ -137,6 +170,18 @@ final class DirectusPushMirror: NSObject {
 
     private func flushOnce() async {
         guard let config = PushService.Config.current else { return }
+        // APNs hasn't registered yet; `apnsTokenChanged` brings us back.
+        guard let token = apnsToken else { return }
+
+        if !defaults.bool(forKey: Keys.restored) {
+            do {
+                try await restore(token: token, config: config)
+            } catch {
+                // Writing now could overwrite the row being restored from.
+                print("Directus push: restore failed: \(error)")
+                return
+            }
+        }
 
         if defaults.bool(forKey: Keys.archiveAll), defaults.object(forKey: Keys.deviceId) != nil {
             let device = defaults.integer(forKey: Keys.deviceId)
@@ -149,7 +194,7 @@ final class DirectusPushMirror: NSObject {
                 save(wanted, Keys.wanted)
                 save([String: StationAlerts](), Keys.synced)
             } catch {
-                print("Directus push mirror: cancel all failed: \(error)")
+                print("Directus push: cancel all failed: \(error)")
                 return
             }
         }
@@ -167,18 +212,13 @@ final class DirectusPushMirror: NSObject {
         save(synced, Keys.synced)
 
         let pending = wanted.filter { synced[$0.key] != $0.value }
-        guard hasDevice || pending.values.contains(where: { !$0.isOff }) else { return }
-
-        guard let state = OneSignal.getDeviceState(), let token = state.pushToken, !token.isEmpty else {
-            // OneSignal hasn't registered yet; its observer brings us back.
-            return
-        }
+        guard Self.needsDevice(hasDevice: hasDevice, pending: pending) else { return }
 
         let device: Int
         do {
-            device = try await deviceId(token: token, playerId: state.userId, config: config)
+            device = try await deviceId(token: token, fcmToken: fcmToken, config: config)
         } catch {
-            print("Directus push mirror: device sync failed: \(error)")
+            print("Directus push: device sync failed: \(error)")
             return
         }
 
@@ -198,22 +238,75 @@ final class DirectusPushMirror: NSObject {
                 }
                 save(done, Keys.synced)
             } catch {
-                print("Directus push mirror: station \(key) failed: \(error)")
+                print("Directus push: station \(key) failed: \(error)")
             }
         }
     }
 
-    /// This device's row, created or refreshed when its token, DND or age
+    /// Once per install: finds the row this phone already has — from before a
+    /// reinstall (same Keychain id), or one made for its APNs token — and
+    /// takes its alerts, and on a fresh install its do-not-disturb window.
+    /// Local changes not yet written win over what's restored.
+    private func restore(token: String, config: PushService.Config) async throws {
+        guard let stableId = PushDeviceIdentity.id() else { throw PushError.noDeviceId }
+        let isFreshInstall = defaults.object(forKey: Keys.deviceId) == nil
+
+        var stored = try await PushService.storedDevice(field: PushDevicePayload.deviceIdField, value: stableId, config: config)
+        if stored == nil {
+            stored = try await PushService.storedDevice(field: "device_token", value: token, config: config)
+        }
+        guard let stored = stored else {
+            defaults.set(true, forKey: Keys.restored)
+            return
+        }
+
+        let remote = StationAlerts.byStation(try await PushService.subscriptions(device: stored.id, config: config))
+
+        if isFreshInstall {
+            if let enabled = stored.dndEnabled {
+                settings.isDndEnabled = enabled
+            }
+            if let start = PushService.StoredDevice.time(stored.dndStart) {
+                settings.dndStartTime = start
+            }
+            if let end = PushService.StoredDevice.time(stored.dndEnd) {
+                settings.dndEndTime = end
+            }
+        }
+
+        var wanted = load([String: StationAlerts].self, Keys.wanted) ?? [:]
+        for (key, alerts) in remote where wanted[key] == nil {
+            wanted[key] = alerts
+        }
+        save(wanted, Keys.wanted)
+
+        // The row is this device's: adopting its id keeps `deviceId(...)`
+        // from treating it as new and writing every alert again.
+        if defaults.object(forKey: Keys.deviceId) == nil || defaults.integer(forKey: Keys.deviceId) != stored.id {
+            defaults.set(stored.id, forKey: Keys.deviceId)
+            defaults.removeObject(forKey: Keys.lastDeviceSyncAt)
+            save(remote, Keys.synced)
+        } else {
+            save(synced.merging(remote) { local, _ in local }, Keys.synced)
+        }
+        defaults.set(true, forKey: Keys.restored)
+        restoredAt = Date()
+    }
+
+    /// This device's row, created or refreshed when its tokens, DND or age
     /// call for it.
-    private func deviceId(token: String, playerId: String?, config: PushService.Config) async throws -> Int {
+    private func deviceId(token: String, fcmToken: String?, config: PushService.Config) async throws -> Int {
         let knownId = defaults.object(forKey: Keys.deviceId) != nil ? defaults.integer(forKey: Keys.deviceId) : nil
         guard let stableId = PushDeviceIdentity.id() else { throw PushError.noDeviceId }
-        let lastSync = defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date
         if let knownId = knownId,
-           !forceDevice,
-           defaults.string(forKey: Keys.deviceToken) == token,
-           let lastSync = lastSync,
-           Date().timeIntervalSince(lastSync) < Self.deviceRefreshInterval {
+           Self.isDeviceCurrent(
+               force: forceDevice,
+               syncedToken: defaults.string(forKey: Keys.deviceToken),
+               token: token,
+               syncedFcmToken: defaults.string(forKey: Keys.fcmToken),
+               fcmToken: fcmToken,
+               lastSync: defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date
+           ) {
             return knownId
         }
 
@@ -221,7 +314,7 @@ final class DirectusPushMirror: NSObject {
         let payload = PushDevicePayload.make(
             deviceId: stableId,
             deviceToken: token,
-            externalId: playerId,
+            fcmToken: fcmToken,
             dndEnabled: settings.isDndEnabled,
             dndStart: settings.dndStartTime,
             dndEnd: settings.dndEndTime
@@ -232,8 +325,36 @@ final class DirectusPushMirror: NSObject {
         }
         defaults.set(id, forKey: Keys.deviceId)
         defaults.set(token, forKey: Keys.deviceToken)
+        if let fcmToken = fcmToken {
+            defaults.set(fcmToken, forKey: Keys.fcmToken)
+        }
         defaults.set(Date(), forKey: Keys.lastDeviceSyncAt)
         return id
+    }
+
+    // MARK: - Decisions
+
+    /// Whether a flush goes on to the device row: always once one exists (so
+    /// a token change alone is written), otherwise only for an alert to turn on.
+    nonisolated static func needsDevice(hasDevice: Bool, pending: [String: StationAlerts]) -> Bool {
+        hasDevice || pending.values.contains { !$0.isOff }
+    }
+
+    /// Whether the row already holds these tokens and was refreshed recently
+    /// enough to skip the upsert. A new APNs or FCM token is always written;
+    /// a missing FCM token (Messaging hasn't issued one) is not a change.
+    nonisolated static func isDeviceCurrent(
+        force: Bool,
+        syncedToken: String?,
+        token: String,
+        syncedFcmToken: String?,
+        fcmToken: String?,
+        lastSync: Date?,
+        now: Date = Date()
+    ) -> Bool {
+        guard !force, syncedToken == token, let lastSync = lastSync else { return false }
+        if let fcmToken = fcmToken, fcmToken != syncedFcmToken { return false }
+        return now.timeIntervalSince(lastSync) < deviceRefreshInterval
     }
 
     // MARK: - Helpers
@@ -254,17 +375,6 @@ final class DirectusPushMirror: NSObject {
 
     private func save<T: Encodable>(_ value: T, _ key: String) {
         defaults.set(try? JSONEncoder().encode(value), forKey: key)
-    }
-}
-
-extension DirectusPushMirror: OSSubscriptionObserver {
-    /// OneSignal calls this off the main thread when it gets or changes the
-    /// APNs token.
-    nonisolated func onOSSubscriptionChanged(_ stateChanges: OSSubscriptionStateChanges) {
-        guard stateChanges.to.pushToken != stateChanges.from.pushToken else { return }
-        Task { @MainActor in
-            self.flush()
-        }
     }
 }
 
@@ -294,7 +404,7 @@ enum PushDeviceIdentity {
         case errSecDuplicateItem:
             return read()
         case let status:
-            print("Directus push mirror: Keychain refused the device id (\(status))")
+            print("Directus push: Keychain refused the device id (\(status))")
             return nil
         }
     }

@@ -10,11 +10,11 @@ import UIKit
 
 import Bugsnag
 import FirebaseCore
+import FirebaseMessaging
 import GoogleMaps
 import GoogleMobileAds
-import OneSignal
 import Sentry
-import SwiftDate
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -38,13 +38,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Bugsnag.start(withApiKey: bugsnagApiKey)
         }
 
-        // Use Firebase library to configure APIs (Analytics and Crashlytics).
+        // Use Firebase library to configure APIs (Analytics, Crashlytics and
+        // Messaging).
         FirebaseApp.configure()
         TrackingManager.applyExclusionAtLaunch()
 
-        // Push is owned entirely by OneSignal below — it prompts for permission
-        // and registers with APNs itself. Firebase Messaging was a second,
-        // redundant path to the same thing.
+        // Push: alerts are sent through Firebase Cloud Messaging to the token
+        // Directus holds for this device (see `DirectusPushMirror`).
+        startPush(application)
 
         // Initialize the Google Mobile Ads SDK.
         MobileAds.shared.start(completionHandler: nil)
@@ -60,52 +61,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 "dsn": sentryDSN,
                 "debug": true,
             ])
-        }
-
-        // Initialize OneSignal push services.
-        if let oneSignalAppId = getEnv("OneSignalAppId") {
-            OneSignal.initWithLaunchOptions(launchOptions)
-            OneSignal.setAppId(oneSignalAppId)
-
-            OneSignal.promptForPushNotifications(userResponse: { accepted in
-                print("User accepted notifications: \(accepted)")
-            })
-
-            OneSignalManager.getOneSignalSettings { result in
-                // OneSignal calls back off the main thread; writing UserDefaults
-                // here fires SettingsStore's publisher on that thread too.
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                        let settings = SettingsStore()
-                        if let isDndEnabled = result.isDndEnabled, isDndEnabled != settings.isDndEnabled {
-                            settings.isDndEnabled = isDndEnabled
-                        }
-
-                        if let dndStartTime = result.dndStartTime {
-                            var components = DateComponents()
-                            components.hour = Int(dndStartTime / 60)
-                            components.minute = dndStartTime % 60
-                            settings.dndStartTime = NSCalendar.current.date(from: components) ?? Date()
-                        }
-
-                        if let dndEndTime = result.dndEndTime {
-                            var components = DateComponents()
-                            components.hour = Int(dndEndTime / 60)
-                            components.minute = dndEndTime % 60
-                            settings.dndEndTime = NSCalendar.current.date(from: components) ?? Date() + 2.hours
-                        }
-
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-
-            // Copies alert settings to Directus alongside OneSignal's tags,
-            // using the APNs token OneSignal registered.
-            DirectusPushMirror.shared.start()
         }
 
         StoreReviewHelper.incrementAppOpenedCount()
@@ -128,4 +83,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
+    // MARK: Push
+
+    /// Asks for permission at launch, as the app always has, and registers
+    /// with APNs either way: Messaging needs the APNs token for an FCM one.
+    private func startPush(_ application: UIApplication) {
+        UNUserNotificationCenter.current().delegate = self
+        Messaging.messaging().delegate = self
+        DirectusPushMirror.shared.start()
+
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if let error = error {
+                print("Notification permission request failed: \(error.localizedDescription)")
+            }
+            print("User accepted notifications: \(granted)")
+            DispatchQueue.main.async {
+                application.registerForRemoteNotifications()
+            }
+        }
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+        DirectusPushMirror.shared.apnsTokenChanged(deviceToken)
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed: \(error.localizedDescription)")
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    /// At launch, and whenever FCM issues a new token.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        Task { @MainActor in
+            DirectusPushMirror.shared.fcmTokenChanged(fcmToken)
+        }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    /// Alerts still show while the app is open.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        Messaging.messaging().appDidReceiveMessage(notification.request.content.userInfo)
+        completionHandler([.banner, .list, .sound, .badge])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        Messaging.messaging().appDidReceiveMessage(response.notification.request.content.userInfo)
+        completionHandler()
+    }
 }

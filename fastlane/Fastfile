@@ -385,7 +385,7 @@ platform :ios do
     latest = latest_testflight_build_number(api_key: key, version: APP_VERSION, initial_build_number: 0).to_i
     build = [current, latest].max + 1
 
-    # The app, watch app, widget and notification extension must all carry the
+    # The app, watch app and widgets must all carry the
     # same build number, so every occurrence is rewritten, not just the app's.
     source = File.read(project)
     File.write(project, source.gsub(/CURRENT_PROJECT_VERSION = \d+;/, "CURRENT_PROJECT_VERSION = #{build};"))

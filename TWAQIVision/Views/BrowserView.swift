@@ -180,7 +180,7 @@ private struct StationSearchTab: View {
 // MARK: - Help
 
 /// The iOS Help tab without its push-notification and in-app-purchase
-/// sections: there's no OneSignal on visionOS, and Pro removes ads this app
+/// sections: push alerts are iPhone-only, and Pro removes ads this app
 /// doesn't show.
 private struct HelpTab: View {
     var body: some View {

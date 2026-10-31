@@ -13,13 +13,12 @@ target 'TWAQI' do
   pod 'SwiftDate', '~> 6.1'
   pod 'SwiftyJSON', '~> 5.0'
 
-  # Firebase (Analytics, Crashlytics) comes from Swift Package Manager, added
+  # Firebase (Analytics, Crashlytics, Messaging) comes from Swift Package Manager, added
   # in the Xcode project: Firebase stopped publishing to CocoaPods after
   # October 2026. Nothing left here shares a dependency with it.
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
   pod 'Bugsnag', '~> 5.23'
-  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
   # Host-app tests: they link against the app, so they only need the pods'
@@ -27,12 +26,6 @@ target 'TWAQI' do
   target 'TWAQITests' do
     inherit! :search_paths
   end
-end
-
-target 'OneSignalNotificationServiceExtension' do
-  platform :ios, '15.0'
-
-  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
 end
 
 post_install do |installer|
@@ -68,10 +61,11 @@ post_install do |installer|
   end
 
   # App Store Connect rejects any binary containing bitcode (error 90482).
-  # OneSignal 3.9.1 predates that change and ships device slices built with it,
-  # so an archive is refused at upload even though nothing here enables bitcode.
-  # Strip it after every `pod install`, since a manual strip would be undone the
-  # next time the pods are reinstalled.
+  # Older vendored xcframeworks (OneSignal 3.9.1 was the one that hit this)
+  # ship device slices built with it, so an archive is refused at upload even
+  # though nothing here enables bitcode. Kept as a guard for any pod that still
+  # does: strip it after every `pod install`, since a manual strip would be
+  # undone the next time the pods are reinstalled.
   #
   # Only iOS *device* slices: those are the ones that end up in an archive, and
   # `bitcode_strip` fails outright on some simulator/catalyst/tvOS binaries.

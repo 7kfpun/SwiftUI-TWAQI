@@ -33,9 +33,8 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(PushDirection(.cleanliness), .below)
     }
 
-    func testStationAlertsFromOneSignalSetting() {
-        let setting = OneSignalStationSetting(
-            stationName: "Banqiao",
+    func testStationAlertsFromSetting() {
+        let setting = StationAlertSetting(
             isPollutionNotificationEnabled: true,
             isCleanlinessNotificationEnabled: true,
             pollutionTherhold: 150,
@@ -45,8 +44,7 @@ final class PushServiceTests: XCTestCase {
     }
 
     func testStationAlertsOffWhenSwitchedOff() {
-        let setting = OneSignalStationSetting(
-            stationName: "Banqiao",
+        let setting = StationAlertSetting(
             isPollutionNotificationEnabled: false,
             isCleanlinessNotificationEnabled: true,
             pollutionTherhold: 150,
@@ -56,7 +54,48 @@ final class PushServiceTests: XCTestCase {
         XCTAssertNil(alerts.above)
         XCTAssertEqual(alerts.below, 25)
         XCTAssertFalse(alerts.isOff)
-        XCTAssertTrue(StationAlerts(OneSignalStationSetting(stationName: "x", isPollutionNotificationEnabled: false, isCleanlinessNotificationEnabled: false)).isOff)
+        XCTAssertTrue(StationAlerts(StationAlertSetting.off).isOff)
+    }
+
+    func testSettingRoundTripsThroughAlerts() {
+        let alerts = StationAlerts(above: 150, below: nil)
+        let setting = StationAlertSetting(alerts)
+        XCTAssertTrue(setting.isPollutionNotificationEnabled)
+        XCTAssertFalse(setting.isCleanlinessNotificationEnabled)
+        XCTAssertEqual(setting.pollutionTherhold, 150)
+        // An alert that's off keeps its slider's default.
+        XCTAssertEqual(setting.cleanlinessTherhold, 30)
+        XCTAssertEqual(StationAlerts(setting), alerts)
+    }
+
+    func testAlertsByStationTakesFirstLiveRowPerDirection() {
+        let rows = [
+            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
+            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .above, threshold: 200, enabled: true),
+            PushSubscription(id: 3, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: false),
+            PushSubscription(id: 4, stationId: "9", siteId: nil, direction: .below, threshold: 25, enabled: true),
+            PushSubscription(id: 5, stationId: "7", siteId: nil, direction: .below, threshold: 25, enabled: false),
+        ]
+        XCTAssertEqual(StationAlerts.byStation(rows), [
+            "5": StationAlerts(above: 120),
+            "9": StationAlerts(below: 25),
+        ])
+    }
+
+    func testStoredDeviceDecodesAndParsesTimes() throws {
+        let data = Data(#"{"id":7,"dnd_enabled":true,"dnd_start":"22:30:00","dnd_end":"07:05"}"#.utf8)
+        let device = try JSONDecoder().decode(PushService.StoredDevice.self, from: data)
+        XCTAssertEqual(device.id, 7)
+        XCTAssertEqual(device.dndEnabled, true)
+
+        let now = date(12, 0, in: taipei)
+        let start = try XCTUnwrap(PushService.StoredDevice.time(device.dndStart, calendar: taipei, now: now))
+        let end = try XCTUnwrap(PushService.StoredDevice.time(device.dndEnd, calendar: taipei, now: now))
+        XCTAssertEqual(PushDevicePayload.hourMinute(start, calendar: taipei), "22:30")
+        XCTAssertEqual(PushDevicePayload.hourMinute(end, calendar: taipei), "07:05")
+        XCTAssertNil(PushService.StoredDevice.time(nil))
+        XCTAssertNil(PushService.StoredDevice.time("25:00"))
+        XCTAssertNil(PushService.StoredDevice.time("noon"))
     }
 
     // MARK: - Subscription encoding
@@ -111,7 +150,7 @@ final class PushServiceTests: XCTestCase {
         let payload = PushDevicePayload.make(
             deviceId: "6f1c2e7a-0000-4000-8000-000000000001",
             deviceToken: "abcd",
-            externalId: "player",
+            fcmToken: "fcm:abc",
             dndEnabled: true,
             dndStart: date(22, 30, in: taipei),
             dndEnd: date(7, 0, in: taipei),
@@ -127,7 +166,9 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(PushDevicePayload.deviceIdField, "device_id")
         XCTAssertEqual(body["device_id"] as? String, "6f1c2e7a-0000-4000-8000-000000000001")
         XCTAssertNil(body["install_id"])
-        XCTAssertEqual(body["external_id"] as? String, "player")
+        XCTAssertEqual(body["fcm_token"] as? String, "fcm:abc")
+        // OneSignal's player id is no longer written; the column is left as is.
+        XCTAssertFalse(body.keys.contains("external_id"))
         XCTAssertEqual(body["dnd_enabled"] as? Bool, true)
         XCTAssertEqual(body["dnd_start"] as? String, "22:30")
         XCTAssertEqual(body["dnd_end"] as? String, "07:00")
@@ -136,12 +177,15 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(body["archived"] as? Bool, false)
     }
 
-    func testDevicePayloadOmitsMissingExternalId() throws {
+    func testDevicePayloadOmitsMissingFcmToken() throws {
         let payload = PushDevicePayload.make(
-            deviceId: "d", deviceToken: "abcd", externalId: nil, dndEnabled: false,
+            deviceId: "d", deviceToken: "abcd", fcmToken: nil, dndEnabled: false,
             dndStart: Date(), dndEnd: Date(), environment: .production, calendar: taipei
         )
-        XCTAssertFalse(try json(payload).keys.contains("external_id"))
+        let body = try json(payload)
+        // Left out, not cleared: a row keeps its last FCM token until a new one.
+        XCTAssertFalse(body.keys.contains("fcm_token"))
+        XCTAssertFalse(body.keys.contains("external_id"))
     }
 
     // MARK: - Reconcile plan
@@ -183,6 +227,37 @@ final class PushServiceTests: XCTestCase {
         let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: .off)
         XCTAssertEqual(plan.save, [])
         XCTAssertEqual(plan.archive, [1, 2])
+    }
+
+    // MARK: - Device sync gate
+
+    func testDeviceWithNoPendingAlertsStillSyncs() {
+        // An FCM token refresh arrives with no station changes pending.
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: true, pending: [:]))
+        // No row yet: only an alert being switched on makes one.
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: [:]))
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": .off]))
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": StationAlerts(above: 120)]))
+    }
+
+    func testNewFcmTokenAloneForcesUpsert() {
+        let now = Date()
+        let recent = now.addingTimeInterval(-60)
+        func current(force: Bool = false, token: String = "apns", fcm: String? = "fcm-1", lastSync: Date? = recent) -> Bool {
+            DirectusPushMirror.isDeviceCurrent(
+                force: force, syncedToken: "apns", token: token,
+                syncedFcmToken: "fcm-1", fcmToken: fcm, lastSync: lastSync, now: now
+            )
+        }
+        XCTAssertTrue(current())
+        // Same APNs token, refreshed recently, but FCM rotated: write it.
+        XCTAssertFalse(current(fcm: "fcm-2"))
+        // Messaging hasn't issued a token yet: not a change.
+        XCTAssertTrue(current(fcm: nil))
+        XCTAssertFalse(current(token: "apns-new"))
+        XCTAssertFalse(current(force: true))
+        XCTAssertFalse(current(lastSync: nil))
+        XCTAssertFalse(current(lastSync: now.addingTimeInterval(-DirectusPushMirror.deviceRefreshInterval - 1)))
     }
 
     // MARK: - Config

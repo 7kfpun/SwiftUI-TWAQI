@@ -13,7 +13,7 @@
 </head>
 <body><main><h1>隱私權政策</h1>隱私權政策
 
-最後更新日期：2026 年 8 月 8 日
+最後更新日期：2026 年 10 月 31 日
 
 「台灣空氣品質 Taiwan Air」（以下稱「本 App」，App Store ID 1286516443，Bundle ID com.kfpun.twaqi）提供台灣各政府空氣品質監測站的觀測數值，由獨立開發者製作。我們尊重您的隱私，並將資料蒐集降到最低。本政策說明我們蒐集哪些資料、用途，以及會分享給誰。
 
@@ -33,8 +33,9 @@
 • 若您拒絕定位權限，本 App 仍可正常使用，會改用預設測站以及您在地圖上自行選擇的測站。
 
 通知
-• 推播通知由 OneSignal 提供。當您為某測站開啟警示時，該測站名稱、您設定的門檻值與勿擾時段會以標籤（tags）形式存放於 OneSignal 的推播紀錄中，以便送出通知。
-• OneSignal 會取得推播 token 與一般裝置資訊。關閉警示即會移除相關標籤；刪除 App 則停止推播。
+• 推播通知透過 Google Firebase 雲端通訊（Firebase Cloud Messaging）與 Apple 推播通知服務送達，兩者會取得您裝置的推播 token。
+• 當您為某測站開啟警示時，我們會在自己的伺服器上儲存為此裝置產生的隨機識別碼、推播 token、該測站、您設定的門檻值、勿擾時段與時區，以及 App 版本與語言，以便送出通知。這些資料不會與您的姓名或通訊錄連結。
+• 關閉警示後，該警示會標記為停用且不再使用；刪除 App 則停止推播。
 
 分析與當機回報
 • Google Firebase Analytics 記錄匿名的使用事件，例如您選擇了哪個空氣指標、開啟測站、開始或完成購買，並附帶一般的裝置與 App 資訊。
@@ -54,12 +55,12 @@ Apple Watch
 • Apple Watch 版本同樣是向我們的 API 取得公開的空氣品質數值，不會額外蒐集任何資料。
 
 資料會分享給誰
-• Google（Firebase Analytics、Firebase Crashlytics、AdMob、Google Maps）、OneSignal、Bugsnag、Sentry 與 Apple，各自依其隱私權政策處理上述用途所需的資料。
+• Google（Firebase Analytics、Firebase Crashlytics、Firebase Cloud Messaging、AdMob、Google Maps）、Bugsnag、Sentry 與 Apple，各自依其隱私權政策處理上述用途所需的資料。
 • 我們不會販售您的資料，也不會提供給資料仲介商。
 
 保存期限
 • 裝置上的設定與收藏會保留到您刪除本 App 為止。
-• OneSignal 標籤會保留到您關閉相關警示或刪除本 App 為止。
+• 我們伺服器上的警示設定會保留，以便您重新安裝 App 後還原。如需刪除，請透過「意見回饋 / 聯絡我們」與我們聯繫。
 • 分析與當機資料由各服務商依其標準保存期限保存，我們不另行留存副本。
 • 我們的 API 提供的是公開資料，不儲存個人資料；一般伺服器日誌可能為了安全與除錯，短期記錄 IP 位址等請求中繼資料。
 

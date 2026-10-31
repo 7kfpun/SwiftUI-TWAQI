@@ -12,8 +12,8 @@ import SwiftUI
 /// what it is, where that sits on the scale, what's in the air and how it has
 /// moved over the day, the wind, what to do about it, where the station is.
 ///
-/// Leaves out the iOS page's notification thresholds: those are OneSignal
-/// push tags, and OneSignal has no visionOS SDK.
+/// Leaves out the iOS page's notification thresholds: push alerts are only
+/// wired up for the iPhone app.
 struct StationDetailView: View {
     let stationId: Int
 
