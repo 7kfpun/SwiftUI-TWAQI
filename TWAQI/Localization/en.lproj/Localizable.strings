@@ -173,6 +173,8 @@
 "Details.high" = "High";
 "Details.average" = "Average";
 "Details.no_trend_data" = "Not enough readings yet to show a trend";
+"Details.not_reporting" = "No live readings";
+"Details.not_reporting_message" = "This station isn't reporting right now. It may be offline for maintenance, or retired. Stations nearby are on the map.";
 "Details.pollutants" = "Pollutants";
 "Details.health_advice" = "Health advice";
 "Details.notifications" = "Notifications";

@@ -66,6 +66,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// station goes to the panel instead of a sheet over the map.
     var onStationSelected: ((Int) -> Void)?
 
+    /// The app's shared store, handed down from SwiftUI, for the station sheet.
+    /// A fresh `SettingsStore()` there was a second instance outside the app's
+    /// environment. Always set by `GoogleMapController`.
+    var settings: SettingsStore?
+
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
         TrackingManager.logEvent(eventName: "set_wind_mode", parameters: ["label": self.isWindMode ? "on" : "off"])
@@ -737,7 +742,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         let detailsView = DetailsView(stationId: pollutant.stationId)
-        let detailsViewController = UIHostingController(rootView: detailsView.environmentObject(SettingsStore()))
+        let detailsViewController = UIHostingController(
+            // The fallback only for a controller built outside SwiftUI; every
+            // store reads the same defaults, so it behaves the same.
+            rootView: detailsView.environmentObject(settings ?? SettingsStore())
+        )
         detailsViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
@@ -786,12 +795,17 @@ struct GoogleMapController: UIViewControllerRepresentable {
 
     var onStationSelected: ((Int) -> Void)?
 
+    /// The app's shared store, passed through to the station sheet.
+    @EnvironmentObject var settings: SettingsStore
+
     func makeUIViewController(context: UIViewControllerRepresentableContext<GoogleMapController>) -> GoogleMapViewController {
-        // Create the `GoogleMapViewController`.
-        return GoogleMapViewController()
+        let controller = GoogleMapViewController()
+        controller.settings = settings
+        return controller
     }
 
     func updateUIViewController(_ uiViewController: GoogleMapViewController, context: UIViewControllerRepresentableContext<GoogleMapController>) {
         uiViewController.onStationSelected = onStationSelected
+        uiViewController.settings = settings
     }
 }
