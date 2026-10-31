@@ -20,7 +20,10 @@ enum ShareCardSharing {
     /// take without cropping.
     private static let scale: CGFloat = 3
 
-    static func share(card: ShareCardView, stationId: Int) {
+    /// `sourceFrame` is the share button's frame in the window, for the
+    /// popover's arrow in a wide window. Empty falls back to the top-right
+    /// corner, where the button usually is.
+    static func share(card: ShareCardView, stationId: Int, from sourceFrame: CGRect = .zero) {
         guard let image = render(card) else { return }
 
         let status = AirStatuses.checkAirStatus(airIndexType: .aqi, value: card.aqi)
@@ -31,7 +34,10 @@ enum ShareCardSharing {
             "AirStatus.\(status.rawValue)".localized
         )
 
-        present(items: [CardItemSource(image: image, title: message), "\(message)\n\(appStoreURL.absoluteString)"])
+        present(
+            items: [CardItemSource(image: image, title: message), "\(message)\n\(appStoreURL.absoluteString)"],
+            sourceFrame: sourceFrame
+        )
 
         TrackingManager.logEvent(eventName: "share_card", parameters: [
             "stationId": stationId,
@@ -65,18 +71,27 @@ enum ShareCardSharing {
     }
 
     /// Presented from UIKit rather than a SwiftUI sheet: the station screen is
-    /// also shown modally from a map marker inside a UIKit navigation
-    /// controller, and a share sheet inside a sheet looks wrong on iPad.
-    private static func present(items: [Any]) {
+    /// also shown in a sheet over the map, and a share sheet inside a sheet
+    /// looks wrong on iPad.
+    private static func present(items: [Any], sourceFrame: CGRect) {
         guard let presenter = topViewController() else { return }
 
         let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        // Only in a wide window: a narrow one shows the sheet from the bottom.
         if let popover = activity.popoverPresentationController {
-            // The share button sits in the top-right of the navigation bar.
             let view = presenter.view!
             popover.sourceView = view
-            popover.sourceRect = CGRect(x: view.bounds.maxX - 60, y: view.safeAreaInsets.top, width: 1, height: 1)
-            popover.permittedArrowDirections = .up
+            if sourceFrame.isEmpty {
+                // The share button sits in the top-right of the navigation bar.
+                popover.sourceRect = CGRect(x: view.bounds.maxX - 60, y: view.safeAreaInsets.top, width: 1, height: 1)
+                popover.permittedArrowDirections = .up
+            } else {
+                // From the window's coordinates. On an unfolded iPhone Duo or
+                // an iPad the page may be the right-hand pane, the left-hand
+                // one, or the whole window.
+                popover.sourceRect = view.convert(sourceFrame, from: nil)
+                popover.permittedArrowDirections = [.up, .down]
+            }
         }
         presenter.present(activity, animated: true)
     }

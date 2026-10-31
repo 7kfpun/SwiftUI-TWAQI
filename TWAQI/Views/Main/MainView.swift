@@ -11,11 +11,14 @@ import SwiftUI
 struct MainView: View {
     @EnvironmentObject var settings: SettingsStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.foldLineX) private var foldLineX
 
-    /// Station shown in the panel beside the map. Only used in a wide window
-    /// (iPad, an unfolded foldable, a large split-screen window); a narrow one
-    /// opens the station in a sheet over the map instead.
-    @State private var selectedStationId: Int?
+    /// Station shown in the panel beside the map, in a wide window: iPad, an
+    /// unfolded iPhone Duo, a large split-screen window.
+    @State private var panelStationId: Int?
+
+    /// Station shown in a sheet over the map, in a narrow window.
+    @State private var sheetStation: SheetStation?
 
     private var isWide: Bool { horizontalSizeClass == .regular }
 
@@ -24,44 +27,76 @@ struct MainView: View {
             HStack(spacing: 0) {
                 map
 
-                if isWide, let stationId = selectedStationId {
+                if isWide, let stationId = panelStationId {
                     Divider()
                         .edgesIgnoringSafeArea(.vertical)
 
-                    stationPanel(stationId: stationId)
-                        .frame(width: Self.panelWidth(for: geometry.size.width))
-                        .transition(.move(edge: .trailing))
+                    stationPage(stationId: stationId) {
+                        withAnimation { panelStationId = nil }
+                    }
+                    .frame(width: panelWidth(in: geometry.frame(in: .global)))
+                    .transition(.move(edge: .trailing))
                 }
+            }
+        }
+        .sheet(item: $sheetStation) { station in
+            stationPage(stationId: station.id) { sheetStation = nil }
+        }
+        // Folding or unfolding the Duo, or resizing the window, keeps the open
+        // station open: the panel becomes a sheet, and the sheet the panel.
+        .onChange(of: horizontalSizeClass) { sizeClass in
+            if sizeClass == .regular, let station = sheetStation {
+                sheetStation = nil
+                panelStationId = station.id
+            } else if sizeClass != .regular, let stationId = panelStationId {
+                panelStationId = nil
+                sheetStation = SheetStation(id: stationId)
             }
         }
     }
 
     private var map: some View {
-        GoogleMapController(onStationSelected: isWide ? { stationId in
-            withAnimation { selectedStationId = stationId }
-        } : nil)
+        GoogleMapController(
+            onStationSelected: { stationId in
+                if isWide {
+                    withAnimation { panelStationId = stationId }
+                } else {
+                    sheetStation = SheetStation(id: stationId)
+                }
+            },
+            panelStationId: isWide ? panelStationId : nil
+        )
             .edgesIgnoringSafeArea(.all)
             .safeAreaInset(edge: .bottom) {
                 AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!)
             }
     }
 
-    private func stationPanel(stationId: Int) -> some View {
+    /// The same page in the panel and the sheet, closed by the cross at its
+    /// leading edge.
+    private func stationPage(stationId: Int, onClose: @escaping () -> Void) -> some View {
         NavigationView {
-            DetailsView(stationId: stationId) {
-                withAnimation { selectedStationId = nil }
-            }
-            // A fresh page per station, not the last one's data reused.
-            .id(stationId)
-            .navigationBarTitleDisplayMode(.inline)
-            .environmentObject(settings)
+            DetailsView(stationId: stationId, onClose: onClose)
+                // A fresh page per station, not the last one's data reused.
+                .id(stationId)
+                .navigationBarTitleDisplayMode(.inline)
+                .environmentObject(settings)
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
 
-    /// About two fifths of the window, so the map stays the larger half.
-    private static func panelWidth(for width: CGFloat) -> CGFloat {
-        min(max(width * 0.4, 320), 440)
+    /// On an unfolded foldable the divider sits on the fold, so the map and
+    /// the station each get a half to themselves. Otherwise about two fifths
+    /// of the window, so the map stays the larger part.
+    private func panelWidth(in frame: CGRect) -> CGFloat {
+        if let mapWidth = FoldLine.leadingWidth(foldX: foldLineX, in: frame) {
+            return frame.width - mapWidth
+        }
+        return min(max(frame.width * 0.4, 320), 440)
+    }
+
+    private struct SheetStation: Identifiable {
+        let id: Int
     }
 }
 

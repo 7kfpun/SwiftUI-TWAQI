@@ -32,6 +32,8 @@ struct ContentView: View {
         }
         .id(language)
         .environment(\.locale, language.locale())
+        // Outside the rebuilt tabs, so a language change doesn't lose it.
+        .readsFoldLine()
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.

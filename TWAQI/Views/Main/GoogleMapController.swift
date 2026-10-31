@@ -62,14 +62,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var pollutants: Pollutants = []
 
-    /// Set while the map shares a wide window with a station panel. A tapped
-    /// station goes to the panel instead of a sheet over the map.
+    /// A tapped station. `MainView` opens it in the panel beside the map or
+    /// in a sheet over it, whichever the window's width calls for.
     var onStationSelected: ((Int) -> Void)?
 
-    /// The app's shared store, handed down from SwiftUI, for the station sheet.
-    /// A fresh `SettingsStore()` there was a second instance outside the app's
-    /// environment. Always set by `GoogleMapController`.
-    var settings: SettingsStore?
+    /// Station open in the panel beside the map, if any. Kept in view when
+    /// the panel opens, or the window resizes, and takes width from the map.
+    var panelStationId: Int?
+    private var lastLayoutWidth: CGFloat = 0
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
@@ -120,10 +120,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
             TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
         }
-    }
-
-    @objc func dismissModal() {
-        self.dismiss(animated: true, completion: nil)
     }
 
     var isWindMode = false {
@@ -735,29 +731,32 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             "stationId": pollutant.stationId,
         ])
 
-        if let onStationSelected = onStationSelected {
-            onStationSelected(pollutant.stationId)
-            return true
-        }
-
-        let detailsView = DetailsView(stationId: pollutant.stationId)
-        // Outside the SwiftUI tree, so the Help language has to be passed in.
-        let detailsViewController = UIHostingController(
-            // The fallback only for a controller built outside SwiftUI; every
-            // store reads the same defaults, so it behaves the same.
-            rootView: detailsView
-                .environmentObject(settings ?? SettingsStore())
-                .environment(\.locale, .app)
-        )
-        detailsViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .done,
-            target: self,
-            action: #selector(dismissModal)
-        )
-        let detailsViewNavigationController = UINavigationController(rootViewController: detailsViewController)
-        self.present(detailsViewNavigationController, animated: true, completion: nil)
-
+        onStationSelected?(pollutant.stationId)
         return true
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard view.bounds.width != lastLayoutWidth else { return }
+        lastLayoutWidth = view.bounds.width
+        // After the map has taken its new size, so the projection matches.
+        DispatchQueue.main.async { [weak self] in
+            self?.revealPanelStation()
+        }
+    }
+
+    /// The map keeps its centre as the panel takes its width, so a station
+    /// tapped near the panel's side can end up behind it. Pans to it then.
+    private func revealPanelStation() {
+        guard let stationId = panelStationId,
+              let pollutant = countryPollutants.values.lazy.flatMap({ $0 })
+                .first(where: { $0.stationId == stationId }) else { return }
+
+        let coordinate = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)
+        // Clear of the edges, where the buttons and bars sit over the map.
+        let clear = mapView.bounds.insetBy(dx: 80, dy: 80)
+        guard !clear.contains(mapView.projection.point(for: coordinate)) else { return }
+        mapView.animate(toLocation: coordinate)
     }
 
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
@@ -796,18 +795,14 @@ struct GoogleMapController: UIViewControllerRepresentable {
     typealias UIViewControllerType = GoogleMapViewController
 
     var onStationSelected: ((Int) -> Void)?
-
-    /// The app's shared store, passed through to the station sheet.
-    @EnvironmentObject var settings: SettingsStore
+    var panelStationId: Int?
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<GoogleMapController>) -> GoogleMapViewController {
-        let controller = GoogleMapViewController()
-        controller.settings = settings
-        return controller
+        GoogleMapViewController()
     }
 
     func updateUIViewController(_ uiViewController: GoogleMapViewController, context: UIViewControllerRepresentableContext<GoogleMapController>) {
         uiViewController.onStationSelected = onStationSelected
-        uiViewController.settings = settings
+        uiViewController.panelStationId = panelStationId
     }
 }

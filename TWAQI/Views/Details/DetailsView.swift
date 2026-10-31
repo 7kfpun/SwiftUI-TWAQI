@@ -24,11 +24,18 @@ struct DetailsView: View {
     /// Needed to know whether the ad banner is taking space at the bottom.
     @EnvironmentObject var settings: SettingsStore
 
-    /// Set when shown in the panel beside the map, which has no back button.
+    /// Set when shown from the map, in the panel beside it or a sheet over
+    /// it, neither of which has a back button.
     private let onClose: (() -> Void)?
 
     /// Bumped when an on-device translation of the township or address lands.
     @State private var translationRevision = 0
+
+    /// Where the share button is in the window. In a wide window (iPad, an
+    /// unfolded iPhone Duo) the share sheet is a popover, and it should point
+    /// at the button wherever the page sits: the panel beside the map, or the
+    /// details column beside a list.
+    @State private var shareButtonFrame: CGRect = .zero
 
     var body: some View {
         // One `navigationBarItems` call per branch: a second call replaces the
@@ -53,10 +60,17 @@ struct DetailsView: View {
     /// Disabled until there is a reading: a card saying "—" is not worth
     /// sending anyone.
     private var shareButton: some View {
-        Button(action: { ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId) }) {
+        Button(action: {
+            ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId, from: shareButtonFrame)
+        }) {
             Image(systemName: "square.and.arrow.up")
         }
         .buttonStyle(PlainButtonStyle())
+        .background(GeometryReader { proxy in
+            Color.clear
+                .onAppear { shareButtonFrame = proxy.frame(in: .global) }
+                .onChange(of: proxy.frame(in: .global)) { shareButtonFrame = $0 }
+        })
         .disabled(currentAqi <= 0)
         .accessibilityLabel(Text("Share.share"))
     }
@@ -181,12 +195,12 @@ struct DetailsView: View {
             .frame(maxWidth: .infinity)
             // Clearance for the banner, reserved inside the scroll content.
             //
-            // This screen is presented two ways: pushed inside the tab's
-            // NavigationView, and modally from a map marker as a
-            // UIHostingController wrapped in a UINavigationController. The
-            // modal path did not apply the bottom `.safeAreaInset`, so the
-            // banner sat on top of the last section instead of below it.
-            // Reserving the space in the content works in both.
+            // This screen is shown several ways: pushed or in the details
+            // column from a list, and from a map marker in the panel beside
+            // the map or a sheet over it. The modal path once did not apply
+            // the bottom `.safeAreaInset`, so the banner sat on top of the
+            // last section instead of below it. Reserving the space in the
+            // content works in all of them.
             .padding(.bottom, settings.isPro ? 0 : AdBannerView.height)
         }
         .overlay(alignment: .bottom) {

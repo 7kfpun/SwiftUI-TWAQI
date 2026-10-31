@@ -22,7 +22,9 @@ struct HelpView: View {
     @AppStorage("developerMode") private var developerMode = false
 
     var body: some View {
-        NavigationView {
+        // Feedback, the widget and watch guides and the index pages open
+        // beside the list in a wide window, as stations do in the lists.
+        AdaptiveNavigation(placeholderIcon: "questionmark.circle", placeholderMessage: "Help.select_a_topic") {
             Form {
                 doNotDisturbSection
                 languageSection
@@ -45,7 +47,6 @@ struct HelpView: View {
                 AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
         .sheet(isPresented: $showingPro) {
             ProView()
         }
