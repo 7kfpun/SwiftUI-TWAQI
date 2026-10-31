@@ -197,11 +197,26 @@ jobs:
           '
           )"
           echo "Using iOS Simulator: ${device}"
+          # A small, high-signal subset: the suites guarding crash- and
+          # regression-prone code. The full TWAQITests suite runs locally
+          # (Mac mini / Orca) before merge — see README "Tests".
+          #   offline cache + networking: PollutantCacheTests, OfflineCacheRetentionTests
+          #   push dual-write, favourites ↔ alerts: PushServiceTests, FavouriteAlertsTests
+          #   station-cam history loader/cache: StationCamTests,
+          #     StationCamFrameCacheTests, StationCamHistoryCacheTests
+          #   SettingsStore persistence: AppLanguageTests
           xcodebuild test \
             -workspace TWAQI.xcworkspace \
             -scheme TWAQI \
             -destination "platform=iOS Simulator,name=${device},OS=latest" \
-            -only-testing:TWAQITests \
+            -only-testing:TWAQITests/PollutantCacheTests \
+            -only-testing:TWAQITests/OfflineCacheRetentionTests \
+            -only-testing:TWAQITests/PushServiceTests \
+            -only-testing:TWAQITests/FavouriteAlertsTests \
+            -only-testing:TWAQITests/StationCamTests \
+            -only-testing:TWAQITests/StationCamFrameCacheTests \
+            -only-testing:TWAQITests/StationCamHistoryCacheTests \
+            -only-testing:TWAQITests/AppLanguageTests \
             -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \

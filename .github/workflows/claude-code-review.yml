@@ -44,6 +44,44 @@ jobs:
             5. Networking/security: error handling, hardcoded secrets or keys, insecure HTTP.
             6. Localization (strings not hardcoded) and accessibility.
 
+            Also check, using `gh pr view` (title, body, linked ticket) and `gh pr diff`:
+            A. Ticket acceptance. The PR body names a Linear ticket (FOX-nn) and should
+               quote its scope or acceptance criteria. You cannot open Linear, so work
+               from what the body states. Compare the diff against it: flag anything in
+               scope that the diff does not do, and any product change outside it. If the
+               ticket says to remove a UI element (button, row, picker, section, string),
+               confirm it is gone from the views and its Localizable.strings keys, and
+               flag it if it is still there. If the body names no ticket or criteria, say so.
+            B. PR-body claims. Verify every behavioral claim in the body ("X now does Y",
+               "no behavior change", "removes Z", "tests cover W") against the diff. Flag
+               each claim the diff does not support, quoting it.
+            C. Blocking invariants. Mark these **BLOCKING** in the summary:
+               - Push settings: OneSignal tags stay the source of truth for delivery; the
+                 Directus mirror (`DirectusPushMirror`, `twaqi_push_devices` /
+                 `twaqi_push_subscriptions`) writes after OneSignal, never before or
+                 instead, and its failure never blocks or reverts the OneSignal write.
+                 Switching an alert off soft-archives the Directus row, never deletes it.
+               - Favourites ↔ alerts (`FavouriteAlerts`): a station with an alert on is
+                 always a favourite, and leaving Favourites turns its alerts off (OneSignal,
+                 then Directus). Alert state reads and writes the same OneSignal tag codes
+                 the station screen uses (English name in Taiwan, numeric id elsewhere).
+                 Reordering favourites must not touch alerts.
+               - Any change that makes the OneSignal and Directus copies disagree.
+
+            Domain notes for this app:
+            - Push today is OneSignal, dual-written to Directus on cms.wahthefox.com. An
+              FCM cutover exists on a separate branch and is not on master; do not assume it.
+            - Station cams: R2 behind `https://twaqi.app.wahthefox.com`. Latest frame
+              `stations/{siteId}.jpg`, hourly history `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
+              `siteId` is the MOENV image site id, not a TWAQI station id. History is a rolling
+              24 h window; a missing hour is a normal 404, not an error.
+            - Taiwan-local logic (cam hour keys, forecast dates, MOENV publish times,
+              "today") is Asia/Taipei (UTC+8, no DST), never the device time zone. Flag
+              `TimeZone.current` / `Calendar.current` there. Timestamps the API sends in
+              UTC (e.g. the map timeline) stay UTC.
+            - Offline caches (readings, cam frames, hourly frames) are purged after a week;
+              cache directories must stay inside the directories the purge scans.
+
             Be concise. Only flag real issues — no style nitpicks a linter would catch.
             Use inline comments (mcp__github_inline_comment__create_inline_comment) for specific lines,
             and `gh pr comment` for a short top-level summary.

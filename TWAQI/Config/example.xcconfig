@@ -18,11 +18,7 @@ ApiEnpointStations = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fstations.js
 ApiEnpointCurrentPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcurrent-pollutants.json?alt=media&token=1ba8f3fd-b0fb-44fe-a4a3-e0085a25ba1f
 ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fhistorical-pollutants.json?alt=media&token=63729049-76eb-4836-ab28-c5dd371769ed
 
-// Deprecated
-
 // Services
-AppCenterSecret =
-AppCenterAppSecret =
 BugsnagApiKey =
 GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
 GMSServicesApiKey = // Required
@@ -39,10 +35,9 @@ AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
 // In-App Purchase
 InAppPurchaseProductId = test
 
-// Links
+// Links (Help → "Interested to be our Business Partner?")
 PartnerUrlZh = http:\/\/example.com/
 PartnerUrlEn = http:\/\/example.com/
-BetaTesterUrl = http:\/\/example.com/
 
 // Directus (in-app feedback, and the 空品區 forecast read from twaqi_aqi_forecast).
 // The TWAQI App static token: create on twaqi_feedback, read on twaqi_aqi_forecast.

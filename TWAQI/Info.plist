@@ -22,10 +22,6 @@
 	<string>$(ApiEnpointHistoricalPollutants)</string>
 	<key>ApiEnpointStations</key>
 	<string>$(ApiEnpointStations)</string>
-	<key>AppCenterAppSecret</key>
-	<string>$(AppCenterAppSecret)</string>
-	<key>BetaTesterUrl</key>
-	<string>$(BetaTesterUrl)</string>
 	<key>BugsnagApiKey</key>
 	<string>$(BugsnagApiKey)</string>
 	<key>CFBundleDevelopmentRegion</key>

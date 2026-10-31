@@ -57,10 +57,6 @@
 "Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
 "Feedback.title" = "意見回饋";
-"Feedback.platform" = "手機平台";
-"Feedback.platform_ios" = "iOS";
-"Feedback.platform_android" = "Android";
-"Feedback.platform_other" = "其他";
 "Feedback.rating_header" = "您對應用程序的滿意程度如何？";
 "Feedback.rating_stars %lld" = "%lld 顆星";
 "Feedback.message_header" = "建議";
@@ -150,13 +146,11 @@
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "建議留在室內並減少體力消耗活動";
 "AirStatus.sensitive_group_guidance_hazardous" = "應留在室內並避免體力消耗活動";
 
-"Details.station" = "測站";
 "Details.last_updated" = "最後更新";
 "Details.address" = "地址";
 "Details.coordinates" = "座標";
 "Details.wind" = "風向風速";
 "Details.location" = "位置";
-"Details.conditions" = "即時狀況";
 "Details.no_data" = "無資料";
 "Details.select_a_station" = "選擇一個測站";
 
