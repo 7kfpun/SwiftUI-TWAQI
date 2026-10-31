@@ -42,7 +42,12 @@ struct CooperateView: View {
             TrackingManager.logEvent(eventName: "open_cooperate_form")
         }
         .alert("Cooperate.sent_title", isPresented: $showingSuccess) {
-            Button("OK") { dismiss() }
+            Button("OK") {
+                // In a wide window this is the column beside Help, which
+                // `dismiss` can't close: empty it so it can't be sent twice.
+                clear()
+                dismiss()
+            }
         } message: {
             Text("Cooperate.sent_message")
         }
@@ -181,6 +186,17 @@ struct CooperateView: View {
             && FeedbackSubmission.trimmed(message) != nil
     }
 
+    private func clear() {
+        cooperationType = nil
+        company = ""
+        name = ""
+        jobTitle = ""
+        email = ""
+        phone = ""
+        website = ""
+        message = ""
+    }
+
     private func send() {
         guard canSend, let cooperationType = cooperationType else { return }
         let submission = CooperateSubmission.make(
@@ -195,7 +211,8 @@ struct CooperateView: View {
         )
         isSending = true
 
-        Task {
+        // State is only touched on the main actor, before and after the await.
+        Task { @MainActor in
             do {
                 try await CooperateService.submit(submission)
                 TrackingManager.logEvent(

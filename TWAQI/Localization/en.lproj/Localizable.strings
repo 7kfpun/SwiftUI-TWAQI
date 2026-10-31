@@ -96,7 +96,7 @@
 "Cooperate.contact_footer" = "We'll get back to you by email.";
 "Cooperate.message_header" = "About the partnership";
 "Cooperate.message_placeholder" = "Tell us your idea, and any timeline or budget.";
-"Cooperate.privacy_footer" = "What you enter is only used to reply to this enquiry. The app version, device model, OS version and language are sent with it.";
+"Cooperate.privacy_footer" = "We use what you enter only to reply to this enquiry. The app version, device model, OS version, language and time zone are sent with it.";
 "Cooperate.sent_title" = "Thank you!";
 "Cooperate.sent_message" = "We've received your enquiry and will be in touch soon.";
 "Cooperate.error_title" = "Couldn't send enquiry";

@@ -86,7 +86,8 @@ struct CooperateSubmission: Encodable, Equatable {
             deviceModel: FeedbackSubmission.currentDeviceModel,
             osVersion: UIDevice.current.systemVersion,
             locale: Locale.current.identifier,
-            metaJson: FeedbackSubmission.clientMeta(bundle: bundle)
+            // No install id: an enquiry carries contact details already.
+            metaJson: FeedbackSubmission.clientMeta(bundle: bundle, anonymousId: false)
         )
     }
 }

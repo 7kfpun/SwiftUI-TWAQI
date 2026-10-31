@@ -100,7 +100,7 @@
 "Cooperate.contact_footer" = "我們會以電子郵件與您聯繫。";
 "Cooperate.message_header" = "合作內容";
 "Cooperate.message_placeholder" = "請簡述合作構想，以及預計時程或預算。";
-"Cooperate.privacy_footer" = "您填寫的資料僅用於回覆此次合作洽詢。App 版本、裝置型號、系統版本與語言會一併送出。";
+"Cooperate.privacy_footer" = "您填寫的資料僅用於回覆此次合作洽詢。App 版本、裝置型號、系統版本、語言與時區會一併送出。";
 "Cooperate.sent_title" = "謝謝您！";
 "Cooperate.sent_message" = "已收到您的合作洽詢，我們會盡快與您聯繫。";
 "Cooperate.error_title" = "無法送出合作洽詢";

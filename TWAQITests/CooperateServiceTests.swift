@@ -55,6 +55,9 @@ final class CooperateServiceTests: XCTestCase {
         XCTAssertFalse(made.locale?.isEmpty ?? true)
         XCTAssertEqual(made.metaJson?["app_platform"], "ios")
         XCTAssertNotNil(made.metaJson?["bundle_id"])
+        XCTAssertNotNil(made.metaJson?["time_zone"])
+        // Not needed for a business enquiry, and not in the privacy footer.
+        XCTAssertNil(made.metaJson?["anonymous_id"])
     }
 
     func testEncodesDirectusFieldNames() throws {

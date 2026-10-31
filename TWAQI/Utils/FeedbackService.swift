@@ -88,9 +88,9 @@ struct FeedbackSubmission: Encodable, Equatable {
         )
     }
 
-    /// The `meta_json` details sent with every form the app posts to
-    /// Directus (feedback and cooperate).
-    static func clientMeta(bundle: Bundle = .main) -> [String: String] {
+    /// The `meta_json` details sent with the forms the app posts to Directus
+    /// (feedback and cooperate). `anonymousId` adds the per-vendor install id.
+    static func clientMeta(bundle: Bundle = .main, anonymousId: Bool = true) -> [String: String] {
         var meta: [String: String] = [:]
         meta["bundle_id"] = bundle.bundleIdentifier
         meta["build"] = bundle.infoDictionary?["CFBundleVersion"] as? String
@@ -99,8 +99,10 @@ struct FeedbackSubmission: Encodable, Equatable {
         meta["app_language"] = bundle.preferredLocalizations.first
         meta["preferred_languages"] = Locale.preferredLanguages.prefix(3).joined(separator: ",")
         meta["time_zone"] = TimeZone.current.identifier
-        // Per-install and per-vendor; resets when every app from us is removed.
-        meta["anonymous_id"] = UIDevice.current.identifierForVendor?.uuidString
+        if anonymousId {
+            // Per-install and per-vendor; resets when every app from us is removed.
+            meta["anonymous_id"] = UIDevice.current.identifierForVendor?.uuidString
+        }
         return meta
     }
 
