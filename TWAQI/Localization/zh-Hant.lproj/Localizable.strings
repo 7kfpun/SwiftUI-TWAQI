@@ -177,6 +177,8 @@
 "Details.high" = "最高";
 "Details.average" = "平均";
 "Details.no_trend_data" = "資料還不夠，無法顯示趨勢";
+"Details.not_reporting" = "目前沒有即時資料";
+"Details.not_reporting_message" = "這個測站目前沒有回報資料，可能正在維修或已停止運作。附近的測站可在地圖上查看。";
 "Details.pollutants" = "污染物";
 "Details.health_advice" = "健康建議";
 "Details.notifications" = "通知";

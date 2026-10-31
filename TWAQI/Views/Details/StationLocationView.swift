@@ -14,26 +14,36 @@ import SwiftUI
 /// everything that changes hour to hour, rather than sharing a heading with the
 /// live wind measurement as it used to.
 struct StationLocationView: View {
-    var pollutant: Pollutant
+    var address: String?
+    var coordinateText: String
+
+    init(address: String?, coordinateText: String) {
+        self.address = address
+        self.coordinateText = coordinateText
+    }
+
+    init(pollutant: Pollutant) {
+        self.init(address: pollutant.address, coordinateText: pollutant.coordinateText)
+    }
 
     /// Nothing to show for a station the API gave no address or coordinates.
     var hasContent: Bool {
-        pollutant.address != nil || !pollutant.coordinateText.isEmpty
+        address != nil || !coordinateText.isEmpty
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(text: "Details.location")
 
-            if let address = pollutant.address {
+            if let address = address {
                 InfoRow(icon: "mappin.circle", title: "Details.address", value: address)
             }
 
-            if !pollutant.coordinateText.isEmpty {
+            if !coordinateText.isEmpty {
                 InfoRow(
                     icon: "location",
                     title: "Details.coordinates",
-                    value: pollutant.coordinateText
+                    value: coordinateText
                 )
             }
         }

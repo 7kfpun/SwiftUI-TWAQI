@@ -32,6 +32,13 @@ class DetailsViewModel: ObservableObject {
     /// Both requests failed and there was no saved reading to show instead.
     @Published var loadFailed = false
 
+    /// The API answered, and has no current reading for this station. Search
+    /// lists every station `getStations` knows (~150), but only the ones still
+    /// reporting (~84, the map's) have one; the rest are retired or offline
+    /// sites whose history can be years old. Not an outage — `loadFailed` and
+    /// `isShowingLastGood` cover those.
+    @Published var isNotReporting = false
+
     /// Answers from the latest `getData`, so `loadFailed` is decided once
     /// both requests have answered. `onAppear` can fire again while the first
     /// pair is still on the wire; answers from an older pair are not counted.
@@ -84,12 +91,19 @@ class DetailsViewModel: ObservableObject {
         APIManager.getCurrentPollutantsByStationId(stationId: "\(self.stationId)") { result in
             switch result {
             case .success(let pollutants):
-                // An empty answer keeps a saved reading rather than blanking it.
+                // An empty answer keeps a saved reading rather than blanking
+                // it, but is still the API saying it has no current reading:
+                // the page says so, and the saved one shows its own age.
                 if let pollutant = pollutants.first {
                     self.pollutant = pollutant
                     self.isShowingLastGood = false
+                    self.isNotReporting = false
                     self.findCam(name: pollutant.nameLocal, lat: pollutant.lat, lon: pollutant.lon)
                     self.findForecast(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, title: pollutant.displayArea)
+                } else {
+                    self.isNotReporting = true
+                    // Online, so whatever is on screen is not an offline fallback.
+                    self.isShowingLastGood = false
                 }
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
@@ -153,6 +167,17 @@ class DetailsViewModel: ObservableObject {
                 title: title
             )
         }
+    }
+
+    /// The newest history point is from the last day, so the 24-hour chart is
+    /// still about today. A station that stopped reporting long ago still
+    /// returns its last 24 points, which would read as a current trend.
+    var hasRecentHistory: Bool {
+        guard
+            let publishTime = historicalPollutants.last?.publishTime,
+            let date = Date.fromApi(publishTime)
+        else { return false }
+        return Date().timeIntervalSince(date) < 24 * 60 * 60
     }
 
     /// Most recent reading, preferring live current conditions over history.

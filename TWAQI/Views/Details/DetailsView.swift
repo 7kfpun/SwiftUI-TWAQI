@@ -63,7 +63,7 @@ struct DetailsView: View {
 
         return ShareCardView(
             title: stationTitle,
-            locality: pollutant?.displayLocality,
+            locality: pollutant?.displayLocality ?? viewModel.station?.displayLocality,
             aqi: currentAqi,
             pollutant: pollutant,
             publishTime: viewModel.latestPublishTime
@@ -113,16 +113,27 @@ struct DetailsView: View {
 
                 Separator().frame(height: 8)
 
+                // Where the readings go: rather than a page of sections that
+                // silently aren't there, or a saved reading passed off as live.
+                if viewModel.isNotReporting {
+                    NotReportingView()
+                        .padding(.vertical, 16)
+                }
+
                 if let pollutant = viewModel.pollutant {
                     PollutantGridView(pollutant: pollutant, selected: $selectedPollutant)
                         .padding(.top, 16)
                         .padding(.bottom, 4)
                 }
 
-                DetailsHistoryView(
-                    historicalPollutants: viewModel.historicalPollutants,
-                    airIndexType: selectedPollutant
-                )
+                // A retired station still returns its last 24 points, which
+                // would read as today's trend.
+                if !viewModel.isNotReporting || viewModel.hasRecentHistory {
+                    DetailsHistoryView(
+                        historicalPollutants: viewModel.historicalPollutants,
+                        airIndexType: selectedPollutant
+                    )
+                }
 
                 Separator().frame(height: 8)
 
@@ -149,11 +160,8 @@ struct DetailsView: View {
 
                 // Fixed metadata last: it never changes, so it has no claim on
                 // the space above the fold.
-                if let pollutant = viewModel.pollutant {
-                    let location = StationLocationView(pollutant: pollutant)
-                    if location.hasContent {
-                        location.padding(.vertical, 16)
-                    }
+                if let location = location, location.hasContent {
+                    location.padding(.vertical, 16)
                 }
             }
             // A readable measure. Left unbounded, every row stretched the full
@@ -189,9 +197,21 @@ struct DetailsView: View {
         return Color(status.getColor())
     }
 
-    /// Live reading when available, else the newest history point.
+    /// Live (or saved, at most a week old and timestamped) reading when
+    /// available, else the newest history point — unless the station has
+    /// stopped reporting, when that point may be years old and must not be
+    /// shown, scored or shared as the air now.
     private var currentAqi: Double {
-        viewModel.pollutant?.aqi ?? viewModel.historicalPollutants.last?.aqi ?? 0
+        if let pollutant = viewModel.pollutant { return pollutant.aqi }
+        if viewModel.isNotReporting, !viewModel.hasRecentHistory { return 0 }
+        return viewModel.historicalPollutants.last?.aqi ?? 0
+    }
+
+    /// From the live reading, else the station record — fixed metadata, so a
+    /// station with no reading still says where it is.
+    private var location: StationLocationView? {
+        if let pollutant = viewModel.pollutant { return StationLocationView(pollutant: pollutant) }
+        return viewModel.station.map { StationLocationView(station: $0) }
     }
 
     private var stationTitle: String {
@@ -202,13 +222,14 @@ struct DetailsView: View {
 
     private var header: some View {
         let pollutant = viewModel.pollutant
+        let station = viewModel.station
 
         return StationHeaderView(
             title: stationTitle,
-            locality: pollutant?.displayLocality,
-            area: pollutant?.displayArea,
-            stationType: pollutant?.stationType ?? .unknown,
-            aqi: pollutant?.aqi ?? viewModel.historicalPollutants.last?.aqi ?? 0,
+            locality: pollutant?.displayLocality ?? station?.displayLocality,
+            area: pollutant?.displayArea ?? station?.displayArea,
+            stationType: pollutant?.stationType ?? station?.stationType ?? .unknown,
+            aqi: currentAqi,
             publishTime: viewModel.latestPublishTime
         )
     }
@@ -220,6 +241,44 @@ struct DetailsView: View {
 
     private func getData() {
         self.viewModel.getData()
+    }
+}
+
+extension StationLocationView {
+    /// For a station with no current reading: the station record carries the
+    /// same address and position. Here rather than beside `init(pollutant:)`
+    /// because visionOS shares that file but not the `Station` model.
+    init(station: Station) {
+        self.init(
+            address: station.address,
+            coordinateText: String(format: "%.6f, %.6f", station.lat, station.lon)
+        )
+    }
+}
+
+/// The station is listed but has no current reading: retired, or offline for
+/// maintenance. Says so, instead of leaving the readings sections blank.
+private struct NotReportingView: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                .font(.system(size: 32, weight: .thin))
+                .foregroundColor(.secondary)
+
+            Text("Details.not_reporting")
+                .font(.headline)
+                .fontWeight(.regular)
+
+            Text("Details.not_reporting_message")
+                .font(.callout)
+                .fontWeight(.light)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 32)
+        .accessibilityElement(children: .combine)
     }
 }
 
