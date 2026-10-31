@@ -32,6 +32,9 @@
 "Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
 "Help.start_time" = "Start Time";
 "Help.end_time" = "End Time";
+"Help.language" = "Language";
+"Help.language_system" = "System default";
+"Help.language_footer" = "Addresses and forecast text from the government are in Chinese. In other languages they are translated on this device, once that language is downloaded for Translate in Settings.";
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";

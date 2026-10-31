@@ -187,11 +187,13 @@ private struct StationCamFrameView: View {
         return formatter
     }()
 
-    private static let relativeFormatter: RelativeDateTimeFormatter = {
+    /// Built per use so it follows a language changed under Help.
+    private static var relativeFormatter: RelativeDateTimeFormatter {
         let formatter = RelativeDateTimeFormatter()
+        formatter.locale = .app
         formatter.unitsStyle = .short
         return formatter
-    }()
+    }
 }
 
 /// A fixed 16:9 box, so the layout does not jump when the frame arrives.

@@ -16,6 +16,9 @@ import SwiftUI
 struct StationLocationView: View {
     var address: String?
     var coordinateText: String
+    /// The address as it should read — translated on device outside Chinese.
+    /// Nil shows `address`, the API's Chinese.
+    var displayAddress: String?
 
     init(address: String?, coordinateText: String) {
         self.address = address
@@ -35,7 +38,7 @@ struct StationLocationView: View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(text: "Details.location")
 
-            if let address = address {
+            if let address = displayAddress ?? address {
                 InfoRow(icon: "mappin.circle", title: "Details.address", value: address)
             }
 

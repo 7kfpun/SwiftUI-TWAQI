@@ -23,6 +23,9 @@ struct AreaForecastView: View {
     @State private var truncated = false
     /// Bumped when a translation of the forecast text arrives.
     @State private var translationRevision = 0
+    /// Width the forecast text lays out at, to guess how much of it the
+    /// collapsed lines show. Zero until measured.
+    @State private var textWidth: CGFloat = 0
 
     private static let cornerRadius: CGFloat = 12
 
@@ -98,11 +101,13 @@ struct AreaForecastView: View {
 
     /// MOENV's forecast text runs to a paragraph per region; show the start
     /// and let the reader open the rest. Outside Chinese it is shown in the
-    /// reader's language once on-device translation has it, else as written.
+    /// reader's language once on-device translation has it, else as written:
+    /// the sentences the collapsed lines show first, the rest on expanding.
     private func contentText(_ content: String) -> some View {
         // Read so a finished translation redraws this text.
         _ = translationRevision
-        let shown = ForecastTranslation.display(content)
+        let segments = OnDeviceTranslation.segments(content)
+        let shown = OnDeviceTranslation.display(segments: segments, target: OnDeviceTranslation.target)
 
         return VStack(alignment: .leading, spacing: 4) {
             Text(shown)
@@ -129,10 +134,21 @@ struct AreaForecastView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(truncated ? .isButton : [])
-        .translatesForecast(content, revision: $translationRevision)
+        .translatesOnDevice(segmentsToTranslate(segments), revision: $translationRevision)
     }
 
     private static let collapsedLines = 3
+
+    /// Everything once expanded; before that, about as much of the original
+    /// as the collapsed lines hold, and nothing until the width is known.
+    private func segmentsToTranslate(_ segments: [String]) -> [String] {
+        if expanded { return segments }
+        guard textWidth > 0 else { return [] }
+        let pointSize = UIFont.preferredFont(forTextStyle: .footnote).pointSize
+        // A CJK character is about one point size wide.
+        let perLine = max(Int(textWidth / pointSize), 1)
+        return OnDeviceTranslation.leadingSegments(segments, characters: perLine * Self.collapsedLines)
+    }
 
     /// Lays the text out at full length and at three lines, invisibly, and
     /// records whether the two differ.
@@ -144,6 +160,8 @@ struct AreaForecastView: View {
             }
             .frame(width: container.size.width, alignment: .topLeading)
             .hidden()
+            .onAppear { textWidth = container.size.width }
+            .onChange(of: container.size.width) { textWidth = $0 }
         }
         .onPreferenceChange(TextHeightsKey.self) { heights in
             guard heights.count == 2 else { return }
@@ -204,26 +222,26 @@ struct AreaForecastView: View {
 
     private static func formatter(_ template: String) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = Locale.isChinese ? Locale(identifier: "zh_Hant_TW") : Locale.current
+        formatter.locale = Locale.isChinese ? Locale(identifier: "zh_Hant_TW") : Locale.app
         formatter.timeZone = AqiForecastDates.taipei
         formatter.setLocalizedDateFormatFromTemplate(template)
         return formatter
     }
 
-    private static let weekdayFormatter = formatter("EEEE")
-    private static let dateFormatter = formatter("MdEEE")
-    private static let dateTimeFormatter: DateFormatter = {
+    // Built per use (a few rows) so they follow a language changed under Help.
+    private static var weekdayFormatter: DateFormatter { formatter("EEEE") }
+    private static var dateFormatter: DateFormatter { formatter("MdEEE") }
+    private static var dateTimeFormatter: DateFormatter { fixedFormatter("M/d HH:mm") }
+    private static var timeFormatter: DateFormatter { fixedFormatter("HH:mm") }
+
+    /// Numeric layouts, but still in the app's locale (digits, calendar).
+    private static func fixedFormatter(_ format: String) -> DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = .app
         formatter.timeZone = AqiForecastDates.taipei
-        formatter.dateFormat = "M/d HH:mm"
+        formatter.dateFormat = format
         return formatter
-    }()
-    private static let timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.timeZone = AqiForecastDates.taipei
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
+    }
 }
 
 private struct TextHeightsKey: PreferenceKey {

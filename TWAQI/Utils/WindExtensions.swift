@@ -104,6 +104,7 @@ extension String {
         // device's calendar preference, which rendered this reading's timestamp
         // as 佛曆 2569 for anyone on the Buddhist calendar.
         formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = .app
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -113,6 +114,7 @@ extension String {
     var asRelativeAge: String {
         guard let date = Date.fromApi(self) else { return "" }
         let formatter = RelativeDateTimeFormatter()
+        formatter.locale = .app
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
     }

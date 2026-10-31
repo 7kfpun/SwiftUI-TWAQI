@@ -9,12 +9,29 @@
 import SwiftUI
 
 struct ContentView: View {
+    /// The language chosen under Help. Watched here so a change applies at
+    /// once: SwiftUI `Text("Key")` follows `\.locale`, and rebuilding the
+    /// tabs refreshes text produced in code (`.localized`, the UIKit map
+    /// overlay, formatters, `Locale.isChinese` names).
+    @AppStorage(AppLanguage.defaultsKey) private var language: AppLanguage = .system
+
+    /// Kept outside the rebuilt tabs so changing language stays on Help.
+    @State private var selectedTab: AppTab = .main
+
+    enum AppTab: Hashable {
+        case main, favourites, detailsList, help
+    }
+
     var body: some View {
-        if #available(iOS 26.0, *) {
-            glassTabs
-        } else {
-            classicTabs
+        Group {
+            if #available(iOS 26.0, *) {
+                glassTabs
+            } else {
+                classicTabs
+            }
         }
+        .id(language)
+        .environment(\.locale, language.locale())
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.
@@ -23,20 +40,20 @@ struct ContentView: View {
     /// would pin it apart at the end of the bar after Help.
     @available(iOS 26.0, *)
     private var glassTabs: some View {
-        TabView {
-            Tab("Tabbar.main", systemImage: "map.fill") {
+        TabView(selection: $selectedTab) {
+            Tab("Tabbar.main", systemImage: "map.fill", value: AppTab.main) {
                 MainView()
             }
 
-            Tab("Tabbar.favourites", systemImage: "heart") {
+            Tab("Tabbar.favourites", systemImage: "heart", value: AppTab.favourites) {
                 FavouriteListView()
             }
 
-            Tab("Tabbar.details_list", systemImage: "list.bullet") {
+            Tab("Tabbar.details_list", systemImage: "list.bullet", value: AppTab.detailsList) {
                 DetailsListView()
             }
 
-            Tab("Tabbar.help", systemImage: "questionmark.circle") {
+            Tab("Tabbar.help", systemImage: "questionmark.circle", value: AppTab.help) {
                 HelpView(viewModel: .init())
             }
         }
@@ -45,30 +62,34 @@ struct ContentView: View {
     }
 
     private var classicTabs: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             MainView()
                 .tabItem {
                     Image(systemName: "map.fill")
                     Text("Tabbar.main")
             }
+            .tag(AppTab.main)
 
             FavouriteListView()
                 .tabItem {
                     Image(systemName: "heart")
                     Text("Tabbar.favourites")
             }
+            .tag(AppTab.favourites)
 
             DetailsListView()
                 .tabItem {
                     Image(systemName: "list.bullet")
                     Text("Tabbar.details_list")
             }
+            .tag(AppTab.detailsList)
 
             HelpView(viewModel: .init())
                 .tabItem {
                     Image(systemName: "questionmark.circle")
                     Text("Tabbar.help")
             }
+            .tag(AppTab.help)
         }
         .font(.headline)
         .accentColor(Color(0x5AC8FA))

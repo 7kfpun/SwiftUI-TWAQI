@@ -98,18 +98,18 @@ final class AqiForecastTests: XCTestCase {
     }
 
     func testForecastTextTranslationFallsBackToOriginal() {
-        XCTAssertTrue(ForecastTranslation.needsTranslation("今日北部普通。"))
-        XCTAssertFalse(ForecastTranslation.needsTranslation("smoke test FOX-8"))
+        XCTAssertTrue(OnDeviceTranslation.needsTranslation("今日北部普通。"))
+        XCTAssertFalse(OnDeviceTranslation.needsTranslation("smoke test FOX-8"))
 
         let text = "明日北部普通。\(UUID().uuidString)"
         // Nothing translated yet: the original, whatever the language.
-        XCTAssertEqual(ForecastTranslation.display(text), text)
+        XCTAssertEqual(OnDeviceTranslation.display(text), text)
         // English-only text is never swapped for a translation.
-        XCTAssertEqual(ForecastTranslation.display("smoke test"), "smoke test")
+        XCTAssertEqual(OnDeviceTranslation.display("smoke test"), "smoke test")
 
-        ForecastTranslation.store("Tomorrow: north moderate.", for: text, target: "en_US")
-        XCTAssertEqual(ForecastTranslation.cached(text, target: "en_US"), "Tomorrow: north moderate.")
-        XCTAssertNil(ForecastTranslation.cached(text, target: "ja_JP"))
+        OnDeviceTranslation.store("Tomorrow: north moderate.", for: text, target: "en")
+        XCTAssertEqual(OnDeviceTranslation.cached(text, target: "en"), "Tomorrow: north moderate.")
+        XCTAssertNil(OnDeviceTranslation.cached(text, target: "ja_JP"))
     }
 
     func testRequestReadsTodayOnwardsWithBearerToken() throws {
