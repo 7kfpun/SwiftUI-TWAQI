@@ -43,7 +43,7 @@ stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg      e.g. stations/001/2026-10-30/22.jpg
 - The first frame a sync sees in each hour is filed: the `:00` frame whenever a sync catches it, otherwise the earliest after it (a missed sync, or a site that skipped `:00`). Later frames in that hour are not. The manifest's per-site `hourKey` records the hour last filed, so nothing has to `HEAD` or list R2.
 - An hour's object never changes once written (`Cache-Control: public, max-age=86400`); its `customMetadata.time` is the actual capture time.
 - The app builds the URL from the site id and the hour. An hour with no frame (cam down, or not filed yet) is a plain 404.
-- **Retention: 7 days** (`HISTORY_DAYS` in `src/history.ts`). As each hour is filed, the same site's object for that hour 7 days earlier is deleted, so R2 holds a rolling week without listing the bucket. Frames left behind by a site that stopped reporting, or by a failed delete, are not swept; an R2 lifecycle rule on the bucket would catch those (follow-up).
+- **Retention: rolling 24 hours** (`HISTORY_DAYS = 1` in `src/history.ts`). As each hour is filed, the same site's object for that hour the day before is deleted, so R2 holds the last 24 hourly slots per site without listing the bucket. (The app keeps its own offline copies for up to a week.) Frames left behind by a site that stopped reporting, or by a failed delete, are not swept; an R2 lifecycle rule on the bucket would catch those (follow-up).
 
 Logic tests (`node --test`, no extra dependencies, Node 23.6+):
 
