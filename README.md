@@ -61,6 +61,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | Station webcams | R2 bucket `twaqi-station-cams` behind `https://twaqi.app.wahthefox.com`, synced every 10 min by `workers/twaqi-workers` |
 | Push alerts | OneSignal, with settings dual-written to Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
+| Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
 ### Station webcams
 
