@@ -229,6 +229,37 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(plan.archive, [1, 2])
     }
 
+    // MARK: - Device sync gate
+
+    func testDeviceWithNoPendingAlertsStillSyncs() {
+        // An FCM token refresh arrives with no station changes pending.
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: true, pending: [:]))
+        // No row yet: only an alert being switched on makes one.
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: [:]))
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": .off]))
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": StationAlerts(above: 120)]))
+    }
+
+    func testNewFcmTokenAloneForcesUpsert() {
+        let now = Date()
+        let recent = now.addingTimeInterval(-60)
+        func current(force: Bool = false, token: String = "apns", fcm: String? = "fcm-1", lastSync: Date? = recent) -> Bool {
+            DirectusPushMirror.isDeviceCurrent(
+                force: force, syncedToken: "apns", token: token,
+                syncedFcmToken: "fcm-1", fcmToken: fcm, lastSync: lastSync, now: now
+            )
+        }
+        XCTAssertTrue(current())
+        // Same APNs token, refreshed recently, but FCM rotated: write it.
+        XCTAssertFalse(current(fcm: "fcm-2"))
+        // Messaging hasn't issued a token yet: not a change.
+        XCTAssertTrue(current(fcm: nil))
+        XCTAssertFalse(current(token: "apns-new"))
+        XCTAssertFalse(current(force: true))
+        XCTAssertFalse(current(lastSync: nil))
+        XCTAssertFalse(current(lastSync: now.addingTimeInterval(-DirectusPushMirror.deviceRefreshInterval - 1)))
+    }
+
     // MARK: - Config
 
     func testConfigPrefersPushTokenThenFeedbackToken() {

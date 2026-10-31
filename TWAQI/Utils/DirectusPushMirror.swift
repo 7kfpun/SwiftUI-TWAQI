@@ -28,7 +28,7 @@ final class DirectusPushMirror: ObservableObject {
     static let shared = DirectusPushMirror()
 
     /// A launch refreshes `last_seen_at` at most this often.
-    static let deviceRefreshInterval: TimeInterval = 6 * 60 * 60
+    nonisolated static let deviceRefreshInterval: TimeInterval = 6 * 60 * 60
     /// Sliders send a value per step; write once they settle.
     static let debounce: UInt64 = 800_000_000
 
@@ -212,7 +212,7 @@ final class DirectusPushMirror: ObservableObject {
         save(synced, Keys.synced)
 
         let pending = wanted.filter { synced[$0.key] != $0.value }
-        guard hasDevice || pending.values.contains(where: { !$0.isOff }) else { return }
+        guard Self.needsDevice(hasDevice: hasDevice, pending: pending) else { return }
 
         let device: Int
         do {
@@ -298,13 +298,15 @@ final class DirectusPushMirror: ObservableObject {
     private func deviceId(token: String, fcmToken: String?, config: PushService.Config) async throws -> Int {
         let knownId = defaults.object(forKey: Keys.deviceId) != nil ? defaults.integer(forKey: Keys.deviceId) : nil
         guard let stableId = PushDeviceIdentity.id() else { throw PushError.noDeviceId }
-        let lastSync = defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date
         if let knownId = knownId,
-           !forceDevice,
-           defaults.string(forKey: Keys.deviceToken) == token,
-           fcmToken == nil || defaults.string(forKey: Keys.fcmToken) == fcmToken,
-           let lastSync = lastSync,
-           Date().timeIntervalSince(lastSync) < Self.deviceRefreshInterval {
+           Self.isDeviceCurrent(
+               force: forceDevice,
+               syncedToken: defaults.string(forKey: Keys.deviceToken),
+               token: token,
+               syncedFcmToken: defaults.string(forKey: Keys.fcmToken),
+               fcmToken: fcmToken,
+               lastSync: defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date
+           ) {
             return knownId
         }
 
@@ -328,6 +330,31 @@ final class DirectusPushMirror: ObservableObject {
         }
         defaults.set(Date(), forKey: Keys.lastDeviceSyncAt)
         return id
+    }
+
+    // MARK: - Decisions
+
+    /// Whether a flush goes on to the device row: always once one exists (so
+    /// a token change alone is written), otherwise only for an alert to turn on.
+    nonisolated static func needsDevice(hasDevice: Bool, pending: [String: StationAlerts]) -> Bool {
+        hasDevice || pending.values.contains { !$0.isOff }
+    }
+
+    /// Whether the row already holds these tokens and was refreshed recently
+    /// enough to skip the upsert. A new APNs or FCM token is always written;
+    /// a missing FCM token (Messaging hasn't issued one) is not a change.
+    nonisolated static func isDeviceCurrent(
+        force: Bool,
+        syncedToken: String?,
+        token: String,
+        syncedFcmToken: String?,
+        fcmToken: String?,
+        lastSync: Date?,
+        now: Date = Date()
+    ) -> Bool {
+        guard !force, syncedToken == token, let lastSync = lastSync else { return false }
+        if let fcmToken = fcmToken, fcmToken != syncedFcmToken { return false }
+        return now.timeIntervalSince(lastSync) < deviceRefreshInterval
     }
 
     // MARK: - Helpers
