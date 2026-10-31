@@ -18,39 +18,95 @@ struct SettingsRow: View {
     let TOO_SMALL_POLLUTION = 110.0
     let TOO_LARGE_CLEANLINESS = 30.0
 
+    private static let cornerRadius: CGFloat = 12
+
     var body: some View {
-        // The station name used to head this block, repeating the page header a
-        // scroll above it. The section is identified by what it does instead.
-        VStack(alignment: .leading, spacing: 20) {
-            SectionLabel(text: "Details.notifications")
+        // A card near the top of the page rather than a labelled block at the
+        // bottom (FOX-25): it heads itself with what it does and whether it is
+        // on, so it reads as an invitation when off and a status when on. The
+        // station name used to head this block, repeating the page header; it
+        // is still left out.
+        VStack(alignment: .leading, spacing: 0) {
+            summary
+                .padding(12)
 
-            threshold(
-                title: "Settings.notice_me_when_aqi_is_above",
-                isOn: $viewModel.stationSetting.isPollutionNotificationEnabled,
-                value: $viewModel.stationSetting.pollutionTherhold,
-                warning: viewModel.stationSetting.pollutionTherhold < TOO_SMALL_POLLUTION
-                    ? "Settings.the_value_is_too_small_you_would_get_lots_of_notifications"
-                    : nil
-            )
+            Divider()
 
-            threshold(
-                title: "Settings.notice_me_when_aqi_is_below",
-                isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled,
-                value: $viewModel.stationSetting.cleanlinessTherhold,
-                warning: viewModel.stationSetting.cleanlinessTherhold > TOO_LARGE_CLEANLINESS
-                    ? "Settings.the_value_is_too_large_you_would_get_lots_of_notifications"
-                    : nil
-            )
+            VStack(alignment: .leading, spacing: 16) {
+                threshold(
+                    title: "Settings.notice_me_when_aqi_is_above",
+                    isOn: $viewModel.stationSetting.isPollutionNotificationEnabled,
+                    value: $viewModel.stationSetting.pollutionTherhold,
+                    warning: viewModel.stationSetting.pollutionTherhold < TOO_SMALL_POLLUTION
+                        ? "Settings.the_value_is_too_small_you_would_get_lots_of_notifications"
+                        : nil
+                )
 
-            if viewModel.isDisabled {
-                Text("Settings.you_can_only_enable_at_most_for_two_stations")
-                    .font(.caption)
+                threshold(
+                    title: "Settings.notice_me_when_aqi_is_below",
+                    isOn: $viewModel.stationSetting.isCleanlinessNotificationEnabled,
+                    value: $viewModel.stationSetting.cleanlinessTherhold,
+                    warning: viewModel.stationSetting.cleanlinessTherhold > TOO_LARGE_CLEANLINESS
+                        ? "Settings.the_value_is_too_large_you_would_get_lots_of_notifications"
+                        : nil
+                )
+
+                if viewModel.isDisabled {
+                    Text("Settings.you_can_only_enable_at_most_for_two_stations")
+                        .font(.caption)
+                        .fontWeight(.light)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(12)
+        }
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous))
+        .padding(.horizontal)
+    }
+
+    /// Whether either switch below is on. Read from the row's own setting, so
+    /// it follows the switches, and a clear from Favourites, with no plumbing
+    /// of its own.
+    private var isOn: Bool {
+        viewModel.stationSetting.isPollutionNotificationEnabled
+            || viewModel.stationSetting.isCleanlinessNotificationEnabled
+    }
+
+    /// Bell, what alerts do, and whether they are on for this station.
+    private var summary: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: isOn ? "bell.badge.fill" : "bell")
+                .font(.title3)
+                .foregroundColor(.accentColor)
+                .frame(width: 28)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Details.alerts_title")
+                    .font(.headline)
+
+                Text("Details.alerts_pitch")
+                    .font(.footnote)
                     .fontWeight(.light)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            Spacer(minLength: 0)
+
+            Text(isOn ? "Details.alerts_on" : "Details.alerts_off")
+                .font(.caption.weight(.medium))
+                .foregroundColor(isOn ? .white : .secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule().fill(isOn ? Color.accentColor : Color(.tertiarySystemFill))
+                )
         }
-        .padding(.horizontal)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 
     /// One alert threshold: a switch, and — only once it's on — the value and
@@ -133,6 +189,6 @@ struct SettingsRow_Previews: PreviewProvider {
                 nameLocal: "松山"
             ))
         }
-        .previewLayout(.fixed(width: 400, height: 250))
+        .previewLayout(.sizeThatFits)
     }
 }
