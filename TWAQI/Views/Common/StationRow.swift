@@ -89,6 +89,36 @@ struct EmptyStateView: View {
     }
 }
 
+/// One line saying the readings below are the last good ones saved, because
+/// the latest request failed. Each reading already shows its own time.
+struct OfflineNotice: View {
+    var body: some View {
+        Label {
+            Text("Offline.showing_saved_readings")
+        } icon: {
+            Image(systemName: "wifi.slash")
+        }
+        .font(.footnote)
+        .foregroundColor(.orange)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Nothing could be loaded and nothing was saved to show instead.
+struct OfflineEmptyStateView: View {
+    var retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            EmptyStateView(icon: "wifi.slash", message: "Offline.nothing_saved")
+            Button(action: retry) {
+                Text("Offline.retry")
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+}
+
 /// Navigation for the station lists. In a wide window — iPad, an unfolded
 /// foldable, a large split-screen window — the list and the chosen station sit
 /// side by side; in a narrow one it is the usual push stack. Follows the

@@ -16,6 +16,17 @@ enum NetworkError: Error {
 }
 
 struct APIManager {
+    /// Alamofire's default session waits 60 s for a response and has no
+    /// overall limit, so on a flaky connection a screen could sit on its
+    /// placeholder for minutes before falling back to the last good copy.
+    /// 20 s matches the Directus requests.
+    static let session: Session = {
+        let configuration = URLSessionConfiguration.af.default
+        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForResource = 30
+        return Session(configuration: configuration)
+    }()
+
     static let apiDomain = getEnv("ApiDomain")!
     static let apiEnpointCountries = getEnv("ApiEnpointCountries")!
     static let apiEnpointStations = getEnv("ApiEnpointStations")!
@@ -30,7 +41,7 @@ struct APIManager {
             return
         }
 
-        AF.request(url)
+        session.request(url)
             .validate(contentType: ["application/json"])
             .responseJSON { (response) -> Void in
                 let json = JSON(response.data as Any)
@@ -53,6 +64,9 @@ struct APIManager {
                         ))
                     }
                     completionHandler(.success(countries))
+                } else {
+                    // Without this an offline launch never called back.
+                    completionHandler(.failure(.networkError))
                 }
             }
     }
@@ -67,7 +81,7 @@ struct APIManager {
             "country": countryCode,
         ]
 
-        AF.request(url, parameters: parameters)
+        session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseJSON { (response) -> Void in
                 let json = JSON(response.data as Any)
@@ -78,6 +92,8 @@ struct APIManager {
                         stations.append(Station.make(from: stationJSON))
                     }
                     completionHandler(.success(stations))
+                } else {
+                    completionHandler(.failure(.networkError))
                 }
             }
     }
@@ -92,7 +108,7 @@ struct APIManager {
             "country": countryCode,
         ]
 
-        AF.request(url, parameters: parameters)
+        session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
@@ -103,6 +119,7 @@ struct APIManager {
 
                     debugPrint(response)
                     let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    PollutantCache.shared.save(countryCode: countryCode, response: data)
                     completionHandler(.success(pollutantsResponse.data))
                 } catch {
                     print(error)
@@ -121,7 +138,7 @@ struct APIManager {
             "station_id": stationId,
         ]
 
-        AF.request(url, parameters: parameters)
+        session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
                 do {
@@ -132,6 +149,7 @@ struct APIManager {
 
                     debugPrint(response)
                     let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    PollutantCache.shared.saveStations(response: data)
                     completionHandler(.success(pollutantsResponse.data))
                 } catch {
                     print(error)
@@ -151,7 +169,7 @@ struct APIManager {
             "limit": limit,
         ]
 
-        AF.request(url, parameters: parameters)
+        session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseJSON { (response) -> Void in
                 let json = JSON(response.data as Any)

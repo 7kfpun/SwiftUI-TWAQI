@@ -340,3 +340,9 @@
 "Forecast.source" = "資料來源：環境部";
 "Forecast.more" = "顯示更多";
 "Forecast.less" = "收合";
+
+/* 離線：最後一次成功的資料 */
+"Offline.showing_saved_readings" = "目前離線，顯示最後儲存的資料";
+"Offline.updated_ago %@" = "離線・%@更新";
+"Offline.nothing_saved" = "目前無法連線，也沒有已儲存的資料。請檢查網路連線後再試一次。";
+"Offline.retry" = "重試";

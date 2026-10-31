@@ -193,9 +193,18 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
                 self.checkClosestCountry(latitude: self.currentLatitude, longitude: self.currentLongitude)
                 self.loadMarkers()
-                print("Total Countries: \(result.count), first item \(result[0])")
+                print("Total Countries: \(result.count)")
             case .failure(let error):
                 print(error.localizedDescription)
+                // Offline launch: the country list is only needed to know
+                // which country to load, and the last answer is saved. Its
+                // pollutants request falls back to the last good readings.
+                // The list itself is asked for again on the next foreground.
+                if self.supportedCountryCode == nil,
+                   let code = defaults.string(forKey: "supportedCountryCode"), !code.isEmpty {
+                    self.supportedCountryCode = code
+                    self.callGetCurrentPollutantsApi(countryCode: code)
+                }
             }
         }
     }
@@ -209,6 +218,19 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// was sending this same request four times.
     private var pollutantRequestsInFlight: Set<String> = []
 
+    /// Countries whose markers are the last good readings from disk (or from
+    /// earlier this session) because the latest request failed. Their card
+    /// says so, and they are never published to the widgets, which may have
+    /// fetched something newer themselves.
+    private var lastGoodCountryCodes: Set<String> = [] {
+        didSet {
+            guard lastGoodCountryCodes != oldValue else { return }
+            loadClosestStationView()
+        }
+    }
+
+    private var foregroundObserver: NSObjectProtocol?
+
     func callGetCurrentPollutantsApi(countryCode: String) {
         guard !pollutantRequestsInFlight.contains(countryCode) else { return }
         pollutantRequestsInFlight.insert(countryCode)
@@ -219,14 +241,55 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             switch result {
             case .success(let result):
                 print("callGetCurrentPollutantsApi Total: \(result.count)")
+                self.lastGoodCountryCodes.remove(countryCode)
                 self.countryPollutants[countryCode] = result
                 WidgetBridge.publish(
-                    pollutants: self.countryPollutants.values.flatMap { $0 },
-                    closest: self.closestPollutant
+                    pollutants: self.liveCountryPollutants,
+                    closest: self.liveClosestPollutant
                 )
             case .failure(let error):
                 print(error.localizedDescription)
+                // Keep what is on screen; with nothing on screen yet, show the
+                // last good readings rather than an empty map.
+                if self.countryPollutants[countryCode] == nil {
+                    guard let cached = PollutantCache.shared.pollutants(countryCode: countryCode) else { return }
+                    self.lastGoodCountryCodes.insert(countryCode)
+                    self.countryPollutants[countryCode] = cached
+                } else {
+                    self.lastGoodCountryCodes.insert(countryCode)
+                }
             }
+        }
+    }
+
+    /// Pollutants from countries whose latest request succeeded.
+    private var liveCountryPollutants: Pollutants {
+        countryPollutants
+            .filter { !lastGoodCountryCodes.contains($0.key) }
+            .values
+            .flatMap { $0 }
+    }
+
+    /// The closest station, unless its reading is a last good one.
+    private var liveClosestPollutant: Pollutant? {
+        closestPollutant.flatMap { isLastGood(stationId: $0.stationId) ? nil : $0 }
+    }
+
+    private func isLastGood(stationId: Int) -> Bool {
+        countryPollutants.contains { countryCode, pollutants in
+            lastGoodCountryCodes.contains(countryCode) && pollutants.contains { $0.stationId == stationId }
+        }
+    }
+
+    /// Back from the background, possibly back online: retry what failed.
+    /// The 15-minute timer alone left an offline launch on old readings for
+    /// up to a quarter of an hour after the connection returned.
+    private func refreshAfterForeground() {
+        if countries.isEmpty {
+            callGetCountriesApi()
+        }
+        for countryCode in lastGoodCountryCodes {
+            callGetCurrentPollutantsApi(countryCode: countryCode)
         }
     }
 
@@ -538,10 +601,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         if let closestPollutant = tempClosestPollutant {
             print("checkClosestStation", closestPollutant)
             self.closestPollutant = closestPollutant
-            WidgetBridge.publish(
-                pollutants: self.countryPollutants.values.flatMap { $0 },
-                closest: closestPollutant
-            )
+            // Last good readings stay on the map; the widgets keep whatever
+            // they last had, which may be newer.
+            if !isLastGood(stationId: closestPollutant.stationId) {
+                WidgetBridge.publish(
+                    pollutants: self.liveCountryPollutants,
+                    closest: closestPollutant
+                )
+            }
         }
     }
 
@@ -559,6 +626,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             closestStationView.stationName = closestPollutant.displayName
             closestStationView.locality = closestPollutant.displayLocality
             closestStationView.publishTime = closestPollutant.publishTime
+            closestStationView.isLastGood = isLastGood(stationId: livePollutant.stationId)
             closestStationView.timelineContext = timelineHoursAgo > 0
                 ? anchor(forStation: livePollutant.stationId)
                     .flatMap { MapTimeline.describe(anchor: $0, hoursAgo: timelineHoursAgo) }
@@ -606,9 +674,18 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
         Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { (_) in
             // Schedule in seconds
+            if self.countries.isEmpty {
+                self.callGetCountriesApi()
+            }
             for (countryCode, _) in self.countryPollutants {
                 self.callGetCurrentPollutantsApi(countryCode: countryCode)
             }
+        }
+
+        foregroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.refreshAfterForeground()
         }
 
         loadContent()

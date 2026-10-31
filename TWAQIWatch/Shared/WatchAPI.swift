@@ -77,7 +77,10 @@ enum WatchAPI {
             + parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
         guard let url = components.url else { throw Failure.badURL }
 
-        let (data, response) = try await URLSession.shared.data(from: url)
+        // URLSession's default waits 60 s for a response, longer than a
+        // widget timeline reload is given; fail sooner and fall back to the
+        // cached reading instead.
+        let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 20))
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw Failure.badResponse }
         return try JSONDecoder().decode(Response.self, from: data)
     }

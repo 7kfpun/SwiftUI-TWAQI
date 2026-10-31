@@ -18,7 +18,9 @@ struct DetailsListView: View {
     var body: some View {
         AdaptiveNavigation {
             Group {
-                if viewModel.stations.isEmpty {
+                if viewModel.stations.isEmpty, viewModel.loadFailed {
+                    OfflineEmptyStateView(retry: getData)
+                } else if viewModel.stations.isEmpty {
                     EmptyStateView(icon: "list.bullet", message: "Details.no_data")
                 } else {
                     list

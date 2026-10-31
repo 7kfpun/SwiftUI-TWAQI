@@ -61,7 +61,9 @@ final class StationCamStore {
         waiting.append(completion)
         guard waiting.count == 1 else { return }
 
-        session.dataTask(with: Self.manifestURL) { data, response, _ in
+        // Without a timeout the cam section could sit on its spinner for the
+        // system's 60 s before falling back to the saved manifest.
+        session.dataTask(with: URLRequest(url: Self.manifestURL, timeoutInterval: 20)) { data, response, _ in
             let ok = (response as? HTTPURLResponse).map { (200..<300).contains($0.statusCode) } ?? false
             let manifest = ok ? data.flatMap { try? JSONDecoder().decode(StationCamManifest.self, from: $0) } : nil
 

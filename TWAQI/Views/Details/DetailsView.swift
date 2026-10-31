@@ -85,6 +85,15 @@ struct DetailsView: View {
             // time. The pollutant grid sits immediately above the chart it
             // drives, so tapping one visibly changes the other.
             VStack(alignment: .leading, spacing: 0) {
+                if viewModel.isShowingLastGood {
+                    OfflineNotice()
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                } else if viewModel.loadFailed {
+                    OfflineEmptyStateView(retry: getData)
+                        .padding(.bottom, 24)
+                }
+
                 header
 
                 AqiScaleView(aqi: currentAqi)

@@ -25,6 +25,19 @@ class DetailsViewModel: ObservableObject {
 
     @Published var isFavourited: Bool = false
 
+    /// `pollutant` is the last good reading saved, because the latest
+    /// request failed.
+    @Published var isShowingLastGood = false
+
+    /// Both requests failed and there was no saved reading to show instead.
+    @Published var loadFailed = false
+
+    /// Answers from the latest `getData`, so `loadFailed` is decided once
+    /// both requests have answered. `onAppear` can fire again while the first
+    /// pair is still on the wire; answers from an older pair are not counted.
+    private var generation = 0
+    private var answers: [Bool] = []
+
     /// This station's MOENV webcam, found by joining on name and position.
     @Published var cam: StationCamState = .loading
 
@@ -40,6 +53,18 @@ class DetailsViewModel: ObservableObject {
     }
 
     private(set) lazy var getData: () -> Void = {
+        // The last good reading at once, so a station opened offline — or
+        // on a slow connection — is not a blank page. The request replaces it.
+        if self.pollutant == nil, let saved = PollutantCache.shared.pollutant(stationId: self.stationId) {
+            self.pollutant = saved
+            self.findCam(name: saved.nameLocal, lat: saved.lat, lon: saved.lon)
+            self.findForecast(areaLocal: saved.areaLocal, countyLocal: saved.countyLocal, title: saved.displayArea)
+        }
+        self.generation += 1
+        let generation = self.generation
+        self.answers = []
+        self.loadFailed = false
+
         APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
             switch result {
             case .success(let result):
@@ -49,23 +74,39 @@ class DetailsViewModel: ObservableObject {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
                 }
+                self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
                 print(error.localizedDescription)
+                self.requestFinished(failed: true, generation: generation)
             }
         }
 
         APIManager.getCurrentPollutantsByStationId(stationId: "\(self.stationId)") { result in
             switch result {
             case .success(let pollutants):
-                self.pollutant = pollutants.first
-                if let pollutant = self.pollutant {
+                // An empty answer keeps a saved reading rather than blanking it.
+                if let pollutant = pollutants.first {
+                    self.pollutant = pollutant
+                    self.isShowingLastGood = false
                     self.findCam(name: pollutant.nameLocal, lat: pollutant.lat, lon: pollutant.lon)
                     self.findForecast(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, title: pollutant.displayArea)
                 }
+                self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
                 print(error.localizedDescription)
+                // Whatever is on screen — the saved reading, or one from
+                // earlier this visit — is now the last good one.
+                self.isShowingLastGood = self.pollutant != nil
+                self.requestFinished(failed: true, generation: generation)
             }
         }
+    }
+
+    private func requestFinished(failed: Bool, generation: Int) {
+        guard generation == self.generation else { return }
+        answers.append(failed)
+        guard answers.count == 2 else { return }
+        loadFailed = answers.allSatisfy { $0 } && pollutant == nil && historicalPollutants.isEmpty
     }
 
     private(set) lazy var favouriteStationToggle: () -> Void = {
