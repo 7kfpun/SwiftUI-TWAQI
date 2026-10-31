@@ -107,8 +107,8 @@ final class AqiForecastTests: XCTestCase {
         // English-only text is never swapped for a translation.
         XCTAssertEqual(OnDeviceTranslation.display("smoke test"), "smoke test")
 
-        OnDeviceTranslation.store("Tomorrow: north moderate.", for: text, target: "en_US")
-        XCTAssertEqual(OnDeviceTranslation.cached(text, target: "en_US"), "Tomorrow: north moderate.")
+        OnDeviceTranslation.store("Tomorrow: north moderate.", for: text, target: "en")
+        XCTAssertEqual(OnDeviceTranslation.cached(text, target: "en"), "Tomorrow: north moderate.")
         XCTAssertNil(OnDeviceTranslation.cached(text, target: "ja_JP"))
     }
 

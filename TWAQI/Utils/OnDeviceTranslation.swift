@@ -24,14 +24,25 @@ enum OnDeviceTranslation {
     /// The API writes Traditional Chinese.
     static let sourceIdentifier = "zh-Hant"
 
-    /// The app's locale to translate into, e.g. "en", or nil when the
-    /// original should show. Follows the language chosen under Help.
+    /// The language to translate into, as a bare language code ("en"), or
+    /// nil when the original should show. Follows the language chosen under
+    /// Help.
     static var target: String? {
         target(for: .app)
     }
 
+    /// Language code only, so System English ("en_US") and Help → English
+    /// ("en") share one cache and one language pack check.
     static func target(for locale: Locale) -> String? {
-        locale.isChinese ? nil : locale.identifier
+        guard !locale.isChinese else { return nil }
+        let code = locale.languageCode
+            ?? locale.identifier.split(whereSeparator: { $0 == "_" || $0 == "-" }).first.map(String.init)
+        return (code?.isEmpty ?? true) ? nil : code
+    }
+
+    /// Drops every translation made so far, e.g. when the language changes.
+    static func clearCache() {
+        cache.removeAllObjects()
     }
 
     /// Only text with Chinese in it is worth sending; anything else (a test
@@ -177,7 +188,8 @@ private struct OnDeviceTranslationModifier: ViewModifier {
     @Binding var revision: Int
 
     private var source: Locale.Language { Locale.Language(identifier: OnDeviceTranslation.sourceIdentifier) }
-    private var targetLanguage: Locale.Language { Locale(identifier: target).language }
+    /// `target` is already a bare language code, the same one the cache uses.
+    private var targetLanguage: Locale.Language { Locale.Language(identifier: target) }
 
     @State private var configuration: TranslationSession.Configuration?
 

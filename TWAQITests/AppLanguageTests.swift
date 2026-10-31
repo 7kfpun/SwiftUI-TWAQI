@@ -111,6 +111,28 @@ final class AppLanguageTests: XCTestCase {
         XCTAssertEqual(OnDeviceTranslation.display(text), "No. 6, Ln. 42")
     }
 
+    func testTargetIsTheBareLanguageCode() {
+        // System English and Help → English share one cache and one pack check.
+        XCTAssertEqual(OnDeviceTranslation.target(for: Locale(identifier: "en_US")), "en")
+        XCTAssertEqual(OnDeviceTranslation.target(for: Locale(identifier: "en_GB")), "en")
+        XCTAssertEqual(OnDeviceTranslation.target(for: Locale(identifier: "en")), "en")
+        XCTAssertEqual(OnDeviceTranslation.target(for: Locale(identifier: "ja_JP")), "ja")
+        XCTAssertNil(OnDeviceTranslation.target(for: Locale(identifier: "zh-Hans")))
+        XCTAssertNil(OnDeviceTranslation.target(for: Locale(identifier: "zh_Hant_TW")))
+
+        UserDefaults.standard.set(AppLanguage.english.rawValue, forKey: AppLanguage.defaultsKey)
+        XCTAssertEqual(OnDeviceTranslation.target, "en")
+    }
+
+    func testChangingLanguageClearsTranslations() {
+        let text = "板橋區\(UUID().uuidString)"
+        OnDeviceTranslation.store("Banqiao District", for: text, target: "en")
+        XCTAssertEqual(OnDeviceTranslation.cached(text, target: "en"), "Banqiao District")
+
+        SettingsStore(defaults: defaults).appLanguage = .english
+        XCTAssertNil(OnDeviceTranslation.cached(text, target: "en"))
+    }
+
     func testOnlyTextWithChineseIsSent() {
         XCTAssertEqual(
             OnDeviceTranslation.translatable(["板橋區", "Banqiao", "板橋區", "", "42-6"]),

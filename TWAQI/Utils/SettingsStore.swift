@@ -85,6 +85,9 @@ final class SettingsStore: ObservableObject {
             } else {
                 defaults.removeObject(forKey: AppLanguage.defaultsKey)
             }
+            // The root view rebuilds for the new language; nothing translated
+            // for the old one should be shown under it.
+            OnDeviceTranslation.clearCache()
             TrackingManager.logEvent(eventName: "select_language", parameters: ["label": newValue.rawValue])
         }
         get { AppLanguage.stored(in: defaults) }

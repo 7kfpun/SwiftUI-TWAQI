@@ -231,18 +231,17 @@ struct AreaForecastView: View {
     // Built per use (a few rows) so they follow a language changed under Help.
     private static var weekdayFormatter: DateFormatter { formatter("EEEE") }
     private static var dateFormatter: DateFormatter { formatter("MdEEE") }
-    private static let dateTimeFormatter: DateFormatter = {
+    private static var dateTimeFormatter: DateFormatter { fixedFormatter("M/d HH:mm") }
+    private static var timeFormatter: DateFormatter { fixedFormatter("HH:mm") }
+
+    /// Numeric layouts, but still in the app's locale (digits, calendar).
+    private static func fixedFormatter(_ format: String) -> DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = .app
         formatter.timeZone = AqiForecastDates.taipei
-        formatter.dateFormat = "M/d HH:mm"
+        formatter.dateFormat = format
         return formatter
-    }()
-    private static let timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.timeZone = AqiForecastDates.taipei
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
+    }
 }
 
 private struct TextHeightsKey: PreferenceKey {
