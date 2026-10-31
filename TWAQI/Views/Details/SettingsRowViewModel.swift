@@ -22,6 +22,9 @@ class SettingsRowViewModel: ObservableObject {
     /// MOENV SiteId of this station's cam, stored with its Directus alerts.
     private var siteId: String?
 
+    private let settings = SettingsStore()
+    private var clearedObserver: NSObjectProtocol?
+
     @Published var isDisabled: Bool = true
 
     @Published var stationSetting: OneSignalStationSetting {
@@ -42,18 +45,26 @@ class SettingsRowViewModel: ObservableObject {
             // Dual-write: OneSignal above stays the sender; Directus gets a
             // copy, debounced, and its failures stay out of the UI.
             mirror(stationSetting, settled: false)
+
+            let isOn = !StationAlerts(stationSetting).isOff
+            if isOn {
+                addToFavourites()
+            }
+            FavouriteAlerts.post(stationId: station.id, isOn: isOn)
         }
     }
 
     init(station: Station) {
         self.station = station
-        self.notificationTagCode = station.countryCode == "twn" ? station.name : "\(station.id)"
+        self.notificationTagCode = FavouriteAlerts.tagCode(countryCode: station.countryCode, name: station.name, stationId: station.id)
 
         self.stationSetting = OneSignalStationSetting(
             stationName: notificationTagCode,
             isPollutionNotificationEnabled: false,
             isCleanlinessNotificationEnabled: false
         )
+
+        followClears()
 
         StationCamStore.shared.cams { [weak self] cams in
             self?.siteId = StationCamMatcher.match(name: station.nameLocal, lat: station.lat, lon: station.lon, in: cams)?.siteId
@@ -74,11 +85,47 @@ class SettingsRowViewModel: ObservableObject {
                         // first time their station is opened.
                         self.mirror(remote, settled: true)
                     }
+                    FavouriteAlerts.post(stationId: self.station.id, isOn: !StationAlerts(self.stationSetting).isOff)
                     self.isApplyingRemoteSettings = false
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
             }
+        }
+    }
+
+    deinit {
+        clearedObserver.map(NotificationCenter.default.removeObserver)
+    }
+
+    /// An alert switched on makes the station a favourite, so every station
+    /// that can send one is in the list where it can be found and removed.
+    private func addToFavourites() {
+        guard !settings.savedFavouriteStations.contains(station.id) else { return }
+        settings.savedFavouriteStations.append(station.id)
+        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+            "label": "on",
+            "stationId": station.id,
+            "source": "alert",
+        ])
+    }
+
+    /// Alerts cleared elsewhere — the station was removed from Favourites —
+    /// switch off here too, without writing them back.
+    private func followClears() {
+        clearedObserver = NotificationCenter.default.addObserver(
+            forName: FavouriteAlerts.changed,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self,
+                  FavouriteAlerts.isOn(in: notification, stationId: self.station.id) == false,
+                  !StationAlerts(self.stationSetting).isOff
+            else { return }
+            self.isApplyingRemoteSettings = true
+            self.stationSetting.isPollutionNotificationEnabled = false
+            self.stationSetting.isCleanlinessNotificationEnabled = false
+            self.isApplyingRemoteSettings = false
         }
     }
 

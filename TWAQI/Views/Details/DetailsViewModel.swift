@@ -23,7 +23,14 @@ class DetailsViewModel: ObservableObject {
 
     @Published var historicalPollutants: HistoricalPollutants = []
 
-    @Published var isFavourited: Bool = false
+    /// The station has an alert on. From the alert controls once they have
+    /// read OneSignal, else this device's last record of what it sent.
+    @Published var hasAlerts = false
+
+    /// Unfavouriting waits on the reader: it would also turn alerts off.
+    @Published var isConfirmingUnfavourite = false
+
+    private var alertsObserver: NSObjectProtocol?
 
     /// `pollutant` is the last good reading saved, because the latest
     /// request failed.
@@ -56,7 +63,21 @@ class DetailsViewModel: ObservableObject {
     init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
         self.stationId = stationId
         self.historicalPollutants = historicalPollutants
-        self.isFavourited = settings.savedFavouriteStations.contains(stationId)
+        self.hasAlerts = FavouriteAlerts.locallyKnown(stationId: stationId) ?? false
+        self.alertsObserver = NotificationCenter.default.addObserver(
+            forName: FavouriteAlerts.changed,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self, let isOn = FavouriteAlerts.isOn(in: notification, stationId: self.stationId) else { return }
+            if self.hasAlerts != isOn {
+                self.hasAlerts = isOn
+            }
+        }
+    }
+
+    deinit {
+        alertsObserver.map(NotificationCenter.default.removeObserver)
     }
 
     private(set) lazy var getData: () -> Void = {
@@ -123,16 +144,46 @@ class DetailsViewModel: ObservableObject {
         loadFailed = answers.allSatisfy { $0 } && pollutant == nil && historicalPollutants.isEmpty
     }
 
-    private(set) lazy var favouriteStationToggle: () -> Void = {
-        self.isFavourited.toggle()
-        if self.isFavourited {
-            self.settings.savedFavouriteStations.append(self.stationId)
+    /// Read from the shared defaults rather than kept here, so the heart
+    /// follows changes made in Favourites or by switching an alert on.
+    var isFavourited: Bool {
+        settings.savedFavouriteStations.contains(stationId)
+    }
+
+    func favouriteStationToggle() {
+        if !isFavourited {
+            settings.savedFavouriteStations.append(stationId)
+            logFavourite(on: true)
+        } else if hasAlerts {
+            isConfirmingUnfavourite = true
         } else {
-            self.settings.savedFavouriteStations = self.settings.savedFavouriteStations.filter { $0 != self.stationId }
+            removeFromFavourites()
         }
+    }
+
+    /// Takes the station out of Favourites, and turns its alerts off with it
+    /// when it has any — only after `isConfirmingUnfavourite` was answered.
+    func removeFromFavourites() {
+        if hasAlerts {
+            FavouriteAlerts.clear(stationId: stationId, tagCodes: alertTagCodes)
+        }
+        settings.savedFavouriteStations.removeAll { $0 == stationId }
+        logFavourite(on: false)
+    }
+
+    /// Where OneSignal has this station's alerts: exact once the station
+    /// record (with its country) has loaded.
+    private var alertTagCodes: [String] {
+        if let station = station {
+            return [FavouriteAlerts.tagCode(countryCode: station.countryCode, name: station.name, stationId: stationId)]
+        }
+        return FavouriteAlerts.candidateTagCodes(name: pollutant?.name ?? "", stationId: stationId)
+    }
+
+    private func logFavourite(on: Bool) {
         TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
-            "label": self.isFavourited ? "on" : "off",
-            "stationId": self.stationId,
+            "label": on ? "on" : "off",
+            "stationId": stationId,
         ])
     }
 

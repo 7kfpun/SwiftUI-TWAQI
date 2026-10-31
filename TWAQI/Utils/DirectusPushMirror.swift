@@ -112,6 +112,20 @@ final class DirectusPushMirror: NSObject {
         flush()
     }
 
+    /// The station's alerts as last sent to OneSignal, from this mirror's
+    /// record: still to write, else written. Nil when there is no record.
+    /// Only reads defaults, so callable from any thread.
+    nonisolated static func knownAlerts(stationId: Int, defaults: UserDefaults = .standard) -> StationAlerts? {
+        let key = String(stationId)
+        for record in [Keys.wanted, Keys.synced] {
+            if let alerts = defaults.data(forKey: record)
+                .flatMap({ try? JSONDecoder().decode([String: StationAlerts].self, from: $0) })?[key] {
+                return alerts
+            }
+        }
+        return nil
+    }
+
     // MARK: - Sync
 
     private var synced: [String: StationAlerts] {

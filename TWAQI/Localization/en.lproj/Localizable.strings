@@ -14,6 +14,15 @@
 "FavouriteList.favourites" = "Favourites";
 "Favourites.add_your_first_favourite_station" = "Add your first favourite station";
 "Favourites.remove_all_your_saved_stations" = "Remove all your saved station";
+"Favourites.add_to_favourites" = "Add to Favourites";
+"Favourites.remove_from_favourites" = "Remove from Favourites";
+"Favourites.alerts_on" = "Alerts on";
+"Favourites.remove_station_with_alerts_title" = "Remove from Favourites?";
+"Favourites.remove_station_with_alerts_message" = "This station has AQI alerts on. Removing it from Favourites also turns its alerts off.";
+"Favourites.remove_all_with_alerts_title" = "Remove All Favourites?";
+"Favourites.remove_all_with_alerts_message" = "Some of these stations have AQI alerts on. Removing them also turns their alerts off.";
+"Favourites.remove_and_turn_off_alerts" = "Remove and Turn Off Alerts";
+"Favourites.cancel" = "Cancel";
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";
