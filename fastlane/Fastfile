@@ -77,11 +77,13 @@ LOCALES = {
     regular: FONT_LATIN_REGULAR,
     titles: {
       "iPhone_6.9_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
-      "iPhone_6.9_02" => ["Know before you go out.", "AQI, pollutants and health advice."],
-      "iPhone_6.9_03" => ["Share the air you breathe.", "Send any station's reading as a card."],
+      "iPhone_6.9_02" => ["Know before you go out.", "AQI and every pollutant, station by station."],
+      "iPhone_6.9_03" => ["24 hours at a glance.", "Tap a pollutant to chart its trend."],
+      "iPhone_6.9_04" => ["Your stations, saved.", "Favourites feed the widget and AQI alerts."],
       "iPad_13_01"    => ["Every station. One map.", "Live AQI from across Taiwan."],
-      "iPad_13_02"    => ["Know before you go out.", "AQI, pollutants and health advice."],
-      "iPad_13_03"    => ["Share the air you breathe.", "Send any station's reading as a card."],
+      "iPad_13_02"    => ["Station beside the map.", "AQI and every pollutant, station by station."],
+      "iPad_13_03"    => ["24 hours at a glance.", "Tap a pollutant to chart its trend."],
+      "iPad_13_04"    => ["Your stations, saved.", "Favourites feed the widget and AQI alerts."],
       "iPhone_Duo_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
       "iPhone_Duo_02" => ["Map and station, side by side.", "Unfold to see every reading at a glance."],
       "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."],
@@ -97,11 +99,13 @@ LOCALES = {
     regular: FONT_CJK_REGULAR,
     titles: {
       "iPhone_6.9_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
-      "iPhone_6.9_02" => ["出門前，先看空氣", "AQI、污染物與健康建議"],
-      "iPhone_6.9_03" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
+      "iPhone_6.9_02" => ["出門前，先看空氣", "AQI 與各項污染物，逐站掌握"],
+      "iPhone_6.9_03" => ["過去 24 小時，一目了然", "點選污染物，查看變化趨勢"],
+      "iPhone_6.9_04" => ["常用測站，隨時查看", "加入最愛，搭配小工具與空品通知"],
       "iPad_13_01"    => ["全台測站，一眼掌握", "即時空氣品質地圖"],
-      "iPad_13_02"    => ["出門前，先看空氣", "AQI、污染物與健康建議"],
-      "iPad_13_03"    => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
+      "iPad_13_02"    => ["地圖與測站並排", "AQI 與各項污染物，逐站掌握"],
+      "iPad_13_03"    => ["過去 24 小時，一目了然", "點選污染物，查看變化趨勢"],
+      "iPad_13_04"    => ["常用測站，隨時查看", "加入最愛，搭配小工具與空品通知"],
       "iPhone_Duo_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
       "iPhone_Duo_02" => ["展開手機，地圖與測站並排", "一眼看完所有數據"],
       "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"],
@@ -185,6 +189,55 @@ platform :ios do
 
     UI.user_error!("No 'iPhone Duo NN.png' captures under #{RAW_ROOT}/<locale>/") if produced.zero?
     UI.success("#{produced} iPhone Duo screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Capture the raw App Store screenshots of the four headline features on one simulator"
+  desc "AppStoreScreenshotTests takes map, station, 24-hour chart and Favourites, once per locale, into"
+  desc "fastlane/screenshots_raw/<locale>/<prefix> NN <name>.png. Then run frame_screenshots"
+  desc "Options: device (simulator name, default \"iPhone 18 Pro\"), prefix (\"iPhone\" or \"iPad\","
+  desc "default \"iPhone\"), zoom (map zoom, default 7.2). The Duo keeps capture_duo_screenshots"
+  lane :capture_screenshots do |options|
+    device = options[:device] || "iPhone 18 Pro"
+    prefix = options[:prefix] || "iPhone"
+    derived = "/tmp/twaqi-screenshots"
+    xcodebuild = [
+      "xcodebuild",
+      "-workspace", File.join(ROOT, "TWAQI.xcworkspace"),
+      "-scheme", "TWAQI",
+      "-destination", "platform=iOS Simulator,name=#{device}",
+      "-derivedDataPath", derived
+    ]
+
+    sh((xcodebuild + ["build-for-testing", "-quiet"]).shelljoin)
+
+    # 9:41, full bars, charged: the status bar Apple's own screenshots use.
+    sh("xcrun simctl boot #{device.shellescape} || true")
+    sh("xcrun simctl status_bar #{device.shellescape} override --time 9:41 " \
+       "--dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active " \
+       "--cellularBars 4 --batteryState charged --batteryLevel 100")
+
+    { "en-US" => "en", "zh-Hant" => "zh-Hant" }.each do |locale, language|
+      out_dir = File.join(RAW_ROOT, locale)
+      sh("mkdir -p '#{out_dir}'")
+      sh("rm -f '#{out_dir}/#{prefix} '[0-9][0-9]*.png")
+      # xcodebuild hands TEST_RUNNER_-prefixed variables to the test runner
+      # with the prefix stripped.
+      env = {
+        "TEST_RUNNER_SCREENSHOT_DIR" => out_dir,
+        "TEST_RUNNER_SCREENSHOT_PREFIX" => prefix,
+        "TEST_RUNNER_SCREENSHOT_LANGUAGE" => language,
+        "TEST_RUNNER_SCREENSHOT_MAP_ZOOM" => (options[:zoom] || "7.2").to_s
+      }.map { |key, value| "#{key}=#{value.shellescape}" }.join(" ")
+      tests = (xcodebuild + [
+        "test-without-building",
+        # Map loads are slow on a busy Mac; the test waits up to minutes.
+        "-test-timeouts-enabled", "YES",
+        "-default-test-execution-time-allowance", "1200",
+        "-only-testing:TWAQIUITests/AppStoreScreenshotTests"
+      ]).shelljoin
+      sh("#{env} #{tests}")
+      UI.success("#{locale}: #{Dir["#{out_dir}/#{prefix} [0-9][0-9]*.png"].count} #{prefix} capture(s)")
+    end
   end
 
   desc "Capture the raw iPhone Duo screenshots on the unfolded iPhone Duo simulator (iOS 27.1+)"
