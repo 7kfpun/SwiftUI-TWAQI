@@ -15,17 +15,7 @@ struct FavouriteListView: View {
 
     /// Stations waiting on the reader before they leave Favourites, because
     /// at least one has an alert that would be turned off with it.
-    @State private var pendingRemoval: PendingRemoval?
-
-    private struct PendingRemoval {
-        var stationIds: [Int]
-        var isAll: Bool
-
-        static let oneTitle: LocalizedStringKey = "Favourites.remove_station_with_alerts_title"
-        static let oneMessage: LocalizedStringKey = "Favourites.remove_station_with_alerts_message"
-        static let allTitle: LocalizedStringKey = "Favourites.remove_all_with_alerts_title"
-        static let allMessage: LocalizedStringKey = "Favourites.remove_all_with_alerts_message"
-    }
+    @State private var pendingRemoval: [Int]?
 
     var body: some View {
         AdaptiveNavigation {
@@ -50,7 +40,7 @@ struct FavouriteListView: View {
                 }
             }
             .navigationBarTitle("FavouriteList.favourites")
-            .navigationBarItems(leading: editButton, trailing: removeAllButton)
+            .navigationBarItems(leading: editButton)
             // Insets the scroll content so the last row clears the banner,
             // instead of padding the content by a guessed height.
             .safeAreaInset(edge: .bottom) {
@@ -59,23 +49,23 @@ struct FavouriteListView: View {
         }
         .onAppear(perform: getData)
         .alert(
-            Text(pendingRemoval?.isAll == true ? PendingRemoval.allTitle : PendingRemoval.oneTitle),
+            Text("Favourites.remove_station_with_alerts_title"),
             isPresented: Binding(
                 get: { pendingRemoval != nil },
                 set: { if !$0 { pendingRemoval = nil } }
             ),
             presenting: pendingRemoval
-        ) { pending in
+        ) { stationIds in
             Button(role: .destructive) {
-                commitRemoval(pending)
+                commitRemoval(stationIds)
             } label: {
                 Text("Favourites.remove_and_turn_off_alerts")
             }
             Button(role: .cancel, action: {}) {
                 Text("Favourites.cancel")
             }
-        } message: { pending in
-            Text(pending.isAll ? PendingRemoval.allMessage : PendingRemoval.oneMessage)
+        } message: { _ in
+            Text("Favourites.remove_station_with_alerts_message")
         }
     }
 
@@ -121,16 +111,6 @@ struct FavouriteListView: View {
         }
     }
 
-    @ViewBuilder
-    private var removeAllButton: some View {
-        if !settings.savedFavouriteStations.isEmpty {
-            Button(action: removeAll) {
-                Text("Favourites.remove_all_your_saved_stations")
-                    .font(.footnote)
-            }
-        }
-    }
-
     /// The pollutants that most often set Taiwan's AQI, shown on each row.
     /// The station screen has all six.
     private static let keyPollutants: [AirIndexTypes] = [.pm25, .pm10, .o3]
@@ -145,7 +125,12 @@ struct FavouriteListView: View {
 
     private func remove(at offsets: IndexSet) {
         let ids = offsets.map { viewModel.favouritePollutants[$0].stationId }
-        request(PendingRemoval(stationIds: ids, isAll: false))
+        // Removes at once, unless an alert would go with it: then asks first.
+        if viewModel.needsConfirmation(toRemove: ids) {
+            pendingRemoval = ids
+        } else {
+            commitRemoval(ids)
+        }
     }
 
     /// Saves the new order, which the widget's first favourite follows.
@@ -157,31 +142,14 @@ struct FavouriteListView: View {
         TrackingManager.logEvent(eventName: "favourite_station_reordered")
     }
 
-    private func removeAll() {
-        request(PendingRemoval(stationIds: settings.savedFavouriteStations, isAll: true))
-    }
-
-    /// Removes at once, unless an alert would go with it: then asks first.
-    private func request(_ removal: PendingRemoval) {
-        if viewModel.needsConfirmation(toRemove: removal.stationIds) {
-            pendingRemoval = removal
-        } else {
-            commitRemoval(removal)
-        }
-    }
-
-    private func commitRemoval(_ removal: PendingRemoval) {
-        viewModel.remove(stationIds: removal.stationIds)
+    private func commitRemoval(_ stationIds: [Int]) {
+        viewModel.remove(stationIds: stationIds)
         pendingRemoval = nil
 
-        if removal.isAll {
-            TrackingManager.logEvent(eventName: "favourite_station_all_removed")
-        } else {
-            TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
-                "label": "off",
-                "stationId": removal.stationIds.first ?? 0,
-            ])
-        }
+        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+            "label": "off",
+            "stationId": stationIds.first ?? 0,
+        ])
     }
 }
 

@@ -101,13 +101,6 @@ private struct FavouritesTab: View {
                 }
             }
             .navigationTitle("FavouriteList.favourites")
-            .toolbar {
-                if !favourites.stationIds.isEmpty {
-                    Button("Favourites.remove_all_your_saved_stations", role: .destructive) {
-                        favourites.removeAll()
-                    }
-                }
-            }
             .stationDestinations()
         }
     }

@@ -17,14 +17,11 @@
 
 "FavouriteList.favourites" = "我的最愛";
 "Favourites.add_your_first_favourite_station" = "新增第一個常用測站";
-"Favourites.remove_all_your_saved_stations" = "移除所有已儲存的測站";
 "Favourites.add_to_favourites" = "加入我的最愛";
 "Favourites.remove_from_favourites" = "從我的最愛移除";
 "Favourites.alerts_on" = "已開啟通知";
 "Favourites.remove_station_with_alerts_title" = "要從我的最愛移除嗎？";
 "Favourites.remove_station_with_alerts_message" = "這個測站已開啟 AQI 通知，從我的最愛移除後，通知也會一併關閉。";
-"Favourites.remove_all_with_alerts_title" = "要移除所有最愛測站嗎？";
-"Favourites.remove_all_with_alerts_message" = "部分測站已開啟 AQI 通知，移除後，這些測站的通知也會一併關閉。";
 "Favourites.remove_and_turn_off_alerts" = "移除並關閉通知";
 "Favourites.cancel" = "取消";
 
