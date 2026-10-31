@@ -80,6 +80,31 @@
 "Feedback.try_again" = "再試一次";
 "Feedback.cancel" = "取消";
 
+"Cooperate.title" = "商業合作";
+"Cooperate.intro_header" = "合作洽詢";
+"Cooperate.intro_footer" = "歡迎品牌、媒體、學校與機關單位與我們聯繫，我們會盡快以電子郵件回覆。";
+"Cooperate.type" = "合作類型";
+"Cooperate.type_choose" = "請選擇";
+"Cooperate.type_advertising" = "廣告投放";
+"Cooperate.type_data_api" = "資料與 API 合作";
+"Cooperate.type_sponsorship" = "贊助";
+"Cooperate.type_media" = "媒體與公關";
+"Cooperate.type_other" = "其他";
+"Cooperate.company_header" = "公司或單位";
+"Cooperate.company_placeholder" = "公司或單位名稱 *";
+"Cooperate.website_placeholder" = "網站（選填）";
+"Cooperate.contact_header" = "聯絡人";
+"Cooperate.name_placeholder" = "姓名 *";
+"Cooperate.job_title_placeholder" = "職稱（選填）";
+"Cooperate.phone_placeholder" = "電話（選填）";
+"Cooperate.contact_footer" = "我們會以電子郵件與您聯繫。";
+"Cooperate.message_header" = "合作內容";
+"Cooperate.message_placeholder" = "請簡述合作構想，以及預計時程或預算。";
+"Cooperate.privacy_footer" = "您填寫的資料僅用於回覆此次合作洽詢。App 版本、裝置型號、系統版本、語言與時區會一併送出。";
+"Cooperate.sent_title" = "謝謝您！";
+"Cooperate.sent_message" = "已收到您的合作洽詢，我們會盡快與您聯繫。";
+"Cooperate.error_title" = "無法送出合作洽詢";
+
 "Help.widgets_and_watch" = "小工具與 Apple Watch";
 "Help.widgets_title" = "主畫面與鎖定畫面小工具";
 "Help.widgets_shows_header" = "顯示內容";

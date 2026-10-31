@@ -8,6 +8,8 @@
 	<string>$(ApiEnpointCurrentPollutants)</string>
 	<key>ApiEnpointHistoricalPollutants</key>
 	<string>$(ApiEnpointHistoricalPollutants)</string>
+	<key>DirectusCooperateToken</key>
+	<string>$(DirectusCooperateToken)</string>
 	<key>DirectusFeedbackToken</key>
 	<string>$(DirectusFeedbackToken)</string>
 	<key>DirectusUrl</key>
@@ -20,10 +22,6 @@
 	<array>
 		<string>com.kfpun.twaqi.station</string>
 	</array>
-	<key>PartnerUrlEn</key>
-	<string>$(PartnerUrlEn)</string>
-	<key>PartnerUrlZh</key>
-	<string>$(PartnerUrlZh)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationPreferredDefaultSceneSessionRole</key>

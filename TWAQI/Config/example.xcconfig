@@ -35,10 +35,6 @@ AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
 // In-App Purchase
 InAppPurchaseProductId = test
 
-// Links (Help → "Interested to be our Business Partner?")
-PartnerUrlZh = http:\/\/example.com/
-PartnerUrlEn = http:\/\/example.com/
-
 // Directus (in-app feedback, and the 空品區 forecast read from twaqi_aqi_forecast).
 // The TWAQI App static token: create on twaqi_feedback, read on twaqi_aqi_forecast.
 // Keep the real value in debug.xcconfig / release.xcconfig, which are gitignored.
@@ -49,3 +45,10 @@ DirectusFeedbackToken =
 // a token that may create, read and update those collections. Optional: when
 // empty the app uses DirectusFeedbackToken, whose role already has that access.
 DirectusPushToken =
+
+// Business partner form (Directus twaqi_cooperate, create only; the app
+// sends archived=false and never deletes). Optional: when empty the app uses
+// DirectusFeedbackToken, so the TWAQI App role needs create on twaqi_cooperate
+// for the fields in CooperateSubmission, including archived. Set this only
+// to use a separate create-only token.
+DirectusCooperateToken =
