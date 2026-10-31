@@ -48,3 +48,8 @@ BetaTesterUrl = http:\/\/example.com/
 // real value in debug.xcconfig / release.xcconfig, which are gitignored.
 DirectusUrl = https:\/\/cms.wahthefox.com
 DirectusFeedbackToken =
+
+// Push settings dual-write (Directus twaqi_push_devices / twaqi_push_subscriptions):
+// a token that may create, read and update those collections. Optional: when
+// empty the app uses DirectusFeedbackToken, whose role already has that access.
+DirectusPushToken =

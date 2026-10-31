@@ -102,6 +102,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     }
                 }
             }
+
+            // Copies alert settings to Directus alongside OneSignal's tags,
+            // using the APNs token OneSignal registered.
+            DirectusPushMirror.shared.start()
         }
 
         StoreReviewHelper.incrementAppOpenedCount()

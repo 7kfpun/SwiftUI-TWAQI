@@ -113,7 +113,7 @@ struct OneSignalManager {
                                 stationName: stationName,
                                 isPollutionNotificationEnabled: false,
                                 isCleanlinessNotificationEnabled: true,
-                                pollutionTherhold: Double(value)!
+                                cleanlinessTherhold: Double(value)!
                             )
                         }
                     }
