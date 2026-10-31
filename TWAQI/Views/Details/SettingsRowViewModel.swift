@@ -19,6 +19,9 @@ class SettingsRowViewModel: ObservableObject {
     /// Guards the write-back loop while values fetched from OneSignal are applied.
     private var isApplyingRemoteSettings = false
 
+    /// MOENV SiteId of this station's cam, stored with its Directus alerts.
+    private var siteId: String?
+
     @Published var isDisabled: Bool = true
 
     @Published var stationSetting: OneSignalStationSetting {
@@ -35,6 +38,10 @@ class SettingsRowViewModel: ObservableObject {
                     print(error.localizedDescription)
                 }
             }
+
+            // Dual-write: OneSignal above stays the sender; Directus gets a
+            // copy, debounced, and its failures stay out of the UI.
+            mirror(stationSetting, settled: false)
         }
     }
 
@@ -48,6 +55,10 @@ class SettingsRowViewModel: ObservableObject {
             isCleanlinessNotificationEnabled: false
         )
 
+        StationCamStore.shared.cams { [weak self] cams in
+            self?.siteId = StationCamMatcher.match(name: station.nameLocal, lat: station.lat, lon: station.lon, in: cams)?.siteId
+        }
+
         OneSignalManager.getOneSignalSettings { [weak self] result in
             // OneSignal calls back off the main thread; @Published must not be
             // mutated there.
@@ -59,12 +70,24 @@ class SettingsRowViewModel: ObservableObject {
                     self.isDisabled = settings.stationSettings.count >= 2
                     if let remote = settings.stationSettings[self.notificationTagCode] {
                         self.stationSetting = remote
+                        // Alerts set before the dual-write reach Directus the
+                        // first time their station is opened.
+                        self.mirror(remote, settled: true)
                     }
                     self.isApplyingRemoteSettings = false
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
             }
+        }
+    }
+
+    private func mirror(_ setting: OneSignalStationSetting, settled: Bool) {
+        let alerts = StationAlerts(setting)
+        let stationId = station.id
+        let siteId = siteId
+        Task { @MainActor in
+            DirectusPushMirror.shared.stationChanged(stationId: stationId, siteId: siteId, alerts: alerts, settled: settled)
         }
     }
 }

@@ -58,6 +58,7 @@ class HelpViewModel: ObservableObject {
                         print(error.localizedDescription)
                     }
                 }
+                mirrorDnd()
             }
 
             TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
@@ -85,9 +86,24 @@ class HelpViewModel: ObservableObject {
                 print(error.localizedDescription)
             }
         }
+        mirrorDnd()
+    }
+
+    /// Dual-write: Directus gets a copy of the window from `SettingsStore`,
+    /// after OneSignal has been sent it.
+    private func mirrorDnd() {
+        Task { @MainActor in
+            DirectusPushMirror.shared.dndChanged()
+        }
     }
 
     func removeAllNotification() {
+        // Not tied to OneSignal's answer: the Directus copy is cleared even if
+        // reading the tags fails.
+        Task { @MainActor in
+            DirectusPushMirror.shared.cancelAll()
+        }
+
         OneSignalManager.getOneSignalSettings { [weak self] result in
             // OneSignal calls back off the main thread.
             DispatchQueue.main.async {
