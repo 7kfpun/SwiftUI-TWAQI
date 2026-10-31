@@ -203,7 +203,10 @@
 "Details.not_reporting_message" = "這個測站目前沒有回報資料，可能正在維修或已停止運作。附近的測站可在地圖上查看。";
 "Details.pollutants" = "污染物";
 "Details.health_advice" = "健康建議";
-"Details.notifications" = "通知";
+"Details.alerts_title" = "空品通知";
+"Details.alerts_pitch" = "這裡的空氣變差或轉好時，馬上通知你。";
+"Details.alerts_on" = "已開啟";
+"Details.alerts_off" = "未開啟";
 "Details.live_cam" = "即時影像";
 "Details.cam_captured %@" = "拍攝於 %@";
 "Details.cam_source" = "影像來源：環境部";

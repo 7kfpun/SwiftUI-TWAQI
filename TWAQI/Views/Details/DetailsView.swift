@@ -99,11 +99,18 @@ struct DetailsView: View {
 
     private var page: some View {
         ScrollView {
-            // Ordered as a reader's questions: what is it, where does that sit
-            // on the scale, what is actually in the air, which way is that
-            // heading, where is this station, what should I do, tell me next
-            // time. The pollutant grid sits immediately above the chart it
-            // drives, so tapping one visibly changes the other.
+            // Ordered as a reader's questions (FOX-25): what is the air now,
+            // tell me when it changes, what should I do, where is it heading
+            // and what does it look like, what exactly is in it, then where
+            // this station is.
+            //
+            // Alerts sit straight under the reading: from a map marker this
+            // page opens as a half-height sheet, and on a small phone the
+            // first screen ends about there, so anything lower is only found
+            // by those who already scroll. The pollutant grid sits
+            // immediately above the chart it drives, so tapping one visibly
+            // changes the other, and wind follows them because its arrow
+            // takes the selected pollutant's colour.
             VStack(alignment: .leading, spacing: 0) {
                 if viewModel.isShowingLastGood {
                     OfflineNotice()
@@ -120,16 +127,33 @@ struct DetailsView: View {
                     .padding(.top, 4)
                     .padding(.bottom, 16)
 
-                // Where that number is heading: the region's outlook. Absent,
-                // not empty, when there is no forecast to show.
-                if let forecast = viewModel.forecast {
-                    AreaForecastView(forecast: forecast)
+                // Tell me next time: the reason to come back, promoted from
+                // near the bottom of the page.
+                if let station = viewModel.station {
+                    SettingsRow(station: station)
                         .padding(.bottom, 16)
                 }
 
-                // What that number looks like outside.
-                StationCamView(state: viewModel.cam)
-                    .padding(.bottom, 16)
+                // What to do about the number above: two short lines, so it
+                // costs little space this high up.
+                if currentAqi > 0 {
+                    HealthGuidanceView(aqi: currentAqi)
+                        .padding(.bottom, 16)
+                }
+
+                Separator().frame(height: 8)
+
+                // Where that number is heading, and what it looks like
+                // outside. The forecast is absent, not empty, when there is
+                // none to show.
+                VStack(alignment: .leading, spacing: 16) {
+                    if let forecast = viewModel.forecast {
+                        AreaForecastView(forecast: forecast)
+                    }
+
+                    StationCamView(state: viewModel.cam)
+                }
+                .padding(.vertical, 16)
 
                 Separator().frame(height: 8)
 
@@ -159,20 +183,6 @@ struct DetailsView: View {
 
                 if let pollutant = viewModel.pollutant {
                     WindView(wind: pollutant.wind, tint: selectedTint(for: pollutant))
-                        .padding(.vertical, 16)
-
-                    Separator().frame(height: 8)
-                }
-
-                if currentAqi > 0 {
-                    HealthGuidanceView(aqi: currentAqi)
-                        .padding(.vertical, 16)
-
-                    Separator().frame(height: 8)
-                }
-
-                if let station = viewModel.station {
-                    SettingsRow(station: station)
                         .padding(.vertical, 16)
 
                     Separator().frame(height: 8)
