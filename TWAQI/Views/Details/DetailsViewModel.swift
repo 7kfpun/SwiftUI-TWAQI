@@ -28,6 +28,11 @@ class DetailsViewModel: ObservableObject {
     /// This station's MOENV webcam, found by joining on name and position.
     @Published var cam: StationCamState = .loading
 
+    /// MOENV's forecast for this station's 空品區, today onwards. Nil until
+    /// loaded, and stays nil when there is none (offline, no match) — the
+    /// screen then shows no forecast section at all.
+    @Published var forecast: AreaForecast?
+
     init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
         self.stationId = stationId
         self.historicalPollutants = historicalPollutants
@@ -42,6 +47,7 @@ class DetailsViewModel: ObservableObject {
                 self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
+                    self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
                 }
             case .failure(let error):
                 print(error.localizedDescription)
@@ -54,6 +60,7 @@ class DetailsViewModel: ObservableObject {
                 self.pollutant = pollutants.first
                 if let pollutant = self.pollutant {
                     self.findCam(name: pollutant.nameLocal, lat: pollutant.lat, lon: pollutant.lon)
+                    self.findForecast(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, title: pollutant.displayArea)
                 }
             case .failure(let error):
                 print(error.localizedDescription)
@@ -89,6 +96,21 @@ class DetailsViewModel: ObservableObject {
             } else if self.cam == .loading {
                 self.cam = .missing
             }
+        }
+    }
+
+    /// Called by both station requests, like `findCam`; the first match wins.
+    private func findForecast(areaLocal: String?, countyLocal: String?, title: String?) {
+        guard forecast == nil, areaLocal != nil || countyLocal != nil else { return }
+
+        AqiForecastStore.shared.forecasts { forecasts in
+            guard self.forecast == nil else { return }
+            self.forecast = AqiForecastMatcher.forecast(
+                areaLocal: areaLocal,
+                countyLocal: countyLocal,
+                in: forecasts,
+                title: title
+            )
         }
     }
 

@@ -227,9 +227,13 @@
 		FD82CBFCB443469ECC82845D /* Faces.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B24479F966EFE547F09CCC2 /* Faces.xcassets */; };
 		FD8DFBB207CC9497466F5457 /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
 		F569AFF1D3B7F9DE11F6BCA0 /* StationCams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BAAB62CFA3EB870547CDDC /* StationCams.swift */; };
+		F714AF684AD9625E01855394 /* AqiForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B92A7319F203C7207887169 /* AqiForecast.swift */; };
 		48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F15F0DF067304D6744238CD /* StationCamStore.swift */; };
+		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
 		D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */; };
+		8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02741CF262046B02509EB59F /* AreaForecastView.swift */; };
 		408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */; };
+		5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -474,9 +478,13 @@
 		FA857C0653969296C45E53AE /* PollutantGridView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantGridView.swift; sourceTree = "<group>"; };
 		FD4960C340833CD7D23354E4 /* StationHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationHeaderView.swift; sourceTree = "<group>"; };
 		51BAAB62CFA3EB870547CDDC /* StationCams.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCams.swift; sourceTree = "<group>"; };
+		7B92A7319F203C7207887169 /* AqiForecast.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecast.swift; sourceTree = "<group>"; };
 		2F15F0DF067304D6744238CD /* StationCamStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamStore.swift; sourceTree = "<group>"; };
+		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
 		37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamView.swift; sourceTree = "<group>"; };
+		02741CF262046B02509EB59F /* AreaForecastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AreaForecastView.swift; sourceTree = "<group>"; };
 		8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamTests.swift; sourceTree = "<group>"; };
+		5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -614,6 +622,7 @@
 				7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */,
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
+				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
 			);
@@ -803,6 +812,7 @@
 				9BE775C56385FDE2BC07B4BB /* WindView.swift */,
 				EF2D9DEA8C6744210C4D3F8C /* StationLocationView.swift */,
 				37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */,
+				02741CF262046B02509EB59F /* AreaForecastView.swift */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -813,6 +823,7 @@
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				2F15F0DF067304D6744238CD /* StationCamStore.swift */,
+				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
 				9EF3D3472393B318009CED32 /* APIResponses.swift */,
 				9E1AC566233FB0A400AC862D /* ColorExtensions.swift */,
 				9E9042E92372F73200DDD4D9 /* DateExtension.swift */,
@@ -860,6 +871,7 @@
 				9E01F534235C3E1900BC3486 /* OneSignalSettings.swift */,
 				9EF3D34523939798009CED32 /* Stations.swift */,
 				51BAAB62CFA3EB870547CDDC /* StationCams.swift */,
+				7B92A7319F203C7207887169 /* AqiForecast.swift */,
 				39D50685ABB6D7832C10DAFD /* AqiTrend.swift */,
 			);
 			path = Models;
@@ -1444,6 +1456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
+				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */,
@@ -1505,8 +1518,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
+				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
+				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,
 				F569AFF1D3B7F9DE11F6BCA0 /* StationCams.swift in Sources */,
+				F714AF684AD9625E01855394 /* AqiForecast.swift in Sources */,
 				C55A1CD97F82B346B2516220 /* StationParsing.swift in Sources */,
 				FA5DA2BD0F7DC4F1239EA042 /* StationRow.swift in Sources */,
 				4A86C8B42555F0665B7BDA86 /* HealthGuidanceView.swift in Sources */,

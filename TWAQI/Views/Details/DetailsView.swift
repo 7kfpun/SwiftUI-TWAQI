@@ -91,6 +91,13 @@ struct DetailsView: View {
                     .padding(.top, 4)
                     .padding(.bottom, 16)
 
+                // Where that number is heading: the region's outlook. Absent,
+                // not empty, when there is no forecast to show.
+                if let forecast = viewModel.forecast {
+                    AreaForecastView(forecast: forecast)
+                        .padding(.bottom, 16)
+                }
+
                 // What that number looks like outside.
                 StationCamView(state: viewModel.cam)
                     .padding(.bottom, 16)
