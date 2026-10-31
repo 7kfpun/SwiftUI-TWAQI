@@ -559,6 +559,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             closestStationView.stationName = closestPollutant.displayName
             closestStationView.locality = closestPollutant.displayLocality
             closestStationView.publishTime = closestPollutant.publishTime
+            closestStationView.timelineContext = timelineHoursAgo > 0
+                ? anchor(forStation: livePollutant.stationId)
+                    .flatMap { MapTimeline.describe(anchor: $0, hoursAgo: timelineHoursAgo) }
+                    .map { "\($0.clock)・\($0.relative)" }
+                : nil
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 

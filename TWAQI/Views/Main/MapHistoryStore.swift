@@ -142,6 +142,30 @@ enum MapTimeline {
         return formatter.string(from: hour)
     }
 
+    /// How the timeline names an hour: the clock time, prefixed 「昨天」 when it
+    /// falls on the day before `anchor`, and how far back it is
+    /// (「3 小時前」, or 「最新」 at the anchor itself).
+    static func describe(anchor: String, hoursAgo: Int) -> (clock: String, relative: String)? {
+        guard let anchorDate = date(anchor) else { return nil }
+        let date = anchorDate.addingTimeInterval(-Double(hoursAgo) * 3600)
+        var clock = clockFormatter.string(from: date)
+        if !calendar.isDate(date, inSameDayAs: anchorDate) {
+            clock = "\("Timeline.yesterday".localized) \(clock)"
+        }
+        let relative = hoursAgo == 0
+            ? "Timeline.latest".localized
+            : String(format: "Timeline.hours_ago".localized, hoursAgo)
+        return (clock, relative)
+    }
+
+    static let clockFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
     /// The publish hour `hoursAgo` before `anchor`.
     static func publishTime(_ anchor: String, hoursAgo: Int) -> String? {
         guard let date = date(anchor) else { return nil }
