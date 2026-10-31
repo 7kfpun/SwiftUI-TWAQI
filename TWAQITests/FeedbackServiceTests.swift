@@ -18,7 +18,6 @@ final class FeedbackServiceTests: XCTestCase {
         email: String = "me@example.com"
     ) -> FeedbackSubmission {
         FeedbackSubmission.make(
-            platform: .ios,
             rating: rating,
             message: "  Add PM1 \n",
             otherFeedback: otherFeedback,
@@ -40,7 +39,6 @@ final class FeedbackServiceTests: XCTestCase {
         XCTAssertEqual(made.email, "me@example.com")
         XCTAssertNil(made.otherFeedback)
         XCTAssertNil(made.name)
-        XCTAssertEqual(made.platform, "ios")
         XCTAssertTrue(made.interviewInterest)
     }
 
@@ -53,6 +51,15 @@ final class FeedbackServiceTests: XCTestCase {
         XCTAssertEqual(made.metaJson?["app_platform"], "ios")
         XCTAssertNotNil(made.metaJson?["device_idiom"])
         XCTAssertNotNil(made.metaJson?["bundle_id"])
+    }
+
+    func testMakeSetsPlatformFromBuild() throws {
+        let made = submission()
+
+        // Tests run in the iOS app, so the automatic value is "ios".
+        XCTAssertEqual(FeedbackPlatform.suggested, .ios)
+        XCTAssertEqual(made.platform, FeedbackPlatform.suggested.rawValue)
+        XCTAssertEqual(try json(made)["platform"] as? String, "ios")
     }
 
     func testMakeClampsRating() {

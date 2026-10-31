@@ -9,12 +9,11 @@
 import SwiftUI
 
 /// Sends feedback to the Directus `twaqi_feedback` collection. The fields
-/// follow the old Airtable form; app and device details are added
-/// automatically and never shown.
+/// follow the old Airtable form minus the platform question; platform, app
+/// and device details are added automatically and never shown.
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var platform = FeedbackPlatform.suggested
     @State private var rating: Int?
     @State private var message = ""
     @State private var otherFeedback = ""
@@ -28,7 +27,6 @@ struct FeedbackView: View {
 
     var body: some View {
         Form {
-            platformSection
             ratingSection
             messageSection
             otherFeedbackSection
@@ -63,18 +61,6 @@ struct FeedbackView: View {
             Text(failure == .offline
                 ? LocalizedStringKey("Feedback.error_offline")
                 : LocalizedStringKey("Feedback.error_generic"))
-        }
-    }
-
-    private var platformSection: some View {
-        Section {
-            Picker(selection: $platform) {
-                ForEach(FeedbackPlatform.allCases) { platform in
-                    Text(platform.title).tag(platform)
-                }
-            } label: {
-                requiredLabel("Feedback.platform")
-            }
         }
     }
 
@@ -202,7 +188,6 @@ struct FeedbackView: View {
     private func send() {
         guard canSend, let rating = rating else { return }
         let submission = FeedbackSubmission.make(
-            platform: platform,
             rating: rating,
             message: message,
             otherFeedback: otherFeedback,
