@@ -116,13 +116,6 @@
 "AirIndex.meaning_so2" = "二氧化硫";
 "AirIndex.meaning_no2" = "二氧化氮";
 
-"AirIndex.description_aqi" = "綜合各項污染物的空氣品質指標，數值愈高表示空氣品質愈差";
-"AirIndex.description_pm25" = "對心血管及神經系統傷害大，可能含有重金屬等污染物";
-"AirIndex.description_pm10" = "顆粒較大的懸浮微粒，濃度過高時容易形成霾害";
-"AirIndex.description_o3" = "對眼睛及呼吸道具有刺激與損害作用";
-"AirIndex.description_co" = "主要來自化石燃料燃燒或火山活動，通常在大氣中含量甚微";
-"AirIndex.description_so2" = "過量接觸可能造成眼睛疼痛及肺部損傷";
-"AirIndex.description_no2" = "來自車輛廢氣、火力發電廠及工業排放，過量吸入會傷害肺部";
 
 "AirStatus.good" = "良好";
 "AirStatus.moderate" = "普通";

@@ -31,32 +31,6 @@ enum AirIndexTypes: String, CaseIterable, Hashable {
         return readableStrings[self.rawValue] ?? ""
     }
 
-    func getMeaning() -> LocalizedStringKey {
-        let units = [
-            "aqi": "AirIndex.meaning_aqi" as LocalizedStringKey,
-            "pm25": "AirIndex.meaning_pm25" as LocalizedStringKey,
-            "pm10": "AirIndex.meaning_pm10" as LocalizedStringKey,
-            "o3": "AirIndex.meaning_o3" as LocalizedStringKey,
-            "co": "AirIndex.meaning_co" as LocalizedStringKey,
-            "so2": "AirIndex.meaning_so2" as LocalizedStringKey,
-            "no2": "AirIndex.meaning_no2" as LocalizedStringKey,
-        ]
-        return units[self.rawValue] ?? ""
-    }
-
-    func getDescription() -> LocalizedStringKey {
-        let units = [
-            "aqi": "AirIndex.description_aqi" as LocalizedStringKey,
-            "pm25": "AirIndex.description_pm25" as LocalizedStringKey,
-            "pm10": "AirIndex.description_pm10" as LocalizedStringKey,
-            "o3": "AirIndex.description_o3" as LocalizedStringKey,
-            "co": "AirIndex.description_co" as LocalizedStringKey,
-            "so2": "AirIndex.description_so2" as LocalizedStringKey,
-            "no2": "AirIndex.description_no2" as LocalizedStringKey,
-        ]
-        return units[self.rawValue] ?? ""
-    }
-
     func getUnit() -> String {
         let units = [
             "aqi": "",

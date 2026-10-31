@@ -652,7 +652,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         mapView.settings.compassButton = true
         // Exposes the markers, by their titles, to VoiceOver.
         mapView.accessibilityElementsHidden = false
-        // mapView.settings.myLocationButton = true
 
         if self.traitCollection.userInterfaceStyle == .dark {
             // User Interface is Dark

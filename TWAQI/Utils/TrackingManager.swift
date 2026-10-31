@@ -49,11 +49,6 @@ struct TrackingManager {
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(enabled)
     }
 
-    static func setUserProperty(key: String, value: String) {
-        // Google Analytics
-        Analytics.setUserProperty(value, forName: key)
-    }
-
     static func logEvent(eventName: String, parameters: [String: Any] = [:]) {
         print("LogEvent", eventName, parameters)
 
