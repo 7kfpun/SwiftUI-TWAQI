@@ -232,6 +232,7 @@
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
 		D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */; };
 		8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02741CF262046B02509EB59F /* AreaForecastView.swift */; };
+		01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4423A411B7699945286E1E56 /* ForecastTranslation.swift */; };
 		408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */; };
 		5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */; };
 /* End PBXBuildFile section */
@@ -483,6 +484,7 @@
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
 		37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamView.swift; sourceTree = "<group>"; };
 		02741CF262046B02509EB59F /* AreaForecastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AreaForecastView.swift; sourceTree = "<group>"; };
+		4423A411B7699945286E1E56 /* ForecastTranslation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastTranslation.swift; sourceTree = "<group>"; };
 		8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamTests.swift; sourceTree = "<group>"; };
 		5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -813,6 +815,7 @@
 				EF2D9DEA8C6744210C4D3F8C /* StationLocationView.swift */,
 				37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */,
 				02741CF262046B02509EB59F /* AreaForecastView.swift */,
+				4423A411B7699945286E1E56 /* ForecastTranslation.swift */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -1519,6 +1522,7 @@
 			files = (
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
+				01BE869ED763860B13699590 /* ForecastTranslation.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,
 				F569AFF1D3B7F9DE11F6BCA0 /* StationCams.swift in Sources */,

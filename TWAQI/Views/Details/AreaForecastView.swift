@@ -21,6 +21,8 @@ struct AreaForecastView: View {
     /// Whether the forecast text runs past the collapsed three lines; the
     /// toggle only appears when there is something more to show.
     @State private var truncated = false
+    /// Bumped when a translation of the forecast text arrives.
+    @State private var translationRevision = 0
 
     private static let cornerRadius: CGFloat = 12
 
@@ -95,16 +97,21 @@ struct AreaForecastView: View {
     }
 
     /// MOENV's forecast text runs to a paragraph per region; show the start
-    /// and let the reader open the rest.
+    /// and let the reader open the rest. Outside Chinese it is shown in the
+    /// reader's language once on-device translation has it, else as written.
     private func contentText(_ content: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(content)
+        // Read so a finished translation redraws this text.
+        _ = translationRevision
+        let shown = ForecastTranslation.display(content)
+
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(shown)
                 .font(.footnote)
                 .foregroundColor(.primary)
                 .lineLimit(expanded ? nil : Self.collapsedLines)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
-                .background(truncationProbe(content))
+                .background(truncationProbe(shown))
             if truncated {
                 Text(expanded ? "Forecast.less" : "Forecast.more")
                     .font(.footnote.weight(.medium))
@@ -122,6 +129,7 @@ struct AreaForecastView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(truncated ? .isButton : [])
+        .translatesForecast(content, revision: $translationRevision)
     }
 
     private static let collapsedLines = 3
