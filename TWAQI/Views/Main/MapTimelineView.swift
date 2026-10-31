@@ -16,7 +16,12 @@ import UIKit
 /// hours before the latest reading and the right end is that reading; there is
 /// no forecast, so nothing lies to the right of "now".
 final class MapTimelineView: UIView {
-    static let preferredHeight: CGFloat = 50
+    /// One row: play, the selected hour, then the track. Kept low so the map
+    /// keeps the room; the touch targets reach past what is drawn.
+    static let preferredHeight: CGFloat = 38
+
+    /// Wide enough for 「昨天 22:00」, so the track doesn't shift as the hour changes.
+    private static let timeColumnWidth: CGFloat = 70
 
     /// The user moved the scrubber. Hours before the latest reading; 0 is live.
     var onChange: ((Int) -> Void)?
@@ -52,25 +57,17 @@ final class MapTimelineView: UIView {
         }
     }
 
-    /// Stations loaded out of those in view, while any are outstanding.
+    /// Stations loaded out of those in view, while any are outstanding. Shown
+    /// in place of 「N 小時前」 until they're in.
     var progress: (done: Int, total: Int)? {
-        didSet {
-            if let progress, progress.done < progress.total {
-                statusLabel.text = String(format: "Timeline.loading".localized, progress.done, progress.total)
-                spinner.startAnimating()
-            } else {
-                statusLabel.text = nil
-                spinner.stopAnimating()
-            }
-        }
+        didSet { updateDetail() }
     }
 
-    private static let playSymbol = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
+    private static let playSymbol = UIImage.SymbolConfiguration(pointSize: 10, weight: .bold)
 
-    private let playButton = UIButton(type: .system)
-    private let titleLabel = UILabel()
-    private let statusLabel = UILabel()
-    private let spinner = UIActivityIndicatorView(style: .medium)
+    private let playButton = ExpandedHitButton(type: .system)
+    private let clockLabel = UILabel()
+    private let detailLabel = UILabel()
     private let track = MapTimelineTrack()
     private let selectionFeedback = UISelectionFeedbackGenerator()
 
@@ -89,7 +86,7 @@ final class MapTimelineView: UIView {
 
         // Same card treatment as the index pills and the closest-station card.
         backgroundColor = .tertiarySystemBackground
-        layer.cornerRadius = 14
+        layer.cornerRadius = Self.preferredHeight / 2
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOffset = CGSize(width: 0, height: 3)
         layer.shadowRadius = 4
@@ -97,40 +94,35 @@ final class MapTimelineView: UIView {
 
         playButton.backgroundColor = IndexSelectorView.accent
         playButton.tintColor = .white
-        playButton.layer.cornerRadius = 15
+        playButton.layer.cornerRadius = 13
         playButton.isEnabled = false
         playButton.addTarget(self, action: #selector(playTapped), for: .touchUpInside)
         isPlaying = false
         addSubview(playButton)
         playButton.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(10)
+            make.left.equalToSuperview().offset(6)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(30)
+            make.width.height.equalTo(26)
         }
 
-        titleLabel.adjustsFontForContentSizeCategory = false
-        addSubview(titleLabel)
-        titleLabel.snp.makeConstraints { make in
-            make.left.equalTo(playButton.snp.right).offset(10)
-            make.top.equalToSuperview().offset(5)
-            make.height.equalTo(17)
-        }
+        clockLabel.font = .monospacedDigitSystemFont(ofSize: 13, weight: .semibold)
+        clockLabel.textColor = .label
+        clockLabel.adjustsFontSizeToFitWidth = true
+        clockLabel.minimumScaleFactor = 0.8
+        detailLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
+        detailLabel.textColor = .secondaryLabel
+        detailLabel.adjustsFontSizeToFitWidth = true
+        detailLabel.minimumScaleFactor = 0.8
 
-        statusLabel.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
-        statusLabel.textColor = .secondaryLabel
-        addSubview(statusLabel)
-        statusLabel.snp.makeConstraints { make in
-            make.right.equalToSuperview().offset(-12)
-            make.centerY.equalTo(titleLabel)
-            make.left.greaterThanOrEqualTo(titleLabel.snp.right).offset(8)
-        }
-
-        spinner.hidesWhenStopped = true
-        spinner.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
-        addSubview(spinner)
-        spinner.snp.makeConstraints { make in
-            make.right.equalTo(statusLabel.snp.left).offset(-2)
-            make.centerY.equalTo(titleLabel)
+        let timeStack = UIStackView(arrangedSubviews: [clockLabel, detailLabel])
+        timeStack.axis = .vertical
+        timeStack.spacing = 0
+        timeStack.isAccessibilityElement = false
+        addSubview(timeStack)
+        timeStack.snp.makeConstraints { make in
+            make.left.equalTo(playButton.snp.right).offset(8)
+            make.centerY.equalToSuperview()
+            make.width.equalTo(Self.timeColumnWidth)
         }
 
         track.isUserInteractionEnabled = false
@@ -138,10 +130,9 @@ final class MapTimelineView: UIView {
         track.onAccessibilityStep = { [weak self] delta in self?.step(by: delta) }
         addSubview(track)
         track.snp.makeConstraints { make in
-            make.left.equalTo(titleLabel)
-            make.right.equalToSuperview().offset(-12)
-            make.top.equalTo(titleLabel.snp.bottom)
-            make.bottom.equalToSuperview().offset(-1)
+            make.left.equalTo(timeStack.snp.right).offset(2)
+            make.right.equalToSuperview().offset(-10)
+            make.top.bottom.equalToSuperview()
         }
 
         updateSelection(animated: false)
@@ -174,28 +165,29 @@ final class MapTimelineView: UIView {
 
     private func updateSelection(animated: Bool) {
         track.setIndex(MapHistoryStore.hours - hoursAgo, animated: animated)
-        titleLabel.attributedText = title
-        track.accessibilityValue = titleLabel.attributedText?.string
+
+        let description = anchor.flatMap { MapTimeline.describe(anchor: $0, hoursAgo: hoursAgo) }
+        clockLabel.text = description?.clock ?? "Timeline.title".localized
+        updateDetail()
+        track.accessibilityValue = [description?.clock, description?.relative]
+            .compactMap { $0 }
+            .joined(separator: " ")
     }
 
-    /// "14:00  3 小時前", "昨天 22:00  19 小時前", or "17:00  最新".
-    private var title: NSAttributedString {
-        let primary: [NSAttributedString.Key: Any] = [
-            .font: UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .semibold),
-            .foregroundColor: UIColor.label,
-        ]
-        let secondary: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .regular),
-            .foregroundColor: UIColor.secondaryLabel,
-        ]
-
-        guard let anchor, let description = MapTimeline.describe(anchor: anchor, hoursAgo: hoursAgo) else {
-            return NSAttributedString(string: "Timeline.title".localized, attributes: secondary)
+    /// 「3 小時前」 / 「最新」, or 「載入中 12/84」 while history is arriving.
+    private func updateDetail() {
+        if let progress, progress.done < progress.total {
+            detailLabel.text = String(format: "Timeline.loading".localized, progress.done, progress.total)
+        } else {
+            detailLabel.text = anchor.flatMap { MapTimeline.describe(anchor: $0, hoursAgo: hoursAgo) }?.relative
         }
+    }
+}
 
-        let text = NSMutableAttributedString(string: description.clock, attributes: primary)
-        text.append(NSAttributedString(string: "  \(description.relative)", attributes: secondary))
-        return text
+/// A small button that still takes a fingertip-sized tap.
+private final class ExpandedHitButton: UIButton {
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        bounds.insetBy(dx: -8, dy: -8).contains(point)
     }
 }
 
@@ -221,8 +213,8 @@ final class MapTimelineTrack: UIView {
     }()
 
     private let steps = MapHistoryStore.hours
-    private let trackY: CGFloat = 9
-    private let thumbSize: CGFloat = 16
+    private let trackY: CGFloat = 14
+    private let thumbSize: CGFloat = 14
     private var index = MapHistoryStore.hours
 
     private let thumb = UIView()
@@ -248,7 +240,7 @@ final class MapTimelineTrack: UIView {
         thumb.backgroundColor = .white
         thumb.layer.cornerRadius = thumbSize / 2
         thumb.layer.borderColor = IndexSelectorView.accent.cgColor
-        thumb.layer.borderWidth = 3.5
+        thumb.layer.borderWidth = 3
         thumb.layer.shadowColor = UIColor.black.cgColor
         thumb.layer.shadowOffset = CGSize(width: 0, height: 1)
         thumb.layer.shadowRadius = 2
@@ -301,7 +293,7 @@ final class MapTimelineTrack: UIView {
         for (index, label) in tickLabels {
             label.sizeToFit()
             var frame = label.frame
-            frame.origin.y = trackY + 7
+            frame.origin.y = trackY + 6
             frame.origin.x = x(for: index) - frame.width / 2
             // The end label ("現在") hangs left of its tick rather than off the bar.
             frame.origin.x = min(max(frame.origin.x, 0), bounds.width - frame.width)
@@ -368,7 +360,7 @@ final class MapTimelineTrack: UIView {
         // Ticks first, so the filled stretch reads as one bar over them.
         for tick in 0...steps {
             let isMajor = majorTicks.contains(tick)
-            let height: CGFloat = isMajor ? 8 : 5
+            let height: CGFloat = isMajor ? 7 : 4
             let line = UIBezierPath(
                 roundedRect: CGRect(x: x(for: tick) - 0.5, y: trackY - height / 2, width: 1, height: height),
                 cornerRadius: 0.5
@@ -407,7 +399,7 @@ final class MapTimelineTrack: UIView {
     /// The bar's own hit area is taller than its drawing, so a thumb that lands
     /// a little above or below the rail still scrubs.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        bounds.insetBy(dx: -8, dy: -12).contains(point)
+        bounds.insetBy(dx: -8, dy: -8).contains(point)
     }
 
     override func accessibilityIncrement() {
