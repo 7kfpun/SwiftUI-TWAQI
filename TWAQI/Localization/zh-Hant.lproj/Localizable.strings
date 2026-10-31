@@ -38,6 +38,7 @@
 "Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能設定 2 個測站";
 
 "Help.help" = "說明";
+"Help.select_a_topic" = "選擇一個項目";
 "Help.do_not_disturb" = "勿擾模式";
 "Help.turn_on_do_not_disturb" = "開啟勿擾模式";
 "Help.start_time" = "開始時間";

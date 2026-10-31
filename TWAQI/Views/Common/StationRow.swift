@@ -168,34 +168,43 @@ struct OfflineEmptyStateView: View {
     }
 }
 
-/// Navigation for the station lists. In a wide window — iPad, an unfolded
-/// foldable, a large split-screen window — the list and the chosen station sit
-/// side by side; in a narrow one it is the usual push stack. Follows the
-/// window as it resizes.
+/// Navigation for the station lists and Help. In a wide window — iPad, an
+/// unfolded iPhone Duo, a large split-screen window — the list and the chosen
+/// page sit side by side; in a narrow one it is the usual push stack. Follows
+/// the window as it resizes, folds and unfolds.
 struct AdaptiveNavigation<Sidebar: View>: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.foldLineX) private var foldLineX
 
     private let sidebar: Sidebar
+    private let placeholderIcon: String
+    private let placeholderMessage: LocalizedStringKey
 
-    init(@ViewBuilder sidebar: () -> Sidebar) {
+    /// The placeholder fills the second column until something is chosen.
+    init(
+        placeholderIcon: String = "aqi.medium",
+        placeholderMessage: LocalizedStringKey = "Details.select_a_station",
+        @ViewBuilder sidebar: () -> Sidebar
+    ) {
         self.sidebar = sidebar()
+        self.placeholderIcon = placeholderIcon
+        self.placeholderMessage = placeholderMessage
     }
 
     var body: some View {
         if horizontalSizeClass == .regular {
             if #available(iOS 16.0, *) {
-                // Both columns always: a hideable list would leave an iPad in
-                // portrait opening on an empty "select a station" page.
-                NavigationSplitView(columnVisibility: .constant(.all)) {
-                    if #available(iOS 17.0, *) {
-                        sidebar.toolbar(removing: .sidebarToggle)
-                    } else {
-                        sidebar
+                if foldLineX == nil {
+                    // iPad and the like: laid out exactly as without a fold.
+                    splitView(sidebarWidth: nil)
+                } else {
+                    GeometryReader { geometry in
+                        splitView(sidebarWidth: FoldLine.leadingWidth(
+                            foldX: foldLineX,
+                            in: Self.fullFrame(of: geometry)
+                        ))
                     }
-                } detail: {
-                    noSelection
                 }
-                .navigationSplitViewStyle(.balanced)
             } else {
                 NavigationView {
                     sidebar
@@ -211,8 +220,55 @@ struct AdaptiveNavigation<Sidebar: View>: View {
         }
     }
 
+    /// On an unfolded iPhone Duo the list ends on the fold, so the list and
+    /// the page each get a half of the display to themselves. Elsewhere the
+    /// system's own sidebar width.
+    @available(iOS 16.0, *)
+    @ViewBuilder
+    private func splitView(sidebarWidth: CGFloat?) -> some View {
+        if let sidebarWidth = sidebarWidth {
+            splitView { sidebarColumn.navigationSplitViewColumnWidth(sidebarWidth) }
+        } else {
+            splitView { sidebarColumn }
+        }
+    }
+
+    @available(iOS 16.0, *)
+    private func splitView<Column: View>(@ViewBuilder sidebar: () -> Column) -> some View {
+        // Both columns always: a hideable list would leave an iPad in
+        // portrait opening on an empty "select a station" page.
+        NavigationSplitView(columnVisibility: .constant(.all)) {
+            sidebar()
+        } detail: {
+            noSelection
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+
+    @ViewBuilder
+    private var sidebarColumn: some View {
+        if #available(iOS 17.0, *) {
+            sidebar.toolbar(removing: .sidebarToggle)
+        } else {
+            sidebar
+        }
+    }
+
     private var noSelection: some View {
-        EmptyStateView(icon: "aqi.medium", message: "Details.select_a_station")
+        EmptyStateView(icon: placeholderIcon, message: placeholderMessage)
+    }
+
+    /// The split view's frame in the window, safe areas included: its columns
+    /// are measured from the window's edge, not from inside the safe area.
+    private static func fullFrame(of geometry: GeometryProxy) -> CGRect {
+        let frame = geometry.frame(in: .global)
+        let insets = geometry.safeAreaInsets
+        return CGRect(
+            x: frame.minX - insets.leading,
+            y: frame.minY - insets.top,
+            width: frame.width + insets.leading + insets.trailing,
+            height: frame.height + insets.top + insets.bottom
+        )
     }
 }
 

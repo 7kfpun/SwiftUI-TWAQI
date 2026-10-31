@@ -217,10 +217,12 @@
 		F72539BC90E373EA047A4FEF /* Pollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF3D3502393B9C6009CED32 /* Pollutants.swift */; };
 		F84590CCFCE369C4F2850862 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3A29346F1E1C85233A4C40C9 /* FirebaseCrashlytics */; };
 		F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */; };
+		8984CF8AABB7A4350DE4E955 /* FoldLineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C768A96173FB4F7A29D07C /* FoldLineTests.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */; };
 		7D3E5A1C2B4F4E6A9C0D1E35 /* FeedbackServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */; };
 		FA00031F472BB3EEFB8D525F /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		FA5DA2BD0F7DC4F1239EA042 /* StationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA61685800F418B19D88A /* StationRow.swift */; };
+		576B8448301202FDB137FF4E /* FoldLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B28C564E6535A1380C29C4 /* FoldLine.swift */; };
 		FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A225060AF021643D29C12E0 /* StationParsingTests.swift */; };
 		3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */; };
 		FD65596098C2443A3132468F /* TWAQIWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 272BB792F0EDC20873E7A119 /* TWAQIWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -232,6 +234,7 @@
 		575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */; };
 		89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28105738488F92DC053659E1 /* StationCamHistoryCache.swift */; };
 		4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */; };
+		E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B28C564E6535A1380C29C4 /* FoldLine.swift */; };
 		B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7601D6C9CFBFEDB76837949B /* PollutantCache.swift */; };
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
 		D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */; };
@@ -375,6 +378,7 @@
 		88436DBC746CC67A1C080E2F /* StationMarker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationMarker.swift; sourceTree = "<group>"; };
 		89FC168EDE496D71C4BDD43B /* TWAQIWatchWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TWAQIWatchWidget.entitlements; sourceTree = "<group>"; };
 		908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiTrendTests.swift; sourceTree = "<group>"; };
+		17C768A96173FB4F7A29D07C /* FoldLineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoldLineTests.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardTests.swift; sourceTree = "<group>"; };
 		912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIWatchWidget.swift; sourceTree = "<group>"; };
 		913DCC07EB40441B55E33524 /* TWAQIWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TWAQIWatchApp.swift; sourceTree = "<group>"; };
@@ -490,6 +494,7 @@
 		DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamFrameCache.swift; sourceTree = "<group>"; };
 		28105738488F92DC053659E1 /* StationCamHistoryCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamHistoryCache.swift; sourceTree = "<group>"; };
 		CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetention.swift; sourceTree = "<group>"; };
+		46B28C564E6535A1380C29C4 /* FoldLine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoldLine.swift; sourceTree = "<group>"; };
 		7601D6C9CFBFEDB76837949B /* PollutantCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCache.swift; sourceTree = "<group>"; };
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
 		37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamView.swift; sourceTree = "<group>"; };
@@ -632,6 +637,7 @@
 			children = (
 				64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */,
 				908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */,
+				17C768A96173FB4F7A29D07C /* FoldLineTests.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E15 /* ShareCardTests.swift */,
 				7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */,
 				B7E1D2A40C5F4A6B8D9E0F03 /* PushServiceTests.swift */,
@@ -842,6 +848,7 @@
 				DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */,
 				28105738488F92DC053659E1 /* StationCamHistoryCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
+				46B28C564E6535A1380C29C4 /* FoldLine.swift */,
 				7601D6C9CFBFEDB76837949B /* PollutantCache.swift */,
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
 				9EF3D3472393B318009CED32 /* APIResponses.swift */,
@@ -1482,6 +1489,7 @@
 				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
+				8984CF8AABB7A4350DE4E955 /* FoldLineTests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E16 /* ShareCardTests.swift in Sources */,
 				7D3E5A1C2B4F4E6A9C0D1E35 /* FeedbackServiceTests.swift in Sources */,
 				B7E1D2A40C5F4A6B8D9E0F13 /* PushServiceTests.swift in Sources */,
@@ -1549,6 +1557,7 @@
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
+				E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */,
 				B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,
 				F569AFF1D3B7F9DE11F6BCA0 /* StationCams.swift in Sources */,
@@ -1684,6 +1693,7 @@
 				F222ED7CAD5D5A66F322C7C6 /* StationWindow.swift in Sources */,
 				67F6FF0F7A46CB169EEA6783 /* BrowserView.swift in Sources */,
 				659789303E11B311EAE3A700 /* StationRow.swift in Sources */,
+				576B8448301202FDB137FF4E /* FoldLine.swift in Sources */,
 				1A0FBDB593A6B53C35E9F547 /* AqiScaleView.swift in Sources */,
 				D6DCD32D46848575084A57B7 /* HealthGuidanceView.swift in Sources */,
 				4B3A9AD56DCC8F7DDB3B9748 /* LabelView.swift in Sources */,

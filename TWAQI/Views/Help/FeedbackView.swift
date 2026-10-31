@@ -41,7 +41,12 @@ struct FeedbackView: View {
             TrackingManager.logEvent(eventName: "open_feedback_form")
         }
         .alert("Feedback.sent_title", isPresented: $showingSuccess) {
-            Button("OK") { dismiss() }
+            Button("OK") {
+                // In a wide window this is the column beside Help, which
+                // `dismiss` can't close: empty it so it can't be sent twice.
+                clear()
+                dismiss()
+            }
         } message: {
             Text("Feedback.sent_message")
         }
@@ -183,6 +188,15 @@ struct FeedbackView: View {
             && rating != nil
             && !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && FeedbackSubmission.isValidEmail(email)
+    }
+
+    private func clear() {
+        rating = nil
+        message = ""
+        otherFeedback = ""
+        interviewInterest = false
+        name = ""
+        email = ""
     }
 
     private func send() {

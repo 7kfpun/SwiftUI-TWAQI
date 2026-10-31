@@ -34,6 +34,7 @@
 "Settings.you_can_only_enable_at_most_for_two_stations" = "You can only enable at most for 2 stations";
 
 "Help.help" = "Help";
+"Help.select_a_topic" = "Select a topic";
 "Help.do_not_disturb" = "Do Not Disturb";
 "Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
 "Help.start_time" = "Start Time";
