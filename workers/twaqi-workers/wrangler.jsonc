@@ -7,7 +7,7 @@
 // Public URLs:
 //   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
 //     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
-//     https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg  (hourly, Taiwan time, kept 7 days)
+//     https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg  (hourly, Taiwan time, rolling 24 hours)
 //     https://twaqi.app.wahthefox.com/manifest.json
 //   Worker (health, webcam status/sync/reads under /station-cams, forecast status/sync under /forecast):
 //     https://twaqi-workers.710kfpun.workers.dev

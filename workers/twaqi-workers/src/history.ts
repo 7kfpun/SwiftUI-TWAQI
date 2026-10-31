@@ -6,8 +6,12 @@
 // the bucket. Kept to plain functions (no Workers APIs) so they can be tested
 // with `node --test`.
 
-/** Days of hourly frames kept in R2. The app scrubs 24 hours and keeps its own copies at most a week. */
-export const HISTORY_DAYS = 7
+/**
+ * Days of hourly frames kept in R2: 1, so each site holds a rolling 24 hourly
+ * slots (writing hour H deletes hour H the day before). The app scrubs those 24
+ * hours and keeps its own offline copies for up to a week.
+ */
+export const HISTORY_DAYS = 1
 
 /** Hourly objects never change once written. */
 export const HISTORY_CACHE_CONTROL = 'public, max-age=86400'

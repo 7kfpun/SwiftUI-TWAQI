@@ -11,9 +11,10 @@ test('hour key comes straight off the Taiwan-local MOENV stamp', () => {
   assert.equal(hourKey('001', 'nope'), null)
 })
 
-test('expired key is the same hour HISTORY_DAYS earlier, across month ends', () => {
-  assert.equal(expiredHourKey('001', '202610302210'), 'stations/001/2026-10-23/22.jpg')
-  assert.equal(expiredHourKey('001', '202611030010'), 'stations/001/2026-10-27/00.jpg')
+test('expired key is the same hour HISTORY_DAYS (1) earlier, across month and year ends', () => {
+  assert.equal(expiredHourKey('001', '202610302210'), 'stations/001/2026-10-29/22.jpg')
+  assert.equal(expiredHourKey('001', '202611010010'), 'stations/001/2026-10-31/00.jpg')
+  assert.equal(expiredHourKey('001', '202701010300'), 'stations/001/2026-12-31/03.jpg')
   assert.equal(expiredHourKey('001', '202701020300', 7), 'stations/001/2026-12-26/03.jpg')
 })
 
