@@ -111,17 +111,20 @@ struct APIManager {
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
+                debugPrint(response)
+                // Every path calls back: transport/validation failure, an
+                // undecodable body, or success. Only a decoded response is saved.
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                        PollutantCache.shared.save(countryCode: countryCode, response: data)
+                        completionHandler(.success(pollutantsResponse.data))
+                    } catch {
+                        print(error)
                         completionHandler(.failure(.networkError))
-                        return
                     }
-
-                    debugPrint(response)
-                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
-                    PollutantCache.shared.save(countryCode: countryCode, response: data)
-                    completionHandler(.success(pollutantsResponse.data))
-                } catch {
+                case .failure(let error):
                     print(error)
                     completionHandler(.failure(.networkError))
                 }
@@ -141,17 +144,20 @@ struct APIManager {
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
-                do {
-                    guard let data: Data = response.data else {
+                debugPrint(response)
+                // Every path calls back: transport/validation failure, an
+                // undecodable body, or success. Only a decoded response is saved.
+                switch response.result {
+                case .success(let data):
+                    do {
+                        let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                        PollutantCache.shared.saveStations(response: data)
+                        completionHandler(.success(pollutantsResponse.data))
+                    } catch {
+                        print(error)
                         completionHandler(.failure(.networkError))
-                        return
                     }
-
-                    debugPrint(response)
-                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
-                    PollutantCache.shared.saveStations(response: data)
-                    completionHandler(.success(pollutantsResponse.data))
-                } catch {
+                case .failure(let error):
                     print(error)
                     completionHandler(.failure(.networkError))
                 }
