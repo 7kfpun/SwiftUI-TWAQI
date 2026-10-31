@@ -181,6 +181,7 @@
 "Details.cam_source" = "Image: MOENV";
 "Details.no_cam" = "This station has no camera";
 "Details.cam_unavailable" = "Couldn't load the camera image";
+"Details.cam_showing_saved" = "Couldn't load the latest image — showing the last one saved";
 
 /* Share card */
 "Share.share" = "Share";

@@ -13,6 +13,11 @@ import WidgetKit
 
 @main
 struct TWAQIWatchApp: App {
+    init() {
+        // Readings cached more than a week ago are never shown; drop them.
+        WatchStore.purgeExpiredReadings()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

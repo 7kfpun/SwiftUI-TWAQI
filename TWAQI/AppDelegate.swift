@@ -29,6 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // build, only reach the app group once they're mirrored.
         WidgetBridge.publish(favouriteStationIds: SettingsStore().savedFavouriteStations)
 
+        // Offline data saved more than a week ago is never shown; delete it.
+        OfflineCacheRetention.purgeInBackground()
+
         // A device excluded from reporting (Help's hidden version toggle, or any
         // DEBUG run) starts none of the crash reporters.
         let reportsThisLaunch = !TrackingManager.isExcludedThisLaunch

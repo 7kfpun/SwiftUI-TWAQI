@@ -87,13 +87,17 @@ final class StationCamStore {
         .resume()
     }
 
+    /// A file older than `OfflineCacheRetention.maxAge` is not used, even as
+    /// a last good copy.
     private func loadFromDisk() {
+        let modified = OfflineCacheRetention.modificationDate(of: cacheFile)
         guard
+            !OfflineCacheRetention.isExpired(modified),
             let data = try? Data(contentsOf: cacheFile),
             let manifest = try? JSONDecoder().decode(StationCamManifest.self, from: data)
         else { return }
 
         cams = manifest.cams
-        fetchedAt = (try? FileManager.default.attributesOfItem(atPath: cacheFile.path))?[.modificationDate] as? Date
+        fetchedAt = modified
     }
 }
