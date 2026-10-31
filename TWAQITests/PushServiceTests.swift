@@ -210,3 +210,52 @@ private struct AnyEncodable: Encodable {
     init(_ value: Encodable) { self.value = value }
     func encode(to encoder: Encoder) throws { try value.encode(to: encoder) }
 }
+
+/// FOX-20: the pure parts of keeping alerts and Favourites together.
+final class FavouriteAlertsTests: XCTestCase {
+    private var suiteName: String!
+    private var defaults: UserDefaults!
+
+    override func setUp() {
+        super.setUp()
+        suiteName = "FavouriteAlertsTests-\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suiteName)
+    }
+
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: suiteName)
+        super.tearDown()
+    }
+
+    private func store(_ alerts: [String: StationAlerts], key: String) throws {
+        defaults.set(try JSONEncoder().encode(alerts), forKey: key)
+    }
+
+    func testTagCodeIsEnglishNameInTaiwanAndIdElsewhere() {
+        XCTAssertEqual(FavouriteAlerts.tagCode(countryCode: "twn", name: "Songshan", stationId: 126), "Songshan")
+        XCTAssertEqual(FavouriteAlerts.tagCode(countryCode: "tha", name: "Bangkok", stationId: 901), "901")
+    }
+
+    func testCandidateTagCodesTryNameThenIdAndSkipBlankName() {
+        XCTAssertEqual(FavouriteAlerts.candidateTagCodes(name: "Songshan", stationId: 126), ["Songshan", "126"])
+        XCTAssertEqual(FavouriteAlerts.candidateTagCodes(name: "", stationId: 126), ["126"])
+    }
+
+    func testKnownAlertsPrefersUnsentOverSent() throws {
+        try store(["126": StationAlerts(above: 150)], key: "directusPushWantedAlerts")
+        try store(["126": StationAlerts(above: 100), "7": StationAlerts(below: 20)], key: "directusPushSyncedAlerts")
+
+        XCTAssertEqual(DirectusPushMirror.knownAlerts(stationId: 126, defaults: defaults), StationAlerts(above: 150))
+        XCTAssertEqual(DirectusPushMirror.knownAlerts(stationId: 7, defaults: defaults), StationAlerts(below: 20))
+        XCTAssertNil(DirectusPushMirror.knownAlerts(stationId: 8, defaults: defaults))
+    }
+
+    func testChangedNotificationIsReadForItsStationOnly() {
+        let notification = Notification(name: FavouriteAlerts.changed, userInfo: [
+            FavouriteAlerts.stationIdKey: 126,
+            FavouriteAlerts.isOnKey: false,
+        ])
+        XCTAssertEqual(FavouriteAlerts.isOn(in: notification, stationId: 126), false)
+        XCTAssertNil(FavouriteAlerts.isOn(in: notification, stationId: 7))
+    }
+}

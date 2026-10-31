@@ -331,10 +331,23 @@ final class StationCamHistoryCacheTests: XCTestCase {
         guard case .missing = load(cache, hour) else { return XCTFail("a week-old frame must not be shown") }
     }
 
+    /// Compared as paths, not URLs: a URL's trailing "/" comes from
+    /// `isDirectory` — or, without it, from whether the folder exists on the
+    /// machine yet — and says nothing about where the folder is.
     func testDefaultDirectoryIsInsideTheCamFramesDirectoryThePurgeScans() {
+        let history = StationCamHistoryCache.defaultDirectory.standardizedFileURL.path
+
+        // Built the way `OfflineCacheRetention.purge` builds the folder it scans.
+        let purgeScans = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(StationCamFrameCache.directoryName, isDirectory: true)
+            .appendingPathComponent(StationCamHistoryCache.directoryName, isDirectory: true)
+        XCTAssertEqual(history, purgeScans.standardizedFileURL.path)
+
         XCTAssertEqual(
-            StationCamHistoryCache.defaultDirectory,
-            StationCamFrameCache.defaultDirectory.appendingPathComponent(StationCamHistoryCache.directoryName)
+            history,
+            StationCamFrameCache.defaultDirectory
+                .appendingPathComponent(StationCamHistoryCache.directoryName)
+                .standardizedFileURL.path
         )
     }
 

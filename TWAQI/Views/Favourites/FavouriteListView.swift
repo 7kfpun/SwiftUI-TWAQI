@@ -13,6 +13,10 @@ struct FavouriteListView: View {
     // Owns its view model — see the note in DetailsView.
     @StateObject private var viewModel: FavouriteListViewModel
 
+    /// Stations waiting on the reader before they leave Favourites, because
+    /// at least one has an alert that would be turned off with it.
+    @State private var pendingRemoval: [Int]?
+
     var body: some View {
         AdaptiveNavigation {
             Group {
@@ -36,7 +40,7 @@ struct FavouriteListView: View {
                 }
             }
             .navigationBarTitle("FavouriteList.favourites")
-            .navigationBarItems(leading: editButton, trailing: removeAllButton)
+            .navigationBarItems(leading: editButton)
             // Insets the scroll content so the last row clears the banner,
             // instead of padding the content by a guessed height.
             .safeAreaInset(edge: .bottom) {
@@ -44,6 +48,25 @@ struct FavouriteListView: View {
             }
         }
         .onAppear(perform: getData)
+        .alert(
+            Text("Favourites.remove_station_with_alerts_title"),
+            isPresented: Binding(
+                get: { pendingRemoval != nil },
+                set: { if !$0 { pendingRemoval = nil } }
+            ),
+            presenting: pendingRemoval
+        ) { stationIds in
+            Button(role: .destructive) {
+                commitRemoval(stationIds)
+            } label: {
+                Text("Favourites.remove_and_turn_off_alerts")
+            }
+            Button(role: .cancel, action: {}) {
+                Text("Favourites.cancel")
+            }
+        } message: { _ in
+            Text("Favourites.remove_station_with_alerts_message")
+        }
     }
 
     private var list: some View {
@@ -63,7 +86,14 @@ struct FavouriteListView: View {
                         StationRow(
                             title: pollutant.displayName,
                             subtitle: pollutant.displayLocality,
-                            reading: .init(aqi: pollutant.aqi, publishTime: pollutant.publishTime)
+                            reading: .init(
+                                aqi: pollutant.aqi,
+                                publishTime: pollutant.publishTime,
+                                pollutants: Self.keyPollutants.map {
+                                    .init(type: $0, value: pollutant.getValue(airIndexType: $0))
+                                }
+                            ),
+                            alertsOn: viewModel.alertedStationIds.contains(pollutant.stationId)
                         )
                     }
                 }
@@ -81,15 +111,9 @@ struct FavouriteListView: View {
         }
     }
 
-    @ViewBuilder
-    private var removeAllButton: some View {
-        if !settings.savedFavouriteStations.isEmpty {
-            Button(action: removeAll) {
-                Text("Favourites.remove_all_your_saved_stations")
-                    .font(.footnote)
-            }
-        }
-    }
+    /// The pollutants that most often set Taiwan's AQI, shown on each row.
+    /// The station screen has all six.
+    private static let keyPollutants: [AirIndexTypes] = [.pm25, .pm10, .o3]
 
     init() {
         _viewModel = StateObject(wrappedValue: FavouriteListViewModel())
@@ -100,14 +124,13 @@ struct FavouriteListView: View {
     }
 
     private func remove(at offsets: IndexSet) {
-        let removedIds = offsets.map { viewModel.favouritePollutants[$0].stationId }
-        settings.savedFavouriteStations.removeAll { removedIds.contains($0) }
-        viewModel.favouritePollutants.remove(atOffsets: offsets)
-
-        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
-            "label": "off",
-            "stationId": removedIds.first ?? 0,
-        ])
+        let ids = offsets.map { viewModel.favouritePollutants[$0].stationId }
+        // Removes at once, unless an alert would go with it: then asks first.
+        if viewModel.needsConfirmation(toRemove: ids) {
+            pendingRemoval = ids
+        } else {
+            commitRemoval(ids)
+        }
     }
 
     /// Saves the new order, which the widget's first favourite follows.
@@ -119,10 +142,14 @@ struct FavouriteListView: View {
         TrackingManager.logEvent(eventName: "favourite_station_reordered")
     }
 
-    private func removeAll() {
-        settings.savedFavouriteStations = []
-        viewModel.favouritePollutants = []
-        TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+    private func commitRemoval(_ stationIds: [Int]) {
+        viewModel.remove(stationIds: stationIds)
+        pendingRemoval = nil
+
+        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+            "label": "off",
+            "stationId": stationIds.first ?? 0,
+        ])
     }
 }
 

@@ -58,8 +58,4 @@ final class Favourites {
     func remove(atOffsets offsets: IndexSet) {
         stationIds.remove(atOffsets: offsets)
     }
-
-    func removeAll() {
-        stationIds = []
-    }
 }

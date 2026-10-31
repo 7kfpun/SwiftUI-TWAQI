@@ -15,17 +15,36 @@ struct StationRow: View {
     var subtitle: String?
     /// Omitted on the search screen, where no reading has been fetched.
     var reading: Reading?
+    /// A bell beside the name: the station has an AQI alert on.
+    var alertsOn = false
 
     struct Reading {
         var aqi: Double
         var publishTime: String?
+        /// A few pollutants, one line under the locality. Empty leaves the
+        /// row as just the AQI.
+        var pollutants: [PollutantValue] = []
+    }
+
+    struct PollutantValue: Hashable {
+        var type: AirIndexTypes
+        var value: Double
     }
 
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.body)
+                HStack(spacing: 6) {
+                    Text(title)
+                        .font(.body)
+
+                    if alertsOn {
+                        Image(systemName: "bell.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .accessibilityLabel(Text("Favourites.alerts_on"))
+                    }
+                }
 
                 if let subtitle = subtitle {
                     Text(subtitle)
@@ -33,6 +52,11 @@ struct StationRow: View {
                         .fontWeight(.light)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                }
+
+                if let pollutants = reading?.pollutants, !pollutants.isEmpty {
+                    pollutantLine(pollutants)
+                        .padding(.top, 2)
                 }
 
                 if let publishTime = reading?.publishTime {
@@ -47,6 +71,31 @@ struct StationRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// "PM2.5 18  PM10 32  O3 41.2" as one line of text, each value in its
+    /// band colour like the station screen's grid. One `Text` so it shrinks
+    /// as a whole at large type sizes rather than wrapping mid-pair. Zero is
+    /// "—": several stations report 0.0 for what they don't measure.
+    private func pollutantLine(_ pollutants: [PollutantValue]) -> some View {
+        let line = pollutants.enumerated().reduce(Text(verbatim: "")) { text, item in
+            let (index, pollutant) = item
+            let hasReading = pollutant.value > 0
+            let status = AirStatuses.checkAirStatus(airIndexType: pollutant.type, value: pollutant.value)
+            let value = Text(hasReading ? pollutant.value.format(f: pollutant.type.getFormat()) : "—")
+                .fontWeight(.medium)
+                .foregroundColor(hasReading ? Color(status.getColor()) : .secondary)
+            return text
+                + Text(verbatim: index == 0 ? "" : "   ")
+                + Text(verbatim: "\(pollutant.type.toString()) ").foregroundColor(.secondary)
+                + value
+        }
+
+        return line
+            .font(.caption)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
     }
 
     private func readingBadge(aqi: Double) -> some View {
@@ -171,7 +220,10 @@ struct StationRow_Previews: PreviewProvider {
     static var previews: some View {
         List {
             StationRow(title: "Keelung", subtitle: "Xinyi District, Keelung City",
-                       reading: .init(aqi: 54, publishTime: "2026-08-07T22:00:00"))
+                       reading: .init(aqi: 54, publishTime: "2026-08-07T22:00:00", pollutants: [
+                           .init(type: .pm25, value: 18), .init(type: .pm10, value: 32), .init(type: .o3, value: 41.2),
+                       ]),
+                       alertsOn: true)
             StationRow(title: "Songshan", subtitle: "Songshan District, Taipei City",
                        reading: .init(aqi: 141, publishTime: "2026-08-07T22:00:00"))
             StationRow(title: "臺灣大道", subtitle: nil, reading: nil)

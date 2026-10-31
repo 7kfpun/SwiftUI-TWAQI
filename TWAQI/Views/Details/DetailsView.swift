@@ -74,10 +74,17 @@ struct DetailsView: View {
     }
 
     private var favouriteButton: some View {
-        Button(action: { self.viewModel.favouriteStationToggle() }) {
-            Image(systemName: self.viewModel.isFavourited ? "heart.fill" : "heart")
+        // `settings` rather than the view model: the environment store
+        // redraws when Favourites or an alert switch changes the list.
+        let isFavourited = settings.savedFavouriteStations.contains(viewModel.stationId)
+
+        return Button(action: { self.viewModel.favouriteStationToggle() }) {
+            Image(systemName: isFavourited ? "heart.fill" : "heart")
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel(Text(isFavourited
+            ? LocalizedStringKey("Favourites.remove_from_favourites")
+            : LocalizedStringKey("Favourites.add_to_favourites")))
     }
 
     private var page: some View {
@@ -189,6 +196,21 @@ struct DetailsView: View {
             self.getData()
         }
         .translatesOnDevice(translatableLocation, revision: $translationRevision)
+        // On the page, not the heart: an alert on a navigation-bar item's
+        // content may not present on iOS 15.
+        .alert(
+            Text("Favourites.remove_station_with_alerts_title"),
+            isPresented: $viewModel.isConfirmingUnfavourite
+        ) {
+            Button(role: .destructive, action: viewModel.removeFromFavourites) {
+                Text("Favourites.remove_and_turn_off_alerts")
+            }
+            Button(role: .cancel, action: {}) {
+                Text("Favourites.cancel")
+            }
+        } message: {
+            Text("Favourites.remove_station_with_alerts_message")
+        }
     }
 
     /// Band colour of the pollutant the page is currently showing, so the wind

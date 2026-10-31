@@ -154,6 +154,7 @@
 		9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */; };
 		B7E1D2A40C5F4A6B8D9E0F11 /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */; };
 		B7E1D2A40C5F4A6B8D9E0F12 /* DirectusPushMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */; };
+		FA0E20A1F0C5A1E0000B0012 /* FavouriteAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0E20A1F0C5A1E0000B0002 /* FavouriteAlerts.swift */; };
 		B7E1D2A40C5F4A6B8D9E0F13 /* PushServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1D2A40C5F4A6B8D9E0F03 /* PushServiceTests.swift */; };
 		9EDBA6EE23649079009B4CC4 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6ED23649079009B4CC4 /* APIManager.swift */; };
 		9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDF685623838CDA00B08589 /* MyLocationButton.swift */; };
@@ -450,6 +451,7 @@
 		9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalManager.swift; sourceTree = "<group>"; };
 		B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
 		B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DirectusPushMirror.swift; sourceTree = "<group>"; };
+		FA0E20A1F0C5A1E0000B0002 /* FavouriteAlerts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FavouriteAlerts.swift; sourceTree = "<group>"; };
 		B7E1D2A40C5F4A6B8D9E0F03 /* PushServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushServiceTests.swift; sourceTree = "<group>"; };
 		9EDBA6ED23649079009B4CC4 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		9EDF685623838CDA00B08589 /* MyLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLocationButton.swift; sourceTree = "<group>"; };
@@ -868,6 +870,7 @@
 				9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */,
 				B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */,
 				B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */,
+				FA0E20A1F0C5A1E0000B0002 /* FavouriteAlerts.swift */,
 				9EE9E6BD235C8F150046A590 /* SettingsStore.swift */,
 				9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */,
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
@@ -1631,6 +1634,7 @@
 				9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */,
 				B7E1D2A40C5F4A6B8D9E0F11 /* PushService.swift in Sources */,
 				B7E1D2A40C5F4A6B8D9E0F12 /* DirectusPushMirror.swift in Sources */,
+				FA0E20A1F0C5A1E0000B0012 /* FavouriteAlerts.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */,
 				9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */,
