@@ -222,6 +222,7 @@
 		7D3E5A1C2B4F4E6A9C0D1E35 /* FeedbackServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D3E5A1C2B4F4E6A9C0D1E23 /* FeedbackServiceTests.swift */; };
 		FA00031F472BB3EEFB8D525F /* HistoricalPollutants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF5D23965286002F8DA4 /* HistoricalPollutants.swift */; };
 		FA5DA2BD0F7DC4F1239EA042 /* StationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A8CA61685800F418B19D88A /* StationRow.swift */; };
+		576B8448301202FDB137FF4E /* FoldLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B28C564E6535A1380C29C4 /* FoldLine.swift */; };
 		FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A225060AF021643D29C12E0 /* StationParsingTests.swift */; };
 		3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */; };
 		FD65596098C2443A3132468F /* TWAQIWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 272BB792F0EDC20873E7A119 /* TWAQIWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -1692,6 +1693,7 @@
 				F222ED7CAD5D5A66F322C7C6 /* StationWindow.swift in Sources */,
 				67F6FF0F7A46CB169EEA6783 /* BrowserView.swift in Sources */,
 				659789303E11B311EAE3A700 /* StationRow.swift in Sources */,
+				576B8448301202FDB137FF4E /* FoldLine.swift in Sources */,
 				1A0FBDB593A6B53C35E9F547 /* AqiScaleView.swift in Sources */,
 				D6DCD32D46848575084A57B7 /* HealthGuidanceView.swift in Sources */,
 				4B3A9AD56DCC8F7DDB3B9748 /* LabelView.swift in Sources */,

@@ -748,8 +748,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// The map keeps its centre as the panel takes its width, so a station
     /// tapped near the panel's side can end up behind it. Pans to it then.
     private func revealPanelStation() {
+        // Only the supported country's stations open, and ids are only
+        // unique within a country.
         guard let stationId = panelStationId,
-              let pollutant = countryPollutants.values.lazy.flatMap({ $0 })
+              let pollutant = supportedCountryCode
+                .flatMap({ countryPollutants[$0] })?
                 .first(where: { $0.stationId == stationId }) else { return }
 
         let coordinate = CLLocationCoordinate2D(latitude: pollutant.lat, longitude: pollutant.lon)

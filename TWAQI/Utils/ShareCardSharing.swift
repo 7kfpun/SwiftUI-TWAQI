@@ -20,10 +20,10 @@ enum ShareCardSharing {
     /// take without cropping.
     private static let scale: CGFloat = 3
 
-    /// `sourceFrame` is the share button's frame in the window, for the
-    /// popover's arrow in a wide window. Empty falls back to the top-right
-    /// corner, where the button usually is.
-    static func share(card: ShareCardView, stationId: Int, from sourceFrame: CGRect = .zero) {
+    /// `sourceView` sits behind the share button, for the popover's arrow in
+    /// a wide window. Without one it points at the top-right corner, where
+    /// the button usually is.
+    static func share(card: ShareCardView, stationId: Int, from sourceView: UIView? = nil) {
         guard let image = render(card) else { return }
 
         let status = AirStatuses.checkAirStatus(airIndexType: .aqi, value: card.aqi)
@@ -36,7 +36,7 @@ enum ShareCardSharing {
 
         present(
             items: [CardItemSource(image: image, title: message), "\(message)\n\(appStoreURL.absoluteString)"],
-            sourceFrame: sourceFrame
+            sourceView: sourceView
         )
 
         TrackingManager.logEvent(eventName: "share_card", parameters: [
@@ -73,24 +73,24 @@ enum ShareCardSharing {
     /// Presented from UIKit rather than a SwiftUI sheet: the station screen is
     /// also shown in a sheet over the map, and a share sheet inside a sheet
     /// looks wrong on iPad.
-    private static func present(items: [Any], sourceFrame: CGRect) {
+    private static func present(items: [Any], sourceView: UIView?) {
         guard let presenter = topViewController() else { return }
 
         let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
         // Only in a wide window: a narrow one shows the sheet from the bottom.
         if let popover = activity.popoverPresentationController {
-            let view = presenter.view!
-            popover.sourceView = view
-            if sourceFrame.isEmpty {
+            if let sourceView = sourceView, sourceView.window != nil {
+                // On an unfolded iPhone Duo or an iPad the page may be the
+                // right-hand pane, the left-hand one, or the whole window.
+                popover.sourceView = sourceView
+                popover.sourceRect = sourceView.bounds
+                popover.permittedArrowDirections = [.up, .down]
+            } else {
                 // The share button sits in the top-right of the navigation bar.
+                let view = presenter.view!
+                popover.sourceView = view
                 popover.sourceRect = CGRect(x: view.bounds.maxX - 60, y: view.safeAreaInsets.top, width: 1, height: 1)
                 popover.permittedArrowDirections = .up
-            } else {
-                // From the window's coordinates. On an unfolded iPhone Duo or
-                // an iPad the page may be the right-hand pane, the left-hand
-                // one, or the whole window.
-                popover.sourceRect = view.convert(sourceFrame, from: nil)
-                popover.permittedArrowDirections = [.up, .down]
             }
         }
         presenter.present(activity, animated: true)
@@ -107,6 +107,29 @@ enum ShareCardSharing {
             top = presented
         }
         return top
+    }
+}
+
+/// Holds the UIKit view behind a SwiftUI button, for a popover to point at.
+/// Its frame can't be read reliably from SwiftUI: navigation bar items are
+/// hosted apart from the page, so `.global` there isn't the window's space.
+final class PopoverAnchor {
+    weak var view: UIView?
+}
+
+struct PopoverAnchorView: UIViewRepresentable {
+    let anchor: PopoverAnchor
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        view.isAccessibilityElement = false
+        anchor.view = view
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        anchor.view = uiView
     }
 }
 

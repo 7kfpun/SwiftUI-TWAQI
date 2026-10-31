@@ -20,6 +20,10 @@ struct MainView: View {
     /// Station shown in a sheet over the map, in a narrow window.
     @State private var sheetStation: SheetStation?
 
+    /// Whether the map tab is the one on screen. Folding the Duo while on
+    /// another tab must not throw the map's station up over it as a sheet.
+    @State private var isVisible = false
+
     private var isWide: Bool { horizontalSizeClass == .regular }
 
     var body: some View {
@@ -44,14 +48,25 @@ struct MainView: View {
         }
         // Folding or unfolding the Duo, or resizing the window, keeps the open
         // station open: the panel becomes a sheet, and the sheet the panel.
+        // Off screen, the panel's station waits until the map is back.
         .onChange(of: horizontalSizeClass) { sizeClass in
-            if sizeClass == .regular, let station = sheetStation {
-                sheetStation = nil
-                panelStationId = station.id
-            } else if sizeClass != .regular, let stationId = panelStationId {
-                panelStationId = nil
-                sheetStation = SheetStation(id: stationId)
-            }
+            if isVisible { handOverStation(isWide: sizeClass == .regular) }
+        }
+        .onAppear {
+            isVisible = true
+            handOverStation(isWide: isWide)
+        }
+        .onDisappear { isVisible = false }
+    }
+
+    /// Moves the open station to the presentation the window's width calls for.
+    private func handOverStation(isWide: Bool) {
+        if isWide, let station = sheetStation {
+            sheetStation = nil
+            panelStationId = station.id
+        } else if !isWide, let stationId = panelStationId {
+            panelStationId = nil
+            sheetStation = SheetStation(id: stationId)
         }
     }
 

@@ -31,11 +31,11 @@ struct DetailsView: View {
     /// Bumped when an on-device translation of the township or address lands.
     @State private var translationRevision = 0
 
-    /// Where the share button is in the window. In a wide window (iPad, an
-    /// unfolded iPhone Duo) the share sheet is a popover, and it should point
-    /// at the button wherever the page sits: the panel beside the map, or the
-    /// details column beside a list.
-    @State private var shareButtonFrame: CGRect = .zero
+    /// Behind the share button. In a wide window (iPad, an unfolded iPhone
+    /// Duo) the share sheet is a popover, and it should point at the button
+    /// wherever the page sits: the panel beside the map, or the details
+    /// column beside a list.
+    @State private var shareAnchor = PopoverAnchor()
 
     var body: some View {
         // One `navigationBarItems` call per branch: a second call replaces the
@@ -61,16 +61,12 @@ struct DetailsView: View {
     /// sending anyone.
     private var shareButton: some View {
         Button(action: {
-            ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId, from: shareButtonFrame)
+            ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId, from: shareAnchor.view)
         }) {
             Image(systemName: "square.and.arrow.up")
         }
         .buttonStyle(PlainButtonStyle())
-        .background(GeometryReader { proxy in
-            Color.clear
-                .onAppear { shareButtonFrame = proxy.frame(in: .global) }
-                .onChange(of: proxy.frame(in: .global)) { shareButtonFrame = $0 }
-        })
+        .background(PopoverAnchorView(anchor: shareAnchor))
         .disabled(currentAqi <= 0)
         .accessibilityLabel(Text("Share.share"))
     }

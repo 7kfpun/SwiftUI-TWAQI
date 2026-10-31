@@ -17,8 +17,9 @@ import UIKit
 /// Help | topic each split there instead of at their usual width.
 ///
 /// The hinge is only observable from iOS 27.1 (`UIHingeInteraction`). Before
-/// that, and on every device without one, there is no fold and the layouts
-/// keep their own split.
+/// that, on every device without one, and on visionOS (which shares the
+/// layouts but has no screen to fold), there is no fold and the layouts keep
+/// their own split.
 enum FoldLine {
     /// Narrowest a pane may be for the split to follow the fold. A window that
     /// only just crosses the hinge, as in split screen, keeps its own split.
@@ -58,6 +59,7 @@ extension View {
 }
 
 private struct FoldLineReader: ViewModifier {
+    #if os(iOS)
     @State private var foldX: CGFloat?
 
     func body(content: Content) -> some View {
@@ -65,8 +67,14 @@ private struct FoldLineReader: ViewModifier {
             .background(FoldObserver(foldX: $foldX).accessibilityHidden(true))
             .environment(\.foldLineX, foldX)
     }
+    #else
+    func body(content: Content) -> some View {
+        content
+    }
+    #endif
 }
 
+#if os(iOS)
 private struct FoldObserver: UIViewRepresentable {
     @Binding var foldX: CGFloat?
 
@@ -146,3 +154,4 @@ private final class FoldObservingView: UIView {
         return x
     }
 }
+#endif
