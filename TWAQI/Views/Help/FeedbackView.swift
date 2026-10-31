@@ -8,9 +8,9 @@
 
 import SwiftUI
 
-/// Sends feedback to the Directus `twaqi_feedback` collection. The fields
-/// follow the old Airtable form minus the platform question; platform, app
-/// and device details are added automatically and never shown.
+/// Sends feedback to the Directus `twaqi_feedback` collection on
+/// cms.wahthefox.com. Platform, app and device details are added
+/// automatically and never shown.
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
 

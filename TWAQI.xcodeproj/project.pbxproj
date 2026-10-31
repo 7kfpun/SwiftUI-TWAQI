@@ -106,7 +106,6 @@
 		9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */; };
 		9E03DF6423975CF9002F8DA4 /* FavouriteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6323975CF9002F8DA4 /* FavouriteListView.swift */; };
 		9E03DF6623975D4F002F8DA4 /* FavouriteListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */; };
-		9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0876202382DAA50060476E /* UserDefaultsExtension.swift */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
 		9E1AC540233F981700AC862D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53F233F981700AC862D /* ContentView.swift */; };
@@ -129,9 +128,7 @@
 		9E34B4F82371CDF900B6E600 /* AdBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E34B4F72371CDF900B6E600 /* AdBannerView.swift */; };
 		9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9E34B5032371E7B700B6E600 /* Localizable.strings */; };
 		9E51276E23AC6DDB00DEA45D /* StoreReviewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */; };
-		9E794A62234083700064D874 /* Indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A61234083700064D874 /* Indicator.swift */; };
 		9E794A692340A6090064D874 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E794A682340A6090064D874 /* SettingsRow.swift */; };
-		9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9042E92372F73200DDD4D9 /* DateExtension.swift */; };
 		9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E352372BFDA0010915D /* AirIndexTypes.swift */; };
 		9E942E382372C0380010915D /* AirStatusTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E372372C0380010915D /* AirStatusTypes.swift */; };
 		9E942E3A2372C3B20010915D /* LinkPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E942E392372C3B20010915D /* LinkPages.swift */; };
@@ -146,11 +143,9 @@
 		9EAB27F42379180600AEAF5A /* WindModeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAB27F32379180600AEAF5A /* WindModeButton.swift */; };
 		9EC3CF20235E0EF100F17332 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF1F235E0EF100F17332 /* Separator.swift */; };
 		9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF21235F3B0B00F17332 /* LabelView.swift */; };
-		9EC3CF262360A81300F17332 /* BarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3CF252360A81300F17332 /* BarsView.swift */; };
 		9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC5960B2351BF7800B8AA99 /* getEnv.swift */; };
 		9EC6BB1F235B590500213041 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6BB1E235B590500213041 /* NotificationService.swift */; };
 		9EC6BB23235B590500213041 /* OneSignalNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9EC6BB1C235B590500213041 /* OneSignalNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */; };
 		9EDBA6EC236431C3009B4CC4 /* OneSignalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */; };
 		B7E1D2A40C5F4A6B8D9E0F11 /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */; };
 		B7E1D2A40C5F4A6B8D9E0F12 /* DirectusPushMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */; };
@@ -392,7 +387,6 @@
 		9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListViewModel.swift; sourceTree = "<group>"; };
 		9E03DF6323975CF9002F8DA4 /* FavouriteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListView.swift; sourceTree = "<group>"; };
 		9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListViewModel.swift; sourceTree = "<group>"; };
-		9E0876202382DAA50060476E /* UserDefaultsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsExtension.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E1AC53D233F981700AC862D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -418,9 +412,7 @@
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReviewManager.swift; sourceTree = "<group>"; };
-		9E794A61234083700064D874 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
-		9E9042E92372F73200DDD4D9 /* DateExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
 		9E910C36238182FE00B8B316 /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E942E352372BFDA0010915D /* AirIndexTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirIndexTypes.swift; sourceTree = "<group>"; };
 		9E942E372372C0380010915D /* AirStatusTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirStatusTypes.swift; sourceTree = "<group>"; };
@@ -438,7 +430,6 @@
 		9EC3CF1F235E0EF100F17332 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		9EC3CF21235F3B0B00F17332 /* LabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelView.swift; sourceTree = "<group>"; };
 		9EC3CF23235F5ABB00F17332 /* example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = example.xcconfig; sourceTree = "<group>"; };
-		9EC3CF252360A81300F17332 /* BarsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarsView.swift; sourceTree = "<group>"; };
 		9EC596082351BC5D00B8AA99 /* release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		9EC5960B2351BF7800B8AA99 /* getEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = getEnv.swift; sourceTree = "<group>"; };
 		9EC596112351C94900B8AA99 /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = debug.xcconfig; sourceTree = "<group>"; };
@@ -447,7 +438,6 @@
 		9EC6BB20235B590500213041 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9EC6BB28235B5AD800213041 /* OneSignalNotificationServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OneSignalNotificationServiceExtension.entitlements; sourceTree = "<group>"; };
 		9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TWAQI.entitlements; sourceTree = "<group>"; };
-		9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
 		9EDBA6EB236431C3009B4CC4 /* OneSignalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneSignalManager.swift; sourceTree = "<group>"; };
 		B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
 		B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DirectusPushMirror.swift; sourceTree = "<group>"; };
@@ -783,9 +773,7 @@
 				2A8CA61685800F418B19D88A /* StationRow.swift */,
 				86FA45BEECC6913EE327B3C3 /* HealthGuidanceView.swift */,
 				9E34B4F72371CDF900B6E600 /* AdBannerView.swift */,
-				9EC3CF252360A81300F17332 /* BarsView.swift */,
 				9E978F17235780D900C66A03 /* GADBannerView.swift */,
-				9E794A61234083700064D874 /* Indicator.swift */,
 				9EC3CF21235F3B0B00F17332 /* LabelView.swift */,
 				9EC3CF1F235E0EF100F17332 /* Separator.swift */,
 				E239BC52520B8A358AAADBB9 /* AqiScaleView.swift */,
@@ -858,12 +846,10 @@
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
 				9EF3D3472393B318009CED32 /* APIResponses.swift */,
 				9E1AC566233FB0A400AC862D /* ColorExtensions.swift */,
-				9E9042E92372F73200DDD4D9 /* DateExtension.swift */,
 				9EC5960B2351BF7800B8AA99 /* getEnv.swift */,
 				7D3E5A1C2B4F4E6A9C0D1E21 /* FeedbackService.swift */,
 				9EA1BC72236EAC0A008C3942 /* GoogleMapStyles.swift */,
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
-				9EDBA6E92363284E009B4CC4 /* ImageExtensions.swift */,
 				9E942E3B2372CA4B0010915D /* LocaleExtension.swift */,
 				4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
@@ -875,7 +861,6 @@
 				9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */,
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
-				9E0876202382DAA50060476E /* UserDefaultsExtension.swift */,
 				32CD323794AA44C233EB7C35 /* WidgetBridge.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */,
 			);
@@ -1577,7 +1562,6 @@
 				008E0301089673EC7D242C1D /* StationTypes.swift in Sources */,
 				9EAB27F42379180600AEAF5A /* WindModeButton.swift in Sources */,
 				9EF2501523766BC000A731D5 /* ClosestStationView.swift in Sources */,
-				9E794A62234083700064D874 /* Indicator.swift in Sources */,
 				9EC5960C2351BF7800B8AA99 /* getEnv.swift in Sources */,
 				9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */,
 				9EF7A32A2386FC8700FF410C /* HelpViewModel.swift in Sources */,
@@ -1595,17 +1579,14 @@
 				9EF250172376702100A731D5 /* AirStatusBarView.swift in Sources */,
 				9E978F18235780D900C66A03 /* GADBannerView.swift in Sources */,
 				9E51276E23AC6DDB00DEA45D /* StoreReviewManager.swift in Sources */,
-				9E9042EA2372F73200DDD4D9 /* DateExtension.swift in Sources */,
 				9E205FC62353759100C6D3C1 /* DetailsViewModel.swift in Sources */,
 				9E1C9B14238974120052E115 /* StringExtension.swift in Sources */,
 				9E34B4F2237079F400B6E600 /* TrackingManager.swift in Sources */,
 				9E03DF6123969E54002F8DA4 /* DetailsListViewModel.swift in Sources */,
-				9EC3CF262360A81300F17332 /* BarsView.swift in Sources */,
 				9EE9E6BE235C8F150046A590 /* SettingsStore.swift in Sources */,
 				9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */,
 				9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
-				9EDBA6EA2363284E009B4CC4 /* ImageExtensions.swift in Sources */,
 				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
 				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */,
@@ -1637,7 +1618,6 @@
 				FA0E20A1F0C5A1E0000B0012 /* FavouriteAlerts.swift in Sources */,
 				9E205FC423536C6A00C6D3C1 /* DetailsHistoryView.swift in Sources */,
 				9EA1BC73236EAC0A008C3942 /* GoogleMapStyles.swift in Sources */,
-				9E0876212382DAA50060476E /* UserDefaultsExtension.swift in Sources */,
 				193DD5EF61D21FD83193D375 /* AqiTrend.swift in Sources */,
 				544575DF41EE812F4CD38B77 /* AqiScaleView.swift in Sources */,
 				E50C6954A9796E3809DEDFA3 /* PollutantGridView.swift in Sources */,

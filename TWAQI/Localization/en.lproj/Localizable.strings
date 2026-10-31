@@ -53,10 +53,6 @@
 "Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
 
 "Feedback.title" = "Feedback";
-"Feedback.platform" = "Phone platform";
-"Feedback.platform_ios" = "iOS";
-"Feedback.platform_android" = "Android";
-"Feedback.platform_other" = "Other";
 "Feedback.rating_header" = "How satisfied are you with the app?";
 "Feedback.rating_stars %lld" = "%lld stars";
 "Feedback.message_header" = "Suggestions";
@@ -116,13 +112,6 @@
 "AirIndex.meaning_so2" = "Sulfur dioxide";
 "AirIndex.meaning_no2" = "Nitrogen dioxide";
 
-"AirIndex.description_aqi" = "Air quality index";
-"AirIndex.description_pm25" = "Particulates (PM2.5)";
-"AirIndex.description_pm10" = "Particulates (PM10)";
-"AirIndex.description_o3" = "Ozone";
-"AirIndex.description_co" = "Carbon monoxide";
-"AirIndex.description_so2" = "Sulfur dioxide";
-"AirIndex.description_no2" = "Nitrogen dioxide";
 
 "AirStatus.good" = "Good";
 "AirStatus.moderate" = "Moderate";
@@ -146,13 +135,11 @@
 "AirStatus.sensitive_group_guidance_veryunhealthy" = "Stay indoors and reduce physical exertion";
 "AirStatus.sensitive_group_guidance_hazardous" = "Stay indoors and avoid physical exertion";
 
-"Details.station" = "Station";
 "Details.last_updated" = "Last updated";
 "Details.address" = "Address";
 "Details.coordinates" = "Coordinates";
 "Details.wind" = "Wind";
 "Details.location" = "Location";
-"Details.conditions" = "Conditions";
 "Details.no_data" = "No data";
 "Details.select_a_station" = "Select a station";
 
