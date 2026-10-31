@@ -17,7 +17,8 @@ import Foundation
 /// A cache younger than `ttl` is used without a request. When a refresh fails
 /// the last good rows are used instead — callers drop days before today, so a
 /// cache from yesterday still shows what is left of that forecast, and an old
-/// one shows nothing.
+/// one shows nothing. A response with no rows counts as a failed refresh: it is
+/// never written to disk and doesn't start the TTL.
 final class AqiForecastStore {
     static let shared = AqiForecastStore()
 
@@ -81,7 +82,12 @@ final class AqiForecastStore {
             let decoded = ok ? data.flatMap { try? JSONDecoder().decode(AqiForecastResponse.self, from: $0) } : nil
 
             DispatchQueue.main.async {
-                if let decoded = decoded, let data = data {
+                // Only rows count as a successful refresh. An empty `data` or
+                // a body that doesn't decode is handled like a failed request:
+                // the last good rows stay in memory and on disk, and
+                // `fetchedAt` is left alone so the next open asks again rather
+                // than sitting on nothing for the whole TTL.
+                if let decoded = decoded, !decoded.data.isEmpty, let data = data {
                     self.forecasts = decoded.data
                     self.fetchedAt = Date()
                     try? FileManager.default.createDirectory(
@@ -129,7 +135,8 @@ final class AqiForecastStore {
     private func loadFromDisk() {
         guard
             let data = try? Data(contentsOf: cacheFile),
-            let decoded = try? JSONDecoder().decode(AqiForecastResponse.self, from: data)
+            let decoded = try? JSONDecoder().decode(AqiForecastResponse.self, from: data),
+            !decoded.data.isEmpty
         else { return }
 
         forecasts = decoded.data
