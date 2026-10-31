@@ -8,38 +8,54 @@
   body { font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #222; margin: 0; }
   main { max-width: 680px; margin: 0 auto; padding: 32px 20px 64px; white-space: pre-wrap; }
   h1 { font-size: 1.5em; }
-  @media (prefers-color-scheme: dark) { body { background:#111; color:#ddd; } }
+  a { color: #0a7ea4; }
+  @media (prefers-color-scheme: dark) { body { background:#111; color:#ddd; } a { color:#5ac8e8; } }
 </style>
 </head>
-<body><main><h1>Privacy Policy</h1>Privacy Policy
+<body><main><h1>Privacy Policy</h1>Last updated: 1 November 2026
 
-Last updated: August 8, 2026
+Taiwan Air (&quot;the App&quot;, App Store ID 1286516443, bundle com.kfpun.twaqi) shows air quality readings from government monitoring stations in Taiwan on iPhone, iPad, Apple Watch and Apple Vision Pro. It is made by an independent developer. We keep data collection to a minimum. This policy explains what is collected, why, and who it is shared with.
 
-Taiwan Air (&quot;the App&quot;, App Store ID 1286516443, bundle com.kfpun.twaqi) shows air quality readings from government monitoring stations in Taiwan. It is made by an independent developer. We respect your privacy and keep data collection to a minimum. This policy explains what is collected, why, and who it is shared with.
+Summary
+• No accounts. You can use the App without telling us who you are.
+• Favourites and settings stay on your device.
+• Location is optional and is only used on your device.
+• We receive your name and email address only if you send us the Feedback / Contact us form or the Business partner form.
 
 Where the air quality data comes from
-• Readings are open data published by Taiwan&#x27;s Ministry of Environment (環境部, formerly the Environmental Protection Administration, Executive Yuan). The App fetches them through our own API hosted on Amazon Web Services.
+• Readings are open data published by Taiwan&#x27;s Ministry of Environment (環境部, formerly the Environmental Protection Administration). The App fetches them through our own API hosted on Amazon Web Services.
 • That data describes monitoring stations, not people. Requests to our API carry only a country code, a station ID and a row limit — no account, no device identifier and no coordinates.
+• The air quality zone forecast (空品區預報) is read from our content server at cms.wahthefox.com (Directus). Station webcam images are loaded from twaqi.app.wahthefox.com (Cloudflare). These requests carry no personal data.
 
 Information stored on your device
-• The App has no accounts. We do not collect your name, email address, phone number or contacts.
-• Your settings stay on your device: the index you have selected (AQI, PM2.5, and so on), your favourite stations, the last map position, quiet-hours times, the nearest station last resolved, and whether you have bought the ad-free upgrade.
+• The App has no accounts.
+• Your settings stay on your device: the index you have selected (AQI, PM2.5, and so on), your favourite stations, the last map position, quiet-hours times, language, the nearest station last resolved, and whether you have bought the ad-free upgrade. The Home Screen widget and Apple Watch app read the same settings from your device.
+• Air quality readings, forecasts and webcam images are cached on the device for offline use and removed automatically after about a week.
 • This on-device data is removed when you delete the App.
+
+Feedback / Contact us and Business partner forms
+• These forms are the only place the App asks for personal details, and sending them is entirely up to you. What you submit is sent over HTTPS to our Directus content management system at cms.wahthefox.com and stored there (in collections named twaqi_feedback and twaqi_cooperate).
+• Feedback / Contact us (Help screen) sends: your email address (required, so we can reply), your name (optional), your star rating, your suggestion, any other feedback or question (optional), and whether you are interested in a user interview.
+• Business partner (Help › &quot;Interested to be our Business Partner?&quot;) sends: the type of cooperation, company name, your name, email address, job title (optional), phone number (optional), website (optional) and your message.
+• To help us look into problems, both forms also send technical details: app version and build, device model, iOS version, language and region settings, time zone and platform. The feedback form also includes a random app-install identifier (Apple&#x27;s identifier for vendor) so repeat reports from the same install can be grouped; the Business partner form does not.
+• We use this information only to read and reply to your message, follow up on a partnership enquiry, invite you to a user interview if you asked to be invited, and improve the App. We do not add you to marketing lists and we do not sell it.
 
 Location
 • Location access is optional and is requested only while you are using the App (&quot;Use location to select your nearest air quality monitoring station&quot;).
-• Your coordinates are used on the device to centre the map and to pick the closest monitoring station. They are not sent to our API and we do not store them on our servers.
+• Your coordinates are used on the device to centre the map and to pick the closest monitoring station. They are not sent to our API or to our content server, and we do not store them.
 • The map itself is drawn by the Google Maps SDK. Google may process location and device data for map display under Google&#x27;s own privacy policy.
 • If you decline location access the App still works; it falls back to a default station and to whichever station you choose on the map.
 
 Notifications
-• Push notifications are handled by OneSignal. If you turn on alerts for a station, the station name, your chosen threshold and your quiet-hours window are stored with OneSignal as tags on your device&#x27;s push record so the alert can be delivered.
-• OneSignal receives a push token and standard device information. Turning alerts off removes those tags; deleting the App stops delivery.
+• Push notifications are delivered by OneSignal. If you turn on alerts for a station, the station, your chosen threshold and your quiet-hours window are stored with OneSignal as tags on your device&#x27;s push record so the alert can be delivered. OneSignal receives a push token and standard device information.
+• The same alert settings are also copied to our Directus server (cms.wahthefox.com) so we can run alerts ourselves in future. That copy contains a random device ID generated by the App, the push token, OneSignal&#x27;s ID for your device, app version, language, time zone, your quiet-hours setting, and for each station with alerts: the station, the index, the threshold and whether the alert is on. It contains no name, email or location.
+• Turning an alert off removes the OneSignal tags and marks the copy on our server as inactive. Deleting the App stops delivery.
+• A station with an alert switched on is kept in your favourites so you can find it again.
 
 Analytics and crash reporting
 • Google Firebase Analytics records anonymous usage events — for example which air index you select, opening a station, or starting and completing a purchase — together with standard device and app information.
 • Google Firebase Crashlytics, Bugsnag and Sentry receive crash and error reports: stack traces, device model, OS version and app version. These help us fix bugs.
-• None of this is used to identify you personally, and we do not link it to your name or contacts.
+• None of this is used to identify you personally, and we do not link it to the details you send in the forms.
 
 Advertising
 • The free version shows banner ads through Google AdMob.
@@ -48,25 +64,29 @@ Advertising
 • Buying the ad-free in-app purchase stops banners from being requested at all.
 
 Purchases
-• The ad-free upgrade is a one-time purchase processed by Apple. We receive your purchase status only; we never see your payment details. The App simply records a flag on your device that ads are off.
+• The ad-free upgrade is a one-time purchase processed by Apple. We receive your purchase status only; we never see your payment details. The App records a flag on your device that ads are off.
 
-Apple Watch
-• The Apple Watch companion fetches the same public air quality readings from our API. It does not collect anything additional.
+Apple Watch, widgets and Apple Vision Pro
+• The Apple Watch app, complications, Home Screen widgets and the Apple Vision Pro app fetch the same public air quality readings. They do not collect anything additional.
 
 Who your data is shared with
-• Google (Firebase Analytics, Firebase Crashlytics, AdMob, Google Maps), OneSignal, Bugsnag, Sentry and Apple, each acting under its own privacy policy for the purposes described above.
+• Service providers acting for the purposes described above, each under its own privacy policy: Google (Firebase Analytics, Firebase Crashlytics, AdMob, Google Maps), OneSignal, Bugsnag, Sentry, Amazon Web Services, Cloudflare and Apple.
+• Form submissions and the copy of alert settings are stored on our own Directus server and are only accessible to us.
 • We do not sell your data and we do not share it with data brokers.
 
 Data retention
 • On-device settings and favourites stay on your device until you delete the App.
-• OneSignal tags stay until you turn the relevant alerts off or delete the App.
+• Feedback and Business partner submissions are kept for as long as we need them to reply, follow up and improve the App. When we no longer need one we archive it; you can ask us to delete yours at any time (see Your choices).
+• OneSignal tags stay until you turn the relevant alerts off or delete the App. The copy of alert settings on our server is marked inactive when you turn alerts off.
 • Analytics and crash reports are kept by those providers under their own standard retention schedules; we do not keep a separate copy.
-• Our API serves public air quality data and does not store personal data. Ordinary server logs may record request metadata such as IP addresses for a short period for security and troubleshooting.
+• Our API and image server serve public data and do not store personal data. Ordinary server logs may record request metadata such as IP addresses for a short period for security and troubleshooting.
 
 Your choices
-• Turn location off in iOS Settings › Privacy › Location Services.
-• Turn notifications off in iOS Settings, or disable individual station alerts inside the App.
+• Turn location off in iOS Settings › Privacy &amp; Security › Location Services.
+• Turn notifications off in iOS Settings, or disable individual station alerts (or cancel all alerts) inside the App.
 • Buy the ad-free upgrade to remove ads and ad requests.
+• Don&#x27;t send the forms if you don&#x27;t want us to have your name and email — the rest of the App works without them.
+• To see, correct or delete what you sent us through a form, send a request through &quot;Feedback / Contact us&quot; from the email address you used, and we will act on it.
 • Delete the App to remove all data held on your device.
 
 Children
