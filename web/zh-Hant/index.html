@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台灣空氣品質 Taiwan Air：全台測站即時 AQI 與 PM2.5</title>
+<meta name="description" content="台灣空氣品質是免費的空氣品質 App：環境部全台監測站即時 AQI 與 PM2.5、24 小時趨勢、測站即時影像、官方空品區預報、超標通知與勿擾時段，並支援小工具、Apple Watch 與 Apple Vision Pro。">
+<link rel="canonical" href="https://taiwanair.wahthefox.com/zh-Hant/">
+<link rel="alternate" hreflang="en" href="https://taiwanair.wahthefox.com/">
+<link rel="alternate" hreflang="zh-Hant" href="https://taiwanair.wahthefox.com/zh-Hant/">
+<link rel="alternate" hreflang="x-default" href="https://taiwanair.wahthefox.com/">
+<meta name="theme-color" content="#f4f8fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-itunes-app" content="app-id=1286516443">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="台灣空氣品質 Taiwan Air">
+<meta property="og:title" content="台灣空氣品質：全台測站即時 AQI 與 PM2.5">
+<meta property="og:description" content="環境部全台監測站的即時空氣品質，加上超標通知、小工具、Apple Watch 與 Apple Vision Pro。免費下載，不需註冊。">
+<meta property="og:url" content="https://taiwanair.wahthefox.com/zh-Hant/">
+<meta property="og:image" content="https://taiwanair.wahthefox.com/assets/og-zh.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="514">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "台灣空氣品質",
+  "alternateName": "Taiwan Air",
+  "operatingSystem": "iOS, iPadOS, watchOS, visionOS",
+  "applicationCategory": "WeatherApplication",
+  "url": "https://taiwanair.wahthefox.com/zh-Hant/",
+  "downloadUrl": "https://apps.apple.com/tw/app/id1286516443",
+  "image": "https://taiwanair.wahthefox.com/assets/icon-192.png",
+  "inLanguage": ["zh-Hant", "en"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "台灣空氣品質要付費嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不用。App 免費下載，所有空氣品質功能在免費版都能使用，免費版會顯示橫幅廣告。Taiwan Air Pro 為選購項目，可移除廣告，並加入 Apple Watch 錶面複雜功能與中、大尺寸主畫面小工具。" } },
+    { "@type": "Question", "name": "需要註冊帳號嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不需要。沒有註冊、也沒有登入，你的最愛測站與設定都只存在你的裝置上。" } },
+    { "@type": "Question", "name": "資料從哪裡來？", "acceptedAnswer": { "@type": "Answer", "text": "所有數值都是環境部「空氣品質監測網」的公開資料，空品區預報則是環境部官方發布的預報。我們如實呈現，不做任何調整。" } },
+    { "@type": "Question", "name": "資料多久更新一次？", "acceptedAnswer": { "@type": "Answer", "text": "監測站每小時發布一次數值。App 會自動更新，並標示每筆資料的發布時間與距今多久。" } },
+    { "@type": "Question", "name": "沒有網路也能用嗎？", "acceptedAnswer": { "@type": "Answer", "text": "可以。看過的數值、預報與即時影像會在裝置上保留約一週，沒有網路時仍可查看最近一次的數值，小工具也會顯示最後一次儲存的數值。" } },
+    { "@type": "Question", "name": "App 會蒐集我的哪些資料？", "acceptedAnswer": { "@type": "Answer", "text": "很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時，會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。完整內容請見隱私權政策。" } },
+    { "@type": "Question", "name": "支援哪些裝置？", "acceptedAnswer": { "@type": "Answer", "text": "iOS 15 以上的 iPhone 與 iPad、watchOS 10 以上的 Apple Watch，以及 Apple Vision Pro。並提供主畫面與鎖定畫面小工具。" } },
+    { "@type": "Question", "name": "App 的資訊可以當作醫療建議嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不行。本 App 僅供一般資訊參考。資料可能延遲、缺漏，或由環境部事後修正。如有健康疑慮，請諮詢專業人員並查閱政府官方來源。" } }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">跳至主要內容</a>
+
+<nav class="nav" aria-label="主選單">
+  <a class="brand" href="/zh-Hant/" aria-current="page"><img src="/assets/icon-192.png" alt="" width="24" height="24">台灣空氣品質</a>
+  <ul class="nav-links">
+    <li><a href="#features">功能</a></li>
+    <li><a href="#how">如何使用</a></li>
+    <li><a href="#faq">常見問題</a></li>
+    <li><a href="#contact">聯絡我們</a></li>
+    <li><a href="/" hreflang="en" lang="en">English</a></li>
+  </ul>
+  <a class="nav-cta" href="https://apps.apple.com/tw/app/id1286516443">下載</a>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="選單"><span></span><span></span></button>
+</nav>
+<div class="menu-panel" id="menu" aria-hidden="true">
+  <ul>
+    <li><a href="#features">功能</a></li>
+    <li><a href="#how">如何使用</a></li>
+    <li><a href="#faq">常見問題</a></li>
+    <li><a href="#contact">聯絡我們</a></li>
+    <li><a href="/" hreflang="en" lang="en">English</a></li>
+  </ul>
+  <div class="menu-foot"><a href="https://apps.apple.com/tw/app/id1286516443">在 App Store 下載</a></div>
+</div>
+
+<main id="main">
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>iPhone · iPad · Apple Watch · Apple Vision Pro</span>
+        <h1>出門之前，<br>先看看外面的空氣</h1>
+        <p class="lede">環境部全台監測站的即時 AQI 與 PM2.5，一句話告訴你空氣正在好轉還是變差；你關心的測站超過設定的數值時，立即通知你。</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/tw/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>免費下載</small>App Store</span>
+          </a>
+        </div>
+        <ul class="proof">
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>環境部官方公開資料</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>不需註冊帳號</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>繁體中文與 English</li>
+        </ul>
+        <div class="bands" aria-hidden="true"><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span><span class="b5"></span><span class="b6"></span></div>
+      </div>
+      <div class="devices">
+        <div class="phone back"><img src="/assets/detail-zh.webp" width="600" height="1215" alt="板橋測站頁面：AQI 56，普通，附風向風速與健康建議"></div>
+        <div class="phone"><img src="/assets/map-zh.webp" width="600" height="1215" alt="台灣地圖，每個監測站都標示目前的 AQI 並依等級上色" fetchpriority="high"></div>
+        <div class="watch"><img src="/assets/watch-zh.webp" width="416" height="496" alt="Apple Watch 錶面顯示 AQI 與空氣品質等級"></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">功能</p>
+        <h2 id="features-title">全台監測網測得的數值，整理在一個清爽的 App</h2>
+        <p>打開就看到離你最近的測站，幾秒鐘就知道今天該開窗、戴口罩，還是開空氣清淨機。</p>
+      </div>
+
+      <div class="feature-row reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/map-zh.webp" width="600" height="1215" alt="測站即時地圖，可切換 AQI、PM2.5、PM10、O3、CO" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>全台測站，一張即時地圖</h3>
+          <p>所有官方監測站都標示目前數值，並依空氣品質等級上色。</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-trifold"/></svg><span><strong>七項指標。</strong>一鍵切換 AQI、PM2.5、PM10、O3、CO、SO2 與 NO2。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#wind"/></svg><span><strong>風向模式。</strong>每個標記換成箭頭，一眼看出空污往哪裡擴散、風勢多強。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-pin"/></svg><span><strong>最近的測站。</strong>允許定位後，離你最近的測站會一直顯示在畫面上，含數值與觀測時間。</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feature-row flip reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/detail-zh.webp" width="600" height="1215" alt="測站詳情：AQI、即時狀況、位置與健康建議" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>測站頁面，直接回答你想知道的事</h3>
+          <p>空氣是變好還是變差？每個測站都用一句話告訴你，下方是依每小時分色的 24 小時 AQI 趨勢圖。</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#chart-line-up"/></svg><span><strong>24 小時趨勢。</strong>正在好轉、正在變差或大致持平，並列出當日最低、最高與平均值。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#video-camera"/></svg><span><strong>測站即時影像。</strong>有攝影機的測站可看最新畫面，也能逐小時回看過去 24 小時。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg><span><strong>六項污染物與健康建議。</strong>PM2.5、PM10、臭氧、一氧化碳、二氧化硫、二氧化氮，以及給一般民眾與敏感族群的建議。</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#calendar-dots"/></svg></div>
+          <h3>空品區預報</h3>
+          <p>環境部官方發布的各空品區未來數日預報，週末要去跑步、帶孩子出遊，先看一眼再安排。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#heart"/></svg></div>
+          <h3>我的最愛</h3>
+          <p>把住家、公司、學校加入最愛，一次掌握。可依測站名稱、鄉鎮或縣市搜尋，並依空品區分組。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#bell-ringing"/></svg></div>
+          <h3>超標通知，也不吵你睡覺</h3>
+          <p>測站 AQI 高於你設定的數值時通知你；也可以設定「低於」門檻，知道什麼時候可以放心開窗。設定勿擾時段，夜間不會被吵醒。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#squares-four"/></svg></div>
+          <h3>主畫面與鎖定畫面小工具</h3>
+          <p>顯示最近測站或第一個最愛測站，七項指標任選。較大的小工具還會列出你其他的最愛測站。</p>
+          <span class="tag">中、大尺寸小工具屬於 Pro</span>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#wifi-slash"/></svg></div>
+          <h3>離線也能看</h3>
+          <p>看過的數值、預報與即時影像會在裝置上保留約一週，在捷運上或山裡沒有訊號時，也能看到最近一次的數值。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#translate"/></svg></div>
+          <h3>繁體中文與 English</h3>
+          <p>整個 App 都支援兩種語言，空氣品質等級一律採用環境部官方用語。</p>
+        </article>
+      </div>
+
+      <div class="platforms">
+        <article class="platform reveal">
+          <div class="shot"><img src="/assets/watch-zh.webp" width="416" height="496" alt="Apple Watch 錶面上的 AQI 複雜功能" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Watch</h3>
+            <p>免費的手錶 App 可查看你的測站；升級 Pro 後，還能把 AQI、PM2.5 等指標直接放上錶面。</p>
+          </div>
+        </article>
+        <article class="platform vision reveal">
+          <div class="shot"><img src="/assets/vision-zh.webp" width="1200" height="675" alt="Apple Vision Pro 在桌面上顯示台灣立體地形圖，各測站依數值標示" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Vision Pro</h3>
+            <p>把台灣立體地形圖放在桌上，每個測站依目前數值標示，同樣可切換指標與風向模式。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline" aria-label="為什麼重要">
+    <div class="wrap">
+      <p data-reveal-words>出門前花三十秒確認，<br>就知道今天該戴口罩，<br>還是該把窗戶關好。</p>
+      <p class="source reveal">國際癌症研究機構（IARC）在 2013 年將戶外空氣污染列為第一類致癌物，兒童與長者受到的影響尤其明顯。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="bands-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">看懂顏色</p>
+        <h2 id="bands-title">六個等級，與環境部相同</h2>
+        <p>地圖標記、小工具與錶面都採用官方 AQI 分級，同一個顏色在 App 裡的意思永遠一樣。</p>
+      </div>
+      <div class="legend reveal">
+        <div><i class="b1"></i><b>良好</b><span>0–50</span></div>
+        <div><i class="b2"></i><b>普通</b><span>51–100</span></div>
+        <div><i class="b3"></i><b>對敏感族群不健康</b><span>101–150</span></div>
+        <div><i class="b4"></i><b>對所有族群不健康</b><span>151–200</span></div>
+        <div><i class="b5"></i><b>非常不健康</b><span>201–300</span></div>
+        <div><i class="b6"></i><b>危害</b><span>301 以上</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">如何使用</p>
+        <h2 id="how-title">一分鐘內就能設定好</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><span class="n">1</span><h3>免費下載</h3><p>從 App Store 下載台灣空氣品質，不需要註冊任何帳號。</p></li>
+        <li class="reveal"><span class="n">2</span><h3>找到你的測站</h3><p>允許定位即可跳到最近的測站，或直接點選地圖上的任一標記。你的位置不會離開裝置。</p></li>
+        <li class="reveal"><span class="n">3</span><h3>加入最愛並開啟通知</h3><p>點一下愛心加入最愛，設定通知門檻與勿擾時段，再加上小工具或在手錶上查看。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">常見問題</p>
+        <h2 id="faq-title">大家常問的問題</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary>台灣空氣品質要付費嗎？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>不用。App 免費下載，所有空氣品質功能在免費版都能使用，免費版會顯示橫幅廣告。Taiwan Air Pro 為選購項目，可移除廣告，並加入 Apple Watch 錶面複雜功能與中、大尺寸主畫面小工具。</p></div>
+        </details>
+        <details>
+          <summary>需要註冊帳號嗎？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>不需要。沒有註冊、也沒有登入，你的最愛測站與設定都只存在你的裝置上。</p></div>
+        </details>
+        <details>
+          <summary>資料從哪裡來？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>所有數值都是環境部「空氣品質監測網」的公開資料，空品區預報則是環境部官方發布的預報。我們如實呈現，不做任何調整。</p></div>
+        </details>
+        <details>
+          <summary>資料多久更新一次？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>監測站每小時發布一次數值。App 會自動更新，並標示每筆資料的發布時間與距今多久。</p></div>
+        </details>
+        <details>
+          <summary>沒有網路也能用嗎？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>可以。看過的數值、預報與即時影像會在裝置上保留約一週，沒有網路時仍可查看最近一次的數值，小工具也會顯示最後一次儲存的數值。</p></div>
+        </details>
+        <details>
+          <summary>App 會蒐集我的哪些資料？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a">
+            <p>很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時，會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。</p>
+            <p>蒐集哪些資料、與誰分享，詳見<a href="/zh-Hant/privacy.html">隱私權政策</a>。</p>
+          </div>
+        </details>
+        <details>
+          <summary>支援哪些裝置？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>iOS 15 以上的 iPhone 與 iPad、watchOS 10 以上的 Apple Watch，以及 Apple Vision Pro。並提供主畫面與鎖定畫面小工具。</p></div>
+        </details>
+        <details>
+          <summary>App 的資訊可以當作醫療建議嗎？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>不行。本 App 僅供一般資訊參考。資料可能延遲、缺漏，或由環境部事後修正。如有健康疑慮，請諮詢專業人員並查閱政府官方來源。詳見<a href="/zh-Hant/terms.html">服務條款</a>。</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">聯絡我們</p>
+        <h2 id="contact-title">直接和開發者聯絡</h2>
+        <p>台灣空氣品質由獨立開發者打造。兩個表單都在 App 的「說明」頁面。</p>
+      </div>
+      <div class="contact">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#chat-circle-text"/></svg></div>
+          <h3>意見回饋與客服</h3>
+          <p>問題、錯誤回報、功能建議，或是想查看、刪除你送給我們的資料。</p>
+          <p class="path"><span>說明</span><i aria-hidden="true">›</i><span>意見回饋 / 聯絡我們</span></p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#handshake"/></svg></div>
+          <h3>商業合作</h3>
+          <p>廣告、資料與 API 合作、贊助及媒體洽詢。</p>
+          <p class="path"><span>說明</span><i aria-hidden="true">›</i><span>想成為我們的合作夥伴嗎？</span></p>
+        </article>
+      </div>
+      <p class="note reveal">手邊沒有 App？請來信 <a href="mailto:info@dllm.io">info@dllm.io</a>。App 內的表單會將你填寫的內容（包含姓名與電子郵件）傳送到我們自己的伺服器，以便回覆，詳見<a href="/zh-Hant/privacy.html">隱私權政策</a>。</p>
+    </div>
+  </section>
+
+  <section class="final" aria-labelledby="final-title">
+    <div class="wrap">
+      <div class="box reveal">
+        <img class="icon" src="/assets/icon-192.png" width="80" height="80" alt="台灣空氣品質 App 圖示">
+        <h2 id="final-title">出門前，先看一眼空氣</h2>
+        <p>iPhone、iPad、Apple Watch 與 Apple Vision Pro 免費下載，不需註冊帳號。</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/tw/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>免費下載</small>App Store</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a class="brand" href="/zh-Hant/"><img src="/assets/icon-192.png" alt="" width="24" height="24">台灣空氣品質 Taiwan Air</a>
+      <p class="foot-note">空氣品質資料：環境部空氣品質監測網公開資料。地圖資料 © Google。</p>
+      <p>© 2017–2026 台灣空氣品質</p>
+    </div>
+    <div>
+      <h2>法律資訊</h2>
+      <ul>
+        <li><a href="/zh-Hant/privacy.html">隱私權政策</a></li>
+        <li><a href="/zh-Hant/terms.html">服務條款</a></li>
+        <li><a href="/privacy.html" hreflang="en" lang="en">Privacy Policy</a></li>
+        <li><a href="/terms.html" hreflang="en" lang="en">Terms of Service</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>台灣空氣品質</h2>
+      <ul>
+        <li><a href="https://apps.apple.com/tw/app/id1286516443">App Store</a></li>
+        <li><a href="#contact">聯絡我們</a></li>
+        <li><a href="/" hreflang="en" lang="en">English</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

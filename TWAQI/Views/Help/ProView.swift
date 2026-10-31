@@ -122,7 +122,7 @@ struct ProView: View {
 
     private static func legalURL(_ page: String) -> URL {
         let locale = Locale.isChinese ? "zh-Hant/" : ""
-        return URL(string: "https://kf-twaqi.web.app/\(locale)\(page)")!
+        return URL(string: "https://taiwanair.wahthefox.com/\(locale)\(page)")!
     }
 
     private func load() async {

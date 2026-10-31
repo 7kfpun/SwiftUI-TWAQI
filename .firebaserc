@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "kf-twaqi"
+  },
+  "targets": {
+    "kf-twaqi": {
+      "hosting": {
+        "main": [
+          "taiwanair-wahthefox"
+        ],
+        "legacy": [
+          "kf-twaqi"
+        ]
+      }
+    }
   }
 }

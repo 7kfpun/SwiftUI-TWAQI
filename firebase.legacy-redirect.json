@@ -1,0 +1,25 @@
+{
+  "hosting": [
+    {
+      "target": "legacy",
+      "public": "web-legacy",
+      "ignore": [
+        "firebase.json",
+        "firebase.legacy-redirect.json",
+        "**/.*"
+      ],
+      "redirects": [
+        {
+          "source": "/",
+          "destination": "https://taiwanair.wahthefox.com/",
+          "type": 301
+        },
+        {
+          "regex": "^/(?P<path>.*)$",
+          "destination": "https://taiwanair.wahthefox.com/:path",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}
