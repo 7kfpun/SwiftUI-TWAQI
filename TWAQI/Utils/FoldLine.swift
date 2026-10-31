@@ -103,6 +103,16 @@ private final class FoldObservingView: UIView {
         isUserInteractionEnabled = false
         isAccessibilityElement = false
 
+        observeHinge()
+    }
+
+    /// Compiled only against an SDK that has `UIHingeInteraction` (iOS 27.1+,
+    /// whose UIKit is 9127.1 or later), and run only on an OS that has it.
+    /// Built with an older SDK (CI's Xcode, for one) this does nothing: the
+    /// hinge stays "closed", so there is no fold and every layout keeps its
+    /// own split.
+    private func observeHinge() {
+        #if canImport(UIKit, _version: 9127.1)
         if #available(iOS 27.1, *) {
             addInteraction(UIHingeInteraction { [weak self] _, update in
                 // Unknown counts as open: the width checks below still rule
@@ -111,6 +121,7 @@ private final class FoldObservingView: UIView {
                 self?.report()
             })
         }
+        #endif
     }
 
     required init?(coder: NSCoder) {
