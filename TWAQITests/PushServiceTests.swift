@@ -123,11 +123,10 @@ final class PushServiceTests: XCTestCase {
 
         XCTAssertEqual(body["device_token"] as? String, "abcd")
         XCTAssertEqual(body["environment"] as? String, "sandbox")
-        // The stable device id is the upsert key; with no device_id column
-        // it rides in install_id.
-        XCTAssertEqual(PushDevicePayload.deviceIdField, "install_id")
-        XCTAssertEqual(body["install_id"] as? String, "6f1c2e7a-0000-4000-8000-000000000001")
-        XCTAssertNil(body["device_id"])
+        // The stable device id is the upsert key.
+        XCTAssertEqual(PushDevicePayload.deviceIdField, "device_id")
+        XCTAssertEqual(body["device_id"] as? String, "6f1c2e7a-0000-4000-8000-000000000001")
+        XCTAssertNil(body["install_id"])
         XCTAssertEqual(body["external_id"] as? String, "player")
         XCTAssertEqual(body["dnd_enabled"] as? Bool, true)
         XCTAssertEqual(body["dnd_start"] as? String, "22:30")

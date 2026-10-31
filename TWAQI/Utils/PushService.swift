@@ -61,9 +61,7 @@ enum PushDirection: String, Codable, CaseIterable {
 /// The app's side of a Directus `twaqi_push_devices` item: everything but the
 /// sender's bookkeeping.
 struct PushDevicePayload: Encodable, Equatable {
-    /// Column holding the app's stable device id, the upsert key. The live
-    /// collection has no `device_id` column yet, so the id goes in
-    /// `install_id`; change this once a `device_id` column exists.
+    /// Column holding the app's stable device id, the upsert key.
     static let deviceIdField = CodingKeys.deviceId.rawValue
 
     /// Stable per device (a Keychain UUID, kept across reinstalls), unlike
@@ -88,7 +86,7 @@ struct PushDevicePayload: Encodable, Equatable {
     enum CodingKeys: String, CodingKey {
         case environment, locale, timezone, archived
         /// See `deviceIdField`.
-        case deviceId = "install_id"
+        case deviceId = "device_id"
         case deviceToken = "device_token"
         case appVersion = "app_version"
         case lastSeenAt = "last_seen_at"
