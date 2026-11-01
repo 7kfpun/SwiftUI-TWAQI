@@ -52,7 +52,7 @@ SECRET_FILE_GLOBS = (
     "*serviceaccount*.json",
 )
 # Template copies of the files above are meant to be committed.
-EXAMPLE_MARKERS = ("example", "sample", "template", "placeholder", "dist")
+EXAMPLE_MARKERS = ("example", "sample", "template", "placeholder")
 
 ENV_LIKE_GLOBS = ("*.xcconfig", ".env*", ".dev.vars*", "*.env")
 SECRET_SETTING = re.compile(
@@ -84,11 +84,12 @@ def is_example(name):
 
 
 def secret_file_rule(path):
-    name = pathlib.PurePosixPath(path).name.lower()
+    original = pathlib.PurePosixPath(path).name
+    name = original.lower()
     if is_example(name):
         return None
     if name in SECRET_FILE_NAMES:
-        return f"secret file {name} must stay untracked (copy it from an example instead)"
+        return f"secret file {original} must stay untracked (copy it from an example instead)"
     for pattern in SECRET_FILE_GLOBS:
         if fnmatch.fnmatch(name, pattern):
             return f"secret file matching {pattern} must not be committed"
