@@ -93,14 +93,19 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
 ## Branches, CI and review
 
-- Work on `feature/*` branches and open a PR to `master`, as a draft until it is ready.
-- On a **non-draft** PR from `feature/*` to `master`, GitHub runs:
+- Work on `feature/fox-nn-*` branches and open a PR to `master`, as a draft until it is ready. Flow: Orca codes → Mini LGTM → user greenlight → squash-merge → TestFlight / App Store / Firebase only when the ticket names them. Full map of checks and deploy paths: [`docs/ci-cd-guardrails.md`](docs/ci-cd-guardrails.md).
+- On every PR to `master`, drafts included:
+  - **PR policy** — `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, and version / build numbers / What's New consistent.
+  - **Secret files** — fails on `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env`, `.dev.vars`, signing keys, force-added gitignored files or real-looking secret values in the diff.
+  - **Mini LGTM** (status) — pending until Mini leaves a review starting `**Mini LGTM**` that covers the head commit.
+- On a **non-draft** PR from `feature/*` to `master`, GitHub also runs:
   - **CI / Unit tests** — the subset above. Skipped when the PR only touches docs, media, `assets/`, `fastlane/`, `web/` or `workers/`.
-  - **CI / Vulnerability checks** — TruffleHog and osv-scanner. Warning-only; results are posted as a PR comment.
+  - **CI / Vulnerability checks** — TruffleHog and osv-scanner, posted as a PR comment. Fails only on secrets TruffleHog **verified** as live; everything else is a warning.
   - **Claude Code Review** — reviews the diff against the ticket scope and the PR body's claims, and marks push / favourites ↔ alerts / dual-write breaks as blocking. A failed review fails the check.
-  - **Workers** — typechecks and dry-runs any Worker the PR changes. Merging to `master` deploys only the changed Workers.
-- Put the Linear ticket (`FOX-nn`) and its scope in the PR body, and only claim behavior the diff shows — the reviewer checks both.
-- Releases (version bump, TestFlight, App Store) use the fastlane lanes in [`fastlane/README.md`](fastlane/README.md) and are run by hand, never from a feature PR.
+  - **Workers** — typechecks and dry-runs any Worker the PR changes (green when none changed). Merging to `master` deploys only the changed Workers.
+- Put the Linear ticket (`FOX-nn`) and its scope in the PR body, and only claim behavior the diff shows — the reviewer checks both. The PR template carries the merge gates.
+- `master` protection (required checks, no direct pushes, up-to-date branches) is proposed in [`docs/master-protection.md`](docs/master-protection.md).
+- Releases (version bump, TestFlight, App Store) use the fastlane lanes in [`fastlane/README.md`](fastlane/README.md) and are run by hand, never from a feature PR. Screenshot uploads refuse to run while the version is `WAITING_FOR_REVIEW` (`fastlane asc_version_state` shows the state). The website deploys through the manual `Firebase Hosting` workflow.
 
 ## License
 

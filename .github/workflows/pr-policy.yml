@@ -1,0 +1,74 @@
+name: PR policy
+
+# Cheap checks for every pull request to master: drafts included, and whatever
+# the branch is called, since the branch name is one of the rules. Both jobs
+# are meant to be required status checks (docs/master-protection.md).
+#
+# The gate scripts run from master's copy when master has one, so a pull
+# request can't loosen a check in the same change it is checked by.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+    branches: [master]
+
+concurrency:
+  group: pr-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: PR policy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Branch, ticket and merge order
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          script="$RUNNER_TEMP/pr_policy.py"
+          git show origin/master:tools/pr_policy.py >"$script" 2>/dev/null || cp tools/pr_policy.py "$script"
+          python3 "$script"
+
+      - name: Version, build numbers and What's New
+        # master's script, run against the PR's project file, Fastfile and notes.
+        run: |
+          set -euo pipefail
+          script="$RUNNER_TEMP/check_release_consistency.py"
+          git show origin/master:tools/check_release_consistency.py >"$script" 2>/dev/null \
+            || cp tools/check_release_consistency.py "$script"
+          python3 "$script" "$PWD"
+
+  secret-files:
+    name: Secret files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: No secret files or values in the diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          script="$RUNNER_TEMP/check_secret_files.py"
+          git show origin/master:tools/check_secret_files.py >"$script" 2>/dev/null || cp tools/check_secret_files.py "$script"
+          python3 "$script" "$BASE_SHA" "$HEAD_SHA"

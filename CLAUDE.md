@@ -28,8 +28,12 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 
 ## Workflow
 
-- Branch `feature/*` off `master`; open a **draft** PR to `master`. CI (unit-test subset,
-  vulnerability checks, Claude review) runs only on non-draft `feature/*` PRs.
+- Branch `feature/fox-nn-*` off `master`; open a **draft** PR to `master` using the PR
+  template. CI (unit-test subset, vulnerability checks, Claude review) runs only on
+  non-draft `feature/*` PRs, `Workers` on every non-draft PR; `PR policy`, `Secret files`
+  and the `Mini LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
+- Merge only after a `**Mini LGTM**` review and the user's greenlight, squash only. Never
+  post a review starting with "Mini" yourself: that is Mini's sign-off.
 - Don't merge, bump versions, archive, or upload to TestFlight/App Store unless asked.
 - Workers deploy on merge to `master`; don't deploy them from a branch.
 

@@ -280,6 +280,7 @@ platform :ios do
   desc "Upload screenshots only to App Store Connect for #{APP_VERSION}"
   desc "Does not touch the binary, the metadata, or the review submission"
   lane :upload_screenshots do
+    ensure_screenshots_editable!("IOS")
     deliver(
       api_key: asc_api_key,
       app_version: APP_VERSION,
@@ -308,6 +309,7 @@ platform :ios do
   desc "Upload the Apple Watch screenshots only to App Store Connect for #{APP_VERSION}"
   desc "Leaves the iPhone and iPad screenshots already on the version alone"
   lane :upload_watch_screenshots do
+    ensure_screenshots_editable!("IOS")
     sh("rm -rf '#{WATCH_UPLOAD_DIR}'")
     staged = 0
     LOCALES.each_key do |locale|
@@ -344,6 +346,7 @@ platform :ios do
   desc "Upload the iPhone Duo screenshots only to App Store Connect for #{APP_VERSION}"
   desc "Leaves the iPhone, iPad and watch screenshots already on the version alone"
   lane :upload_duo_screenshots do
+    ensure_screenshots_editable!("IOS")
     sh("rm -rf '#{DUO_UPLOAD_DIR}'")
     staged = 0
     LOCALES.each_key do |locale|
@@ -418,6 +421,7 @@ platform :ios do
       app_id: app.id, filter: { platform: "VISION_OS", versionString: APP_VERSION }
     ).to_models.first
     UI.user_error!("No visionOS #{APP_VERSION} version on App Store Connect") unless version
+    ensure_screenshots_editable!("VISION_OS", version: version)
 
     Spaceship::ConnectAPI.get_app_store_version_localizations(app_store_version_id: version.id).to_models.each do |loc|
       images = staged[loc.locale]
@@ -467,6 +471,10 @@ platform :ios do
   desc "Archive a Release build of #{APP_VERSION} and upload it to App Store Connect"
   desc "Bumps every target's build number past the latest one on TestFlight. Never submits for review"
   lane :release_build do
+    # Version, build numbers and What's New must agree before anything is
+    # archived or uploaded (FOX-38). Same check as CI's PR policy job.
+    sh("python3 '#{File.join(ROOT, "tools/check_release_consistency.py")}'")
+
     key = asc_api_key
     UI.user_error!("release_build needs the App Store Connect API key (ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH)") unless key
 
@@ -506,11 +514,77 @@ platform :ios do
     )
   end
 
+  desc "Print the App Store Connect state of the #{APP_VERSION} version on each platform. Read-only"
+  desc "Screenshot upload lanes refuse to run unless the state is one where screenshots can be edited"
+  lane :asc_version_state do
+    %w[IOS VISION_OS].each do |platform|
+      version = asc_app_store_version(platform)
+      state = version ? asc_state(version) : "(no #{APP_VERSION} version)"
+      editable = version && SCREENSHOT_EDITABLE_STATES.include?(state) ? "screenshots editable" : "screenshots locked"
+      UI.message("#{platform} #{APP_VERSION}: #{state} — #{editable}")
+    end
+  end
+
   desc "Frame, then upload"
   lane :screenshots do
+    # Fail before framing, not after, when the version is locked.
+    ensure_screenshots_editable!("IOS")
     frame_screenshots
     upload_screenshots
   end
+end
+
+# App Store Connect states in which a version's screenshots can still be
+# changed. Anything else — above all WAITING_FOR_REVIEW and IN_REVIEW — makes
+# ASC answer "Can't Create Screenshot while Waiting For Review", and deliver /
+# Spaceship then retry forever instead of failing (FOX-29, FOX-38).
+SCREENSHOT_EDITABLE_STATES = %w[
+  PREPARE_FOR_SUBMISSION
+  DEVELOPER_REJECTED
+  REJECTED
+  METADATA_REJECTED
+  INVALID_BINARY
+].freeze
+
+# Logs Spaceship in the same way deliver does: API key when configured,
+# otherwise the Apple ID session deliver would open anyway.
+def asc_login!
+  key = asc_api_key
+  if key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: key)
+  elsif Spaceship::ConnectAPI.token.nil?
+    Spaceship::ConnectAPI.login(ENV["FASTLANE_APPLE_ID"], nil, use_portal: false, use_tunes: true)
+  end
+end
+
+def asc_app_store_version(platform)
+  asc_login!
+  app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+  UI.user_error!("App not found on App Store Connect") unless app
+  Spaceship::ConnectAPI.get_app_store_versions(
+    app_id: app.id, filter: { platform: platform, versionString: APP_VERSION }
+  ).to_models.first
+end
+
+def asc_state(version)
+  version.app_version_state || version.app_store_state
+end
+
+# Fails loudly, before anything is staged or uploaded, unless the version's
+# screenshots can be edited. There is no override: pulling a version from
+# review is a deliberate act for the user, not something a lane works around.
+def ensure_screenshots_editable!(platform, version: nil)
+  version ||= asc_app_store_version(platform)
+  unless version
+    UI.user_error!("No #{platform} #{APP_VERSION} version on App Store Connect. Create it first (upload_metadata).")
+  end
+  state = asc_state(version)
+  return if SCREENSHOT_EDITABLE_STATES.include?(state)
+
+  UI.user_error!(
+    "#{platform} #{APP_VERSION} is #{state} on App Store Connect; screenshots can't be changed now. " \
+    "Upload them to the next version once it is PREPARE_FOR_SUBMISSION, or after the user pulls this one from review."
+  )
 end
 
 # Builds the App Store Connect API key from the environment, failing loudly
