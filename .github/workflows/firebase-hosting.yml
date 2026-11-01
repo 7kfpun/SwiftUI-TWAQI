@@ -1,0 +1,150 @@
+name: Firebase Hosting
+
+# Deploys web/ (taiwanair.wahthefox.com) by hand, separately from merging.
+# Merging a PR never deploys the site. Run this only when the ticket or PR
+# names a site deploy. It follows the runbook in docs/web-hosting.md:
+#
+#   check-domain     read-only: does taiwanair.wahthefox.com serve HTTPS yet?
+#                    (runbook step 5, after the DNS change). No approval needed.
+#   deploy-main      firebase deploy --only hosting:main   (runbook step 2)
+#   deploy-legacy    firebase deploy --config firebase.legacy-redirect.json
+#                    --only hosting:legacy                 (runbook step 6)
+#                    Refuses to run until check-domain passes, so kf-twaqi.web.app
+#                    can't 301 to a domain that doesn't resolve yet.
+#
+# The DNS record itself (Cloudflare, zone wahthefox.com) and the custom domain
+# in the Firebase console stay manual: runbook steps 3-4.
+#
+# Deploys run only from master, in the `firebase-hosting` environment, which
+# should require the owner's approval (docs/ci-cd-guardrails.md). They need
+# the repository or environment secret FIREBASE_SERVICE_ACCOUNT: a service
+# account key (JSON) for project kf-twaqi with the Firebase Hosting Admin role.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to run
+        required: true
+        type: choice
+        options:
+          - check-domain
+          - deploy-main
+          - deploy-legacy
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting
+  cancel-in-progress: false
+
+env:
+  FIREBASE_TOOLS: firebase-tools@15.34.0
+  PROJECT: kf-twaqi
+  DOMAIN: https://taiwanair.wahthefox.com
+  MAIN_SITE: https://taiwanair-wahthefox.web.app
+  LEGACY_SITE: https://kf-twaqi.web.app
+
+jobs:
+  check-domain:
+    name: Check taiwanair.wahthefox.com
+    if: inputs.action != 'deploy-main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Custom domain serves the site over HTTPS
+        run: |
+          set -uo pipefail
+          failed=0
+          for path in / /zh-Hant/ /privacy.html /zh-Hant/privacy.html /terms.html /zh-Hant/terms.html; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${DOMAIN}${path}")"
+            echo "${DOMAIN}${path} -> ${code}"
+            [ "$code" = 200 ] || failed=1
+          done
+          if [ "$failed" != 0 ]; then
+            echo "::error::${DOMAIN} is not serving every page over HTTPS yet. Finish runbook steps 3-5 (custom domain, DNS, certificate) first."
+            exit 1
+          fi
+
+  deploy:
+    name: ${{ inputs.action }}
+    needs: check-domain
+    # deploy-main does not depend on the domain; deploy-legacy needs it to pass.
+    if: >-
+      always() &&
+      inputs.action != 'check-domain' &&
+      (inputs.action == 'deploy-main' || needs.check-domain.result == 'success')
+    runs-on: ubuntu-latest
+    environment: firebase-hosting
+    steps:
+      - name: Only from master
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$REF" != refs/heads/master ]; then
+            echo "::error::Deploy the site from master only (this run is on ${REF})."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Write service account key
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT}" ]; then
+            echo "::error::Add the FIREBASE_SERVICE_ACCOUNT secret (service account JSON for ${PROJECT}) to the firebase-hosting environment."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" >"$RUNNER_TEMP/firebase-sa.json"
+
+      - name: Deploy
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -euo pipefail
+          case "$ACTION" in
+            deploy-main)
+              npx --yes "$FIREBASE_TOOLS" deploy --only hosting:main --project "$PROJECT" --non-interactive
+              ;;
+            deploy-legacy)
+              npx --yes "$FIREBASE_TOOLS" deploy --config firebase.legacy-redirect.json \
+                --only hosting:legacy --project "$PROJECT" --non-interactive
+              ;;
+          esac
+
+      - name: Verify
+        env:
+          ACTION: ${{ inputs.action }}
+        run: |
+          set -uo pipefail
+          failed=0
+          if [ "$ACTION" = deploy-main ]; then
+            for path in / /zh-Hant/ /privacy.html /zh-Hant/privacy.html /terms.html /zh-Hant/terms.html; do
+              code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${MAIN_SITE}${path}")"
+              echo "${MAIN_SITE}${path} -> ${code}"
+              [ "$code" = 200 ] || failed=1
+            done
+          else
+            for path in / /zh-Hant/privacy.html; do
+              headers="$(curl -sI --max-time 20 "${LEGACY_SITE}${path}")"
+              code="$(printf '%s' "$headers" | head -1 | awk '{print $2}')"
+              location="$(printf '%s' "$headers" | tr -d '\r' | awk 'tolower($1)=="location:" {print $2}')"
+              echo "${LEGACY_SITE}${path} -> ${code} ${location}"
+              [ "$code" = 301 ] && [ "$location" = "${DOMAIN}${path}" ] || failed=1
+            done
+          fi
+          [ "$failed" = 0 ] || { echo "::error::Post-deploy check failed."; exit 1; }
+
+      - name: Remove service account key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/firebase-sa.json"

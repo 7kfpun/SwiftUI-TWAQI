@@ -271,7 +271,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
-        # Warning only: never fail the pull request for scan findings or tool issues.
+        # Reports only: findings and tool issues never fail this step. The next
+        # step fails the job on verified secrets alone (FOX-38).
         continue-on-error: true
         run: |
           set +e
@@ -284,6 +285,7 @@ jobs:
           : >"$deps_log"
           echo 1 >"$RUNNER_TEMP/trufflehog.exit"
           echo 1 >"$RUNNER_TEMP/osv.exit"
+          rm -f "$RUNNER_TEMP/trufflehog.verified"
 
           # Prefer a binary TruffleHog so the job does not depend on docker.
           # Fall back to docker when the binary install fails; either way a
@@ -370,11 +372,18 @@ jobs:
           def cell(value):
               return str(value).replace("|", "\\|").replace("\n", " ")
 
+          verified = [item for item in findings if item["verified"] == "yes"]
+          if secrets_exit == 0:
+              # Read by the "Fail on verified secrets" step. Not written when
+              # TruffleHog did not finish, which stays a warning.
+              (runner / "trufflehog.verified").write_text(f"{len(verified)}\n")
+
           lines = [
               marker,
               "## Vulnerability checks",
               "",
-              "Warning only. These results do not fail the pull request.",
+              "**Verified** secrets (TruffleHog confirmed the credential is live) fail this check.",
+              "Unverified secret findings and dependency results are warnings only.",
               "",
               "### Secrets",
               "",
@@ -406,6 +415,13 @@ jobs:
                   lines.append(f"{len(findings) - len(shown)} more findings omitted.")
               lines.append("")
               lines.append("Secret values are left out of this comment.")
+              if verified:
+                  lines.append("")
+                  lines.append(
+                      f"**{len(verified)} verified secret(s): this check fails.** Revoke and rotate the "
+                      "credential, then remove it from the branch's commits. The repository is public, "
+                      "so a pushed secret is already exposed."
+                  )
               warnings.append(
                   f"TruffleHog reported {len(findings)} secret finding(s). Details are in the pull request comment."
               )
@@ -500,5 +516,21 @@ jobs:
           except Exception as exc:
               print(f"::warning::Could not post vulnerability comment: {exc}", flush=True)
           PY
-          # Always green: findings and tool failures are warnings/comments only.
+          # Always green: the next step decides whether the job fails.
           exit 0
+
+      - name: Fail on verified secrets
+        run: |
+          set -euo pipefail
+          count_file="$RUNNER_TEMP/trufflehog.verified"
+          if [ ! -s "$count_file" ]; then
+            # TruffleHog did not finish; already reported as a warning.
+            echo "::warning::No TruffleHog result to check; verified secrets were not ruled out."
+            exit 0
+          fi
+          count="$(tr -dc '0-9' <"$count_file")"
+          if [ "${count:-0}" -gt 0 ]; then
+            echo "::error::TruffleHog verified ${count} live secret(s) in this pull request's commits. See the Vulnerability checks comment; rotate them and remove them from the branch."
+            exit 1
+          fi
+          echo "No verified secrets."
