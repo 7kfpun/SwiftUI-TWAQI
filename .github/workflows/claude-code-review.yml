@@ -5,8 +5,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [master]
 
+# Draftness is part of the key, as in ci.yml: a stale draft run must not cancel
+# the run that "Ready for review" starts (FOX-38).
 concurrency:
-  group: claude-review-${{ github.event.pull_request.number }}
+  group: claude-review-${{ github.event.pull_request.number }}-draft-${{ github.event.pull_request.draft }}
   cancel-in-progress: true
 
 jobs:

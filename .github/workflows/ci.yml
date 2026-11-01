@@ -5,8 +5,13 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [master]
 
+# Draftness is part of the key. A push and "Ready for review" in the same second
+# give a run whose payload still says draft (it skips every job) and the real
+# non-draft run. With one key per PR, the stale draft run could cancel the real
+# one and the PR showed CI as skipped. Now a run only cancels runs of the same
+# draftness, so marking a PR ready always gets a full run (FOX-38).
 concurrency:
-  group: ci-${{ github.event.pull_request.number }}
+  group: ci-${{ github.event.pull_request.number }}-draft-${{ github.event.pull_request.draft }}
   cancel-in-progress: true
 
 permissions:

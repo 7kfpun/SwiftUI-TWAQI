@@ -16,9 +16,9 @@ name: Firebase Hosting
 # in the Firebase console stay manual: runbook steps 3-4.
 #
 # Deploys run only from master, in the `firebase-hosting` environment, which
-# should require the owner's approval (docs/ci-cd-guardrails.md). They need
-# the repository or environment secret FIREBASE_SERVICE_ACCOUNT: a service
-# account key (JSON) for project kf-twaqi with the Firebase Hosting Admin role.
+# requires the owner's approval and allows master only (docs/ci-cd-guardrails.md).
+# They need the environment secret FIREBASE_SERVICE_ACCOUNT: a service account
+# key (JSON) for project kf-twaqi with the Firebase Hosting Admin role.
 
 on:
   workflow_dispatch:

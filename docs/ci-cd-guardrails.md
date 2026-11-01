@@ -27,6 +27,14 @@ only when the ticket or PR names it.
 "CI green" for undrafting means everything except `Mini LGTM`, which stays pending until
 Mini reviews.
 
+Undraft race: `ci.yml` and `claude-code-review.yml` cancel superseded runs per PR, and
+their concurrency key includes whether the PR is a draft. A push and "Ready for review"
+in the same second used to let the push's run, whose payload still said draft and so
+skipped everything, cancel the ready-for-review run, which left CI skipped. With
+draftness in the key, a draft run can only cancel draft runs, so undrafting always gets
+a full run. `Workers` has no per-PR cancel. `PR policy` and `Mini LGTM` don't depend on
+draftness, and their newest run reads the PR's current state.
+
 Stacked PRs: `PR policy` only re-runs on the PR's own events, so it stays red after the
 base PR merges until the stacked PR is updated. Once protection requires up-to-date
 branches, that update has to happen anyway. Until then, re-run the check by hand. Which checks block a merge is set by `master`'s ruleset:
@@ -48,11 +56,22 @@ exposed: rotate the key, then rewrite the branch.
 | **TestFlight** | `fastlane release_build` on the Mac mini (cloud-managed signing needs the Xcode Apple ID, so it can't run on GitHub's runners) | named in the ticket/PR; the lane runs `check_release_consistency.py` first |
 | **App Store Connect** metadata / screenshots / review | `fastlane upload_metadata`, `upload_*screenshots`; submission by hand | named in the ticket/PR; screenshot lanes refuse to run unless the version is editable |
 
-### Firebase Hosting environment (one-time, owner)
+### Firebase Hosting environment
 
-The workflow is inert until the environment and its secret exist. Create the
-environment **before** adding the secret: a workflow that names a missing environment
-creates it with no protection.
+**Created on 2026-11-01 (FOX-38):** `firebase-hosting`, with required reviewer `7kfpun`
+(self-review allowed, since every run is triggered from that account) and deployment
+branches limited to `master`. **No secret yet.** The workflow fails at "Write service
+account key" until the owner adds `FIREBASE_SERVICE_ACCOUNT` as an *environment* secret,
+so only approved runs can read it:
+
+```sh
+# Service account for project kf-twaqi with the Firebase Hosting Admin role.
+gh secret set FIREBASE_SERVICE_ACCOUNT --env firebase-hosting < kf-twaqi-hosting-sa.json
+```
+
+The environment was created with the commands below. They are kept for re-creating it.
+Create the environment before adding any secret: a workflow that names a missing
+environment creates it with no protection.
 
 ```sh
 # Owner approval, deployable from master only.
@@ -65,14 +84,10 @@ gh api --method PUT repos/7kfpun/SwiftUI-TWAQI/environments/firebase-hosting --i
 JSON
 gh api --method POST repos/7kfpun/SwiftUI-TWAQI/environments/firebase-hosting/deployment-branch-policies \
   -f name=master -f type=branch
-
-# Service account for project kf-twaqi with the Firebase Hosting Admin role, stored as an
-# environment secret so only approved runs can read it.
-gh secret set FIREBASE_SERVICE_ACCOUNT --env firebase-hosting < kf-twaqi-hosting-sa.json
 ```
 
-`2672802` is the `7kfpun` user id. Until this is done, deploy the site from a laptop as
-in [web-hosting.md](web-hosting.md). The same order applies there.
+`2672802` is the `7kfpun` user id. Until the secret is added, deploy the site from a
+laptop as in [web-hosting.md](web-hosting.md). The same order applies there.
 
 ## After the merge: TestFlight
 
