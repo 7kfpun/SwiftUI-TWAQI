@@ -51,11 +51,11 @@
   "@type": "FAQPage",
   "mainEntity": [
     { "@type": "Question", "name": "台灣空氣品質要付費嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不用。App 免費下載，所有空氣品質功能在免費版都能使用，免費版會顯示橫幅廣告。Taiwan Air Pro 為選購項目，可移除廣告，並加入 Apple Watch 錶面複雜功能與中、大尺寸主畫面小工具。" } },
-    { "@type": "Question", "name": "需要註冊帳號嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不需要。沒有註冊、也沒有登入，你的最愛測站與設定都只存在你的裝置上。" } },
+    { "@type": "Question", "name": "需要註冊帳號嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不需要。沒有註冊、也沒有登入，你的最愛測站與設定都存在你的裝置上。唯一的例外是通知：測站開啟通知時（包括加入最愛時自動開啟的通知），該測站與門檻設定會傳送到推播服務 OneSignal 與我們自己的伺服器，以便發送通知。" } },
     { "@type": "Question", "name": "資料從哪裡來？", "acceptedAnswer": { "@type": "Answer", "text": "所有數值都是環境部「空氣品質監測網」的公開資料，空品區預報則是環境部官方發布的預報。我們如實呈現，不做任何調整。" } },
     { "@type": "Question", "name": "資料多久更新一次？", "acceptedAnswer": { "@type": "Answer", "text": "監測站每小時發布一次數值。App 會自動更新，並標示每筆資料的發布時間與距今多久。" } },
     { "@type": "Question", "name": "沒有網路也能用嗎？", "acceptedAnswer": { "@type": "Answer", "text": "可以。看過的數值、預報與即時影像會在裝置上保留約一週，沒有網路時仍可查看最近一次的數值，小工具也會顯示最後一次儲存的數值。" } },
-    { "@type": "Question", "name": "App 會蒐集我的哪些資料？", "acceptedAnswer": { "@type": "Answer", "text": "很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時，會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。完整內容請見隱私權政策。" } },
+    { "@type": "Question", "name": "App 會蒐集我的哪些資料？", "acceptedAnswer": { "@type": "Answer", "text": "很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時（加入最愛也會自動開啟），會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。完整內容請見隱私權政策。" } },
     { "@type": "Question", "name": "支援哪些裝置？", "acceptedAnswer": { "@type": "Answer", "text": "iOS 15 以上的 iPhone 與 iPad、watchOS 10 以上的 Apple Watch，以及 Apple Vision Pro。並提供主畫面與鎖定畫面小工具。" } },
     { "@type": "Question", "name": "App 的資訊可以當作醫療建議嗎？", "acceptedAnswer": { "@type": "Answer", "text": "不行。本 App 僅供一般資訊參考。資料可能延遲、缺漏，或由環境部事後修正。如有健康疑慮，請諮詢專業人員並查閱政府官方來源。" } }
   ]
@@ -237,7 +237,7 @@
       <ol class="steps">
         <li class="reveal"><span class="n">1</span><h3>免費下載</h3><p>從 App Store 下載台灣空氣品質，不需要註冊任何帳號。</p></li>
         <li class="reveal"><span class="n">2</span><h3>找到你的測站</h3><p>允許定位即可跳到最近的測站，或直接點選地圖上的任一標記。你的位置不會離開裝置。</p></li>
-        <li class="reveal"><span class="n">3</span><h3>加入最愛並開啟通知</h3><p>點一下愛心加入最愛，設定通知門檻與勿擾時段，再加上小工具或在手錶上查看。</p></li>
+        <li class="reveal"><span class="n">3</span><h3>加入最愛，自動通知</h3><p>點一下愛心加入最愛，同時開啟 AQI 高於 120 的超標通知；門檻與勿擾時段隨時可以調整。再加上小工具或在手錶上查看。</p></li>
       </ol>
     </div>
   </section>
@@ -255,7 +255,7 @@
         </details>
         <details>
           <summary>需要註冊帳號嗎？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
-          <div class="a"><p>不需要。沒有註冊、也沒有登入，你的最愛測站與設定都只存在你的裝置上。</p></div>
+          <div class="a"><p>不需要。沒有註冊、也沒有登入，你的最愛測站與設定都存在你的裝置上。唯一的例外是通知：測站開啟通知時（包括加入最愛時自動開啟的通知），該測站與門檻設定會傳送到推播服務 OneSignal 與我們自己的伺服器，以便發送通知。</p></div>
         </details>
         <details>
           <summary>資料從哪裡來？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
@@ -272,7 +272,7 @@
         <details>
           <summary>App 會蒐集我的哪些資料？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
           <div class="a">
-            <p>很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時，會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。</p>
+            <p>很少。定位權限可自由選擇，只在裝置上用來找出最近的測站。開啟通知時（加入最愛也會自動開啟），會儲存測站與門檻設定以便發送通知。只有在你送出「意見回饋」或「商業合作」表單時，我們才會收到你的姓名與電子郵件。</p>
             <p>蒐集哪些資料、與誰分享，詳見<a href="/zh-Hant/privacy.html">隱私權政策</a>。</p>
           </div>
         </details>
