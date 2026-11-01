@@ -85,6 +85,7 @@
 		8249C2C83B32D720E58F53D6 /* TWAQIWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */; };
 		836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E1A /* AppStoreScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */; };
 		838AE2B6805D7FE81DC68B49 /* AqiTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D50685ABB6D7832C10DAFD /* AqiTrend.swift */; };
 		84D7C82DBEE6A091FDCF2DEF /* WindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE775C56385FDE2BC07B4BB /* WindView.swift */; };
 		859F6BC67157B7687568B86D /* StationHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4960C340833CD7D23354E4 /* StationHeaderView.swift */; };
@@ -480,6 +481,7 @@
 		CDABF31536526074C5DD15CB /* ScreenshotLaunch.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotLaunch.swift; sourceTree = "<group>"; };
 		CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuoScreenshotTests.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareScreenshotTests.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppStoreScreenshotTests.swift; sourceTree = "<group>"; };
 		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
 		D8AA8FEAA3FCED7566CD7F45 /* MapControls.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapControls.swift; sourceTree = "<group>"; };
 		D92DB7F473AB70324C3565E8 /* WatchPro.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchPro.swift; sourceTree = "<group>"; };
@@ -963,6 +965,7 @@
 			children = (
 				CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */,
 			);
 			path = TWAQIUITests;
 			sourceTree = "<group>";
@@ -1665,6 +1668,7 @@
 			files = (
 				836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E1A /* AppStoreScreenshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
