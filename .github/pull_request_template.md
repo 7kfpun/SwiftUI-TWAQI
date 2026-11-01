@@ -4,7 +4,8 @@ FOX-nn — https://linear.app/foxtechnologies/issue/FOX-nn
 
 > Quote the ticket's scope / acceptance criteria here. The Claude review checks the diff against it.
 
-<!-- Stacked PR? Keep a line like the one below: the PR policy check stays red until #N is merged.
+<!-- Stacked PR? Keep a line like the one below: the PR policy check stays red until #N is merged
+     (then update this branch from master, or re-run the check).
 Depends on #N
 -->
 

@@ -45,8 +45,13 @@ jobs:
           python3 "$script"
 
       - name: Version, build numbers and What's New
-        # The PR's own copy: it reads the PR's project file and Fastfile.
-        run: python3 tools/check_release_consistency.py
+        # master's script, run against the PR's project file, Fastfile and notes.
+        run: |
+          set -euo pipefail
+          script="$RUNNER_TEMP/check_release_consistency.py"
+          git show origin/master:tools/check_release_consistency.py >"$script" 2>/dev/null \
+            || cp tools/check_release_consistency.py "$script"
+          python3 "$script" "$PWD"
 
   secret-files:
     name: Secret files

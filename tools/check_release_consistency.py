@@ -14,7 +14,12 @@ visionOS (SDKROOT = xros) is reported but not checked: it ships its own build
 numbers and can trail the iPhone version.
 
 Used by CI (PR policy) and by `fastlane release_build` before it archives.
-Standard library only. Run from anywhere: python3 tools/check_release_consistency.py
+Standard library only. Run from anywhere:
+
+    python3 tools/check_release_consistency.py [repo-root]
+
+The root defaults to the checkout the script sits in. CI runs master's copy of
+the script against the PR's checkout by passing the root.
 """
 
 import os
@@ -22,7 +27,7 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else pathlib.Path(__file__).parent.parent).resolve()
 PBXPROJ = ROOT / "TWAQI.xcodeproj" / "project.pbxproj"
 FASTFILE = ROOT / "fastlane" / "Fastfile"
 METADATA = ROOT / "fastlane" / "metadata"

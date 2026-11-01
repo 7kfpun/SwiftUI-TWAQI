@@ -25,7 +25,11 @@ only when the ticket or PR names it.
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
 "CI green" for undrafting means everything except `Mini LGTM`, which stays pending until
-Mini reviews. Which checks block a merge is set by `master`'s ruleset:
+Mini reviews.
+
+Stacked PRs: `PR policy` only re-runs on the PR's own events, so it stays red after the
+base PR merges until the stacked PR is updated. Once protection requires up-to-date
+branches, that update has to happen anyway. Until then, re-run the check by hand. Which checks block a merge is set by `master`'s ruleset:
 [master-protection.md](master-protection.md) (proposed, not applied yet).
 
 The secret checks are layered. `Secret files` fails on what the PR would merge, whether

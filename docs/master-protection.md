@@ -37,11 +37,17 @@ plus these:
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
 | required: `Workers` | Workers | One summary check on every PR, green when no Worker changed. |
-| required: `Mini LGTM` | Mini LGTM | Commit status set from Mini's review. See below. |
+| required: `Mini LGTM` | Mini LGTM | Commit status set from Mini's review (any source, see below). |
 | `bypass_actors` | none | Every actor here, Orca and Mini included, uses the owner's admin account. An admin bypass would exempt the agents too, so there is none. |
 
-`integration_id: 15368` is GitHub Actions. It means only a workflow can satisfy a check:
-a `gh api …/statuses` call made with a personal token does **not** turn `Mini LGTM` green.
+`integration_id: 15368` is GitHub Actions: those five checks can only be satisfied by a
+workflow. `Mini LGTM` is a commit *status*, not a check run, and it is left without an
+`integration_id` on purpose. It isn't confirmed that a ruleset matches a status posted with
+`GITHUB_TOKEN` to the Actions app, and if it doesn't, every PR would be blocked. The
+trade-off is that a status posted by hand (`gh api …/statuses` with a personal token) would
+also count. Optional hardening once the ruleset is live: add `"integration_id": 15368` to
+that entry, then confirm on one PR that a real Mini LGTM still unblocks the merge. If it
+doesn't, remove the id again.
 
 `Claude Code Review` (check name `review`) stays advisory, not required. It depends on an
 external token and quota, and its findings go into Mini's LGTM anyway.
@@ -73,7 +79,9 @@ every review. [`tools/mini_lgtm_gate.py`](../tools/mini_lgtm_gate.py) then sets 
 - Dismissing the review withdraws the LGTM.
 
 Limits, stated plainly: Orca, Mini and the owner share one GitHub account, so the gate
-checks a convention, not an identity. **Orca must never post a review that starts with
+checks a convention, not an identity. Any owner, member or collaborator can post a
+"Mini LGTM" review; today the owner is the only collaborator, and anyone added later is
+trusted with that. **Orca must never post a review that starts with
 "Mini".** The gate scripts run from `master`'s copy, so a PR can't loosen its own gate,
 but a PR that edits `.github/` or `tools/` still deserves a careful read from Mini. The
 user greenlight is a human step (the PR template's checkbox), not a check.
@@ -100,9 +108,8 @@ Then, on the next PR:
 
 - Push a `feature/fox-nn-…` branch and open a PR. `PR policy`, `Secret files`, `Workers`
   and `Mini LGTM` (pending) should all report.
-- Leave a `**Mini LGTM**` review and the status should turn green. If the merge box
-  still lists `Mini LGTM` as expected even though the status is green, drop
-  `"integration_id": 15368` from the `Mini LGTM` entry and PUT again.
+- Leave a `**Mini LGTM**` review. The status should turn green and the merge box should
+  stop listing `Mini LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.
 
