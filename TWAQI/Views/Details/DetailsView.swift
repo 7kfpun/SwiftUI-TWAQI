@@ -221,6 +221,42 @@ struct DetailsView: View {
         } message: {
             Text("Favourites.remove_station_with_alerts_message")
         }
+        // Favourited, but its alerts couldn't be switched on: one line on
+        // why, and the way to fix it when it's a setting.
+        .alert(
+            Text("Favourites.added_to_favourites"),
+            isPresented: isShowingFavouriteAlertsHint,
+            presenting: viewModel.favouriteAlertsHint
+        ) { hint in
+            if hint == .notificationsDenied {
+                Button(action: openNotificationSettings) {
+                    Text("Favourites.open_settings")
+                }
+            }
+            Button(role: .cancel, action: {}) {
+                Text("Favourites.ok")
+            }
+        } message: { hint in
+            switch hint {
+            case .capReached:
+                Text("Favourites.alerts_cap_reached_message")
+            case .notificationsDenied:
+                Text("Favourites.notifications_off_message")
+            }
+        }
+    }
+
+    private var isShowingFavouriteAlertsHint: Binding<Bool> {
+        Binding(
+            get: { viewModel.favouriteAlertsHint != nil },
+            set: { if !$0 { viewModel.favouriteAlertsHint = nil } }
+        )
+    }
+
+    private func openNotificationSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
 
     /// Band colour of the pollutant the page is currently showing, so the wind

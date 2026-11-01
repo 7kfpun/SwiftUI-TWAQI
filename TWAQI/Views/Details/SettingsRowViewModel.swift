@@ -78,7 +78,7 @@ class SettingsRowViewModel: ObservableObject {
                 switch result {
                 case .success(let settings):
                     self.isApplyingRemoteSettings = true
-                    self.isDisabled = settings.stationSettings.count >= 2
+                    self.isDisabled = settings.stationSettings.count >= FavouriteAlerts.maxAlertedStations
                     if let remote = settings.stationSettings[self.notificationTagCode] {
                         self.stationSetting = remote
                         // Alerts set before the dual-write reach Directus the
@@ -110,8 +110,9 @@ class SettingsRowViewModel: ObservableObject {
         ])
     }
 
-    /// Alerts cleared elsewhere — the station was removed from Favourites —
-    /// switch off here too, without writing them back.
+    /// Alerts changed elsewhere follow here, without being written back:
+    /// cleared because the station left Favourites, or switched on because it
+    /// was just favourited (FOX-31).
     private func followClears() {
         clearedObserver = NotificationCenter.default.addObserver(
             forName: FavouriteAlerts.changed,
@@ -119,13 +120,24 @@ class SettingsRowViewModel: ObservableObject {
             queue: .main
         ) { [weak self] notification in
             guard let self = self,
-                  FavouriteAlerts.isOn(in: notification, stationId: self.station.id) == false,
-                  !StationAlerts(self.stationSetting).isOff
+                  let isOn = FavouriteAlerts.isOn(in: notification, stationId: self.station.id)
             else { return }
-            self.isApplyingRemoteSettings = true
-            self.stationSetting.isPollutionNotificationEnabled = false
-            self.stationSetting.isCleanlinessNotificationEnabled = false
-            self.isApplyingRemoteSettings = false
+
+            if !isOn {
+                guard !StationAlerts(self.stationSetting).isOff else { return }
+                self.isApplyingRemoteSettings = true
+                self.stationSetting.isPollutionNotificationEnabled = false
+                self.stationSetting.isCleanlinessNotificationEnabled = false
+                self.isApplyingRemoteSettings = false
+            } else if let setting = FavouriteAlerts.setting(in: notification),
+                      StationAlerts(self.stationSetting).isOff {
+                self.isApplyingRemoteSettings = true
+                self.stationSetting = setting
+                if let count = FavouriteAlerts.alertedStationCount(in: notification) {
+                    self.isDisabled = count >= FavouriteAlerts.maxAlertedStations
+                }
+                self.isApplyingRemoteSettings = false
+            }
         }
     }
 

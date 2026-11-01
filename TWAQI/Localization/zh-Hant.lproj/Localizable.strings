@@ -24,6 +24,11 @@
 "Favourites.remove_station_with_alerts_message" = "這個測站已開啟 AQI 通知，從我的最愛移除後，通知也會一併關閉。";
 "Favourites.remove_and_turn_off_alerts" = "移除並關閉通知";
 "Favourites.cancel" = "取消";
+"Favourites.added_to_favourites" = "已加入我的最愛";
+"Favourites.alerts_cap_reached_message" = "已有 2 個測站開啟通知，已達上限，這個測站的通知暫不開啟。到其中一個測站頁面關閉通知後，即可為這個測站開啟。";
+"Favourites.notifications_off_message" = "Taiwan Air 的通知已關閉，因此這個測站的通知暫不開啟。請到「設定」開啟通知，再於下方開啟測站通知。";
+"Favourites.open_settings" = "開啟設定";
+"Favourites.ok" = "好";
 
 "DetailsList.details" = "測站列表";
 "DetailsList.search" = "搜尋";
