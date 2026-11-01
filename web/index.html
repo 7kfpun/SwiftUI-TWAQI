@@ -1,77 +1,365 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Taiwan Air 台灣空氣品質</title>
-<meta name="description" content="Taiwan Air — live air quality from Taiwan's government monitoring stations, with forecasts, alerts, station webcams and widgets on iPhone, iPad, Apple Watch and Apple Vision Pro.">
-<style>
-  body { font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #222; margin: 0; }
-  main { max-width: 680px; margin: 0 auto; padding: 32px 20px 64px; }
-  h1 { font-size: 1.5em; margin-bottom: 0.2em; }
-  h2 { font-size: 1.1em; margin-top: 2em; }
-  .lede { margin-top: 0; }
-  .cta { display: inline-block; padding: 8px 16px; border-radius: 8px; background: #0a7ea4; color: #fff; text-decoration: none; font-weight: 600; }
-  ul { padding-left: 1.2em; }
-  li { margin: 0.3em 0; }
-  hr { border: 0; border-top: 1px solid #ddd; margin: 2.5em 0; }
-  small { color: #666; }
-  a { color: #0a7ea4; }
-  @media (prefers-color-scheme: dark) {
-    body { background:#111; color:#ddd; } a { color:#5ac8e8; }
-    .cta { background:#5ac8e8; color:#111; } hr { border-top-color:#333; } small { color:#999; }
-  }
-</style>
+<title>Taiwan Air: live AQI and PM2.5 for every station in Taiwan</title>
+<meta name="description" content="Taiwan Air is the free app for live air quality across Taiwan: AQI and PM2.5 from every Ministry of Environment station, a 24 hour trend, station webcams, the official zone forecast, alerts with quiet hours, widgets, Apple Watch and Apple Vision Pro.">
+<link rel="canonical" href="https://taiwanair.wahthefox.com/">
+<link rel="alternate" hreflang="en" href="https://taiwanair.wahthefox.com/">
+<link rel="alternate" hreflang="zh-Hant" href="https://taiwanair.wahthefox.com/zh-Hant/">
+<link rel="alternate" hreflang="x-default" href="https://taiwanair.wahthefox.com/">
+<meta name="theme-color" content="#f4f8fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-itunes-app" content="app-id=1286516443">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Taiwan Air">
+<meta property="og:title" content="Taiwan Air: live AQI and PM2.5 for every station in Taiwan">
+<meta property="og:description" content="Live air quality from every official monitoring station in Taiwan, with alerts, widgets, Apple Watch and Apple Vision Pro. Free, no account.">
+<meta property="og:url" content="https://taiwanair.wahthefox.com/">
+<meta property="og:image" content="https://taiwanair.wahthefox.com/assets/og-en.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="514">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<script>
+  // Old links pointed at the Chinese section of the previous one page site.
+  if (location.hash === "#zh") location.replace("/zh-Hant/");
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Taiwan Air",
+  "alternateName": "台灣空氣品質",
+  "operatingSystem": "iOS, iPadOS, watchOS, visionOS",
+  "applicationCategory": "WeatherApplication",
+  "url": "https://taiwanair.wahthefox.com/",
+  "downloadUrl": "https://apps.apple.com/tw/app/id1286516443",
+  "image": "https://taiwanair.wahthefox.com/assets/icon-192.png",
+  "inLanguage": ["en", "zh-Hant"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is Taiwan Air free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Taiwan Air is free to download and every air quality feature works in the free version, which shows banner ads. Taiwan Air Pro is optional: it removes the ads and adds Apple Watch complications and medium and large Home Screen widgets." } },
+    { "@type": "Question", "name": "Do I need an account?", "acceptedAnswer": { "@type": "Answer", "text": "No. There is no sign up and no login. Your favourites and settings stay on your device." } },
+    { "@type": "Question", "name": "Where does the data come from?", "acceptedAnswer": { "@type": "Answer", "text": "Every reading is open data from the air quality monitoring network of Taiwan's Ministry of Environment (環境部). The zone forecast is the ministry's official 空品區預報. Taiwan Air shows the numbers as published and does not adjust them." } },
+    { "@type": "Question", "name": "How often are readings updated?", "acceptedAnswer": { "@type": "Answer", "text": "Monitoring stations publish once an hour. The app refreshes on its own and shows when each reading was published and how long ago that was." } },
+    { "@type": "Question", "name": "Does it work offline?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Readings, forecasts and webcam images you have loaded stay on your device for about a week, so the last values are still there without a connection. Widgets show the last saved values too." } },
+    { "@type": "Question", "name": "What does Taiwan Air know about me?", "acceptedAnswer": { "@type": "Answer", "text": "Very little. Location is optional and is only used on your device to find your nearest station. If you turn on alerts, your station and threshold are stored so the notification can be sent. We only receive your name and email if you send us the Feedback or Business partner form. The privacy policy lists everything." } },
+    { "@type": "Question", "name": "Which devices does it run on?", "acceptedAnswer": { "@type": "Answer", "text": "iPhone and iPad with iOS 15 or later, Apple Watch with watchOS 10 or later, and Apple Vision Pro. Home Screen and Lock Screen widgets are included." } },
+    { "@type": "Question", "name": "Is Taiwan Air medical advice?", "acceptedAnswer": { "@type": "Answer", "text": "No. Taiwan Air is general information. Readings can be late, missing or corrected later by the ministry. If you have health concerns, talk to a professional and check official government sources." } }
+  ]
+}
+</script>
 </head>
-<body><main>
-<h1>Taiwan Air 台灣空氣品質</h1>
-<p class="lede">Live air quality from every Ministry of Environment (環境部) monitoring station in Taiwan, on iPhone, iPad, Apple Watch and Apple Vision Pro. <a href="#zh">中文說明</a></p>
-<p><a class="cta" href="https://apps.apple.com/tw/app/id1286516443">Download on the App Store</a></p>
+<body>
+<a class="skip" href="#main">Skip to content</a>
 
-<h2>What it does</h2>
-<ul>
-  <li><strong>Map of stations</strong> — AQI, PM2.5, PM10, O₃ and more for every station, colour-coded, with your nearest station picked for you if you allow location.</li>
-  <li><strong>Station details</strong> — recent readings and trends, plus the station webcam (where available) with the last 24 hours of hourly frames.</li>
-  <li><strong>Forecast</strong> — the official air quality zone forecast (空品區預報) for the days ahead.</li>
-  <li><strong>Favourites</strong> — keep the stations you care about in one list.</li>
-  <li><strong>Alerts</strong> — get a notification when a station crosses the level you choose, with quiet hours.</li>
-  <li><strong>Widgets &amp; Watch</strong> — Home Screen widgets, an Apple Watch app and complications.</li>
-  <li><strong>Works offline</strong> — the last readings stay available without a connection.</li>
-</ul>
-<p>Free with banner ads; a one-time in-app purchase removes them. No account needed.</p>
+<nav class="nav" aria-label="Main">
+  <a class="brand" href="/" aria-current="page"><img src="/assets/icon-192.png" alt="" width="24" height="24">Taiwan Air</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文</a></li>
+  </ul>
+  <a class="nav-cta" href="https://apps.apple.com/tw/app/id1286516443">Download</a>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><span></span><span></span></button>
+</nav>
+<div class="menu-panel" id="menu" aria-hidden="true">
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文版</a></li>
+  </ul>
+  <div class="menu-foot"><a href="https://apps.apple.com/tw/app/id1286516443">Download on the App Store</a></div>
+</div>
 
-<h2>Get in touch</h2>
-<p>In the app, open <strong>Help</strong>:</p>
-<ul>
-  <li><strong>Feedback / Contact us</strong> — questions, bug reports and ideas.</li>
-  <li><strong>Interested to be our Business Partner?</strong> — advertising, data/API, sponsorship and media enquiries.</li>
-</ul>
-<p><small>Both forms send what you type, including your name and email, to us so we can reply. See the <a href="/privacy.html">Privacy Policy</a>.</small></p>
+<main id="main">
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>iPhone · iPad · Apple Watch · Apple Vision Pro</span>
+        <h1>Know Taiwan's air<br>before you step out</h1>
+        <p class="lede">Live AQI and PM2.5 from every Ministry of Environment monitoring station, a plain answer on whether the air is getting better or worse, and an alert when your station crosses the line you set.</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/tw/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>Free on the</small>App Store</span>
+          </a>
+        </div>
+        <ul class="proof">
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>Official 環境部 open data</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>No account</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>English and 繁體中文</li>
+        </ul>
+        <div class="bands" aria-hidden="true"><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span><span class="b5"></span><span class="b6"></span></div>
+      </div>
+      <div class="devices">
+        <div class="phone back"><img src="/assets/detail-en.webp" width="600" height="1215" alt="Station screen for Wanhua, Taipei: AQI 61, Moderate, with wind and health advice"></div>
+        <div class="phone"><img src="/assets/map-en.webp" width="600" height="1215" alt="Map of Taiwan with every monitoring station pinned and coloured by its current AQI" fetchpriority="high"></div>
+        <div class="watch"><img src="/assets/watch-en.webp" width="416" height="496" alt="Apple Watch face showing AQI 33, Good, at Songshan"></div>
+      </div>
+    </div>
+  </header>
 
-<h2>Legal</h2>
-<ul>
-  <li><a href="/privacy.html">Privacy Policy</a> · <a href="/zh-Hant/privacy.html">隱私權政策</a></li>
-  <li><a href="/terms.html">Terms of Service</a> · <a href="/zh-Hant/terms.html">服務條款</a></li>
-</ul>
-<p><small>Air quality data: open data from Taiwan&#x27;s Ministry of Environment.</small></p>
+  <section id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">What it does</p>
+        <h2 id="features-title">Everything Taiwan's monitoring network measures, in one calm app</h2>
+        <p>Open it, see your nearest station, and know in a few seconds whether to open the window, take a mask or run the purifier.</p>
+      </div>
 
-<hr>
+      <div class="feature-row reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/map-en.webp" width="600" height="1215" alt="Live station map with the AQI, PM2.5, PM10, O3 and CO switcher" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>Every station on one live map</h3>
+          <p>Every official monitoring station is pinned with its current reading and coloured by health band.</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-trifold"/></svg><span><strong>Seven indices.</strong> Switch the whole map between AQI, PM2.5, PM10, O3, CO, SO2 and NO2.</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#wind"/></svg><span><strong>Wind mode.</strong> Every marker turns into an arrow, so you see which way pollution is blowing and how hard.</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-pin"/></svg><span><strong>Your nearest station.</strong> Allow location and it stays on screen with its reading and the time it was measured.</span></li>
+          </ul>
+        </div>
+      </div>
 
-<section id="zh" lang="zh-Hant">
-<h2>台灣空氣品質</h2>
-<p>即時呈現環境部全台空氣品質監測站的觀測數值，支援 iPhone、iPad、Apple Watch 與 Apple Vision Pro。</p>
-<ul>
-  <li><strong>測站地圖</strong>：AQI、PM2.5、PM10、臭氧等指標一目了然；開啟定位即可自動選擇最近的測站。</li>
-  <li><strong>測站詳情</strong>：近期數值與趨勢，有攝影機的測站還可瀏覽即時影像及過去 24 小時的每小時畫面。</li>
-  <li><strong>空品區預報</strong>：官方發布的未來數日空氣品質預報。</li>
-  <li><strong>收藏</strong>：把常看的測站整理在同一個清單。</li>
-  <li><strong>警示通知</strong>：測站數值超過您設定的門檻時通知您，並可設定勿擾時段。</li>
-  <li><strong>小工具與 Apple Watch</strong>：主畫面小工具、Apple Watch App 與錶面複雜功能。</li>
-  <li><strong>離線瀏覽</strong>：沒有網路時仍可查看最近一次的數值。</li>
-</ul>
-<p>免費下載，內含橫幅廣告，可透過一次性購買移除廣告。不需要註冊帳號。</p>
-<p>有任何問題或建議，請在 App 的「說明」頁面點選「意見回饋 / 聯絡我們」；商業合作請點選「想成為我們的合作夥伴嗎？」。表單會將您填寫的內容（包含姓名與電子郵件）傳送給我們以便回覆，詳見<a href="/zh-Hant/privacy.html">隱私權政策</a>。</p>
-<p><a class="cta" href="https://apps.apple.com/tw/app/id1286516443">在 App Store 下載</a></p>
-</section>
-</main></body>
+      <div class="feature-row flip reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/detail-en.webp" width="600" height="1215" alt="Station details with AQI, conditions, location and health guidance" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>Station details that answer the real question</h3>
+          <p>Is it getting better or worse? Each station says so in one line, above a 24 hour AQI chart coloured hour by hour.</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#chart-line-up"/></svg><span><strong>24 hour trend.</strong> Improving, getting worse or steady, with the day's low, high and average.</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#video-camera"/></svg><span><strong>Station webcams.</strong> Where a station has a camera, see the latest view and step back through the last 24 hours, hour by hour.</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg><span><strong>All six pollutants and health advice.</strong> PM2.5, PM10, ozone, CO, SO2 and NO2, plus guidance for the general public and sensitive groups.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#calendar-dots"/></svg></div>
+          <h3>Zone forecast (空品區預報)</h3>
+          <p>The ministry's official air quality forecast for each zone for the days ahead, so you can plan the weekend run or the school trip.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#heart"/></svg></div>
+          <h3>Favourites</h3>
+          <p>Save home, work and school and check them all at a glance. Search by station, township or county, grouped by air quality zone.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#bell-ringing"/></svg></div>
+          <h3>Alerts that respect your sleep</h3>
+          <p>Get a notification when AQI at your station rises above your threshold, or drops below one so you know it is safe to open the windows. Set quiet hours and nothing arrives overnight.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#squares-four"/></svg></div>
+          <h3>Home Screen and Lock Screen widgets</h3>
+          <p>Your nearest or first favourite station, in any of the seven indices. Larger widgets list your other favourites too.</p>
+          <span class="tag">Medium and large widgets are Pro</span>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#wifi-slash"/></svg></div>
+          <h3>Works offline</h3>
+          <p>Readings, forecasts and webcam frames you have opened stay on your device for about a week, so the last numbers are there on the MRT or in the mountains.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#translate"/></svg></div>
+          <h3>English and 繁體中文</h3>
+          <p>The whole app in both languages, with the ministry's official wording for every health band.</p>
+        </article>
+      </div>
+
+      <div class="platforms">
+        <article class="platform reveal">
+          <div class="shot"><img src="/assets/watch-en.webp" width="416" height="496" alt="Apple Watch face with an AQI complication" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Watch</h3>
+            <p>A free watch app for your stations, plus complications that put AQI, PM2.5 or any index on your watch face with Pro.</p>
+          </div>
+        </article>
+        <article class="platform vision reveal">
+          <div class="shot"><img src="/assets/vision-en.webp" width="1200" height="675" alt="Apple Vision Pro showing a 3D relief map of Taiwan on a table, with stations pinned at their readings" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Vision Pro</h3>
+            <p>Taiwan as a 3D relief map on your table, every station standing at its reading, with the same index switcher and wind mode.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline" aria-label="Why it matters">
+    <div class="wrap">
+      <p data-reveal-words>Thirty seconds before you leave<br> tells you whether to take the mask<br> or keep the window shut.</p>
+      <p class="source reveal">Outdoor air pollution was classified as a Group 1 carcinogen by the International Agency for Research on Cancer in 2013. Children and older adults are affected most.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="bands-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">Reading the colours</p>
+        <h2 id="bands-title">Six bands, the same as the ministry uses</h2>
+        <p>Every marker, widget and watch face uses the official AQI bands, so a colour means the same thing everywhere in the app.</p>
+      </div>
+      <div class="legend reveal">
+        <div><i class="b1"></i><b>Good</b><span>0 to 50</span></div>
+        <div><i class="b2"></i><b>Moderate</b><span>51 to 100</span></div>
+        <div><i class="b3"></i><b>Unhealthy for sensitive groups</b><span>101 to 150</span></div>
+        <div><i class="b4"></i><b>Unhealthy</b><span>151 to 200</span></div>
+        <div><i class="b5"></i><b>Very unhealthy</b><span>201 to 300</span></div>
+        <div><i class="b6"></i><b>Hazardous</b><span>301 and above</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">How it works</p>
+        <h2 id="how-title">Set up in under a minute</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><span class="n">1</span><h3>Download it free</h3><p>Get Taiwan Air from the App Store. There is nothing to sign up for.</p></li>
+        <li class="reveal"><span class="n">2</span><h3>Find your station</h3><p>Allow location to jump to the nearest station, or tap any marker on the map. Your location never leaves the device.</p></li>
+        <li class="reveal"><span class="n">3</span><h3>Save it and set an alert</h3><p>Tap the heart to add it to favourites, choose a threshold and quiet hours, then add a widget or check your watch.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">FAQ</p>
+        <h2 id="faq-title">Questions people ask</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary>Is Taiwan Air free?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>Yes. Taiwan Air is free to download and every air quality feature works in the free version, which shows banner ads. Taiwan Air Pro is optional: it removes the ads and adds Apple Watch complications and medium and large Home Screen widgets.</p></div>
+        </details>
+        <details>
+          <summary>Do I need an account?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>No. There is no sign up and no login. Your favourites and settings stay on your device.</p></div>
+        </details>
+        <details>
+          <summary>Where does the data come from?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>Every reading is open data from the air quality monitoring network of Taiwan's Ministry of Environment (環境部). The zone forecast is the ministry's official 空品區預報. Taiwan Air shows the numbers as published and does not adjust them.</p></div>
+        </details>
+        <details>
+          <summary>How often are readings updated?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>Monitoring stations publish once an hour. The app refreshes on its own and shows when each reading was published and how long ago that was.</p></div>
+        </details>
+        <details>
+          <summary>Does it work offline?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>Yes. Readings, forecasts and webcam images you have loaded stay on your device for about a week, so the last values are still there without a connection. Widgets show the last saved values too.</p></div>
+        </details>
+        <details>
+          <summary>What does Taiwan Air know about me?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a">
+            <p>Very little. Location is optional and is only used on your device to find your nearest station. If you turn on alerts, your station and threshold are stored so the notification can be sent. We only receive your name and email if you send us the Feedback or Business partner form.</p>
+            <p>The <a href="/privacy.html">privacy policy</a> lists everything that is collected and who it is shared with.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Which devices does it run on?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>iPhone and iPad with iOS 15 or later, Apple Watch with watchOS 10 or later, and Apple Vision Pro. Home Screen and Lock Screen widgets are included.</p></div>
+        </details>
+        <details>
+          <summary>Is Taiwan Air medical advice?<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>No. Taiwan Air is general information. Readings can be late, missing or corrected later by the ministry. If you have health concerns, talk to a professional and check official government sources. See the <a href="/terms.html">terms of service</a>.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">Contact</p>
+        <h2 id="contact-title">Talk to the people who make it</h2>
+        <p>Taiwan Air is built by an independent developer. Both forms live in the app, on the Help tab.</p>
+      </div>
+      <div class="contact">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#chat-circle-text"/></svg></div>
+          <h3>Feedback and support</h3>
+          <p>Questions, bug reports, ideas, or a request to see or delete what you sent us.</p>
+          <p class="path"><span>Help</span><i aria-hidden="true">›</i><span>Feedback / Contact us</span></p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#handshake"/></svg></div>
+          <h3>Business partners</h3>
+          <p>Advertising, data and API, sponsorship and media enquiries.</p>
+          <p class="path"><span>Help</span><i aria-hidden="true">›</i><span>Interested to be our Business Partner?</span></p>
+        </article>
+      </div>
+      <p class="note reveal">No app to hand? Email <a href="mailto:info@dllm.io">info@dllm.io</a>. The forms in the app send what you type, including your name and email, to our own server so we can reply. See the <a href="/privacy.html">privacy policy</a>.</p>
+    </div>
+  </section>
+
+  <section class="final" aria-labelledby="final-title">
+    <div class="wrap">
+      <div class="box reveal">
+        <img class="icon" src="/assets/icon-192.png" width="80" height="80" alt="Taiwan Air app icon">
+        <h2 id="final-title">Check the air before you head out</h2>
+        <p>Free on iPhone, iPad, Apple Watch and Apple Vision Pro. No account needed.</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/tw/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>Free on the</small>App Store</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a class="brand" href="/"><img src="/assets/icon-192.png" alt="" width="24" height="24">Taiwan Air 台灣空氣品質</a>
+      <p class="foot-note">Air quality data: open data from Taiwan's Ministry of Environment (環境部). Map data © Google.</p>
+      <p>© 2017–2026 Taiwan Air</p>
+    </div>
+    <div>
+      <h2>Legal</h2>
+      <ul>
+        <li><a href="/privacy.html">Privacy Policy</a></li>
+        <li><a href="/terms.html">Terms of Service</a></li>
+        <li><a href="/zh-Hant/privacy.html" hreflang="zh-Hant" lang="zh-Hant">隱私權政策</a></li>
+        <li><a href="/zh-Hant/terms.html" hreflang="zh-Hant" lang="zh-Hant">服務條款</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Taiwan Air</h2>
+      <ul>
+        <li><a href="https://apps.apple.com/tw/app/id1286516443">App Store</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文版</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>
+</body>
 </html>
