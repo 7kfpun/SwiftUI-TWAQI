@@ -203,10 +203,17 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// The lowest piece of text in `scrollView` that one of `overlays`
-    /// covers, if any, with the overlay that covers it.
+    /// covers, if any, with the overlay that covers it. A page that can't be
+    /// read fails the run: no answer is not the same as no covered text.
     private func textUnder(_ overlays: [CGRect], in scrollView: XCUIElement)
         -> (label: String, text: CGRect, overlay: CGRect)? {
-        guard let root = try? scrollView.snapshot() else { return nil }
+        let root: XCUIElementSnapshot
+        do {
+            root = try scrollView.snapshot()
+        } catch {
+            XCTFail("Couldn't read the station page to check for covered text: \(error)")
+            return nil
+        }
         var lowest: (label: String, text: CGRect, overlay: CGRect)?
         var pending = root.children
         while let node = pending.popLast() {
