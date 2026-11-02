@@ -61,10 +61,11 @@ owner's account. The options were:
    APPROVE review is required. This is GitHub's native mechanism, but it needs another
    seat and its credentials on the Mini.
 2. **A status check gated on another agent's review.** This is the chosen approach. A
-   pull request review or comment whose body starts with the agent's name counts:
-   Grok, Claude, Codex, Cursor, Orca, or Mini (`**Mini LGTM**` still counts).
+   pull request review or comment counts when its body starts with the agent's name and
+   then "review" or "LGTM" (`**Grok review**`, `**Codex LGTM**`). The agents are Grok,
+   Claude, Codex, Cursor, Orca, and Mini; `**Mini LGTM**` still counts.
 
-[`mini-lgtm.yml`](../.github/workflows/mini-lgtm.yml) runs on every push to the PR, every
+[`lgtm.yml`](../.github/workflows/lgtm.yml) runs on every push to the PR, every
 review, and every PR comment. [`tools/mini_lgtm_gate.py`](../tools/mini_lgtm_gate.py)
 then sets the `Mini LGTM` status on the head commit:
 
@@ -78,8 +79,9 @@ then sets the `Mini LGTM` status on the head commit:
 
 Limits, stated plainly: Orca, Mini and the owner share one GitHub account, so the gate
 checks the opening words of the review, not a separate login. A bot counts when its body
-starts with an agent name. A person counts only with owner, member, or collaborator
-access. Don't start a review with another agent's name. The gate script runs from
+opens that way, except `claude[bot]`: the Claude Code Review workflow is advisory, and its
+progress comment appears before it has reviewed anything. A person counts only with
+owner, member, or collaborator access. Don't start a review with another agent's name. The gate script runs from
 `master`'s copy, so a PR can't loosen its own gate, but a PR that edits `.github/` or
 `tools/` still deserves a careful read. The user greenlight is a human step (the PR
 template's checkbox), not a check.
@@ -106,7 +108,8 @@ Then, on the next PR:
 
 - Push a `feature/fox-nn-…` branch and open a PR. `PR policy`, `Secret files`, `Workers`
   and `Mini LGTM` (pending) should all report.
-- Leave a review whose body starts with Grok, Claude, Codex, Cursor, Orca, or Mini. The
+- Leave a review whose body starts with `**<Agent> review**` (Grok, Claude, Codex, Cursor,
+  Orca, or Mini). The
   status should turn green and the merge box should stop listing `Mini LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.

@@ -2,8 +2,9 @@ name: Mini LGTM
 
 # Turns another agent's review into a commit status that branch protection can
 # require. PRs are opened from the owner's account, which can't APPROVE its own
-# PR. A pull request review or comment whose body starts with Grok, Claude,
-# Codex, Cursor, Orca, or Mini covers the head. The job sets the `Mini LGTM`
+# PR. A pull request review or comment whose body starts with "<Agent> review"
+# or "<Agent> LGTM" (Grok, Claude, Codex, Cursor, Orca, or Mini) covers the
+# head. The job sets the `Mini LGTM`
 # status: pending until such a review covers the head's changes. See
 # tools/mini_lgtm_gate.py and docs/master-protection.md.
 #
@@ -19,7 +20,7 @@ on:
     types: [created, edited, deleted]
 
 concurrency:
-  group: mini-lgtm-${{ github.event.pull_request.number }}
+  group: lgtm-${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: true
 
 permissions:

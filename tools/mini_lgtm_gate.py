@@ -13,12 +13,15 @@ The job sets the `Mini LGTM` status on the head commit:
   pending  no agent review yet, or the branch changed after the review
 
 An agent review is a non-dismissed pull request review, or a pull request
-comment, with a non-empty body that starts with the agent's name: Grok,
-Claude, Codex, Cursor, Orca, or Mini. Bold markers are fine ("**Grok review**",
-"**Mini LGTM**"). A bot counts when its body starts that way; a person counts
-only with owner, member, or collaborator access, so a stranger can't turn the
-status green by writing "Grok review". A comment has no commit of its own: it
-covers the head only when it was written at or after that commit.
+comment, whose body starts with the agent's name and then "review" or "LGTM":
+Grok, Claude, Codex, Cursor, Orca, or Mini. Bold markers are fine
+("**Grok review**", "**Mini LGTM**"). "Grok, please fix X" is not a review.
+A bot counts when its body starts that way, except claude[bot]: the Claude Code
+Review workflow is advisory, and its progress comment ("**Claude Code is
+working…**") appears before any review is done. A person counts only with
+owner, member, or collaborator access, so a stranger can't turn the status
+green by writing "Grok review". A comment has no commit of its own: it covers
+the head only when it was written at or after that commit.
 
 Needs `gh` (GH_TOKEN with statuses:write) and a full clone (fetch-depth 0).
 `python3 tools/mini_lgtm_gate.py --self-test` checks the decision table.
@@ -26,6 +29,7 @@ Needs `gh` (GH_TOKEN with statuses:write) and a full clone (fetch-depth 0).
 
 import hashlib
 import json
+from datetime import datetime
 import os
 import re
 import subprocess
@@ -33,7 +37,9 @@ import sys
 
 CONTEXT = "Mini LGTM"
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
-AGENT = re.compile(r"^\W*(grok|claude|codex|cursor|orca|mini)\b", re.I)
+AGENT = re.compile(r"^\W*(grok|claude|codex|cursor|orca|mini)\W+(?:review|reviewed|lgtm)\b", re.I)
+# The Claude Code Review workflow's bot: advisory, not a sign-off.
+EXCLUDED_BOTS = {"claude[bot]"}
 
 
 def run(*args, check=True):
@@ -80,9 +86,22 @@ def is_agent_review(item):
         return False
     user = item.get("user") or {}
     login = user.get("login") or ""
+    if login in EXCLUDED_BOTS:
+        return False
     if user.get("type") == "Bot" or login.endswith("[bot]"):
         return True
     return item.get("author_association") in TRUSTED
+
+
+def parse_time(value):
+    """An ISO 8601 time as an aware datetime, or None. Git gives the committer's
+    offset (+08:00), GitHub gives UTC (Z), so they can't be compared as text."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 def covers(item, head, head_time, base_ref, finger):
@@ -90,8 +109,8 @@ def covers(item, head, head_time, base_ref, finger):
     if not reviewed:
         # A PR comment is not tied to a commit. It covers this head only when
         # it was written after the head commit existed.
-        created = item.get("at") or ""
-        return bool(head_time) and created >= head_time
+        created, committed = parse_time(item.get("at")), parse_time(head_time)
+        return bool(created and committed) and created >= committed
     if reviewed == head:
         return True
     then, now = finger(reviewed, base_ref), finger(head, base_ref)
@@ -101,7 +120,7 @@ def covers(item, head, head_time, base_ref, finger):
 def decide(items, head, head_time, base_ref, finger=fingerprint):
     agents = [item for item in items if is_agent_review(item)]
     if not agents:
-        return "pending", "Waiting for a review from another agent (Grok, Claude, Codex, Cursor, Orca, or Mini)"
+        return "pending", "Waiting for a review from another agent (\"Grok review\", \"Codex LGTM\", ...)"
     latest = max(agents, key=lambda item: item.get("at") or "")
     name = agent_name(latest)
     reviewed = latest.get("commit_id") or ""
@@ -191,21 +210,29 @@ def self_test():
         ("no review", [], "pending"),
         ("grok on head", [item("Grok review\n\nlooks fine")], "success"),
         ("mini lgtm still counts", [item("**Mini LGTM**\n\nship it")], "success"),
-        ("mini changes needed still counts", [item("**Mini** changes needed")], "success"),
+        ("mini review asking for changes still counts", [item("**Mini review**: changes needed")], "success"),
+        ("owner note that only starts with a name", [item("Grok, please fix the time zone")], "pending"),
+        ("name without review or lgtm", [item("**Mini** changes needed")], "pending"),
         ("empty review", [item("   ")], "pending"),
         ("owner note without an agent name", [item("Checked against FOX-47")], "pending"),
         ("stranger", [item("Grok review", author_association="NONE", user=stranger)], "pending"),
-        ("bot claude", [item("**Claude finished** the review", user=bot, author_association="NONE")], "success"),
+        ("claude[bot] progress comment", [item("**Claude Code is working…**", user=bot, author_association="NONE")], "pending"),
+        ("claude[bot] even with a review marker", [item("Claude review: looks fine", user=bot, author_association="NONE")], "pending"),
+        ("other bot review", [item("**Codex review**", user={"login": "codex[bot]", "type": "Bot"}, author_association="NONE")], "success"),
         ("actions bot noise", [item("<!-- vulnerability-checks -->\nno secrets", user={"login": "github-actions[bot]", "type": "Bot"}, author_association="NONE")], "pending"),
         ("dismissed", [item("Grok review", state="DISMISSED")], "pending"),
         ("same diff after rebase", [item("Codex review", commit_id="old")], "success"),
         ("new commits since review", [item("Orca review", commit_id="other")], "pending"),
         ("comment after the head commit", [item("Cursor review", commit_id="", at="2026-11-02T12:00:00Z")], "success"),
         ("comment before the head commit", [item("Grok review", commit_id="", at="2026-11-02T10:00:00Z")], "pending"),
+        ("comment after a +08:00 head commit", [item("Grok review", commit_id="", at="2026-11-02T11:00:30Z")], "success", "2026-11-02T19:00:00+08:00"),
+        ("comment before a +08:00 head commit", [item("Grok review", commit_id="", at="2026-11-02T10:59:59Z")], "pending", "2026-11-02T19:00:00+08:00"),
+        ("unreadable head time", [item("Grok review", commit_id="")], "pending", ""),
     ]
     failed = 0
-    for name, items, want in cases:
-        state, description = decide(items, head, "2026-11-02T11:00:00Z", "master", same)
+    for name, items, want, *rest in cases:
+        head_time = rest[0] if rest else "2026-11-02T11:00:00Z"
+        state, description = decide(items, head, head_time, "master", same)
         if state != want:
             failed += 1
             print(f"FAIL {name}: got {state} ({description}), want {want}")
