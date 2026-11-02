@@ -212,7 +212,7 @@ enum ProFeature: String, CaseIterable, Identifiable {
     }
 }
 
-private struct ProFeatureRow: View {
+struct ProFeatureRow: View {
     var feature: ProFeature
 
     var body: some View {

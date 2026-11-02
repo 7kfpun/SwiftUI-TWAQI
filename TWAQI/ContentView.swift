@@ -18,6 +18,10 @@ struct ContentView: View {
     /// Kept outside the rebuilt tabs so changing language stays on Help.
     @State private var selectedTab: AppTab = .main
 
+    /// The welcome flow, on a fresh install until it is finished or skipped.
+    /// Help opens it again on its own.
+    @State private var showingOnboarding = OnboardingStore().showsOnLaunch
+
     enum AppTab: Hashable {
         case main, favourites, detailsList, help
     }
@@ -34,6 +38,10 @@ struct ContentView: View {
         .environment(\.locale, language.locale())
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView { showingOnboarding = false }
+                .environment(\.locale, language.locale())
+        }
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.

@@ -13,6 +13,7 @@ struct HelpView: View {
     @ObservedObject var viewModel: HelpViewModel
 
     @State private var showingPro = false
+    @State private var showingOnboarding = false
     @State private var versionTapCount = 0
     @State private var analyticsExcluded = TrackingManager.isExcluded
     @State private var proOverride = IAPManager.proOverride
@@ -28,6 +29,7 @@ struct HelpView: View {
             Form {
                 doNotDisturbSection
                 languageSection
+                welcomeSection
 
                 if !settings.isPro {
                     purchaseSection
@@ -49,6 +51,23 @@ struct HelpView: View {
         }
         .sheet(isPresented: $showingPro) {
             ProView()
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            // Help's own quiet-hours model, so its switch shows what the flow set.
+            OnboardingView(doNotDisturb: viewModel) { showingOnboarding = false }
+                .environment(\.locale, settings.appLanguage.locale())
+        }
+    }
+
+    /// Runs the whole welcome flow again (FOX-34).
+    private var welcomeSection: some View {
+        Section(header: Label("Help.welcome", systemImage: "hand.wave")) {
+            Button {
+                showingOnboarding = true
+                TrackingManager.logEvent(eventName: "onboarding_open_from_help")
+            } label: {
+                Text("Help.show_welcome_guide")
+            }
         }
     }
 
