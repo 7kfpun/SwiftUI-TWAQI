@@ -170,6 +170,25 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(posts.value, 0)
     }
 
+    func testOnlyTheFirstSceneOpensTheLaunchFlow() {
+        let saved = Onboarding.launchFlowClaimed
+        defer { Onboarding.launchFlowClaimed = saved }
+        Onboarding.launchFlowClaimed = false
+
+        // Two iPad windows restored together on the launch that shows it.
+        XCTAssertTrue(Onboarding.claimLaunchFlow(showsOnLaunch: true))
+        XCTAssertFalse(Onboarding.claimLaunchFlow(showsOnLaunch: true))
+    }
+
+    func testNoSceneClaimsTheFlowWhenItDoesNotShow() {
+        let saved = Onboarding.launchFlowClaimed
+        defer { Onboarding.launchFlowClaimed = saved }
+        Onboarding.launchFlowClaimed = false
+
+        XCTAssertFalse(Onboarding.claimLaunchFlow(showsOnLaunch: false))
+        XCTAssertFalse(Onboarding.launchFlowClaimed)
+    }
+
     // MARK: - Steps
 
     func testStepOrder() {

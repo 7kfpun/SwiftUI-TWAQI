@@ -24,6 +24,20 @@ enum Onboarding {
     /// way. Main thread only.
     static var isOpenAtLaunch = false
 
+    /// A scene has taken the flow that opens by itself on this launch.
+    /// Main thread only; tests reset it.
+    static var launchFlowClaimed = false
+
+    /// Whether a connecting scene opens the flow by itself: only the first
+    /// one on a launch that shows it, so two windows restored together on
+    /// iPad don't both open it and one going away can't release the hold
+    /// while the other still shows it.
+    static func claimLaunchFlow(showsOnLaunch: Bool) -> Bool {
+        guard showsOnLaunch, !launchFlowClaimed else { return false }
+        launchFlowClaimed = true
+        return true
+    }
+
     /// Ends the launch-time hold, once: clears `isOpenAtLaunch` and posts
     /// `didFinish` so the held prompts go ahead. Called when the flow is
     /// finished or skipped, and when the scene showing it goes away without

@@ -44,10 +44,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
     private var onboardingObserver: NSObjectProtocol?
-
-    deinit {
-        onboardingObserver.map(NotificationCenter.default.removeObserver)
-    }
     private var isProLayout = false
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.
@@ -75,6 +71,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// the panel opens, or the window resizes, and takes width from the map.
     var panelStationId: Int?
     private var lastLayoutWidth: CGFloat = 0
+
+    deinit {
+        onboardingObserver.map(NotificationCenter.default.removeObserver)
+    }
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
