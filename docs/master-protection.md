@@ -62,9 +62,11 @@ owner's account. The options were:
    seat and its credentials on the Mini.
 2. **A status check gated on a reviewer's LGTM.** This is the chosen approach. A pull
    request review or comment counts when its first line is "LGTM", optionally after one
-   word naming the reviewer (`**Grok LGTM**`, `**Copilot LGTM** (head abc1234)`,
-   `LGTM`). The gate keeps no list of agents: reviewers come and go, and any name works.
-   "Not LGTM" doesn't count, and neither does `**Grok review**` without a verdict.
+   word naming the reviewer, with nothing after it but punctuation or a `(head <sha>)`
+   note (`**Grok LGTM**`, `**Copilot LGTM** (head abc1234)`, `LGTM`). "LGTM?",
+   "LGTM, but …", and a negating word in the name slot ("Never LGTM", "Almost LGTM")
+   don't count. The gate keeps no list of agents: reviewers come and go, and any name works.
+   `**Grok review**` without a verdict doesn't count either.
 
 [`lgtm.yml`](../.github/workflows/lgtm.yml) runs on every push to the PR, every
 review, and every PR comment. [`tools/lgtm_gate.py`](../tools/lgtm_gate.py)

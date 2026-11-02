@@ -22,7 +22,10 @@ the reviewer. Bold and punctuation are fine:
   changes  "**Codex — changes needed** (head abc1234)", "Changes requested",
            or a review with GitHub's CHANGES_REQUESTED state
 
-"Not LGTM" is not an LGTM, and "Grok review" alone is no verdict. A bot counts,
+Nothing may follow LGTM on its line but punctuation or "(head <sha>)", so
+"LGTM?" and "LGTM, but fix X" don't pass. A negating or qualifying word in the
+name slot ("Not LGTM", "Never LGTM", "Almost LGTM") isn't a name, and
+"Grok review" alone is no verdict. A bot counts,
 except claude[bot]: the Claude Code Review workflow is advisory, and its
 progress comment ("**Claude Code is working…**") appears before any review is
 done. A person counts only with owner, member, or collaborator access, so a
@@ -44,9 +47,19 @@ import sys
 CONTEXT = "LGTM"
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
 # First line: an optional one-word reviewer name, then the verdict.
-LGTM = re.compile(r"^\W*(?:(?P<name>[A-Za-z][\w.-]{0,39})\W+)?LGTM\b", re.I)
+# Nothing may follow LGTM on that line except emphasis, "." "!" ":" or a
+# "(head <sha>)" note, so "LGTM?" and "LGTM, but fix X" don't pass.
+LGTM = re.compile(
+    r"^\W*(?:(?P<name>[A-Za-z][\w.-]{0,39})\W+)?LGTM\b"
+    r"[\s*_~.!:]*(?:\(head\s+[0-9a-f]{7,40}\)[\s*_~.!:]*)?$",
+    re.I,
+)
 CHANGES = re.compile(r"^\W*(?:(?P<name>[A-Za-z][\w.-]{0,39})\W+)?changes\s+(?:needed|requested)\b", re.I)
-NEGATIONS = {"not", "no", "non"}
+# Words that can't be a reviewer's name: they negate or qualify the verdict.
+NEGATIONS = {
+    "not", "no", "non", "never", "cannot", "cant", "without", "almost", "nearly",
+    "zero", "nothing", "partial", "partially", "conditional", "pre", "pending",
+}
 # The Claude Code Review workflow's bot: advisory, not a sign-off.
 EXCLUDED_BOTS = {"claude[bot]"}
 
@@ -245,6 +258,16 @@ def self_test():
         ("lgtm after changes needed", [item("**Codex — changes needed**", at="2026-11-02T12:00:00Z"), item("**Codex LGTM**", at="2026-11-02T12:05:00Z")], "success"),
         ("github changes requested state", [item("see inline comments", state="CHANGES_REQUESTED", user={"login": "cursor[bot]", "type": "Bot"}, author_association="NONE")], "pending"),
         ("lgtm later in the body only", [item("Checked FOX-36.\n\nLGTM")], "pending"),
+        ("lgtm with a head note", [item("**Grok LGTM** (head abcdef1)")], "success"),
+        ("lgtm with an exclamation", [item("LGTM!")], "success"),
+        ("never lgtm", [item("Never LGTM")], "pending"),
+        ("cannot lgtm", [item("**Cannot LGTM** (head abcdef1)")], "pending"),
+        ("almost lgtm", [item("Almost LGTM")], "pending"),
+        ("can't lgtm", [item("Can't LGTM this")], "pending"),
+        ("lgtm question", [item("LGTM?")], "pending"),
+        ("lgtm with a condition", [item("LGTM, but fix the time zone")], "pending"),
+        ("zero changes needed is no veto",
+         [item("**Grok LGTM**", at="2026-11-02T12:00:00Z"), item("Zero changes needed", at="2026-11-02T12:05:00Z")], "success"),
         ("owner note", [item("Grok, please fix the time zone")], "pending"),
         ("empty review", [item("   ")], "pending"),
         ("stranger", [item("LGTM", author_association="NONE", user=stranger)], "pending"),
