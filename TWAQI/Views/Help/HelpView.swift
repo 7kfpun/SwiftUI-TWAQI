@@ -97,7 +97,9 @@ struct HelpView: View {
             }
             .alert(isPresented: $viewModel.showingAlert) {
                 Alert(
-                    title: Text("Help.all_site_notification_has_been_cancelled"),
+                    title: viewModel.cancelAllFailed
+                        ? Text("Help.site_notification_cancel_failed")
+                        : Text("Help.all_site_notification_has_been_cancelled"),
                     dismissButton: .default(Text("OK"))
                 )
             }

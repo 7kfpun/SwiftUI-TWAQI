@@ -63,10 +63,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Initialize Sentry service.
         if reportsThisLaunch, let sentryDSN = getEnv("SentryDSN") {
-            SentrySDK.start(options: [
-                "dsn": sentryDSN,
-                "debug": true,
-            ])
+            var sentryOptions: [String: Any] = ["dsn": sentryDSN]
+            #if DEBUG
+            // Verbose SDK logging is for development only.
+            sentryOptions["debug"] = true
+            #endif
+            SentrySDK.start(options: sentryOptions)
         }
 
         // Initialize OneSignal push services.
@@ -118,6 +120,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Copies alert settings to Directus alongside OneSignal's tags,
             // using the APNs token OneSignal registered.
             DirectusPushMirror.shared.start()
+
+            // Alerts of stations removed from Favourites while OneSignal
+            // couldn't be reached.
+            FavouriteAlerts.retryPendingClears()
         }
 
         StoreReviewHelper.incrementAppOpenedCount()

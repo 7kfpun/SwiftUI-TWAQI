@@ -29,6 +29,10 @@
 "Favourites.notifications_off_message" = "Taiwan Air 的通知已關閉，因此這個測站的通知暫不開啟。請到「設定」開啟通知，再於下方開啟測站通知。";
 "Favourites.open_settings" = "開啟設定";
 "Favourites.ok" = "好";
+"Favourites.removed_from_favourites" = "已從我的最愛移除";
+"Favourites.alerts_not_changed_message" = "目前無法開啟這個測站的通知。連上網路後，請在測站頁面的通知卡片中開啟。";
+"Favourites.alerts_clear_pending_message" = "目前還無法關閉這個測站的通知，Taiwan Air 會在恢復連線後再試一次。";
+"Favourites.alerts_clear_pending_list" = "已移除測站的通知還無法關閉，Taiwan Air 會在恢復連線後再試一次。";
 
 "DetailsList.details" = "測站列表";
 "DetailsList.search" = "搜尋";
@@ -53,6 +57,7 @@
 "Help.language_footer" = "政府提供的地址與預報內容為中文。選擇其他語言時，若已在「設定」下載該翻譯語言，會在本機上翻譯。";
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
+"Help.site_notification_cancel_failed" = "無法取消測站通知，請檢查網路連線後再試一次。";
 "Help.in_app_purchase" = "App 內購買";
 "Help.ad_free" = "移除廣告並解鎖錶面複雜功能";
 "Help.restore_purchase" = "回復購買項目";
@@ -212,6 +217,10 @@
 "Details.alerts_pitch" = "這裡的空氣變差或轉好時，馬上通知你。";
 "Details.alerts_on" = "已開啟";
 "Details.alerts_off" = "未開啟";
+"Details.alerts_checking" = "正在確認通知設定…";
+"Details.alerts_unavailable" = "目前無法載入通知設定，請檢查網路連線後再試一次。";
+"Details.alerts_try_again" = "再試一次";
+"Details.alerts_save_failed" = "無法變更通知設定，請檢查網路連線後再試一次。";
 "Details.live_cam" = "即時影像";
 "Details.cam_captured %@" = "拍攝於 %@";
 "Details.cam_source" = "影像來源：環境部";
