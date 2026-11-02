@@ -50,7 +50,7 @@ struct ContentView: View {
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
         .fullScreenCover(isPresented: $showingOnboarding) {
-            OnboardingView { showingOnboarding = false }
+            OnboardingView(isLaunchFlow: true) { showingOnboarding = false }
                 .environment(\.locale, language.locale())
                 // Shown counts from the moment it opens, so quitting or
                 // skipping it doesn't bring it back on the next launch.

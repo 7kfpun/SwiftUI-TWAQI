@@ -48,6 +48,15 @@ enum Onboarding {
         notificationCenter.post(name: didFinish, object: nil)
     }
 
+    /// The flow was finished or skipped. Only the run that opened by itself
+    /// at launch ends the hold: Help can run the flow in a second iPad window
+    /// while the first still shows the launch run, and finishing that one
+    /// mustn't let the held prompts out over it.
+    static func flowEnded(isLaunchFlow: Bool, notificationCenter: NotificationCenter = .default) {
+        guard isLaunchFlow else { return }
+        releaseLaunchHold(notificationCenter: notificationCenter)
+    }
+
     /// The steps, in order. Location is asked for on `.location` only, and
     /// notifications on `.notifications` only.
     enum Step: Int, CaseIterable, Identifiable {

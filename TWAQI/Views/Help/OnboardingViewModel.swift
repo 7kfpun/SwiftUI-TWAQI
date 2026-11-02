@@ -209,8 +209,10 @@ final class OnboardingViewModel: ObservableObject {
 
     /// Finished or skipped. The flow was marked shown when it opened, so it
     /// won't open by itself again either way; Help can run it anytime.
-    func finish(skippedAt skipped: Onboarding.Step? = nil) {
-        Onboarding.releaseLaunchHold()
+    /// `isLaunchFlow`: this run opened by itself at launch, so finishing it
+    /// ends the launch-time hold; a Help run leaves the hold alone.
+    func finish(skippedAt skipped: Onboarding.Step? = nil, isLaunchFlow: Bool) {
+        Onboarding.flowEnded(isLaunchFlow: isLaunchFlow)
         if let skipped {
             TrackingManager.logEvent(eventName: "onboarding_skipped", parameters: [
                 "label": "step_\(skipped.rawValue + 1)",

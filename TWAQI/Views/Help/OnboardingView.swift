@@ -18,6 +18,9 @@ struct OnboardingView: View {
     /// Quiet hours, written as Help writes them. Help passes its own model;
     /// at launch the flow has one of its own.
     private let sharedDoNotDisturb: HelpViewModel?
+    /// Opened by itself at launch, rather than from Help. Only that run ends
+    /// the launch-time hold on the location and review prompts.
+    private let isLaunchFlow: Bool
     private let onFinish: () -> Void
 
     @StateObject private var settings = SettingsStore()
@@ -28,8 +31,9 @@ struct OnboardingView: View {
 
     private let accent = Color(0x5AC8FA)
 
-    init(doNotDisturb: HelpViewModel? = nil, onFinish: @escaping () -> Void) {
+    init(doNotDisturb: HelpViewModel? = nil, isLaunchFlow: Bool = false, onFinish: @escaping () -> Void) {
         self.sharedDoNotDisturb = doNotDisturb
+        self.isLaunchFlow = isLaunchFlow
         self.onFinish = onFinish
     }
 
@@ -331,7 +335,7 @@ struct OnboardingView: View {
     }
 
     private func finish(skippedAt step: Onboarding.Step? = nil) {
-        viewModel.finish(skippedAt: step)
+        viewModel.finish(skippedAt: step, isLaunchFlow: isLaunchFlow)
         onFinish()
     }
 }

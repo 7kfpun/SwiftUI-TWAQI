@@ -170,6 +170,36 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(posts.value, 0)
     }
 
+    func testFinishingAHelpRunLeavesTheLaunchHold() {
+        let center = NotificationCenter()
+        let posts = PostCount()
+        let token = center.addObserver(forName: Onboarding.didFinish, object: nil, queue: nil) { _ in posts.value += 1 }
+        defer { center.removeObserver(token) }
+        let saved = Onboarding.isOpenAtLaunch
+        defer { Onboarding.isOpenAtLaunch = saved }
+
+        // The launch run is still up in one iPad window; Help's run in
+        // another is finished.
+        Onboarding.isOpenAtLaunch = true
+        Onboarding.flowEnded(isLaunchFlow: false, notificationCenter: center)
+        XCTAssertTrue(Onboarding.isOpenAtLaunch)
+        XCTAssertEqual(posts.value, 0)
+    }
+
+    func testFinishingTheLaunchRunReleasesTheHold() {
+        let center = NotificationCenter()
+        let posts = PostCount()
+        let token = center.addObserver(forName: Onboarding.didFinish, object: nil, queue: nil) { _ in posts.value += 1 }
+        defer { center.removeObserver(token) }
+        let saved = Onboarding.isOpenAtLaunch
+        defer { Onboarding.isOpenAtLaunch = saved }
+
+        Onboarding.isOpenAtLaunch = true
+        Onboarding.flowEnded(isLaunchFlow: true, notificationCenter: center)
+        XCTAssertFalse(Onboarding.isOpenAtLaunch)
+        XCTAssertEqual(posts.value, 1)
+    }
+
     func testOnlyTheFirstSceneOpensTheLaunchFlow() {
         let saved = Onboarding.launchFlowClaimed
         defer { Onboarding.launchFlowClaimed = saved }
