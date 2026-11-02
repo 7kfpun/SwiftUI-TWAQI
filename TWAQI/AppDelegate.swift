@@ -22,6 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
+        // Before this launch is counted below: an install that has run before
+        // pre-dates the welcome flow and is not walked through it.
+        OnboardingStore().adoptExistingInstall(hasLaunchedBefore: StoreReviewHelper.hasLaunchedBefore)
+
         SettingsStore.observeProTransactions()
         Task { await SettingsStore.refreshPro() }
 
@@ -70,9 +74,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             OneSignal.initWithLaunchOptions(launchOptions)
             OneSignal.setAppId(oneSignalAppId)
 
-            OneSignal.promptForPushNotifications(userResponse: { accepted in
-                print("User accepted notifications: \(accepted)")
-            })
+            // A fresh install is asked on the welcome flow's notifications
+            // step instead, so the two prompts never stack (FOX-34). Installs
+            // from before the flow keep this; it is a no-op once answered.
+            if OnboardingStore().promptsForPushAtLaunch {
+                OneSignal.promptForPushNotifications(userResponse: { accepted in
+                    print("User accepted notifications: \(accepted)")
+                })
+            }
 
             OneSignalManager.getOneSignalSettings { result in
                 // OneSignal calls back off the main thread; writing UserDefaults

@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B3B4EC36CE2E6B47C7044C4E /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C087A9241D43CECA11D0085C /* Onboarding.swift */; };
+		39F6C4C701FB5EC1988473B6 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */; };
+		55E1C42FC16E2766D66B3A88 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55099A312B9E5B7CBDAD497C /* OnboardingViewModel.swift */; };
+		FEC3DE3DAF39B017A6EFB46A /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB686663069F57E2CD5660 /* OnboardingTests.swift */; };
+		2FD81BE457A4FB709E291D6D /* Locator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD383AA3C04F105BD89983D7 /* Locator.swift */; };
 		008E0301089673EC7D242C1D /* StationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB601F7471823C2024AB3D6 /* StationTypes.swift */; };
 		0691200182DB13884325B08D /* TaiwanMeshBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AAC5E1DF9D0DE1459435C5E /* TaiwanMeshBuilder.swift */; };
 		07483877742E742C1A1424CA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6AE59816821C1D910BB21E26 /* Assets.xcassets */; };
@@ -337,6 +342,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C087A9241D43CECA11D0085C /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
+		8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		55099A312B9E5B7CBDAD497C /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		92DB686663069F57E2CD5660 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
 		0BB601F7471823C2024AB3D6 /* StationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationTypes.swift; sourceTree = "<group>"; };
 		137AA5506D82FA067FB434C8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		178721325D33D2D77344F3F5 /* StationParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationParsing.swift; sourceTree = "<group>"; };
@@ -649,6 +658,7 @@
 		67678988171B643CA9475889 /* TWAQITests */ = {
 			isa = PBXGroup;
 			children = (
+				92DB686663069F57E2CD5660 /* OnboardingTests.swift */,
 				64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */,
 				908F4ED4FA2F2C4377D0C9F7 /* AqiTrendTests.swift */,
 				17C768A96173FB4F7A29D07C /* FoldLineTests.swift */,
@@ -824,6 +834,8 @@
 		9E1AC55C233F9A4400AC862D /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				55099A312B9E5B7CBDAD497C /* OnboardingViewModel.swift */,
+				8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */,
 				9E1AC55D233F9A5000AC862D /* HelpView.swift */,
 				9EF7A3292386FC8700FF410C /* HelpViewModel.swift */,
 				9BBB3B8DA8D6029AE4AFADA9 /* ProView.swift */,
@@ -859,6 +871,7 @@
 		9E1AC565233FB09000AC862D /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				C087A9241D43CECA11D0085C /* Onboarding.swift */,
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				2F15F0DF067304D6744238CD /* StationCamStore.swift */,
@@ -1503,6 +1516,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEC3DE3DAF39B017A6EFB46A /* OnboardingTests.swift in Sources */,
 				F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */,
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
@@ -1573,6 +1587,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FD81BE457A4FB709E291D6D /* Locator.swift in Sources */,
+				55E1C42FC16E2766D66B3A88 /* OnboardingViewModel.swift in Sources */,
+				39F6C4C701FB5EC1988473B6 /* OnboardingView.swift in Sources */,
+				B3B4EC36CE2E6B47C7044C4E /* Onboarding.swift in Sources */,
 				F0A47D1E0000000000000011 /* DeepLink.swift in Sources */,
 				F0A47D1E0000000000000013 /* AppRouter.swift in Sources */,
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
