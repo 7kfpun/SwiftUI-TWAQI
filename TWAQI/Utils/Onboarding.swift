@@ -9,13 +9,20 @@
 import CoreLocation
 import Foundation
 
-/// The welcome flow (FOX-34): shown once on a fresh install, and again
-/// whenever it is opened from Help.
+/// The welcome flow (FOX-34): opens by itself once for every user, fresh
+/// installs and updates alike (FOX-49), and again whenever it is opened from
+/// Help.
 enum Onboarding {
     /// Posted on the main thread when the flow is finished or skipped. The map
     /// holds back its location request until then, so the system prompts
     /// don't stack over the flow.
     static let didFinish = Notification.Name("Onboarding.didFinish")
+
+    /// The flow opened by itself on this launch and isn't finished yet.
+    /// Decided in `AppDelegate` before the flow marks itself shown, so the
+    /// launch-time prompts (location, notifications, review) stay out of its
+    /// way. Main thread only.
+    static var isOpenAtLaunch = false
 
     /// The steps, in order. Location is asked for on `.location` only, and
     /// notifications on `.notifications` only.
@@ -36,26 +43,39 @@ enum Onboarding {
     }
 }
 
-/// Whether the welcome flow has been seen, in the app's own defaults.
+/// Which version of the welcome flow has opened by itself, in the app's own
+/// defaults.
 struct OnboardingStore {
+    /// The flow's version. Raise it to open a reworked flow by itself once
+    /// more for everyone; nothing else has to change.
+    static let currentVersion = 1
+
     enum Keys {
-        static let completed = "onboardingCompleted"
+        /// The highest flow version that has opened by itself. Set when it is
+        /// presented, not when it is finished, so quitting or skipping it
+        /// counts as shown.
+        static let shownVersion = "onboardingShownVersion"
         /// Set once the first launch of an onboarding build has looked at
         /// whether the install is older than the flow.
         static let installChecked = "onboardingInstallChecked"
-        /// The install ran before the flow existed, and was marked complete
-        /// without seeing it.
+        /// The install ran before the flow existed.
         static let legacyInstall = "onboardingLegacyInstall"
+        /// FOX-34 builds: finished or skipped, or an older install marked so
+        /// without seeing the flow. Read once to carry its answer over.
+        static let completed = "onboardingCompleted"
     }
 
     private let defaults: UserDefaults
+    private let currentVersion: Int
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, currentVersion: Int = OnboardingStore.currentVersion) {
         self.defaults = defaults
+        self.currentVersion = currentVersion
     }
 
-    var isCompleted: Bool {
-        defaults.bool(forKey: Keys.completed)
+    /// The highest flow version that has opened by itself; 0 for none.
+    var shownVersion: Int {
+        defaults.integer(forKey: Keys.shownVersion)
     }
 
     /// The install pre-dates the flow. Such installs keep the launch-time
@@ -65,30 +85,40 @@ struct OnboardingStore {
         defaults.bool(forKey: Keys.legacyInstall)
     }
 
-    /// Whether the flow should open by itself at launch.
-    var showsOnLaunch: Bool { !isCompleted }
+    /// Whether the flow should open by itself at launch: this version of it
+    /// never has, on any earlier launch.
+    var showsOnLaunch: Bool { shownVersion < currentVersion }
 
-    /// Whether `AppDelegate` may ask for notifications at launch.
-    var promptsForPushAtLaunch: Bool { isLegacyInstall }
+    /// Whether `AppDelegate` may ask for notifications at launch. Never on a
+    /// launch that opens the flow, which asks on its own step.
+    var promptsForPushAtLaunch: Bool { isLegacyInstall && !showsOnLaunch }
 
-    /// Finished or skipped: the flow won't open by itself again.
-    func markCompleted() {
-        defaults.set(true, forKey: Keys.completed)
+    /// The flow opened by itself: it won't again until the version is raised.
+    /// Help's manual runs don't call this.
+    func markShown() {
+        guard shownVersion < currentVersion else { return }
+        defaults.set(currentVersion, forKey: Keys.shownVersion)
     }
 
     /// Run once per launch, before this launch is counted anywhere.
     ///
-    /// Someone updating from a build without the flow has used the app
-    /// already; they are not walked through it (Help has it). Decided on the
-    /// first launch of an onboarding build only, so a fresh install that
-    /// quits mid-flow still gets the flow on its next launch.
-    func adoptExistingInstall(hasLaunchedBefore: Bool) {
-        guard !defaults.bool(forKey: Keys.installChecked) else { return }
-        defaults.set(true, forKey: Keys.installChecked)
+    /// Notes whether the install pre-dates the flow, on the first launch of
+    /// an onboarding build only. Such installs are walked through it too.
+    ///
+    /// A FOX-34 build marked a flow as `completed` when it was finished or
+    /// skipped (version 1 was shown), or, for an older install, without
+    /// showing it (it still has to be).
+    func prepareForLaunch(hasLaunchedBefore: Bool) {
+        if !defaults.bool(forKey: Keys.installChecked) {
+            defaults.set(true, forKey: Keys.installChecked)
+            if hasLaunchedBefore && !defaults.bool(forKey: Keys.completed) {
+                defaults.set(true, forKey: Keys.legacyInstall)
+            }
+        }
 
-        if hasLaunchedBefore && !isCompleted {
-            defaults.set(true, forKey: Keys.completed)
-            defaults.set(true, forKey: Keys.legacyInstall)
+        if defaults.object(forKey: Keys.shownVersion) == nil,
+           defaults.bool(forKey: Keys.completed), !isLegacyInstall {
+            defaults.set(1, forKey: Keys.shownVersion)
         }
     }
 }

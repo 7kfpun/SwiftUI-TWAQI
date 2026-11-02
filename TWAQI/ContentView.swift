@@ -21,8 +21,8 @@ struct ContentView: View {
     /// Kept outside the rebuilt tabs so changing language stays on Help.
     @State private var selectedTab: AppTab = .main
 
-    /// The welcome flow, on a fresh install until it is finished or skipped.
-    /// Help opens it again on its own.
+    /// The welcome flow, opened by itself once per flow version for every
+    /// user (FOX-49). Help opens it again on its own.
     @State private var showingOnboarding = OnboardingStore().showsOnLaunch
 
     enum AppTab: Hashable {
@@ -44,6 +44,14 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView { showingOnboarding = false }
                 .environment(\.locale, language.locale())
+                // Shown counts from the moment it opens, so quitting or
+                // skipping it doesn't bring it back on the next launch.
+                .onAppear {
+                    OnboardingStore().markShown()
+                    TrackingManager.logEvent(eventName: "onboarding_shown", parameters: [
+                        "label": "launch",
+                    ])
+                }
         }
         // On the root rather than a tab, so it opens whichever tab is showing.
         .sheet(isPresented: $router.showingPro) {

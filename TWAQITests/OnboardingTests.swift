@@ -25,58 +25,97 @@ final class OnboardingTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - Completion persistence
+    // MARK: - Shown once (FOX-49)
 
     func testFreshInstallShowsFlowAndDoesNotPromptAtLaunch() {
         let store = OnboardingStore(defaults: defaults)
-        store.adoptExistingInstall(hasLaunchedBefore: false)
+        store.prepareForLaunch(hasLaunchedBefore: false)
 
-        XCTAssertFalse(store.isCompleted)
         XCTAssertTrue(store.showsOnLaunch)
+        XCTAssertFalse(store.isLegacyInstall)
         XCTAssertFalse(store.promptsForPushAtLaunch)
     }
 
-    func testCompletionPersistsAcrossStores() {
-        OnboardingStore(defaults: defaults).markCompleted()
+    func testShownPersistsUnderTheVersionedKey() {
+        let store = OnboardingStore(defaults: defaults)
+        store.prepareForLaunch(hasLaunchedBefore: false)
+        store.markShown()
 
-        // A new store over the same defaults, as on the next launch.
+        XCTAssertEqual(defaults.integer(forKey: "onboardingShownVersion"), OnboardingStore.currentVersion)
+        // A new store over the same defaults, as on the next launch or after an update.
         let nextLaunch = OnboardingStore(defaults: defaults)
-        XCTAssertTrue(nextLaunch.isCompleted)
+        nextLaunch.prepareForLaunch(hasLaunchedBefore: true)
         XCTAssertFalse(nextLaunch.showsOnLaunch)
-        // Finishing the flow doesn't bring the launch-time prompt back.
+        // Seeing the flow doesn't bring the launch-time prompt back.
         XCTAssertFalse(nextLaunch.promptsForPushAtLaunch)
     }
 
-    func testFreshInstallThatQuitMidFlowStillGetsTheFlow() {
+    func testQuitMidFlowIsNotShownAgain() {
+        // Marked when it opens; the app is killed before Done or Skip.
         let store = OnboardingStore(defaults: defaults)
-        store.adoptExistingInstall(hasLaunchedBefore: false)
-        // Quit before finishing; the next launch has been counted once.
-        store.adoptExistingInstall(hasLaunchedBefore: true)
+        store.prepareForLaunch(hasLaunchedBefore: false)
+        store.markShown()
 
-        XCTAssertFalse(store.isCompleted)
-        XCTAssertTrue(store.showsOnLaunch)
-        XCTAssertFalse(store.isLegacyInstall)
+        let nextLaunch = OnboardingStore(defaults: defaults)
+        nextLaunch.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertFalse(nextLaunch.showsOnLaunch)
     }
 
-    func testUpdateFromBuildWithoutFlowIsNotWalkedThrough() {
+    func testUpdateFromBuildWithoutFlowSeesItOnce() {
         let store = OnboardingStore(defaults: defaults)
-        store.adoptExistingInstall(hasLaunchedBefore: true)
+        store.prepareForLaunch(hasLaunchedBefore: true)
 
-        XCTAssertTrue(store.isCompleted)
-        XCTAssertFalse(store.showsOnLaunch)
         XCTAssertTrue(store.isLegacyInstall)
-        // Keeps the launch-time prompt it always had.
-        XCTAssertTrue(store.promptsForPushAtLaunch)
+        XCTAssertTrue(store.showsOnLaunch)
+        // Not on the launch the flow opens: it asks on its own step.
+        XCTAssertFalse(store.promptsForPushAtLaunch)
+
+        store.markShown()
+        let nextLaunch = OnboardingStore(defaults: defaults)
+        nextLaunch.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertFalse(nextLaunch.showsOnLaunch)
+        // Keeps the launch-time prompt it always had afterwards.
+        XCTAssertTrue(nextLaunch.promptsForPushAtLaunch)
     }
 
-    func testRerunFromHelpKeepsCompletion() {
-        let store = OnboardingStore(defaults: defaults)
-        store.adoptExistingInstall(hasLaunchedBefore: false)
-        store.markCompleted()
-        // Help runs the flow again and it is finished again.
-        store.markCompleted()
+    func testOlderInstallMarkedDoneByFox34StillSeesItOnce() {
+        // What a FOX-34 build wrote for an install older than the flow.
+        defaults.set(true, forKey: "onboardingInstallChecked")
+        defaults.set(true, forKey: "onboardingCompleted")
+        defaults.set(true, forKey: "onboardingLegacyInstall")
 
-        XCTAssertTrue(OnboardingStore(defaults: defaults).isCompleted)
+        let store = OnboardingStore(defaults: defaults)
+        store.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertTrue(store.showsOnLaunch)
+    }
+
+    func testFlowFinishedOnFox34BuildCountsAsShown() {
+        // A FOX-34 fresh install that finished or skipped the flow.
+        defaults.set(true, forKey: "onboardingInstallChecked")
+        defaults.set(true, forKey: "onboardingCompleted")
+
+        let store = OnboardingStore(defaults: defaults)
+        store.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertFalse(store.showsOnLaunch)
+        XCTAssertEqual(store.shownVersion, 1)
+        XCTAssertFalse(store.promptsForPushAtLaunch)
+    }
+
+    func testRaisingTheVersionShowsItOnceMore() {
+        OnboardingStore(defaults: defaults, currentVersion: 1).markShown()
+
+        let reworked = OnboardingStore(defaults: defaults, currentVersion: 2)
+        reworked.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertTrue(reworked.showsOnLaunch)
+        reworked.markShown()
+        XCTAssertFalse(OnboardingStore(defaults: defaults, currentVersion: 2).showsOnLaunch)
+    }
+
+    func testMarkShownNeverLowersTheVersion() {
+        OnboardingStore(defaults: defaults, currentVersion: 2).markShown()
+        OnboardingStore(defaults: defaults, currentVersion: 1).markShown()
+
+        XCTAssertEqual(OnboardingStore(defaults: defaults).shownVersion, 2)
     }
 
     // MARK: - Steps

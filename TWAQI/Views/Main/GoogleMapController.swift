@@ -644,10 +644,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     override func loadView() {
-        // Prepare a map. Showing the blue dot asks for location, so on a fresh
-        // install it waits for the welcome flow, which asks on its own step,
-        // rather than stacking a second prompt over it.
-        if OnboardingStore().isCompleted {
+        // Prepare a map. Showing the blue dot asks for location, so on the
+        // launch the welcome flow opens it waits for the flow, which asks on
+        // its own step, rather than stacking a second prompt over it.
+        if !Onboarding.isOpenAtLaunch {
             mapView.isMyLocationEnabled = true
         } else {
             onboardingObserver = NotificationCenter.default.addObserver(
