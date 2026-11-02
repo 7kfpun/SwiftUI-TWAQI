@@ -248,18 +248,23 @@ struct ReadingWidgetView: View {
     private var type: AirIndexTypes { entry.airIndexType }
 
     var body: some View {
-        if let reading = entry.reading {
-            if entry.isLocked {
-                content(reading)
-                    .overlay(alignment: .bottom) { proBanner }
+        Group {
+            if let reading = entry.reading {
+                if entry.isLocked {
+                    content(reading)
+                        .overlay(alignment: .bottom) { proBanner }
+                } else {
+                    content(reading)
+                }
+            } else if entry.isLocked {
+                proOnly
             } else {
-                content(reading)
+                empty
             }
-        } else if entry.isLocked {
-            proOnly
-        } else {
-            empty
         }
+        // Locked medium / large: a tap opens the app on the Pro screen.
+        // Unlocked widgets keep opening the app as before.
+        .widgetURL(entry.isLocked ? DeepLink.proURL(source: .widgetLocked) : nil)
     }
 
     @ViewBuilder
@@ -595,8 +600,7 @@ struct ReadingWidgetView: View {
         }
     }
 
-    /// Over a locked widget's blurred numbers. Tapping opens the app, where
-    /// Pro is.
+    /// Over a locked widget's blurred numbers. Tapping opens the Pro screen.
     private var proBanner: some View {
         Label {
             Text("Widget.pro_unlock")

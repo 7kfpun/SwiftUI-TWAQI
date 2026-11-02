@@ -14,6 +14,11 @@ struct StoreReviewHelper {
         static let appOpenedCount = "appOpenedCount"
     }
 
+    /// The app has been opened before this launch was counted.
+    static var hasLaunchedBefore: Bool {
+        (UserDefaults.standard.value(forKey: Keys.appOpenedCount) as? Int ?? 0) > 0
+    }
+
     static func incrementAppOpenedCount() { // called from appdelegate didfinishLaunchingWithOptions:
         guard var appOpenCount = UserDefaults.standard.value(forKey: Keys.appOpenedCount) as? Int else {
             UserDefaults.standard.set(1, forKey: Keys.appOpenedCount)

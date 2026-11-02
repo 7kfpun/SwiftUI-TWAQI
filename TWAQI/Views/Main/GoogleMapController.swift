@@ -43,6 +43,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// down when the banner goes away.
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
+    private var onboardingObserver: NSObjectProtocol?
     private var isProLayout = false
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.
@@ -643,8 +644,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     override func loadView() {
-        // Prepare a map
-        mapView.isMyLocationEnabled = true
+        // Prepare a map. Showing the blue dot asks for location, so on a fresh
+        // install it waits for the welcome flow, which asks on its own step,
+        // rather than stacking a second prompt over it.
+        if OnboardingStore().isCompleted {
+            mapView.isMyLocationEnabled = true
+        } else {
+            onboardingObserver = NotificationCenter.default.addObserver(
+                forName: Onboarding.didFinish, object: nil, queue: .main
+            ) { [weak self] _ in
+                self?.mapView.isMyLocationEnabled = true
+                self?.onboardingObserver.map(NotificationCenter.default.removeObserver)
+                self?.onboardingObserver = nil
+            }
+        }
         mapView.settings.compassButton = true
         // Exposes the markers, by their titles, to VoiceOver.
         mapView.accessibilityElementsHidden = false
