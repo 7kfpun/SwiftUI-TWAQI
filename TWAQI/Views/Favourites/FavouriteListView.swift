@@ -77,6 +77,19 @@ struct FavouriteListView: View {
                 }
             }
 
+            if viewModel.hasPendingAlertClears {
+                Section {
+                    Label {
+                        Text("Favourites.alerts_clear_pending_list")
+                    } icon: {
+                        Image(systemName: "bell.slash")
+                    }
+                    .font(.footnote)
+                    .foregroundColor(.orange)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+
             Section {
                 ForEach(viewModel.favouritePollutants, id: \.self) { pollutant in
                     NavigationLink(

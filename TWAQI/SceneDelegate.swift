@@ -83,6 +83,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to undo the changes made on entering the background.
         // A subscription may have lapsed or renewed while the app was away.
         Task { await SettingsStore.refreshPro() }
+        // Back online, perhaps: alerts of stations removed from Favourites
+        // that OneSignal hasn't taken yet.
+        FavouriteAlerts.retryPendingClears()
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {

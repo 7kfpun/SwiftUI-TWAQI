@@ -23,9 +23,13 @@ class DetailsViewModel: ObservableObject {
 
     @Published var historicalPollutants: HistoricalPollutants = []
 
-    /// The station has an alert on. From the alert controls once they have
-    /// read OneSignal, else this device's last record of what it sent.
-    @Published var hasAlerts = false
+    /// Whether the station has an alert on: from the alert controls once
+    /// they have read OneSignal, else this device's last record of what it
+    /// sent. Nil when neither is known yet.
+    @Published private(set) var alertsOn: Bool?
+
+    /// The station has an alert on, as far as is known.
+    var hasAlerts: Bool { alertsOn == true }
 
     /// Unfavouriting waits on the reader: it would also turn alerts off.
     @Published var isConfirmingUnfavourite = false
@@ -33,6 +37,10 @@ class DetailsViewModel: ObservableObject {
     /// Why favouriting just now left the station's alerts off, when the
     /// reader can do something about it. Nil otherwise.
     @Published var favouriteAlertsHint: FavouriteAlertsHint?
+
+    /// The station record didn't load, so there is no alerts card to show:
+    /// the page shows why instead.
+    @Published var stationLoadFailed = false
 
     /// Favourited before the station record — which says which OneSignal tag
     /// the alerts go under — had loaded: switched on once it has.
@@ -71,15 +79,15 @@ class DetailsViewModel: ObservableObject {
     init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
         self.stationId = stationId
         self.historicalPollutants = historicalPollutants
-        self.hasAlerts = FavouriteAlerts.locallyKnown(stationId: stationId) ?? false
+        self.alertsOn = FavouriteAlerts.locallyKnown(stationId: stationId)
         self.alertsObserver = NotificationCenter.default.addObserver(
             forName: FavouriteAlerts.changed,
             object: nil,
             queue: .main
         ) { [weak self] notification in
             guard let self = self, let isOn = FavouriteAlerts.isOn(in: notification, stationId: self.stationId) else { return }
-            if self.hasAlerts != isOn {
-                self.hasAlerts = isOn
+            if self.alertsOn != isOn {
+                self.alertsOn = isOn
             }
         }
     }
@@ -105,6 +113,7 @@ class DetailsViewModel: ObservableObject {
             switch result {
             case .success(let result):
                 self.station = result["station"] as? Station
+                self.stationLoadFailed = self.station == nil
                 self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
                 if self.enablesAlertsWhenStationLoads, self.station != nil {
                     self.enablesAlertsWhenStationLoads = false
@@ -117,6 +126,13 @@ class DetailsViewModel: ObservableObject {
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
                 print(error.localizedDescription)
+                self.stationLoadFailed = self.station == nil
+                // Favourited while this was on the wire: say the alerts
+                // couldn't be switched on, rather than wait in silence.
+                if self.enablesAlertsWhenStationLoads, self.station == nil {
+                    self.enablesAlertsWhenStationLoads = false
+                    self.favouriteAlertsHint = .notChanged
+                }
                 self.requestFinished(failed: true, generation: generation)
             }
         }
@@ -176,9 +192,16 @@ class DetailsViewModel: ObservableObject {
 
     /// Takes the station out of Favourites, and turns its alerts off with it
     /// when it has any — only after `isConfirmingUnfavourite` was answered.
+    /// When that isn't known yet, alerts are cleared anyway: a favourite
+    /// never leaves an alert on behind it.
     func removeFromFavourites() {
-        if hasAlerts {
-            FavouriteAlerts.clear(stationId: stationId, tagCodes: alertTagCodes)
+        let codes = FavouriteAlerts.tagCodesToClear(
+            alertsOn: alertsOn,
+            knownTagCode: exactTagCode,
+            candidates: candidateTagCodes
+        )
+        if !codes.isEmpty {
+            clearAlerts(tagCodes: codes)
         }
         enablesAlertsWhenStationLoads = false
         settings.savedFavouriteStations.removeAll { $0 == stationId }
@@ -212,25 +235,42 @@ class DetailsViewModel: ObservableObject {
                 // Unfavourited while OneSignal was writing: don't leave an
                 // alert on a station that isn't a favourite.
                 if !self.isFavourited {
-                    FavouriteAlerts.clear(stationId: stationId, tagCodes: self.alertTagCodes)
+                    self.clearAlerts(tagCodes: self.exactTagCode.map { [$0] } ?? self.candidateTagCodes)
                 }
             case .capReached:
                 self.favouriteAlertsHint = .capReached
             case .notificationsDenied:
                 self.favouriteAlertsHint = .notificationsDenied
-            case .alreadyOn, .notChanged:
+            case .notChanged:
+                // Also the outcome when it was unfavourited meanwhile, which
+                // needs no word.
+                if self.isFavourited {
+                    self.favouriteAlertsHint = .notChanged
+                }
+            case .alreadyOn:
                 break
             }
         }
     }
 
-    /// Where OneSignal has this station's alerts: exact once the station
-    /// record (with its country) has loaded.
-    private var alertTagCodes: [String] {
-        if let station = station {
-            return [FavouriteAlerts.tagCode(countryCode: station.countryCode, name: station.name, stationId: stationId)]
+    /// Turns the station's alerts off as it leaves Favourites. If OneSignal
+    /// can't take it now, it is tried again later, and the reader is told.
+    private func clearAlerts(tagCodes: [String]) {
+        FavouriteAlerts.clear(stationId: stationId, tagCodes: tagCodes) { [weak self] cleared in
+            guard let self = self, !cleared, !self.isFavourited else { return }
+            self.favouriteAlertsHint = .clearPending
         }
-        return FavouriteAlerts.candidateTagCodes(name: pollutant?.name ?? "", stationId: stationId)
+    }
+
+    /// Where OneSignal has this station's alerts, once the station record
+    /// (with its country) has loaded.
+    private var exactTagCode: String? {
+        station.map { FavouriteAlerts.tagCode(countryCode: $0.countryCode, name: $0.name, stationId: stationId) }
+    }
+
+    /// Where OneSignal may have them before then.
+    private var candidateTagCodes: [String] {
+        FavouriteAlerts.candidateTagCodes(name: pollutant?.name ?? "", stationId: stationId)
     }
 
     private func logFavourite(on: Bool) {
@@ -290,10 +330,19 @@ class DetailsViewModel: ObservableObject {
     }
 }
 
-/// Why a station just favourited has no alerts, as told to the reader.
+/// What favouriting or unfavouriting just now did not do to the station's
+/// alerts, as told to the reader.
 enum FavouriteAlertsHint: Equatable {
-    /// Two other stations already have alerts on.
+    /// Favourited; two other stations already have alerts on.
     case capReached
-    /// Notifications are turned off for the app in Settings.
+    /// Favourited; notifications are turned off for the app in Settings.
     case notificationsDenied
+    /// Favourited; OneSignal couldn't be reached, so alerts stay off.
+    case notChanged
+    /// Unfavourited; OneSignal couldn't be reached, so its alerts are turned
+    /// off later.
+    case clearPending
+
+    /// Whether this follows favouriting rather than unfavouriting.
+    var isAfterFavouriting: Bool { self != .clearPending }
 }

@@ -31,7 +31,7 @@ struct OneSignalManager {
             "isDndStartEarlierThanEnd": dndStartTimeCurrentRegion > dndEndTimeCurrentRegion,
         ]
         OneSignal.sendTags(tags, onSuccess: { result in
-            print("Tags sent, \(tags) - \(result!)")
+            print("Tags sent, \(tags) - \(result ?? [:])")
             completionHandler(.success(true))
         }) { error in
             print("Error sending tags: \(error?.localizedDescription ?? "None")")
@@ -42,7 +42,7 @@ struct OneSignalManager {
     static func disableDnd(completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         let tags = ["isDndEnabled", "dndStartTime", "dndEndTime", "isDndStartEarlierThanEnd"]
         OneSignal.deleteTags(tags, onSuccess: { result in
-            print("Tags deleted, \(tags) - \(result!)")
+            print("Tags deleted, \(tags) - \(result ?? [:])")
             completionHandler(.success(true))
         }) { error in
             print("Error sending tags: \(error?.localizedDescription ?? "None")")
@@ -52,7 +52,7 @@ struct OneSignalManager {
 
     static func sendTags(tags: [String: String], completionHandler: @escaping (Result<Bool, OneSignalError>) -> Void) {
         OneSignal.sendTags(tags, onSuccess: { result in
-            print("Tags sent, \(tags) - \(result!)")
+            print("Tags sent, \(tags) - \(result ?? [:])")
             completionHandler(.success(true))
         }) { error in
             print("Error sending tags: \(error?.localizedDescription ?? "None")")
@@ -60,70 +60,99 @@ struct OneSignalManager {
         }
     }
 
+    /// How long a tag read may take before callers stop waiting. OneSignal
+    /// can sit on a read with no answer — offline, or before it has
+    /// registered — and the station screen's alert switches wait on it.
+    static let readTimeout: TimeInterval = 10
+
+    /// Push settings as OneSignal holds them in this device's tags. Calls
+    /// back exactly once, off the main thread: with the settings, or with a
+    /// failure when OneSignal fails or doesn't answer within `readTimeout`.
     static func getOneSignalSettings(completionHandler: @escaping (Result<OneSignalSettings, OneSignalError>) -> Void) {
-        var oneSignalSettings = OneSignalSettings(stationSettings: [:])
+        readOnce(timeout: readTimeout, read: { answer in
+            OneSignal.getTags({ tags in
+                print("OneSignal tags - \(tags ?? [:])")
+                answer(.success(settings(fromTags: tags)))
+            }, onFailure: { error in
+                print("Error getting tags - \(error?.localizedDescription ?? "None")")
+                answer(.failure(.oneSignalError))
+            })
+        }, completion: completionHandler)
+    }
 
-        OneSignal.getTags({ tags in
-            guard let tags = tags else {
-                return
+    /// Runs `read` and passes on its first answer, or a failure once
+    /// `timeout` has passed without one. Later answers are dropped, so
+    /// `completion` runs exactly once.
+    static func readOnce<T>(
+        timeout: TimeInterval,
+        read: (@escaping (Result<T, OneSignalError>) -> Void) -> Void,
+        completion: @escaping (Result<T, OneSignalError>) -> Void
+    ) {
+        let lock = NSLock()
+        var answered = false
+        let answer: (Result<T, OneSignalError>) -> Void = { result in
+            lock.lock()
+            let isFirst = !answered
+            answered = true
+            lock.unlock()
+            if isFirst {
+                completion(result)
             }
-            print("OneSignal tags - \(tags)")
+        }
+        DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
+            answer(.failure(.oneSignalError))
+        }
+        read(answer)
+    }
 
-            for tag in tags {
-                guard let key = tag.key as? String, let value = tag.value as? String else {
-                    return
-                }
+    /// Reads OneSignal's tags into settings. No tags is no settings; a tag
+    /// that isn't a string, or a threshold that isn't a number (one set by
+    /// hand in the dashboard, say), is skipped rather than failing the rest.
+    static func settings(fromTags tags: [AnyHashable: Any]?) -> OneSignalSettings {
+        var settings = OneSignalSettings(stationSettings: [:])
 
-                switch key {
-                case "isDndEnabled":
-                    oneSignalSettings.isDndEnabled = value == "true"
-                case "dndStartTime":
-                    oneSignalSettings.dndStartTime = Int(value)
-                case "dndEndTime":
-                    oneSignalSettings.dndEndTime = Int(value)
-                default:
-                    if key.contains("_pollution_therhold") {
-                        let stationName = key
-                            .replacingOccurrences(of: "_pollution_therhold", with: "", options: NSString.CompareOptions.literal, range: nil)
+        for (key, value) in tags ?? [:] {
+            guard let key = key as? String, let value = value as? String else { continue }
 
-                        if var oneSignalStationSetting = oneSignalSettings.stationSettings[stationName] {
-                            oneSignalStationSetting.isPollutionNotificationEnabled = true
-                            oneSignalStationSetting.pollutionTherhold = Double(value)!
-                            oneSignalSettings.stationSettings[stationName] = oneSignalStationSetting
-                        } else {
-                            oneSignalSettings.stationSettings[stationName] = OneSignalStationSetting(
-                                stationName: stationName,
-                                isPollutionNotificationEnabled: true,
-                                isCleanlinessNotificationEnabled: false,
-                                pollutionTherhold: Double(value)!
-                            )
-                        }
-                    }
-
-                    if key.contains("_cleanliness_therhold") {
-                        let stationName = key
-                            .replacingOccurrences(of: "_cleanliness_therhold", with: "", options: NSString.CompareOptions.literal, range: nil)
-
-                        if var oneSignalStationSetting = oneSignalSettings.stationSettings[stationName] {
-                            oneSignalStationSetting.isCleanlinessNotificationEnabled = true
-                            oneSignalStationSetting.cleanlinessTherhold = Double(value)!
-                            oneSignalSettings.stationSettings[stationName] = oneSignalStationSetting
-                        } else {
-                            oneSignalSettings.stationSettings[stationName] = OneSignalStationSetting(
-                                stationName: stationName,
-                                isPollutionNotificationEnabled: false,
-                                isCleanlinessNotificationEnabled: true,
-                                cleanlinessTherhold: Double(value)!
-                            )
-                        }
-                    }
+            switch key {
+            case "isDndEnabled":
+                settings.isDndEnabled = value == "true"
+            case "dndStartTime":
+                settings.dndStartTime = Int(value)
+            case "dndEndTime":
+                settings.dndEndTime = Int(value)
+            default:
+                if let stationName = stationName(key, suffix: pollutionSuffix), let threshold = Double(value) {
+                    var setting = settings.stationSettings[stationName] ?? OneSignalStationSetting(
+                        stationName: stationName,
+                        isPollutionNotificationEnabled: false,
+                        isCleanlinessNotificationEnabled: false
+                    )
+                    setting.isPollutionNotificationEnabled = true
+                    setting.pollutionTherhold = threshold
+                    settings.stationSettings[stationName] = setting
+                } else if let stationName = stationName(key, suffix: cleanlinessSuffix), let threshold = Double(value) {
+                    var setting = settings.stationSettings[stationName] ?? OneSignalStationSetting(
+                        stationName: stationName,
+                        isPollutionNotificationEnabled: false,
+                        isCleanlinessNotificationEnabled: false
+                    )
+                    setting.isCleanlinessNotificationEnabled = true
+                    setting.cleanlinessTherhold = threshold
+                    settings.stationSettings[stationName] = setting
                 }
             }
+        }
 
-            completionHandler(.success(oneSignalSettings))
-        }, onFailure: { error in
-            print("Error getting tags - \(error!.localizedDescription)")
-            completionHandler(.failure(.oneSignalError))
-        })
+        return settings
+    }
+
+    // The legacy `therhold` spelling is what OneSignal's segments filter on.
+    private static let pollutionSuffix = "_pollution_therhold"
+    private static let cleanlinessSuffix = "_cleanliness_therhold"
+
+    private static func stationName(_ key: String, suffix: String) -> String? {
+        guard key.hasSuffix(suffix), key.count > suffix.count else { return nil }
+        return String(key.dropLast(suffix.count))
     }
 }
