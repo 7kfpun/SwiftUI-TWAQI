@@ -14,6 +14,9 @@ struct StoreReviewHelper {
         static let appOpenedCount = "appOpenedCount"
     }
 
+    /// Ask for a review every this many app opens.
+    static let reviewRequestInterval = 10
+
     /// The app has been opened before this launch was counted.
     static var hasLaunchedBefore: Bool {
         (UserDefaults.standard.value(forKey: Keys.appOpenedCount) as? Int ?? 0) > 0
@@ -28,6 +31,12 @@ struct StoreReviewHelper {
         UserDefaults.standard.set(appOpenCount, forKey: Keys.appOpenedCount)
     }
 
+    /// Whether this open should request a review: opens 10, 20, 30, and so on.
+    /// iOS decides whether the prompt actually shows, so asking often is fine.
+    static func shouldRequestReview(appOpenCount: Int) -> Bool {
+        appOpenCount > 0 && appOpenCount % reviewRequestInterval == 0
+    }
+
     static func checkAndAskForReview() { // call this whenever appropriate
         // this will not be shown everytime. Apple has some internal logic on how to show this.
         guard let appOpenCount = UserDefaults.standard.value(forKey: Keys.appOpenedCount) as? Int else {
@@ -35,14 +44,13 @@ struct StoreReviewHelper {
             return
         }
 
-        switch appOpenCount {
-        case 10, 30, 60:
-            StoreReviewHelper().requestReview()
-        case _ where appOpenCount % 100 == 0 :
-            StoreReviewHelper().requestReview()
-        default:
+        guard shouldRequestReview(appOpenCount: appOpenCount) else {
             print("App run count is : \(appOpenCount)")
+            return
         }
+
+        TrackingManager.logEvent(eventName: "review_requested", parameters: ["app_open_count": appOpenCount])
+        StoreReviewHelper().requestReview()
     }
 
     fileprivate func requestReview() {
