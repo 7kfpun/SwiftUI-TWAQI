@@ -23,6 +23,7 @@ struct TWAQIWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "TWAQIWidget", intent: SelectIndexIntent.self, provider: ReadingProvider()) { entry in
             ReadingWidgetView(entry: entry)
+                .appLanguageLocale()
                 .widgetContainerBackground(tint: entry.tintColor)
         }
         .configurationDisplayName("Widget.widget_name")
@@ -638,6 +639,18 @@ private extension View {
     func proBlurred(_ isLocked: Bool) -> some View {
         blur(radius: isLocked ? 6 : 0)
             .accessibilityHidden(isLocked)
+    }
+
+    /// The language chosen in the app under Help, as the app's root view
+    /// applies it, so `Text("Key")` and status names follow it. Left to the
+    /// system when no choice is made.
+    @ViewBuilder
+    func appLanguageLocale() -> some View {
+        if let identifier = AppLanguage.current.localeIdentifier {
+            environment(\.locale, Locale(identifier: identifier))
+        } else {
+            self
+        }
     }
 
     /// iOS 17+ container background; older Home Screen widgets keep a clear fill.

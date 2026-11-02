@@ -59,6 +59,51 @@ final class AppLanguageTests: XCTestCase {
         XCTAssertEqual(AppLanguage.stored(in: defaults), .system)
     }
 
+    // MARK: - Widget mirror
+
+    func testMirrorWritesTheChoiceAndSystemRemovesIt() {
+        XCTAssertTrue(AppLanguage.mirror(.traditionalChinese, to: defaults))
+        XCTAssertEqual(defaults.string(forKey: AppLanguage.defaultsKey), "zh-Hant")
+        // Same value again: nothing to write, no timeline reload.
+        XCTAssertFalse(AppLanguage.mirror(.traditionalChinese, to: defaults))
+
+        XCTAssertTrue(AppLanguage.mirror(.english, to: defaults))
+        XCTAssertEqual(AppLanguage.stored(in: defaults), .english)
+
+        XCTAssertTrue(AppLanguage.mirror(.system, to: defaults))
+        XCTAssertNil(defaults.string(forKey: AppLanguage.defaultsKey))
+        XCTAssertFalse(AppLanguage.mirror(.system, to: defaults))
+    }
+
+    func testExtensionReadsTheMirrorAndTheAppItsOwnDefaults() throws {
+        let sharedSuite = "AppLanguageTests.shared.\(UUID().uuidString)"
+        let shared = try XCTUnwrap(UserDefaults(suiteName: sharedSuite))
+        defer { shared.removePersistentDomain(forName: sharedSuite) }
+
+        // Chinese chosen under Help, mirrored for the widget.
+        defaults.set(AppLanguage.traditionalChinese.rawValue, forKey: AppLanguage.defaultsKey)
+        AppLanguage.mirror(.traditionalChinese, to: shared)
+        XCTAssertEqual(AppLanguage.current(own: defaults, shared: shared, isExtension: false), .traditionalChinese)
+        // The widget's own defaults never hold a choice.
+        let widgetOwn = try XCTUnwrap(UserDefaults(suiteName: "AppLanguageTests.widget.\(UUID().uuidString)"))
+        XCTAssertEqual(AppLanguage.current(own: widgetOwn, shared: shared, isExtension: true), .traditionalChinese)
+
+        // A stale mirror never overrides the app's own choice.
+        defaults.removeObject(forKey: AppLanguage.defaultsKey)
+        XCTAssertEqual(AppLanguage.current(own: defaults, shared: shared, isExtension: false), .system)
+    }
+
+    func testSettingsStoreMirrorsTheChoiceForTheWidget() {
+        let original = AppLanguage.stored(in: AppLanguage.shared)
+        defer { AppLanguage.mirror(original, to: AppLanguage.shared) }
+
+        let settings = SettingsStore(defaults: defaults)
+        settings.appLanguage = .traditionalChinese
+        XCTAssertEqual(AppLanguage.stored(in: AppLanguage.shared), .traditionalChinese)
+        settings.appLanguage = .system
+        XCTAssertEqual(AppLanguage.stored(in: AppLanguage.shared), .system)
+    }
+
     // MARK: - Locale
 
     func testLocaleResolution() {

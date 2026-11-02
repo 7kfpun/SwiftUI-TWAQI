@@ -32,6 +32,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Favourites saved before the widget listed them, or by an older
         // build, only reach the app group once they're mirrored.
         WidgetBridge.publish(favouriteStationIds: SettingsStore().savedFavouriteStations)
+        // Likewise a language chosen under Help before the widget followed it.
+        WidgetBridge.publish(appLanguage: AppLanguage.stored())
 
         // Offline data saved more than a week ago is never shown; delete it.
         OfflineCacheRetention.purgeInBackground()

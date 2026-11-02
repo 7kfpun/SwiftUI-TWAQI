@@ -10,9 +10,11 @@ import Foundation
 
 /// The language chosen under Help, overriding the system's for this app.
 ///
-/// Stored in the app's own standard defaults. The widgets, watch and Vision
-/// targets compile this file too but never see that value, so they follow
-/// the system language as before.
+/// Stored in the app's own standard defaults, the source of truth.
+/// `WidgetBridge` mirrors it into the app group so the phone's Home Screen
+/// widget, a separate process, shows the same language. The watch and Vision
+/// targets compile this file too but nothing writes their app group, so they
+/// follow the system language as before.
 enum AppLanguage: String, CaseIterable, Identifiable {
     /// Whatever iOS gives the app.
     case system
@@ -32,7 +34,35 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         defaults.string(forKey: defaultsKey).flatMap(AppLanguage.init(rawValue:)) ?? .system
     }
 
-    static var current: AppLanguage { stored() }
+    /// The app reads its own defaults; an extension (the widget) reads the
+    /// mirror in the app group, since it can't see the app's defaults.
+    static var current: AppLanguage {
+        current(own: .standard, shared: shared, isExtension: isAppExtension)
+    }
+
+    static func current(own: UserDefaults, shared: UserDefaults, isExtension: Bool) -> AppLanguage {
+        stored(in: isExtension ? shared : own)
+    }
+
+    /// The app group defaults the widget reads, under the same key.
+    static var shared: UserDefaults {
+        UserDefaults(suiteName: WatchStore.appGroup) ?? .standard
+    }
+
+    /// Writes `language` into `shared` the way `SettingsStore` writes its own
+    /// defaults: `.system` removes the key. Returns whether anything changed.
+    @discardableResult
+    static func mirror(_ language: AppLanguage, to shared: UserDefaults) -> Bool {
+        guard stored(in: shared) != language else { return false }
+        if let identifier = language.localeIdentifier {
+            shared.set(identifier, forKey: defaultsKey)
+        } else {
+            shared.removeObject(forKey: defaultsKey)
+        }
+        return true
+    }
+
+    private static let isAppExtension = Bundle.main.bundlePath.hasSuffix(".appex")
 
     /// The locale this choice resolves to; `.system` gives `system` back.
     func locale(system: Locale = .current) -> Locale {
