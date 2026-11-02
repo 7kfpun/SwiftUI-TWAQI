@@ -27,8 +27,9 @@ struct ContentView: View {
 
     /// `opensOnboarding`: whether this scene opens the welcome flow by
     /// itself. `SceneDelegate` decides it, so it knows which scene holds the
-    /// launch-time prompts back.
-    init(router: AppRouter, opensOnboarding: Bool = OnboardingStore().showsOnLaunch) {
+    /// launch-time prompts back (via `Onboarding.claimLaunchFlow`). No
+    /// default, so a new call site can't open the flow without owning it.
+    init(router: AppRouter, opensOnboarding: Bool) {
         self.router = router
         _showingOnboarding = State(initialValue: opensOnboarding)
     }
@@ -135,7 +136,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(["zh-Hant", "en"], id: \.self) { localIdentifier in
-            ContentView(router: AppRouter())
+            ContentView(router: AppRouter(), opensOnboarding: false)
                 .environmentObject(SettingsStore())
                 .environment(\.locale, .init(identifier: localIdentifier))
                 .previewDisplayName(localIdentifier)
