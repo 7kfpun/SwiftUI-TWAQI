@@ -122,7 +122,12 @@ class DetailsViewModel: ObservableObject {
             }
             switch result {
             case .success(let result):
-                self.station = result["station"] as? Station
+                // An older answer without the record doesn't take away one
+                // already loaded.
+                let station = result["station"] as? Station
+                if station != nil || isLatest {
+                    self.station = station
+                }
                 if self.station != nil || isLatest {
                     self.stationLoadFailed = self.station == nil
                 }
