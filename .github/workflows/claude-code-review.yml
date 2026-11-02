@@ -37,56 +37,107 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Review this pull request for a SwiftUI iOS app (Taiwan air quality, with WidgetKit widgets).
-            Focus on, in priority order:
-            1. Correctness bugs and crashes: force unwraps, optional handling, off-by-one, bad date/time-zone logic, Codable decoding mismatches.
-            2. Concurrency: main-actor UI updates, async/await and Task misuse, data races, Sendable issues.
-            3. SwiftUI: state ownership (@State/@StateObject/@ObservedObject/@Observable), unnecessary view re-renders, memory/retain cycles in closures.
-            4. Widgets/extensions: timeline reload policy, App Group data sharing, memory limits.
-            5. Networking/security: error handling, hardcoded secrets or keys, insecure HTTP.
-            6. Localization (strings not hardcoded) and accessibility.
+            Review this pull request for TWAQI: a SwiftUI app (iPhone/iPad, iOS 15) with a
+            WidgetKit widget, an Apple Watch app and complication, a visionOS app, and
+            Cloudflare Workers under `workers/`. Your job is to find real problems before
+            they ship and suggest worthwhile improvements, not to restate the diff.
 
-            Also check, using `gh pr view` (title, body, linked ticket) and `gh pr diff`:
-            A. Ticket acceptance. The PR body names a Linear ticket (FOX-nn) and should
-               quote its scope or acceptance criteria. You cannot open Linear, so work
-               from what the body states. Compare the diff against it: flag anything in
-               scope that the diff does not do, and any product change outside it. If the
-               ticket says to remove a UI element (button, row, picker, section, string),
-               confirm it is gone from the views and its Localizable.strings keys, and
-               flag it if it is still there. If the body names no ticket or criteria, say so.
-            B. PR-body claims. Verify every behavioral claim in the body ("X now does Y",
-               "no behavior change", "removes Z", "tests cover W") against the diff. Flag
-               each claim the diff does not support, quoting it.
-            C. Blocking invariants. Mark these **BLOCKING** in the summary:
-               - Push settings: OneSignal tags stay the source of truth for delivery; the
-                 Directus mirror (`DirectusPushMirror`, `twaqi_push_devices` /
-                 `twaqi_push_subscriptions`) writes after OneSignal, never before or
-                 instead, and its failure never blocks or reverts the OneSignal write.
-                 Switching an alert off soft-archives the Directus row, never deletes it.
-               - Favourites ↔ alerts (`FavouriteAlerts`): a station with an alert on is
-                 always a favourite, and leaving Favourites turns its alerts off (OneSignal,
-                 then Directus). Alert state reads and writes the same OneSignal tag codes
-                 the station screen uses (English name in Taiwan, numeric id elsewhere).
-                 Reordering favourites must not touch alerts.
-               - Any change that makes the OneSignal and Directus copies disagree.
+            ## Method
 
-            Domain notes for this app:
-            - Push today is OneSignal, dual-written to Directus on cms.wahthefox.com. An
-              FCM cutover exists on a separate branch and is not on master; do not assume it.
+            1. Intent. `gh pr view` (title, body, linked ticket) and `gh pr view --comments`.
+               Know what the change is supposed to do before judging how it does it.
+            2. Diff. `gh pr diff`. Then read each changed file in full (Read), not just the
+               hunks: most bugs sit where new code meets code the diff didn't show.
+            3. Trace. For each changed function or type, Grep its callers and what it calls.
+               Ask what else depends on the old behaviour, and whether a similar call site
+               needed the same change but didn't get it.
+            4. Break it. For each change, try concrete failure scenarios: empty / nil /
+               first launch / no network / slow network / API error / old persisted data from
+               the previous version / Pro vs free / Taiwan vs elsewhere / iPhone vs iPad split
+               view / widget and watch targets / zh-Hant vs en / VoiceOver / backgrounding
+               mid-request / two quick taps.
+            5. Verify before reporting. Each finding must name the file:line, the concrete
+               input or state, and the wrong result. If you can't state the scenario, it is
+               a question, not a finding. Don't report what you haven't checked in the code.
+            6. Earlier threads. If an `**Author reply**` already answered a point, don't
+               repeat it unless the reply is wrong, and then say why.
+
+            ## What to look for
+
+            - Correctness: force unwraps, optional handling, off-by-one, wrong conditions,
+              error paths that swallow failures or leave UI stuck in loading, retries that
+              loop, state not reset.
+            - Time: Taiwan-local logic (cam hour keys, forecast dates, MOENV publish times,
+              "today") uses `Asia/Taipei`, never `TimeZone.current` / `Calendar.current`.
+              UTC timestamps from the API stay UTC. Date formatters need a fixed locale.
+            - Data: Codable key or type mismatches with the API / Directus columns; renamed
+              UserDefaults / App Group keys with no migration; cache directories outside the
+              ones `OfflineCacheRetention` scans.
+            - Concurrency: UI updates off the main actor, races between overlapping tasks,
+              tasks not cancelled when a view goes away, retain cycles in closures.
+            - SwiftUI: state ownership (@State / @StateObject / @ObservedObject), views that
+              re-create expensive objects on every render, iPad two-pane navigation.
+            - Targets: shared files compile for the widget, watch and visionOS targets;
+              widget timeline reload policy, App Group sharing, memory limits.
+            - Localization and accessibility: every new user-facing string in both
+              `en` and `zh-Hant` `Localizable.strings`; removed UI also removes its keys;
+              labels for icon-only buttons.
+            - Security: secrets or keys in code, insecure HTTP, logging personal data.
+            - Tests: new logic in a pure function without a test; tests that can't fail;
+              a change in a CI-subset area (offline caches, push dual-write, favourites ↔
+              alerts, cam history, `SettingsStore`) with no test.
+            - Ticket and body. The PR body names a Linear ticket (FOX-nn) and should quote
+              its scope; you can't open Linear, so work from what the body states. Flag
+              scope the diff misses and product changes outside it. If the ticket removes
+              a UI element, confirm it's gone from the views and its strings. Check every
+              behavioural claim in the body ("no behavior change", "tests cover X")
+              against the diff, quoting each one the diff doesn't back.
+            - Improvements: a simpler approach, an existing helper the change duplicates,
+              dead code it leaves behind, a missing log or analytics event the ticket asked
+              for. Only ones worth the author's time; at most three.
+
+            ## Blocking invariants (always Blocking when broken)
+
+            - Push settings: OneSignal tags stay the source of truth for delivery. The
+              Directus mirror (`DirectusPushMirror`, `twaqi_push_devices` /
+              `twaqi_push_subscriptions`) writes after OneSignal, never before or instead,
+              and its failure never blocks or reverts the OneSignal write. Switching an
+              alert off soft-archives the Directus row, never deletes it.
+            - Favourites ↔ alerts (`FavouriteAlerts`): a station with an alert on is always
+              a favourite, and leaving Favourites turns its alerts off (OneSignal, then
+              Directus). Alert state reads and writes the same OneSignal tag codes the
+              station screen uses (English name in Taiwan, numeric id elsewhere).
+              Reordering favourites must not touch alerts.
+            - Any change that makes the OneSignal and Directus copies disagree.
+
+            ## Domain notes
+
+            - Push is OneSignal, dual-written to Directus on cms.wahthefox.com. An FCM
+              cutover exists on a separate branch and is not on master; don't assume it.
             - Station cams: R2 behind `https://twaqi.app.wahthefox.com`. Latest frame
               `stations/{siteId}.jpg`, hourly history `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
-              `siteId` is the MOENV image site id, not a TWAQI station id. History is a rolling
-              24 h window; a missing hour is a normal 404, not an error.
-            - Taiwan-local logic (cam hour keys, forecast dates, MOENV publish times,
-              "today") is Asia/Taipei (UTC+8, no DST), never the device time zone. Flag
-              `TimeZone.current` / `Calendar.current` there. Timestamps the API sends in
-              UTC (e.g. the map timeline) stay UTC.
-            - Offline caches (readings, cam frames, hourly frames) are purged after a week;
-              cache directories must stay inside the directories the purge scans.
+              `siteId` is the MOENV image site id, not a TWAQI station id. History is a
+              rolling 24 h window; a missing hour is a normal 404, not an error.
+            - Offline caches (readings, cam frames, hourly frames) are purged after a week.
 
-            Be concise. Only flag real issues — no style nitpicks a linter would catch.
-            Use inline comments (mcp__github_inline_comment__create_inline_comment) for specific lines,
-            and `gh pr comment` for a short top-level summary.
+            ## Output
+
+            Severity:
+            - **Blocking**: a bug users will hit, data loss, a broken invariant, a crash,
+              a security issue, or scope the ticket requires that is missing.
+            - **Should fix**: a real problem with a narrower trigger, a missing test for new
+              logic, a PR-body claim the diff doesn't back.
+            - **Suggestion**: an improvement; the author may decline it.
+            No style nitpicks (SwiftLint covers them) and no praise padding.
+
+            Post an inline comment (mcp__github_inline_comment__create_inline_comment) for
+            each Blocking and Should-fix finding: severity, the failure scenario, and a
+            concrete fix. Then post one top-level summary with `gh pr comment`, starting
+            exactly:
+            `**Claude Code Review** — <n> blocking, <n> should fix, <n> suggestions`
+            followed by the findings as a numbered list (severity, file:line, one line
+            each), the suggestions, any questions, and one line on what you checked.
+            With nothing blocking or should-fix, say so plainly in that first line's counts.
 
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "Read,Grep,Glob,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
