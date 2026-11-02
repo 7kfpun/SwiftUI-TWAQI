@@ -22,6 +22,12 @@ import XCTest
 ///   SCREENSHOT_PREFIX    file name prefix: "iPhone" or "iPad"
 ///   SCREENSHOT_LANGUAGE  "en" or "zh-Hant"
 ///   SCREENSHOT_MAP_ZOOM  optional; the map's zoom, default 7.2
+///
+/// It writes nothing to OneSignal or Directus: the welcome flow is marked
+/// done, so a fresh install is never asked for notifications, a stray
+/// notification prompt is turned down, and no alert switch or heart is
+/// tapped. The station shot is checked to show the alerts card (FOX-25)
+/// switched off and unlocked before it is taken.
 final class AppStoreScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
     private var outputDir: URL!
@@ -50,11 +56,13 @@ final class AppStoreScreenshotTests: XCTestCase {
 
         app = XCUIApplication()
         // NSUserDefaults' argument domain, for this launch only: `pro` hides
-        // the ad banners, the camera keys frame the whole island, the
-        // favourites are seeded without touching alerts, and the last two
-        // pick the language.
+        // the ad banners, `onboardingCompleted` skips the welcome flow (and
+        // with it the notification prompt), the camera keys frame the whole
+        // island, the favourites are seeded without touching alerts, and the
+        // last two pick the language.
         app.launchArguments = [
             "-pro", "YES",
+            "-onboardingCompleted", "YES",
             "-lastestMapLat", "23.7",
             "-lastestMapLon", "121.0",
             "-lastestMapZoom", zoom,
@@ -88,6 +96,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         wait(for: [loaded], timeout: 90)
         // Anything below the reading (forecast, cam frame) arrives after it.
         settle(seconds: 6)
+        assertAlertsCardOffAndUnlocked()
         snapshot("02 station")
 
         // 03: the pollutants scrolled up to the top, with PM2.5 picked so
@@ -104,7 +113,13 @@ final class AppStoreScreenshotTests: XCTestCase {
             .matching(NSPredicate(format: "label BEGINSWITH %@ AND label != %@", "PM2.5", "PM2.5"))
             .firstMatch
         XCTAssertTrue(pm25.waitForExistence(timeout: 10), "No PM2.5 cell in the pollutant grid")
-        pm25.tap()
+        // A tap while the page is still settling from the drags can be taken
+        // as "stop scrolling" and select nothing, so check and tap again.
+        for _ in 0..<3 where !pm25.isSelected {
+            settle(seconds: 2)
+            pm25.tap()
+        }
+        XCTAssertTrue(pm25.isSelected, "PM2.5 isn't picked, so the chart shows AQI")
         settle()
         snapshot("03 trend")
 
@@ -130,30 +145,61 @@ final class AppStoreScreenshotTests: XCTestCase {
 
     /// Drags `element` up to just under the floating close and share
     /// buttons, slowly so the scroll view doesn't coast past it.
+    ///
+    /// Since FOX-25 the alerts card and health advice sit above the
+    /// pollutants, so they start well below the fold. Each drag starts in
+    /// the scroll view's right gutter, clear of the switches and the cam
+    /// scrubber, and it keeps going until the element is at the top or the
+    /// page stops moving: in the tall iPad panel the page bottoms out with
+    /// the pollutants mid-screen, and the chart still fits under them.
     private func scrollToTop(_ element: XCUIElement) {
-        guard element.waitForExistence(timeout: 10) else { return }
+        XCTAssertTrue(element.waitForExistence(timeout: 10), "Nothing to scroll to")
+        let scrollView = app.scrollViews.containing(NSPredicate(format: "label == %@", element.label)).firstMatch
         let window = app.windows.firstMatch.frame
         let target = window.minY + window.height * 0.17
-        for _ in 0..<3 {
+        for _ in 0..<8 {
             let y = element.frame.minY
             guard y > target + 20 else { return }
-            let distance = min(y - target, window.height * 0.6)
-            let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let distance = min(y - target, window.height * 0.5)
+            let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.8))
             let end = start.withOffset(CGVector(dx: 0, dy: -distance))
             start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.6)
             settle(seconds: 1)
+            guard abs(element.frame.minY - y) > 2 else { return }
         }
     }
 
-    /// Location, notification and tracking prompts. Index 1 is the allowing
-    /// choice on each, in either language.
+    /// The alerts card FOX-25 put under the reading: present, off, and
+    /// without the two-station cap caption and locked switches it shows
+    /// until OneSignal has answered (FOX-37 M3). Fails the run rather than
+    /// capture a station page that isn't what the app shows.
+    private func assertAlertsCardOffAndUnlocked() {
+        let title = isChinese ? "空品通知" : "Air quality alerts"
+        let off = isChinese ? "未開啟" : "Off"
+        let card = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH %@", title))
+            .firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 15), "No alerts card on the station page")
+        XCTAssertTrue(card.label.hasSuffix(off), "Alerts card isn't off: \(card.label)")
+
+        let cap = app.staticTexts[isChinese ? "最多只能設定 2 個測站" : "You can only enable at most for 2 stations"]
+        let unlocked = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: cap)
+        wait(for: [unlocked], timeout: 30)
+        XCTAssertFalse(cap.exists, "Alerts card still shows the two-station cap")
+    }
+
+    /// Location and tracking prompts are allowed (index 1 in either
+    /// language); a notification prompt is turned down (index 0), so a
+    /// capture never registers this simulator for push.
     private func dismissSystemAlerts() {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         for _ in 0..<3 {
             let alert = springboard.alerts.firstMatch
             guard alert.waitForExistence(timeout: 5) else { return }
+            let isNotifications = alert.label.localizedCaseInsensitiveContains("notification")
+                || alert.label.contains("通知")
             let buttons = alert.buttons
-            buttons.element(boundBy: min(1, buttons.count - 1)).tap()
+            buttons.element(boundBy: isNotifications ? 0 : min(1, buttons.count - 1)).tap()
         }
     }
 

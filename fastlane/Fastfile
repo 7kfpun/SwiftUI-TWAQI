@@ -194,23 +194,27 @@ platform :ios do
   desc "Capture the raw App Store screenshots of the four headline features on one simulator"
   desc "AppStoreScreenshotTests takes map, station, 24-hour chart and Favourites, once per locale, into"
   desc "fastlane/screenshots_raw/<locale>/<prefix> NN <name>.png. Then run frame_screenshots"
-  desc "Options: device (simulator name, default \"iPhone 18 Pro\"), prefix (\"iPhone\" or \"iPad\","
-  desc "default \"iPhone\"), zoom (map zoom, default 7.2). The Duo keeps capture_duo_screenshots"
+  desc "Options: device (simulator name, default \"iPhone 18 Pro\"), udid (a simulator's id, used instead"
+  desc "of device, so parallel worktrees can each capture on their own), prefix (\"iPhone\" or \"iPad\","
+  desc "default \"iPhone\"), zoom (map zoom, default 7.2), derived_data (default /tmp/twaqi-screenshots)."
+  desc "The Duo keeps capture_duo_screenshots"
   lane :capture_screenshots do |options|
-    device = options[:device] || "iPhone 18 Pro"
+    device = options[:udid] || options[:device] || "iPhone 18 Pro"
+    destination = options[:udid] ? "id=#{options[:udid]}" : "platform=iOS Simulator,name=#{device}"
     prefix = options[:prefix] || "iPhone"
-    derived = "/tmp/twaqi-screenshots"
+    derived = File.expand_path(options[:derived_data] || "/tmp/twaqi-screenshots")
     xcodebuild = [
       "xcodebuild",
       "-workspace", File.join(ROOT, "TWAQI.xcworkspace"),
       "-scheme", "TWAQI",
-      "-destination", "platform=iOS Simulator,name=#{device}",
+      "-destination", destination,
       "-derivedDataPath", derived
     ]
 
     sh((xcodebuild + ["build-for-testing", "-quiet"]).shelljoin)
 
     # 9:41, full bars, charged: the status bar Apple's own screenshots use.
+    # simctl takes a simulator's name or its id.
     sh("xcrun simctl boot #{device.shellescape} || true")
     sh("xcrun simctl status_bar #{device.shellescape} override --time 9:41 " \
        "--dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active " \

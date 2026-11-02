@@ -86,5 +86,8 @@ struct PollutantGridView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(!hasReading)
+        // The charted pollutant reads as selected to VoiceOver (and to the
+        // App Store screenshot test), not only by its tint.
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
