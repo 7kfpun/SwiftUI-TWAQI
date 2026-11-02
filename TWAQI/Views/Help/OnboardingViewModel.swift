@@ -210,8 +210,7 @@ final class OnboardingViewModel: ObservableObject {
     /// Finished or skipped. The flow was marked shown when it opened, so it
     /// won't open by itself again either way; Help can run it anytime.
     func finish(skippedAt skipped: Onboarding.Step? = nil) {
-        Onboarding.isOpenAtLaunch = false
-        NotificationCenter.default.post(name: Onboarding.didFinish, object: nil)
+        Onboarding.releaseLaunchHold()
         if let skipped {
             TrackingManager.logEvent(eventName: "onboarding_skipped", parameters: [
                 "label": "step_\(skipped.rawValue + 1)",

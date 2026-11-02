@@ -24,6 +24,16 @@ enum Onboarding {
     /// way. Main thread only.
     static var isOpenAtLaunch = false
 
+    /// Ends the launch-time hold, once: clears `isOpenAtLaunch` and posts
+    /// `didFinish` so the held prompts go ahead. Called when the flow is
+    /// finished or skipped, and when the scene showing it goes away without
+    /// either, so a hold can't outlive the flow. Main thread only.
+    static func releaseLaunchHold(notificationCenter: NotificationCenter = .default) {
+        guard isOpenAtLaunch else { return }
+        isOpenAtLaunch = false
+        notificationCenter.post(name: didFinish, object: nil)
+    }
+
     /// The steps, in order. Location is asked for on `.location` only, and
     /// notifications on `.notifications` only.
     enum Step: Int, CaseIterable, Identifiable {

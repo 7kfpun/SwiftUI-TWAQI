@@ -19,6 +19,10 @@ import SwiftDate
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    /// Asks for a review once the welcome flow that opened at launch is
+    /// finished, skipped, or gone with its scene.
+    private var reviewAfterOnboarding: NSObjectProtocol?
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
@@ -132,9 +136,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         StoreReviewHelper.incrementAppOpenedCount()
-        // Not over the welcome flow.
+        // Not over the welcome flow: after it, so a 10/30/60/100 milestone
+        // that falls on this launch isn't lost.
         if !Onboarding.isOpenAtLaunch {
             StoreReviewHelper.checkAndAskForReview()
+        } else {
+            reviewAfterOnboarding = NotificationCenter.default.addObserver(
+                forName: Onboarding.didFinish, object: nil, queue: .main
+            ) { [weak self] _ in
+                self?.reviewAfterOnboarding.map(NotificationCenter.default.removeObserver)
+                self?.reviewAfterOnboarding = nil
+                StoreReviewHelper.checkAndAskForReview()
+            }
         }
 
         return true

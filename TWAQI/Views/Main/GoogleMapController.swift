@@ -44,6 +44,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
     private var onboardingObserver: NSObjectProtocol?
+
+    deinit {
+        onboardingObserver.map(NotificationCenter.default.removeObserver)
+    }
     private var isProLayout = false
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.

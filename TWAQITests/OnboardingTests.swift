@@ -135,6 +135,41 @@ final class OnboardingTests: XCTestCase {
         XCTAssertEqual(OnboardingStore(defaults: defaults).shownVersion, 2)
     }
 
+    // MARK: - Launch hold
+
+    func testReleasingTheLaunchHoldClearsItAndPostsOnce() {
+        let center = NotificationCenter()
+        let posts = PostCount()
+        let token = center.addObserver(forName: Onboarding.didFinish, object: nil, queue: nil) { _ in posts.value += 1 }
+        defer { center.removeObserver(token) }
+        let saved = Onboarding.isOpenAtLaunch
+        defer { Onboarding.isOpenAtLaunch = saved }
+
+        Onboarding.isOpenAtLaunch = true
+        Onboarding.releaseLaunchHold(notificationCenter: center)
+        XCTAssertFalse(Onboarding.isOpenAtLaunch)
+        XCTAssertEqual(posts.value, 1)
+
+        // Finished, then its scene goes too: nothing more to release.
+        Onboarding.releaseLaunchHold(notificationCenter: center)
+        XCTAssertEqual(posts.value, 1)
+    }
+
+    func testReleasingWithoutALaunchHoldPostsNothing() {
+        let center = NotificationCenter()
+        let posts = PostCount()
+        let token = center.addObserver(forName: Onboarding.didFinish, object: nil, queue: nil) { _ in posts.value += 1 }
+        defer { center.removeObserver(token) }
+        let saved = Onboarding.isOpenAtLaunch
+        defer { Onboarding.isOpenAtLaunch = saved }
+
+        // A Help run, or a launch the flow didn't open on.
+        Onboarding.isOpenAtLaunch = false
+        Onboarding.releaseLaunchHold(notificationCenter: center)
+        XCTAssertFalse(Onboarding.isOpenAtLaunch)
+        XCTAssertEqual(posts.value, 0)
+    }
+
     // MARK: - Steps
 
     func testStepOrder() {
@@ -194,4 +229,8 @@ final class OnboardingTests: XCTestCase {
         """
         return try JSONDecoder().decode(Pollutant.self, from: Data(json.utf8))
     }
+}
+
+private final class PostCount: @unchecked Sendable {
+    var value = 0
 }

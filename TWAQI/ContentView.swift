@@ -23,7 +23,15 @@ struct ContentView: View {
 
     /// The welcome flow, opened by itself once per flow version for every
     /// user (FOX-49). Help opens it again on its own.
-    @State private var showingOnboarding = OnboardingStore().showsOnLaunch
+    @State private var showingOnboarding: Bool
+
+    /// `opensOnboarding`: whether this scene opens the welcome flow by
+    /// itself. `SceneDelegate` decides it, so it knows which scene holds the
+    /// launch-time prompts back.
+    init(router: AppRouter, opensOnboarding: Bool = OnboardingStore().showsOnLaunch) {
+        self.router = router
+        _showingOnboarding = State(initialValue: opensOnboarding)
+    }
 
     enum AppTab: Hashable {
         case main, favourites, detailsList, help
