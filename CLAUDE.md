@@ -31,8 +31,8 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - Branch `feature/fox-nn-*` off `master`; open a **draft** PR to `master` using the PR
   template. CI (unit-test subset, vulnerability checks, Claude review) runs only on
   non-draft `feature/*` PRs, `Workers` on every non-draft PR; `PR policy`, `Secret files`
-  and the `Mini LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
-- Merge only after another agent's review covers the head and the user gives the greenlight, squash only. The review is a pull request review or comment whose body starts with that agent's name and then "review" or "LGTM", e.g. `**Grok review**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The advisory Claude Code Review bot doesn't count. That turns the `Mini LGTM` status green. Don't start a review with another agent's name.
+  and the `LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
+- Merge only after another agent's review covers the head and the user gives the greenlight, squash only. The review is a pull request review or comment whose body starts with that agent's name and then "review" or "LGTM", e.g. `**Grok review**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The advisory Claude Code Review bot doesn't count. That turns the `LGTM` status green. Don't start a review with another agent's name.
 - Don't merge, bump versions, archive, or upload to TestFlight/App Store unless asked.
 - Workers deploy on merge to `master`; don't deploy them from a branch.
 

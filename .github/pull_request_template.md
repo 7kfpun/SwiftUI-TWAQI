@@ -26,7 +26,7 @@ Depends on #N
 Don't merge until every box is ticked. Merge is a **squash-merge** done after the greenlight. Details: `docs/ci-cd-guardrails.md`.
 
 - [ ] CI green: Unit tests, Vulnerability checks, PR policy, Secret files, Workers
-- [ ] **Mini LGTM**: a review from another agent that covers the current head. A pull request review or comment whose body starts with `**<Agent> review**` or `**<Agent> LGTM**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The `Mini LGTM` status turns green.
+- [ ] **LGTM**: a review from another agent that covers the current head. A pull request review or comment whose body starts with `**<Agent> review**` or `**<Agent> LGTM**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The `LGTM` status turns green.
 - [ ] **User greenlight**: the user said to merge this PR (quote or link it)
 - [ ] **Merge order**: not stacked / stacked on #N, which is merged (the `Depends on #N` line above)
 

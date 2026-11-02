@@ -97,7 +97,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 - On every PR to `master`, drafts included:
   - **PR policy** — `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, and version / build numbers / What's New consistent.
   - **Secret files** — fails on `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env`, `.dev.vars`, signing keys, force-added gitignored files or real-looking secret values in the diff.
-  - **Mini LGTM** (status) — pending until a review from another agent covers the head commit. The review is a pull request review or comment whose body starts with the agent's name and then "review" or "LGTM", e.g. `**Grok review**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The advisory Claude Code Review bot doesn't count.
+  - **LGTM** (status) — pending until a review from another agent covers the head commit. The review is a pull request review or comment whose body starts with the agent's name and then "review" or "LGTM", e.g. `**Grok review**` (Grok, Claude, Codex, Cursor, Orca, or Mini). The advisory Claude Code Review bot doesn't count.
 - On a **non-draft** PR from `feature/*` to `master`, GitHub also runs:
   - **CI / Unit tests** — the subset above. Skipped when the PR only touches docs, media, `assets/`, `fastlane/`, `web/` or `workers/`.
   - **CI / Vulnerability checks** — TruffleHog and osv-scanner, posted as a PR comment. Fails only on secrets TruffleHog **verified** as live; everything else is a warning.

@@ -35,7 +35,7 @@
           { "context": "PR policy", "integration_id": 15368 },
           { "context": "Secret files", "integration_id": 15368 },
           { "context": "Workers", "integration_id": 15368 },
-          { "context": "Mini LGTM" }
+          { "context": "LGTM" }
         ]
       }
     }

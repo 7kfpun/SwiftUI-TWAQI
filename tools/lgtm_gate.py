@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Set the `Mini LGTM` commit status on a pull request's head commit.
+"""Set the `LGTM` commit status on a pull request's head commit.
 
-    REPO=owner/name PR=123 python3 tools/mini_lgtm_gate.py [--dry-run]
+    REPO=owner/name PR=123 python3 tools/lgtm_gate.py [--dry-run]
 
 Every PR here is opened from the repository owner's account, and GitHub won't
 let that account APPROVE its own PR. Another agent's review takes that place.
-The job sets the `Mini LGTM` status on the head commit:
+The job sets the `LGTM` status on the head commit:
 
   success  the latest agent review covers the head commit, or an earlier
            commit whose net change is the same as head's (the branch was only
@@ -24,7 +24,7 @@ green by writing "Grok review". A comment has no commit of its own: it covers
 the head only when it was written at or after that commit.
 
 Needs `gh` (GH_TOKEN with statuses:write) and a full clone (fetch-depth 0).
-`python3 tools/mini_lgtm_gate.py --self-test` checks the decision table.
+`python3 tools/lgtm_gate.py --self-test` checks the decision table.
 """
 
 import hashlib
@@ -35,7 +35,7 @@ import re
 import subprocess
 import sys
 
-CONTEXT = "Mini LGTM"
+CONTEXT = "LGTM"
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
 AGENT = re.compile(r"^\W*(grok|claude|codex|cursor|orca|mini)\W+(?:review|reviewed|lgtm)\b", re.I)
 # The Claude Code Review workflow's bot: advisory, not a sign-off.

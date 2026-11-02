@@ -30,23 +30,23 @@ plus these:
 
 | Rule | Setting | Why |
 |---|---|---|
-| `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `Mini LGTM` status takes the place of an approval. It turns green on a review from another agent. |
+| `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `LGTM` status takes the place of an approval. It turns green on a review from another agent. |
 | `required_status_checks` | `strict: true` | The branch must be up to date with `master` before merging. Stacked PRs then merge in order, and each one is tested against what is actually on `master`. |
 | required: `Unit tests` | CI | Skips itself (green) for docs, media, `fastlane/`, `web/` and `workers/`-only PRs. |
 | required: `Vulnerability checks` | CI | Fails only on TruffleHog **verified** secrets. osv-scanner and unverified findings are warnings. |
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
 | required: `Workers` | Workers | One summary check on every PR, green when no Worker changed. |
-| required: `Mini LGTM` | Mini LGTM | Commit status set from another agent's review (see below). |
+| required: `LGTM` | LGTM | Commit status set from another agent's review (see below). |
 | `bypass_actors` | none | Every actor here, Orca and Mini included, uses the owner's admin account. An admin bypass would exempt the agents too, so there is none. |
 
 `integration_id: 15368` is GitHub Actions: those five checks can only be satisfied by a
-workflow. `Mini LGTM` is a commit *status*, not a check run, and it is left without an
+workflow. `LGTM` is a commit *status*, not a check run, and it is left without an
 `integration_id` on purpose. It isn't confirmed that a ruleset matches a status posted with
 `GITHUB_TOKEN` to the Actions app, and if it doesn't, every PR would be blocked. The
 trade-off is that a status posted by hand (`gh api …/statuses` with a personal token) would
 also count. Optional hardening once the ruleset is live: add `"integration_id": 15368` to
-that entry, then confirm on one PR that a real Mini LGTM still unblocks the merge. If it
+that entry, then confirm on one PR that a real agent review still unblocks the merge. If it
 doesn't, remove the id again.
 
 `Claude Code Review` (check name `review`) stays advisory, not required. It depends on an
@@ -66,8 +66,8 @@ owner's account. The options were:
    Claude, Codex, Cursor, Orca, and Mini; `**Mini LGTM**` still counts.
 
 [`lgtm.yml`](../.github/workflows/lgtm.yml) runs on every push to the PR, every
-review, and every PR comment. [`tools/mini_lgtm_gate.py`](../tools/mini_lgtm_gate.py)
-then sets the `Mini LGTM` status on the head commit:
+review, and every PR comment. [`tools/lgtm_gate.py`](../tools/lgtm_gate.py)
+then sets the `LGTM` status on the head commit:
 
 - **pending** until an agent review exists, and again when the branch changes after it.
 - **success** when the latest agent review was left on the head commit, or on an earlier
@@ -107,10 +107,10 @@ gh api repos/7kfpun/SwiftUI-TWAQI/rulesets/25890340 --jq '.rules[].type'
 Then, on the next PR:
 
 - Push a `feature/fox-nn-…` branch and open a PR. `PR policy`, `Secret files`, `Workers`
-  and `Mini LGTM` (pending) should all report.
+  and `LGTM` (pending) should all report.
 - Leave a review whose body starts with `**<Agent> review**` (Grok, Claude, Codex, Cursor,
   Orca, or Mini). The
-  status should turn green and the merge box should stop listing `Mini LGTM` as expected.
+  status should turn green and the merge box should stop listing `LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.
 
