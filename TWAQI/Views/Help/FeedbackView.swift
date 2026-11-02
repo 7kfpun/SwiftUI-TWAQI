@@ -14,6 +14,9 @@ import SwiftUI
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
 
+    /// Where the form was opened from, for the `open_feedback_form` event.
+    private let source: FeedbackSource
+
     @State private var rating: Int?
     @State private var message = ""
     @State private var otherFeedback = ""
@@ -38,7 +41,10 @@ struct FeedbackView: View {
         .navigationBarTitleDisplayMode(.inline)
         .disabled(isSending)
         .onAppear {
-            TrackingManager.logEvent(eventName: "open_feedback_form")
+            TrackingManager.logEvent(
+                eventName: "open_feedback_form",
+                parameters: source.openFormEventParameters
+            )
         }
         .alert("Feedback.sent_title", isPresented: $showingSuccess) {
             Button("OK") {
@@ -67,6 +73,12 @@ struct FeedbackView: View {
                 ? LocalizedStringKey("Feedback.error_offline")
                 : LocalizedStringKey("Feedback.error_generic"))
         }
+    }
+
+    // Explicit: the private `@State` properties would make the memberwise
+    // initialiser private.
+    init(source: FeedbackSource = .help) {
+        self.source = source
     }
 
     private var ratingSection: some View {

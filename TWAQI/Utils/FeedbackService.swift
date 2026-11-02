@@ -27,6 +27,20 @@ enum FeedbackPlatform: String, CaseIterable {
     }
 }
 
+/// Where the feedback form was opened from, sent as `source` on the
+/// `open_feedback_form` event so the entry points can be compared (FOX-44).
+enum FeedbackSource: String {
+    /// Help → Feedback / Contact us (and the visionOS Help list).
+    case help
+    /// The "Send feedback" link at the foot of a station's page.
+    case stationPage = "station_page"
+
+    /// Parameters for the `open_feedback_form` analytics event.
+    var openFormEventParameters: [String: String] {
+        ["source": rawValue]
+    }
+}
+
 /// One item in the Directus `twaqi_feedback` collection. The app only ever
 /// creates items; `status` and `archived` are preset on the server.
 /// Nil fields are left out of the JSON.
