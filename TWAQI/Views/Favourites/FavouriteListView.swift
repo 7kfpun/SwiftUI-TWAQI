@@ -20,20 +20,17 @@ struct FavouriteListView: View {
     var body: some View {
         AdaptiveNavigation {
             Group {
-                if settings.savedFavouriteStations.isEmpty {
-                    EmptyStateView(
-                        icon: "heart",
-                        message: "Favourites.add_your_first_favourite_station"
-                    )
-                } else if viewModel.favouritePollutants.isEmpty {
-                    // Favourites are saved but none can be shown yet: say
-                    // why, rather than look like there are none.
-                    if viewModel.loadFailed {
-                        OfflineEmptyStateView(retry: getData)
-                    } else {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 64)
+                if settings.savedFavouriteStations.isEmpty || viewModel.favouritePollutants.isEmpty {
+                    // No list to carry the pending-clear notice: it goes
+                    // above the placeholder, so removing the last favourite
+                    // offline still says its alerts aren't off yet.
+                    VStack(spacing: 0) {
+                        if viewModel.hasPendingAlertClears {
+                            PendingAlertClearsNotice()
+                                .padding(.horizontal, 32)
+                                .padding(.top, 16)
+                        }
+                        placeholder
                     }
                 } else {
                     list
@@ -79,14 +76,7 @@ struct FavouriteListView: View {
 
             if viewModel.hasPendingAlertClears {
                 Section {
-                    Label {
-                        Text("Favourites.alerts_clear_pending_list")
-                    } icon: {
-                        Image(systemName: "bell.slash")
-                    }
-                    .font(.footnote)
-                    .foregroundColor(.orange)
-                    .accessibilityElement(children: .combine)
+                    PendingAlertClearsNotice()
                 }
             }
 
@@ -115,6 +105,24 @@ struct FavouriteListView: View {
             }
         }
         .listStyle(InsetGroupedListStyle())
+    }
+
+    /// Shown instead of the list: no favourites, or saved ones that can't
+    /// be shown yet — say why, rather than look like there are none.
+    @ViewBuilder
+    private var placeholder: some View {
+        if settings.savedFavouriteStations.isEmpty {
+            EmptyStateView(
+                icon: "heart",
+                message: "Favourites.add_your_first_favourite_station"
+            )
+        } else if viewModel.loadFailed {
+            OfflineEmptyStateView(retry: getData)
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity)
+                .padding(.top, 64)
+        }
     }
 
     @ViewBuilder
@@ -163,6 +171,21 @@ struct FavouriteListView: View {
             "label": "off",
             "stationId": stationIds.first ?? 0,
         ])
+    }
+}
+
+/// A removed station's alerts haven't reached OneSignal yet and will be
+/// tried again.
+private struct PendingAlertClearsNotice: View {
+    var body: some View {
+        Label {
+            Text("Favourites.alerts_clear_pending_list")
+        } icon: {
+            Image(systemName: "bell.slash")
+        }
+        .font(.footnote)
+        .foregroundColor(.orange)
+        .accessibilityElement(children: .combine)
     }
 }
 
