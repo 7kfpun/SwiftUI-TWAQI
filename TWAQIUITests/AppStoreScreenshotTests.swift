@@ -57,12 +57,15 @@ final class AppStoreScreenshotTests: XCTestCase {
         app = XCUIApplication()
         // NSUserDefaults' argument domain, for this launch only: `pro` hides
         // the ad banners, `onboardingCompleted` skips the welcome flow (and
-        // with it the notification prompt), the camera keys frame the whole
-        // island, the favourites are seeded without touching alerts, and the
-        // last two pick the language.
+        // with it the notification prompt), `onboardingLegacyInstall` keeps
+        // the launch-time prompt off even on a simulator with an older
+        // install, the camera keys frame the whole island, the favourites
+        // are seeded without touching alerts, and the last two pick the
+        // language.
         app.launchArguments = [
             "-pro", "YES",
             "-onboardingCompleted", "YES",
+            "-onboardingLegacyInstall", "NO",
             "-lastestMapLat", "23.7",
             "-lastestMapLon", "121.0",
             "-lastestMapZoom", zoom,
