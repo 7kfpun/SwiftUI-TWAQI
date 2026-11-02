@@ -21,6 +21,8 @@ import WidgetKit
 /// - `favouriteStationIds` — mirror of `SettingsStore.savedFavouriteStations`,
 ///   which stays the source of truth, for the medium and large widgets.
 /// - `favouriteReadings` — last readings seen for those stations.
+/// - `appLanguage` — mirror of `SettingsStore.appLanguage` (Help → Language),
+///   so the widget shows the language the app does.
 enum WidgetBridge {
     private static let homeWidgetKind = "TWAQIWidget"
 
@@ -74,6 +76,13 @@ enum WidgetBridge {
         WatchStore.cacheFavouriteReadings(
             pollutants.filter { ids.contains($0.stationId) }.map(WatchReading.init)
         )
+    }
+
+    /// Mirrors the Help language choice into the app group. Called on every
+    /// change and once at launch, for a choice made by an older build.
+    static func publish(appLanguage: AppLanguage) {
+        guard AppLanguage.mirror(appLanguage, to: AppLanguage.shared) else { return }
+        WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
     }
 
     /// The large widget lists favourites only with Pro. The phone's app group
