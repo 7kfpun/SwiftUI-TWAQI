@@ -32,8 +32,7 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
   template. CI (unit-test subset, vulnerability checks, Claude review) runs only on
   non-draft `feature/*` PRs, `Workers` on every non-draft PR; `PR policy`, `Secret files`
   and the `Mini LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
-- Merge only after a `**Mini LGTM**` review and the user's greenlight, squash only. Never
-  post a review starting with "Mini" yourself: that is Mini's sign-off.
+- Merge only after another agent's review covers the head and the user gives the greenlight, squash only. The review is a pull request review or comment whose body starts with that agent's name (Grok, Claude, Codex, Cursor, Orca, or Mini). That turns the `Mini LGTM` status green. Don't start a review with another agent's name.
 - Don't merge, bump versions, archive, or upload to TestFlight/App Store unless asked.
 - Workers deploy on merge to `master`; don't deploy them from a branch.
 

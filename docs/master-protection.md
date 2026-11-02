@@ -30,14 +30,14 @@ plus these:
 
 | Rule | Setting | Why |
 |---|---|---|
-| `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `Mini LGTM` status takes the place of an approval. |
+| `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `Mini LGTM` status takes the place of an approval. It turns green on a review from another agent. |
 | `required_status_checks` | `strict: true` | The branch must be up to date with `master` before merging. Stacked PRs then merge in order, and each one is tested against what is actually on `master`. |
 | required: `Unit tests` | CI | Skips itself (green) for docs, media, `fastlane/`, `web/` and `workers/`-only PRs. |
 | required: `Vulnerability checks` | CI | Fails only on TruffleHog **verified** secrets. osv-scanner and unverified findings are warnings. |
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
 | required: `Workers` | Workers | One summary check on every PR, green when no Worker changed. |
-| required: `Mini LGTM` | Mini LGTM | Commit status set from Mini's review (any source, see below). |
+| required: `Mini LGTM` | Mini LGTM | Commit status set from another agent's review (see below). |
 | `bypass_actors` | none | Every actor here, Orca and Mini included, uses the owner's admin account. An admin bypass would exempt the agents too, so there is none. |
 
 `integration_id: 15368` is GitHub Actions: those five checks can only be satisfied by a
@@ -60,31 +60,29 @@ owner's account. The options were:
 1. **A second approver account** (a bot or machine user with write access) whose
    APPROVE review is required. This is GitHub's native mechanism, but it needs another
    seat and its credentials on the Mini.
-2. **A status check gated on Mini's LGTM comment.** This is the chosen approach. It
-   matches what Mini already does: a PR review left as a *Comment* whose body starts with
-   `**Mini LGTM**`.
+2. **A status check gated on another agent's review.** This is the chosen approach. A
+   pull request review or comment whose body starts with the agent's name counts:
+   Grok, Claude, Codex, Cursor, Orca, or Mini (`**Mini LGTM**` still counts).
 
-[`mini-lgtm.yml`](../.github/workflows/mini-lgtm.yml) runs on every push to the PR and
-every review. [`tools/mini_lgtm_gate.py`](../tools/mini_lgtm_gate.py) then sets the
-`Mini LGTM` status on the head commit:
+[`mini-lgtm.yml`](../.github/workflows/mini-lgtm.yml) runs on every push to the PR, every
+review, and every PR comment. [`tools/mini_lgtm_gate.py`](../tools/mini_lgtm_gate.py)
+then sets the `Mini LGTM` status on the head commit:
 
-- **pending** until a Mini review exists. A Mini review is a non-dismissed review by an
-  owner, member or collaborator whose body starts with `Mini`.
-- **success** when the latest Mini review starts `Mini LGTM` and either was left on the
-  head commit, or was left on an earlier commit with the same net change. The second case
-  covers a rebase or "Update branch" with no edits of its own. Checked against the real
-  PRs: #30 and #31 were rebased after their LGTM and stay green, while a branch with new
-  commits after the LGTM goes back to pending.
-- **failure** when the latest Mini review is anything else (`**Mini** changes needed: …`).
-- Dismissing the review withdraws the LGTM.
+- **pending** until an agent review exists, and again when the branch changes after it.
+- **success** when the latest agent review was left on the head commit, or on an earlier
+  commit with the same net change. The second case covers a rebase or "Update branch"
+  with no edits of its own. A comment has no commit, so it covers the head only when it
+  was written at or after that commit.
+- Dismissing the review withdraws it. A review that asks for changes still counts: the
+  status means an agent reviewed this head, not that the agent approved it.
 
 Limits, stated plainly: Orca, Mini and the owner share one GitHub account, so the gate
-checks a convention, not an identity. Any owner, member or collaborator can post a
-"Mini LGTM" review; today the owner is the only collaborator, and anyone added later is
-trusted with that. **Orca must never post a review that starts with
-"Mini".** The gate scripts run from `master`'s copy, so a PR can't loosen its own gate,
-but a PR that edits `.github/` or `tools/` still deserves a careful read from Mini. The
-user greenlight is a human step (the PR template's checkbox), not a check.
+checks the opening words of the review, not a separate login. A bot counts when its body
+starts with an agent name. A person counts only with owner, member, or collaborator
+access. Don't start a review with another agent's name. The gate script runs from
+`master`'s copy, so a PR can't loosen its own gate, but a PR that edits `.github/` or
+`tools/` still deserves a careful read. The user greenlight is a human step (the PR
+template's checkbox), not a check.
 
 `FOX-nn` in the branch or title is enforced by the `PR policy` check, not by a ruleset
 metadata rule.
@@ -108,8 +106,8 @@ Then, on the next PR:
 
 - Push a `feature/fox-nn-…` branch and open a PR. `PR policy`, `Secret files`, `Workers`
   and `Mini LGTM` (pending) should all report.
-- Leave a `**Mini LGTM**` review. The status should turn green and the merge box should
-  stop listing `Mini LGTM` as expected.
+- Leave a review whose body starts with Grok, Claude, Codex, Cursor, Orca, or Mini. The
+  status should turn green and the merge box should stop listing `Mini LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.
 

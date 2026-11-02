@@ -1,11 +1,11 @@
 name: Mini LGTM
 
-# Turns Mini's sign-off into a commit status that branch protection can
+# Turns another agent's review into a commit status that branch protection can
 # require. PRs are opened from the owner's account, which can't APPROVE its own
-# PR, so Mini leaves a PR review as a Comment starting "Mini LGTM". The job
-# sets the `Mini LGTM` status on the head commit: pending until then, success
-# once the LGTM covers the head's changes, failure if Mini's latest review is
-# not an LGTM. See tools/mini_lgtm_gate.py and docs/master-protection.md.
+# PR. A pull request review or comment whose body starts with Grok, Claude,
+# Codex, Cursor, Orca, or Mini covers the head. The job sets the `Mini LGTM`
+# status: pending until such a review covers the head's changes. See
+# tools/mini_lgtm_gate.py and docs/master-protection.md.
 #
 # Its own job always succeeds; what protection requires is the status.
 
@@ -15,6 +15,8 @@ on:
     branches: [master]
   pull_request_review:
     types: [submitted, edited, dismissed]
+  issue_comment:
+    types: [created, edited, deleted]
 
 concurrency:
   group: mini-lgtm-${{ github.event.pull_request.number }}
@@ -26,7 +28,8 @@ permissions:
 jobs:
   gate:
     name: Mini LGTM gate
-    if: github.event.pull_request.base.ref == 'master'
+    # issue_comment events don't carry the base ref; the script skips other bases.
+    if: ${{ (github.event_name == 'issue_comment' && github.event.issue.pull_request) || (github.event_name != 'issue_comment' && github.event.pull_request.base.ref == 'master') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,14 +39,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Set the Mini LGTM status
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
           set -euo pipefail
           # master's copy when there is one, so a PR can't rewrite its own gate.
