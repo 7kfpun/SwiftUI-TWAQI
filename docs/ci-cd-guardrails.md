@@ -21,11 +21,11 @@ only when the ticket or PR names it.
 | `PR policy` | `pr-policy.yml` | every PR, drafts too | the branch isn't `feature/…`; no `FOX-nn` in the branch or title; a `Depends on #N` PR isn't merged; Fastfile `APP_VERSION`, `MARKETING_VERSION`, build numbers or What's New disagree (`tools/check_release_consistency.py`). |
 | `Secret files` | `pr-policy.yml` | every PR, drafts too | the net diff adds or changes `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env*`, `.dev.vars*`, signing keys or profiles; force-adds a gitignored file; or adds a real-looking secret value (`tools/check_secret_files.py`). Example and placeholder files pass. |
 | `Workers` | `workers.yml` | non-draft PRs | a changed Worker fails its typecheck or `wrangler deploy --dry-run`. Green when no Worker changed. |
-| `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a review from another agent covers the head. The body starts with "<Agent> review" or "<Agent> LGTM" (Grok, Claude, Codex, Cursor, Orca, or Mini); the advisory `claude[bot]` doesn't count. |
+| `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
 "CI green" for undrafting means everything except `LGTM`, which stays pending until
-another agent reviews.
+a reviewer's LGTM covers the head.
 
 Undraft race: `ci.yml` and `claude-code-review.yml` cancel superseded runs per PR, and
 their concurrency key includes whether the PR is a draft. A push and "Ready for review"

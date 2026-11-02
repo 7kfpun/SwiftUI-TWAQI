@@ -50,7 +50,7 @@ that entry, then confirm on one PR that a real agent review still unblocks the m
 doesn't, remove the id again.
 
 `Claude Code Review` (check name `review`) stays advisory, not required. It depends on an
-external token and quota, and its findings go into Mini's LGTM anyway.
+external token and quota, and its findings go into the reviewer's verdict anyway.
 
 ## The LGTM approach
 
@@ -60,28 +60,36 @@ owner's account. The options were:
 1. **A second approver account** (a bot or machine user with write access) whose
    APPROVE review is required. This is GitHub's native mechanism, but it needs another
    seat and its credentials on the Mini.
-2. **A status check gated on another agent's review.** This is the chosen approach. A
-   pull request review or comment counts when its body starts with the agent's name and
-   then "review" or "LGTM" (`**Grok review**`, `**Codex LGTM**`). The agents are Grok,
-   Claude, Codex, Cursor, Orca, and Mini; `**Mini LGTM**` still counts.
+2. **A status check gated on a reviewer's LGTM.** This is the chosen approach. A pull
+   request review or comment counts when its first line is "LGTM", optionally after one
+   word naming the reviewer, with nothing after it but punctuation or a `(head <sha>)`
+   note (`**Grok LGTM**`, `**Copilot LGTM** (head abc1234)`, `LGTM`). "LGTM?",
+   "LGTM, but …", and a negating word in the name slot ("Never LGTM", "Almost LGTM")
+   don't count. The gate keeps no list of agents: reviewers come and go, and any name works.
+   `**Grok review**` without a verdict doesn't count either.
 
 [`lgtm.yml`](../.github/workflows/lgtm.yml) runs on every push to the PR, every
 review, and every PR comment. [`tools/lgtm_gate.py`](../tools/lgtm_gate.py)
 then sets the `LGTM` status on the head commit:
 
-- **pending** until an agent review exists, and again when the branch changes after it.
-- **success** when the latest agent review was left on the head commit, or on an earlier
+- **pending** until an LGTM exists, when a later "changes needed" overrides it, and
+  again when the branch changes after it.
+- **success** when the latest verdict is an LGTM left on the head commit, or on an earlier
   commit with the same net change. The second case covers a rebase or "Update branch"
   with no edits of its own. A comment has no commit, so it covers the head only when it
   was written at or after that commit.
-- Dismissing the review withdraws it. A review that asks for changes still counts: the
-  status means an agent reviewed this head, not that the agent approved it.
+- Dismissing the review withdraws it. The latest verdict wins: a review or comment whose
+  first line is "changes needed" or "changes requested" (optionally after a name, e.g.
+  `**Codex — changes needed**`), or a review in GitHub's `CHANGES_REQUESTED` state, sets
+  the status back to pending until a newer LGTM. The status means a reviewer approved
+  this head.
 
 Limits, stated plainly: Orca, Mini and the owner share one GitHub account, so the gate
-checks the opening words of the review, not a separate login. A bot counts when its body
-opens that way, except `claude[bot]`: the Claude Code Review workflow is advisory, and its
+checks the review's first line, not a separate login. A bot counts when its first line
+is a verdict, except `claude[bot]`: the Claude Code Review workflow is advisory, and its
 progress comment appears before it has reviewed anything. A person counts only with
-owner, member, or collaborator access. Don't start a review with another agent's name. The gate script runs from
+owner, member, or collaborator access. Don't start a comment with "LGTM" unless you
+reviewed the head. The gate script runs from
 `master`'s copy, so a PR can't loosen its own gate, but a PR that edits `.github/` or
 `tools/` still deserves a careful read. The user greenlight is a human step (the PR
 template's checkbox), not a check.
@@ -108,8 +116,7 @@ Then, on the next PR:
 
 - Push a `feature/fox-nn-…` branch and open a PR. `PR policy`, `Secret files`, `Workers`
   and `LGTM` (pending) should all report.
-- Leave a review whose body starts with `**<Agent> review**` (Grok, Claude, Codex, Cursor,
-  Orca, or Mini). The
+- Leave a review whose first line is `**<Name> LGTM**`. The
   status should turn green and the merge box should stop listing `LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.

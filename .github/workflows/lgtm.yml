@@ -1,12 +1,11 @@
 name: LGTM
 
-# Turns another agent's review into a commit status that branch protection can
+# Turns a reviewer's LGTM into a commit status that branch protection can
 # require. PRs are opened from the owner's account, which can't APPROVE its own
-# PR. A pull request review or comment whose body starts with "<Agent> review"
-# or "<Agent> LGTM" (Grok, Claude, Codex, Cursor, Orca, or Mini) covers the
-# head. The job sets the `LGTM`
-# status: pending until such a review covers the head's changes. See
-# tools/lgtm_gate.py and docs/master-protection.md.
+# PR. A pull request review or comment whose first line is "<Name> LGTM" (any
+# reviewer name, or none) covers the head; a later "changes needed" cancels it.
+# The job sets the `LGTM` status: pending until an LGTM covers the head's
+# changes. See tools/lgtm_gate.py and docs/master-protection.md.
 #
 # Its own job always succeeds; what protection requires is the status.
 
