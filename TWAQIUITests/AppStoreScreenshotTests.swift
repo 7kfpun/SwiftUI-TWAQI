@@ -147,28 +147,97 @@ final class AppStoreScreenshotTests: XCTestCase {
     }
 
     /// Drags `element` up to just under the floating close and share
-    /// buttons, slowly so the scroll view doesn't coast past it.
+    /// buttons, slowly so the scroll view doesn't coast past it, then makes
+    /// sure no text is left under those buttons.
     ///
     /// Since FOX-25 the alerts card and health advice sit above the
     /// pollutants, so they start well below the fold. Each drag starts in
     /// the scroll view's right gutter, clear of the switches and the cam
-    /// scrubber, and it keeps going until the element is at the top or the
-    /// page stops moving: in the tall iPad panel the page bottoms out with
-    /// the pollutants mid-screen, and the chart still fits under them.
+    /// scrubber. The page can bottom out before `element` reaches the
+    /// buttons (in the iPad panel it stops with the pollutants mid-screen),
+    /// which can leave a line of text under them; the page is then pulled
+    /// back down until that text clears them. The chart still fits under
+    /// the pollutants either way.
     private func scrollToTop(_ element: XCUIElement) {
         XCTAssertTrue(element.waitForExistence(timeout: 10), "Nothing to scroll to")
         let scrollView = app.scrollViews.containing(NSPredicate(format: "label == %@", element.label)).firstMatch
-        let window = app.windows.firstMatch.frame
-        let target = window.minY + window.height * 0.17
+        let overlays = floatingControls(over: scrollView)
+        let floor = overlays.map(\.maxY).max() ?? scrollView.frame.minY
+        let gap: CGFloat = 16
+
+        // Up: the pollutants to just under the buttons, or as far as the
+        // page goes.
         for _ in 0..<8 {
             let y = element.frame.minY
-            guard y > target + 20 else { return }
-            let distance = min(y - target, window.height * 0.5)
-            let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: 0.8))
-            let end = start.withOffset(CGVector(dx: 0, dy: -distance))
+            guard y > floor + gap + 8 else { break }
+            drag(scrollView, by: -min(y - floor - gap, app.windows.firstMatch.frame.height * 0.5))
+            guard abs(element.frame.minY - y) > 2 else { break }
+        }
+
+        // Down: until no text is under a button. Each pull moves the lowest
+        // covered text just below the button over it; text further up can
+        // then slide under, so check again.
+        for _ in 0..<6 {
+            guard let covered = textUnder(overlays, in: scrollView) else { return }
+            drag(scrollView, by: covered.overlay.maxY + gap - covered.text.minY)
+        }
+        if let covered = textUnder(overlays, in: scrollView) {
+            XCTFail("\"\(covered.label)\" at \(covered.text) is still under a button at \(covered.overlay)")
+        }
+    }
+
+    /// What floats over the top of the station page: the close, share and
+    /// favourite buttons, and in a wide window the tab bar.
+    private func floatingControls(over scrollView: XCUIElement) -> [CGRect] {
+        let page = scrollView.frame
+        let named = app.buttons.matching(NSPredicate(format: "label IN %@", ["Close", "關閉", "Share", "分享"]))
+        let controls = app.navigationBars.buttons.allElementsBoundByIndex
+            + named.allElementsBoundByIndex
+            + app.tabBars.allElementsBoundByIndex
+        let frames = controls
+            .map(\.frame)
+            // Small controls near the top, not a container that spans the window.
+            .filter { !$0.isEmpty && $0.intersects(page) && $0.minY < page.midY && $0.height < page.height / 8 }
+        XCTAssertFalse(frames.isEmpty, "No close or share button over the station page")
+        return frames
+    }
+
+    /// The lowest piece of text in `scrollView` that one of `overlays`
+    /// covers, if any, with the overlay that covers it.
+    private func textUnder(_ overlays: [CGRect], in scrollView: XCUIElement)
+        -> (label: String, text: CGRect, overlay: CGRect)? {
+        guard let root = try? scrollView.snapshot() else { return nil }
+        var lowest: (label: String, text: CGRect, overlay: CGRect)?
+        var pending = root.children
+        while let node = pending.popLast() {
+            pending.append(contentsOf: node.children)
+            // Leaves with a label are what a reader sees as text: labels,
+            // switches with their caption, combined rows. The cam frame and
+            // the scrubber aren't text, so they may sit under the buttons.
+            guard node.children.isEmpty, !node.label.isEmpty,
+                  node.elementType != .image, node.elementType != .slider else { continue }
+            let text = node.frame
+            // The glass circle round a toolbar glyph reaches ~8 pt past
+            // the frame XCUITest reports for the button.
+            guard let overlay = overlays.first(where: { $0.insetBy(dx: -8, dy: -8).intersects(text) }) else { continue }
+            if text.minY > lowest?.text.minY ?? -.greatestFiniteMagnitude {
+                lowest = (node.label, text, overlay)
+            }
+        }
+        return lowest
+    }
+
+    /// Moves the page by `distance` points (negative is up), slowly and with
+    /// a hold at the end so it doesn't coast. A drag loses its first few
+    /// points to the touch slop, so a short move overshoots and comes back
+    /// by the same detour; the two losses cancel.
+    private func drag(_ scrollView: XCUIElement, by distance: CGFloat) {
+        let detour: CGFloat = abs(distance) < 60 ? (distance < 0 ? -60 : 60) : 0
+        for step in detour == 0 ? [distance] : [distance + detour, -detour] {
+            let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.97, dy: step < 0 ? 0.8 : 0.3))
+            let end = start.withOffset(CGVector(dx: 0, dy: step))
             start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.6)
             settle(seconds: 1)
-            guard abs(element.frame.minY - y) > 2 else { return }
         }
     }
 
