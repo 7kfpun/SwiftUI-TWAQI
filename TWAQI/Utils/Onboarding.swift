@@ -94,10 +94,13 @@ struct OnboardingStore {
     var promptsForPushAtLaunch: Bool { isLegacyInstall && !showsOnLaunch }
 
     /// The flow opened by itself: it won't again until the version is raised.
-    /// Help's manual runs don't call this.
-    func markShown() {
-        guard shownVersion < currentVersion else { return }
+    /// Help's manual runs don't call this. Returns whether this call recorded
+    /// it, so a repeated `onAppear` is counted once.
+    @discardableResult
+    func markShown() -> Bool {
+        guard shownVersion < currentVersion else { return false }
         defaults.set(currentVersion, forKey: Keys.shownVersion)
+        return true
     }
 
     /// Run once per launch, before this launch is counted anywhere.

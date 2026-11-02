@@ -89,6 +89,16 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(store.showsOnLaunch)
     }
 
+    func testFox34InstallThatQuitMidFlowSeesItOnce() {
+        // A FOX-34 fresh install killed before Done or Skip: nothing marked.
+        defaults.set(true, forKey: "onboardingInstallChecked")
+
+        let store = OnboardingStore(defaults: defaults)
+        store.prepareForLaunch(hasLaunchedBefore: true)
+        XCTAssertTrue(store.showsOnLaunch)
+        XCTAssertFalse(store.isLegacyInstall)
+    }
+
     func testFlowFinishedOnFox34BuildCountsAsShown() {
         // A FOX-34 fresh install that finished or skipped the flow.
         defaults.set(true, forKey: "onboardingInstallChecked")
@@ -109,6 +119,13 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(reworked.showsOnLaunch)
         reworked.markShown()
         XCTAssertFalse(OnboardingStore(defaults: defaults, currentVersion: 2).showsOnLaunch)
+    }
+
+    func testMarkShownRecordsOnlyTheFirstTime() {
+        let store = OnboardingStore(defaults: defaults)
+        XCTAssertTrue(store.markShown())
+        // A second `onAppear` for the same cover.
+        XCTAssertFalse(store.markShown())
     }
 
     func testMarkShownNeverLowersTheVersion() {

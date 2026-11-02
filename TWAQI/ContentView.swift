@@ -47,10 +47,12 @@ struct ContentView: View {
                 // Shown counts from the moment it opens, so quitting or
                 // skipping it doesn't bring it back on the next launch.
                 .onAppear {
-                    OnboardingStore().markShown()
-                    TrackingManager.logEvent(eventName: "onboarding_shown", parameters: [
-                        "label": "launch",
-                    ])
+                    // `onAppear` can run again for the same cover; log once.
+                    if OnboardingStore().markShown() {
+                        TrackingManager.logEvent(eventName: "onboarding_shown", parameters: [
+                            "label": "launch",
+                        ])
+                    }
                 }
         }
         // On the root rather than a tab, so it opens whichever tab is showing.
