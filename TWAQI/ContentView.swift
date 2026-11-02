@@ -9,6 +9,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    /// Screens opened by URL, such as Pro from the locked widget.
+    @ObservedObject var router: AppRouter
+
     /// The language chosen under Help. Watched here so a change applies at
     /// once: SwiftUI `Text("Key")` follows `\.locale`, and rebuilding the
     /// tabs refreshes text produced in code (`.localized`, the UIKit map
@@ -34,6 +37,11 @@ struct ContentView: View {
         .environment(\.locale, language.locale())
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
+        // On the root rather than a tab, so it opens whichever tab is showing.
+        .sheet(isPresented: $router.showingPro) {
+            ProView()
+                .environment(\.locale, language.locale())
+        }
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.
@@ -101,7 +109,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(["zh-Hant", "en"], id: \.self) { localIdentifier in
-            ContentView()
+            ContentView(router: AppRouter())
                 .environmentObject(SettingsStore())
                 .environment(\.locale, .init(identifier: localIdentifier))
                 .previewDisplayName(localIdentifier)

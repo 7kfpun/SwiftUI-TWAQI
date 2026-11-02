@@ -55,4 +55,10 @@ struct TrackingManager {
         // Google Analytics log event.
         Analytics.logEvent(eventName, parameters: parameters)
     }
+
+    /// The Pro screen opened, and from where. Only the widget link calls it
+    /// so far; the Pro funnel (FOX-44) builds on this event.
+    static func logProScreenOpened(source: ProScreenSource) {
+        logEvent(eventName: "pro_screen_opened", parameters: ["source": source.rawValue])
+    }
 }
