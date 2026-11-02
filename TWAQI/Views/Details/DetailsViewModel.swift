@@ -44,7 +44,10 @@ class DetailsViewModel: ObservableObject {
 
     /// Favourited before the station record — which says which OneSignal tag
     /// the alerts go under — had loaded: switched on once it has.
-    private var enablesAlertsWhenStationLoads = false
+    private var deferredEnable = DeferredAlertsEnable()
+
+    /// No answer yet to the latest request for the station record.
+    private var isAwaitingStation = true
 
     private var alertsObserver: NSObjectProtocol?
 
@@ -108,17 +111,23 @@ class DetailsViewModel: ObservableObject {
         let generation = self.generation
         self.answers = []
         self.loadFailed = false
+        self.isAwaitingStation = true
 
         APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
+            // An answer from an older pair while the latest is still on the
+            // wire says nothing about whether the record will load.
+            let isLatest = generation == self.generation
+            if isLatest {
+                self.isAwaitingStation = false
+            }
             switch result {
             case .success(let result):
                 self.station = result["station"] as? Station
-                self.stationLoadFailed = self.station == nil
-                self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
-                if self.enablesAlertsWhenStationLoads, self.station != nil {
-                    self.enablesAlertsWhenStationLoads = false
-                    self.enableAlertsForNewFavourite()
+                if self.station != nil || isLatest {
+                    self.stationLoadFailed = self.station == nil
                 }
+                self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
+                self.stationAnswered(isLatest: isLatest)
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
@@ -126,13 +135,10 @@ class DetailsViewModel: ObservableObject {
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
                 print(error.localizedDescription)
-                self.stationLoadFailed = self.station == nil
-                // Favourited while this was on the wire: say the alerts
-                // couldn't be switched on, rather than wait in silence.
-                if self.enablesAlertsWhenStationLoads, self.station == nil {
-                    self.enablesAlertsWhenStationLoads = false
-                    self.favouriteAlertsHint = .notChanged
+                if isLatest {
+                    self.stationLoadFailed = self.station == nil
                 }
+                self.stationAnswered(isLatest: isLatest)
                 self.requestFinished(failed: true, generation: generation)
             }
         }
@@ -162,6 +168,19 @@ class DetailsViewModel: ObservableObject {
                 self.isShowingLastGood = self.pollutant != nil
                 self.requestFinished(failed: true, generation: generation)
             }
+        }
+    }
+
+    /// A favourite waiting on the station record: switched on now that it
+    /// has loaded, or the reader is told the alerts stayed off.
+    private func stationAnswered(isLatest: Bool) {
+        switch deferredEnable.stationAnswered(hasStation: station != nil, isLatest: isLatest) {
+        case .enable:
+            enableAlertsForNewFavourite()
+        case .tellNotChanged:
+            favouriteAlertsHint = .notChanged
+        case .nothing:
+            break
         }
     }
 
@@ -199,7 +218,7 @@ class DetailsViewModel: ObservableObject {
         if !codes.isEmpty {
             clearAlerts(tagCodes: codes)
         }
-        enablesAlertsWhenStationLoads = false
+        deferredEnable.cancel()
         settings.savedFavouriteStations.removeAll { $0 == stationId }
         logFavourite(on: false)
     }
@@ -210,7 +229,11 @@ class DetailsViewModel: ObservableObject {
     /// reader is told why the alerts stayed off.
     private func enableAlertsForNewFavourite() {
         guard let station = station else {
-            enablesAlertsWhenStationLoads = true
+            // Offline, say: the record already failed. Said now rather than
+            // left silent; Try Again on this visit still switches them on.
+            if deferredEnable.favourited(isAwaitingStation: isAwaitingStation) == .tellNotChanged {
+                favouriteAlertsHint = .notChanged
+            }
             return
         }
         let stationId = stationId
@@ -337,6 +360,53 @@ class DetailsViewModel: ObservableObject {
     /// Most recent reading, preferring live current conditions over history.
     var latestPublishTime: String? {
         pollutant?.publishTime ?? historicalPollutants.last?.publishTime
+    }
+}
+
+/// A favourite made before the station record — which says which OneSignal
+/// tag its alerts go under — had loaded. Its alerts are switched on once a
+/// station request brings the record. If the latest request has answered
+/// without it, the reader is told the alerts stayed off (once), and the wait
+/// goes on, so Try Again on the same visit can still switch them on.
+struct DeferredAlertsEnable: Equatable {
+    enum Step: Equatable {
+        case enable
+        case tellNotChanged
+        case nothing
+    }
+
+    private(set) var isWaiting = false
+    private var hasTold = false
+
+    /// Favourited with no station record. `isAwaitingStation`: the latest
+    /// request for it hasn't answered yet.
+    mutating func favourited(isAwaitingStation: Bool) -> Step {
+        isWaiting = true
+        hasTold = false
+        return isAwaitingStation ? .nothing : tell()
+    }
+
+    /// A request for the station record answered. `isLatest`: from the
+    /// latest pair, so nothing else for the record is on the wire.
+    mutating func stationAnswered(hasStation: Bool, isLatest: Bool) -> Step {
+        guard isWaiting else { return .nothing }
+        if hasStation {
+            isWaiting = false
+            return .enable
+        }
+        return isLatest ? tell() : .nothing
+    }
+
+    /// Unfavourited: nothing to switch on.
+    mutating func cancel() {
+        isWaiting = false
+        hasTold = false
+    }
+
+    private mutating func tell() -> Step {
+        guard !hasTold else { return .nothing }
+        hasTold = true
+        return .tellNotChanged
     }
 }
 

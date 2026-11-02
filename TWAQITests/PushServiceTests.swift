@@ -658,6 +658,42 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: false, exactTagCode: "Songshan", candidates: ["Songshan", "126"]), [])
     }
 
+    func testFavouriteAfterTheStationRecordFailedSaysSoAndTryAgainStillEnables() {
+        var deferred = DeferredAlertsEnable()
+        // Opened offline: the latest request already failed, then the heart.
+        XCTAssertEqual(deferred.favourited(isAwaitingStation: false), .tellNotChanged)
+        XCTAssertTrue(deferred.isWaiting)
+        // Try Again fails too: told once already.
+        XCTAssertEqual(deferred.stationAnswered(hasStation: false, isLatest: true), .nothing)
+        // Try Again loads the record: alerts go on.
+        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .enable)
+        XCTAssertFalse(deferred.isWaiting)
+        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .nothing)
+    }
+
+    func testFavouriteWhileTheStationRecordIsOnTheWireWaitsForTheLatestAnswer() {
+        var deferred = DeferredAlertsEnable()
+        XCTAssertEqual(deferred.favourited(isAwaitingStation: true), .nothing)
+        // A failure from an older pair while the latest is still on the wire.
+        XCTAssertEqual(deferred.stationAnswered(hasStation: false, isLatest: false), .nothing)
+        XCTAssertTrue(deferred.isWaiting)
+        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .enable)
+
+        // The latest failing does say so.
+        var failed = DeferredAlertsEnable()
+        _ = failed.favourited(isAwaitingStation: true)
+        XCTAssertEqual(failed.stationAnswered(hasStation: false, isLatest: true), .tellNotChanged)
+    }
+
+    func testUnfavouriteStopsAWaitingEnable() {
+        var deferred = DeferredAlertsEnable()
+        _ = deferred.favourited(isAwaitingStation: true)
+        deferred.cancel()
+        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .nothing)
+        var neverFavourited = DeferredAlertsEnable()
+        XCTAssertEqual(neverFavourited.stationAnswered(hasStation: false, isLatest: true), .nothing)
+    }
+
     func testTagCodesToClearWhenStateIsKnownOrNot() {
         let candidates = ["Songshan", "126"]
         XCTAssertEqual(FavouriteAlerts.tagCodesToClear(alertsOn: false, knownTagCode: "Songshan", candidates: candidates), [])
