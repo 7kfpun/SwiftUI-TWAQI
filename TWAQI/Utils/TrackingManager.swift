@@ -34,6 +34,21 @@ struct TrackingManager {
     /// Call once, right after `FirebaseApp.configure()`.
     static func applyExclusionAtLaunch() {
         setFirebaseCollection(enabled: !isExcludedThisLaunch)
+        #if DEBUG
+        // Xcode runs report nothing, except to Firebase DebugView when the
+        // scheme passes `-FIRDebugEnabled`: Firebase keeps debug-mode events
+        // out of the production reports, so new events can be checked there.
+        if FirebaseApp.app() != nil,
+           debugViewCollectionEnabled(arguments: ProcessInfo.processInfo.arguments, isExcluded: isExcluded) {
+            Analytics.setAnalyticsCollectionEnabled(true)
+        }
+        #endif
+    }
+
+    /// Whether a DEBUG launch sends Analytics events to DebugView: only with
+    /// Firebase's debug flag, and never on a device excluded from reporting.
+    static func debugViewCollectionEnabled(arguments: [String], isExcluded: Bool) -> Bool {
+        !isExcluded && arguments.contains("-FIRDebugEnabled")
     }
 
     /// Persists the choice and stops or resumes Firebase immediately. Bugsnag
@@ -49,16 +64,19 @@ struct TrackingManager {
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(enabled)
     }
 
-    static func logEvent(eventName: String, parameters: [String: Any] = [:]) {
-        print("LogEvent", eventName, parameters)
+    /// Logs `event`. Names come from `AnalyticsEvent` only, so they stay
+    /// consistent; with collection off (see above) Firebase drops it.
+    static func logEvent(_ event: AnalyticsEvent, parameters: [String: Any] = [:]) {
+        #if DEBUG
+        print("LogEvent", event.rawValue, parameters)
+        #endif
 
-        // Google Analytics log event.
-        Analytics.logEvent(eventName, parameters: parameters)
+        Analytics.logEvent(event.rawValue, parameters: parameters)
     }
 
-    /// The Pro screen opened, and from where. Only the widget link calls it
-    /// so far; the Pro funnel (FOX-44) builds on this event.
+    /// The Pro screen opened, and from where: the first step of the Pro
+    /// funnel. `ProView` logs it once per presentation.
     static func logProScreenOpened(source: ProScreenSource) {
-        logEvent(eventName: "pro_screen_opened", parameters: ["source": source.rawValue])
+        logEvent(.proScreenOpened, parameters: ["source": source.rawValue])
     }
 }

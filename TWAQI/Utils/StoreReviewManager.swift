@@ -49,7 +49,7 @@ struct StoreReviewHelper {
             return
         }
 
-        TrackingManager.logEvent(eventName: "review_requested", parameters: ["app_open_count": appOpenCount])
+        TrackingManager.logEvent(.reviewRequested, parameters: ["app_open_count": appOpenCount])
         StoreReviewHelper().requestReview()
     }
 

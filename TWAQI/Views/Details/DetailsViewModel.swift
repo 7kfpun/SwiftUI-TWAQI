@@ -312,7 +312,7 @@ class DetailsViewModel: ObservableObject {
     }
 
     private func logFavourite(on: Bool) {
-        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+        TrackingManager.logEvent(.favouriteStationSaved, parameters: [
             "label": on ? "on" : "off",
             "stationId": stationId,
         ])

@@ -12,5 +12,5 @@ import Foundation
 /// compile here. The iOS one reports to Firebase Analytics, which this target
 /// doesn't link; events are dropped.
 enum TrackingManager {
-    static func logEvent(eventName: String, parameters: [String: Any] = [:]) {}
+    static func logEvent(_ event: AnalyticsEvent, parameters: [String: Any] = [:]) {}
 }

@@ -144,7 +144,7 @@ enum FavouriteAlerts {
         pending[stationId] = codes
         savePendingClears(pending, defaults: services.defaults)
 
-        TrackingManager.logEvent(eventName: "station_alerts_cleared_by_unfavourite", parameters: [
+        TrackingManager.logEvent(.stationAlertsClearedByUnfavourite, parameters: [
             "stationId": stationId,
         ])
         sendClear(stationId: stationId, tagCodes: codes, services: services, completion: completion)
@@ -542,7 +542,7 @@ enum FavouriteAlerts {
         case .notificationsDenied: name = "notifications_denied"
         case .notChanged: name = "not_changed"
         }
-        TrackingManager.logEvent(eventName: "station_alerts_on_favourite", parameters: [
+        TrackingManager.logEvent(.stationAlertsOnFavourite, parameters: [
             "outcome": name,
             "stationId": stationId,
         ])

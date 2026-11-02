@@ -12,9 +12,10 @@ import UIKit
 
 struct GADBannerViewController: UIViewControllerRepresentable {
     var adUnitID: String = "ca-app-pub-3940256099942544/2934735716"  // Testing id
+    var placement: AdPlacement
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(placement: placement)
     }
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -36,12 +37,22 @@ struct GADBannerViewController: UIViewControllerRepresentable {
     /// Without a delegate an ad that never arrives is completely silent — no log,
     /// no failure, just empty space. These logs make that diagnosable.
     class Coordinator: NSObject, BannerViewDelegate {
+        let placement: AdPlacement
+
+        init(placement: AdPlacement) {
+            self.placement = placement
+        }
+
         func bannerViewDidReceiveAd(_ bannerView: BannerView) {
             print("AdMob: received ad for \(bannerView.adUnitID ?? "?")")
         }
 
         func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
             print("AdMob: FAILED for \(bannerView.adUnitID ?? "?") — \(error.localizedDescription)")
+        }
+
+        func bannerViewDidRecordClick(_ bannerView: BannerView) {
+            TrackingManager.logEvent(.adBannerTapped, parameters: ["placement": placement.rawValue])
         }
     }
 }

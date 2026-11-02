@@ -78,10 +78,17 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
-        TrackingManager.logEvent(eventName: "set_wind_mode", parameters: ["label": self.isWindMode ? "on" : "off"])
+        TrackingManager.logEvent(.setWindMode, parameters: ["label": self.isWindMode ? "on" : "off"])
     }
 
-    @objc func goToMyLocation(isSkipLog: Bool = false) {
+    /// The button's action. `goToMyLocation(isSkipLog:)` can't be the
+    /// selector itself: UIKit would pass the button as `isSkipLog`, which
+    /// then read as an arbitrary Bool and dropped the event at random.
+    @objc private func myLocationTapped() {
+        goToMyLocation()
+    }
+
+    func goToMyLocation(isSkipLog: Bool = false) {
         if let mylocation = self.mapView.myLocation {
             print("User's location: \(mylocation)")
             let mylocationCamera = GMSCameraPosition.camera(
@@ -94,7 +101,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self.mapView.animate(to: mylocationCamera)
 
             if !isSkipLog {
-                TrackingManager.logEvent(eventName: "move_to_current_location")
+                TrackingManager.logEvent(.moveToCurrentLocation)
             }
         } else {
             print("User's location is unknown")
@@ -112,7 +119,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             zoom: zoom
         )
         self.mapView.animate(to: defaultCamera)
-        TrackingManager.logEvent(eventName: "move_to_default_location")
+        TrackingManager.logEvent(.moveToDefaultLocation)
     }
 
     @objc func changeIndex(sender: UIButton?) {
@@ -123,7 +130,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
             indexSelectorView.setSelected(tag: tag)
 
-            TrackingManager.logEvent(eventName: "select_index", parameters: ["label": airIndexTypes.rawValue])
+            TrackingManager.logEvent(.selectIndex, parameters: ["label": airIndexTypes.rawValue])
         }
     }
 
@@ -420,7 +427,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.width.equalTo(60)
             make.height.equalTo(60)
         }
-        myLocationButton.button.addTarget(self, action: #selector(goToMyLocation), for: .touchUpInside)
+        myLocationButton.button.addTarget(self, action: #selector(myLocationTapped), for: .touchUpInside)
 
         // MARK: Default Location Button
         defaultLocationButton = DefaultLocationButton()
@@ -569,7 +576,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             timelineHoursAgo = MapHistoryStore.hours
         }
         timelineView.isPlaying = true
-        TrackingManager.logEvent(eventName: "map_timeline_play")
+        TrackingManager.logEvent(.mapTimelinePlay)
 
         playTimer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
             guard let self else { return }
@@ -720,9 +727,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         super.viewWillTransition(to: size, with: coordinator)
         self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
 
-        TrackingManager.logEvent(eventName: "change_device_orientation", parameters: [
-            "label": UIDevice.current.orientation.isLandscape ? "landscape" : "portrait",
-        ])
+        // From the sizes rather than `UIDevice.orientation`, which is still
+        // the old one here (or face up), and only when the shape flips: a
+        // window resized on iPad isn't a rotation.
+        let isLandscape = size.width > size.height
+        if isLandscape != (view.bounds.width > view.bounds.height) {
+            TrackingManager.logEvent(.changeDeviceOrientation, parameters: [
+                "label": isLandscape ? "landscape" : "portrait",
+            ])
+        }
     }
 
     // MARK: GMSMapViewDelegate
@@ -742,7 +755,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         let pollutant = stationMarker.pollutant
         print("Marker tapped", pollutant.stationId)
 
-        TrackingManager.logEvent(eventName: "check_main_details", parameters: [
+        TrackingManager.logEvent(.checkMainDetails, parameters: [
             "name": pollutant.name,
             "nameLocal": pollutant.nameLocal,
             "stationId": pollutant.stationId,

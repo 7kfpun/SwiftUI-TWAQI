@@ -73,6 +73,22 @@ enum Onboarding {
         var next: Step? { Step(rawValue: rawValue + 1) }
         var previous: Step? { Step(rawValue: rawValue - 1) }
         var isLast: Bool { next == nil }
+
+        /// The step as `onboarding_step_viewed` names it.
+        var analyticsName: String {
+            switch self {
+            case .welcome: return "welcome"
+            case .location: return "location"
+            case .closestStation: return "closest_station"
+            case .notifications: return "notifications"
+            case .doNotDisturb: return "do_not_disturb"
+            case .dataSource: return "data_source"
+            case .premium: return "premium"
+            }
+        }
+
+        /// 1-based, as the dots and `onboarding_skipped`'s step_<n> count.
+        var analyticsIndex: Int { rawValue + 1 }
     }
 }
 

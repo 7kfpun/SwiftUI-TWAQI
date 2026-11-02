@@ -46,11 +46,11 @@ struct HelpView: View {
             }
             .navigationBarTitle("Help.help")
             .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!, placement: .help)
             }
         }
         .sheet(isPresented: $showingPro) {
-            ProView()
+            ProView(source: .helpRow)
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
             // Help's own quiet-hours model, so its switch shows what the flow set.
@@ -64,7 +64,7 @@ struct HelpView: View {
         Section(header: Label("Help.welcome", systemImage: "hand.wave")) {
             Button {
                 showingOnboarding = true
-                TrackingManager.logEvent(eventName: "onboarding_open_from_help")
+                TrackingManager.logEvent(.onboardingOpenFromHelp)
             } label: {
                 Text("Help.show_welcome_guide")
             }
