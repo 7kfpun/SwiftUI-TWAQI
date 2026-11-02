@@ -62,6 +62,9 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         return true
     }
 
+    // True for the watch widget too. It still gets `.system`, since only the
+    // phone app writes the mirror and the watch's app group is its own
+    // container. Revisit if WatchConnectivity ever copies these defaults.
     private static let isAppExtension = Bundle.main.bundlePath.hasSuffix(".appex")
 
     /// The locale this choice resolves to; `.system` gives `system` back.
