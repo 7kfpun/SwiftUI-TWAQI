@@ -89,10 +89,14 @@ jobs:
               ;;
           esac
           # Keep folders that still exist as packages; a deleted Worker has
-          # nothing to deploy.
+          # nothing to deploy. An empty list is success, so the test stays
+          # inside `if`: a failing `[ -f ]` under `pipefail` used to fail
+          # this job whenever no Worker changed.
           workers="$(
-            printf '%s\n' $names | sort -u | while read -r name; do
-              [ -n "$name" ] && [ -f "workers/$name/package.json" ] && echo "$name"
+            printf '%s\n' ${names:-} | sort -u | while read -r name; do
+              if [ -n "$name" ] && [ -f "workers/$name/package.json" ]; then
+                echo "$name"
+              fi
             done | jq -R . | jq -cs .
           )"
           echo "Workers: $workers"
