@@ -29,7 +29,10 @@ contents are not.
 `deep_link`. Every step of the funnel carries it:
 
 1. `pro_screen_opened`: logged once each time the Pro screen is shown.
-2. `pro_plan_selected`: `plan` is `1m`, `6m`, `12m` or `lifetime`.
+2. `pro_plan_selected`: `plan` is `1m`, `6m`, `12m` or `lifetime`. Use this
+   as step 2, not `user_premium_buy_product_started`. Both fire on the same
+   tap with the same parameters, and the older one is kept only so its
+   history carries on. Putting both in one funnel counts each tap twice.
 3. `user_premium_buy_product_done`. Alongside it, the purchase also logs
    `user_premium_buy_product_not_completed` (cancelled, or pending Ask to Buy)
    or `user_premium_buy_product_failed`.
@@ -48,12 +51,14 @@ station's alerts) and `ad_banner_tapped` (`placement`: `main`, `details`,
 - `open_feedback_form` (`source`), then `submit_feedback` (`rating`,
   `platform`, `interview_interest`) or `submit_feedback_failed` (`reason`).
 - `review_requested` (`app_open_count`): the app asked StoreKit for the
-  review prompt. iOS decides whether it actually shows.
+  review prompt. iOS decides whether it actually shows and throttles it, so
+  this count is higher than the number of prompts users saw.
 
 ## Onboarding
 
 `onboarding_shown` (`label`: launch, when the flow opens by itself),
 `onboarding_step_viewed` (`step`, `index`), `onboarding_location` and
 `onboarding_notifications` (`label`: on / off, the answer to each permission
-prompt), then `onboarding_completed`, or `onboarding_skipped` (`label`:
+prompt; `onboarding_location` is logged only when the system prompt was
+shown), then `onboarding_completed`, or `onboarding_skipped` (`label`:
 `step_<index>`).

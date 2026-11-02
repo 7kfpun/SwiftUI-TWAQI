@@ -99,11 +99,13 @@ final class OnboardingViewModel: ObservableObject {
     /// The system location prompt. Only the location step calls this.
     func requestLocation() {
         guard locationState != .asking else { return }
+        // Only a real prompt's answer is logged, not a status decided earlier.
+        let prompts = statusManager.authorizationStatus == .notDetermined
         locationState = .asking
         Task {
             location = await locator.current()
             refreshLocationState()
-            if locationState == .on || locationState == .off {
+            if prompts, locationState == .on || locationState == .off {
                 TrackingManager.logEvent(.onboardingLocation, parameters: [
                     "label": locationState == .on ? "on" : "off",
                 ])
