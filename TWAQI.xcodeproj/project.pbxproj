@@ -248,6 +248,10 @@
 		6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */; };
 		1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */; };
 		5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */; };
+		F0A47D1E0000000000000011 /* DeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A47D1E0000000000000001 /* DeepLink.swift */; };
+		F0A47D1E0000000000000012 /* DeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A47D1E0000000000000001 /* DeepLink.swift */; };
+		F0A47D1E0000000000000013 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A47D1E0000000000000002 /* AppRouter.swift */; };
+		F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A47D1E0000000000000003 /* DeepLinkTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -511,6 +515,9 @@
 		4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCacheTests.swift; sourceTree = "<group>"; };
 		B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetentionTests.swift; sourceTree = "<group>"; };
 		5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastTests.swift; sourceTree = "<group>"; };
+		F0A47D1E0000000000000001 /* DeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLink.swift; sourceTree = "<group>"; };
+		F0A47D1E0000000000000002 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		F0A47D1E0000000000000003 /* DeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -651,6 +658,7 @@
 				B7E1D2A40C5F4A6B8D9E0F03 /* PushServiceTests.swift */,
 				4A225060AF021643D29C12E0 /* StationParsingTests.swift */,
 				B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */,
+				F0A47D1E0000000000000003 /* DeepLinkTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
@@ -879,6 +887,8 @@
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				32CD323794AA44C233EB7C35 /* WidgetBridge.swift */,
+				F0A47D1E0000000000000001 /* DeepLink.swift */,
+				F0A47D1E0000000000000002 /* AppRouter.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */,
 			);
 			path = Utils;
@@ -1493,6 +1503,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */,
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
 				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
@@ -1515,6 +1526,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0A47D1E0000000000000012 /* DeepLink.swift in Sources */,
 				C3876FFC2DC1987EC72823BD /* TWAQIWidget.swift in Sources */,
 				78BA213325AB985305EDE801 /* WatchAPI.swift in Sources */,
 				37720FAFC125B3D1AC7F5764 /* WatchReading.swift in Sources */,
@@ -1561,6 +1573,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0A47D1E0000000000000011 /* DeepLink.swift in Sources */,
+				F0A47D1E0000000000000013 /* AppRouter.swift in Sources */,
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
 				01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */,
