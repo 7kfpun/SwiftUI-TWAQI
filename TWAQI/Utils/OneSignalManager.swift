@@ -140,6 +140,9 @@ struct OneSignalManager {
                     setting.isCleanlinessNotificationEnabled = true
                     setting.cleanlinessTherhold = threshold
                     settings.stationSettings[stationName] = setting
+                } else if !value.isEmpty,
+                          let stationName = stationName(key, suffix: pollutionSuffix) ?? stationName(key, suffix: cleanlinessSuffix) {
+                    settings.unreadableStationTagCodes.insert(stationName)
                 }
             }
         }

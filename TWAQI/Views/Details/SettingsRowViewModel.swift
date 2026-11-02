@@ -39,6 +39,10 @@ class SettingsRowViewModel: ObservableObject {
     /// Counts writes, so only the latest one's answer moves the switches.
     private var writeGeneration = 0
 
+    /// Counts reads, so a slow answer (or timeout) from a read that Try
+    /// Again has replaced doesn't undo the newer one's.
+    private var readGeneration = 0
+
     private let settings = SettingsStore()
     private var changesObserver: NSObjectProtocol?
 
@@ -88,11 +92,13 @@ class SettingsRowViewModel: ObservableObject {
     /// Reads OneSignal for this station's alerts and the cap.
     func reload() {
         alertsState = .checking
+        readGeneration += 1
+        let generation = readGeneration
         OneSignalManager.getOneSignalSettings { [weak self] result in
             // OneSignal calls back off the main thread; @Published must not be
             // mutated there.
             DispatchQueue.main.async {
-                guard let self = self else { return }
+                guard let self = self, self.readGeneration == generation else { return }
                 switch result {
                 case .success(let settings):
                     self.isApplyingRemoteSettings = true

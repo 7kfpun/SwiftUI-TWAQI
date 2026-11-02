@@ -195,11 +195,7 @@ class DetailsViewModel: ObservableObject {
     /// When that isn't known yet, alerts are cleared anyway: a favourite
     /// never leaves an alert on behind it.
     func removeFromFavourites() {
-        let codes = FavouriteAlerts.tagCodesToClear(
-            alertsOn: alertsOn,
-            knownTagCode: exactTagCode,
-            candidates: candidateTagCodes
-        )
+        let codes = Self.tagCodesToClear(alertsOn: alertsOn, exactTagCode: exactTagCode, candidates: candidateTagCodes)
         if !codes.isEmpty {
             clearAlerts(tagCodes: codes)
         }
@@ -262,7 +258,21 @@ class DetailsViewModel: ObservableObject {
         }
     }
 
-    /// Where OneSignal has this station's alerts, once the station record
+    /// What leaving Favourites clears from this screen. `exactTagCode` is
+    /// where this app writes the station's alerts, so it is where they are
+    /// once their state is known — read from OneSignal under it, or written
+    /// by this device under it. While the state is unknown it says nothing
+    /// about where an alert may be, so every candidate is cleared.
+    static func tagCodesToClear(alertsOn: Bool?, exactTagCode: String?, candidates: [String]) -> [String] {
+        let candidates = alertsOn == nil ? Array(Set(candidates + [exactTagCode].compactMap { $0 })).sorted() : candidates
+        return FavouriteAlerts.tagCodesToClear(
+            alertsOn: alertsOn,
+            knownTagCode: alertsOn == nil ? nil : exactTagCode,
+            candidates: candidates
+        )
+    }
+
+    /// Where this app writes the station's alerts, once the station record
     /// (with its country) has loaded.
     private var exactTagCode: String? {
         station.map { FavouriteAlerts.tagCode(countryCode: $0.countryCode, name: $0.name, stationId: stationId) }

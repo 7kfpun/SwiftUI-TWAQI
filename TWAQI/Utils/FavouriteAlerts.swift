@@ -152,6 +152,8 @@ enum FavouriteAlerts {
 
     /// Clears that OneSignal hasn't taken yet, tried again. A station that is
     /// a favourite again is dropped: its alerts are its own once more.
+    /// One still on the wire is left to answer, not sent a second time.
+    /// Main thread.
     static func retryPendingClears(
         isFavourite: (Int) -> Bool = { SettingsStore().savedFavouriteStations.contains($0) },
         services: Services = .live
@@ -159,7 +161,7 @@ enum FavouriteAlerts {
         for (stationId, codes) in pendingClears(defaults: services.defaults) {
             if isFavourite(stationId) {
                 cancelPendingClear(stationId: stationId, defaults: services.defaults)
-            } else {
+            } else if !isClearInFlight(stationId: stationId) {
                 sendClear(stationId: stationId, tagCodes: codes, services: services, completion: nil)
             }
         }
@@ -187,6 +189,10 @@ enum FavouriteAlerts {
         defaults.set(try? JSONEncoder().encode(stored), forKey: pendingClearsKey)
     }
 
+    /// Main thread. Anything for the station that would write OneSignal
+    /// waits until this has answered (`afterClearsSettle`), so OneSignal
+    /// takes this clear before it and the Directus copy follows in the same
+    /// order.
     private static func sendClear(
         stationId: Int,
         tagCodes: [String],
@@ -197,21 +203,79 @@ enum FavouriteAlerts {
         for code in tagCodes {
             tags.merge(off(tagCode: code).getDisabledTags()) { _, new in new }
         }
+        clearsInFlight[stationId, default: 0] += 1
         services.sendTags(tags) { result in
             DispatchQueue.main.async {
+                defer { clearSettled(stationId: stationId) }
                 guard case .success = result else {
                     completion?(false)
                     return
                 }
-                // Favourited again while this was on the wire: the new
-                // favourite's alerts are not this clear's to report.
-                if pendingClears(defaults: services.defaults)[stationId] != nil {
-                    cancelPendingClear(stationId: stationId, defaults: services.defaults)
-                    services.mirror(stationId, nil, .off, true)
+                // OneSignal has them off now, even when the station was
+                // favourited again meanwhile: what that does waits for this
+                // and writes, and copies, after it.
+                var pending = pendingClears(defaults: services.defaults)
+                if pending[stationId] == tagCodes {
+                    pending[stationId] = nil
+                    savePendingClears(pending, defaults: services.defaults)
+                }
+                services.mirror(stationId, nil, .off, true)
+                // A switch moved on the station screen meanwhile is about to
+                // be written: the screen keeps showing it rather than "off".
+                let switchWriteWaiting = afterClears[stationId]?.contains { $0.isSwitchWrite } ?? false
+                if !switchWriteWaiting {
                     post(stationId: stationId, isOn: false)
                 }
                 completion?(true)
             }
+        }
+    }
+
+    // MARK: - Clears still on the wire
+
+    /// Clears handed to OneSignal that haven't answered yet, per station.
+    /// OneSignal can take a clear after a write sent later, or a read can
+    /// still see the alerts the clear is about to remove, so writes for the
+    /// station wait for these. Main thread only.
+    private static var clearsInFlight: [Int: Int] = [:]
+
+    private struct AfterClear {
+        let isSwitchWrite: Bool
+        let run: () -> Void
+    }
+
+    private static var afterClears: [Int: [AfterClear]] = [:]
+
+    /// A clear for the station is on the wire. Main thread.
+    static func isClearInFlight(stationId: Int) -> Bool {
+        clearsInFlight[stationId, default: 0] > 0
+    }
+
+    /// Runs `work` on the main thread once no clear for the station is on
+    /// the wire — at once when none is — in the order asked.
+    private static func afterClearsSettle(stationId: Int, isSwitchWrite: Bool = false, _ work: @escaping () -> Void) {
+        onMain {
+            guard isClearInFlight(stationId: stationId) else { return work() }
+            afterClears[stationId, default: []].append(AfterClear(isSwitchWrite: isSwitchWrite, run: work))
+        }
+    }
+
+    private static func clearSettled(stationId: Int) {
+        let left = clearsInFlight[stationId, default: 1] - 1
+        guard left <= 0 else {
+            clearsInFlight[stationId] = left
+            return
+        }
+        clearsInFlight[stationId] = nil
+        let waiting = afterClears.removeValue(forKey: stationId) ?? []
+        waiting.forEach { $0.run() }
+    }
+
+    private static func onMain(_ work: @escaping () -> Void) {
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.async(execute: work)
         }
     }
 
@@ -228,8 +292,9 @@ enum FavouriteAlerts {
     /// Turns every station's alerts off: OneSignal first, the Directus copy
     /// only once OneSignal has taken every write. If OneSignal can't be read
     /// or written, Directus is left as it is, so the copy never says off
-    /// while OneSignal still sends. Calls back on the main thread with
-    /// whether it worked.
+    /// while OneSignal still sends. The same write takes the clears still
+    /// waiting here and any station tag too garbled to read, so neither is
+    /// left on. Calls back on the main thread with whether it worked.
     static func cancelAll(services: Services = .live, completion: @escaping (Bool) -> Void) {
         services.readSettings { result in
             guard case .success(let settings) = result else {
@@ -240,11 +305,22 @@ enum FavouriteAlerts {
             for setting in settings.stationSettings.values {
                 tags.merge(setting.getDisabledTags()) { _, new in new }
             }
+            let pending = pendingClears(defaults: services.defaults)
+            let codes = pending.values.flatMap { $0 } + settings.unreadableStationTagCodes
+            for code in codes {
+                tags.merge(off(tagCode: code).getDisabledTags()) { _, new in new }
+            }
 
             let finish = {
                 DispatchQueue.main.async {
                     services.mirrorCancelAll()
-                    savePendingClears([:], defaults: services.defaults)
+                    // Only the clears this write took: one saved meanwhile
+                    // is still to do.
+                    var left = pendingClears(defaults: services.defaults)
+                    for (stationId, codes) in pending where left[stationId] == codes {
+                        left[stationId] = nil
+                    }
+                    savePendingClears(left, defaults: services.defaults)
                     completion(true)
                 }
             }
@@ -264,8 +340,9 @@ enum FavouriteAlerts {
     /// Writes a station's alerts as set on its screen: OneSignal first, then
     /// the Directus copy — debounced, since a slider sends a value per step —
     /// only once OneSignal has taken it, and only while `isCurrent` (a later
-    /// change brings its own copy). Calls back on the main thread with
-    /// whether OneSignal took it.
+    /// change brings its own copy). Sent once any clear of the station on
+    /// the wire has answered, so that clear can't land after it. Calls back
+    /// on the main thread with whether OneSignal took it.
     static func write(
         _ setting: OneSignalStationSetting,
         stationId: Int,
@@ -274,13 +351,15 @@ enum FavouriteAlerts {
         services: Services = .live,
         completion: @escaping (Bool) -> Void
     ) {
-        services.sendTags(setting.getTags()) { result in
-            DispatchQueue.main.async {
-                guard case .success = result else { return completion(false) }
-                if isCurrent() {
-                    services.mirror(stationId, siteId, StationAlerts(setting), false)
+        afterClearsSettle(stationId: stationId, isSwitchWrite: true) {
+            services.sendTags(setting.getTags()) { result in
+                DispatchQueue.main.async {
+                    guard case .success = result else { return completion(false) }
+                    if isCurrent() {
+                        services.mirror(stationId, siteId, StationAlerts(setting), false)
+                    }
+                    completion(true)
                 }
-                completion(true)
             }
         }
     }
@@ -399,9 +478,32 @@ enum FavouriteAlerts {
         }
 
         // A favourite again: a clear from when it last left must not undo
-        // what happens next.
+        // what happens next. One already on the wire can't be called back,
+        // so this waits for it to answer: reading before then could still
+        // see the alerts it removes, and writing before then could be
+        // undone by it.
         cancelPendingClear(stationId: stationId, defaults: services.defaults)
 
+        afterClearsSettle(stationId: stationId) {
+            enableAfterClears(
+                stationId: stationId,
+                tagCode: tagCode,
+                siteId: siteId,
+                isStillFavourite: isStillFavourite,
+                services: services,
+                finish: finish
+            )
+        }
+    }
+
+    private static func enableAfterClears(
+        stationId: Int,
+        tagCode: String,
+        siteId: String?,
+        isStillFavourite: @escaping () -> Bool,
+        services: Services,
+        finish: @escaping (NewFavouriteOutcome) -> Void
+    ) {
         services.notificationsDenied { denied in
             guard !denied else { return finish(.notificationsDenied) }
 
@@ -411,7 +513,9 @@ enum FavouriteAlerts {
                 let decision = newFavouriteDecision(settings: settings, tagCode: tagCode)
                 guard case .enabled(let setting) = decision else { return finish(decision) }
 
-                DispatchQueue.main.async {
+                // Unfavourited and favourited again during the read: wait
+                // for that clear too.
+                afterClearsSettle(stationId: stationId) {
                     guard isStillFavourite() else { return finish(.notChanged) }
 
                     services.sendTags(setting.getTags()) { result in

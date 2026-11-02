@@ -248,6 +248,8 @@ extension PushServiceTests {
         XCTAssertNil(settings.stationSettings[""])
         XCTAssertEqual(settings.stationSettings.keys.sorted(), ["Songshan"])
         XCTAssertEqual(settings.stationSettings["Songshan"].map { StationAlerts($0) }, StationAlerts(above: 120))
+        // Still known as tags, so "cancel all" can remove them.
+        XCTAssertEqual(settings.unreadableStationTagCodes, ["Banqiao"])
     }
 
     func testReadThatNeverAnswersFailsAfterTheTimeout() {
@@ -386,11 +388,14 @@ final class FavouriteAlertsTests: XCTestCase {
         )
     }
 
-    /// Records calls in order; answers synchronously.
+    /// Records calls in order; answers synchronously, or holds OneSignal
+    /// writes on the wire while `holdSends` is set.
     private final class FakeServices {
         var denied = false
         var read: Result<OneSignalSettings, OneSignalError> = .success(OneSignalSettings(stationSettings: [:]))
         var send: Result<Bool, OneSignalError> = .success(true)
+        var holdSends = false
+        var heldSends: [(Result<Bool, OneSignalError>) -> Void] = []
         var calls: [String] = []
         var sentTags: [String: String]?
         var mirrored: (stationId: Int, siteId: String?, alerts: StationAlerts)?
@@ -410,7 +415,11 @@ final class FavouriteAlertsTests: XCTestCase {
                     self.calls.append("onesignal")
                     self.sentTags = tags
                     self.sentTagWrites.append(tags)
-                    completion(self.send)
+                    if self.holdSends {
+                        self.heldSends.append(completion)
+                    } else {
+                        completion(self.send)
+                    }
                 },
                 mirror: { [unowned self] in
                     self.calls.append("directus")
@@ -496,6 +505,109 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.calls, ["permission", "read"])
     }
 
+    /// Lets work already queued on the main thread run.
+    private func drainMain() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+    }
+
+    /// Answers the OneSignal write held longest, and stops holding new ones.
+    private func answerHeldSend(_ fake: FakeServices, _ result: Result<Bool, OneSignalError> = .success(true)) {
+        fake.holdSends = false
+        fake.heldSends.removeFirst()(result)
+    }
+
+    func testNewFavouriteWaitsForAClearOnTheWireAndWritesAfterIt() {
+        let fake = FakeServices(defaults: defaults)
+        fake.holdSends = true
+        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
+        XCTAssertTrue(FavouriteAlerts.isClearInFlight(stationId: 126))
+
+        let done = expectation(description: "enabled")
+        var outcome: FavouriteAlerts.NewFavouriteOutcome?
+        FavouriteAlerts.enableForNewFavourite(
+            stationId: 126,
+            tagCode: "Songshan",
+            siteId: "012",
+            isStillFavourite: { true },
+            services: fake.services
+        ) {
+            outcome = $0
+            done.fulfill()
+        }
+        drainMain()
+        // Nothing read or written while the clear may still land.
+        XCTAssertEqual(fake.calls, ["onesignal"])
+
+        answerHeldSend(fake)
+        wait(for: [done], timeout: 2)
+        XCTAssertEqual(outcome, .enabled(FavouriteAlerts.defaultAlerts(tagCode: "Songshan")))
+        // The clear lands and is copied first; the new alerts after it, so
+        // OneSignal and Directus both end on.
+        XCTAssertEqual(fake.calls, ["onesignal", "directus", "permission", "read", "onesignal", "directus"])
+        XCTAssertEqual(fake.sentTagWrites.last, FavouriteAlerts.defaultAlerts(tagCode: "Songshan").getTags())
+        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 120))
+        XCTAssertFalse(FavouriteAlerts.isClearInFlight(stationId: 126))
+    }
+
+    func testNewFavouriteAfterAFailedClearOnTheWireReadsItsAlertsStillOn() {
+        let fake = FakeServices(defaults: defaults)
+        fake.holdSends = true
+        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
+        let done = expectation(description: "enabled")
+        var outcome: FavouriteAlerts.NewFavouriteOutcome?
+        FavouriteAlerts.enableForNewFavourite(
+            stationId: 126, tagCode: "Songshan", siteId: nil, isStillFavourite: { true }, services: fake.services
+        ) {
+            outcome = $0
+            done.fulfill()
+        }
+        fake.read = .success(settings([on("Songshan", above: 150)]))
+
+        answerHeldSend(fake, .failure(.oneSignalError))
+        wait(for: [done], timeout: 2)
+        XCTAssertEqual(outcome, .alreadyOn)
+        XCTAssertEqual(fake.calls, ["onesignal", "permission", "read"])
+        XCTAssertNil(fake.mirrored)
+        // Favourited again, so not retried later either.
+        XCTAssertNil(FavouriteAlerts.pendingClears(defaults: defaults)[126])
+    }
+
+    func testRetryLeavesAClearStillOnTheWireAlone() {
+        let fake = FakeServices(defaults: defaults)
+        fake.holdSends = true
+        FavouriteAlerts.clear(stationId: removed, tagCodes: ["Songshan"], services: fake.services)
+        FavouriteAlerts.retryPendingClears(isFavourite: { _ in false }, services: fake.services)
+        XCTAssertEqual(fake.sentTagWrites.count, 1)
+
+        answerHeldSend(fake)
+        drainMain()
+        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
+    }
+
+    func testSwitchWriteWaitsForAClearOnTheWireAndTheScreenKeepsIt() {
+        let fake = FakeServices(defaults: defaults)
+        fake.holdSends = true
+        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
+        let saidOff = expectation(forNotification: FavouriteAlerts.changed, object: nil) { notification in
+            FavouriteAlerts.isOn(in: notification, stationId: 126) == false
+        }
+        saidOff.isInverted = true
+
+        let written = expectation(description: "written")
+        FavouriteAlerts.write(on("Songshan", above: 150), stationId: 126, siteId: "012", isCurrent: { true }, services: fake.services) {
+            XCTAssertTrue($0)
+            written.fulfill()
+        }
+        drainMain()
+        XCTAssertEqual(fake.sentTagWrites.count, 1)
+
+        answerHeldSend(fake)
+        wait(for: [written, saidOff], timeout: 0.5)
+        XCTAssertEqual(fake.calls, ["onesignal", "directus", "onesignal", "directus"])
+        XCTAssertEqual(fake.sentTagWrites.last, on("Songshan", above: 150).getTags())
+        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 150))
+    }
+
     func testNewFavouriteCancelsAClearStillWaiting() throws {
         try storePending([126: ["Songshan"]])
         let fake = FakeServices(defaults: defaults)
@@ -535,6 +647,15 @@ final class FavouriteAlertsTests: XCTestCase {
         }
         wait(for: [done], timeout: 2)
         return cleared
+    }
+
+    func testStationScreenClearsEveryCandidateWhileAlertStateIsUnknown() {
+        // The station record says where this app writes alerts, not where
+        // an alert of unknown state is.
+        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: nil, exactTagCode: "Songshan", candidates: ["126"]), ["126", "Songshan"])
+        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: nil, exactTagCode: nil, candidates: ["Songshan", "126"]), ["126", "Songshan"])
+        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: true, exactTagCode: "Songshan", candidates: ["Songshan", "126"]), ["Songshan"])
+        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: false, exactTagCode: "Songshan", candidates: ["Songshan", "126"]), [])
     }
 
     func testTagCodesToClearWhenStateIsKnownOrNot() {
@@ -620,6 +741,28 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.sentTags?["Banqiao_pollution_therhold"], "")
         XCTAssertEqual(fake.sentTags?["901_cleanliness_therhold"], "")
         XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
+    }
+
+    func testCancelAllAlsoClearsWaitingClearsAndUnreadableTags() throws {
+        try storePending([removed: ["Xindian"]])
+        let fake = FakeServices(defaults: defaults)
+        var read = settings([])
+        read.unreadableStationTagCodes = ["Banqiao"]
+        fake.read = .success(read)
+
+        XCTAssertEqual(cancelAll(fake), true)
+        XCTAssertEqual(fake.calls, ["read", "onesignal", "directus-cancel-all"])
+        XCTAssertEqual(fake.sentTags?["Xindian_pollution_therhold"], "")
+        XCTAssertEqual(fake.sentTags?["Banqiao_pollution_therhold"], "")
+        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
+    }
+
+    func testCancelAllRefusedKeepsWaitingClears() throws {
+        try storePending([removed: ["Xindian"]])
+        let fake = FakeServices(defaults: defaults)
+        fake.send = .failure(.oneSignalError)
+        XCTAssertEqual(cancelAll(fake), false)
+        XCTAssertEqual(FavouriteAlerts.pendingClears(defaults: defaults), [removed: ["Xindian"]])
     }
 
     func testCancelAllWithNothingOnStillClearsTheDirectusCopy() {

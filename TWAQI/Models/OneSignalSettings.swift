@@ -13,6 +13,10 @@ struct OneSignalSettings: Hashable, Codable {
     var dndStartTime: Int?
     var dndEndTime: Int?
     var stationSettings: [String: OneSignalStationSetting]
+    /// Station tag prefixes whose threshold isn't a number (set by hand in
+    /// the dashboard, say): left out of `stationSettings`, but still tags
+    /// that "cancel all" removes.
+    var unreadableStationTagCodes: Set<String> = []
 }
 
 struct OneSignalStationSetting: Hashable, Codable {
