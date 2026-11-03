@@ -29,8 +29,19 @@ name slot ("Not LGTM", "Never LGTM", "Almost LGTM") isn't a name, and
 except claude[bot]: the Claude Code Review workflow is advisory, and its
 progress comment ("**Claude Code is working…**") appears before any review is
 done. A person counts only with owner, member, or collaborator access, so a
-stranger can't turn the status green by writing "LGTM". A comment has no commit
-of its own: it covers the head only when it was written at or after that commit.
+stranger can't turn the status green by writing "LGTM".
+
+A rebase or "Update branch" (a merge from master) keeps an LGTM. "Same net
+change" compares the PR's own added and removed lines per file against the
+merge base, ignoring where master was: hunk positions, blob ids and the
+unchanged context lines around each hunk, which move whenever master edits
+nearby. Resolving a conflict or any edit of the branch's own changes the net
+change and needs a fresh LGTM.
+
+A review is tied to the commit it was left on. A comment has no commit of its
+own: one with a "(head <sha>)" note is tied to that commit, so it survives a
+rebase like a review does; one without a note covers the head only when it was
+written at or after that commit.
 
 Needs `gh` (GH_TOKEN with statuses:write) and a full clone (fetch-depth 0).
 `python3 tools/lgtm_gate.py --self-test` checks the decision table.
@@ -49,6 +60,8 @@ TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
 # First line: an optional one-word reviewer name, then the verdict.
 # Nothing may follow LGTM on that line except emphasis, "." "!" ":" or a
 # "(head <sha>)" note, so "LGTM?" and "LGTM, but fix X" don't pass.
+# The "(head <sha>)" note a reviewer adds to the verdict line.
+HEAD_NOTE = re.compile(r"\(head\s+([0-9a-f]{7,40})\)", re.I)
 LGTM = re.compile(
     r"^\W*(?:(?P<name>[A-Za-z][\w.-]{0,39})\W+)?LGTM\b"
     r"[\s*_~.!:]*(?:\(head\s+[0-9a-f]{7,40}\)[\s*_~.!:]*)?$",
@@ -73,26 +86,67 @@ def gh_json_lines(endpoint):
     return [json.loads(line) for line in out.splitlines() if line.strip()]
 
 
-def fingerprint(sha, base_ref):
-    """Hash of the PR's net change at `sha`, ignoring where master was."""
-    if subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True).returncode != 0:
+def has_commit(sha):
+    return subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True).returncode == 0
+
+
+def resolve_commit(sha):
+    """Full sha of `sha` (which may be a short one from a "(head <sha>)" note),
+    fetched when a rebase left it off every branch. None if it can't be found."""
+    if not has_commit(sha) and len(sha) < 40 and os.environ.get("REPO"):
+        # A short sha can't be fetched; GitHub resolves it to the full one.
+        sha = run("gh", "api", f"repos/{os.environ['REPO']}/commits/{sha}", "--jq", ".sha", check=False).strip() or sha
+    if not has_commit(sha):
         subprocess.run(["git", "fetch", "--quiet", "origin", sha], capture_output=True)
-    base = run("git", "merge-base", f"origin/{base_ref}", sha, check=False).strip()
-    if not base:
+    if not has_commit(sha):
         return None
-    diff = run("git", "diff", "--no-color", "--no-ext-diff", "--binary", base, sha, check=False)
+    return run("git", "rev-parse", f"{sha}^{{commit}}", check=False).strip() or None
+
+
+def normalize_diff(diff):
+    """The PR's own changes in `diff`: file headers and added/removed lines.
+    Drops what moves when master changes around the PR: blob ids, hunk
+    positions, and the unchanged context lines (" ...") inside hunks."""
     normalized = []
     for line in diff.splitlines():
         if line.startswith("index "):
             continue  # blob ids move when master changes the same file elsewhere
         if line.startswith("@@"):
-            line = "@@"  # line numbers move when master changes earlier lines
+            continue  # line numbers move when master changes earlier lines
+        if line.startswith(" "):
+            continue  # context moves when master edits lines next to the PR's
         normalized.append(line)
-    return hashlib.sha256("\n".join(normalized).encode()).hexdigest()
+    return "\n".join(normalized)
+
+
+def fingerprint(sha, base_ref):
+    """Hash of the PR's net change at `sha`, ignoring where master was."""
+    sha = resolve_commit(sha)
+    if not sha:
+        return None
+    base = run("git", "merge-base", f"origin/{base_ref}", sha, check=False).strip()
+    if not base:
+        return None
+    diff = run("git", "diff", "--no-color", "--no-ext-diff", "--binary", base, sha, check=False)
+    return hashlib.sha256(normalize_diff(diff).encode()).hexdigest()
 
 
 def first_line(item):
     return (item.get("body") or "").strip().splitlines()[0] if (item.get("body") or "").strip() else ""
+
+
+def reviewed_commit(item):
+    """The commit a verdict is about: a review's own commit, or the
+    "(head <sha>)" note on a comment's first line. "" when there is neither."""
+    if item.get("commit_id"):
+        return item["commit_id"]
+    note = HEAD_NOTE.search(first_line(item))
+    return note.group(1).lower() if note else ""
+
+
+def is_commit(sha, head):
+    """`sha` (full, or short from a note) names `head`."""
+    return bool(sha) and len(sha) >= 7 and head.lower().startswith(sha.lower())
 
 
 def verdict(item):
@@ -138,13 +192,13 @@ def parse_time(value):
 
 
 def covers(item, head, head_time, base_ref, finger):
-    reviewed = item.get("commit_id") or ""
+    reviewed = reviewed_commit(item)
     if not reviewed:
-        # A PR comment is not tied to a commit. It covers this head only when
-        # it was written after the head commit existed.
+        # A PR comment without a "(head <sha>)" note is not tied to a commit.
+        # It covers this head only when it was written after the head commit existed.
         created, committed = parse_time(item.get("at")), parse_time(head_time)
         return bool(created and committed) and created >= committed
-    if reviewed == head:
+    if is_commit(reviewed, head):
         return True
     then, now = finger(reviewed, base_ref), finger(head, base_ref)
     return bool(then) and then == now
@@ -157,12 +211,12 @@ def decide(items, head, head_time, base_ref, finger=fingerprint):
         return "pending", "Waiting for a reviewer's LGTM (\"**<Name> LGTM**\")"
     latest, kind = max(verdicts, key=lambda pair: pair[0].get("at") or "")
     name = reviewer_name(latest)
-    reviewed = latest.get("commit_id") or ""
+    reviewed = reviewed_commit(latest)
     short = (reviewed or head)[:7]
     if kind == "changes":
         return "pending", f"{name}: changes needed on {short}; needs a fresh LGTM"
     if covers(latest, head, head_time, base_ref, finger):
-        if reviewed and reviewed != head:
+        if reviewed and not is_commit(reviewed, head):
             return "success", f"{name} LGTM on {reviewed[:7]}; head has the same changes (rebased/updated)"
         return "success", f"{name} LGTM on {short}"
     if reviewed:
@@ -227,8 +281,10 @@ def self_test():
     stranger = {"login": "someone", "type": "User"}
     head = "abcdef1234567890"
 
+    # "old" and "1234567" stand for earlier commits with head's net change
+    # (rebased / updated from master); anything else has changes of its own.
     def same(reviewed, base):
-        return "same" if reviewed in ("old", head) else "other"
+        return "same" if reviewed in ("old", "1234567", head) or is_commit(reviewed, head) else "other"
 
     def item(body, **extra):
         base = {
@@ -283,8 +339,40 @@ def self_test():
         ("comment after a +08:00 head commit", [item("Grok LGTM", commit_id="", at="2026-11-02T11:00:30Z")], "success", "2026-11-02T19:00:00+08:00"),
         ("comment before a +08:00 head commit", [item("Grok LGTM", commit_id="", at="2026-11-02T10:59:59Z")], "pending", "2026-11-02T19:00:00+08:00"),
         ("unreadable head time", [item("Grok LGTM", commit_id="")], "pending", ""),
+        ("comment noting the head, written before it", [item("**Grok LGTM** (head abcdef1)", commit_id="", at="2026-11-02T10:00:00Z")], "success"),
+        ("comment noting a rebased-away commit with the same changes",
+         [item("**Codex LGTM** (head 1234567)", commit_id="", at="2026-11-02T10:00:00Z")], "success"),
+        ("comment noting a commit with other changes, written after head",
+         [item("**Codex LGTM** (head 7654321)", commit_id="", at="2026-11-02T12:00:00Z")], "pending"),
+        ("review keeps its own commit over a note", [item("**Grok LGTM** (head 1234567)", commit_id="other")], "pending"),
+        ("changes needed on a rebased-away commit still vetoes",
+         [item("**Grok LGTM**", at="2026-11-02T12:00:00Z"), item("**Codex — changes needed** (head 1234567)", commit_id="", at="2026-11-02T12:05:00Z")], "pending"),
     ]
     failed = 0
+
+    # The fingerprint's normalization: what master moves around the PR is
+    # ignored, the PR's own added/removed lines are not.
+    reviewed_diff = (
+        "diff --git a/f.swift b/f.swift\nindex 1111111..2222222 100644\n--- a/f.swift\n+++ b/f.swift\n"
+        "@@ -10,7 +10,7 @@ struct A {\n     let a = 1\n-    let b = 2\n+    let b = 3\n     let c = 4\n"
+    )
+    diff_cases = [
+        ("rebased: new blob ids, hunk position and context", (
+            "diff --git a/f.swift b/f.swift\nindex 3333333..4444444 100644\n--- a/f.swift\n+++ b/f.swift\n"
+            "@@ -14,7 +14,7 @@ struct A {\n     let a = 10\n-    let b = 2\n+    let b = 3\n     let c = 40\n"
+        ), True),
+        ("an added line of its own", reviewed_diff + "+    let d = 5\n", False),
+        ("a different change", reviewed_diff.replace("+    let b = 3", "+    let b = 4"), False),
+        ("another file touched", reviewed_diff + "diff --git a/g.swift b/g.swift\n--- a/g.swift\n+++ b/g.swift\n@@ -1 +1 @@\n-x\n+y\n", False),
+    ]
+    for name, other, want_same in diff_cases:
+        got_same = normalize_diff(other) == normalize_diff(reviewed_diff)
+        if got_same != want_same:
+            failed += 1
+            print(f"FAIL fingerprint {name}: same={got_same}, want {want_same}")
+        else:
+            print(f"ok   fingerprint {name}: same={got_same}")
+
     for name, items, want, *rest in cases:
         head_time = rest[0] if rest else "2026-11-02T11:00:00Z"
         state, description = decide(items, head, head_time, "master", same)
@@ -296,7 +384,7 @@ def self_test():
     if failed:
         print(f"{failed} failed")
         return 1
-    print(f"{len(cases)} passed")
+    print(f"{len(cases) + len(diff_cases)} passed")
     return 0
 
 
