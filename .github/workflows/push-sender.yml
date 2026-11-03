@@ -5,11 +5,14 @@ name: Push sender
 # 50 subrequests per run can't carry them. This workflow runs the Worker's
 # own run() (workers/twaqi-push-sender/src/index.ts) under Node through
 # scripts/run.ts, with the vars from its wrangler.jsonc plus three secrets.
-# The Worker keeps the app's /app/v1 API and the manual /run and /test routes.
+# The Worker keeps the app's /app/v1 API and the manual /run and /test routes,
+# and takes this run's per-send events on POST /internal/events (SYNC_TOKEN),
+# writing them to Analytics Engine (twaqi_push_events) as it did for its own
+# sends. A failed forward is a warning, never a re-send or a failed job.
 #
 # Runs in the `push-sender` environment (master only, no reviewers), not
 # `workers-production`, whose every job waits for an approval. Its secrets:
-# FCM_SERVICE_ACCOUNT, DIRECTUS_PUSH_TOKEN, AQI_API_BASE.
+# FCM_SERVICE_ACCOUNT, DIRECTUS_PUSH_TOKEN, AQI_API_BASE, SYNC_TOKEN.
 #
 # GitHub's schedule is best effort: a run can start late or be skipped at busy
 # times, and scheduled workflows are turned off after 60 days without activity
@@ -85,6 +88,9 @@ jobs:
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
           DIRECTUS_PUSH_TOKEN: ${{ secrets.DIRECTUS_PUSH_TOKEN }}
           AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          # The Worker that writes the forwarded events to Analytics Engine.
+          PUSH_SENDER_URL: https://twaqi-push-sender.710kfpun.workers.dev
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
         run: |
           set -euo pipefail
@@ -94,5 +100,6 @@ jobs:
           args=()
           if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
           # Exits non-zero, failing the job, when run() throws or any alert
-          # failed to send (dead tokens and deferred sends don't count).
+          # failed to send (dead tokens and deferred sends don't count). Events
+          # that couldn't be forwarded are a warning only.
           npm run --silent send -- "${args[@]}"

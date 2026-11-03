@@ -107,19 +107,23 @@ laptop as in [web-hosting.md](web-hosting.md). The same order applies there.
 The AQI alert sends moved from the `twaqi-push-sender` Worker's cron to GitHub Actions:
 the Cloudflare account is on the Workers Free plan, whose 50 subrequests per run can't
 carry them, and which rejects the `limits` block they needed. The Worker keeps the app's
-`/app/v1` API and the manual `/run` / `/test` routes and still deploys through
-`workers.yml` (`workers-production`).
+`/app/v1` API, the manual `/run` / `/test` routes, and `POST /internal/events`, which
+writes the GitHub run's per-send events to Analytics Engine (`twaqi_push_events`, same data
+points as before). It still deploys through `workers.yml` (`workers-production`).
 
 `push-sender.yml` runs in its own environment, `push-sender`: deployment branches
 limited to `master`, **no required reviewers** (`workers-production` makes every job wait
 for an approval, which a schedule can't). Its secrets, copies of the Worker's:
-`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`. Create the environment before
+`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, and `SYNC_TOKEN` (for the
+event forward to the Worker, whose URL is `PUSH_SENDER_URL` in the workflow). Create the environment before
 the workflow's first run, since a workflow that names a missing environment creates it
 unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#the-push-sender-environment-github-actions).
 
 - One run at a time (`concurrency: push-sender`), `timeout-minutes: 30` (40k sends take
   about 3 minutes). The job fails when the run throws or any alert failed to send (dead
-  tokens and sends deferred to the next run don't count).
+  tokens and sends deferred to the next run don't count). Events that couldn't be
+  forwarded (one retry per 250) are a warning, never a re-send or a failure. The log shows
+  counts only.
 - GitHub's schedule is best effort: runs can start late or be skipped, and scheduled
   workflows switch off after 60 days without repository activity (re-enable under Actions).
   A late run loses nothing: unsent crossings go out on the next run, never twice.

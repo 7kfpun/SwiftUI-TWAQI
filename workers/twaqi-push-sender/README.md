@@ -5,7 +5,7 @@ Sends the TWAQI iOS app's AQI alerts through **Firebase Cloud Messaging** (HTTP 
 **Where it runs (FOX-71).** The Cloudflare account is on the **Workers Free plan**, which allows 50 subrequests per run: far too few for the sends, and it rejects the `limits` block they needed (error 100328). So:
 
 - the **scheduled sends run in GitHub Actions**, [`.github/workflows/push-sender.yml`](../../.github/workflows/push-sender.yml), which calls this package's `run()` (`src/index.ts`) under Node through [`scripts/run.ts`](scripts/run.ts). Same code, no copy of it;
-- the **Worker** serves the app's `/app/v1` API, `GET /`, and the manual `/run` and `/test` routes. It has no cron and no scheduled handler.
+- the **Worker** serves the app's `/app/v1` API, `GET /`, the manual `/run` and `/test` routes, and `POST /internal/events`, where the GitHub Actions run forwards its per-send events to Analytics Engine. It has no cron and no scheduled handler.
 
 The run:
 
@@ -59,7 +59,13 @@ The app has **no Directus token for the push collections**. It writes its own ro
 
 ## Send log (`twaqi_push_logs`, FOX-66)
 
-Every send from the Worker is recorded in **Workers Analytics Engine** (dataset `twaqi_push_events`, binding `PUSH_EVENTS`). The scheduled sends in GitHub Actions have no Worker bindings, so they are **not** in Analytics Engine; their Directus rows (failures, dead tokens) and the run summary in the job log are what's left. The fields are status, trigger, station, error code, token suffix, device id and AQI, kept about 3 months and queryable with SQL. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
+Every send is recorded in **Workers Analytics Engine** (dataset `twaqi_push_events`, binding `PUSH_EVENTS`). The fields are status, trigger, station, error code, token suffix, device id and AQI, kept about 3 months and queryable with SQL. One data point per send, built in one place (`pushEventPoint` in `src/events.ts`): index `station`; blobs `status`, `trigger`, `station`, `error_code`, `token_suffix`, `device`; double `aqi`.
+
+**Sends from GitHub Actions** (FOX-71, the user's call to keep per-send analytics on the Free plan): Node has no bindings, so `scripts/run.ts` passes `run()` a collector as `PUSH_EVENTS`. `run()` writes to it exactly as to the binding. Once `run()` has saved state and logs, the script POSTs the points to the Worker's `/internal/events` in chunks of 250, each tried twice, and the Worker writes them to the dataset unchanged. Existing queries see no difference.
+
+- `POST /internal/events`, `Authorization: Bearer $SYNC_TOKEN` (constant-time check, like `/run`), body `{"events": [point, …]}`. At most **250** per request: Analytics Engine takes at most 250 `writeDataPoint` calls per Worker invocation. Each point must be exactly the shape above (a known status and trigger, 6 string blobs, one finite double, index ≤ 96 bytes); otherwise the whole request is a 400 and nothing is written. → `{ received, written }`. Not under `/app/v1`, so neither device auth nor `APP_LIMITER` applies.
+- A forward that fails twice is a **warning** in the job (`N of M push events not forwarded`), with counts only. It never re-sends an alert and doesn't fail the job: only `counts.failed` (alerts FCM refused) does.
+- **Free plan:** 40k events a run is 160 requests to the Worker, well inside 100,000 requests a day. But Analytics Engine on Free includes **100,000 data points a day**, and twelve runs at the 40k sizing would be 480k. Below that sizing it fits. Cloudflare's limits page doesn't say what happens to writes past the daily allowance on Free, so if volume nears it, check the dataset's daily counts against the job logs' `events forwarded` (or move to Workers Paid: 10M a month). The Directus failure rows are unaffected either way. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
 
 The Directus rows are: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
 
@@ -81,8 +87,9 @@ DIRECTUS_ADMIN_TOKEN=… node directus/push-logs.mjs --apply  # create it
 | `GET /` | Health, and whether the FCM service account is set |
 | `POST /run` | Run now. `?dry` sends and writes nothing and lists each decision. Body `{"aqi": {"105": 180}}` replaces live AQI for those stations, to force a crossing. On the Free plan a real run stops at `SUBREQUEST_LIMIT` (50 requests) and defers the rest to the next run: fine for a forced test crossing, not for a full run. |
 | `POST /test` | `{"device_id": 5}` (optionally `"station_id": 105`): one test alert to one device, ignoring quiet hours. Checks the service account and the APNs key in Firebase. |
+| `POST /internal/events` | `{"events": [...]}`, at most 250: per-send data points from the GitHub Actions run, written to Analytics Engine ([Send log](#send-log-twaqi_push_logs-fox-66)). |
 
-Both POST routes need `Authorization: Bearer $SYNC_TOKEN` (the same token as `twaqi-workers`).
+All three POST routes need `Authorization: Bearer $SYNC_TOKEN` (the same token as `twaqi-workers`).
 
 ```sh
 curl -X POST "$WORKER/run?dry" -H "Authorization: Bearer $SYNC_TOKEN" -d '{"aqi":{"105":180}}'
@@ -104,7 +111,7 @@ It never deletes. The app's static token (TWAQI App role) needs **no** access to
 
 ## Secrets
 
-The Worker's are listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. The scheduled sends read `FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN` and `AQI_API_BASE` from a second environment, `push-sender` (below). Never commit any of them.
+The Worker's are listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. The scheduled sends read `FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` (to forward events to `/internal/events`) from a second environment, `push-sender` (below). Never commit any of them.
 
 | Secret | |
 | --- | --- |
@@ -125,7 +132,7 @@ Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRI
 
 ### The `push-sender` environment (GitHub Actions)
 
-`push-sender.yml` runs in the GitHub environment `push-sender`: deployments from `master` only, **no required reviewers** (a scheduled run can't wait for an approval, which is why it isn't `workers-production`). Its secrets are copies of the Worker's three:
+`push-sender.yml` runs in the GitHub environment `push-sender`: deployments from `master` only, **no required reviewers** (a scheduled run can't wait for an approval, which is why it isn't `workers-production`). Its secrets are copies of four of the Worker's:
 
 ```sh
 gh api --method PUT repos/7kfpun/SwiftUI-TWAQI/environments/push-sender --input - <<'JSON'
@@ -136,11 +143,14 @@ gh api --method POST repos/7kfpun/SwiftUI-TWAQI/environments/push-sender/deploym
 gh secret set FCM_SERVICE_ACCOUNT -R 7kfpun/SwiftUI-TWAQI --env push-sender < kf-twaqi-firebase-adminsdk.json
 gh secret set DIRECTUS_PUSH_TOKEN -R 7kfpun/SwiftUI-TWAQI --env push-sender
 gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env push-sender
+gh secret set SYNC_TOKEN          -R 7kfpun/SwiftUI-TWAQI --env push-sender
 ```
+
+The Worker's URL for the event forward is `PUSH_SENDER_URL` in the workflow (`https://twaqi-push-sender.710kfpun.workers.dev`), not a secret.
 
 Create it before the workflow's first run: a workflow that names a missing environment creates it with no branch rule. Rotating a secret means setting it in both environments.
 
-The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. The job fails when `run()` throws, or when it finishes with any alert that failed to send (`counts.failed`, after state and logs are saved; those alerts stay unsent and are retried next run). Dead tokens and sends deferred to the next run don't fail it. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
+The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. The job fails when `run()` throws, or when it finishes with any alert that failed to send (`counts.failed`, after state and logs are saved; those alerts stay unsent and are retried next run). Dead tokens, sends deferred to the next run, and events that couldn't be forwarded don't fail it. The job log shows counts only: never device ids, token suffixes or `SYNC_TOKEN`. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
 
 **GitHub's schedule is best effort.** A scheduled run can start late or be skipped when GitHub is busy, and scheduled workflows are switched off after **60 days without activity** in the repository (turn it back on under Actions → Push sender). A late or skipped run loses nothing: a crossing stays unsent until a run sends it, and nothing is sent twice.
 
@@ -148,7 +158,7 @@ The workflow refuses any branch but `master` (and any fork) in a job that runs b
 
 1. In `wrangler.jsonc`, restore `"triggers": { "crons": ["20 */2 * * *"] }` and `"limits": { "subrequests": 100000 }`, and set `SUBREQUEST_LIMIT` to `"100000"`.
 2. Restore the `scheduled` handler in `src/index.ts` (it called `run(env, { now: new Date(controller.scheduledTime) })` inside `ctx.waitUntil`; see the FOX-71 PR).
-3. Delete `.github/workflows/push-sender.yml` in the same PR, so the two never both send, and then the `push-sender` environment. `scripts/run.ts` can stay for local runs.
+3. Delete `.github/workflows/push-sender.yml` in the same PR, so the two never both send, and then the `push-sender` environment. `scripts/run.ts` can stay for local runs; `/internal/events` can go once nothing forwards to it (a cron run writes to the binding directly).
 
 ## Develop
 
@@ -162,8 +172,10 @@ npx wrangler dev  # secrets from .dev.vars (gitignored)
 `/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes. The GitHub Actions entry runs the same way from a shell (Node 22 or later, no `npm install` needed):
 
 ```sh
-FCM_SERVICE_ACCOUNT="$(cat key.json)" DIRECTUS_PUSH_TOKEN=… AQI_API_BASE=… npm run send -- --dry-run
+FCM_SERVICE_ACCOUNT="$(cat key.json)" DIRECTUS_PUSH_TOKEN=… AQI_API_BASE=… SYNC_TOKEN=… npm run send -- --dry-run
 ```
+
+A dry run sends nothing, so it has no events to forward. Set `PUSH_SENDER_URL` for a real run, or its events are only counted (with a warning).
 
 Without `--dry-run` it sends for real; any other argument is refused.
 

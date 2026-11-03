@@ -6,17 +6,21 @@
 //
 //   node --experimental-strip-types --no-warnings scripts/run.ts [--dry-run]
 //
-// The env is the `vars` in wrangler.jsonc plus three secrets from the process
-// environment: FCM_SERVICE_ACCOUNT, DIRECTUS_PUSH_TOKEN, AQI_API_BASE. There
-// are no Worker bindings: PUSH_EVENTS (Analytics Engine) is absent, so sends
-// are counted only in Directus logs (failures, dead tokens). SYNC_TOKEN gates
-// the Worker's HTTP routes and isn't needed here.
+// The env is the `vars` in wrangler.jsonc plus four secrets from the process
+// environment: FCM_SERVICE_ACCOUNT, DIRECTUS_PUSH_TOKEN, AQI_API_BASE and
+// SYNC_TOKEN. Node has no Worker bindings, so PUSH_EVENTS is a collector: run()
+// writes its per-send data points to it exactly as to Analytics Engine, and
+// once run() has saved state and logs they are POSTed to the Worker's
+// /internal/events (PUSH_SENDER_URL, SYNC_TOKEN), which writes them to the
+// twaqi_push_events dataset. A failed forward is a warning: it never re-sends
+// an alert and never fails the job.
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { MAX_EVENTS_PER_REQUEST } from '../src/events.ts'
 import { run, type Env, type RunResult } from '../src/index.ts'
 
-export const SECRETS = ['FCM_SERVICE_ACCOUNT', 'DIRECTUS_PUSH_TOKEN', 'AQI_API_BASE'] as const
+export const SECRETS = ['FCM_SERVICE_ACCOUNT', 'DIRECTUS_PUSH_TOKEN', 'AQI_API_BASE', 'SYNC_TOKEN'] as const
 
 /** wrangler.jsonc → object: drops comments and trailing commas, leaving
  * string contents alone (the same parse as workers.yml's secrets step). */
@@ -59,14 +63,97 @@ export function failure(result: RunResult): string | null {
   return failed ? `${failed} alert(s) failed to send; they stay unsent and are retried next run` : null
 }
 
+/** Stands in for the PUSH_EVENTS binding: keeps every data point run()
+ * writes, to forward afterwards. */
+export function eventCollector(): { dataset: AnalyticsEngineDataset; points: AnalyticsEngineDataPoint[] } {
+  const points: AnalyticsEngineDataPoint[] = []
+  return { dataset: { writeDataPoint: (point?: AnalyticsEngineDataPoint) => void points.push(point ?? {}) }, points }
+}
+
+export interface ForwardResult {
+  /** Points collected. */
+  events: number
+  /** Points in requests the Worker accepted. */
+  forwarded: number
+  /** Points the Worker reports written to Analytics Engine. */
+  written: number
+  /** Points in requests that failed twice. */
+  failed: number
+  /** HTTP status (or "network") of the last failed request. */
+  lastError?: string
+}
+
+/** POSTs the points to `${url}/internal/events` in chunks of 250, each tried
+ * twice. Only talks to that URL, so it can't re-send an alert, and never
+ * throws: what didn't make it is counted. */
+export async function forwardEvents(
+  points: AnalyticsEngineDataPoint[],
+  options: { url: string; token: string; fetch?: typeof fetch; retryDelayMs?: number; chunkSize?: number },
+): Promise<ForwardResult> {
+  const { url, token, fetch: fetchImpl = fetch, retryDelayMs = 1000, chunkSize = MAX_EVENTS_PER_REQUEST } = options
+  const endpoint = `${url.replace(/\/+$/, '')}/internal/events`
+  const result: ForwardResult = { events: points.length, forwarded: 0, written: 0, failed: 0 }
+  for (let i = 0; i < points.length; i += chunkSize) {
+    const chunk = points.slice(i, i + chunkSize)
+    let ok = false
+    for (let attempt = 1; attempt <= 2 && !ok; attempt++) {
+      if (attempt > 1) await new Promise((r) => setTimeout(r, retryDelayMs))
+      try {
+        const res = await fetchImpl(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ events: chunk }),
+          signal: AbortSignal.timeout(30_000),
+        })
+        if (res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { written?: unknown }
+          result.forwarded += chunk.length
+          result.written += typeof body.written === 'number' ? body.written : 0
+          ok = true
+        } else {
+          result.lastError = `HTTP ${res.status}`
+        }
+      } catch {
+        result.lastError = 'network'
+      }
+    }
+    if (!ok) result.failed += chunk.length
+  }
+  return result
+}
+
 async function main(): Promise<void> {
   const { dryRun } = parseArgs(process.argv.slice(2))
   const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
-  const result = await run(nodeEnv(config, process.env), { dryRun })
-  // The log is public (public repo): counts only, no per-device decisions.
-  const { decisions, ...summary } = result
+  const collector = eventCollector()
+  const env = { ...nodeEnv(config, process.env), PUSH_EVENTS: collector.dataset }
+  const result = await run(env, { dryRun })
+  // The log is public (public repo): counts only, never device ids, token
+  // suffixes or per-device decisions.
+  const { decisions, archivedDevices, ...summary } = result
   const failed = failure(result)
-  console.log(failed ? 'run finished with failures' : 'run ok', JSON.stringify({ ...summary, decisions: decisions?.length }))
+  console.log(
+    failed ? 'run finished with failures' : 'run ok',
+    JSON.stringify({ ...summary, archivedDevices: archivedDevices.length, decisions: decisions?.length }),
+  )
+
+  // After run() has saved state and logs. Separate from the exit code below.
+  if (collector.points.length) {
+    const url = process.env.PUSH_SENDER_URL
+    if (!url) {
+      console.log(`::warning::${collector.points.length} push events not forwarded: PUSH_SENDER_URL is not set`)
+    } else {
+      const forward = await forwardEvents(collector.points, { url, token: env.SYNC_TOKEN })
+      const { lastError, ...counts } = forward
+      console.log('events forwarded', JSON.stringify(counts))
+      if (forward.failed) {
+        console.log(`::warning::${forward.failed} of ${forward.events} push events not forwarded to Analytics Engine (${lastError})`)
+      } else if (forward.written < forward.forwarded) {
+        console.log(`::warning::Analytics Engine wrote ${forward.written} of ${forward.forwarded} forwarded push events`)
+      }
+    }
+  }
+
   if (failed) {
     console.error(`::error::${failed}`)
     process.exitCode = 1

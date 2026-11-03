@@ -7,7 +7,8 @@
 // The scheduled run() is called from GitHub Actions under Node
 // (scripts/run.ts, .github/workflows/push-sender.yml), not from a Worker cron:
 // the Workers Free plan can't carry the sends (FOX-71). The Worker itself
-// serves fetch(): the app's /app/v1 API and the manual /run and /test routes.
+// serves fetch(): the app's /app/v1 API, the manual /run and /test routes, and
+// /internal/events, where the GitHub Actions run forwards its per-send events.
 import { allReadings, type AqiConfig, type Reading } from './aqi.ts'
 import { handleApp, type AppApiEnv } from './app-api.ts'
 import {
@@ -22,12 +23,15 @@ import {
   type Subscription,
   type SubscriptionUpdate,
 } from './directus.ts'
+import { parseEvents, pushEventPoint, writePushEvents } from './events.ts'
 import { isConfigured as fcmConfigured, send, type FcmConfig } from './fcm.ts'
 import { alertText, stationName, testText } from './message.ts'
 import { decide, isQuiet, publishedAt, type Outcome } from './rules.ts'
 
 export interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
-  /** Workers Analytics Engine dataset for every send (twaqi_push_events). */
+  /** Workers Analytics Engine dataset for every send (twaqi_push_events). The
+   * GitHub Actions run passes a collector here and forwards what it gathered
+   * to /internal/events (scripts/run.ts). */
   PUSH_EVENTS?: AnalyticsEngineDataset
   /** Bearer token for the manual POST routes, shared with twaqi-workers. */
   SYNC_TOKEN: string
@@ -101,6 +105,17 @@ export default {
       } catch (e) {
         return json({ error: String(e) }, 502)
       }
+    }
+
+    // Per-send events from the GitHub Actions run (scripts/run.ts), which has
+    // no Analytics Engine binding of its own (FOX-71).
+    if (url.pathname === '/internal/events') {
+      if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
+      if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
+      if (!env.PUSH_EVENTS) return json({ error: 'PUSH_EVENTS is not bound' }, 503)
+      const events = parseEvents(await readJson(request))
+      if (typeof events === 'string') return json({ error: events }, 400)
+      return json({ received: events.length, written: writePushEvents(env.PUSH_EVENTS, events) })
     }
 
     return json({ error: 'not found' }, 404)
@@ -380,21 +395,7 @@ async function sendTest(env: Env, body: Record<string, unknown>) {
  * month. Never throws. */
 export async function logQuietly(env: Env, logs: PushLog[]): Promise<{ rows: number; events: number }> {
   if (!logs.length) return { rows: 0, events: 0 }
-  let events = 0
-  if (env.PUSH_EVENTS) {
-    for (const log of logs) {
-      try {
-        env.PUSH_EVENTS.writeDataPoint({
-          indexes: [log.station ?? ''],
-          blobs: [log.status, log.trigger, log.station ?? '', log.error_code ?? '', log.token_suffix, String(log.device)],
-          doubles: [log.aqi ?? 0],
-        })
-        events++
-      } catch (e) {
-        console.warn('push event write failed', String(e))
-      }
-    }
-  }
+  const events = env.PUSH_EVENTS ? writePushEvents(env.PUSH_EVENTS, logs.map(pushEventPoint)) : 0
   const rows = logs.filter((log) => log.status !== 'sent' || log.trigger === 'test')
   if (!rows.length) return { rows: 0, events }
   try {

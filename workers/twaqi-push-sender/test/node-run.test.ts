@@ -7,7 +7,7 @@ import { failure, nodeEnv, parseArgs, parseJsonc } from '../scripts/run.ts'
 // The GitHub Actions runner (FOX-71): run() with a plain env object built from
 // wrangler.jsonc's vars and three secrets, no Worker bindings.
 const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
-const secrets = { FCM_SERVICE_ACCOUNT: '{}', DIRECTUS_PUSH_TOKEN: 'w', AQI_API_BASE: 'https://aqi.test/api' }
+const secrets = { FCM_SERVICE_ACCOUNT: '{}', DIRECTUS_PUSH_TOKEN: 'w', AQI_API_BASE: 'https://aqi.test/api', SYNC_TOKEN: 's' }
 
 describe('nodeEnv', () => {
   it('is the wrangler vars plus the secrets, with no bindings and no subrequest cap', () => {
