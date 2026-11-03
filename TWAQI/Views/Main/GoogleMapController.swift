@@ -460,38 +460,74 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
     }
 
-    /// Redraws every marker at the timeline's hour.
+    /// The markers on the map, one per station, kept between redraws.
+    private var markers: [MarkerKey: StationMapMarker] = [:]
+
+    /// Station ids are only unique within a country.
+    struct MarkerKey: Hashable {
+        let countryCode: String
+        let stationId: Int
+    }
+
+    /// Brings every marker to the timeline's hour.
+    ///
+    /// Markers are kept and only those whose look changed are restyled, so
+    /// stepping through the timeline (or a burst of history arriving) costs a
+    /// handful of icon swaps rather than clearing the map and building every
+    /// marker again (FOX-69).
     func renderMarkers() {
-        print("renderMarkers", timelineHoursAgo)
-        self.mapView.clear()
+        var wanted: [MarkerKey: (pollutant: Pollutant, appearance: MarkerAppearance, isInteractive: Bool)] = [:]
         for (countryCode, pollutants) in self.countryPollutants {
             let isInteractive = countryCode == self.supportedCountryCode
-            let anchor = Self.anchor(of: pollutants)
-            pollutants.forEach { livePollutant in
-                let (pollutant, hasData) = displayedPollutant(livePollutant, anchor: anchor)
-                var pollutantMarker: GMSMarker
-                if self.isWindMode {
-                    pollutantMarker = WindDirectionMarker(
-                        pollutant: pollutant,
-                        airIndexTypeSelected: self.airIndexTypeSelected,
-                        isInteractive: isInteractive
-                    )
-                } else {
-                    pollutantMarker = PollutantMarker(
-                        pollutant: pollutant,
-                        airIndexTypeSelected: self.airIndexTypeSelected,
-                        isInteractive: isInteractive
-                    )
-                }
-                if !hasData {
-                    // Not loaded yet, or no reading that hour: grey "-", faded
-                    // so it reads as missing rather than as a reading.
-                    pollutantMarker.opacity = min(pollutantMarker.opacity, 0.55)
-                }
-                pollutantMarker.tracksViewChanges = false
-                pollutantMarker.map = self.mapView
+            // Worked out once per country rather than per station.
+            let hour = timelineHour(anchor: Self.anchor(of: pollutants))
+            for livePollutant in pollutants {
+                let (pollutant, hasData) = displayedPollutant(livePollutant, hour: hour)
+                let appearance = MarkerAppearance(
+                    pollutant: pollutant,
+                    airIndexType: self.airIndexTypeSelected,
+                    isWindMode: self.isWindMode,
+                    isInteractive: isInteractive,
+                    hasData: hasData
+                )
+                let key = MarkerKey(countryCode: countryCode, stationId: livePollutant.stationId)
+                wanted[key] = (pollutant, appearance, isInteractive)
             }
         }
+
+        let current = markers.compactMapValues(\.appearance)
+        let plan = MarkerUpdatePlan(current: current, wanted: wanted.mapValues(\.appearance))
+
+        for key in plan.remove {
+            markers[key]?.map = nil
+            markers[key] = nil
+        }
+        for (key, station) in wanted {
+            if plan.add.contains(key) {
+                let marker = StationMapMarker(
+                    pollutant: station.pollutant,
+                    appearance: station.appearance,
+                    isInteractive: station.isInteractive
+                )
+                marker.map = self.mapView
+                markers[key] = marker
+            } else {
+                // Unchanged looks return early; the reading and whether it
+                // opens are still swapped so a tap does the right thing.
+                markers[key]?.update(
+                    pollutant: station.pollutant,
+                    appearance: station.appearance,
+                    isInteractive: station.isInteractive
+                )
+            }
+        }
+    }
+
+    /// The publish hour the timeline is on for a country with this anchor, or
+    /// `nil` at "now" (or before the country's readings are in).
+    private func timelineHour(anchor: String?) -> String? {
+        guard timelineHoursAgo > 0, let anchor else { return nil }
+        return MapTimeline.publishTime(anchor, hoursAgo: timelineHoursAgo)
     }
 
     /// The latest publish hour among a country's stations — "now" on the
@@ -508,15 +544,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     /// What a station shows at the timeline's hour, and whether there is a
     /// reading behind it. Live at "now"; that hour's history otherwise.
-    private func displayedPollutant(_ live: Pollutant, anchor: String? = nil) -> (pollutant: Pollutant, hasData: Bool) {
-        guard timelineHoursAgo > 0,
-              let anchor = anchor ?? self.anchor(forStation: live.stationId),
-              let target = MapTimeline.publishTime(anchor, hoursAgo: timelineHoursAgo) else {
-            return (live, true)
-        }
+    private func displayedPollutant(_ live: Pollutant) -> (pollutant: Pollutant, hasData: Bool) {
+        displayedPollutant(live, hour: timelineHour(anchor: anchor(forStation: live.stationId)))
+    }
 
-        let reading = historyStore.reading(stationId: live.stationId, publishTime: target)
-        return (Pollutant(live, reading: reading, publishTime: target), reading != nil)
+    /// As above, for an hour already worked out (`nil` is live).
+    private func displayedPollutant(_ live: Pollutant, hour: String?) -> (pollutant: Pollutant, hasData: Bool) {
+        guard let hour else { return (live, true) }
+        let reading = historyStore.reading(stationId: live.stationId, hour: hour)
+        return (Pollutant(live, reading: reading, publishTime: hour), reading != nil)
     }
 
     /// The timeline is labelled in the supported country's clock (Taiwan).

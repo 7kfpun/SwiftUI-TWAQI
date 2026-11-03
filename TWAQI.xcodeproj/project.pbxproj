@@ -32,6 +32,7 @@
 		23924069AB460C3CF561A526 /* DefinitionPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF250182376B95D00A731D5 /* DefinitionPages.swift */; };
 		2B8B366CCA72E538CF8124D8 /* StationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB601F7471823C2024AB3D6 /* StationTypes.swift */; };
 		2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E010BE4EF22BFDE16E305BC /* WindTests.swift */; };
+		9EC0FFEE2A10000000000069 /* MapMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */; };
 		2F2BF8CF267E066C72439E82 /* IndexGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B21B3367FF98833E1B3BE6 /* IndexGuideView.swift */; };
 		31E5674C08F39AF35DA29D65 /* StationHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4960C340833CD7D23354E4 /* StationHeaderView.swift */; };
 		37720FAFC125B3D1AC7F5764 /* WatchReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4800E039975374A0F588145 /* WatchReading.swift */; };
@@ -364,6 +365,7 @@
 		2A8CA61685800F418B19D88A /* StationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationRow.swift; sourceTree = "<group>"; };
 		2B62FC15B7CFF80DF517CBF2 /* Pods_TWAQI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TWAQI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E010BE4EF22BFDE16E305BC /* WindTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindTests.swift; sourceTree = "<group>"; };
+		9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapMarkerTests.swift; sourceTree = "<group>"; };
 		32CD323794AA44C233EB7C35 /* WidgetBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		346558AFF08D2DD24C5AE502 /* WindExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindExtensions.swift; sourceTree = "<group>"; };
 		369428456E755810656C6624 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -664,6 +666,7 @@
 				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
 				F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
+				9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */,
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
 			);
 			path = TWAQITests;
@@ -1469,6 +1472,7 @@
 				FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */,
 				3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */,
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
+				9EC0FFEE2A10000000000069 /* MapMarkerTests.swift in Sources */,
 				56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
