@@ -89,14 +89,13 @@ jobs:
               handle.write(f"run={decision}\n")
           PY
 
-      - name: Boot simulator
+      - name: Pick simulator
         if: steps.scope.outputs.run == 'true'
         run: |
           set -euo pipefail
-          # A fresh simulator takes minutes to boot on the runner, and the first
-          # simctl call can take a minute too. Pick and boot one in the
-          # background now, so both overlap checkout, pod install and the build.
-          # "Build for testing" waits for the pick; "Run unit tests" for the boot.
+          # The first simctl call on a runner can take a minute (it starts
+          # CoreSimulatorService). Pick in the background so that overlaps
+          # checkout and pod install; "Build for testing" waits for the pick.
           state="$RUNNER_TEMP/simulator"
           mkdir -p "$state"
           # generic/platform=iOS Simulator cannot execute tests. Pick the newest
@@ -128,21 +127,18 @@ jobs:
           version, device = best
           print(device["udid"], device["name"], "iOS " + ".".join(map(str, version)), sep="\t")
           PY
-          cat > "$state/boot.sh" <<'SH'
+          cat > "$state/pick.sh" <<'SH'
           set -euo pipefail
           state="$1"
-          trap 'echo $? > "$state/exit"' EXIT
+          trap 'echo $? > "$state/pick-exit"' EXIT
+          echo "$(date -u +%T) picking"
           xcrun simctl list devices available -j > "$state/devices.json"
           python3 "$state/pick.py" < "$state/devices.json" > "$state/picked.tmp"
           mv "$state/picked.tmp" "$state/picked"
-          udid="$(cut -f1 "$state/picked")"
-          echo "$(date -u +%T) booting $(tr '\t' ' ' < "$state/picked")"
-          xcrun simctl boot "$udid"
-          xcrun simctl bootstatus "$udid"
-          echo "$(date -u +%T) booted"
+          echo "$(date -u +%T) picked $(tr '\t' ' ' < "$state/picked")"
           SH
-          nohup bash "$state/boot.sh" "$state" > "$state/boot.log" 2>&1 &
-          echo "Simulator boot started in the background (log: $state/boot.log)."
+          nohup bash "$state/pick.sh" "$state" > "$state/pick.log" 2>&1 &
+          echo "Picking a simulator in the background (log: $state/pick.log)."
 
 
       - name: Checkout repository
@@ -224,7 +220,9 @@ jobs:
         if: steps.scope.outputs.run == 'true'
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/SourcePackages
+          # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
+          # runs DerivedData/SourcePackages/checkouts/firebase-ios-sdk/...
+          path: ${{ runner.temp }}/DerivedData/SourcePackages
           key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: |
             spm-${{ runner.os }}-${{ runner.arch }}-
@@ -249,6 +247,32 @@ jobs:
           fi
           pod install
 
+      - name: Boot simulator
+        if: steps.scope.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          # A fresh simulator takes minutes to boot on the runner. Boot it in the
+          # background so it overlaps package resolve and the build; "Run unit
+          # tests" waits for it. Started after pod install, not earlier: the
+          # first boot is disk- and CPU-heavy and slowed pod install by minutes.
+          state="$RUNNER_TEMP/simulator"
+          cat > "$state/boot.sh" <<'SH'
+          set -euo pipefail
+          state="$1"
+          trap 'echo $? > "$state/boot-exit"' EXIT
+          for _ in $(seq 1 300); do
+            if [ -s "$state/picked" ] || [ -s "$state/pick-exit" ]; then break; fi
+            sleep 1
+          done
+          udid="$(cut -f1 "$state/picked")"
+          echo "$(date -u +%T) booting ${udid}"
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid"
+          echo "$(date -u +%T) booted"
+          SH
+          nohup bash "$state/boot.sh" "$state" > "$state/boot.log" 2>&1 &
+          echo "Simulator boot started in the background (log: $state/boot.log)."
+
       - name: Build for testing
         id: build
         if: steps.scope.outputs.run == 'true'
@@ -256,11 +280,11 @@ jobs:
           set -euo pipefail
           state="$RUNNER_TEMP/simulator"
           for _ in $(seq 1 300); do
-            if [ -s "$state/picked" ] || [ -s "$state/exit" ]; then break; fi
+            if [ -s "$state/picked" ] || [ -s "$state/pick-exit" ]; then break; fi
             sleep 1
           done
+          cat "$state/pick.log" || true
           if [ ! -s "$state/picked" ]; then
-            cat "$state/boot.log" || true
             echo "::error::No iPhone simulator was picked. See the log above."
             exit 1
           fi
@@ -275,7 +299,7 @@ jobs:
             -scheme TWAQI-CI \
             -destination "id=${udid}" \
             -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
-            -clonedSourcePackagesDirPath "${RUNNER_TEMP}/SourcePackages" \
+            -clonedSourcePackagesDirPath "${RUNNER_TEMP}/DerivedData/SourcePackages" \
             COMPILER_INDEX_STORE_ENABLE=NO \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -291,9 +315,10 @@ jobs:
           # Normally booted long ago. If the background boot is still going, wait
           # for it; if it failed, bootstatus -b boots the simulator here instead.
           for _ in $(seq 1 600); do
-            if [ -s "$state/exit" ]; then break; fi
+            if [ -s "$state/boot-exit" ]; then break; fi
             sleep 1
           done
+          echo "$(date -u +%T) boot log:"
           cat "$state/boot.log" || true
           xcrun simctl bootstatus "$UDID" -b
           xctestrun="$(find "${RUNNER_TEMP}/DerivedData/Build/Products" -maxdepth 1 -name 'TWAQI-CI_*.xctestrun' | head -n 1)"
