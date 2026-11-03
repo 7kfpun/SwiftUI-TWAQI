@@ -6,7 +6,7 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
   1. Read every station's current AQI in one request to the app's own API (`AQI_API_BASE` + `/v1/current-pollutants?country=twn`): the same numbers the station screen shows.
   2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold ≤ AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer reaches (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
   3. Send an alert to each one that crossed in, and write back only the rows whose state changed.
-- **Only devices with an `fcm_token`**, i.e. builds from FOX-13 on. Older builds have no FCM token and are still served by the OneSignal tracker in `ai-playground`, which this Worker does not touch.
+- **Only devices with an `fcm_token`**, i.e. builds from FOX-13 on. Older builds have no FCM token. They were served by the OneSignal tracker in `ai-playground`, which is being switched off. The app keeps OneSignal registered with the same tags, so it can be switched back on.
 - **Directus** (`https://cms.wahthefox.com`) is the database. The app creates and updates rows; this Worker reads them and updates state. Nothing is deleted: dead rows get `archived = true`.
 
 ## Rules
@@ -50,9 +50,11 @@ The app has **no Directus token for the push collections**. It writes its own ro
 
 ## Send log (`twaqi_push_logs`, FOX-66)
 
-Every send attempt, alert or test, is written to `twaqi_push_logs`: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
+Every send is recorded in **Workers Analytics Engine** (dataset `twaqi_push_events`, binding `PUSH_EVENTS`). The fields are status, trigger, station, error code, token suffix, device id and AQI, kept about 3 months and queryable with SQL. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
 
-The log is best effort: a failed write is logged to the console and never holds up a send or its state. Quiet-hours and cool-down skips are not logged (the subscription's `last_value` / `in_zone` record those).
+The Directus rows are: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
+
+Both logs are best effort: a failed write is logged to the console and never holds up a send or its state. Quiet-hours and cool-down skips are not logged (the subscription's `last_value` / `in_zone` record those).
 
 The collection is created by [`directus/push-logs.mjs`](directus/push-logs.mjs), which also lets the **TWAQI Push Worker** policy create rows (and nothing else) there. It is idempotent and only adds what's missing:
 
@@ -110,7 +112,7 @@ gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env workers-producti
 
 To set one on the live Worker without a deploy: `npx wrangler secret put FCM_SERVICE_ACCOUNT < kf-twaqi-firebase-adminsdk.json`.
 
-Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`, `MAX_SENDS_PER_RUN`.
+Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`, `MAX_SENDS_PER_RUN`. Bindings: `APP_LIMITER` (rate limit), `PUSH_EVENTS` (Analytics Engine). `limits.subrequests` sets the per-run request budget.
 
 ## Develop
 
@@ -123,4 +125,9 @@ npx wrangler dev  # secrets from .dev.vars (gitignored)
 
 `/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes.
 
-Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one subrequest per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. State and logs are saved after every 100 sends, and a run sends at most `MAX_SENDS_PER_RUN` (800, sized for the paid plan's ~1,000 subrequests; set it to ~30 on the free plan's 50). Alerts past that stay unsent and go out on the next run, never twice. More than that per run needs the queue-based sender (follow-up).
+Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one subrequest per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. **Sized for 40,000 alerts per 2-hour run** on Workers Paid.
+- **Requests:** a run may make up to `limits.subrequests` = 60,000 outgoing requests (Paid allows 10,000 by default, up to 10M). That covers one per alert plus reads and writes.
+- **Time:** sends go 25 at a time, so 40k at ~100 ms each take about 3 minutes. A cron every 2 h gets 15 min of CPU and 15 min of wall time.
+- **Cap:** `MAX_SENDS_PER_RUN` is 45,000. Anything past it stays unsent and goes out on the next run.
+- **No repeats:** state is saved to Directus after every 100 sends, so a run cut short never resends what it already delivered.
+- **FCM** allows about 600k messages a minute per project.

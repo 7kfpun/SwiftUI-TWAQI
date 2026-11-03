@@ -24,10 +24,19 @@
     "COOLDOWN_MINUTES": "180",
     // Readings older than this are ignored rather than alerted on.
     "MAX_DATA_AGE_MINUTES": "180",
-    // Alerts sent per run; the rest go out on the next run. Sized to the paid
-    // plan's ~1,000 subrequests per run, with room for reads and writes.
-    "MAX_SENDS_PER_RUN": "800"
+    // Alerts sent per run; the rest go out on the next run, never twice.
+    // Aimed at 40k per 2-hour run; must stay under limits.subrequests minus
+    // the reads and per-100 writes (~1.5k at 45k sends).
+    "MAX_SENDS_PER_RUN": "45000"
   },
+  // Workers Paid: 10,000 outgoing requests per run by default, up to 10M.
+  // One per alert sent, plus reads and writes. Cron every 2 h gets 15 min
+  // CPU and 15 min wall time; 40k sends take ~3 min.
+  "limits": { "subrequests": 60000 },
+  // Every send, for delivery stats (Directus keeps only failures and tests).
+  "analytics_engine_datasets": [
+    { "binding": "PUSH_EVENTS", "dataset": "twaqi_push_events" }
+  ],
   // Per-IP limit on the app's /app/v1 routes (Workers Rate Limiting).
   "ratelimits": [
     { "name": "APP_LIMITER", "namespace_id": "1301", "simple": { "limit": 60, "period": 60 } }

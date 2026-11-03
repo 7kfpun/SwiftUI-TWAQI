@@ -190,3 +190,66 @@ describe('twaqi_push_logs schema', () => {
     assert.equal(collection.meta.archive_field, 'archived')
   })
 })
+
+describe('send log routing', () => {
+  const realFetch = globalThis.fetch
+  afterEach(() => {
+    globalThis.fetch = realFetch
+  })
+
+  it('records every send as an event, and only failures and tests in Directus', async () => {
+    const { logQuietly } = await import('../src/index.ts')
+    const points: unknown[] = []
+    const posted: unknown[][] = []
+    globalThis.fetch = (async (_url: string, init: RequestInit) => {
+      posted.push(JSON.parse(String(init.body)))
+      return new Response('{"data":[]}', { status: 200 })
+    }) as typeof fetch
+    const env = {
+      DIRECTUS_URL: 'https://cms.test', DIRECTUS_PUSH_TOKEN: 't',
+      PUSH_EVENTS: { writeDataPoint: (p: unknown) => points.push(p) },
+    } as never
+    const log = (status: 'sent' | 'failed' | 'unregistered', trigger: 'pollution' | 'test' = 'pollution') => ({
+      token_suffix: 'abc123', status, station: '105', trigger, device: 5, aqi: 130, fcm_message_id: null, error_code: null,
+    })
+    const result = await logQuietly(env, [log('sent'), log('sent'), log('failed'), log('unregistered'), log('sent', 'test')])
+    assert.deepEqual(result, { rows: 3, events: 5 })
+    assert.equal(points.length, 5)
+    assert.deepEqual(posted[0].map((r) => (r as { status: string }).status), ['failed', 'unregistered', 'sent'])
+  })
+})
+
+describe('send under load', () => {
+  const realFetch = globalThis.fetch
+  afterEach(() => {
+    globalThis.fetch = realFetch
+  })
+
+  it('shares one OAuth exchange between parallel sends, and retries a network error once', async () => {
+    const pair = await crypto.subtle.generateKey(
+      { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' },
+      true,
+      ['sign'],
+    )
+    const der = Buffer.from(new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey))).toString('base64')
+    const label = ['PRIVATE', 'KEY'].join(' ')
+    // A new client_email, so the token cached by earlier tests isn't reused.
+    const account = JSON.stringify({ project_id: 'p', client_email: `load-${Date.now()}@p.iam.gserviceaccount.com`, private_key: `-----BEGIN ${label}-----\n${der}\n-----END ${label}-----\n` })
+    let oauth = 0
+    let fcm = 0
+    globalThis.fetch = (async (url: string) => {
+      if (String(url).startsWith('https://oauth2.googleapis.com/')) {
+        oauth++
+        await new Promise((r) => setTimeout(r, 20))
+        return new Response(JSON.stringify({ access_token: 'tok', expires_in: 3600 }), { status: 200 })
+      }
+      fcm++
+      if (fcm === 1) throw new TypeError('fetch failed')
+      return new Response(JSON.stringify({ name: `projects/p/messages/${fcm}` }), { status: 200 })
+    }) as typeof fetch
+    const results = await Promise.all(Array.from({ length: 25 }, (_, i) => send({ FCM_SERVICE_ACCOUNT: account }, { token: `t${i}`, title: 'T', body: 'B' })))
+    assert.equal(oauth, 1)
+    assert.equal(results.filter((r) => r.ok).length, 25)
+    assert.equal(fcm, 26) // 25 sends, one of them retried
+  })
+})

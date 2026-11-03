@@ -46,6 +46,9 @@ const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const REFRESH_MARGIN_MS = 5 * 60_000
 
 let cached: { token: string; expiresAt: number; email: string } | null = null
+/** The exchange in flight, shared by sends that start before it finishes, so
+ * 25 parallel sends make one OAuth call, not 25. */
+let pending: Promise<string> | null = null
 
 export function isConfigured(config: Partial<FcmConfig>): boolean {
   try {
@@ -100,7 +103,21 @@ export function classifyError(status: number, body: unknown): { errorCode: strin
   return { errorCode, deadToken }
 }
 
+/** Retried once, a moment later, on a network error or an FCM 429/5xx. */
+const RETRY_DELAY_MS = 500
+
 export async function send(config: FcmConfig, m: FcmMessage): Promise<FcmResult> {
+  try {
+    const first = await sendOnce(config, m)
+    if (first.ok || !(first.status === 429 || first.status >= 500)) return first
+  } catch {
+    // Network error: try once more below.
+  }
+  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
+  return sendOnce(config, m)
+}
+
+async function sendOnce(config: FcmConfig, m: FcmMessage): Promise<FcmResult> {
   const account = parseServiceAccount(config.FCM_SERVICE_ACCOUNT)
   const accessToken = await getAccessToken(account)
   const res = await fetch(`https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`, {
@@ -122,10 +139,17 @@ export async function send(config: FcmConfig, m: FcmMessage): Promise<FcmResult>
 }
 
 async function getAccessToken(account: ServiceAccount): Promise<string> {
-  const now = Date.now()
-  if (cached && cached.email === account.client_email && now < cached.expiresAt - REFRESH_MARGIN_MS) {
+  if (cached && cached.email === account.client_email && Date.now() < cached.expiresAt - REFRESH_MARGIN_MS) {
     return cached.token
   }
+  pending ??= exchange(account).finally(() => {
+    pending = null
+  })
+  return pending
+}
+
+async function exchange(account: ServiceAccount): Promise<string> {
+  const now = Date.now()
 
   const key = await crypto.subtle.importKey(
     'pkcs8',

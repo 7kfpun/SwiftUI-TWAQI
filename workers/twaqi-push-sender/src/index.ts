@@ -21,7 +21,9 @@ import { isConfigured as fcmConfigured, send, type FcmConfig } from './fcm.ts'
 import { alertText, stationName, testText } from './message.ts'
 import { decide, isQuiet, publishedAt, type Outcome } from './rules.ts'
 
-interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
+export interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
+  /** Workers Analytics Engine dataset for every send (twaqi_push_events). */
+  PUSH_EVENTS?: AnalyticsEngineDataset
   /** Bearer token for the manual POST routes, shared with twaqi-workers. */
   SYNC_TOKEN: string
   COOLDOWN_MINUTES?: string
@@ -40,7 +42,7 @@ interface RunOptions {
 
 type Count = Outcome | 'sent' | 'failed' | 'dead-token' | 'deferred'
 
-interface RunResult {
+export interface RunResult {
   /** Stations with a fresh reading, each one filtered for in Directus. */
   stations: number
   /** Subscriptions whose zone changed: to send, drop, or re-arm. */
@@ -48,12 +50,16 @@ interface RunResult {
   counts: Partial<Record<Count, number>>
   archivedDevices: number[]
   updated: number
+  /** Rows written to Directus twaqi_push_logs: failures, dead tokens, tests. */
   logged: number
+  /** Sends recorded in Analytics Engine (every one). */
+  events: number
   dryRun: boolean
   decisions?: { subscription: number; device: number; station: number | null; aqi: number; outcome: string }[]
 }
 
-const SEND_CONCURRENCY = 10
+/** FCM sends in flight at once. 40k alerts at ~100 ms each take ~3 min. */
+const SEND_CONCURRENCY = 25
 /** State and logs are saved after every this many sends. */
 const SAVE_EVERY = 100
 /** An AQI alert an hour late is noise; let APNs drop it. */
@@ -101,7 +107,7 @@ export default {
   },
 } satisfies ExportedHandler<Env>
 
-async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
+export async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
   const now = options.now ?? new Date()
   const dryRun = options.dryRun ?? false
   // Without a key every crossing would be recorded as handled and never sent.
@@ -146,6 +152,7 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
     archivedDevices: [],
     updated: 0,
     logged: 0,
+    events: 0,
     dryRun,
     decisions: dryRun ? [] : undefined,
   }
@@ -196,7 +203,7 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
   // A run sends at most this many; the rest stay unsent (in_zone false) and
   // go out on the next run. Keeps every run inside the Worker's subrequest
   // limit, so state is always written for what was sent: no repeat alerts.
-  const maxSends = Number(env.MAX_SENDS_PER_RUN ?? 800)
+  const maxSends = Number(env.MAX_SENDS_PER_RUN ?? 45000)
   const deferred = toSend.splice(maxSends)
   if (deferred.length) {
     result.counts.deferred = deferred.length
@@ -207,18 +214,18 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
   for (let i = 0; i < toSend.length; i += SAVE_EVERY) {
     const logs: PushLog[] = []
     const chunk = toSend.slice(i, i + SAVE_EVERY)
-    for (let j = 0; j < chunk.length; j += SEND_CONCURRENCY) {
-      await Promise.all(chunk.slice(j, j + SEND_CONCURRENCY).map(async ({ sub, reading }) => {
-        if (dead.has(sub.device.id)) return
-        logs.push(await sendOne(sub, reading))
-      }))
-    }
+    await pool(chunk, SEND_CONCURRENCY, async ({ sub, reading }) => {
+      if (dead.has(sub.device.id)) return
+      logs.push(await sendOne(sub, reading))
+    })
     // Saved per chunk: what was sent is marked sent before the next chunk.
     const newlyDead = [...dead].filter((id) => !result.archivedDevices.includes(id))
     await archiveDevices(env, newlyDead)
     result.archivedDevices.push(...newlyDead)
     await saveUpdates()
-    result.logged += await logQuietly(env, logs)
+    const written = await logQuietly(env, logs)
+    result.logged += written.rows
+    result.events += written.events
   }
   return result
 
@@ -320,16 +327,45 @@ async function sendTest(env: Env, body: Record<string, unknown>) {
   return { device: device.id, ...res }
 }
 
-/** Writes the send log; a failure is logged and counted as 0, never thrown. */
-async function logQuietly(env: Env, logs: PushLog[]): Promise<number> {
-  if (!logs.length) return 0
+/** Every send goes to Analytics Engine (cheap, kept ~3 months); only the
+ * ones worth a row of their own reach Directus: failures, dead tokens and
+ * tests. At 40k alerts a run, a Directus row per send would be ~14M rows a
+ * month. Never throws. */
+export async function logQuietly(env: Env, logs: PushLog[]): Promise<{ rows: number; events: number }> {
+  if (!logs.length) return { rows: 0, events: 0 }
+  let events = 0
+  if (env.PUSH_EVENTS) {
+    for (const log of logs) {
+      try {
+        env.PUSH_EVENTS.writeDataPoint({
+          indexes: [log.station ?? ''],
+          blobs: [log.status, log.trigger, log.station ?? '', log.error_code ?? '', log.token_suffix, String(log.device)],
+          doubles: [log.aqi ?? 0],
+        })
+        events++
+      } catch (e) {
+        console.warn('push event write failed', String(e))
+      }
+    }
+  }
+  const rows = logs.filter((log) => log.status !== 'sent' || log.trigger === 'test')
+  if (!rows.length) return { rows: 0, events }
   try {
-    await writeLogs(env, logs)
-    return logs.length
+    await writeLogs(env, rows)
+    return { rows: rows.length, events }
   } catch (e) {
     console.warn('push log write failed', String(e))
-    return 0
+    return { rows: 0, events }
   }
+}
+
+/** Runs `work` over `items`, at most `limit` at a time. */
+async function pool<T>(items: T[], limit: number, work: (item: T) => Promise<void>): Promise<void> {
+  let next = 0
+  const lanes = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) await work(items[next++])
+  })
+  await Promise.all(lanes)
 }
 
 async function readJson(request: Request): Promise<Record<string, unknown>> {
