@@ -24,7 +24,7 @@ struct SettingsRow: View {
         // on, so it reads as an invitation when off and a status when on. The
         // station name used to head this block, repeating the page header; it
         // is still left out.
-        AlertsCard(isOn: viewModel.alertsState == .ready ? isOn : nil) {
+        AlertsCard(isOn: isOn) {
             threshold(
                 title: "Settings.notice_me_when_aqi_is_above",
                 isOn: $viewModel.stationSetting.isPollutionNotificationEnabled,
@@ -50,21 +50,8 @@ struct SettingsRow: View {
     /// One line under the switches on why they can't be used, if they can't.
     @ViewBuilder
     private var status: some View {
-        switch viewModel.alertsState {
-        case .checking:
-            HStack(spacing: 8) {
-                ProgressView()
-                AlertsCaption("Details.alerts_checking")
-            }
-        case .unavailable:
-            AlertsUnavailableNotice(retry: viewModel.reload)
-        case .ready:
-            if viewModel.saveFailed {
-                AlertsCaption("Details.alerts_save_failed")
-            }
-            if viewModel.isAtCap {
-                AlertsCaption("Settings.you_can_only_enable_at_most_for_two_stations")
-            }
+        if viewModel.isAtCap {
+            AlertsCaption("Settings.alerts_station_limit \(FavouriteAlerts.maxAlertedStations)")
         }
     }
 
@@ -85,10 +72,9 @@ struct SettingsRow: View {
         value: Binding<Double>,
         warning: LocalizedStringKey?
     ) -> some View {
-        // Locked until OneSignal has been read. After that, only other
-        // stations being at the two-station limit locks a switch that is
-        // off; one that is on must stay switchable off.
-        let locked = viewModel.alertsState != .ready || (viewModel.isAtCap && !isOn.wrappedValue)
+        // Only other stations being at the station limit locks a switch
+        // that is off; one that is on must stay switchable off.
+        let locked = viewModel.isAtCap && !isOn.wrappedValue
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {

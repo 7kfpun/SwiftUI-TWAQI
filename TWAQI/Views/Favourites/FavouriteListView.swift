@@ -21,17 +21,7 @@ struct FavouriteListView: View {
         AdaptiveNavigation {
             Group {
                 if settings.savedFavouriteStations.isEmpty || viewModel.favouritePollutants.isEmpty {
-                    // No list to carry the pending-clear notice: it goes
-                    // above the placeholder, so removing the last favourite
-                    // offline still says its alerts aren't off yet.
-                    VStack(spacing: 0) {
-                        if viewModel.hasPendingAlertClears {
-                            PendingAlertClearsNotice()
-                                .padding(.horizontal, 32)
-                                .padding(.top, 16)
-                        }
-                        placeholder
-                    }
+                    placeholder
                 } else {
                     list
                 }
@@ -71,12 +61,6 @@ struct FavouriteListView: View {
             if viewModel.isShowingLastGood {
                 Section {
                     OfflineNotice()
-                }
-            }
-
-            if viewModel.hasPendingAlertClears {
-                Section {
-                    PendingAlertClearsNotice()
                 }
             }
 
@@ -174,21 +158,6 @@ struct FavouriteListView: View {
                 "stationId": stationId,
             ])
         }
-    }
-}
-
-/// A removed station's alerts haven't reached OneSignal yet and will be
-/// tried again.
-private struct PendingAlertClearsNotice: View {
-    var body: some View {
-        Label {
-            Text("Favourites.alerts_clear_pending_list")
-        } icon: {
-            Image(systemName: "bell.slash")
-        }
-        .font(.footnote)
-        .foregroundColor(.orange)
-        .accessibilityElement(children: .combine)
     }
 }
 

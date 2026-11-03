@@ -40,7 +40,7 @@ enum AnalyticsEvent: String, CaseIterable {
     case restorePurchaseDone = "user_premium_restore_purchase_done"
     /// `source`.
     case restorePurchaseFailed = "user_premium_restore_purchase_failed"
-    /// `stationId`: the "at most two stations" note on a station's alerts.
+    /// `stationId`: the "at most three stations" note (`FavouriteAlerts.maxAlertedStations`) on a station's alerts.
     case alertLimitShown = "alert_limit_shown"
     /// `placement` (`AdPlacement`): AdMob recorded a click on a banner.
     case adBannerTapped = "ad_banner_tapped"

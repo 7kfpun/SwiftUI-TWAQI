@@ -257,13 +257,10 @@ struct DetailsView: View {
         } message: {
             Text("Favourites.remove_station_with_alerts_message")
         }
-        // Favourited, but its alerts couldn't be switched on — or
-        // unfavourited, but they couldn't be switched off yet: one line on
+        // Favourited, but its alerts couldn't be switched on: one line on
         // why, and the way to fix it when it's a setting.
         .alert(
-            viewModel.favouriteAlertsHint?.isAfterFavouriting == false
-                ? Text("Favourites.removed_from_favourites")
-                : Text("Favourites.added_to_favourites"),
+            Text("Favourites.added_to_favourites"),
             isPresented: isShowingFavouriteAlertsHint,
             presenting: viewModel.favouriteAlertsHint
         ) { hint in
@@ -278,13 +275,9 @@ struct DetailsView: View {
         } message: { hint in
             switch hint {
             case .capReached:
-                Text("Favourites.alerts_cap_reached_message")
+                Text("Favourites.alerts_cap_reached_message \(FavouriteAlerts.maxAlertedStations)")
             case .notificationsDenied:
                 Text("Favourites.notifications_off_message")
-            case .notChanged:
-                Text("Favourites.alerts_not_changed_message")
-            case .clearPending:
-                Text("Favourites.alerts_clear_pending_message")
             }
         }
     }

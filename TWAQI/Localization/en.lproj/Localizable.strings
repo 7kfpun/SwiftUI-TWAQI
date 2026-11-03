@@ -22,14 +22,11 @@
 "Favourites.remove_and_turn_off_alerts" = "Remove and Turn Off Alerts";
 "Favourites.cancel" = "Cancel";
 "Favourites.added_to_favourites" = "Added to Favourites";
-"Favourites.alerts_cap_reached_message" = "Alerts are already on for 2 stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.";
+"Favourites.alerts_cap_reached_message %lld" = "Alerts are already on for %lld stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.";
 "Favourites.notifications_off_message" = "Notifications are off for Taiwan Air, so alerts for this station stay off. Turn them on in Settings, then switch alerts on below.";
 "Favourites.open_settings" = "Open Settings";
 "Favourites.ok" = "OK";
 "Favourites.removed_from_favourites" = "Removed from Favourites";
-"Favourites.alerts_not_changed_message" = "Alerts for this station couldn't be switched on right now. Switch them on from its alerts card once you're online.";
-"Favourites.alerts_clear_pending_message" = "This station's alerts couldn't be turned off yet. Taiwan Air will try again when you're back online.";
-"Favourites.alerts_clear_pending_list" = "Alerts for a station you removed couldn't be turned off yet. Taiwan Air will try again when you're back online.";
 
 "DetailsList.details" = "Details";
 "DetailsList.search" = "Search";
@@ -41,7 +38,7 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
-"Settings.you_can_only_enable_at_most_for_two_stations" = "You can only enable at most for 2 stations";
+"Settings.alerts_station_limit %lld" = "You can turn on alerts for up to %lld stations.";
 
 "Help.help" = "Help";
 "Help.select_a_topic" = "Select a topic";
@@ -54,7 +51,6 @@
 "Help.language_footer" = "Addresses and forecast text from the government are in Chinese. In other languages they are translated on this device, once that language is downloaded for Translate in Settings.";
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
-"Help.site_notification_cancel_failed" = "Couldn't cancel site notifications. Check your connection and try again.";
 "Help.in_app_purchase" = "In-app purchase";
 "Help.ad_free" = "Remove ads & get watch complications";
 "Help.restore_purchase" = "Restore purchase";
@@ -214,10 +210,8 @@
 "Details.alerts_pitch" = "Get notified when the air here gets worse or clears up.";
 "Details.alerts_on" = "On";
 "Details.alerts_off" = "Off";
-"Details.alerts_checking" = "Checking your alerts…";
 "Details.alerts_unavailable" = "Alerts can't be loaded right now. Check your connection and try again.";
 "Details.alerts_try_again" = "Try Again";
-"Details.alerts_save_failed" = "Couldn't change your alerts. Check your connection and try again.";
 "Details.live_cam" = "Live camera";
 "Details.cam_captured %@" = "Captured %@";
 "Details.cam_source" = "Image: MOENV";
