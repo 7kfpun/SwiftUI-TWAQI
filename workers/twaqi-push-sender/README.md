@@ -2,7 +2,10 @@
 
 Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase Cloud Messaging** (HTTP v1). FCM hands them to APNs with the auth key uploaded in the Firebase console (project `kf-twaqi`).
 
-- **Cron** `*/10 * * * *`: read enabled subscriptions (with their device) from Directus, read current AQI from the app's own API (`AQI_API_BASE` + `/v1/current-pollutants?country=twn`, then `?station_id=` for any station outside it), and send an alert to each subscription whose station just crossed its threshold.
+- **Cron** `20 */2 * * *` (every 2 hours, at :20 past even hours, UTC and Taiwan alike):
+  1. Read every station's current AQI in one request to the app's own API (`AQI_API_BASE` + `/v1/current-pollutants?country=twn`): the same numbers the station screen shows.
+  2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold < AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer passes (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
+  3. Send an alert to each one that crossed in, and write back only the rows whose state changed.
 - **Only devices with an `fcm_token`**, i.e. builds from FOX-13 on. Older builds have no FCM token and are still served by the OneSignal tracker in `ai-playground`, which this Worker does not touch.
 - **Directus** (`https://cms.wahthefox.com`) is the database. The app creates and updates rows; this Worker reads them and updates state. Nothing is deleted: dead rows get `archived = true`.
 
@@ -12,9 +15,10 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
 | --- | --- |
 | Criteria | `direction = above`: AQI **>** threshold. `below`: AQI **<** threshold (the app says 「高於／低於此數值」). Metric is `aqi` only. |
 | Edge trigger | Alert when a subscription **enters** the zone (`in_zone` false/null → true), not on every run spent inside it. Leaving the zone sets `in_zone = false` and re-arms it. |
-| Cool-down | A crossing within `COOLDOWN_MINUTES` (180) of `last_fired_at` is recorded but not sent, for values bouncing around the threshold. |
+| Cool-down | A crossing within `COOLDOWN_MINUTES` (180) of `last_fired_at` is recorded but not sent, for values bouncing around the threshold. With runs 2 hours apart, a subscription alerts at most every 4 hours. |
 | Quiet hours | If the device has `dnd_enabled` and the current time in its `timezone` is in `dnd_start`–`dnd_end` (`HH:mm`, may run past midnight, e.g. 23:00–07:00), the crossing is recorded and the alert is **dropped**. No backlog, no digest. |
-| Stale data | Readings with `publish_time` older than `MAX_DATA_AGE_MINUTES` (180), or AQI ≤ 0, are skipped without changing state. |
+| Stale data | Stations whose `publish_time` is older than `MAX_DATA_AGE_MINUTES` (180), or whose AQI is ≤ 0, are left out of the filter, so nothing on them changes. |
+| Limit | The app allows alerts on at most **3 stations** per device (`FavouriteAlerts.maxAlertedStations`). |
 | Failed send | `in_zone` is left as it was, so the next run retries. |
 | Dead token | FCM `UNREGISTERED`, `SENDER_ID_MISMATCH`, or `INVALID_ARGUMENT` about the registration token → device `archived = true`. Its subscriptions stop matching until the app writes its row again (which sets `archived = false`). |
 | Expiry | An alert APNs can't deliver within an hour is dropped (`apns-expiration`). Same subscription → same `apns-collapse-id`; a station's alerts share a `thread-id`. No badge. |
@@ -60,7 +64,7 @@ curl -X POST "$WORKER/test"    -H "Authorization: Bearer $SYNC_TOKEN" -d '{"devi
 
 ## Directus
 
-`twaqi_push_devices`: `device_id` (Keychain), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale`, `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
+`twaqi_push_devices`: `device_id` (Keychain), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
 
 `twaqi_push_subscriptions`: `device` (M2O), `station_id` (AQI API station id, stored as a string), `site_id` (MOENV SiteId, for cams only), `metric` (`aqi`), `direction` (`above`|`below`), `threshold`, `enabled`, `last_value`, `in_zone`, `last_fired_at`, `archived`.
 
@@ -85,7 +89,7 @@ gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env workers-producti
 
 To set one on the live Worker without a deploy: `npx wrangler secret put FCM_SERVICE_ACCOUNT < kf-twaqi-firebase-adminsdk.json`.
 
-Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`.
+Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`, `MAX_SENDS_PER_RUN`.
 
 ## Develop
 
@@ -98,4 +102,4 @@ npx wrangler dev  # secrets from .dev.vars (gitignored)
 
 `/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes.
 
-Each run makes one subrequest per alert sent, plus one OAuth exchange when the access token is older than ~55 minutes, one AQI request per country and a few Directus calls. With no limit on alerted stations (FOX-41), a busy hour can pass the free plan's 50 subrequests per run; the paid plan allows 1000.
+Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one subrequest per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. State and logs are saved after every 100 sends, and a run sends at most `MAX_SENDS_PER_RUN` (800, sized for the paid plan's ~1,000 subrequests; set it to ~30 on the free plan's 50). Alerts past that stay unsent and go out on the next run, never twice. More than that per run needs the queue-based sender (follow-up).

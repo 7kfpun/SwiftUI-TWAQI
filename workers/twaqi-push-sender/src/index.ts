@@ -1,12 +1,12 @@
-// TWAQI AQI alerts through Firebase Cloud Messaging. Every 10 minutes, match
-// the current AQI against each enabled subscription in Directus and send an
-// FCM alert to each device whose station just crossed its threshold. Only
+// TWAQI AQI alerts through Firebase Cloud Messaging. Every 2 hours, read the
+// current AQI of every station, ask Directus for only the subscriptions whose
+// zone that changes, and send an FCM alert to each one that just crossed in. Only
 // devices with an FCM token are sent to; older builds stay on OneSignal,
 // whose sender is untouched. See README.md for the rules and secrets.
-import { readings, type AqiConfig, type Reading } from './aqi.ts'
+import { allReadings, type AqiConfig, type Reading } from './aqi.ts'
 import {
-  activeSubscriptions,
   archiveDevices,
+  crossingSubscriptions,
   device as getDevice,
   tokenSuffix,
   updateSubscriptions,
@@ -25,6 +25,8 @@ interface Env extends FcmConfig, DirectusConfig, AqiConfig {
   SYNC_TOKEN: string
   COOLDOWN_MINUTES?: string
   MAX_DATA_AGE_MINUTES?: string
+  /** Sends per run; the rest wait for the next run. */
+  MAX_SENDS_PER_RUN?: string
 }
 
 interface RunOptions {
@@ -35,11 +37,13 @@ interface RunOptions {
   aqi?: Record<string, number>
 }
 
-type Count = Outcome | 'no-data' | 'stale' | 'sent' | 'failed' | 'dead-token'
+type Count = Outcome | 'sent' | 'failed' | 'dead-token' | 'deferred'
 
 interface RunResult {
-  subscriptions: number
+  /** Stations with a fresh reading, each one filtered for in Directus. */
   stations: number
+  /** Subscriptions whose zone changed: to send, drop, or re-arm. */
+  subscriptions: number
   counts: Partial<Record<Count, number>>
   archivedDevices: number[]
   updated: number
@@ -49,6 +53,8 @@ interface RunResult {
 }
 
 const SEND_CONCURRENCY = 10
+/** State and logs are saved after every this many sends. */
+const SAVE_EVERY = 100
 /** An AQI alert an hour late is noise; let APNs drop it. */
 const ALERT_EXPIRY_SECONDS = 60 * 60
 
@@ -99,10 +105,7 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
   const cooldownMinutes = Number(env.COOLDOWN_MINUTES ?? 180)
   const maxAgeMs = Number(env.MAX_DATA_AGE_MINUTES ?? 180) * 60_000
 
-  const subs = (await activeSubscriptions(env)).filter(
-    (s) => (s.metric ?? 'aqi') === 'aqi' && typeof s.station_id === 'number',
-  )
-  const live = await readings(env, new Set(subs.map((s) => s.station_id as number)))
+  const live = await allReadings(env)
   for (const [id, aqi] of Object.entries(options.aqi ?? {})) {
     const stationId = Number(id)
     const reading = live.get(stationId)
@@ -116,9 +119,24 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
     })
   }
 
+  // Only fresh, real readings move a subscription. A station that stopped
+  // reporting, or reads 0, leaves every subscription on it as it was.
+  const fresh = new Map<number, Reading>()
+  for (const [stationId, reading] of live) {
+    if (!Number.isFinite(reading.aqi) || reading.aqi <= 0) continue
+    const published = publishedAt(reading.publishTime)
+    if (published && now.getTime() - published.getTime() > maxAgeMs) continue
+    fresh.set(stationId, reading)
+  }
+
+  // Directus does the matching: only rows whose zone disagrees with this AQI.
+  const subs = (await crossingSubscriptions(env, [...fresh.values()].map((r) => ({ stationId: r.stationId, aqi: r.aqi })))).filter(
+    (s) => typeof s.station_id === 'number' && fresh.has(s.station_id),
+  )
+
   const result: RunResult = {
+    stations: fresh.size,
     subscriptions: subs.length,
-    stations: live.size,
     counts: {},
     archivedDevices: [],
     updated: 0,
@@ -134,22 +152,13 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
   const toSend: { sub: Subscription; reading: Reading }[] = []
 
   for (const sub of subs) {
-    const reading = live.get(sub.station_id as number)
-    if (!reading || !Number.isFinite(reading.aqi) || reading.aqi <= 0) {
-      count('no-data')
-      continue
-    }
-    const published = publishedAt(reading.publishTime)
-    if (published && now.getTime() - published.getTime() > maxAgeMs) {
-      // The station has stopped reporting; don't alert on an old number.
-      count('stale')
-      continue
-    }
+    const reading = fresh.get(sub.station_id as number) as Reading
 
     const decision = decide({
       direction: sub.direction,
       threshold: sub.threshold,
-      value: reading.aqi,
+      // Rounded as in the Directus filter, so both agree on the zone.
+      value: Math.round(reading.aqi),
       wasInZone: sub.in_zone,
       lastFiredAt: sub.last_fired_at,
       quiet: isQuiet(sub.device, now),
@@ -165,76 +174,101 @@ async function run(env: Env, options: RunOptions = {}): Promise<RunResult> {
       outcome: decision.outcome,
     })
 
-    if (sub.last_value !== reading.aqi) update(sub.id, { last_value: reading.aqi })
+    // Only rows whose state changes are written; last_value rides along.
     if (decision.outcome === 'fire') {
       toSend.push({ sub, reading })
     } else if (sub.in_zone !== decision.inZone) {
-      update(sub.id, { in_zone: decision.inZone })
+      update(sub.id, { in_zone: decision.inZone, last_value: Math.round(reading.aqi) })
     }
   }
 
   if (dryRun) return result
 
-  const dead = new Set<number>()
-  const logs: PushLog[] = []
-  for (let i = 0; i < toSend.length; i += SEND_CONCURRENCY) {
-    await Promise.all(
-      toSend.slice(i, i + SEND_CONCURRENCY).map(async ({ sub, reading }) => {
-        if (dead.has(sub.device.id)) return
-        const token = sub.device.fcm_token as string
-        const name = stationName(sub.device.locale, reading, sub.station_id)
-        const log: PushLog = {
-          token_suffix: tokenSuffix(token),
-          status: 'failed',
-          station: String(sub.station_id),
-          trigger: sub.direction === 'above' ? 'pollution' : 'cleanliness',
-          device: sub.device.id,
-          aqi: Math.round(reading.aqi),
-          fcm_message_id: null,
-          error_code: null,
-        }
-        try {
-          const res = await send(env, {
-            token,
-            ...alertText(sub.direction, sub.device.locale, name, reading.aqi, sub.threshold),
-            data: alertData(sub, reading),
-            collapseId: `aqi-${sub.id}`,
-            threadId: `station-${sub.station_id}`,
-            expiresInSeconds: ALERT_EXPIRY_SECONDS,
-          })
-          if (res.ok) {
-            count('sent')
-            log.status = 'sent'
-            log.fcm_message_id = res.messageId ?? null
-            update(sub.id, { in_zone: true, last_fired_at: now.toISOString() })
-          } else if (res.deadToken) {
-            count('dead-token')
-            log.status = 'unregistered'
-            log.error_code = res.errorCode ?? null
-            dead.add(sub.device.id)
-          } else {
-            // Leave in_zone as it was, so the next run tries again.
-            count('failed')
-            log.error_code = res.errorCode ?? `HTTP_${res.status}`
-            console.warn('fcm failed', sub.id, res.status, res.errorCode)
-          }
-        } catch (e) {
-          count('failed')
-          log.error_code = 'EXCEPTION'
-          console.warn('fcm error', sub.id, String(e))
-        }
-        logs.push(log)
-      }),
-    )
+  // Re-arms and skipped crossings first, so they're saved even if sending
+  // runs out of budget later.
+  await saveUpdates()
+
+  // A run sends at most this many; the rest stay unsent (in_zone false) and
+  // go out on the next run. Keeps every run inside the Worker's subrequest
+  // limit, so state is always written for what was sent: no repeat alerts.
+  const maxSends = Number(env.MAX_SENDS_PER_RUN ?? 800)
+  const deferred = toSend.splice(maxSends)
+  if (deferred.length) {
+    result.counts.deferred = deferred.length
+    console.warn('sends deferred to the next run', deferred.length)
   }
 
-  result.archivedDevices = [...dead]
-  await archiveDevices(env, result.archivedDevices)
-  const changed = [...updates.values()].filter((u) => Object.keys(u).length > 1)
-  await updateSubscriptions(env, changed)
-  result.updated = changed.length
-  result.logged = await logQuietly(env, logs)
+  const dead = new Set<number>()
+  for (let i = 0; i < toSend.length; i += SAVE_EVERY) {
+    const logs: PushLog[] = []
+    const chunk = toSend.slice(i, i + SAVE_EVERY)
+    for (let j = 0; j < chunk.length; j += SEND_CONCURRENCY) {
+      await Promise.all(chunk.slice(j, j + SEND_CONCURRENCY).map(async ({ sub, reading }) => {
+        if (dead.has(sub.device.id)) return
+        logs.push(await sendOne(sub, reading))
+      }))
+    }
+    // Saved per chunk: what was sent is marked sent before the next chunk.
+    const newlyDead = [...dead].filter((id) => !result.archivedDevices.includes(id))
+    await archiveDevices(env, newlyDead)
+    result.archivedDevices.push(...newlyDead)
+    await saveUpdates()
+    result.logged += await logQuietly(env, logs)
+  }
   return result
+
+  async function saveUpdates() {
+    const changed = [...updates.values()].filter((u) => Object.keys(u).length > 1)
+    updates.clear()
+    await updateSubscriptions(env, changed)
+    result.updated += changed.length
+  }
+
+  async function sendOne(sub: Subscription, reading: Reading): Promise<PushLog> {
+    const token = sub.device.fcm_token as string
+    const name = stationName(sub.device.locale, reading, sub.station_id)
+    const log: PushLog = {
+      token_suffix: tokenSuffix(token),
+      status: 'failed',
+      station: String(sub.station_id),
+      trigger: sub.direction === 'above' ? 'pollution' : 'cleanliness',
+      device: sub.device.id,
+      aqi: Math.round(reading.aqi),
+      fcm_message_id: null,
+      error_code: null,
+    }
+    try {
+      const res = await send(env, {
+        token,
+        ...alertText(sub.direction, sub.device.locale, name, reading.aqi, sub.threshold),
+        data: alertData(sub, reading),
+        collapseId: `aqi-${sub.id}`,
+        threadId: `station-${sub.station_id}`,
+        expiresInSeconds: ALERT_EXPIRY_SECONDS,
+      })
+      if (res.ok) {
+        count('sent')
+        log.status = 'sent'
+        log.fcm_message_id = res.messageId ?? null
+        update(sub.id, { in_zone: true, last_fired_at: now.toISOString(), last_value: Math.round(reading.aqi) })
+      } else if (res.deadToken) {
+        count('dead-token')
+        log.status = 'unregistered'
+        log.error_code = res.errorCode ?? null
+        dead.add(sub.device.id)
+      } else {
+        // Leave in_zone as it was, so the next run tries again.
+        count('failed')
+        log.error_code = res.errorCode ?? `HTTP_${res.status}`
+        console.warn('fcm failed', sub.id, res.status, res.errorCode)
+      }
+    } catch (e) {
+      count('failed')
+      log.error_code = 'EXCEPTION'
+      console.warn('fcm error', sub.id, String(e))
+    }
+    return log
+  }
 }
 
 /** Strings only (FCM's rule). Lets the app open the station when it learns to. */

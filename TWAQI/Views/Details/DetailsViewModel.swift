@@ -193,8 +193,8 @@ class DetailsViewModel: ObservableObject {
 
     /// A new favourite gets alerts, so favouriting is the one step to being
     /// told when the air turns (FOX-31). The favourite stands whatever
-    /// happens here; with notifications off the reader is told why the
-    /// alerts stayed off.
+    /// happens here; at the station cap or with notifications off the
+    /// reader is told why the alerts stayed off.
     private func enableAlertsForNewFavourite() {
         let stationId = stationId
         var siteId: String?
@@ -209,6 +209,8 @@ class DetailsViewModel: ObservableObject {
         ) { [weak self] outcome in
             guard let self = self else { return }
             switch outcome {
+            case .capReached:
+                self.favouriteAlertsHint = .capReached
             case .notificationsDenied:
                 self.favouriteAlertsHint = .notificationsDenied
             case .enabled, .alreadyOn, .notChanged:
@@ -278,6 +280,8 @@ class DetailsViewModel: ObservableObject {
 /// Why favouriting just now left the station's alerts off, as told to the
 /// reader.
 enum FavouriteAlertsHint: Equatable {
+    /// `FavouriteAlerts.maxAlertedStations` other stations already have alerts on.
+    case capReached
     /// Notifications are turned off for the app in Settings.
     case notificationsDenied
 }

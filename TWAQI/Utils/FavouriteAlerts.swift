@@ -29,22 +29,31 @@ enum FavouriteAlerts {
     /// restore), for a station screen already showing the switches to take
     /// as they are.
     static let settingKey = "setting"
+    /// Optional, with `settingKey`: stations with an alert on, this one included.
+    static let alertedStationCountKey = "alertedStationCount"
 
-    // Any number of stations can have alerts (FOX-41): the two-station cap
-    // belonged to the OneSignal setup and went with it.
+    /// Alerts can be on for at most this many stations; the station screen
+    /// locks its switches once other stations reach it. Two under OneSignal,
+    /// briefly none (FOX-41), now three: it bounds the FCM sender's load.
+    static let maxAlertedStations = 3
 
-    static func post(stationId: Int, isOn: Bool, setting: StationAlertSetting? = nil) {
+    static func post(stationId: Int, isOn: Bool, setting: StationAlertSetting? = nil, alertedStationCount: Int? = nil) {
         var userInfo: [String: Any] = [
             stationIdKey: stationId,
             isOnKey: isOn,
         ]
         userInfo[settingKey] = setting
+        userInfo[alertedStationCountKey] = alertedStationCount
         NotificationCenter.default.post(name: changed, object: nil, userInfo: userInfo)
     }
 
     /// The alerts a `changed` notification carries, when it carries them.
     static func setting(in notification: Notification) -> StationAlertSetting? {
         notification.userInfo?[settingKey] as? StationAlertSetting
+    }
+
+    static func alertedStationCount(in notification: Notification) -> Int? {
+        notification.userInfo?[alertedStationCountKey] as? Int
     }
 
     /// Reads a `changed` notification for one station.
@@ -61,6 +70,13 @@ enum FavouriteAlerts {
     /// Stations with an alert on.
     static func alertedStationIds(services: Services = .live) -> Set<Int> {
         Set(services.alertedStations().keys)
+    }
+
+    /// `maxAlertedStations` *other* stations already have alerts, so this
+    /// one's switches that are off stay locked. A station's own alerts don't
+    /// count: with its "above" alert on, its "below" one adds no station.
+    static func isAtCap(alertedStationIds: Set<Int>, excluding stationId: Int) -> Bool {
+        alertedStationIds.subtracting([stationId]).count >= maxAlertedStations
     }
 
     // MARK: - The station screen's switches
@@ -104,6 +120,8 @@ enum FavouriteAlerts {
         case enabled(StationAlertSetting)
         /// Already on: left as they are.
         case alreadyOn
+        /// `maxAlertedStations` other stations already have alerts.
+        case capReached
         /// Notifications are turned off for the app in Settings.
         case notificationsDenied
         /// The station stopped being a favourite before it was written.
@@ -119,9 +137,16 @@ enum FavouriteAlerts {
         isCleanlinessNotificationEnabled: false
     )
 
-    /// The decision, from the stations with alerts on.
+    /// The decision, from the stations with alerts on. Never `.enabled` past
+    /// the cap.
     static func newFavouriteDecision(alertedStationIds: Set<Int>, stationId: Int) -> NewFavouriteOutcome {
-        alertedStationIds.contains(stationId) ? .alreadyOn : .enabled(defaultAlerts)
+        if alertedStationIds.contains(stationId) {
+            return .alreadyOn
+        }
+        if isAtCap(alertedStationIds: alertedStationIds, excluding: stationId) {
+            return .capReached
+        }
+        return .enabled(defaultAlerts)
     }
 
     /// What the writes here talk to; swapped out in tests.
@@ -156,8 +181,8 @@ enum FavouriteAlerts {
         )
     }
 
-    /// Switches a just-favourited station's alerts on, unless they are on
-    /// already or notifications are off — the favourite stands either way; this
+    /// Switches a just-favourited station's alerts on, unless it is past the
+    /// cap or notifications are off — the favourite stands either way; this
     /// only adds to it. `isStillFavourite` is asked just before writing, so a
     /// station unfavourited meanwhile is left alone. Do-not-disturb is not
     /// touched. Calls back on the main thread.
@@ -183,7 +208,7 @@ enum FavouriteAlerts {
                 guard case .enabled(let setting) = decision else { return finish(decision) }
 
                 services.write(stationId, siteId, StationAlerts(setting), true)
-                post(stationId: stationId, isOn: true, setting: setting)
+                post(stationId: stationId, isOn: true, setting: setting, alertedStationCount: alerted.count + 1)
                 finish(decision)
             }
         }
@@ -194,6 +219,7 @@ enum FavouriteAlerts {
         switch outcome {
         case .enabled: name = "enabled"
         case .alreadyOn: name = "already_on"
+        case .capReached: name = "cap_reached"
         case .notificationsDenied: name = "notifications_denied"
         case .notChanged: name = "not_changed"
         }

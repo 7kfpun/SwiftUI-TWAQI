@@ -1,7 +1,7 @@
 // AQI threshold alerts for the TWAQI iOS app, sent through Firebase Cloud
-// Messaging (HTTP v1). Every 10 minutes: read enabled subscriptions from
-// Directus, read current AQI from the app's API, and alert the devices whose
-// station just crossed their threshold. Only devices with an FCM token are
+// Messaging (HTTP v1). Every 2 hours (:20 past even hours): read every
+// station's AQI from the app's API, ask Directus for only the subscriptions
+// whose zone that changes, and alert the devices that just crossed in. Only devices with an FCM token are
 // sent to; builds still on OneSignal are left to the OneSignal tracker.
 // Deployed by GitHub Actions (.github/workflows/workers.yml).
 //
@@ -14,7 +14,7 @@
   "compatibility_date": "2026-10-30",
   "workers_dev": true,
   "triggers": {
-    "crons": ["*/10 * * * *"]
+    "crons": ["20 */2 * * *"]
   },
   "vars": {
     "DIRECTUS_URL": "https://cms.wahthefox.com",
@@ -23,7 +23,10 @@
     // bounces around the threshold.
     "COOLDOWN_MINUTES": "180",
     // Readings older than this are ignored rather than alerted on.
-    "MAX_DATA_AGE_MINUTES": "180"
+    "MAX_DATA_AGE_MINUTES": "180",
+    // Alerts sent per run; the rest go out on the next run. Sized to the paid
+    // plan's ~1,000 subrequests per run, with room for reads and writes.
+    "MAX_SENDS_PER_RUN": "800"
   },
   "secrets": {
     "required": [

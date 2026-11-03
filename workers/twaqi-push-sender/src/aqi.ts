@@ -25,34 +25,14 @@ interface ApiPollutant {
   publish_time?: string
 }
 
-/** Stations not in a fetched country are looked up one by one, up to this
- * many, to stay inside the Worker's subrequest budget. */
-const MAX_SINGLE_LOOKUPS = 20
-
-/** Readings for `stationIds`, keyed by station id. Missing stations are left out. */
-export async function readings(env: AqiConfig, stationIds: Iterable<number>): Promise<Map<number, Reading>> {
-  const wanted = new Set(stationIds)
+/** Every station in `AQI_COUNTRIES`, keyed by station id: one request per
+ * country. The sender works from these to pick the subscriptions to read. */
+export async function allReadings(env: AqiConfig): Promise<Map<number, Reading>> {
   const out = new Map<number, Reading>()
-  if (!wanted.size) return out
-
   const countries = (env.AQI_COUNTRIES || 'twn').split(',').map((c) => c.trim()).filter(Boolean)
   for (const country of countries) {
-    for (const p of await fetchPollutants(env, { country })) {
-      if (wanted.has(p.station_id)) out.set(p.station_id, toReading(p))
-    }
+    for (const p of await fetchPollutants(env, { country })) out.set(p.station_id, toReading(p))
   }
-
-  const missing = [...wanted].filter((id) => !out.has(id)).slice(0, MAX_SINGLE_LOOKUPS)
-  await Promise.all(
-    missing.map(async (id) => {
-      try {
-        const p = (await fetchPollutants(env, { station_id: String(id) })).find((x) => x.station_id === id)
-        if (p) out.set(id, toReading(p))
-      } catch (e) {
-        console.warn('aqi lookup failed', id, String(e))
-      }
-    }),
-  )
   return out
 }
 

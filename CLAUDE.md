@@ -17,7 +17,8 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
   sends through FCM, logging to `twaqi_push_logs` (token suffix only). No OneSignal in the
   app; the old OneSignal tracker in `ai-playground` still serves pre-FOX-13 builds.
 - **Favourites ↔ alerts** (`FavouriteAlerts`): an alert on ⇒ the station is a favourite;
-  removing a favourite turns its alerts off. Alerts are keyed by station id. No station cap (FOX-41).
+  removing a favourite turns its alerts off. Alerts are keyed by station id. At most 3 stations
+  have alerts (`FavouriteAlerts.maxAlertedStations`).
 - **Station cams** are R2 behind `https://twaqi.app.wahthefox.com`: latest
   `stations/{siteId}.jpg`, hourly `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`, rolling 24 h.
   `siteId` is the MOENV image site id, not a station id. A missing hour is a normal 404.

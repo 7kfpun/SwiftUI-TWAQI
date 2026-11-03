@@ -89,6 +89,8 @@ final class SettingsStore: ObservableObject {
             // for the old one should be shown under it.
             OnDeviceTranslation.clearCache()
             WidgetBridge.publish(appLanguage: newValue)
+            // Alerts are written in the app's language.
+            Task { @MainActor in DirectusPushMirror.shared.profileChanged() }
             TrackingManager.logEvent(eventName: "select_language", parameters: ["label": newValue.rawValue])
         }
         get { AppLanguage.stored(in: defaults) }
@@ -165,8 +167,13 @@ extension SettingsStore {
     static func refreshPro() async {
         let entitled = await IAPManager.isEntitled()
         await MainActor.run {
+            let changed = UserDefaults.standard.bool(forKey: Keys.pro) != entitled
             UserDefaults.standard.set(entitled, forKey: Keys.pro)
             WidgetBridge.publish(isPro: entitled)
+            // The device row carries Pro (is_pro in Directus).
+            if changed {
+                DirectusPushMirror.shared.profileChanged()
+            }
         }
     }
 

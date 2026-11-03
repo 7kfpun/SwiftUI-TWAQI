@@ -21,6 +21,7 @@
 "Favourites.remove_and_turn_off_alerts" = "Remove and Turn Off Alerts";
 "Favourites.cancel" = "Cancel";
 "Favourites.added_to_favourites" = "Added to Favourites";
+"Favourites.alerts_cap_reached_message %lld" = "Alerts are already on for %lld stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.";
 "Favourites.notifications_off_message" = "Notifications are off for Taiwan Air, so alerts for this station stay off. Turn them on in Settings, then switch alerts on below.";
 "Favourites.open_settings" = "Open Settings";
 "Favourites.ok" = "OK";
@@ -36,6 +37,7 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
 "Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
+"Settings.alerts_station_limit %lld" = "You can turn on alerts for up to %lld stations.";
 
 "Help.help" = "Help";
 "Help.select_a_topic" = "Select a topic";

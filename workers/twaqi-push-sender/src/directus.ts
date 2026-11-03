@@ -45,31 +45,91 @@ const SUBSCRIPTION_FIELDS = [
   ...DEVICE_FIELDS.map((f) => `device.${f}`),
 ]
 const PAGE_SIZE = 500
+/** Stations per request: keeps the filter, sent in the URL, a few KB. */
+const STATIONS_PER_REQUEST = 10
 
-/** Enabled, unarchived subscriptions on unarchived devices that have an FCM
- * token, with their device. */
-export async function activeSubscriptions(env: DirectusConfig): Promise<Subscription[]> {
+type Filter = Record<string, unknown>
+
+const notInZone: Filter = { _or: [{ in_zone: { _eq: false } }, { in_zone: { _null: true } }] }
+
+/** Live subscriptions on devices FCM can reach. */
+const LIVE: Filter[] = [
+  { enabled: { _eq: true } },
+  { archived: { _eq: false } },
+  { _or: [{ metric: { _eq: 'aqi' } }, { metric: { _null: true } }] },
+  { device: { archived: { _eq: false } } },
+  { device: { fcm_token: { _nnull: true } } },
+]
+
+/** The Directus filter for the subscriptions whose zone changes at these
+ * readings, and only those: at AQI `a`, an "above" one is in its zone when
+ * threshold < a, a "below" one when threshold > a (strict, as the app says).
+ * A row comes back when that disagrees with its stored `in_zone`, so a run
+ * reads only alerts to send and alerts to re-arm, never the rest. */
+export function crossingFilter(readings: Array<{ stationId: number; aqi: number }>): Filter {
+  const aqiOf = (r: { aqi: number }) => Math.round(r.aqi)
+  const station = (r: { stationId: number; aqi: number }): Filter => ({
+    _and: [
+      { station_id: { _eq: String(r.stationId) } },
+      {
+        _or: [
+          {
+            _and: [
+              { direction: { _eq: 'above' } },
+              {
+                _or: [
+                  { _and: [{ threshold: { _lt: aqiOf(r) } }, notInZone] },
+                  { _and: [{ threshold: { _gte: aqiOf(r) } }, { in_zone: { _eq: true } }] },
+                ],
+              },
+            ],
+          },
+          {
+            _and: [
+              { direction: { _eq: 'below' } },
+              {
+                _or: [
+                  { _and: [{ threshold: { _gt: aqiOf(r) } }, notInZone] },
+                  { _and: [{ threshold: { _lte: aqiOf(r) } }, { in_zone: { _eq: true } }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  })
+  return { _and: [...LIVE, { _or: readings.map(station) }] }
+}
+
+/** Subscriptions whose zone changed at these readings (see `crossingFilter`),
+ * with their device. Ten stations per request, paged. */
+export async function crossingSubscriptions(
+  env: DirectusConfig,
+  readings: Array<{ stationId: number; aqi: number }>,
+): Promise<Subscription[]> {
   const all: Subscription[] = []
-  for (let page = 1; ; page++) {
-    const params = new URLSearchParams({
-      fields: SUBSCRIPTION_FIELDS.join(','),
-      'filter[enabled][_eq]': 'true',
-      'filter[archived][_eq]': 'false',
-      'filter[device][archived][_eq]': 'false',
-      'filter[device][fcm_token][_nnull]': 'true',
-      sort: 'id',
-      limit: String(PAGE_SIZE),
-      page: String(page),
-    })
-    const { data } = await request<{ data: Subscription[] }>(env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
-    // A device the token can't read comes back as null; nothing to send to.
-    for (const s of data) {
-      if (!s.device?.fcm_token) continue
-      const stationId = Number(s.station_id)
-      all.push({ ...s, station_id: s.station_id != null && Number.isInteger(stationId) ? stationId : null })
+  for (let i = 0; i < readings.length; i += STATIONS_PER_REQUEST) {
+    const filter = JSON.stringify(crossingFilter(readings.slice(i, i + STATIONS_PER_REQUEST)))
+    for (let page = 1; ; page++) {
+      const params = new URLSearchParams({
+        fields: SUBSCRIPTION_FIELDS.join(','),
+        filter,
+        sort: 'id',
+        limit: String(PAGE_SIZE),
+        page: String(page),
+      })
+      const { data } = await request<{ data: Subscription[] }>(env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
+      // A device the token can't read comes back as null; nothing to send to.
+      for (const s of data) {
+        if (!s.device?.fcm_token) continue
+        const stationId = Number(s.station_id)
+        all.push({ ...s, station_id: s.station_id != null && Number.isInteger(stationId) ? stationId : null })
+      }
+      if (data.length < PAGE_SIZE) break
     }
-    if (data.length < PAGE_SIZE) return all
   }
+  return all
 }
 
 export async function device(env: DirectusConfig, id: number): Promise<Device | null> {

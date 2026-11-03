@@ -39,6 +39,8 @@ final class DirectusPushMirror {
         static let deviceId = "directusPushDeviceId"
         static let deviceToken = "directusPushDeviceToken"
         static let fcmToken = "directusPushFcmToken"
+        /// `PushDevicePayload.profile` as last written: language and Pro.
+        static let profile = "directusPushDeviceProfile"
         static let lastDeviceSyncAt = "directusPushLastDeviceSyncAt"
         /// Station id → alerts as the user set them (or as restored).
         static let wanted = "directusPushWantedAlerts"
@@ -133,6 +135,15 @@ final class DirectusPushMirror {
         later("dnd") { mirror in
             guard mirror.defaults.object(forKey: Keys.deviceId) != nil else { return }
             mirror.forceDevice = true
+            mirror.flush()
+        }
+    }
+
+    /// Help's language or Pro changed. Only updates a device that already
+    /// has a row; the next write compares `PushDevicePayload.profile`.
+    func profileChanged() {
+        later("profile") { mirror in
+            guard mirror.defaults.object(forKey: Keys.deviceId) != nil else { return }
             mirror.flush()
         }
     }
@@ -312,16 +323,27 @@ final class DirectusPushMirror {
         if favourites != settings.savedFavouriteStations {
             settings.savedFavouriteStations = favourites
         }
+        let count = Self.alertedStations(defaults: defaults).count
         for (id, alerts) in restored {
-            FavouriteAlerts.post(stationId: id, isOn: true, setting: StationAlertSetting(alerts))
+            FavouriteAlerts.post(stationId: id, isOn: true, setting: StationAlertSetting(alerts), alertedStationCount: count)
         }
     }
 
-    /// This device's row, created or refreshed when its tokens, DND or age
-    /// call for it.
+    /// This device's row, created or refreshed when its tokens, DND,
+    /// language, Pro or age call for it.
     private func deviceId(token: String, fcmToken: String?, config: PushService.Config) async throws -> Int {
         let knownId = defaults.object(forKey: Keys.deviceId) != nil ? defaults.integer(forKey: Keys.deviceId) : nil
         guard let stableId = PushDeviceIdentity.id() else { throw PushError.noDeviceId }
+        let payload = PushDevicePayload.make(
+            deviceId: stableId,
+            deviceToken: token,
+            fcmToken: fcmToken,
+            dndEnabled: settings.isDndEnabled,
+            dndStart: settings.dndStartTime,
+            dndEnd: settings.dndEndTime,
+            isPro: settings.isPro,
+            language: settings.appLanguage
+        )
         if let knownId = knownId,
            Self.isDeviceCurrent(
                force: forceDevice,
@@ -329,20 +351,14 @@ final class DirectusPushMirror {
                token: token,
                syncedFcmToken: defaults.string(forKey: Keys.fcmToken),
                fcmToken: fcmToken,
-               lastSync: defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date
+               lastSync: defaults.object(forKey: Keys.lastDeviceSyncAt) as? Date,
+               syncedProfile: defaults.string(forKey: Keys.profile),
+               profile: payload.profile
            ) {
             return knownId
         }
 
         forceDevice = false
-        let payload = PushDevicePayload.make(
-            deviceId: stableId,
-            deviceToken: token,
-            fcmToken: fcmToken,
-            dndEnabled: settings.isDndEnabled,
-            dndStart: settings.dndStartTime,
-            dndEnd: settings.dndEndTime
-        )
         let id = try await PushService.upsertDevice(payload, config: config)
         if id != knownId {
             save([String: StationAlerts](), Keys.synced)
@@ -352,6 +368,7 @@ final class DirectusPushMirror {
         if let fcmToken = fcmToken {
             defaults.set(fcmToken, forKey: Keys.fcmToken)
         }
+        defaults.set(payload.profile, forKey: Keys.profile)
         defaults.set(Date(), forKey: Keys.lastDeviceSyncAt)
         return id
     }
@@ -366,7 +383,9 @@ final class DirectusPushMirror {
 
     /// Whether the row already holds these tokens and was refreshed recently
     /// enough to skip the upsert. A new APNs or FCM token is always written;
-    /// a missing FCM token (Messaging hasn't issued one) is not a change.
+    /// a missing FCM token (Messaging hasn't issued one) is not a change. A
+    /// new language or Pro status (`profile`) is written too; a row written
+    /// before the profile was tracked (no `syncedProfile`) is rewritten once.
     nonisolated static func isDeviceCurrent(
         force: Bool,
         syncedToken: String?,
@@ -374,10 +393,13 @@ final class DirectusPushMirror {
         syncedFcmToken: String?,
         fcmToken: String?,
         lastSync: Date?,
+        syncedProfile: String? = nil,
+        profile: String? = nil,
         now: Date = Date()
     ) -> Bool {
         guard !force, syncedToken == token, let lastSync = lastSync else { return false }
         if let fcmToken = fcmToken, fcmToken != syncedFcmToken { return false }
+        if let profile = profile, profile != syncedProfile { return false }
         return now.timeIntervalSince(lastSync) < deviceRefreshInterval
     }
 

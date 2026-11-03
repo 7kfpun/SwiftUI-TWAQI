@@ -42,6 +42,16 @@ struct SettingsRow: View {
                     ? "Settings.the_value_is_too_large_you_would_get_lots_of_notifications"
                     : nil
             )
+
+            status
+        }
+    }
+
+    /// One line under the switches on why they can't be used, if they can't.
+    @ViewBuilder
+    private var status: some View {
+        if viewModel.isAtCap {
+            AlertsCaption("Settings.alerts_station_limit \(FavouriteAlerts.maxAlertedStations)")
         }
     }
 
@@ -62,17 +72,22 @@ struct SettingsRow: View {
         value: Binding<Double>,
         warning: LocalizedStringKey?
     ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        // Only other stations being at the station limit locks a switch
+        // that is off; one that is on must stay switchable off.
+        let locked = viewModel.isAtCap && !isOn.wrappedValue
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Text(title)
                     .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .foregroundColor(locked ? .secondary : .primary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 0)
 
                 Toggle("", isOn: isOn)
                     .labelsHidden()
+                    .disabled(locked)
             }
 
             if isOn.wrappedValue {

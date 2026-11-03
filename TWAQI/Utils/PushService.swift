@@ -81,7 +81,12 @@ struct PushDevicePayload: Encodable, Equatable {
     var fcmToken: String?
     var environment: PushEnvironment
     var appVersion: String?
+    /// The app's language: the one chosen under Help, else iOS's ("zh-Hant",
+    /// "en"). The sender writes each alert in it.
     var locale: String?
+    /// Taiwan Air Pro is active (subscription or lifetime), as last read
+    /// from StoreKit on this device.
+    var isPro: Bool
     var lastSeenAt: String
     var dndEnabled: Bool
     /// "HH:mm", wall-clock time in `timezone`.
@@ -98,6 +103,7 @@ struct PushDevicePayload: Encodable, Equatable {
         case deviceToken = "device_token"
         case fcmToken = "fcm_token"
         case appVersion = "app_version"
+        case isPro = "is_pro"
         case lastSeenAt = "last_seen_at"
         case dndEnabled = "dnd_enabled"
         case dndStart = "dnd_start"
@@ -115,6 +121,7 @@ struct PushDevicePayload: Encodable, Equatable {
         try values.encode(environment, forKey: .environment)
         try values.encodeIfPresent(appVersion, forKey: .appVersion)
         try values.encodeIfPresent(locale, forKey: .locale)
+        try values.encode(isPro, forKey: .isPro)
         try values.encode(lastSeenAt, forKey: .lastSeenAt)
         try values.encode(dndEnabled, forKey: .dndEnabled)
         try values.encode(dndStart, forKey: .dndStart)
@@ -130,6 +137,8 @@ struct PushDevicePayload: Encodable, Equatable {
         dndEnabled: Bool,
         dndStart: Date,
         dndEnd: Date,
+        isPro: Bool = false,
+        language: AppLanguage = .current,
         now: Date = Date(),
         environment: PushEnvironment = .current,
         bundle: Bundle = .main,
@@ -142,13 +151,21 @@ struct PushDevicePayload: Encodable, Equatable {
             environment: environment,
             appVersion: bundle.infoDictionary?["CFBundleShortVersionString"] as? String,
             // The app's language, not the region: alert text follows it.
-            locale: bundle.preferredLocalizations.first ?? Locale.current.identifier,
+            // Help's choice wins over the one iOS picked for the app.
+            locale: language.localeIdentifier ?? bundle.preferredLocalizations.first ?? Locale.current.identifier,
+            isPro: isPro,
             lastSeenAt: ISO8601DateFormatter().string(from: now),
             dndEnabled: dndEnabled,
             dndStart: hourMinute(dndStart, calendar: calendar),
             dndEnd: hourMinute(dndEnd, calendar: calendar),
             timezone: calendar.timeZone.identifier
         )
+    }
+
+    /// What, besides the tokens and DND, makes the row out of date when it
+    /// changes: the language alerts are written in, and Pro.
+    var profile: String {
+        "\(locale ?? "")|\(isPro)"
     }
 
     static func hourMinute(_ date: Date, calendar: Calendar = .current) -> String {

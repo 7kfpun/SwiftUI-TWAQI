@@ -175,6 +175,28 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(body["timezone"] as? String, "Asia/Taipei")
         XCTAssertEqual(body["last_seen_at"] as? String, "1970-01-01T00:00:00Z")
         XCTAssertEqual(body["archived"] as? Bool, false)
+        XCTAssertEqual(body["is_pro"] as? Bool, false)
+    }
+
+    func testDevicePayloadCarriesProAndHelpLanguage() throws {
+        func payload(isPro: Bool, language: AppLanguage) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: false,
+                dndStart: Date(), dndEnd: Date(), isPro: isPro, language: language,
+                environment: .production, calendar: taipei
+            )
+        }
+        let chinese = try json(payload(isPro: true, language: .traditionalChinese))
+        XCTAssertEqual(chinese["is_pro"] as? Bool, true)
+        // Help's choice, not the language iOS picked for the app.
+        XCTAssertEqual(chinese["locale"] as? String, "zh-Hant")
+        XCTAssertEqual(try json(payload(isPro: false, language: .english))["locale"] as? String, "en")
+        // "Follow the system" falls back to what iOS gives the app.
+        XCTAssertEqual(payload(isPro: false, language: .system).locale, Bundle.main.preferredLocalizations.first)
+
+        // Either one changing changes the profile the mirror compares.
+        XCTAssertEqual(payload(isPro: true, language: .traditionalChinese).profile, "zh-Hant|true")
+        XCTAssertNotEqual(payload(isPro: true, language: .english).profile, payload(isPro: false, language: .english).profile)
     }
 
     func testDevicePayloadOmitsMissingFcmToken() throws {
@@ -258,6 +280,23 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(current(force: true))
         XCTAssertFalse(current(lastSync: nil))
         XCTAssertFalse(current(lastSync: now.addingTimeInterval(-DirectusPushMirror.deviceRefreshInterval - 1)))
+    }
+
+    func testNewLanguageOrProForcesUpsert() {
+        let now = Date()
+        func current(synced: String?, profile: String?) -> Bool {
+            DirectusPushMirror.isDeviceCurrent(
+                force: false, syncedToken: "apns", token: "apns",
+                syncedFcmToken: "fcm", fcmToken: "fcm", lastSync: now.addingTimeInterval(-60),
+                syncedProfile: synced, profile: profile, now: now
+            )
+        }
+        XCTAssertTrue(current(synced: "en|false", profile: "en|false"))
+        // Language changed under Help, or Pro started or lapsed: write it.
+        XCTAssertFalse(current(synced: "en|false", profile: "zh-Hant|false"))
+        XCTAssertFalse(current(synced: "en|false", profile: "en|true"))
+        // A row written before the profile was tracked is rewritten once.
+        XCTAssertFalse(current(synced: nil, profile: "en|false"))
     }
 
     // MARK: - Config
@@ -374,6 +413,14 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertNil(FavouriteAlerts.isOn(in: notification, stationId: 7))
     }
 
+    func testCapIsThreeAndCountsOtherStationsOnly() {
+        XCTAssertEqual(FavouriteAlerts.maxAlertedStations, 3)
+        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1, 3], excluding: 2))
+        XCTAssertTrue(FavouriteAlerts.isAtCap(alertedStationIds: [1, 3, 4], excluding: 2))
+        // Its own alerts don't count against it.
+        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1, 2, 3], excluding: 2))
+    }
+
     // MARK: FOX-31 — favouriting switches alerts on
 
     func testDefaultAlertsAreTheStationScreensFirstAboveAlert() {
@@ -382,18 +429,19 @@ final class FavouriteAlertsTests: XCTestCase {
 
     func testNewFavouriteDecision() {
         XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
-        // No cap (FOX-41): two, or any number of, other stations don't stop it.
         XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
-        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: Set(1...40), stationId: 41), .enabled(FavouriteAlerts.defaultAlerts))
-        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 2], stationId: 2), .alreadyOn)
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3, 4], stationId: 2), .capReached)
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 2, 3], stationId: 2), .alreadyOn)
     }
 
     func testEnablingWritesAndTellsTheStationScreen() {
         let fake = FakeServices()
         fake.alerted = [1: StationAlerts(below: 20)]
         var setting: StationAlertSetting?
+        var count: Int?
         let observer = NotificationCenter.default.addObserver(forName: FavouriteAlerts.changed, object: nil, queue: nil) { note in
             setting = FavouriteAlerts.setting(in: note)
+            count = FavouriteAlerts.alertedStationCount(in: note)
         }
         defer { NotificationCenter.default.removeObserver(observer) }
 
@@ -402,6 +450,7 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 120))
         XCTAssertEqual(fake.writes.first?.settled, true)
         XCTAssertEqual(setting, FavouriteAlerts.defaultAlerts)
+        XCTAssertEqual(count, 2)
     }
 
     func testAlreadyOnKeepsItsThresholds() {
@@ -412,12 +461,11 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.alerted[126], StationAlerts(above: 90))
     }
 
-    func testAThirdStationGetsAlertsToo() {
+    func testCapReachedWritesNothing() {
         let fake = FakeServices()
-        fake.alerted = [1: StationAlerts(above: 100), 3: StationAlerts(above: 100)]
-        XCTAssertEqual(enable(126, fake), .enabled(FavouriteAlerts.defaultAlerts))
-        XCTAssertEqual(fake.writes.map(\.stationId), [126])
-        XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 120))
+        fake.alerted = [1: StationAlerts(above: 100), 3: StationAlerts(above: 100), 4: StationAlerts(below: 30)]
+        XCTAssertEqual(enable(126, fake), .capReached)
+        XCTAssertTrue(fake.writes.isEmpty)
     }
 
     func testNotificationsDeniedWritesNothing() {

@@ -274,6 +274,8 @@ struct DetailsView: View {
             }
         } message: { hint in
             switch hint {
+            case .capReached:
+                Text("Favourites.alerts_cap_reached_message \(FavouriteAlerts.maxAlertedStations)")
             case .notificationsDenied:
                 Text("Favourites.notifications_off_message")
             }

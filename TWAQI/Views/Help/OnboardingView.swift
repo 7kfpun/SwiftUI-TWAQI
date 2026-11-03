@@ -391,6 +391,9 @@ private struct OnboardingFavouriteStatus: View {
                 Label("Onboarding.in_favourites", systemImage: "heart.fill")
                 if model.hasAlerts {
                     Label("Favourites.alerts_on", systemImage: "bell.fill")
+                } else if model.favouriteAlertsHint == .capReached {
+                    Label("Favourites.alerts_cap_reached_message \(FavouriteAlerts.maxAlertedStations)", systemImage: "bell.slash")
+                        .foregroundColor(.secondary)
                 } else if model.favouriteAlertsHint == .notificationsDenied {
                     Label("Onboarding.alerts_need_notifications", systemImage: "bell.slash")
                         .foregroundColor(.secondary)
