@@ -230,6 +230,7 @@
 "Details.cam_live" = "即時";
 "Details.cam_timeline" = "過去 24 小時影像";
 "Details.cam_hour_missing" = "這個小時沒有影像";
+"Details.send_feedback" = "提供意見回饋";
 
 /* Share card */
 "Share.share" = "分享";

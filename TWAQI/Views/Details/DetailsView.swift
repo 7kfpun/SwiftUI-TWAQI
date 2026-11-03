@@ -37,6 +37,9 @@ struct DetailsView: View {
     /// column beside a list.
     @State private var shareAnchor = PopoverAnchor()
 
+    /// Behind the "Send feedback" link at the foot of the page.
+    @State private var showingFeedback = false
+
     var body: some View {
         // One `navigationBarItems` call per branch: a second call replaces the
         // first rather than adding to it.
@@ -198,6 +201,9 @@ struct DetailsView: View {
                 if let location = location, location.hasContent {
                     location.padding(.vertical, 16)
                 }
+
+                // Low-key and last, so it never pushes the alerts card down.
+                feedbackLink
             }
             // A readable measure. Left unbounded, every row stretched the full
             // width of an iPad, which turned six pollutant cards into six
@@ -221,6 +227,21 @@ struct DetailsView: View {
             self.getData()
         }
         .translatesOnDevice(translatableLocation, revision: $translationRevision)
+        // A sheet rather than a push: this page is also shown in the panel
+        // beside the map and in a sheet over it, which have no stack to push
+        // onto. Its own stack, so the form keeps its title bar on iPad too.
+        .sheet(isPresented: $showingFeedback) {
+            NavigationView {
+                FeedbackView(source: .stationPage)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Feedback.cancel") { showingFeedback = false }
+                        }
+                    }
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
+            .environment(\.locale, settings.appLanguage.locale())
+        }
         // On the page, not the heart: an alert on a navigation-bar item's
         // content may not present on iOS 15.
         .alert(
@@ -266,6 +287,16 @@ struct DetailsView: View {
                 Text("Favourites.alerts_clear_pending_message")
             }
         }
+    }
+
+    private var feedbackLink: some View {
+        Button(action: { showingFeedback = true }) {
+            Label("Details.send_feedback", systemImage: "bubble.left")
+                .font(.footnote)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
     }
 
     private var isShowingFavouriteAlertsHint: Binding<Bool> {

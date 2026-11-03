@@ -226,6 +226,7 @@
 "Details.cam_live" = "Live";
 "Details.cam_timeline" = "Camera, past 24 hours";
 "Details.cam_hour_missing" = "No image for this hour";
+"Details.send_feedback" = "Send feedback";
 
 /* Share card */
 "Share.share" = "Share";

@@ -119,4 +119,11 @@ final class FeedbackServiceTests: XCTestCase {
         XCTAssertNil(FeedbackService.makeRequest(baseURL: "https://cms.example.com", token: nil, submission: submission()))
         XCTAssertNil(FeedbackService.makeRequest(baseURL: "", token: "t", submission: submission()))
     }
+
+    // MARK: - Entry point (FOX-46)
+
+    func testOpenFormEventParametersNameTheEntryPoint() {
+        XCTAssertEqual(FeedbackSource.help.openFormEventParameters, ["source": "help"])
+        XCTAssertEqual(FeedbackSource.stationPage.openFormEventParameters, ["source": "station_page"])
+    }
 }
