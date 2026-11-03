@@ -1,8 +1,15 @@
 # twaqi-push-sender
 
-Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase Cloud Messaging** (HTTP v1). FCM hands them to APNs with the auth key uploaded in the Firebase console (project `kf-twaqi`).
+Sends the TWAQI iOS app's AQI alerts through **Firebase Cloud Messaging** (HTTP v1), and serves the app's push API. FCM hands the alerts to APNs with the auth key uploaded in the Firebase console (project `kf-twaqi`).
 
-- **Cron** `20 */2 * * *` (every 2 hours, at :20 past even hours, UTC and Taiwan alike):
+**Where it runs (FOX-71).** The Cloudflare account is on the **Workers Free plan**, which allows 50 subrequests per run: far too few for the sends, and it rejects the `limits` block they needed (error 100328). So:
+
+- the **scheduled sends run in GitHub Actions**, [`.github/workflows/push-sender.yml`](../../.github/workflows/push-sender.yml), which calls this package's `run()` (`src/index.ts`) under Node through [`scripts/run.ts`](scripts/run.ts). Same code, no copy of it;
+- the **Worker** serves the app's `/app/v1` API, `GET /`, and the manual `/run` and `/test` routes. It has no cron and no scheduled handler.
+
+The run:
+
+- **Schedule** `20 */2 * * *` (every 2 hours, at :20 past even hours, UTC and Taiwan alike), in GitHub Actions:
   1. Read every station's current AQI in one request to the app's own API (`AQI_API_BASE` + `/v1/current-pollutants?country=twn`): the same numbers the station screen shows.
   2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold ≤ AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer reaches (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
   3. Send an alert to each one that crossed in, and write back only the rows whose state changed.
@@ -52,7 +59,7 @@ The app has **no Directus token for the push collections**. It writes its own ro
 
 ## Send log (`twaqi_push_logs`, FOX-66)
 
-Every send is recorded in **Workers Analytics Engine** (dataset `twaqi_push_events`, binding `PUSH_EVENTS`). The fields are status, trigger, station, error code, token suffix, device id and AQI, kept about 3 months and queryable with SQL. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
+Every send from the Worker is recorded in **Workers Analytics Engine** (dataset `twaqi_push_events`, binding `PUSH_EVENTS`). The scheduled sends in GitHub Actions have no Worker bindings, so they are **not** in Analytics Engine; their Directus rows (failures, dead tokens) and the run summary in the job log are what's left. The fields are status, trigger, station, error code, token suffix, device id and AQI, kept about 3 months and queryable with SQL. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
 
 The Directus rows are: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
 
@@ -72,7 +79,7 @@ DIRECTUS_ADMIN_TOKEN=… node directus/push-logs.mjs --apply  # create it
 | Route | |
 | --- | --- |
 | `GET /` | Health, and whether the FCM service account is set |
-| `POST /run` | Run now. `?dry` sends and writes nothing and lists each decision. Body `{"aqi": {"105": 180}}` replaces live AQI for those stations, to force a crossing. |
+| `POST /run` | Run now. `?dry` sends and writes nothing and lists each decision. Body `{"aqi": {"105": 180}}` replaces live AQI for those stations, to force a crossing. On the Free plan a real run stops at `SUBREQUEST_LIMIT` (50 requests) and defers the rest to the next run: fine for a forced test crossing, not for a full run. |
 | `POST /test` | `{"device_id": 5}` (optionally `"station_id": 105`): one test alert to one device, ignoring quiet hours. Checks the service account and the APNs key in Firebase. |
 
 Both POST routes need `Authorization: Bearer $SYNC_TOKEN` (the same token as `twaqi-workers`).
@@ -97,7 +104,7 @@ It never deletes. The app's static token (TWAQI App role) needs **no** access to
 
 ## Secrets
 
-Listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. Never commit any of them.
+The Worker's are listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. The scheduled sends read `FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN` and `AQI_API_BASE` from a second environment, `push-sender` (below). Never commit any of them.
 
 | Secret | |
 | --- | --- |
@@ -114,23 +121,56 @@ gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env workers-producti
 
 To set one on the live Worker without a deploy: `npx wrangler secret put FCM_SERVICE_ACCOUNT < kf-twaqi-firebase-adminsdk.json`.
 
-Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`, `MAX_SENDS_PER_RUN`. Bindings: `APP_LIMITER` (rate limit), `PUSH_EVENTS` (Analytics Engine). `limits.subrequests` sets the per-run request budget.
+Non-secret settings are `vars` in `wrangler.jsonc`: `DIRECTUS_URL`, `AQI_COUNTRIES`, `COOLDOWN_MINUTES`, `MAX_DATA_AGE_MINUTES`, `MAX_SENDS_PER_RUN`, `SUBREQUEST_LIMIT` (the Worker's 50 per request on Free). The GitHub Actions run uses the same vars, except that it lifts `SUBREQUEST_LIMIT`. Bindings (Worker only): `APP_LIMITER` (rate limit), `PUSH_EVENTS` (Analytics Engine).
+
+### The `push-sender` environment (GitHub Actions)
+
+`push-sender.yml` runs in the GitHub environment `push-sender`: deployments from `master` only, **no required reviewers** (a scheduled run can't wait for an approval, which is why it isn't `workers-production`). Its secrets are copies of the Worker's three:
+
+```sh
+gh api --method PUT repos/7kfpun/SwiftUI-TWAQI/environments/push-sender --input - <<'JSON'
+{ "deployment_branch_policy": { "protected_branches": false, "custom_branch_policies": true } }
+JSON
+gh api --method POST repos/7kfpun/SwiftUI-TWAQI/environments/push-sender/deployment-branch-policies \
+  -f name=master -f type=branch
+gh secret set FCM_SERVICE_ACCOUNT -R 7kfpun/SwiftUI-TWAQI --env push-sender < kf-twaqi-firebase-adminsdk.json
+gh secret set DIRECTUS_PUSH_TOKEN -R 7kfpun/SwiftUI-TWAQI --env push-sender
+gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env push-sender
+```
+
+Create it before the workflow's first run: a workflow that names a missing environment creates it with no branch rule. Rotating a secret means setting it in both environments.
+
+The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. A run that throws fails the job. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
+
+**GitHub's schedule is best effort.** A scheduled run can start late or be skipped when GitHub is busy, and scheduled workflows are switched off after **60 days without activity** in the repository (turn it back on under Actions → Push sender). A late or skipped run loses nothing: a crossing stays unsent until a run sends it, and nothing is sent twice.
+
+### Moving back to the Worker (Workers Paid)
+
+1. In `wrangler.jsonc`, restore `"triggers": { "crons": ["20 */2 * * *"] }` and `"limits": { "subrequests": 100000 }`, and set `SUBREQUEST_LIMIT` to `"100000"`.
+2. Restore the `scheduled` handler in `src/index.ts` (it called `run(env, { now: new Date(controller.scheduledTime) })` inside `ctx.waitUntil`; see the FOX-71 PR).
+3. Delete `.github/workflows/push-sender.yml` in the same PR, so the two never both send, and then the `push-sender` environment. `scripts/run.ts` can stay for local runs.
 
 ## Develop
 
 ```sh
 npm install
-npm test          # rules, FCM request + JWT, alert text, log schema
-npm run typecheck
+npm test          # rules, FCM request + JWT, alert text, log schema, the Node runner
+npm run typecheck # src/ only; scripts/ and test/ run under node --experimental-strip-types
 npx wrangler dev  # secrets from .dev.vars (gitignored)
 ```
 
-`/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes.
+`/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes. The GitHub Actions entry runs the same way from a shell (Node 22 or later, no `npm install` needed):
 
-Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one subrequest per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. **Sized for 40,000 alerts per 2-hour run** on Workers Paid.
-- **Requests:** a run may make up to `limits.subrequests` = 100,000 outgoing requests (Paid allows 10,000 by default, up to 10M). Each alert takes one FCM request, or two when a 429/5xx is retried, plus reads and writes, so 45,000 alerts fit even if every one is retried.
-- **Budget:** the run counts its own requests against `SUBREQUEST_LIMIT`, which must equal `limits.subrequests`. A batch of 100 starts only if its worst case still fits, and is then charged what it actually used. A send that threw counts as two.
-- **Time:** sends go 25 at a time, so 40k at ~100 ms each take about 3 minutes. A cron every 2 h gets 15 min of CPU and 15 min of wall time.
+```sh
+FCM_SERVICE_ACCOUNT="$(cat key.json)" DIRECTUS_PUSH_TOKEN=… AQI_API_BASE=… npm run send -- --dry-run
+```
+
+Without `--dry-run` it sends for real; any other argument is refused.
+
+Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one request per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. **Sized for 40,000 alerts per 2-hour run.**
+- **Requests:** each alert takes one FCM request, or two when a 429/5xx is retried, plus reads and writes. Under Node there is no per-run request limit.
+- **Budget:** the run counts its own requests against `SUBREQUEST_LIMIT`. A batch of 100 starts only if its worst case still fits, and is then charged what it actually used. A send that threw counts as two. On the Worker it is 50 (Free plan), so a manual `/run` defers what doesn't fit rather than failing mid-run; `scripts/run.ts` sets it to `Infinity`, so it never stops the GitHub Actions run early.
+- **Time:** sends go 25 at a time, so 40k at ~100 ms each take about 3 minutes. The job's `timeout-minutes` is 30.
 - **Cap:** `MAX_SENDS_PER_RUN` is 45,000. Anything past it stays unsent and goes out on the next run.
 - **No repeats:** state is saved to Directus after every 100 sends, so a run cut short never resends what it already delivered.
 - **FCM** allows about 600k messages a minute per project.

@@ -3,6 +3,11 @@
 // zone that changes, and send an FCM alert to each one that just crossed in. Only
 // devices with an FCM token are sent to; older builds stay on OneSignal,
 // whose sender is untouched. See README.md for the rules and secrets.
+//
+// The scheduled run() is called from GitHub Actions under Node
+// (scripts/run.ts, .github/workflows/push-sender.yml), not from a Worker cron:
+// the Workers Free plan can't carry the sends (FOX-71). The Worker itself
+// serves fetch(): the app's /app/v1 API and the manual /run and /test routes.
 import { allReadings, type AqiConfig, type Reading } from './aqi.ts'
 import { handleApp, type AppApiEnv } from './app-api.ts'
 import {
@@ -30,7 +35,8 @@ export interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
   MAX_DATA_AGE_MINUTES?: string
   /** Sends per run; the rest wait for the next run. */
   MAX_SENDS_PER_RUN?: string
-  /** Must match `limits.subrequests` in wrangler.jsonc. */
+  /** The Worker's per-request subrequest limit (wrangler.jsonc); the Node
+   * runner (scripts/run.ts) lifts it. */
   SUBREQUEST_LIMIT?: string
 }
 
@@ -72,18 +78,6 @@ const SAVE_ATTEMPTS = 3
 const ALERT_EXPIRY_SECONDS = 60 * 60
 
 export default {
-  async scheduled(controller, env, ctx) {
-    ctx.waitUntil(
-      run(env, { now: new Date(controller.scheduledTime) }).then(
-        (r) => console.log('run ok', JSON.stringify(r)),
-        (e) => {
-          console.error('run failed', e)
-          throw e
-        },
-      ),
-    )
-  },
-
   async fetch(request, env) {
     const url = new URL(request.url)
 
