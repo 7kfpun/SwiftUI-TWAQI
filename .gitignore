@@ -101,6 +101,7 @@ context/
 fastlane/.frameit_work/
 fastlane/.watch_upload/
 fastlane/.duo_upload/
+fastlane/.ios_upload/
 
 # Firebase Hosting
 .firebase/

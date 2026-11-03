@@ -21,7 +21,7 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane ios frame_screenshots
 ```
 
-Frame the raw captures in /Users/kf/Documents/Workspace/SwiftUI-TWAQI/fastlane/screenshots_raw/<locale> into App Store sized PNGs
+Frame the raw captures in /Users/kf/orca/workspaces/SwiftUI-TWAQI/fox-40-asc-station-screenshots/fastlane/screenshots_raw/<locale> into App Store sized PNGs
 
 Requires ImageMagick (brew install imagemagick)
 
@@ -79,6 +79,10 @@ Upload screenshots only to App Store Connect for 3.1.4
 
 Does not touch the binary, the metadata, or the review submission
 
+Leaves out the iPhone Duo images: overwrite removes the Duo set already on the version,
+
+and upload_duo_screenshots adds a fresh one
+
 ### ios upload_watch_screenshots
 
 ```sh
@@ -98,6 +102,8 @@ Leaves the iPhone and iPad screenshots already on the version alone
 Upload the iPhone Duo screenshots only to App Store Connect for 3.1.4
 
 Leaves the iPhone, iPad and watch screenshots already on the version alone
+
+Refuses a framed Duo image whose raw capture isn't in fastlane/screenshots_raw
 
 ### ios frame_vision_screenshots
 
