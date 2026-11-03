@@ -19,9 +19,17 @@ import WidgetKit
 /// by the widget on every timeline refresh, so the windows roll forward even
 /// when the app isn't opened. Each call replaces the whole set.
 enum SmartStackHints {
-    /// The configuration donated: the widget's default, AQI with its label.
-    private static var intent: SelectIndexIntent {
-        SelectIndexIntent(index: .aqi, style: .labelled)
+    /// Every configuration a widget can have. A `RelevantIntent` only lifts a
+    /// widget whose configuration matches its intent, so each context is
+    /// donated once per index × style × show-station (7 × 4 × 2).
+    static var allConfigurations: [SelectIndexIntent] {
+        IndexOption.allCases.flatMap { index in
+            ComplicationStyle.allCases.flatMap { style in
+                [true, false].map { showsStation in
+                    SelectIndexIntent(index: index, style: style, showsStation: showsStation)
+                }
+            }
+        }
     }
 
     static func update(isPro: Bool, now: Date = Date()) async {
@@ -56,8 +64,11 @@ enum SmartStackHints {
             contexts.append(.location(region))
         }
 
-        return contexts.map {
-            RelevantIntent(intent, widgetKind: SelectIndexIntent.widgetKind, relevance: $0)
+        let configurations = allConfigurations
+        return contexts.flatMap { context in
+            configurations.map {
+                RelevantIntent($0, widgetKind: SelectIndexIntent.widgetKind, relevance: context)
+            }
         }
     }
 }

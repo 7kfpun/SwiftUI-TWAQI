@@ -14,7 +14,7 @@ import WidgetKit
 
 /// Which index a complication shows. Mirrors `AirIndexTypes`, which can't
 /// conform to `AppEnum` itself without dragging AppIntents into the iOS app.
-enum IndexOption: String, AppEnum {
+enum IndexOption: String, AppEnum, CaseIterable {
     case aqi, pm25, pm10, o3, co, so2, no2
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Index"
@@ -35,7 +35,7 @@ enum IndexOption: String, AppEnum {
 }
 
 /// How a complication shows its index.
-enum ComplicationStyle: String, AppEnum {
+enum ComplicationStyle: String, AppEnum, CaseIterable {
     /// "AQI 42": the index name, the number and, with room, the unit.
     case labelled
     /// "42": just the number, for small slots and readers who know the index.
