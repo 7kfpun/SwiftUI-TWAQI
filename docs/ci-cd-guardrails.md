@@ -25,7 +25,7 @@ only when the ticket or PR names it.
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
 `Unit tests` speed-ups (FOX-64): the simulator is picked and booted in the background
-before checkout, and Swift packages and `Pods/` are cached with `actions/cache`. Caches
+right after `pod install`, overlapping the build, and Swift packages and `Pods/` are cached with `actions/cache`. Caches
 are scoped to the PR (and `master`, which has no CI run to fill one), so each PR's first
 run is cold; a miss just downloads and builds as before.
 
