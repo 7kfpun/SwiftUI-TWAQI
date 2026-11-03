@@ -30,39 +30,82 @@ final class ForecastViewModel: ObservableObject {
     /// Only read for its status: reading never prompts.
     private let statusManager = CLLocationManager()
     private var isLoading = false
+    private var isLocating = false
+
+    /// What the list is built from, kept so each piece can redraw it as it
+    /// arrives: the forecast rows, the country station list (to name each
+    /// station's area), the latest favourites and the reader's location.
+    private var rows: [AqiForecast]?
+    private var stations: Pollutants = []
+    private var favouriteStationIds: [Int] = []
+    private var location: CLLocation?
 
     /// Loads, or reloads on each visit: the store answers from memory inside
     /// its TTL, and favourites may have changed since.
+    ///
+    /// The list doesn't wait on a location fix, which can take a while
+    /// indoors: it shows with 北部 first and moves the reader's area up
+    /// once the fix arrives.
     func load(favouriteStationIds: [Int]) {
+        self.favouriteStationIds = favouriteStationIds
+        // Favourites edited since the last visit re-pin at once; a load
+        // already running picks up the new ones when it finishes.
+        render()
+
+        let allowed = isLocationAllowed
+        if allowed, location == nil, !isLocating {
+            isLocating = true
+            Task {
+                location = await locator.current()
+                isLocating = false
+                render()
+            }
+        }
+
         guard !isLoading else { return }
         isLoading = true
 
         Task {
             async let forecasts = Self.forecasts()
-            async let stations = stationsForAreas(favouriteStationIds: favouriteStationIds)
-            let (rows, known) = await (forecasts, stations)
+            // Only needed to name the reader's or a favourite's area.
+            if allowed || !favouriteStationIds.isEmpty {
+                stations = await Self.currentStations()
+            }
+            let fetched = await forecasts
             isLoading = false
 
-            guard !rows.isEmpty else {
-                // A reload that finds nothing keeps what is already shown.
-                if case .loaded = state { return }
-                state = .empty
-                return
+            // A reload that finds nothing keeps the last rows it had.
+            if !fetched.isEmpty || rows == nil {
+                rows = fetched
             }
+            render()
+        }
+    }
 
-            let today = AqiForecastDates.today()
-            let areaNames = Array(Set(rows.filter { $0.forecastDate >= today }.map(\.area))).sorted()
-            let areaOf = { (pollutant: Pollutant) in
-                AqiForecastMatcher.area(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, in: areaNames)
-            }
+    private func render() {
+        guard let rows = rows else { return }
+        guard !rows.isEmpty else {
+            if case .loaded = state { return }
+            state = .empty
+            return
+        }
 
-            state = .loaded(ForecastTabOrdering.areas(
-                forecasts: rows,
-                readerArea: known.nearest.flatMap(areaOf),
-                favouriteAreas: known.favourites.map(areaOf),
-                today: today,
-                chinese: Locale.isChinese
-            ))
+        let today = AqiForecastDates.today()
+        let areaNames = Array(Set(rows.filter { $0.forecastDate >= today }.map(\.area))).sorted()
+        let areaOf = { (pollutant: Pollutant) in
+            AqiForecastMatcher.area(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, in: areaNames)
+        }
+        let nearest = location.flatMap { WatchAPI.closest(to: $0, in: stations) }
+
+        let areas = ForecastTabOrdering.areas(
+            forecasts: rows,
+            readerArea: nearest.flatMap(areaOf),
+            favouriteAreas: favourites().map(areaOf),
+            today: today,
+            chinese: Locale.isChinese
+        )
+        if state != .loaded(areas) {
+            state = .loaded(areas)
         }
     }
 
@@ -72,15 +115,8 @@ final class ForecastViewModel: ObservableObject {
         }
     }
 
-    /// The station nearest the reader (nil without location) and the
-    /// favourite stations, in favourites order, as far as they are known.
-    private func stationsForAreas(favouriteStationIds: [Int]) async -> (nearest: Pollutant?, favourites: [Pollutant]) {
-        let location = await currentLocation()
-        guard location != nil || !favouriteStationIds.isEmpty else { return (nil, []) }
-
-        let stations = await Self.currentStations()
-        let nearest = location.flatMap { WatchAPI.closest(to: $0, in: stations) }
-
+    /// The favourite stations, in favourites order, as far as they are known.
+    private func favourites() -> [Pollutant] {
         let byId = Dictionary(stations.map { ($0.stationId, $0) }, uniquingKeysWith: { first, _ in first })
         // A favourite missing from the country list (not reporting now) may
         // still have a saved reading of its own, which carries its area.
@@ -89,16 +125,15 @@ final class ForecastViewModel: ObservableObject {
             PollutantCache.shared.pollutants(stationIds: missing).map { ($0.stationId, $0) },
             uniquingKeysWith: { first, _ in first }
         )
-        let favourites = favouriteStationIds.compactMap { byId[$0] ?? saved[$0] }
-        return (nearest, favourites)
+        return favouriteStationIds.compactMap { byId[$0] ?? saved[$0] }
     }
 
-    private func currentLocation() async -> CLLocation? {
+    private var isLocationAllowed: Bool {
         switch statusManager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
-            return await locator.current()
+            return true
         default:
-            return nil
+            return false
         }
     }
 
