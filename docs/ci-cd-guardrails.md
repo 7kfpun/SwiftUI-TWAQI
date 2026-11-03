@@ -17,13 +17,34 @@ deliberate action, taken only when the ticket or PR names it.
 
 | Check | Workflow | Runs on | Fails when |
 |---|---|---|---|
-| `Unit tests` | `ci.yml` | non-draft `feature/*` | the `-only-testing` subset fails (built from the CI-only `TWAQI-CI` scheme, which leaves out the UI-test runner). Skips itself (green) when only docs, media, `assets/`, `fastlane/`, `web/` or `workers/` changed. |
+| `Unit tests` | `ci.yml` | non-draft `feature/*` | the level script's tests or list check fail; the build fails (**build** and **test** levels); or the `-only-testing` subset fails (**test** level, built from the CI-only `TWAQI-CI` scheme, which leaves out the UI-test runner). Green in seconds at the **skip** level. Levels below. |
 | `Vulnerability checks` | `ci.yml` | non-draft `feature/*` | TruffleHog **verified** a secret in the PR's commits. Unverified findings, osv-scanner results and tool failures are warnings, posted as a PR comment. |
 | `PR policy` | `pr-policy.yml` | every PR, drafts too | the branch isn't `feature/…`; no `FOX-nn` in the branch or title; a `Depends on #N` PR isn't merged; Fastfile `APP_VERSION`, `MARKETING_VERSION`, build numbers or What's New disagree (`tools/check_release_consistency.py`). |
 | `Secret files` | `pr-policy.yml` | every PR, drafts too | the net diff adds or changes `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env*`, `.dev.vars*`, signing keys or profiles; force-adds a gitignored file; or adds a real-looking secret value (`tools/check_secret_files.py`). Example and placeholder files pass. |
 | `Workers` | `workers.yml` | non-draft PRs | a changed Worker fails its typecheck or `wrangler deploy --dry-run`. Green when no Worker changed. |
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
+
+`Unit tests` levels (FOX-79). The job's first steps check out the repo, run
+`tools/test_ci_test_level.py` and `tools/ci_test_level.py check`, then decide a level from
+the PR's file list (`gh api …/pulls/N/files`). The highest level any file needs wins:
+
+| Level | PR touches only… | Runs |
+|---|---|---|
+| **skip** | `workers/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing more; the check is green |
+| **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | config, caches, `pod install`, `build-for-testing`; no simulator pick (it starts CoreSimulatorService), boot or test run |
+| **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `tools/ci_test_level.py` or its test, `Podfile`, `Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
+
+- `CI_GUARDED_PATHS` (job `env` in `ci.yml`) sits beside `CI_TEST_SUITES`, the subset: the
+  suites' test files and the source files they test, read off each suite. `check` fails the
+  job when a suite's file isn't listed or an entry matches no file (a rename).
+- The PR label **`ci-full-tests`** forces **test**. Labels are fetched when the job runs, so
+  add the label and re-run the job (or push). Adding a label alone starts no run.
+- An empty file list, or a failed files or labels API call, gives **test**: never skip on doubt.
+- The step prints the level and the files that decided it, and writes them to the job summary.
+- The check is `Unit tests` at every level, so `master`'s required checks and the `PR policy`
+  and `LGTM` gates are unaffected. The full `TWAQITests` still runs locally before a PR is
+  marked ready; CI's simulator run is the second check.
 
 `Unit tests` speed-ups (FOX-64): the simulator is picked in the background during the
 build and booted after it, in sequence: booting during the build slowed both down on slow

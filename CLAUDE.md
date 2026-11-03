@@ -47,8 +47,14 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - Run the **full** `TWAQITests` locally before a PR is marked ready / merged:
   `xcodebuild test -workspace TWAQI.xcworkspace -scheme TWAQI -destination 'platform=iOS Simulator,name=<iPhone>,OS=latest' -only-testing:TWAQITests`
 - GitHub CI runs only a high-signal subset (offline caches, push dual-write,
-  favourites ↔ alerts, cam history, `SettingsStore`) — listed in `.github/workflows/ci.yml`.
-  Add a suite there only if it guards one of those areas.
+  favourites ↔ alerts, cam history, `SettingsStore`) — `CI_TEST_SUITES` in `.github/workflows/ci.yml`.
+  Add a suite there only if it guards one of those areas, **and** add its test file and the
+  source files it tests to `CI_GUARDED_PATHS` beside it (the job fails if they drift apart).
+- The `Unit tests` job has three levels (FOX-79, `tools/ci_test_level.py`): **skip** for PRs
+  touching only `workers/`, `web/`, `fastlane/`, `assets/`, docs, media or `.github/` other than
+  `ci.yml`; **build** (no simulator) for any other app path; **test** (build + subset) when a
+  guarded path, `ci.yml`, the level script, `Podfile(.lock)` or `Package.resolved` changes, or
+  the PR has the `ci-full-tests` label. The check name stays `Unit tests` at every level.
 - CI builds the CI-only `TWAQI-CI` scheme (`TWAQI` minus the `TWAQIUITests` runner) with
   `build-for-testing` + `test-without-building`. Use `-scheme TWAQI` locally; if you change
   the `TWAQI` scheme's build or test targets, mirror it in `TWAQI-CI`.

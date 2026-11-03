@@ -88,7 +88,16 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
     -only-testing:TWAQITests
   ```
 
-- **GitHub CI runs a small, high-signal subset** (`-only-testing` in `.github/workflows/ci.yml`) covering the crash- and regression-prone areas: networking/offline caches (`PollutantCacheTests`, `OfflineCacheRetentionTests`), push dual-write and favourites ↔ alerts (`PushServiceTests`, `FavouriteAlertsTests`), the station-cam history loader and caches (`StationCamTests`, `StationCamFrameCacheTests`, `StationCamHistoryCacheTests`), `SettingsStore` persistence (`AppLanguageTests`) and the Directus create-only forms (`FeedbackServiceTests`, `CooperateServiceTests`). Add a suite there only if it guards one of those areas.
+- **GitHub CI runs a small, high-signal subset** (`-only-testing` in `.github/workflows/ci.yml`) covering the crash- and regression-prone areas: networking/offline caches (`PollutantCacheTests`, `OfflineCacheRetentionTests`), push dual-write and favourites ↔ alerts (`PushServiceTests`, `FavouriteAlertsTests`), the station-cam history loader and caches (`StationCamTests`, `StationCamFrameCacheTests`, `StationCamHistoryCacheTests`), `SettingsStore` persistence (`AppLanguageTests`) and the Directus create-only forms (`FeedbackServiceTests`, `CooperateServiceTests`). Add a suite there only if it guards one of those areas, and then add its test file and the source files it tests to `CI_GUARDED_PATHS` next to it (the job fails when the two lists drift apart).
+- **The `Unit tests` job runs at one of three levels**, decided from the PR's file list by [`tools/ci_test_level.py`](tools/ci_test_level.py) (highest level wins; the job's first step prints the level and the files that decided it):
+
+  | Level | When the PR touches only… | Runs |
+  |---|---|---|
+  | **skip** | `workers/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing; the check is green in seconds |
+  | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | `build-for-testing` only; no simulator pick, boot or test run |
+  | **test** | a `CI_GUARDED_PATHS` entry (the subset suites' test files and the sources they test), `.github/workflows/ci.yml`, `tools/ci_test_level.py` (and its test), `Podfile`, `Podfile.lock`, `Package.resolved` | build + boot + the subset |
+
+  The PR label **`ci-full-tests`** forces **test** (labels are read when the job runs: add the label, then re-run the job or push). An empty file list or an API error also gives **test**. The script's tests: `python3 -m unittest discover -s tools -p 'test_ci_test_level.py'`; `python3 tools/ci_test_level.py decide --files <list>` shows the level for a file list.
 - CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild). Caches are per PR, so a PR's first run is cold.
 - Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
 
@@ -100,7 +109,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
   - **Secret files** — fails on `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env`, `.dev.vars`, signing keys, force-added gitignored files or real-looking secret values in the diff.
   - **LGTM** (status) — pending until a reviewer's LGTM covers the head commit: a pull request review or comment whose first line is `**<Name> LGTM**`, with any reviewer name (or none). A later `**<Name> — changes needed**` sets it back to pending. The advisory Claude Code Review bot doesn't count.
 - On a **non-draft** PR from `feature/*` to `master`, GitHub also runs:
-  - **CI / Unit tests** — the subset above. Skipped when the PR only touches docs, media, `assets/`, `fastlane/`, `web/` or `workers/`.
+  - **CI / Unit tests** — the subset above, at the skip / build / test level from [Tests](#tests). Green in seconds when the PR only touches docs, media, `assets/`, `fastlane/`, `web/`, `workers/` or `.github/` (other than `ci.yml`).
   - **CI / Vulnerability checks** — TruffleHog and osv-scanner, posted as a PR comment. Fails only on secrets TruffleHog **verified** as live; everything else is a warning.
   - **Claude Code Review** — reviews the diff against the ticket scope and the PR body's claims, and marks push / favourites ↔ alerts / dual-write breaks as blocking. A failed review fails the check.
   - **Workers** — typechecks and dry-runs any Worker the PR changes (green when none changed). Merging to `master` deploys only the changed Workers.
