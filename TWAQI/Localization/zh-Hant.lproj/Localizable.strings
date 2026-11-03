@@ -11,6 +11,7 @@
 */
 
 "Tabbar.main" = "首頁";
+"Tabbar.forecast" = "預報";
 "Tabbar.favourites" = "最愛";
 "Tabbar.details_list" = "搜尋";
 "Tabbar.help" = "說明";
@@ -380,6 +381,10 @@
 "Forecast.source" = "資料來源：環境部";
 "Forecast.more" = "顯示更多";
 "Forecast.less" = "收合";
+"Forecast.tab_title" = "空品區預報";
+"Forecast.your_area" = "所在地區";
+"Forecast.favourite_area" = "最愛測站";
+"Forecast.none_current" = "目前沒有可顯示的最新預報，環境部的最新預報暫時無法載入，請稍後再試。";
 
 /* 離線：最後一次成功的資料 */
 "Offline.showing_saved_readings" = "目前離線，顯示最後儲存的資料";

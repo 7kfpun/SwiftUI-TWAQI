@@ -7,6 +7,7 @@
 */
 
 "Tabbar.main" = "Main";
+"Tabbar.forecast" = "Forecast";
 "Tabbar.favourites" = "Favourites";
 "Tabbar.details_list" = "Search";
 "Tabbar.help" = "Help";
@@ -376,6 +377,10 @@
 "Forecast.source" = "Source: MOENV";
 "Forecast.more" = "Show more";
 "Forecast.less" = "Show less";
+"Forecast.tab_title" = "AQI Forecast";
+"Forecast.your_area" = "Your area";
+"Forecast.favourite_area" = "Favourites";
+"Forecast.none_current" = "No current forecast to show. MOENV's latest one couldn't be loaded; try again later.";
 
 /* Offline: last good readings */
 "Offline.showing_saved_readings" = "Offline — showing the last saved readings";

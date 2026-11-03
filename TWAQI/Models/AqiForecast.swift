@@ -132,20 +132,143 @@ enum AqiForecastMatcher {
         let areas = Array(Set(current.map(\.area))).sorted()
         guard let area = area(areaLocal: areaLocal, countyLocal: countyLocal, in: areas) else { return nil }
 
-        // One row per day; if the feed somehow has two, the newest publish wins.
-        var byDate: [String: AqiForecast] = [:]
-        for row in current where row.area == area {
-            if let existing = byDate[row.forecastDate], (existing.publishTime ?? "") >= (row.publishTime ?? "") {
-                continue
-            }
-            byDate[row.forecastDate] = row
-        }
-        let days = byDate.values.sorted { $0.forecastDate < $1.forecastDate }.prefix(limit)
+        let days = Self.days(area: area, in: current, today: today).prefix(limit)
         guard !days.isEmpty else { return nil }
 
         let nonEmpty = { (value: String?) in value.flatMap { $0.isEmpty ? nil : $0 } }
         let areaTitle = nonEmpty(title) ?? nonEmpty(areaLocal) ?? "\(area)空品區"
         return AreaForecast(areaTitle: areaTitle, days: Array(days))
+    }
+}
+
+extension AqiForecastMatcher {
+    /// Today-onwards days for one MOENV `area`, soonest first, every day the
+    /// feed has. One row per day; if the feed somehow has two, the newest
+    /// publish wins.
+    static func days(area: String, in forecasts: [AqiForecast], today: String) -> [AqiForecast] {
+        var byDate: [String: AqiForecast] = [:]
+        for row in forecasts where row.area == area && row.forecastDate >= today {
+            if let existing = byDate[row.forecastDate], (existing.publishTime ?? "") >= (row.publishTime ?? "") {
+                continue
+            }
+            byDate[row.forecastDate] = row
+        }
+        return byDate.values.sorted { $0.forecastDate < $1.forecastDate }
+    }
+}
+
+/// One 空品區 on the Forecast tab (FOX-32).
+struct ForecastTabArea: Equatable {
+    /// Why the area sits where it does in the list.
+    enum Pin: Equatable {
+        /// The reader's own area: the nearest station's.
+        case reader
+        /// First in place of the reader's area: no location, or the nearest
+        /// station's area has no forecast. Always 北部.
+        case fallback
+        /// The area of at least one favourite station.
+        case favourite
+        case none
+    }
+
+    /// MOENV's short name, "北部".
+    let area: String
+    let pin: Pin
+    let forecast: AreaForecast
+}
+
+/// Orders every 空品區 for the Forecast tab: the reader's area, then the
+/// favourites' areas, then the rest. Pure, so it can be tested without a
+/// location or the network.
+enum ForecastTabOrdering {
+    /// The reader's area when there is no location, or no station near it
+    /// matched a forecast area.
+    static let fallbackArea = "北部"
+
+    /// MOENV's own order, north to south, then the islands; it orders the
+    /// areas that aren't pinned. An area outside this list goes last, by name.
+    static let regionOrder = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "澎湖", "金門", "馬祖"]
+
+    /// - Parameters:
+    ///   - readerArea: the nearest station's MOENV area, already matched; nil
+    ///     falls back to `fallbackArea`.
+    ///   - favouriteAreas: each favourite station's MOENV area, in favourites
+    ///     order; repeats and nils are fine.
+    /// - Returns: every area with a forecast from `today` on, each with all
+    ///   of its days.
+    static func areas(
+        forecasts: [AqiForecast],
+        readerArea: String?,
+        favouriteAreas: [String?],
+        today: String,
+        chinese: Bool
+    ) -> [ForecastTabArea] {
+        let available = Set(forecasts.filter { $0.forecastDate >= today }.map(\.area))
+
+        var seen = Set<String>()
+        var ordered: [(area: String, pin: ForecastTabArea.Pin)] = []
+        func add(_ area: String, _ pin: ForecastTabArea.Pin) {
+            guard available.contains(area), seen.insert(area).inserted else { return }
+            ordered.append((area, pin))
+        }
+
+        if let readerArea = readerArea, available.contains(readerArea) {
+            add(readerArea, .reader)
+        } else {
+            add(fallbackArea, .fallback)
+        }
+        favouriteAreas.compactMap { $0 }.forEach { add($0, .favourite) }
+        let rest = available.sorted { lhs, rhs in
+            let left = regionOrder.firstIndex(of: lhs) ?? regionOrder.count
+            let right = regionOrder.firstIndex(of: rhs) ?? regionOrder.count
+            return left == right ? lhs < rhs : left < right
+        }
+        rest.forEach { add($0, .none) }
+
+        return ordered.compactMap { entry in
+            let days = AqiForecastMatcher.days(area: entry.area, in: forecasts, today: today)
+            guard !days.isEmpty else { return nil }
+            return ForecastTabArea(
+                area: entry.area,
+                pin: entry.pin,
+                forecast: AreaForecast(areaTitle: title(entry.area, chinese: chinese), days: days)
+            )
+        }
+    }
+
+    /// The text the areas share, when MOENV repeats one national paragraph
+    /// on each of them: shown once above the list instead of on every card.
+    /// Nil when two areas' texts differ, or fewer than two areas have one.
+    static func sharedContent(_ areas: [ForecastTabArea]) -> String? {
+        let contents = areas.compactMap(\.forecast.content)
+        guard contents.count > 1, Set(contents).count == 1 else { return nil }
+        return contents.first
+    }
+
+    /// English names as the station API gives them ("North"); the islands,
+    /// which the API files under 其他, by their usual names.
+    private static let englishNames: [String: String] = [
+        "北部": "North",
+        "竹苗": "Chu-Miao",
+        "中部": "Central",
+        "雲嘉南": "Yun-Chia-Nan",
+        "高屏": "Kao-Ping",
+        "宜蘭": "Yilan",
+        "花東": "Hua-Tung",
+        "澎湖": "Penghu",
+        "金門": "Kinmen",
+        "馬祖": "Matsu",
+    ]
+
+    private static let islands: Set<String> = ["澎湖", "金門", "馬祖"]
+
+    /// "北部空品區" / "North"; an island is just its name ("金門" / "Kinmen").
+    static func title(_ area: String, chinese: Bool) -> String {
+        let key = AqiForecastMatcher.normalize(area)
+        if chinese {
+            return islands.contains(key) ? key : "\(key)空品區"
+        }
+        return englishNames[key] ?? area
     }
 }
 
