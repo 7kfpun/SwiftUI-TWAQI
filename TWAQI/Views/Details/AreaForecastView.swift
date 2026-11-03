@@ -29,6 +29,8 @@ struct AreaForecastView: View {
     /// False on the Forecast tab when this area's text is the paragraph
     /// shown once above every card.
     var showsContent = true
+    /// False on the Forecast tab, which names the source once for all cards.
+    var showsSource = true
 
     static let cornerRadius: CGFloat = 12
 
@@ -140,7 +142,9 @@ struct AreaForecastView: View {
                 Text("Forecast.published \(Self.publishedText(published))")
             }
             Spacer(minLength: 8)
-            Text("Forecast.source")
+            if showsSource {
+                Text("Forecast.source")
+            }
         }
         .font(.caption.weight(.light))
         .foregroundColor(.secondary)

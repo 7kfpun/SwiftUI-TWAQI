@@ -57,9 +57,16 @@ struct ForecastView: View {
                     AreaForecastView(
                         forecast: area.forecast,
                         heading: .area(area.pin),
-                        showsContent: shared == nil || area.forecast.content != shared
+                        showsContent: shared == nil || area.forecast.content != shared,
+                        showsSource: false
                     )
                 }
+
+                // Once for the whole list rather than under every card.
+                Text("Forecast.source")
+                    .font(.caption.weight(.light))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
             }
             .padding(.vertical)
         }
