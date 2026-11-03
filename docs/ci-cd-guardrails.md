@@ -25,9 +25,13 @@ only when the ticket or PR names it.
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
 `Unit tests` speed-ups (FOX-64): the simulator is picked and booted in the background
-right after `pod install`, overlapping the build, and Swift packages and `Pods/` are cached with `actions/cache`. Caches
-are scoped to the PR (and `master`, which has no CI run to fill one), so each PR's first
-run is cold; a miss just downloads and builds as before.
+right after `pod install`, overlapping the build. Swift packages, `Pods/` and the
+DerivedData build products are cached with `actions/cache`. The DerivedData key is exact
+(Xcode build + `Podfile.lock` + `Podfile` + `Package.resolved`, no restore-keys), so
+products built against other dependencies are never restored, and app and test sources
+always rebuild (checkout gives them new mtimes). Caches are scoped to the PR (and
+`master`, which has no CI run to fill one), so each PR's first run is cold; a miss just
+downloads and builds as before.
 
 "CI green" for undrafting means everything except `LGTM`, which stays pending until
 a reviewer's LGTM covers the head.
