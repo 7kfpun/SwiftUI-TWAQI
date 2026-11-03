@@ -119,7 +119,9 @@ final class AqiForecastStore {
         components.queryItems = [
             URLQueryItem(name: "filter[archived][_neq]", value: "true"),
             URLQueryItem(name: "filter[forecast_date][_gte]", value: today),
-            URLQueryItem(name: "fields", value: "area,forecast_date,aqi,major_pollutant,minor_pollutant,minor_pollutant_aqi,content,publish_time"),
+            // content_i18n only when the field exists and this token may read
+            // it: naming it in `fields` before then would fail the whole read.
+            URLQueryItem(name: "fields", value: "*"),
             URLQueryItem(name: "sort", value: "forecast_date,area"),
             URLQueryItem(name: "limit", value: "200"),
         ]

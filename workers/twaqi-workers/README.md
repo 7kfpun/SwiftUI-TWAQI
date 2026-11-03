@@ -69,12 +69,28 @@ curl -sI "https://twaqi.app.wahthefox.com/$(curl -s https://twaqi.app.wahthefox.
 - Stored as MOENV publishes it: `area` is the short name (`北部`, `雲嘉南`, not `北部空品區`), `forecast_date` is `YYYY-MM-DD`, `publish_time` is Taiwan local time `YYYY-MM-DD HH:mm:ss`, `source` is `AQF_P_01`.
 - The MOENV key stays in the Worker. The app reads Directus with its own read-only static token.
 
+### Pre-translated forecast text (`content_i18n`)
+
+`content` is MOENV's Traditional Chinese text and stays the source of truth. After each upsert the sync translates it into English with an LLM on [OpenRouter](https://openrouter.ai) (`src/translate.ts`) and stores it in the JSON field `content_i18n`:
+
+```json
+{ "zh-Hant": "<the content it was translated from>", "en": "Today (the 3rd), …" }
+```
+
+- **Current** when `content_i18n["zh-Hant"]` equals `content`. Clients should use `en` only then, and otherwise fall back to `content` (the app translates on device).
+- **When:** a row is translated if its text has Chinese and its translation is missing or was made from older text: new rows, publishes that changed the text, and rows an earlier run failed on. Rows already current make no call, so the sync is idempotent. MOENV repeats one text on every row of a publish, so each distinct text costs one call, shared by those rows.
+- **Model:** pinned in `TRANSLATION_MODEL` (`deepseek/deepseek-v4.1-flash`), `temperature: 0`, a short system prompt plus the glossary terms found in the text (the 10 forecast areas, pollutants, AQI levels, MOENV alerts). Output must be plain English with no Chinese left, or it is rejected.
+- **Limits:** 30 s per call, at most 40 distinct texts and 120 s of translating per run; the rest waits for the next hour.
+- **Never blocks the forecast.** Translation runs after the rows are stored. A failed call, a missing `OPENROUTER_FORECAST_API_KEY`, a missing `content_i18n` field or a refused write leaves `content_i18n` as it was and is retried next run.
+- `GET /forecast` reports `translated` (texts translated), `translatedRows`, `translationFailed`, `translationDeferred`, and `translationSkipped` with the reason when translation did not run or could not save.
+- Directus: `content_i18n` is a JSON field on `twaqi_aqi_forecast`; the **TWAQI Forecast Worker** role needs read and update on it, and the app's role read.
+
 | Route | |
 | --- | --- |
 | `GET /forecast` | Outcome of the last sync (`{ ok, at, result \| error }`), kept in R2 at `forecast/last-sync.json` |
 | `POST /forecast/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN` |
 
-Local testing against a mock feed (no MOENV key needed). `.dev.vars` holds `DIRECTUS_FORECAST_TOKEN` and `SYNC_TOKEN`; the mock URL is passed as a var because `wrangler dev` only loads the declared secrets from `.dev.vars`:
+Local testing against a mock feed (no MOENV key needed). `.dev.vars` holds `DIRECTUS_FORECAST_TOKEN`, `SYNC_TOKEN` and, to try translation, `OPENROUTER_FORECAST_API_KEY`; the mock URL is passed as a var because `wrangler dev` only loads the declared secrets from `.dev.vars`:
 
 ```sh
 npx wrangler dev --var MOENV_FORECAST_URL:http://127.0.0.1:8799/feed.json
@@ -85,13 +101,15 @@ curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 
 GitHub Actions deploys this Worker when a merge to master changes `workers/twaqi-workers/` (see `.github/workflows/workers.yml`). Run the **Workers** workflow by hand to redeploy.
 
-`DIRECTUS_URL` is a plain var in `wrangler.jsonc`. Secrets are listed in `secrets.required` there; a deploy fails if any is missing. CI uploads them from GitHub repository secrets of the same names on every deploy:
+`DIRECTUS_URL` is a plain var in `wrangler.jsonc`. Secrets are listed in `secrets.required` there; a deploy fails if any is missing. CI uploads them on every deploy from the secrets of the same names in the `workers-production` GitHub environment, and each new one also needs a line in the deploy's "Collect Worker secrets" env:
 
 ```sh
-gh secret set MOENV_API_KEY -R 7kfpun/SwiftUI-TWAQI
-gh secret set SYNC_TOKEN -R 7kfpun/SwiftUI-TWAQI
-# Directus static token of the "TWAQI Forecast Worker" user (create/read/update on twaqi_aqi_forecast)
-gh secret set DIRECTUS_FORECAST_TOKEN -R 7kfpun/SwiftUI-TWAQI
+gh secret set MOENV_API_KEY -R 7kfpun/SwiftUI-TWAQI --env workers-production
+gh secret set SYNC_TOKEN -R 7kfpun/SwiftUI-TWAQI --env workers-production
+# Directus static token of the "TWAQI Forecast Worker" user (create/read/update on twaqi_aqi_forecast, including content_i18n)
+gh secret set DIRECTUS_FORECAST_TOKEN -R 7kfpun/SwiftUI-TWAQI --env workers-production
+# OpenRouter key for pre-translating the forecast text
+gh secret set OPENROUTER_FORECAST_API_KEY -R 7kfpun/SwiftUI-TWAQI --env workers-production
 ```
 
 Local development:

@@ -2,7 +2,8 @@
 // and the MOENV air-quality forecast (aqf_p_01) into Directus hourly at :35.
 // Deployed by GitHub Actions (.github/workflows/workers.yml) on merge to master.
 // Secrets (never in git) are listed in secrets.required; CI uploads them from
-// GitHub repository secrets of the same names on every deploy.
+// the `workers-production` GitHub environment secrets of the same names on every deploy.
+// OPENROUTER_FORECAST_API_KEY pre-translates the forecast text (src/translate.ts).
 //
 // Public URLs:
 //   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
@@ -27,7 +28,7 @@
     "DIRECTUS_URL": "https://cms.wahthefox.com"
   },
   "secrets": {
-    "required": ["MOENV_API_KEY", "SYNC_TOKEN", "DIRECTUS_FORECAST_TOKEN"]
+    "required": ["MOENV_API_KEY", "SYNC_TOKEN", "DIRECTUS_FORECAST_TOKEN", "OPENROUTER_FORECAST_API_KEY"]
   },
   "observability": { "enabled": true }
 }

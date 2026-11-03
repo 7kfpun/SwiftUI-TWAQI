@@ -41,6 +41,48 @@ final class AqiForecastTests: XCTestCase {
         XCTAssertEqual(rows[5].status, .unhealthyforsensitivegroup)
     }
 
+    func testDecodesPretranslatedContent() throws {
+        let json = """
+        { "data": [
+          { "area": "北部", "forecast_date": "2026-11-03", "aqi": 62, "content": "今日北部普通。", "publish_time": "2026-11-03 16:30:00",
+            "content_i18n": { "zh-Hant": "今日北部普通。", "en": "Northern: Moderate today." } },
+          { "area": "竹苗", "forecast_date": "2026-11-03", "aqi": 70, "content": "明日竹苗普通。", "publish_time": "2026-11-03 16:30:00",
+            "content_i18n": { "zh-Hant": "今日北部普通。", "en": "Northern: Moderate today." } },
+          { "area": "中部", "forecast_date": "2026-11-03", "aqi": 80, "content": "今日中部普通。", "publish_time": "2026-11-03 16:30:00",
+            "content_i18n": null },
+          { "area": "高屏", "forecast_date": "2026-11-03", "aqi": 90, "content": "今日高屏普通。", "publish_time": "2026-11-03 16:30:00",
+            "content_i18n": { "en": 3 } },
+          { "area": "宜蘭", "forecast_date": "2026-11-03", "aqi": 30, "content": "今日宜蘭良好。", "publish_time": "2026-11-03 16:30:00" }
+        ] }
+        """
+        let rows = try JSONDecoder().decode(AqiForecastResponse.self, from: Data(json.utf8)).data
+        XCTAssertEqual(rows.count, 5)
+
+        // Made from this row's text: used for English, not for other languages.
+        XCTAssertEqual(rows[0].contentI18n?["en"], "Northern: Moderate today.")
+        XCTAssertEqual(rows[0].translatedContent("en"), "Northern: Moderate today.")
+        XCTAssertNil(rows[0].translatedContent("ja"))
+        XCTAssertNil(rows[0].translatedContent(nil))
+        // Made from older text: stale, so the original (and on-device) is used.
+        XCTAssertNil(rows[1].translatedContent("en"))
+        // Null, malformed or missing (older Worker, field not added yet): row still decodes.
+        XCTAssertNil(rows[2].contentI18n)
+        XCTAssertNil(rows[3].contentI18n)
+        XCTAssertEqual(rows[3].aqi, 90)
+        XCTAssertNil(rows[4].contentI18n)
+        XCTAssertNil(rows[4].translatedContent("en"))
+
+        // The area's text and its translation come from the same row.
+        let area = AreaForecast(areaTitle: "North", days: [rows[0]])
+        XCTAssertEqual(area.content, "今日北部普通。")
+        XCTAssertEqual(area.translatedContent("en"), "Northern: Moderate today.")
+        XCTAssertNil(AreaForecast(areaTitle: "Central", days: [rows[2]]).translatedContent("en"))
+
+        // Round-trips through the offline cache file.
+        let cached = try JSONDecoder().decode(AqiForecast.self, from: JSONEncoder().encode(rows[0]))
+        XCTAssertEqual(cached, rows[0])
+    }
+
     func testMatchesStationAreaToForecastArea() {
         let areas = ["北部", "竹苗", "中部", "雲嘉南", "高屏", "宜蘭", "花東", "馬祖", "金門", "澎湖"]
         XCTAssertEqual(AqiForecastMatcher.area(areaLocal: "北部空品區", countyLocal: "臺北市", in: areas), "北部")
@@ -124,6 +166,9 @@ final class AqiForecastTests: XCTestCase {
         let query = Dictionary(uniqueKeysWithValues: (components.queryItems ?? []).map { ($0.name, $0.value ?? "") })
         XCTAssertEqual(query["filter[forecast_date][_gte]"], "2026-10-31")
         XCTAssertEqual(query["filter[archived][_neq]"], "true")
+        // `*`, not a field list: naming content_i18n before Directus has it (or
+        // before this token may read it) would fail the whole request.
+        XCTAssertEqual(query["fields"], "*")
 
         XCTAssertNil(AqiForecastStore.makeRequest(baseURL: "https://cms.wahthefox.com", token: "", today: "2026-10-31"))
         XCTAssertNil(AqiForecastStore.makeRequest(baseURL: nil, token: "abc", today: "2026-10-31"))

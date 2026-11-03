@@ -5,6 +5,12 @@
 // rows whose forecast_date is more than ARCHIVE_AFTER_DAYS old are soft-archived.
 // If MOENV is down or returns nothing usable, Directus is left untouched so the
 // app keeps showing the last good forecast.
+//
+// After the upsert, `content` is pre-translated into `content_i18n` (see
+// translate.ts). Translation is best-effort: it runs after the rows are
+// stored, a failure leaves `content_i18n` as it was, and the next run retries.
+
+import { translateForecast, type TranslationResult } from './translate'
 
 export interface ForecastEnv {
   MOENV_API_KEY: string
@@ -12,6 +18,8 @@ export interface ForecastEnv {
   DIRECTUS_FORECAST_TOKEN: string
   /** Local testing only: point the sync at a mock instead of MOENV. */
   MOENV_FORECAST_URL?: string
+  /** OpenRouter key for pre-translating `content`; without it the sync skips translation. */
+  OPENROUTER_FORECAST_API_KEY?: string
 }
 
 /** A forecast row as stored in Directus. */
@@ -35,6 +43,16 @@ export interface ForecastSyncResult {
   unchanged: number
   archived: number
   latestPublishTime: string | null
+  /** Distinct forecast texts translated by the model this run. */
+  translated: number
+  /** Rows whose `content_i18n` was written this run (a text is shared by many rows). */
+  translatedRows: number
+  /** Distinct texts whose translation failed; retried next run. */
+  translationFailed: number
+  /** Distinct texts left for the next run by the per-run cap or time budget. */
+  translationDeferred: number
+  /** Why translation did not run, or failed to save, if it didn't. */
+  translationSkipped?: string
 }
 
 const MOENV_FORECAST = 'https://data.moenv.gov.tw/api/v2/aqf_p_01?format=JSON&limit=1000'
@@ -86,6 +104,9 @@ export async function syncForecast(env: ForecastEnv): Promise<ForecastSyncResult
 
   const archived = await archiveOld(directus)
 
+  // Never throws: the forecast is already stored.
+  const translation = await translateForecast(env.OPENROUTER_FORECAST_API_KEY, directus, dates)
+
   return {
     fetched: raw.length,
     rows: rows.length,
@@ -94,6 +115,7 @@ export async function syncForecast(env: ForecastEnv): Promise<ForecastSyncResult
     unchanged,
     archived,
     latestPublishTime: rows.reduce<string | null>((max, r) => (comparePublish(r.publish_time, max) > 0 ? r.publish_time : max), null),
+    ...translation,
   }
 }
 

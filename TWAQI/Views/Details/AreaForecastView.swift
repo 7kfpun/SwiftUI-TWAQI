@@ -48,7 +48,8 @@ struct AreaForecastView: View {
 
                 if showsContent, let content = forecast.content {
                     Divider()
-                    ForecastContentText(content: content)
+                    ForecastContentText(content: content,
+                                        translated: forecast.translatedContent(OnDeviceTranslation.target))
                 }
             }
             .background(Color(.secondarySystemBackground))
@@ -201,11 +202,14 @@ struct AreaForecastView: View {
     }
 }
 
-/// MOENV's forecast text, three lines until opened, translated on device
+/// MOENV's forecast text, three lines until opened, in the reader's language
 /// outside Chinese. On a station's card, and once above the Forecast tab's
 /// cards when every area carries the same paragraph.
 struct ForecastContentText: View {
     let content: String
+    /// The Worker's translation of `content` into the reader's language
+    /// (`content_i18n`), when it has one; else it is translated on device.
+    var translated: String? = nil
 
     @State private var expanded = false
     /// Whether the forecast text runs past the collapsed three lines; the
@@ -219,13 +223,14 @@ struct ForecastContentText: View {
 
     /// MOENV's forecast text runs to a paragraph per region; show the start
     /// and let the reader open the rest. Outside Chinese it is shown in the
-    /// reader's language once on-device translation has it, else as written:
-    /// the sentences the collapsed lines show first, the rest on expanding.
+    /// reader's language: the Worker's translation when there is one, else
+    /// on-device translation once it has it (the sentences the collapsed lines
+    /// show first, the rest on expanding), else as written.
     var body: some View {
         // Read so a finished translation redraws this text.
         _ = translationRevision
         let segments = OnDeviceTranslation.segments(content)
-        let shown = OnDeviceTranslation.display(segments: segments, target: OnDeviceTranslation.target)
+        let shown = translated ?? OnDeviceTranslation.display(segments: segments, target: OnDeviceTranslation.target)
 
         return VStack(alignment: .leading, spacing: 4) {
             Text(shown)
@@ -252,7 +257,7 @@ struct ForecastContentText: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(truncated ? .isButton : [])
-        .translatesOnDevice(segmentsToTranslate(segments), revision: $translationRevision)
+        .translatesOnDevice(translated == nil ? segmentsToTranslate(segments) : [], revision: $translationRevision)
     }
 
     private static let collapsedLines = 3

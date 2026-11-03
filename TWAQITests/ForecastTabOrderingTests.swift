@@ -163,4 +163,24 @@ final class ForecastTabOrderingTests: XCTestCase {
     func testNoSharedContentForASingleArea() {
         XCTAssertNil(ForecastTabOrdering.sharedContent(order([row("北部", today, content: "北部普通。")])))
     }
+
+    /// FOX-33: the shared paragraph uses the Worker's translation from any
+    /// area carrying that text, and only one made from that exact text.
+    func testSharedTranslationFromAnyAreaWithThatText() {
+        let text = "1. 今日各地擴散條件良好。"
+        var translated = row("中部", today, content: text)
+        translated.contentI18n = ["zh-Hant": text, "en": "1. Dispersion is good everywhere today."]
+        let result = order([row("北部", today, content: text), translated, row("花東", today)])
+
+        XCTAssertEqual(ForecastTabOrdering.sharedTranslation(result, language: "en"),
+                       "1. Dispersion is good everywhere today.")
+        XCTAssertNil(ForecastTabOrdering.sharedTranslation(result, language: "ja"))
+
+        var stale = row("中部", today, content: text)
+        stale.contentI18n = ["zh-Hant": "舊的文字。", "en": "Old text."]
+        XCTAssertNil(ForecastTabOrdering.sharedTranslation(order([row("北部", today, content: text), stale]), language: "en"))
+
+        // No shared paragraph, no shared translation.
+        XCTAssertNil(ForecastTabOrdering.sharedTranslation(order([translated]), language: "en"))
+    }
 }
