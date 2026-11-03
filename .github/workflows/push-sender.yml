@@ -118,8 +118,13 @@ jobs:
       # failed run pings /fail; a dry run never pings. A timed-out or cancelled
       # job may stop before this step: the missing success ping alerts then.
       # The body is the run's link, which healthchecks.io shows in its email.
+      # healthchecks.io answers 200 for a wrong or deleted check too, with
+      # `OK (not found)` (or `OK (rate limited)`), so only a body of exactly
+      # `OK` counts as pinged. The job's default working directory is replaced
+      # so a failed checkout can still ping /fail.
       - name: Ping the monitor
         if: ${{ always() && !inputs.dry_run }}
+        working-directory: ${{ github.workspace }}
         env:
           PING_URL: ${{ secrets.HEALTHCHECK_PING_URL }}
           SEND_OUTCOME: ${{ steps.send.outcome }}
@@ -136,10 +141,18 @@ jobs:
             label=fail
             url="${url}/fail"
           fi
-          if curl -fsS -m 10 --retry 5 -o /dev/null --data-raw "${label}: ${RUN_URL}" "$url"; then
-            echo "Monitor pinged (${label})."
+          warn() {
+            echo "::warning::$1"
+            echo "⚠️ $1" >> "$GITHUB_STEP_SUMMARY"
+          }
+          # In the if, so a failed request doesn't end the step under bash -e.
+          if body="$(curl -fsS -m 10 --retry 5 --data-raw "${label}: ${RUN_URL}" "$url")"; then
+            if [ "$body" = OK ]; then
+              echo "Monitor pinged (${label})."
+            else
+              body="$(printf '%s' "$body" | tr -d '\r' | tr '\n' ' ' | cut -c1-100)"
+              warn "The monitor answered \"${body}\" to the ${label} ping, not OK: check HEALTHCHECK_PING_URL and the check in healthchecks.io."
+            fi
           else
-            msg="Could not ping the monitor (${label}); it will alert if no success ping arrives in time."
-            echo "::warning::${msg}"
-            echo "⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
+            warn "Could not ping the monitor (${label}); it will alert if no success ping arrives in time."
           fi

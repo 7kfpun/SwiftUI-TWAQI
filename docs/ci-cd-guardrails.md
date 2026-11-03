@@ -155,7 +155,8 @@ unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-
   missing success ping). healthchecks.io emails the owner on a
   `/fail` ping and when no success ping arrives in time (a skipped run, or the schedule
   switched off by the 60-day rule), about an hour after the missed slot. Dry runs don't
-  ping. No secret skips the ping; an undeliverable ping is a warning, not a failure. To
+  ping. No secret skips the ping; an undeliverable ping, or a reply other than `OK` (a
+  wrong or deleted check answers 200 `OK (not found)`), is a warning, not a failure. To
   pause it, press Pause on the check (the next ping resumes it). Setup:
   [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#dead-mans-switch-healthchecksio).
 - Back on Workers Paid: restore the cron, `limits` and the scheduled handler in the Worker,
