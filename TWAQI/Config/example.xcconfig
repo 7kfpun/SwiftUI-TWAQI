@@ -22,6 +22,9 @@ ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2
 BugsnagApiKey =
 GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
 GMSServicesApiKey = // Required
+// OneSignal stays registered alongside FCM (same alert tags), so it can be
+// switched back on as a sender. Optional: empty leaves OneSignal off.
+OneSignalAppId =
 SentryDSN =
 
 // AdMob AdUnitId

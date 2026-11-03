@@ -13,6 +13,7 @@ import FirebaseCore
 import FirebaseMessaging
 import GoogleMaps
 import GoogleMobileAds
+import OneSignal
 import Sentry
 import UserNotifications
 
@@ -59,7 +60,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         TrackingManager.applyExclusionAtLaunch()
 
         // Push: alerts are sent through Firebase Cloud Messaging to the token
-        // Directus holds for this device (see `DirectusPushMirror`).
+        // Directus holds for this device (see `DirectusPushMirror`). OneSignal
+        // stays registered with the same alert tags, ready to switch back on.
+        OneSignalTags.start(launchOptions: launchOptions)
         startPush(application, promptsAtLaunch: onboarding.promptsForPushAtLaunch)
 
         // Initialize the Google Mobile Ads SDK.

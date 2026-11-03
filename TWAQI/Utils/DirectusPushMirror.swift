@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import OneSignal
+import UIKit
 import Security
 
 /// Keeps the push settings — each station's alerts and the do-not-disturb
@@ -186,6 +188,8 @@ final class DirectusPushMirror {
     }
 
     private func flushOnce() async {
+        // OneSignal is kept current too, for switching it back on later.
+        OneSignalTags.sync(wanted: load([String: StationAlerts].self, Keys.wanted) ?? [:], settings: settings, defaults: defaults)
         guard let config = PushService.Config.current else { return }
         // APNs hasn't registered yet; `apnsTokenChanged` brings us back.
         guard let token = apnsToken else { return }
@@ -486,5 +490,124 @@ enum PushDeviceIdentity {
             return nil
         }
         return value
+    }
+}
+
+/// Keeps OneSignal's tags in step with the alerts and do-not-disturb saved
+/// here, so OneSignal can be switched back on as a sender with everyone's
+/// settings current. FCM is the live sender; OneSignal's own sending is off.
+///
+/// Write-only and best effort: `DirectusPushMirror.wanted` stays the truth.
+/// Station tags are keyed by station id, which the OneSignal tracker matches
+/// as well as the English name builds before FOX-13 used; those name tags are
+/// removed once per install.
+enum OneSignalTags {
+    static let pollutionSuffix = "_pollution_therhold"
+    static let cleanlinessSuffix = "_cleanliness_therhold"
+    static let dndKeys = ["isDndEnabled", "dndStartTime", "dndEndTime", "isDndStartEarlierThanEnd"]
+
+    private enum Keys {
+        static let written = "oneSignalWrittenTags"
+        static let cleaned = "oneSignalStaleTagsCleaned"
+    }
+
+    static var isConfigured: Bool {
+        !(getEnv("OneSignalAppId") ?? "").trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// At launch: OneSignal registers this device (the APNs token it gets is
+    /// the same one FCM uses). It never prompts; the app asks for permission.
+    static func start(launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
+        guard isConfigured, let appId = getEnv("OneSignalAppId") else { return }
+        OneSignal.initWithLaunchOptions(launchOptions)
+        OneSignal.setAppId(appId)
+    }
+
+    /// The tags these settings come to: each alert's threshold under
+    /// `{stationId}_pollution_therhold` / `_cleanliness_therhold`, and the
+    /// do-not-disturb window in minutes, as the OneSignal tracker reads them.
+    static func tags(
+        wanted: [String: StationAlerts],
+        dndEnabled: Bool,
+        dndStart: Date,
+        dndEnd: Date,
+        calendar: Calendar = .current
+    ) -> [String: String] {
+        var tags: [String: String] = [:]
+        for (stationId, alerts) in wanted {
+            if let above = alerts.above { tags[stationId + pollutionSuffix] = String(above) }
+            if let below = alerts.below { tags[stationId + cleanlinessSuffix] = String(below) }
+        }
+        if dndEnabled {
+            func minutes(_ date: Date) -> Int {
+                let parts = calendar.dateComponents([.hour, .minute], from: date)
+                return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+            }
+            let start = minutes(dndStart)
+            let end = minutes(dndEnd)
+            tags["isDndEnabled"] = "true"
+            tags["dndStartTime"] = String(start)
+            tags["dndEndTime"] = String(end)
+            // As earlier builds wrote it: true when the window runs past midnight.
+            tags["isDndStartEarlierThanEnd"] = String(start > end)
+        }
+        return tags
+    }
+
+    /// What to send: tags that are new or changed, and "" (OneSignal's
+    /// delete) for ones written before, or found stale, that are no longer
+    /// wanted. Empty when OneSignal already has these settings.
+    static func changes(desired: [String: String], written: [String: String], stale: Set<String> = []) -> [String: String] {
+        var out = desired.filter { written[$0.key] != $0.value }
+        for key in Set(written.keys).union(stale) where desired[key] == nil {
+            out[key] = ""
+        }
+        return out
+    }
+
+    /// Whether a tag is a station alert, from this build or an earlier one.
+    static func isStationTag(_ key: String) -> Bool {
+        key.hasSuffix(pollutionSuffix) || key.hasSuffix(cleanlinessSuffix)
+    }
+
+    /// Sends whatever differs from what OneSignal was last told. The first
+    /// time on an install it also reads OneSignal's tags and clears station
+    /// tags it no longer wants (an earlier build's name-keyed ones).
+    @MainActor
+    static func sync(wanted: [String: StationAlerts], settings: SettingsStore, defaults: UserDefaults = .standard) {
+        guard isConfigured else { return }
+        let desired = tags(
+            wanted: wanted.filter { !$0.value.isOff },
+            dndEnabled: settings.isDndEnabled,
+            dndStart: settings.dndStartTime,
+            dndEnd: settings.dndEndTime
+        )
+        let written = defaults.dictionary(forKey: Keys.written) as? [String: String] ?? [:]
+
+        func send(stale: Set<String>) {
+            let toSend = changes(desired: desired, written: written, stale: stale)
+            guard !toSend.isEmpty else {
+                defaults.set(true, forKey: Keys.cleaned)
+                return
+            }
+            OneSignal.sendTags(toSend, onSuccess: { _ in
+                DispatchQueue.main.async {
+                    defaults.set(desired, forKey: Keys.written)
+                    defaults.set(true, forKey: Keys.cleaned)
+                }
+            }, onFailure: { error in
+                // Tried again on the next change, launch or foreground.
+                print("OneSignal tags failed: \(error?.localizedDescription ?? "unknown")")
+            })
+        }
+
+        guard !defaults.bool(forKey: Keys.cleaned) else { return send(stale: []) }
+        OneSignal.getTags({ tags in
+            let keys = Set((tags ?? [:]).keys.compactMap { $0 as? String }).filter(isStationTag)
+            DispatchQueue.main.async { send(stale: keys) }
+        }, onFailure: { _ in
+            // Not registered yet, or offline: write what we can, clean later.
+            DispatchQueue.main.async { send(stale: []) }
+        })
     }
 }

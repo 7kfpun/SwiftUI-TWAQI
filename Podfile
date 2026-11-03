@@ -19,6 +19,9 @@ target 'TWAQI' do
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
   pod 'Bugsnag', '~> 5.23'
+  # Kept alongside FCM so OneSignal can be switched back on (it gets the
+  # same alert tags); FCM is the live sender. No service extension.
+  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
   pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
   # Host-app tests: they link against the app, so they only need the pods'

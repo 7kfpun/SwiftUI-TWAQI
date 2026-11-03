@@ -301,6 +301,44 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(restore.url?.query, "device_token=abcd")
     }
 
+    // MARK: - OneSignal tags (kept alongside FCM)
+
+    func testOneSignalTagsMirrorAlertsAndDnd() {
+        let tags = OneSignalTags.tags(
+            wanted: ["105": StationAlerts(above: 120, below: 30), "126": StationAlerts(above: 90)],
+            dndEnabled: true, dndStart: date(22, 30, in: taipei), dndEnd: date(7, 0, in: taipei), calendar: taipei
+        )
+        XCTAssertEqual(tags, [
+            "105_pollution_therhold": "120",
+            "105_cleanliness_therhold": "30",
+            "126_pollution_therhold": "90",
+            "isDndEnabled": "true",
+            "dndStartTime": "1350",
+            "dndEndTime": "420",
+            "isDndStartEarlierThanEnd": "true",
+        ])
+        // DND off: its tags aren't wanted.
+        XCTAssertEqual(OneSignalTags.tags(wanted: [:], dndEnabled: false, dndStart: Date(), dndEnd: Date()), [:])
+    }
+
+    func testOneSignalTagChangesSendOnlyDifferencesAndDeleteTheRest() {
+        let written = ["105_pollution_therhold": "120", "126_pollution_therhold": "90", "isDndEnabled": "true"]
+        let desired = ["105_pollution_therhold": "150", "126_pollution_therhold": "90"]
+        XCTAssertEqual(OneSignalTags.changes(desired: desired, written: written), [
+            "105_pollution_therhold": "150",
+            "isDndEnabled": "",
+        ])
+        // Nothing new: nothing to send.
+        XCTAssertEqual(OneSignalTags.changes(desired: desired, written: desired), [:])
+        // An earlier build's name-keyed tag found on OneSignal is cleared.
+        XCTAssertEqual(
+            OneSignalTags.changes(desired: desired, written: desired, stale: ["Zhongshan_pollution_therhold", "105_pollution_therhold"]),
+            ["Zhongshan_pollution_therhold": ""]
+        )
+        XCTAssertTrue(OneSignalTags.isStationTag("Zhongshan_cleanliness_therhold"))
+        XCTAssertFalse(OneSignalTags.isStationTag("isDndEnabled"))
+    }
+
     func testDeviceSecretIsBase64url() {
         XCTAssertEqual(PushDeviceIdentity.base64url(Data([0xfb, 0xff, 0xfe])), "-__-")
         XCTAssertEqual(PushDeviceIdentity.base64url(Data(repeating: 0, count: 32)).count, 43)

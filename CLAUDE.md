@@ -16,8 +16,9 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
   The app holds **no Directus token for push**: it calls the Worker's `/app/v1` API, signed
   with its Keychain device id and secret, and only the Worker writes Directus (FOX-37 M5).
   The device row carries the APNs and FCM tokens; `workers/twaqi-push-sender` reads it and
-  sends through FCM, logging to `twaqi_push_logs` (token suffix only). No OneSignal in the
-  app; the old OneSignal tracker in `ai-playground` still serves pre-FOX-13 builds.
+  sends through FCM, logging to `twaqi_push_logs` (token suffix only). The OneSignal SDK
+  stays in the app with the same alert tags (`OneSignalTags`), so OneSignal can be switched
+  back on later; its sending is off. FCM is the live sender.
 - **Favourites ↔ alerts** (`FavouriteAlerts`): an alert on ⇒ the station is a favourite;
   removing a favourite turns its alerts off. Alerts are keyed by station id. At most 3 stations
   have alerts (`FavouriteAlerts.maxAlertedStations`).
