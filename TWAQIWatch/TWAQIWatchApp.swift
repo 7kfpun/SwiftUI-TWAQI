@@ -56,7 +56,8 @@ final class WatchModel: ObservableObject {
     var isHome: Bool { source != .pinned }
 
     /// Re-asks StoreKit; a purchase or refund on any device lands here.
-    /// The app itself is free; only the complications depend on the answer.
+    /// The app and the face complication are free; only the complication's
+    /// number and other styles depend on the answer.
     func checkPro() async {
         let unlocked = await WatchPro.refresh()
         guard unlocked != isPro else { return }

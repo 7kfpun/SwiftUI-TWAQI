@@ -53,7 +53,7 @@ struct WidgetGuideView: View {
     }
 }
 
-/// The free watch app, and the Pro complications on the watch face.
+/// The free watch app and face complication, and the Pro number and styles.
 struct WatchGuideView: View {
     var body: some View {
         List {

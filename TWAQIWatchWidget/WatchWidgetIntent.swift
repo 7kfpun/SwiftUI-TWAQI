@@ -34,24 +34,16 @@ enum IndexOption: String, AppEnum, CaseIterable {
     }
 }
 
-/// How a complication shows its index.
-enum ComplicationStyle: String, AppEnum, CaseIterable {
-    /// "AQI 42": the index name, the number and, with room, the unit.
-    case labelled
-    /// "42": just the number, for small slots and readers who know the index.
-    case numberOnly
-    /// The phone app's face for the band, with the number where it fits.
-    case face
-    /// "Moderate": the health level in words, no number at all.
-    case status
-
+/// The styles themselves, and which need Pro, are in `ComplicationStyle.swift`.
+/// Every style but the face is marked Pro where it is picked (FOX-63).
+extension ComplicationStyle: AppEnum {
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Style"
 
     static var caseDisplayRepresentations: [ComplicationStyle: DisplayRepresentation] = [
-        .labelled: "With label",
-        .numberOnly: "Number only",
+        .labelled: "With label · Pro",
+        .numberOnly: "Number only · Pro",
         .face: "Face",
-        .status: "Status",
+        .status: "Status · Pro",
     ]
 }
 

@@ -7,6 +7,7 @@
 //
 
 import AppIntents
+import os
 import SwiftUI
 import WidgetKit
 
@@ -33,10 +34,13 @@ struct ReadingEntry: TimelineEntry {
     let airIndexType: AirIndexTypes
     var style: ComplicationStyle = .labelled
     var showsStation = true
-    /// Without the upgrade the complication shows a lock, not the reading.
-    var isLocked = false
+    /// Without Pro the face drops its number and the other styles show a
+    /// lock, not the reading.
+    var access: ComplicationAccess = .full
     /// How far up the Smart Stack this entry should go (`WidgetRelevance`).
     var relevance: TimelineEntryRelevance?
+
+    var isLocked: Bool { access == .locked }
 }
 
 struct ReadingProvider: AppIntentTimelineProvider {
@@ -44,29 +48,43 @@ struct ReadingProvider: AppIntentTimelineProvider {
     /// one publish behind without spending the refresh budget.
     private static let refreshInterval: TimeInterval = 30 * 60
 
+    private static let log = Logger(subsystem: "com.kfpun.twaqi.watchwidget", category: "pro")
+
     func placeholder(in context: Context) -> ReadingEntry {
         ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
     }
 
+    /// Also the face picker's preview, so a Pro style shows "Pro" there
+    /// before it is added, not only after. The cached answer: a snapshot has
+    /// to come back quickly.
     func snapshot(for configuration: SelectIndexIntent, in context: Context) async -> ReadingEntry {
-        ReadingEntry(
+        let access = ComplicationAccess(style: configuration.style, isPro: WatchPro.isUnlocked)
+        return ReadingEntry(
             date: Date(),
-            reading: WatchStore.latestReading ?? .placeholder,
+            reading: access == .locked ? nil : WatchStore.latestReading ?? .placeholder,
             airIndexType: configuration.index.airIndexType,
-            style: configuration.style, showsStation: configuration.showsStation
+            style: configuration.style, showsStation: configuration.showsStation, access: access
         )
     }
 
     func timeline(for configuration: SelectIndexIntent, in context: Context) async -> Timeline<ReadingEntry> {
         let now = Date()
         let next = now.addingTimeInterval(Self.refreshInterval)
-        guard await WatchPro.refresh() else {
-            // The app reloads every timeline the moment a purchase lands. A
-            // lock is never pushed up the Smart Stack.
+        // The free face still gets its reading; only the Pro styles lock.
+        // The app reloads every timeline the moment a purchase lands.
+        let isPro = await WatchPro.refresh()
+        let access = ComplicationAccess(style: configuration.style, isPro: isPro)
+        guard access != .locked else {
+            // The watch has no Firebase Analytics; this is the locked-style
+            // event, in the unified log (FOX-63, FOX-44).
+            Self.log.notice(
+                "watch_complication_locked style=\(configuration.style.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public) index=\(configuration.index.rawValue, privacy: .public)"
+            )
+            // A lock is never pushed up the Smart Stack.
             await SmartStackHints.update(isPro: false, now: now)
             let entry = ReadingEntry(
                 date: now, reading: nil, airIndexType: configuration.index.airIndexType,
-                style: configuration.style, showsStation: configuration.showsStation, isLocked: true,
+                style: configuration.style, showsStation: configuration.showsStation, access: access,
                 relevance: TimelineEntryRelevance(score: 0, duration: Self.refreshInterval)
             )
             return Timeline(entries: [entry], policy: .after(next))
@@ -92,14 +110,16 @@ struct ReadingProvider: AppIntentTimelineProvider {
 
         // The watch has no copy of the phone's alerts, so no threshold here.
         let previous = reading.flatMap(WatchStore.recordForRelevance)
+        // The Smart Stack is part of Pro: the free face is never lifted.
         let score = WidgetRelevance.score(
-            for: reading, airIndexType: configuration.index.airIndexType, previous: previous, now: now
+            for: reading, airIndexType: configuration.index.airIndexType, previous: previous,
+            isLocked: !isPro, now: now
         )
-        await SmartStackHints.update(isPro: true, now: now)
+        await SmartStackHints.update(isPro: isPro, now: now)
 
         let entry = ReadingEntry(
             date: now, reading: reading, airIndexType: configuration.index.airIndexType,
-            style: configuration.style, showsStation: configuration.showsStation,
+            style: configuration.style, showsStation: configuration.showsStation, access: access,
             relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
         )
         return Timeline(entries: [entry], policy: .after(next))
@@ -107,7 +127,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
 
     /// watchOS has no editor for intent parameters on the face, so each index
     /// is offered as its own complication in the picker, once per style,
-    /// with and without the station name.
+    /// with and without the station name. Every style but the free face is
+    /// marked Pro in its name, so nobody meets the lock as a surprise.
     func recommendations() -> [AppIntentRecommendation<SelectIndexIntent>] {
         IndexOption.allCases.flatMap { option in
             let name = option.airIndexType.toString()
@@ -121,14 +142,17 @@ struct ReadingProvider: AppIntentTimelineProvider {
             // interpolated argument as a description, and the extension dies
             // before the face picker gets any of its complications.
             return styles.flatMap { style, title in
-                [
+                let marked = { (title: String) in
+                    style.isPro ? String(localized: "Watch.widget_pro \(title)") : title
+                }
+                return [
                     AppIntentRecommendation(
                         intent: SelectIndexIntent(index: option, style: style),
-                        description: Text(verbatim: title)
+                        description: Text(verbatim: marked(title))
                     ),
                     AppIntentRecommendation(
                         intent: SelectIndexIntent(index: option, style: style, showsStation: false),
-                        description: Text(verbatim: String(localized: "Watch.widget_no_station \(title)"))
+                        description: Text(verbatim: marked(String(localized: "Watch.widget_no_station \(title)")))
                     ),
                 ]
             }
@@ -144,6 +168,8 @@ struct ReadingWidgetView: View {
     private var type: AirIndexTypes { entry.airIndexType }
     private var style: ComplicationStyle { entry.style }
     private var showsLabel: Bool { style == .labelled }
+    /// False for the free face, which never draws the number.
+    private var showsNumber: Bool { entry.access.showsNumber }
 
     var body: some View {
         if entry.isLocked {
@@ -194,10 +220,12 @@ struct ReadingWidgetView: View {
                 .gaugeStyle(.accessoryCircular)
 
         case .accessoryCorner where style == .face:
+            // Without Pro the curve names the index instead of the number,
+            // so a PM2.5 face isn't read as the AQI.
             face(status)
                 .padding(4)
                 .widgetLabel {
-                    Text(verbatim: value)
+                    Text(verbatim: showsNumber ? value : type.toString())
                 }
 
         case .accessoryCorner where style == .status:
@@ -255,7 +283,7 @@ struct ReadingWidgetView: View {
                             : type.toString())
                             .foregroundStyle(.secondary)
                     } else {
-                        Text(verbatim: style == .numberOnly ? value : "\(type.toString()) \(value) \(type.getUnit())")
+                        Text(verbatim: numberLine(value))
                             .monospacedDigit()
 
                         if entry.showsStation {
@@ -271,12 +299,25 @@ struct ReadingWidgetView: View {
             let station = entry.showsStation ? " · \(reading.displayName)" : ""
             if style == .status {
                 Text(status.toString()) + Text(verbatim: station)
-            } else {
+            } else if showsNumber {
                 // Inline can't draw the face, so the face style keeps the label.
                 let text = style == .numberOnly ? value : "\(type.toString()) \(value)"
                 Text(verbatim: text + station)
+            } else {
+                // The free face, where only text fits: the index and its level
+                // stand in for the face, still without the number.
+                Text(verbatim: "\(type.toString()) ") + Text(status.toString()) + Text(verbatim: station)
             }
         }
+    }
+
+    /// The rectangular slot's second line. The free face names the index
+    /// only; the face beside it shows the level.
+    private func numberLine(_ value: String) -> String {
+        if !showsNumber {
+            return type.toString()
+        }
+        return style == .numberOnly ? value : "\(type.toString()) \(value) \(type.getUnit())"
     }
 
     /// Fills by health band rather than raw value. Each index has its own units
@@ -337,19 +378,45 @@ struct ReadingWidgetView: View {
         }
     }
 
-    /// Points the reader at the app, where the paywall is.
+    /// A Pro style without Pro: reads "Pro" and points the reader at the
+    /// app, where the paywall is. The face style is free and never lands here.
     private var locked: some View {
         Group {
             switch family {
             case .accessoryRectangular:
-                Label("Watch.pro_locked", systemImage: "lock.fill")
-                    .font(.footnote)
+                VStack(alignment: .leading, spacing: 1) {
+                    Label {
+                        Text(verbatim: "\(type.toString()) · Pro")
+                    } icon: {
+                        Image(systemName: "lock.fill")
+                    }
+                    .font(.headline)
+                    .widgetAccentable()
+
+                    Text("Watch.pro_locked")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             case .accessoryInline:
                 Label("Watch.pro_locked", systemImage: "lock.fill")
-            default:
+            case .accessoryCorner:
                 Image(systemName: "lock.fill")
                     .font(.title3)
                     .widgetAccentable()
+                    .widgetLabel {
+                        Text(verbatim: "Pro")
+                    }
+            default:
+                VStack(spacing: 0) {
+                    Image(systemName: "lock.fill")
+                        .font(.body)
+                    Text(verbatim: "Pro")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .widgetAccentable()
             }
         }
     }
