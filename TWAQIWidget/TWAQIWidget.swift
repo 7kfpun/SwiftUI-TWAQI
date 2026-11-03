@@ -108,6 +108,9 @@ struct ReadingEntry: TimelineEntry {
     /// A Pro family placed without Pro: stations are shown, their numbers
     /// blurred under a line selling Pro.
     var isLocked = false
+    /// How far up a StandBy or Home Screen Smart Rotate stack this entry
+    /// should go (`WidgetRelevance`).
+    var relevance: TimelineEntryRelevance?
 
     var tintColor: Color {
         guard let reading, !isLocked else { return Color(0x676767) }
@@ -186,7 +189,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: SelectIndexIntent, in context: Context) async -> Timeline<ReadingEntry> {
-        let next = Date().addingTimeInterval(Self.refreshInterval)
+        let now = Date()
+        let next = now.addingTimeInterval(Self.refreshInterval)
         var reading = WatchStore.latestReading
         let lists = Self.listsFavourites(in: context.family)
         let favouriteIds = lists ? WatchStore.favouriteStationIds : []
@@ -233,9 +237,17 @@ struct ReadingProvider: AppIntentTimelineProvider {
 
         // Locked widgets still fetch, so the stations they tease are current.
         // Buying Pro reloads every timeline (`WidgetBridge.publish(isPro:)`).
+        let isLocked = Self.isLocked(in: context)
+        let previous = reading.flatMap(WatchStore.recordForRelevance)
+        let score = WidgetRelevance.score(
+            for: reading, airIndexType: configuration.index.airIndexType, previous: previous,
+            alertThreshold: reading.flatMap { WatchStore.alertThresholds[$0.stationId] },
+            isLocked: isLocked, now: now
+        )
         let entry = ReadingEntry(
-            date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context)
+            date: now, reading: reading, airIndexType: configuration.index.airIndexType,
+            listsFavourites: lists, favourites: favourites, isLocked: isLocked,
+            relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
         )
         return Timeline(entries: [entry], policy: .after(next))
     }
@@ -245,6 +257,11 @@ struct ReadingWidgetView: View {
     let entry: ReadingEntry
 
     @Environment(\.widgetFamily) private var family
+    /// False in StandBy, which drops the container background.
+    @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
+    /// `.vibrant` in StandBy at night (and on the Lock Screen): colour turns
+    /// to shades of one tint, so it can't carry the level by itself.
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     private var type: AirIndexTypes { entry.airIndexType }
 
@@ -275,6 +292,11 @@ struct ReadingWidgetView: View {
         let value = reading.formatted(type)
 
         switch family {
+        // StandBy shows the small widget full screen, read from across the
+        // room: the leading station only, big, with its level in words.
+        case .systemSmall where !showsContainerBackground:
+            standBy(reading)
+
         case .systemSmall where !entry.favourites.isEmpty:
             smallWithFavourites(reading)
 
@@ -390,6 +412,53 @@ struct ReadingWidgetView: View {
             // accessoryInline and any future family.
             Text(verbatim: "\(reading.displayName) · \(type.toString()) \(value)")
         }
+    }
+
+    // MARK: - StandBy
+
+    /// No background of its own: StandBy puts it on black. The level is in
+    /// words as well as in the bar's colour, so it still reads in night mode's
+    /// single red tint, where the bar is drawn plain.
+    private func standBy(_ reading: WatchReading) -> some View {
+        let status = reading.status(type)
+        let tint = Color(status.getColor())
+        let fullColor = renderingMode == .fullColor
+
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top, spacing: 4) {
+                Text(verbatim: type.toString())
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                if status.hasFaceImage {
+                    Image(status.getImage())
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 32, height: 32)
+                }
+            }
+            Text(verbatim: reading.formatted(type))
+                .font(.system(size: 48, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+            // The band's colour on its own bar, not on the number: very
+            // unhealthy and hazardous are too dark to read on black.
+            Capsule()
+                .fill(fullColor ? tint : Color.primary)
+                .frame(height: 6)
+                .widgetAccentable()
+            Text(status.toString())
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(2)
+                .minimumScaleFactor(0.6)
+            Spacer(minLength: 0)
+            Text(reading.displayName)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Favourites

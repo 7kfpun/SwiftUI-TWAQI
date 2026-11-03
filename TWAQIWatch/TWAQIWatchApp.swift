@@ -62,6 +62,7 @@ final class WatchModel: ObservableObject {
         guard unlocked != isPro else { return }
         isPro = unlocked
         WidgetCenter.shared.reloadAllTimelines()
+        await SmartStackHints.update(isPro: unlocked)
     }
 
     /// Purchases completed outside the paywall: Ask to Buy approvals, or a
@@ -95,6 +96,7 @@ final class WatchModel: ObservableObject {
                 if let pollutant {
                     home = WatchReading(pollutant)
                     WatchStore.homeReading = home
+                    WatchStore.homeIsLocated = location != nil
                 }
             }
 
@@ -138,6 +140,9 @@ final class WatchModel: ObservableObject {
         self.reading = reading
         WatchStore.latestReading = reading
         WidgetCenter.shared.reloadAllTimelines()
+        // The Smart Stack's windows follow the station and its reading.
+        let isPro = isPro
+        Task { await SmartStackHints.update(isPro: isPro) }
     }
 }
 

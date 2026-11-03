@@ -41,6 +41,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         WidgetBridge.publish(favouriteStationIds: SettingsStore().savedFavouriteStations)
         // Likewise a language chosen under Help before the widget followed it.
         WidgetBridge.publish(appLanguage: AppLanguage.stored())
+        // Alert thresholds lift the widget's relevance. Also mirrored each
+        // time the app leaves the foreground (`SceneDelegate`).
+        WidgetBridge.publishAlertThresholds()
 
         // Offline data saved more than a week ago is never shown; delete it.
         OfflineCacheRetention.purgeInBackground()

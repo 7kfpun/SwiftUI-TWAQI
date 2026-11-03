@@ -31,6 +31,11 @@ struct WidgetGuideView: View {
                 guideText("Help.widgets_lock_sizes")
             }
 
+            Section(header: Text("Help.widgets_standby_header")) {
+                guideText("Help.widgets_standby_body")
+                guideText("Help.widgets_smart_rotate_body")
+            }
+
             Section(
                 header: Text("Help.widgets_add_header"),
                 footer: Text("Help.widgets_footer").fontWeight(.light)
@@ -58,6 +63,10 @@ struct WatchGuideView: View {
 
             Section(header: Text("Help.watch_complications_header")) {
                 guideText("Help.watch_complications_body")
+            }
+
+            Section(header: Text("Help.watch_smart_stack_header")) {
+                guideText("Help.watch_smart_stack_body")
             }
 
             Section(

@@ -27,6 +27,10 @@ struct WatchReading: Codable, Equatable {
     let windDirection: Double
     let windSpeed: Double
     let publishTime: String
+    /// The station's position, for the watch Smart Stack's "near home" hint.
+    /// Optional: readings saved before FOX-75 have none.
+    var latitude: Double?
+    var longitude: Double?
 
     init(_ pollutant: Pollutant) {
         stationId = pollutant.stationId
@@ -43,6 +47,8 @@ struct WatchReading: Codable, Equatable {
         windDirection = pollutant.windDirection
         windSpeed = pollutant.windSpeed
         publishTime = pollutant.publishTime
+        latitude = pollutant.lat
+        longitude = pollutant.lon
     }
 
     /// Shown in the complication gallery before any real reading exists.

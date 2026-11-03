@@ -21,6 +21,9 @@ import WidgetKit
 /// - `favouriteStationIds` — mirror of `SettingsStore.savedFavouriteStations`,
 ///   which stays the source of truth, for the medium and large widgets.
 /// - `favouriteReadings` — last readings seen for those stations.
+/// - `alertThresholds` — each station's "above" alert threshold, from
+///   `DirectusPushMirror`, which stays the source of truth; the widget's
+///   relevance peaks there (FOX-75).
 /// - `appLanguage` — mirror of `SettingsStore.appLanguage` (Help → Language),
 ///   so the widget shows the language the app does.
 enum WidgetBridge {
@@ -76,6 +79,22 @@ enum WidgetBridge {
         WatchStore.cacheFavouriteReadings(
             pollutants.filter { ids.contains($0.stationId) }.map(WatchReading.init)
         )
+    }
+
+    /// Mirrors the "above" alert thresholds into the app group, so a widget
+    /// leading with a station over its threshold tops a StandBy or Smart
+    /// Rotate stack. Called at launch and whenever the app leaves the
+    /// foreground: the widget isn't on screen while the app is, and a slider
+    /// drag would otherwise reload it at every step. Only reads the alerts;
+    /// never writes them.
+    static func publishAlertThresholds() {
+        publish(alertThresholds: DirectusPushMirror.alertedStations().compactMapValues(\.above))
+    }
+
+    static func publish(alertThresholds: [Int: Int]) {
+        guard alertThresholds != WatchStore.alertThresholds else { return }
+        WatchStore.alertThresholds = alertThresholds
+        WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
     }
 
     /// Mirrors the Help language choice into the app group. Called on every
