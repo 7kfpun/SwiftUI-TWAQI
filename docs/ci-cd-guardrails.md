@@ -24,8 +24,10 @@ only when the ticket or PR names it.
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
-`Unit tests` speed-ups (FOX-64): the simulator is picked and booted in the background
-right after `pod install`, overlapping the build. Swift packages, `Pods/` and the
+`Unit tests` speed-ups (FOX-64): the simulator is picked in the background during the
+build and booted after it, in sequence: booting during the build slowed both down on slow
+runners. The build targets a generic simulator (`ARCHS=arm64`) and the tests run with
+`test-without-building` against the booted simulator's udid. Swift packages, `Pods/` and the
 DerivedData build products are cached with `actions/cache`. The DerivedData key is exact
 (Xcode build + `Podfile.lock` + `Podfile` + `Package.resolved`, no restore-keys), so
 products built against other dependencies are never restored, and app and test sources
