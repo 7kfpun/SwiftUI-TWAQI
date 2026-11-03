@@ -22,7 +22,7 @@ class HelpViewModel: ObservableObject {
             settings.dndStartTime = dndStartTime
             pushDndWindow()
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification_start_time", parameters: [
+            TrackingManager.logEvent(.setDndNotificationStartTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -35,7 +35,7 @@ class HelpViewModel: ObservableObject {
             settings.dndEndTime = dndEndTime
             pushDndWindow()
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification_end_time", parameters: [
+            TrackingManager.logEvent(.setDndNotificationEndTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -61,7 +61,7 @@ class HelpViewModel: ObservableObject {
                 mirrorDnd()
             }
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
+            TrackingManager.logEvent(.setDndNotification, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -106,7 +106,7 @@ class HelpViewModel: ObservableObject {
         FavouriteAlerts.cancelAll { [weak self] cancelled in
             guard let self = self else { return }
             if cancelled {
-                TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+                TrackingManager.logEvent(.favouriteStationAllRemoved)
             }
             self.cancelAllFailed = !cancelled
             self.showingAlert = true

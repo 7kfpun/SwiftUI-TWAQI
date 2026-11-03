@@ -50,7 +50,7 @@ struct IndexGuideView: View {
         .listStyle(.insetGrouped)
         .navigationBarTitle(page.title, displayMode: .inline)
         .onAppear {
-            TrackingManager.logEvent(eventName: "open_definition_page", parameters: ["label": page.rawValue])
+            TrackingManager.logEvent(.openDefinitionPage, parameters: ["label": page.rawValue])
         }
     }
 

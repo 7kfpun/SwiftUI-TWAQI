@@ -41,7 +41,7 @@ struct FavouriteListView: View {
             // Insets the scroll content so the last row clears the banner,
             // instead of padding the content by a guessed height.
             .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!, placement: .favourites)
             }
         }
         .onAppear(perform: getData)
@@ -160,17 +160,20 @@ struct FavouriteListView: View {
         let listed = viewModel.favouritePollutants.map(\.stationId)
         // Saved stations the API didn't return keep their place after the rest.
         settings.savedFavouriteStations = listed + settings.savedFavouriteStations.filter { !listed.contains($0) }
-        TrackingManager.logEvent(eventName: "favourite_station_reordered")
+        TrackingManager.logEvent(.favouriteStationReordered)
     }
 
     private func commitRemoval(_ stationIds: [Int]) {
         viewModel.remove(stationIds: stationIds)
         pendingRemoval = nil
 
-        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
-            "label": "off",
-            "stationId": stationIds.first ?? 0,
-        ])
+        // One per station, as everywhere else: a swipe can remove several.
+        for stationId in stationIds {
+            TrackingManager.logEvent(.favouriteStationSaved, parameters: [
+                "label": "off",
+                "stationId": stationId,
+            ])
+        }
     }
 }
 

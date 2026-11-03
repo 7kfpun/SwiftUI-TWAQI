@@ -34,7 +34,13 @@ final class OnboardingViewModel: ObservableObject {
         case failed
     }
 
-    @Published var step: Onboarding.Step = .welcome
+    @Published var step: Onboarding.Step = .welcome {
+        didSet {
+            if step != oldValue {
+                logStepViewed()
+            }
+        }
+    }
     @Published private(set) var locationState: LocationState = .notAsked
     @Published private(set) var notificationState: NotificationState = .notAsked
     @Published private(set) var closest: ClosestState = .loading
@@ -53,6 +59,14 @@ final class OnboardingViewModel: ObservableObject {
     init() {
         refreshLocationState()
         refreshNotificationState()
+        logStepViewed()
+    }
+
+    private func logStepViewed() {
+        TrackingManager.logEvent(.onboardingStepViewed, parameters: [
+            "step": step.analyticsName,
+            "index": step.analyticsIndex,
+        ])
     }
 
     // MARK: - Navigation
@@ -85,10 +99,17 @@ final class OnboardingViewModel: ObservableObject {
     /// The system location prompt. Only the location step calls this.
     func requestLocation() {
         guard locationState != .asking else { return }
+        // Only a real prompt's answer is logged, not a status decided earlier.
+        let prompts = statusManager.authorizationStatus == .notDetermined
         locationState = .asking
         Task {
             location = await locator.current()
             refreshLocationState()
+            if prompts, locationState == .on || locationState == .off {
+                TrackingManager.logEvent(.onboardingLocation, parameters: [
+                    "label": locationState == .on ? "on" : "off",
+                ])
+            }
             // Back from the station step with location now on: find the
             // station near the reader instead of the 中正 stand-in.
             if location != nil, case .loaded(let shown) = closest, shown.isFallback {
@@ -134,7 +155,7 @@ final class OnboardingViewModel: ObservableObject {
         guard let model = stationModel, !model.isFavourited else { return }
         model.favouriteStationToggle()
         objectWillChange.send()
-        TrackingManager.logEvent(eventName: "onboarding_add_favourite", parameters: [
+        TrackingManager.logEvent(.onboardingAddFavourite, parameters: [
             "stationId": model.stationId,
         ])
     }
@@ -183,7 +204,7 @@ final class OnboardingViewModel: ObservableObject {
         let answered: (Bool) -> Void = { accepted in
             Task { @MainActor in
                 self.notificationState = accepted ? .on : .off
-                TrackingManager.logEvent(eventName: "onboarding_notifications", parameters: [
+                TrackingManager.logEvent(.onboardingNotifications, parameters: [
                     "label": accepted ? "on" : "off",
                 ])
                 self.goForward()
@@ -214,11 +235,11 @@ final class OnboardingViewModel: ObservableObject {
     func finish(skippedAt skipped: Onboarding.Step? = nil, isLaunchFlow: Bool) {
         Onboarding.flowEnded(isLaunchFlow: isLaunchFlow)
         if let skipped {
-            TrackingManager.logEvent(eventName: "onboarding_skipped", parameters: [
-                "label": "step_\(skipped.rawValue + 1)",
+            TrackingManager.logEvent(.onboardingSkipped, parameters: [
+                "label": "step_\(skipped.analyticsIndex)",
             ])
         } else {
-            TrackingManager.logEvent(eventName: "onboarding_completed")
+            TrackingManager.logEvent(.onboardingCompleted)
         }
     }
 }

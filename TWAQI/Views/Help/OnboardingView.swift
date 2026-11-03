@@ -61,7 +61,7 @@ struct OnboardingView: View {
         .background(Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all))
         .animation(.easeInOut(duration: 0.2), value: viewModel.step)
         .sheet(isPresented: $showingPro) {
-            ProView()
+            ProView(source: .onboarding)
         }
         // Back from Settings with location or notifications changed.
         .onChange(of: scenePhase) { phase in
@@ -312,7 +312,7 @@ struct OnboardingView: View {
         case .premium where !settings.isPro:
             Button("Onboarding.see_pro_plans") {
                 showingPro = true
-                TrackingManager.logEvent(eventName: "onboarding_open_pro")
+                TrackingManager.logEvent(.onboardingOpenPro)
             }
         default:
             // Keeps the primary button where it was from step to step.

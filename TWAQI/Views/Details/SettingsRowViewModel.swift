@@ -52,6 +52,9 @@ class SettingsRowViewModel: ObservableObject {
     /// locked. Only meaningful once `alertsState` is `.ready`.
     @Published private(set) var isAtCap = false
 
+    /// `alert_limit_shown` is logged once per station page, not on every read.
+    private var loggedAlertLimit = false
+
     /// The latest change didn't reach OneSignal; the switches went back.
     @Published private(set) var saveFailed = false
 
@@ -114,6 +117,7 @@ class SettingsRowViewModel: ObservableObject {
                     self.isApplyingRemoteSettings = false
                     self.saveFailed = false
                     self.alertsState = .ready
+                    self.logAlertLimitIfShown()
                     FavouriteAlerts.post(stationId: self.station.id, isOn: !StationAlerts(self.stationSetting).isOff)
                 case .failure(let error):
                     print(error.localizedDescription)
@@ -151,6 +155,14 @@ class SettingsRowViewModel: ObservableObject {
         }
     }
 
+    /// The card is showing the "at most two stations" note (`SettingsRow`
+    /// shows it whenever the cap is reached and the alerts are known).
+    private func logAlertLimitIfShown() {
+        guard isAtCap, alertsState == .ready, !loggedAlertLimit else { return }
+        loggedAlertLimit = true
+        TrackingManager.logEvent(.alertLimitShown, parameters: ["stationId": station.id])
+    }
+
     private func revert() {
         saveFailed = true
         isApplyingRemoteSettings = true
@@ -164,7 +176,7 @@ class SettingsRowViewModel: ObservableObject {
     private func addToFavourites() {
         guard !settings.savedFavouriteStations.contains(station.id) else { return }
         settings.savedFavouriteStations.append(station.id)
-        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+        TrackingManager.logEvent(.favouriteStationSaved, parameters: [
             "label": "on",
             "stationId": station.id,
             "source": "alert",
@@ -200,6 +212,7 @@ class SettingsRowViewModel: ObservableObject {
                     // The count includes this station.
                     self.isAtCap = count - 1 >= FavouriteAlerts.maxAlertedStations
                     self.alertsState = .ready
+                    self.logAlertLimitIfShown()
                 }
                 self.isApplyingRemoteSettings = false
             }

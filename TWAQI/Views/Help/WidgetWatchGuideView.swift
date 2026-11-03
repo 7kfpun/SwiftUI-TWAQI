@@ -43,7 +43,7 @@ struct WidgetGuideView: View {
         .listStyle(.insetGrouped)
         .navigationBarTitle("Help.widgets_title", displayMode: .inline)
         .onAppear {
-            TrackingManager.logEvent(eventName: "open_widget_guide")
+            TrackingManager.logEvent(.openWidgetGuide)
         }
     }
 }
@@ -71,7 +71,7 @@ struct WatchGuideView: View {
         .listStyle(.insetGrouped)
         .navigationBarTitle("Help.watch_title", displayMode: .inline)
         .onAppear {
-            TrackingManager.logEvent(eventName: "open_watch_guide")
+            TrackingManager.logEvent(.openWatchGuide)
         }
     }
 }

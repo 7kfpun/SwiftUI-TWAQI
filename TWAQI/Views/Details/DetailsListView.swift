@@ -33,7 +33,7 @@ struct DetailsListView: View {
             // window is wide enough for two.
             .searchable(text: $searchText, prompt: Text("DetailsList.search"))
             .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!, placement: .detailsList)
             }
         }
         .onAppear(perform: getData)

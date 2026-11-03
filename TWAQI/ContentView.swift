@@ -58,7 +58,7 @@ struct ContentView: View {
                 .onAppear {
                     // `onAppear` can run again for the same cover; log once.
                     if OnboardingStore().markShown() {
-                        TrackingManager.logEvent(eventName: "onboarding_shown", parameters: [
+                        TrackingManager.logEvent(.onboardingShown, parameters: [
                             "label": "launch",
                         ])
                     }
@@ -66,7 +66,7 @@ struct ContentView: View {
         }
         // On the root rather than a tab, so it opens whichever tab is showing.
         .sheet(isPresented: $router.showingPro) {
-            ProView()
+            ProView(source: router.proSource)
                 .environment(\.locale, language.locale())
         }
     }

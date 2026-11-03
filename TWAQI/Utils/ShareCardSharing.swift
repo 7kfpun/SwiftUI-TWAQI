@@ -39,7 +39,7 @@ enum ShareCardSharing {
             sourceView: sourceView
         )
 
-        TrackingManager.logEvent(eventName: "share_card", parameters: [
+        TrackingManager.logEvent(.shareCard, parameters: [
             "stationId": stationId,
             "aqi": Int(card.aqi),
         ])
