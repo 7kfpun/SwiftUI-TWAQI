@@ -495,8 +495,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             }
         }
 
-        let current = markers.compactMapValues(\.appearance)
-        let plan = MarkerUpdatePlan(current: current, wanted: wanted.mapValues(\.appearance))
+        let plan = MarkerUpdatePlan(current: Set(markers.keys), wanted: Set(wanted.keys))
 
         for key in plan.remove {
             markers[key]?.map = nil

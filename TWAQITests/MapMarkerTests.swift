@@ -64,34 +64,23 @@ final class MapMarkerTests: XCTestCase {
 
     // MARK: - MarkerUpdatePlan
 
-    func testPlanTouchesOnlyWhatChanged() {
-        let good = MarkerAppearance(shape: .pill(text: "42", foregroundColor: 0xFFFFFF), color: 0x009866, opacity: 1)
-        let moderate = MarkerAppearance(shape: .pill(text: "60", foregroundColor: 0x000000), color: 0xFEDE33, opacity: 1)
-
-        let plan = MarkerUpdatePlan(
-            current: [1: good, 2: good, 3: good],
-            wanted: [1: good, 2: moderate, 4: good]
-        )
-
+    func testPlanAddsNewStationsAndRemovesGoneOnes() {
+        let plan = MarkerUpdatePlan(current: [1, 2, 3], wanted: [1, 2, 4])
         XCTAssertEqual(plan.add, [4])
-        XCTAssertEqual(plan.update, [2])
         XCTAssertEqual(plan.remove, [3])
     }
 
-    /// Scrubbing to an hour whose history hasn't arrived: nothing to redraw.
-    func testPlanForUnchangedMapIsEmpty() {
-        let good = MarkerAppearance(shape: .pill(text: "42", foregroundColor: 0xFFFFFF), color: 0x009866, opacity: 1)
-        let plan = MarkerUpdatePlan(current: [1: good, 2: good], wanted: [1: good, 2: good])
-
+    /// Scrubbing keeps every station on the map: nothing added or removed.
+    func testPlanForSameStationsIsEmpty() {
+        let plan = MarkerUpdatePlan(current: [1, 2], wanted: [1, 2])
         XCTAssertTrue(plan.add.isEmpty)
-        XCTAssertTrue(plan.update.isEmpty)
         XCTAssertTrue(plan.remove.isEmpty)
     }
 
     func testPlanFromEmptyMapAddsEverything() {
-        let good = MarkerAppearance(shape: .calm, color: 0x009866, opacity: 1)
-        let plan = MarkerUpdatePlan<Int>(current: [:], wanted: [1: good, 2: good])
+        let plan = MarkerUpdatePlan<Int>(current: [], wanted: [1, 2])
         XCTAssertEqual(plan.add, [1, 2])
+        XCTAssertTrue(plan.remove.isEmpty)
     }
 
     // MARK: - MarkerIcons
@@ -122,6 +111,14 @@ final class MapMarkerTests: XCTestCase {
         marker.update(pollutant: try station(aqi: 42, publishTime: "2026-11-04T08:00:00"), appearance: look, isInteractive: true)
         XCTAssertTrue(marker.icon === icon)
         XCTAssertEqual(marker.pollutant.publishTime, "2026-11-04T08:00:00")
+
+        let worse = try station(aqi: 60)
+        marker.update(
+            pollutant: worse,
+            appearance: MarkerAppearance(pollutant: worse, airIndexType: .aqi, isWindMode: false, isInteractive: true),
+            isInteractive: true
+        )
+        XCTAssertFalse(marker.icon === icon, "A changed reading is restyled")
 
         let windy = try station(aqi: 42, windDirection: 90, windSpeed: 3)
         marker.update(

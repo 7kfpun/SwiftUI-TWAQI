@@ -166,23 +166,16 @@ final class StationMapMarker: GMSMarker, StationMarker {
     }
 }
 
-/// What a redraw has to do to bring the map's markers in line with the
-/// stations it should show: which to add, which to restyle and which to take
-/// off. Stations whose appearance is unchanged are left alone.
+/// Which markers a redraw adds and which it takes off. Every other station
+/// keeps its marker, and `StationMapMarker.update` only restyles it when its
+/// appearance changed.
 struct MarkerUpdatePlan<Key: Hashable> {
-    var add: Set<Key> = []
-    var update: Set<Key> = []
-    var remove: Set<Key> = []
+    let add: Set<Key>
+    let remove: Set<Key>
 
-    init(current: [Key: MarkerAppearance], wanted: [Key: MarkerAppearance]) {
-        for (key, appearance) in wanted {
-            switch current[key] {
-            case .none: add.insert(key)
-            case .some(let existing) where existing != appearance: update.insert(key)
-            case .some: break
-            }
-        }
-        remove = Set(current.keys).subtracting(wanted.keys)
+    init(current: Set<Key>, wanted: Set<Key>) {
+        add = wanted.subtracting(current)
+        remove = current.subtracting(wanted)
     }
 }
 
