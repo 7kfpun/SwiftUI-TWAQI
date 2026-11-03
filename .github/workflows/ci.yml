@@ -32,77 +32,120 @@ jobs:
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
       COCOAPODS_DISABLE_STATS: "true"
+      # The CI subset: a small, high-signal set of TWAQITests suites guarding
+      # crash- and regression-prone code. The full suite runs locally (Mac mini /
+      # Orca) before merge, see README "Tests".
+      #   offline cache + networking: PollutantCacheTests, OfflineCacheRetentionTests
+      #   push dual-write, favourites ↔ alerts: PushServiceTests, FavouriteAlertsTests
+      #   station-cam history loader/cache: StationCamTests,
+      #     StationCamFrameCacheTests, StationCamHistoryCacheTests
+      #   SettingsStore persistence: AppLanguageTests
+      #   Directus create-only forms: FeedbackServiceTests, CooperateServiceTests
+      CI_TEST_SUITES: |
+        PollutantCacheTests
+        OfflineCacheRetentionTests
+        PushServiceTests
+        FavouriteAlertsTests
+        StationCamTests
+        StationCamFrameCacheTests
+        StationCamHistoryCacheTests
+        AppLanguageTests
+        FeedbackServiceTests
+        CooperateServiceTests
+      # Keep in step with CI_TEST_SUITES (FOX-79): the suites' test files and the
+      # source files they test. A PR touching one of these runs the subset; any
+      # other app change only builds. Adding a suite means adding its test file
+      # and its subject files here. tools/ci_test_level.py check (the "Check the
+      # test-level lists" step) fails when a suite's file is missing here or an
+      # entry matches no file. `*` stays in one folder, `**/` spans folders.
+      CI_GUARDED_PATHS: |
+        # Test files of the subset suites
+        TWAQITests/PollutantCacheTests.swift
+        TWAQITests/OfflineCacheRetentionTests.swift
+        TWAQITests/PushServiceTests.swift
+        TWAQITests/StationCamTests.swift
+        TWAQITests/AppLanguageTests.swift
+        TWAQITests/FeedbackServiceTests.swift
+        TWAQITests/CooperateServiceTests.swift
+        # Offline caches (PollutantCacheTests, OfflineCacheRetentionTests; the watch's
+        # reading expiry is checked against the same ceiling)
+        TWAQI/Utils/PollutantCache.swift
+        TWAQI/Utils/OfflineCacheRetention.swift
+        TWAQIWatch/Shared/WatchStore.swift
+        TWAQIWatch/Shared/WatchReading.swift
+        # Push dual-write (PushServiceTests): OneSignalTags and PushDeviceIdentity
+        # live in DirectusPushMirror.swift
+        TWAQI/Utils/PushService.swift
+        TWAQI/Utils/DirectusPushMirror.swift
+        TWAQI/Models/StationAlertSetting.swift
+        # Favourites ↔ alerts (FavouriteAlertsTests)
+        TWAQI/Utils/FavouriteAlerts.swift
+        # Station-cam history (StationCam*Tests): models and matcher, frame and hour
+        # caches, StationCamHistoryLoader in StationCamView.swift, StationCamStore
+        TWAQI/**/StationCam*.swift
+        # SettingsStore (AppLanguageTests): AppLanguage and Locale.app in
+        # LocaleExtension.swift, String.localized, on-device translation,
+        # Pollutant.displayLocality
+        TWAQI/Utils/SettingsStore.swift
+        TWAQI/Utils/LocaleExtension.swift
+        TWAQI/Utils/StringExtension.swift
+        TWAQI/Utils/OnDeviceTranslation.swift
+        TWAQI/Models/Pollutants.swift
+        # Directus create-only forms (FeedbackServiceTests, CooperateServiceTests)
+        TWAQI/Utils/FeedbackService.swift
+        TWAQI/Utils/CooperateService.swift
     steps:
-      - name: Skip unrelated file changes
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # The level decision's own tests, and the two lists above against this
+      # checkout. Seconds, before anything is built.
+      - name: Check the test-level lists
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools -p 'test_ci_test_level.py'
+          python3 tools/ci_test_level.py check
+
+      # skip: nothing more runs and the check is green. build: build-for-testing
+      # only, no simulator. test: build, boot and run the subset.
+      # tools/ci_test_level.py has the rules; the README "Tests" has the table.
+      - name: Decide the test level
         id: scope
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          # Shallow checkout does not contain the base commit, so use the
-          # pull request file list. An empty list or an API error must not
-          # skip the tests.
-          gh api --paginate \
-            "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
-            --jq '.[].filename' > "$RUNNER_TEMP/pr-files.txt"
-          python3 - <<'PY'
-          import os
-          import pathlib
-
-          files = [
-              line.strip()
-              for line in pathlib.Path(os.environ["RUNNER_TEMP"], "pr-files.txt").read_text().splitlines()
-              if line.strip()
-          ]
-          # These do not feed TWAQITests. Any other path still runs the job.
-          media = {
-              ".m4a", ".mp3", ".wav", ".aac", ".caf", ".aiff", ".aif", ".m4b", ".flac", ".ogg",
-              ".mp4", ".mov", ".m4v", ".avi", ".webm",
-              ".png", ".jpg", ".jpeg", ".gif", ".webp", ".heic", ".svg", ".pdf",
-          }
-          docs = {".md", ".markdown"}
-          # workers/ is checked by the Workers workflow.
-          prefixes = ("assets/", "fastlane/", "web/", "workers/")
-
-          def unrelated(path):
-              normalized = path.replace("\\", "/").lower()
-              if normalized.startswith(prefixes):
-                  return True
-              suffix = pathlib.PurePosixPath(normalized).suffix
-              return suffix in media or suffix in docs
-
-          if not files:
-              print("No changed files were listed. Running unit tests.")
-              decision = "true"
-          else:
-              related = [path for path in files if not unrelated(path)]
-              if related:
-                  print("Running unit tests. Related files:")
-                  print("\n".join(f"  {path}" for path in related))
-                  decision = "true"
-              else:
-                  print("Skipping unit tests. Changed files are media, docs, marketing, or Workers:")
-                  print("\n".join(f"  {path}" for path in files))
-                  decision = "false"
-          with pathlib.Path(os.environ["GITHUB_OUTPUT"]).open("a") as handle:
-              handle.write(f"run={decision}\n")
-          PY
-
-      - name: Checkout repository
-        if: steps.scope.outputs.run == 'true'
-        uses: actions/checkout@v4
+          # Shallow checkout does not contain the base commit, so use the pull
+          # request file list. Labels are read live, so re-running the job after
+          # adding ci-full-tests picks it up. An empty list or an API error
+          # gives the test level: never skip on doubt.
+          files="$RUNNER_TEMP/pr-files.txt"
+          labels="$RUNNER_TEMP/pr-labels.txt"
+          api_error=""
+          if ! gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename' > "$files"; then
+            echo "::warning::Could not list the pull request's files. Running the unit tests."
+            api_error="--api-error"
+          fi
+          if ! gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+              --jq '.labels[].name' > "$labels"; then
+            echo "::warning::Could not read the pull request's labels. Running the unit tests."
+            api_error="--api-error"
+          fi
+          # shellcheck disable=SC2086 # api_error is empty or one flag
+          python3 tools/ci_test_level.py decide --files "$files" --labels "$labels" $api_error
 
       - name: Show Xcode
         id: xcode
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         run: |
           set -euo pipefail
           xcodebuild -version
           echo "build=$(xcodebuild -version | awk '/Build version/ {print $3}')" >> "$GITHUB_OUTPUT"
 
       - name: Prepare gitignored config
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         run: |
           set -euo pipefail
           # The project will not build without these, and they are gitignored
@@ -169,7 +212,7 @@ jobs:
       # Caches are scoped to this PR (and master), so a PR's first run is cold.
       # A miss only means a full download or build, the same as before caching.
       - name: Cache Swift packages
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         uses: actions/cache@v4
         with:
           # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
@@ -180,7 +223,7 @@ jobs:
             spm-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Cache Pods
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         uses: actions/cache@v4
         with:
           path: Pods
@@ -195,7 +238,7 @@ jobs:
       # rebuilds whatever changed: checkout gives every app and test source a
       # new mtime, so only the cached Pods / package products can be reused.
       - name: Cache DerivedData
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         uses: actions/cache@v4
         with:
           path: |
@@ -204,7 +247,7 @@ jobs:
           key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('Podfile.lock', 'Podfile', 'TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
 
       - name: Install CocoaPods dependencies
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         run: |
           set -euo pipefail
           if ! command -v pod >/dev/null 2>&1; then
@@ -213,7 +256,7 @@ jobs:
           pod install
 
       - name: Pick simulator
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level == 'test'
         run: |
           set -euo pipefail
           # The first simctl call on a runner can take a minute (it starts
@@ -263,7 +306,7 @@ jobs:
           echo "Picking a simulator in the background (log: $state/pick.log)."
 
       - name: Build for testing
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level != 'skip'
         run: |
           set -euo pipefail
           # Generic destination, so the build does not depend on the pick.
@@ -288,7 +331,7 @@ jobs:
 
       - name: Boot simulator
         id: boot
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level == 'test'
         run: |
           set -euo pipefail
           # Booted after the build, not during it. On slow runners a first boot
@@ -312,7 +355,7 @@ jobs:
           xcrun simctl bootstatus "$udid" -b
 
       - name: Run unit tests
-        if: steps.scope.outputs.run == 'true'
+        if: steps.scope.outputs.level == 'test'
         env:
           UDID: ${{ steps.boot.outputs.udid }}
         run: |
@@ -322,28 +365,22 @@ jobs:
             echo "::error::Build for testing produced no TWAQI-CI .xctestrun file."
             exit 1
           fi
-          # A small, high-signal subset: the suites guarding crash- and
-          # regression-prone code. The full TWAQITests suite runs locally
-          # (Mac mini / Orca) before merge — see README "Tests".
-          #   offline cache + networking: PollutantCacheTests, OfflineCacheRetentionTests
-          #   push dual-write, favourites ↔ alerts: PushServiceTests, FavouriteAlertsTests
-          #   station-cam history loader/cache: StationCamTests,
-          #     StationCamFrameCacheTests, StationCamHistoryCacheTests
-          #   SettingsStore persistence: AppLanguageTests
-          #   Directus create-only forms: FeedbackServiceTests, CooperateServiceTests
+          # The subset is CI_TEST_SUITES in the job's env (with CI_GUARDED_PATHS).
+          only=()
+          while IFS= read -r suite; do
+            suite="${suite//[[:space:]]/}"
+            case "$suite" in ""|"#"*) continue ;; esac
+            only+=("-only-testing:TWAQITests/${suite}")
+          done <<< "$CI_TEST_SUITES"
+          if [ "${#only[@]}" -eq 0 ]; then
+            echo "::error::CI_TEST_SUITES is empty."
+            exit 1
+          fi
+          printf 'Running %s\n' "${only[@]}"
           xcodebuild test-without-building \
             -xctestrun "$xctestrun" \
             -destination "id=${UDID}" \
-            -only-testing:TWAQITests/PollutantCacheTests \
-            -only-testing:TWAQITests/OfflineCacheRetentionTests \
-            -only-testing:TWAQITests/PushServiceTests \
-            -only-testing:TWAQITests/FavouriteAlertsTests \
-            -only-testing:TWAQITests/StationCamTests \
-            -only-testing:TWAQITests/StationCamFrameCacheTests \
-            -only-testing:TWAQITests/StationCamHistoryCacheTests \
-            -only-testing:TWAQITests/AppLanguageTests \
-            -only-testing:TWAQITests/FeedbackServiceTests \
-            -only-testing:TWAQITests/CooperateServiceTests \
+            "${only[@]}" \
             -derivedDataPath "${RUNNER_TEMP}/DerivedData"
 
   vulnerability-checks:

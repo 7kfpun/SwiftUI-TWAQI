@@ -32,7 +32,7 @@ plus these:
 |---|---|---|
 | `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `LGTM` status takes the place of an approval. It turns green on a review from another agent. |
 | `required_status_checks` | `strict: true` | The branch must be up to date with `master` before merging. Stacked PRs then merge in order, and each one is tested against what is actually on `master`. |
-| required: `Unit tests` | CI | Skips itself (green) for docs, media, `fastlane/`, `web/` and `workers/`-only PRs. |
+| required: `Unit tests` | CI | Reports at every level: green in seconds for docs, media, `assets/`, `fastlane/`, `web/`, `workers/` and `.github/`-only PRs (other than `ci.yml`); build only for other app changes; build + subset for guarded paths ([ci-cd-guardrails.md](ci-cd-guardrails.md)). |
 | required: `Vulnerability checks` | CI | Fails only on TruffleHog **verified** secrets. osv-scanner and unverified findings are warnings. |
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
