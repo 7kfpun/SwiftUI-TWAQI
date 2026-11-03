@@ -161,7 +161,7 @@ A silent stop would mean no alerts until users complain (FOX-77), so every real 
 | Run | Ping | Email from healthchecks.io |
 | --- | --- | --- |
 | Sent, `run()` and every alert succeeded | the ping URL | none |
-| Failed: `run()` threw, an alert failed to send, a step before it failed, or the job timed out or was cancelled | ping URL + `/fail` | at once ("down"), with the run's link in the ping body; "up" again at the next good run |
+| Failed: `run()` threw, an alert failed to send, or a step before it failed. Usually also a timed-out or cancelled job; if the runner stops before the ping step, the next row's email covers it | ping URL + `/fail` | at once ("down"), with the run's link in the ping body; "up" again at the next good run |
 | Skipped, late by more than the grace, or the schedule switched off (the 60-day rule, a disabled workflow) | none arrives | when no ping has come for the period + grace, about **1 hour after the missed slot** |
 | Dry run (`workflow_dispatch`, the default) | none | none |
 
@@ -172,7 +172,7 @@ A silent stop would mean no alerts until users complain (FOX-77), so every real 
   gh secret set HEALTHCHECK_PING_URL -R 7kfpun/SwiftUI-TWAQI --env push-sender   # paste https://hc-ping.com/<uuid>
   ```
 
-  **Without the secret the step prints a line and skips the ping; the run is unaffected.** A ping that can't be delivered (healthchecks.io down, after curl's 5 retries) is a warning in the job, never a failed run: a missed success ping alerts by itself.
+  **Without the secret the step prints a line and skips the ping; the run is unaffected.** A ping that can't be delivered (healthchecks.io down, after curl's 5 retries) is a warning in the job and its summary, never a failed run: a missed success ping alerts by itself. A 404 (wrong or deleted check) isn't retried, so check the summary after setting the secret.
 - **GitHub's own email:** a failed scheduled run also emails whoever last changed the workflow's `schedule`, if their GitHub notification settings send Actions failures. The `/fail` ping doesn't rely on that.
 - **Pause it** (planned downtime, moving back to the Worker): **Pause** on the check in healthchecks.io. A paused check sends nothing and goes back to watching at its next ping, so a run resumes it. To stop for good: pause or delete the check, then `gh secret delete HEALTHCHECK_PING_URL -R 7kfpun/SwiftUI-TWAQI --env push-sender`. If the workflow is deleted (Workers Paid, below), delete the check too.
 - **The 60-day rule** needs no keep-alive step: the repository has commits far more often than every 60 days, and if the schedule is ever switched off anyway, the missing pings trip the check within about an hour of the next slot. Turn it back on under Actions → Push sender → Enable workflow.

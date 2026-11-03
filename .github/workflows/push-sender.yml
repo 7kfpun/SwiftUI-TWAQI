@@ -115,8 +115,9 @@ jobs:
           npm run --silent send -- "${args[@]}"
 
       # Dead-man's switch (FOX-77). Runs after a failure too (always()), so a
-      # failed or timed-out run pings /fail; a dry run never pings. The body is
-      # the run's link, which healthchecks.io shows in its email.
+      # failed run pings /fail; a dry run never pings. A timed-out or cancelled
+      # job may stop before this step: the missing success ping alerts then.
+      # The body is the run's link, which healthchecks.io shows in its email.
       - name: Ping the monitor
         if: ${{ always() && !inputs.dry_run }}
         env:
@@ -138,5 +139,7 @@ jobs:
           if curl -fsS -m 10 --retry 5 -o /dev/null --data-raw "${label}: ${RUN_URL}" "$url"; then
             echo "Monitor pinged (${label})."
           else
-            echo "::warning::Could not ping the monitor (${label}); it will alert if no success ping arrives in time."
+            msg="Could not ping the monitor (${label}); it will alert if no success ping arrives in time."
+            echo "::warning::${msg}"
+            echo "⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
           fi

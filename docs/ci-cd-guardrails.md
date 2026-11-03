@@ -151,7 +151,8 @@ unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-
 - Dead-man's switch (FOX-77): the job's last step, **Ping the monitor**, pings a
   healthchecks.io check (free plan; period 2 h, grace 1 h) whose URL is the optional
   `push-sender` secret `HEALTHCHECK_PING_URL`: success after a good real run, `/fail`
-  after a failed, timed-out or cancelled one. healthchecks.io emails the owner on a
+  after a failed one (a timed-out or cancelled job that stops first alerts through the
+  missing success ping). healthchecks.io emails the owner on a
   `/fail` ping and when no success ping arrives in time (a skipped run, or the schedule
   switched off by the 60-day rule), about an hour after the missed slot. Dry runs don't
   ping. No secret skips the ping; an undeliverable ping is a warning, not a failure. To
