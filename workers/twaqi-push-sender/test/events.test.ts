@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import { afterEach, describe, it } from 'node:test'
 import { pushEventPoint } from '../src/events.ts'
 import worker, { run } from '../src/index.ts'
-import { eventCollector, forwardEvents, nodeEnv } from '../scripts/run.ts'
+import { eventCollector, forwardEvents, nodeEnv, runThenForward } from '../scripts/run.ts'
 
 // Per-send analytics from the GitHub Actions run (FOX-71): run() writes to a
 // collector, scripts/run.ts forwards to POST /internal/events, and the Worker
@@ -189,5 +189,30 @@ describe('forwardEvents', () => {
     }) as unknown as typeof fetch
     const result = await forwardEvents(points.slice(0, 10), { url: 'https://worker.test', token: 'secret', fetch: fake, retryDelayMs: 0 })
     assert.deepEqual(result, { events: 10, forwarded: 0, written: 0, failed: 10, lastError: 'network' })
+  })
+})
+
+describe('runThenForward', () => {
+  it('forwards after a run that resolved', async () => {
+    const order: string[] = []
+    const value = await runThenForward(async () => (order.push('run'), 7), async () => void order.push('forward'))
+    assert.equal(value, 7)
+    assert.deepEqual(order, ['run', 'forward'])
+  })
+
+  it('still forwards when the run throws partway, and rethrows so the job fails (CI review)', async () => {
+    const collector = eventCollector()
+    let forwarded = 0
+    await assert.rejects(
+      runThenForward(
+        async () => {
+          collector.dataset.writeDataPoint(point()) // a send that went out before the failure
+          throw new Error('Directus PATCH /items/twaqi_push_subscriptions: 503')
+        },
+        async () => void (forwarded = collector.points.length),
+      ),
+      /503/,
+    )
+    assert.equal(forwarded, 1)
   })
 })

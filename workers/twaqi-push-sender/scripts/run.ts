@@ -122,12 +122,47 @@ export async function forwardEvents(
   return result
 }
 
+/** Runs `work`, then `forward` whether it resolved or threw: a run that
+ * stops partway (a state write Directus kept refusing) has already sent some
+ * alerts, and their events still go out. The run's error is rethrown, so the
+ * job still fails. `forward` must not throw (forwardEvents doesn't). */
+export async function runThenForward<T>(work: () => Promise<T>, forward: () => Promise<void>): Promise<T> {
+  try {
+    return await work()
+  } finally {
+    await forward()
+  }
+}
+
+/** Forwards the collected points and logs counts only. Never throws. */
+async function forwardCollected(points: AnalyticsEngineDataPoint[], token: string): Promise<void> {
+  if (!points.length) return
+  const url = process.env.PUSH_SENDER_URL
+  if (!url) {
+    console.log(`::warning::${points.length} push events not forwarded: PUSH_SENDER_URL is not set`)
+    return
+  }
+  const forward = await forwardEvents(points, { url, token })
+  const { lastError, ...counts } = forward
+  console.log('events forwarded', JSON.stringify(counts))
+  if (forward.failed) {
+    console.log(`::warning::${forward.failed} of ${forward.events} push events not forwarded to Analytics Engine (${lastError})`)
+  } else if (forward.written < forward.forwarded) {
+    console.log(`::warning::Analytics Engine wrote ${forward.written} of ${forward.forwarded} forwarded push events`)
+  }
+}
+
 async function main(): Promise<void> {
   const { dryRun } = parseArgs(process.argv.slice(2))
   const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
   const collector = eventCollector()
   const env = { ...nodeEnv(config, process.env), PUSH_EVENTS: collector.dataset }
-  const result = await run(env, { dryRun })
+  // Events are forwarded once run() has saved state and logs, or has thrown.
+  // That is separate from the exit code below.
+  const result = await runThenForward(
+    () => run(env, { dryRun }),
+    () => forwardCollected(collector.points, env.SYNC_TOKEN),
+  )
   // The log is public (public repo): counts only, never device ids, token
   // suffixes or per-device decisions.
   const { decisions, archivedDevices, ...summary } = result
@@ -136,23 +171,6 @@ async function main(): Promise<void> {
     failed ? 'run finished with failures' : 'run ok',
     JSON.stringify({ ...summary, archivedDevices: archivedDevices.length, decisions: decisions?.length }),
   )
-
-  // After run() has saved state and logs. Separate from the exit code below.
-  if (collector.points.length) {
-    const url = process.env.PUSH_SENDER_URL
-    if (!url) {
-      console.log(`::warning::${collector.points.length} push events not forwarded: PUSH_SENDER_URL is not set`)
-    } else {
-      const forward = await forwardEvents(collector.points, { url, token: env.SYNC_TOKEN })
-      const { lastError, ...counts } = forward
-      console.log('events forwarded', JSON.stringify(counts))
-      if (forward.failed) {
-        console.log(`::warning::${forward.failed} of ${forward.events} push events not forwarded to Analytics Engine (${lastError})`)
-      } else if (forward.written < forward.forwarded) {
-        console.log(`::warning::Analytics Engine wrote ${forward.written} of ${forward.forwarded} forwarded push events`)
-      }
-    }
-  }
 
   if (failed) {
     console.error(`::error::${failed}`)
