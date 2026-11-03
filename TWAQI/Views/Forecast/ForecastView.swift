@@ -36,6 +36,16 @@ struct ForecastView: View {
             OfflineEmptyStateView(retry: load)
                 .padding(.horizontal, 32)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .noCurrentForecast:
+            VStack(spacing: 16) {
+                EmptyStateView(icon: "calendar", message: "Forecast.none_current")
+                Button(action: load) {
+                    Text("Offline.retry")
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding(.horizontal, 32)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .loaded(let areas):
             list(areas)
         }

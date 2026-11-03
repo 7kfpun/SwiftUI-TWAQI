@@ -386,6 +386,7 @@
 "Forecast.tab_title" = "AQI Forecast";
 "Forecast.your_area" = "Your area";
 "Forecast.favourite_area" = "Favourites";
+"Forecast.none_current" = "No current forecast to show. MOENV's latest one couldn't be loaded; try again later.";
 
 /* Offline: last good readings */
 "Offline.showing_saved_readings" = "Offline — showing the last saved readings";

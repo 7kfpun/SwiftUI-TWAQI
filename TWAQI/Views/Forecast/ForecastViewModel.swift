@@ -20,6 +20,9 @@ final class ForecastViewModel: ObservableObject {
         /// Nothing fetched and nothing cached: offline on first use, or
         /// Directus not reachable.
         case empty
+        /// Rows came back, but none from today on: a saved copy older than
+        /// the forecast it holds, while the refresh keeps failing.
+        case noCurrentForecast
     }
 
     @Published private(set) var state: State = .loading
@@ -29,7 +32,8 @@ final class ForecastViewModel: ObservableObject {
     private let locator = Locator()
     /// Only read for its status: reading never prompts.
     private let statusManager = CLLocationManager()
-    private var isLoading = false
+    private var isLoadingForecasts = false
+    private var isLoadingStations = false
     private var isLocating = false
 
     /// What the list is built from, kept so each piece can redraw it as it
@@ -43,9 +47,10 @@ final class ForecastViewModel: ObservableObject {
     /// Loads, or reloads on each visit: the store answers from memory inside
     /// its TTL, and favourites may have changed since.
     ///
-    /// The list doesn't wait on a location fix, which can take a while
-    /// indoors: it shows with 北部 first and moves the reader's area up
-    /// once the fix arrives.
+    /// The list waits only on the forecast rows. The location fix (slow
+    /// indoors) and the station list (a network request without a saved
+    /// copy) each redraw it when they arrive: until then 北部 is first and
+    /// favourites are named from their own saved readings.
     func load(favouriteStationIds: [Int]) {
         self.favouriteStationIds = favouriteStationIds
         // Favourites edited since the last visit re-pin at once; a load
@@ -62,17 +67,26 @@ final class ForecastViewModel: ObservableObject {
             }
         }
 
-        guard !isLoading else { return }
-        isLoading = true
+        // Only needed to name the reader's or a favourite's area.
+        if allowed || !favouriteStationIds.isEmpty, !isLoadingStations {
+            isLoadingStations = true
+            Task {
+                let fetched = await Self.currentStations()
+                isLoadingStations = false
+                // A failed request keeps the list it had.
+                if !fetched.isEmpty {
+                    stations = fetched
+                }
+                render()
+            }
+        }
+
+        guard !isLoadingForecasts else { return }
+        isLoadingForecasts = true
 
         Task {
-            async let forecasts = Self.forecasts()
-            // Only needed to name the reader's or a favourite's area.
-            if allowed || !favouriteStationIds.isEmpty {
-                stations = await Self.currentStations()
-            }
-            let fetched = await forecasts
-            isLoading = false
+            let fetched = await Self.forecasts()
+            isLoadingForecasts = false
 
             // A reload that finds nothing keeps the last rows it had.
             if !fetched.isEmpty || rows == nil {
@@ -104,8 +118,9 @@ final class ForecastViewModel: ObservableObject {
             today: today,
             chinese: Locale.isChinese
         )
-        if state != .loaded(areas) {
-            state = .loaded(areas)
+        let next: State = areas.isEmpty ? .noCurrentForecast : .loaded(areas)
+        if state != next {
+            state = next
         }
     }
 
