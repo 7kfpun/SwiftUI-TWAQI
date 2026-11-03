@@ -62,6 +62,8 @@ export interface RunResult {
 const SEND_CONCURRENCY = 25
 /** State and logs are saved after every this many sends. */
 const SAVE_EVERY = 100
+/** Tries at saving state before a run gives up (1 s, then 4 s apart). */
+const SAVE_ATTEMPTS = 3
 /** An AQI alert an hour late is noise; let APNs drop it. */
 const ALERT_EXPIRY_SECONDS = 60 * 60
 
@@ -229,10 +231,22 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
   }
   return result
 
+  /** Marks what was sent. Retried with backoff, and cleared only once it
+   * lands; if Directus still refuses, the run stops here, so no further
+   * alerts go out unmarked (those already sent would go again next run). */
   async function saveUpdates() {
     const changed = [...updates.values()].filter((u) => Object.keys(u).length > 1)
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await updateSubscriptions(env, changed)
+        break
+      } catch (e) {
+        if (attempt >= SAVE_ATTEMPTS) throw e
+        console.warn('state write failed, retrying', attempt, String(e))
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt * attempt))
+      }
+    }
     updates.clear()
-    await updateSubscriptions(env, changed)
     result.updated += changed.length
   }
 

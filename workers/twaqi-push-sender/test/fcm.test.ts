@@ -225,7 +225,7 @@ describe('send under load', () => {
     globalThis.fetch = realFetch
   })
 
-  it('shares one OAuth exchange between parallel sends, and retries a network error once', async () => {
+  it('shares one OAuth exchange between parallel sends, retries a 503 once, never a network error', async () => {
     const pair = await crypto.subtle.generateKey(
       { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' },
       true,
@@ -244,12 +244,21 @@ describe('send under load', () => {
         return new Response(JSON.stringify({ access_token: 'tok', expires_in: 3600 }), { status: 200 })
       }
       fcm++
-      if (fcm === 1) throw new TypeError('fetch failed')
+      if (fcm === 1) return new Response('{"error":{"status":"UNAVAILABLE"}}', { status: 503 })
       return new Response(JSON.stringify({ name: `projects/p/messages/${fcm}` }), { status: 200 })
     }) as typeof fetch
     const results = await Promise.all(Array.from({ length: 25 }, (_, i) => send({ FCM_SERVICE_ACCOUNT: account }, { token: `t${i}`, title: 'T', body: 'B' })))
     assert.equal(oauth, 1)
     assert.equal(results.filter((r) => r.ok).length, 25)
-    assert.equal(fcm, 26) // 25 sends, one of them retried
+    assert.equal(fcm, 26) // 25 sends, the 503 one retried
+
+    // A network error is not retried: FCM may already have taken it.
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls++
+      throw new TypeError('fetch failed')
+    }) as typeof fetch
+    await assert.rejects(send({ FCM_SERVICE_ACCOUNT: account }, { token: 'x', title: 'T', body: 'B' }))
+    assert.equal(calls, 1)
   })
 })

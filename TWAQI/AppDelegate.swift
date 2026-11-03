@@ -135,6 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     print("Notification permission request failed: \(error.localizedDescription)")
                 }
                 print("User accepted notifications: \(granted)")
+                Task { @MainActor in DirectusPushMirror.shared.notificationsChanged() }
             }
         }
     }

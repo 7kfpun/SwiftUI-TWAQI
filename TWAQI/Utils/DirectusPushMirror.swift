@@ -142,6 +142,14 @@ final class DirectusPushMirror {
         }
     }
 
+    /// The user just answered the notification prompt (or changed it): the
+    /// row's `notifications_allowed` is written now, not at the next
+    /// foreground. Runs again after a sync already in flight, which may have
+    /// read the status before the answer.
+    func notificationsChanged() {
+        flush()
+    }
+
     /// Help's language or Pro changed. Only updates a device that already
     /// has a row; the next write compares `PushDevicePayload.profile`.
     func profileChanged() {
@@ -640,16 +648,19 @@ enum OneSignalTags {
         )
         let written = defaults.dictionary(forKey: Keys.written) as? [String: String] ?? [:]
 
-        func send(stale: Set<String>) {
+        /// `readTags`: OneSignal's own tags were read, so `stale` is complete
+        /// and the one-time cleanup is done once this lands. Without them
+        /// (not registered yet, offline) the cleanup stays pending.
+        func send(stale: Set<String>, readTags: Bool) {
             let toSend = changes(desired: desired, written: written, stale: stale)
             guard !toSend.isEmpty else {
-                defaults.set(true, forKey: Keys.cleaned)
+                if readTags { defaults.set(true, forKey: Keys.cleaned) }
                 return
             }
             OneSignal.sendTags(toSend, onSuccess: { _ in
                 DispatchQueue.main.async {
                     defaults.set(desired, forKey: Keys.written)
-                    defaults.set(true, forKey: Keys.cleaned)
+                    if readTags { defaults.set(true, forKey: Keys.cleaned) }
                 }
             }, onFailure: { error in
                 // Tried again on the next change, launch or foreground.
@@ -657,13 +668,13 @@ enum OneSignalTags {
             })
         }
 
-        guard !defaults.bool(forKey: Keys.cleaned) else { return send(stale: []) }
+        guard !defaults.bool(forKey: Keys.cleaned) else { return send(stale: [], readTags: false) }
         OneSignal.getTags({ tags in
             let keys = Set((tags ?? [:]).keys.compactMap { $0 as? String }).filter(isStationTag)
-            DispatchQueue.main.async { send(stale: keys) }
+            DispatchQueue.main.async { send(stale: keys, readTags: true) }
         }, onFailure: { _ in
             // Not registered yet, or offline: write what we can, clean later.
-            DispatchQueue.main.async { send(stale: []) }
+            DispatchQueue.main.async { send(stale: [], readTags: false) }
         })
     }
 }

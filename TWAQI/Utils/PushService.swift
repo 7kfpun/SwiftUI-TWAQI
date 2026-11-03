@@ -89,8 +89,9 @@ struct PushDevicePayload: Encodable, Equatable {
     /// from StoreKit on this device.
     var isPro: Bool
     /// Whether iOS lets the app show notifications: false once the user
-    /// turns them off in Settings (or never allowed them), and the sender
-    /// stops sending until it's true again. Nil leaves the row as it was.
+    /// turns them off in Settings, and the sender stops sending until it's
+    /// true again. Nil, before the user has been asked, leaves the row as it
+    /// was (empty on a new row, which the sender treats as "send").
     var notificationsAllowed: Bool?
     var lastSeenAt: String
     var dndEnabled: Bool
@@ -180,12 +181,16 @@ struct PushDevicePayload: Encodable, Equatable {
     }
 
     /// Allowed means iOS will show the alert: authorised, provisional or
-    /// ephemeral. Denied, or never asked, means it won't.
-    static func notificationsAllowed(_ status: UNAuthorizationStatus) -> Bool {
+    /// ephemeral; denied means the user said no. Not asked yet is unknown
+    /// (nil), not "no": onboarding favourites a station, writing the row,
+    /// before it asks, and a "no" there would hold back alerts until the
+    /// next write after the user taps Allow.
+    static func notificationsAllowed(_ status: UNAuthorizationStatus) -> Bool? {
         switch status {
         case .authorized, .provisional, .ephemeral: return true
-        case .denied, .notDetermined: return false
-        @unknown default: return true
+        case .denied: return false
+        case .notDetermined: return nil
+        @unknown default: return nil
         }
     }
 

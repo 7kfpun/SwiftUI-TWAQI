@@ -103,16 +103,14 @@ export function classifyError(status: number, body: unknown): { errorCode: strin
   return { errorCode, deadToken }
 }
 
-/** Retried once, a moment later, on a network error or an FCM 429/5xx. */
+/** Retried once, a moment later, on FCM 429/5xx: FCM answered and did not
+ * take the message. Not on a network error, where FCM may already have
+ * accepted it; the alert is then retried by the next run, never twice now. */
 const RETRY_DELAY_MS = 500
 
 export async function send(config: FcmConfig, m: FcmMessage): Promise<FcmResult> {
-  try {
-    const first = await sendOnce(config, m)
-    if (first.ok || !(first.status === 429 || first.status >= 500)) return first
-  } catch {
-    // Network error: try once more below.
-  }
+  const first = await sendOnce(config, m)
+  if (first.ok || !(first.status === 429 || first.status >= 500)) return first
   await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
   return sendOnce(config, m)
 }

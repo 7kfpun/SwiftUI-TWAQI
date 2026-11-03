@@ -350,10 +350,12 @@ final class PushServiceTests: XCTestCase {
     }
 
     func testDeviceRowCarriesWhetherNotificationsAreAllowed() throws {
-        XCTAssertTrue(PushDevicePayload.notificationsAllowed(.authorized))
-        XCTAssertTrue(PushDevicePayload.notificationsAllowed(.provisional))
-        XCTAssertFalse(PushDevicePayload.notificationsAllowed(.denied))
-        XCTAssertFalse(PushDevicePayload.notificationsAllowed(.notDetermined))
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.authorized), true)
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.provisional), true)
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.denied), false)
+        // Not asked yet is unknown, not "no": onboarding writes the row before
+        // it asks (Grok review), and an empty field is still sent to.
+        XCTAssertNil(PushDevicePayload.notificationsAllowed(.notDetermined))
 
         func payload(_ allowed: Bool?) -> PushDevicePayload {
             PushDevicePayload.make(

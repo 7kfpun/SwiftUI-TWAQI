@@ -181,6 +181,8 @@ final class OnboardingViewModel: ObservableObject {
 
         let answered: (Bool) -> Void = { accepted in
             Task { @MainActor in
+                // Tell the sender now whether this device can show alerts.
+                DirectusPushMirror.shared.notificationsChanged()
                 self.notificationState = accepted ? .on : .off
                 TrackingManager.logEvent(eventName: "onboarding_notifications", parameters: [
                     "label": accepted ? "on" : "off",
