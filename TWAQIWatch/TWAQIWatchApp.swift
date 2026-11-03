@@ -16,6 +16,8 @@ struct TWAQIWatchApp: App {
     init() {
         // Readings cached more than a week ago are never shown; drop them.
         WatchStore.purgeExpiredReadings()
+        // Locked-style hits the complications queued go to the phone's Firebase.
+        PhoneRelay.shared.start()
     }
 
     var body: some Scene {
@@ -162,6 +164,7 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                PhoneRelay.shared.flush()
                 Task {
                     await model.checkPro()
                     await model.refresh()

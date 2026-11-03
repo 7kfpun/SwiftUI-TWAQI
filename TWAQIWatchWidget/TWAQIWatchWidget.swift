@@ -7,7 +7,6 @@
 //
 
 import AppIntents
-import os
 import SwiftUI
 import WidgetKit
 
@@ -48,17 +47,18 @@ struct ReadingProvider: AppIntentTimelineProvider {
     /// one publish behind without spending the refresh budget.
     private static let refreshInterval: TimeInterval = 30 * 60
 
-    private static let log = Logger(subsystem: "com.kfpun.twaqi.watchwidget", category: "pro")
-
     func placeholder(in context: Context) -> ReadingEntry {
         ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
     }
 
     /// Also the face picker's preview, so a Pro style shows "Pro" there
-    /// before it is added, not only after. The cached answer: a snapshot has
-    /// to come back quickly.
+    /// before it is added, not only after. A cached "Pro" is trusted, since a
+    /// snapshot has to come back quickly; a cached "not Pro" is checked with
+    /// StoreKit (local, no network), so Pro just bought on the phone doesn't
+    /// preview as locked before the watch app has run.
     func snapshot(for configuration: SelectIndexIntent, in context: Context) async -> ReadingEntry {
-        let access = ComplicationAccess(style: configuration.style, isPro: WatchPro.isUnlocked)
+        let isPro = WatchPro.isUnlocked ? true : await WatchPro.refresh()
+        let access = ComplicationAccess(style: configuration.style, isPro: isPro)
         return ReadingEntry(
             date: Date(),
             reading: access == .locked ? nil : WatchStore.latestReading ?? .placeholder,
@@ -75,10 +75,15 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let isPro = await WatchPro.refresh()
         let access = ComplicationAccess(style: configuration.style, isPro: isPro)
         guard access != .locked else {
-            // The watch has no Firebase Analytics; this is the locked-style
-            // event, in the unified log (FOX-63, FOX-44).
-            Self.log.notice(
-                "watch_complication_locked style=\(configuration.style.rawValue, privacy: .public) family=\(String(describing: context.family), privacy: .public) index=\(configuration.index.rawValue, privacy: .public)"
+            // The locked-style event (FOX-63, FOX-44): queued once per setup,
+            // sent to the phone's Firebase by the watch app.
+            LockedComplicationLog.record(
+                LockedComplicationHit(
+                    style: configuration.style.rawValue,
+                    family: String(describing: context.family),
+                    index: configuration.index.rawValue
+                ),
+                in: WatchStore.sharedDefaults
             )
             // A lock is never pushed up the Smart Stack.
             await SmartStackHints.update(isPro: false, now: now)

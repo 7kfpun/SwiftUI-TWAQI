@@ -44,6 +44,10 @@ enum AnalyticsEvent: String, CaseIterable {
     case alertLimitShown = "alert_limit_shown"
     /// `placement` (`AdPlacement`): AdMob recorded a click on a banner.
     case adBannerTapped = "ad_banner_tapped"
+    /// `style`, `family`, `index`: a free reader's watch complication set to a
+    /// Pro style, so it shows the lock (FOX-63). Once per setup; relayed from
+    /// the watch (`WatchEventRelay`).
+    case watchComplicationLocked = "watch_complication_locked"
 
     // MARK: Feedback and review
 

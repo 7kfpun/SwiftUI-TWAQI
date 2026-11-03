@@ -61,6 +61,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Messaging).
         FirebaseApp.configure()
         TrackingManager.applyExclusionAtLaunch()
+        // The watch has no Firebase; its events come over WatchConnectivity.
+        WatchEventRelay.shared.start()
 
         // Push: alerts are sent through Firebase Cloud Messaging to the token
         // Directus holds for this device (see `DirectusPushMirror`). OneSignal
