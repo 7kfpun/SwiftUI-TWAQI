@@ -43,6 +43,9 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - GitHub CI runs only a high-signal subset (offline caches, push dual-write,
   favourites ↔ alerts, cam history, `SettingsStore`) — listed in `.github/workflows/ci.yml`.
   Add a suite there only if it guards one of those areas.
+- CI builds the CI-only `TWAQI-CI` scheme (`TWAQI` minus the `TWAQIUITests` runner) with
+  `build-for-testing` + `test-without-building`. Use `-scheme TWAQI` locally; if you change
+  the `TWAQI` scheme's build or test targets, mirror it in `TWAQI-CI`.
 - Workers: `cd workers/twaqi-workers && npm test`.
 
 ## Self-review before opening a PR
