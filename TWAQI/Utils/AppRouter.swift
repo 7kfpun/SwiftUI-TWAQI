@@ -14,11 +14,9 @@ import Foundation
 final class AppRouter: ObservableObject {
     @Published var showingPro = false
 
-    private let logProScreenOpened: (ProScreenSource) -> Void
-
-    init(logProScreenOpened: @escaping (ProScreenSource) -> Void = TrackingManager.logProScreenOpened(source:)) {
-        self.logProScreenOpened = logProScreenOpened
-    }
+    /// Where the link that opened the Pro screen came from, handed to
+    /// `ProView`, which logs it with each funnel step.
+    private(set) var proSource: ProScreenSource = .deepLink
 
     /// Opens what `url` asks for. Returns false when it is ignored: not one
     /// of our URLs, or the Pro screen for someone who already has Pro.
@@ -27,7 +25,7 @@ final class AppRouter: ObservableObject {
         guard let link = DeepLink.route(url, isPro: isPro) else { return false }
         switch link {
         case .pro(let source):
-            logProScreenOpened(source)
+            proSource = source
             showingPro = true
         }
         return true

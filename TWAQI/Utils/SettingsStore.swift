@@ -68,7 +68,7 @@ final class SettingsStore: ObservableObject {
     var airIndexTypeSelected: AirIndexTypes {
         set {
             defaults.set(newValue.rawValue, forKey: Keys.airIndexTypeSelected)
-            TrackingManager.logEvent(eventName: "select_index", parameters: ["label": newValue.rawValue])
+            TrackingManager.logEvent(.selectIndex, parameters: ["label": newValue.rawValue])
         }
         get {
             return defaults.string(forKey: Keys.airIndexTypeSelected)
@@ -91,7 +91,7 @@ final class SettingsStore: ObservableObject {
             WidgetBridge.publish(appLanguage: newValue)
             // Alerts are written in the app's language.
             Task { @MainActor in DirectusPushMirror.shared.profileChanged() }
-            TrackingManager.logEvent(eventName: "select_language", parameters: ["label": newValue.rawValue])
+            TrackingManager.logEvent(.selectLanguage, parameters: ["label": newValue.rawValue])
         }
         get { AppLanguage.stored(in: defaults) }
     }

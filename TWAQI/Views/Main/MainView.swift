@@ -83,7 +83,7 @@ struct MainView: View {
         )
             .edgesIgnoringSafeArea(.all)
             .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!)
+                AdBannerView(adUnitID: getEnv("AdUnitIdMainFooter")!, placement: .main)
             }
     }
 

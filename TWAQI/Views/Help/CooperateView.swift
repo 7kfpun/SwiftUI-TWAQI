@@ -39,7 +39,7 @@ struct CooperateView: View {
         .navigationBarTitleDisplayMode(.inline)
         .disabled(isSending)
         .onAppear {
-            TrackingManager.logEvent(eventName: "open_cooperate_form")
+            TrackingManager.logEvent(.openCooperateForm)
         }
         .alert("Cooperate.sent_title", isPresented: $showingSuccess) {
             Button("OK") {
@@ -216,7 +216,7 @@ struct CooperateView: View {
             do {
                 try await CooperateService.submit(submission)
                 TrackingManager.logEvent(
-                    eventName: "submit_cooperate",
+                    .submitCooperate,
                     parameters: ["cooperation_type": submission.cooperationType]
                 )
                 isSending = false
@@ -225,7 +225,7 @@ struct CooperateView: View {
                 let cooperateError = error as? FeedbackError ?? .network
                 debugPrint("CooperateService.submit failed: \(cooperateError)")
                 TrackingManager.logEvent(
-                    eventName: "submit_cooperate_failed",
+                    .submitCooperateFailed,
                     parameters: ["reason": String(describing: cooperateError)]
                 )
                 isSending = false

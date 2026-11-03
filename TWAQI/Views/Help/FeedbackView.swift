@@ -41,10 +41,7 @@ struct FeedbackView: View {
         .navigationBarTitleDisplayMode(.inline)
         .disabled(isSending)
         .onAppear {
-            TrackingManager.logEvent(
-                eventName: "open_feedback_form",
-                parameters: source.openFormEventParameters
-            )
+            TrackingManager.logEvent(.openFeedbackForm, parameters: source.openFormEventParameters)
         }
         .alert("Feedback.sent_title", isPresented: $showingSuccess) {
             Button("OK") {
@@ -227,7 +224,7 @@ struct FeedbackView: View {
             do {
                 try await FeedbackService.submit(submission)
                 TrackingManager.logEvent(
-                    eventName: "submit_feedback",
+                    .submitFeedback,
                     parameters: [
                         "platform": submission.platform,
                         "rating": submission.rating,
@@ -240,7 +237,7 @@ struct FeedbackView: View {
                 let feedbackError = error as? FeedbackError ?? .network
                 debugPrint("FeedbackService.submit failed: \(feedbackError)")
                 TrackingManager.logEvent(
-                    eventName: "submit_feedback_failed",
+                    .submitFeedbackFailed,
                     parameters: ["reason": String(describing: feedbackError)]
                 )
                 isSending = false

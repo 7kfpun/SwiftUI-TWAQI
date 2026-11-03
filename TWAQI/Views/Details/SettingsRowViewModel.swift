@@ -23,7 +23,12 @@ class SettingsRowViewModel: ObservableObject {
 
     /// `FavouriteAlerts.maxAlertedStations` other stations already have
     /// alerts, so switches that are off stay locked.
-    @Published private(set) var isAtCap = false
+    @Published private(set) var isAtCap = false {
+        didSet { logAlertLimitIfShown() }
+    }
+
+    /// `alert_limit_shown` is logged once per station page, not on every read.
+    private var loggedAlertLimit = false
 
     @Published var stationSetting: StationAlertSetting {
         // `didSet` rather than `willSet`: the side effect must not run while
@@ -38,6 +43,7 @@ class SettingsRowViewModel: ObservableObject {
         self.station = station
         self.stationSetting = StationAlertSetting(DirectusPushMirror.alerts(stationId: station.id))
         self.isAtCap = FavouriteAlerts.isAtCap(alertedStationIds: FavouriteAlerts.alertedStationIds(), excluding: station.id)
+        logAlertLimitIfShown()
 
         followChanges()
 
@@ -66,7 +72,7 @@ class SettingsRowViewModel: ObservableObject {
     private func addToFavourites() {
         guard !settings.savedFavouriteStations.contains(station.id) else { return }
         settings.savedFavouriteStations.append(station.id)
-        TrackingManager.logEvent(eventName: "favourite_station_saved", parameters: [
+        TrackingManager.logEvent(.favouriteStationSaved, parameters: [
             "label": "on",
             "stationId": station.id,
             "source": "alert",
@@ -100,5 +106,13 @@ class SettingsRowViewModel: ObservableObject {
                 self.isApplyingStoredSettings = false
             }
         }
+    }
+
+    /// The card is showing the station-limit note (`SettingsRow` shows it
+    /// whenever other stations are at the limit).
+    private func logAlertLimitIfShown() {
+        guard isAtCap, !loggedAlertLimit else { return }
+        loggedAlertLimit = true
+        TrackingManager.logEvent(.alertLimitShown, parameters: ["stationId": station.id])
     }
 }

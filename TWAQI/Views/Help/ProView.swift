@@ -12,12 +12,16 @@ import SwiftUI
 /// What Pro includes, then the plans. Features come first: a list of prices
 /// with nothing above it doesn't say what the money buys.
 struct ProView: View {
+    /// Where it was opened from, logged with every step of the Pro funnel.
+    var source: ProScreenSource
+
     @Environment(\.dismiss) private var dismiss
 
     @State private var products: [Product] = []
     @State private var loadFailed = false
     @State private var purchasingId: String?
     @State private var purchaseFailed = false
+    @State private var loggedOpen = false
 
     var body: some View {
         NavigationView {
@@ -54,6 +58,11 @@ struct ProView: View {
                         Image(systemName: "xmark")
                     }
                 }
+            }
+            .onAppear {
+                guard !loggedOpen else { return }
+                loggedOpen = true
+                TrackingManager.logProScreenOpened(source: source)
             }
             .task { await load() }
             .alert("Pro.purchase_failed", isPresented: $purchaseFailed) {
@@ -138,16 +147,23 @@ struct ProView: View {
     private func buy(_ product: Product) async {
         purchasingId = product.id
         defer { purchasingId = nil }
-        TrackingManager.logEvent(eventName: "user_premium_buy_product_started")
+        let parameters = [
+            "plan": ProPlan(productId: product.id).rawValue,
+            "source": source.rawValue,
+        ]
+        TrackingManager.logEvent(.proPlanSelected, parameters: parameters)
+        TrackingManager.logEvent(.buyProductStarted, parameters: parameters)
 
         do {
             if try await IAPManager.purchase(product) == .purchased {
                 await SettingsStore.refreshPro()
-                TrackingManager.logEvent(eventName: "user_premium_buy_product_done")
+                TrackingManager.logEvent(.buyProductDone, parameters: parameters)
                 dismiss()
+            } else {
+                TrackingManager.logEvent(.buyProductNotCompleted, parameters: parameters)
             }
         } catch {
-            TrackingManager.logEvent(eventName: "user_premium_buy_product_failed")
+            TrackingManager.logEvent(.buyProductFailed, parameters: parameters)
             purchaseFailed = true
         }
     }
@@ -155,21 +171,46 @@ struct ProView: View {
     private func restore() async {
         purchasingId = ""
         defer { purchasingId = nil }
-        TrackingManager.logEvent(eventName: "user_premium_restore_purchase_started")
+        let parameters = ["source": source.rawValue]
+        TrackingManager.logEvent(.restorePurchaseStarted, parameters: parameters)
 
         do {
             try await AppStore.sync()
             await SettingsStore.refreshPro()
             if UserDefaults.standard.bool(forKey: "pro") {
-                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_done")
+                TrackingManager.logEvent(.restorePurchaseDone, parameters: parameters)
                 dismiss()
             } else {
-                TrackingManager.logEvent(eventName: "user_premium_restore_purchase_failed")
+                TrackingManager.logEvent(.restorePurchaseFailed, parameters: parameters)
                 purchaseFailed = true
             }
         } catch {
-            TrackingManager.logEvent(eventName: "user_premium_restore_purchase_failed")
+            TrackingManager.logEvent(.restorePurchaseFailed, parameters: parameters)
             purchaseFailed = true
+        }
+    }
+}
+
+/// A Pro product as the funnel events name it (`plan`), so the reports read
+/// "6m" rather than a product id.
+enum ProPlan: String {
+    case oneMonth = "1m"
+    case sixMonths = "6m"
+    case twelveMonths = "12m"
+    case lifetime
+    /// A product id this build doesn't know.
+    case other
+
+    init(productId: String, lifetimeProductId: String? = IAPManager.lifetimeProductId) {
+        if productId == lifetimeProductId {
+            self = .lifetime
+            return
+        }
+        switch productId {
+        case "com.kfpun.twaqi.subscription.adfree.1m": self = .oneMonth
+        case "com.kfpun.twaqi.subscription.adfree.6m": self = .sixMonths
+        case "com.kfpun.twaqi.subscription.adfree.12m": self = .twelveMonths
+        default: self = .other
         }
     }
 }

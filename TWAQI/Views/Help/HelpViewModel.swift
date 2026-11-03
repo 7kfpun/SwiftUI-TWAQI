@@ -22,7 +22,7 @@ class HelpViewModel: ObservableObject {
             settings.dndStartTime = dndStartTime
             pushDndWindow()
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification_start_time", parameters: [
+            TrackingManager.logEvent(.setDndNotificationStartTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -35,7 +35,7 @@ class HelpViewModel: ObservableObject {
             settings.dndEndTime = dndEndTime
             pushDndWindow()
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification_end_time", parameters: [
+            TrackingManager.logEvent(.setDndNotificationEndTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -49,7 +49,7 @@ class HelpViewModel: ObservableObject {
 
             pushDndWindow()
 
-            TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
+            TrackingManager.logEvent(.setDndNotification, parameters: [
                 "label": isDndEnabled ? "on" : "off",
                 "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
                 "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
@@ -76,7 +76,7 @@ class HelpViewModel: ObservableObject {
     /// as soon as it can be reached.
     func removeAllNotification() {
         FavouriteAlerts.cancelAll()
-        TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+        TrackingManager.logEvent(.favouriteStationAllRemoved)
         showingAlert = true
     }
 }

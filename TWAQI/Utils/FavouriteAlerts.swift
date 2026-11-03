@@ -94,7 +94,7 @@ enum FavouriteAlerts {
     static func clear(stationId: Int, services: Services = .live) {
         guard isOn(stationId: stationId, services: services) else { return }
         services.write(stationId, nil, .off, true)
-        TrackingManager.logEvent(eventName: "station_alerts_cleared_by_unfavourite", parameters: [
+        TrackingManager.logEvent(.stationAlertsClearedByUnfavourite, parameters: [
             "stationId": stationId,
         ])
         post(stationId: stationId, isOn: false)
@@ -223,7 +223,7 @@ enum FavouriteAlerts {
         case .notificationsDenied: name = "notifications_denied"
         case .notChanged: name = "not_changed"
         }
-        TrackingManager.logEvent(eventName: "station_alerts_on_favourite", parameters: [
+        TrackingManager.logEvent(.stationAlertsOnFavourite, parameters: [
             "outcome": name,
             "stationId": stationId,
         ])

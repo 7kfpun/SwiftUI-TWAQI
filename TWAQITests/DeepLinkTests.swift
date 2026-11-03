@@ -60,31 +60,27 @@ final class DeepLinkTests: XCTestCase {
 
     // MARK: - Router
 
-    func testRouterOpensProAndLogsSource() throws {
-        var logged: [ProScreenSource] = []
-        let router = AppRouter { logged.append($0) }
+    func testRouterOpensProWithTheLinksSource() throws {
+        let router = AppRouter()
 
         XCTAssertTrue(router.open(try url("twaqi://pro?source=widget_locked"), isPro: false))
         XCTAssertTrue(router.showingPro)
-        XCTAssertEqual(logged, [.widgetLocked])
+        XCTAssertEqual(router.proSource, .widgetLocked)
     }
 
     func testRouterIgnoresProURLWhenAlreadyPro() throws {
-        var logged: [ProScreenSource] = []
-        let router = AppRouter { logged.append($0) }
+        let router = AppRouter()
 
         XCTAssertFalse(router.open(try url("twaqi://pro?source=widget_locked"), isPro: true))
         XCTAssertFalse(router.showingPro)
-        XCTAssertTrue(logged.isEmpty)
+        XCTAssertEqual(router.proSource, .deepLink)
     }
 
     func testRouterIgnoresUnknownURL() throws {
-        var logged: [ProScreenSource] = []
-        let router = AppRouter { logged.append($0) }
+        let router = AppRouter()
 
         XCTAssertFalse(router.open(try url("twaqi://station/126"), isPro: false))
         XCTAssertFalse(router.open(try url("https://example.com/pro"), isPro: false))
         XCTAssertFalse(router.showingPro)
-        XCTAssertTrue(logged.isEmpty)
     }
 }

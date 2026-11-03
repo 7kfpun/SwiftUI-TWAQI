@@ -8,9 +8,14 @@
 
 import Foundation
 
-/// Where the Pro screen was opened from. Rides on `twaqi://pro` as `source`
-/// and is logged with `pro_screen_opened`.
+/// Where the Pro screen was opened from. Logged as `source` with every step
+/// of the Pro funnel (`pro_screen_opened`, `pro_plan_selected`, the purchase
+/// events); the widget's link carries it on `twaqi://pro` as `source`.
 enum ProScreenSource: String {
+    /// The "Ad-free" row in Help.
+    case helpRow = "help_row"
+    /// "See Pro plans" on the last step of the welcome flow.
+    case onboarding
     /// The "Unlock with Pro" placeholder on a medium or large widget.
     case widgetLocked = "widget_locked"
     /// `twaqi://pro` with no `source`, or one this build doesn't know.

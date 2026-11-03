@@ -221,7 +221,7 @@ struct DetailsView: View {
             .padding(.bottom, settings.isPro ? 0 : AdBannerView.height)
         }
         .overlay(alignment: .bottom) {
-            AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!)
+            AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!, placement: .details)
         }
         .onAppear {
             self.getData()
