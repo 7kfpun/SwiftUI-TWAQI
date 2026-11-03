@@ -94,8 +94,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Show Xcode
+        id: xcode
         if: steps.scope.outputs.run == 'true'
-        run: xcodebuild -version
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          echo "build=$(xcodebuild -version | awk '/Build version/ {print $3}')" >> "$GITHUB_OUTPUT"
 
       - name: Prepare gitignored config
         if: steps.scope.outputs.run == 'true'
@@ -185,6 +189,19 @@ jobs:
           restore-keys: |
             pods-${{ runner.os }}-${{ runner.arch }}-
 
+      # Build products of the last green run with the same dependencies and
+      # Xcode. Exact key only, no restore-keys: products built against other
+      # pods, packages or Xcode are never restored. Inside a hit, Xcode still
+      # rebuilds whatever changed: checkout gives every app and test source a
+      # new mtime, so only the cached Pods / package products can be reused.
+      - name: Cache DerivedData
+        if: steps.scope.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/DerivedData/Build
+            ${{ runner.temp }}/DerivedData/ModuleCache.noindex
+          key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('Podfile.lock', 'Podfile', 'TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
 
       - name: Install CocoaPods dependencies
         if: steps.scope.outputs.run == 'true'
@@ -261,6 +278,9 @@ jobs:
           # TWAQI-CI is the TWAQI scheme without the TWAQIUITests runner, which
           # CI never runs. The local full-suite command keeps using TWAQI.
           # COMPILER_INDEX_STORE_ENABLE=NO: the index is only for Xcode's editor.
+          # A restored cache gives every file a new inode. Let Xcode compare
+          # mtime and size only, so unchanged cached products are reused.
+          defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
           xcodebuild build-for-testing \
             -workspace TWAQI.xcworkspace \
             -scheme TWAQI-CI \
