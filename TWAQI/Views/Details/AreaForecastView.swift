@@ -15,28 +15,26 @@ import SwiftUI
 /// with the region and sits below the station's own number. The caller hides
 /// it entirely when there is nothing to show.
 struct AreaForecastView: View {
+    /// What the card's label says.
+    enum Heading {
+        /// On a station: 「空品區預報 · 北部空品區」.
+        case regionalForecast
+        /// On the Forecast tab, where every card is a forecast: the area's
+        /// name, with a tag when it is the reader's area or a favourite's.
+        case area(ForecastTabArea.Pin)
+    }
+
     let forecast: AreaForecast
+    var heading: Heading = .regionalForecast
+    /// False on the Forecast tab when this area's text is the paragraph
+    /// shown once above every card.
+    var showsContent = true
 
-    @State private var expanded = false
-    /// Whether the forecast text runs past the collapsed three lines; the
-    /// toggle only appears when there is something more to show.
-    @State private var truncated = false
-    /// Bumped when a translation of the forecast text arrives.
-    @State private var translationRevision = 0
-    /// Width the forecast text lays out at, to guess how much of it the
-    /// collapsed lines show. Zero until measured.
-    @State private var textWidth: CGFloat = 0
-
-    private static let cornerRadius: CGFloat = 12
+    static let cornerRadius: CGFloat = 12
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 4) {
-                SectionLabel(text: "Forecast.title")
-                Text("· \(forecast.areaTitle)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            label
 
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(forecast.days.enumerated()), id: \.element.forecastDate) { index, day in
@@ -46,9 +44,9 @@ struct AreaForecastView: View {
                     dayRow(day)
                 }
 
-                if let content = forecast.content {
+                if showsContent, let content = forecast.content {
                     Divider()
-                    contentText(content)
+                    ForecastContentText(content: content)
                 }
             }
             .background(Color(.secondarySystemBackground))
@@ -57,6 +55,41 @@ struct AreaForecastView: View {
             caption
         }
         .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var label: some View {
+        switch heading {
+        case .regionalForecast:
+            HStack(spacing: 4) {
+                SectionLabel(text: "Forecast.title")
+                Text("· \(forecast.areaTitle)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        case .area(let pin):
+            HStack(spacing: 6) {
+                Text(forecast.areaTitle)
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                if let tag = Self.tag(pin) {
+                    Text(tag)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundColor(.accentColor)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.15)))
+                }
+            }
+        }
+    }
+
+    private static func tag(_ pin: ForecastTabArea.Pin) -> LocalizedStringKey? {
+        switch pin {
+        case .reader: return "Forecast.your_area"
+        case .favourite: return "Forecast.favourite_area"
+        case .fallback, .none: return nil
+        }
     }
 
     private func dayRow(_ day: AqiForecast) -> some View {
@@ -99,11 +132,92 @@ struct AreaForecastView: View {
         .accessibilityElement(children: .combine)
     }
 
+    /// 「發布 16:30 · 資料來源：環境部」
+    private var caption: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "clock")
+            if let published = forecast.publishedAt {
+                Text("Forecast.published \(Self.publishedText(published))")
+            }
+            Spacer(minLength: 8)
+            Text("Forecast.source")
+        }
+        .font(.caption.weight(.light))
+        .foregroundColor(.secondary)
+        .lineLimit(1)
+    }
+
+    // MARK: - Formatting
+
+    /// 今天 / 明天 / 後天, else the weekday.
+    static func dayTitle(_ forecastDate: String, now: Date = Date()) -> String {
+        switch AqiForecastDates.daysFromToday(forecastDate, now: now) {
+        case 0: return "Forecast.today".localized
+        case 1: return "Forecast.tomorrow".localized
+        case 2: return "Forecast.day_after_tomorrow".localized
+        default:
+            return AqiForecastDates.parseDay(forecastDate).map { weekdayFormatter.string(from: $0) } ?? forecastDate
+        }
+    }
+
+    /// 「11/1（日）」
+    static func dateSubtitle(_ forecastDate: String) -> String {
+        AqiForecastDates.parseDay(forecastDate).map { dateFormatter.string(from: $0) } ?? forecastDate
+    }
+
+    /// "16:30" when published today (Taiwan time), else "10/30 22:30".
+    static func publishedText(_ date: Date, now: Date = Date()) -> String {
+        let calendar = AqiForecastDates.calendar
+        return calendar.isDate(date, inSameDayAs: now)
+            ? timeFormatter.string(from: date)
+            : dateTimeFormatter.string(from: date)
+    }
+
+    private static func formatter(_ template: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.isChinese ? Locale(identifier: "zh_Hant_TW") : Locale.app
+        formatter.timeZone = AqiForecastDates.taipei
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        return formatter
+    }
+
+    // Built per use (a few rows) so they follow a language changed under Help.
+    private static var weekdayFormatter: DateFormatter { formatter("EEEE") }
+    private static var dateFormatter: DateFormatter { formatter("MdEEE") }
+    private static var dateTimeFormatter: DateFormatter { fixedFormatter("M/d HH:mm") }
+    private static var timeFormatter: DateFormatter { fixedFormatter("HH:mm") }
+
+    /// Numeric layouts, but still in the app's locale (digits, calendar).
+    private static func fixedFormatter(_ format: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = .app
+        formatter.timeZone = AqiForecastDates.taipei
+        formatter.dateFormat = format
+        return formatter
+    }
+}
+
+/// MOENV's forecast text, three lines until opened, translated on device
+/// outside Chinese. On a station's card, and once above the Forecast tab's
+/// cards when every area carries the same paragraph.
+struct ForecastContentText: View {
+    let content: String
+
+    @State private var expanded = false
+    /// Whether the forecast text runs past the collapsed three lines; the
+    /// toggle only appears when there is something more to show.
+    @State private var truncated = false
+    /// Bumped when a translation of the forecast text arrives.
+    @State private var translationRevision = 0
+    /// Width the forecast text lays out at, to guess how much of it the
+    /// collapsed lines show. Zero until measured.
+    @State private var textWidth: CGFloat = 0
+
     /// MOENV's forecast text runs to a paragraph per region; show the start
     /// and let the reader open the rest. Outside Chinese it is shown in the
     /// reader's language once on-device translation has it, else as written:
     /// the sentences the collapsed lines show first, the rest on expanding.
-    private func contentText(_ content: String) -> some View {
+    var body: some View {
         // Read so a finished translation redraws this text.
         _ = translationRevision
         let segments = OnDeviceTranslation.segments(content)
@@ -177,70 +291,6 @@ struct AreaForecastView: View {
             .background(GeometryReader { proxy in
                 Color.clear.preference(key: TextHeightsKey.self, value: [proxy.size.height])
             })
-    }
-
-    /// 「發布 16:30 · 資料來源：環境部」
-    private var caption: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "clock")
-            if let published = forecast.publishedAt {
-                Text("Forecast.published \(Self.publishedText(published))")
-            }
-            Spacer(minLength: 8)
-            Text("Forecast.source")
-        }
-        .font(.caption.weight(.light))
-        .foregroundColor(.secondary)
-        .lineLimit(1)
-    }
-
-    // MARK: - Formatting
-
-    /// 今天 / 明天 / 後天, else the weekday.
-    static func dayTitle(_ forecastDate: String, now: Date = Date()) -> String {
-        switch AqiForecastDates.daysFromToday(forecastDate, now: now) {
-        case 0: return "Forecast.today".localized
-        case 1: return "Forecast.tomorrow".localized
-        case 2: return "Forecast.day_after_tomorrow".localized
-        default:
-            return AqiForecastDates.parseDay(forecastDate).map { weekdayFormatter.string(from: $0) } ?? forecastDate
-        }
-    }
-
-    /// 「11/1（日）」
-    static func dateSubtitle(_ forecastDate: String) -> String {
-        AqiForecastDates.parseDay(forecastDate).map { dateFormatter.string(from: $0) } ?? forecastDate
-    }
-
-    /// "16:30" when published today (Taiwan time), else "10/30 22:30".
-    static func publishedText(_ date: Date, now: Date = Date()) -> String {
-        let calendar = AqiForecastDates.calendar
-        return calendar.isDate(date, inSameDayAs: now)
-            ? timeFormatter.string(from: date)
-            : dateTimeFormatter.string(from: date)
-    }
-
-    private static func formatter(_ template: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = Locale.isChinese ? Locale(identifier: "zh_Hant_TW") : Locale.app
-        formatter.timeZone = AqiForecastDates.taipei
-        formatter.setLocalizedDateFormatFromTemplate(template)
-        return formatter
-    }
-
-    // Built per use (a few rows) so they follow a language changed under Help.
-    private static var weekdayFormatter: DateFormatter { formatter("EEEE") }
-    private static var dateFormatter: DateFormatter { formatter("MdEEE") }
-    private static var dateTimeFormatter: DateFormatter { fixedFormatter("M/d HH:mm") }
-    private static var timeFormatter: DateFormatter { fixedFormatter("HH:mm") }
-
-    /// Numeric layouts, but still in the app's locale (digits, calendar).
-    private static func fixedFormatter(_ format: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = .app
-        formatter.timeZone = AqiForecastDates.taipei
-        formatter.dateFormat = format
-        return formatter
     }
 }
 

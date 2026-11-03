@@ -35,7 +35,7 @@ struct ContentView: View {
     }
 
     enum AppTab: Hashable {
-        case main, favourites, detailsList, help
+        case main, forecast, favourites, detailsList, help
     }
 
     var body: some View {
@@ -72,7 +72,8 @@ struct ContentView: View {
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.
-    /// Same order as the classic bar, Help last. The station list keeps its
+    /// Same order as the classic bar: Map, Forecast, Favourites, List, Help
+    /// (FOX-32 put Forecast second). The station list keeps its
     /// own search field rather than taking the system search role, which
     /// would pin it apart at the end of the bar after Help.
     @available(iOS 26.0, *)
@@ -80,6 +81,10 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             Tab("Tabbar.main", systemImage: "map.fill", value: AppTab.main) {
                 MainView()
+            }
+
+            Tab("Tabbar.forecast", systemImage: "calendar", value: AppTab.forecast) {
+                ForecastView()
             }
 
             Tab("Tabbar.favourites", systemImage: "heart", value: AppTab.favourites) {
@@ -106,6 +111,13 @@ struct ContentView: View {
                     Text("Tabbar.main")
             }
             .tag(AppTab.main)
+
+            ForecastView()
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Tabbar.forecast")
+            }
+            .tag(AppTab.forecast)
 
             FavouriteListView()
                 .tabItem {
