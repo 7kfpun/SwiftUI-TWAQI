@@ -10,20 +10,20 @@ import XCTest
 @testable import Taiwan_Air
 
 final class StoreReviewTests: XCTestCase {
-    func testRequestsReviewEveryTenOpens() {
-        for count in [10, 20, 30, 40, 50, 60, 100, 110, 1_000] {
+    func testRequestsReviewEveryTwentyOpens() {
+        for count in [20, 40, 60, 80, 100, 120, 1_000] {
             XCTAssertTrue(StoreReviewHelper.shouldRequestReview(appOpenCount: count), "open \(count)")
         }
     }
 
-    func testDoesNotRequestReviewBetweenMultiplesOfTen() {
-        for count in [1, 2, 9, 11, 15, 19, 21, 29, 31, 99, 101, 1_001] {
+    func testDoesNotRequestReviewBetweenMultiplesOfTwenty() {
+        for count in [1, 9, 10, 11, 19, 21, 30, 50, 99, 101, 110, 1_010] {
             XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: count), "open \(count)")
         }
     }
 
     func testDoesNotRequestReviewForZeroOrNegativeCount() {
         XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: 0))
-        XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: -10))
+        XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: -20))
     }
 }
