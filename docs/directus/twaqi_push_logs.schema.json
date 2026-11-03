@@ -1,0 +1,240 @@
+{
+  "cms": "https://cms.wahthefox.com",
+  "collection": "twaqi_push_logs",
+  "linear": "FOX-66",
+  "created_at_local": "2026-11-03 Asia/Hong_Kong",
+  "meta": {
+    "archive_field": "archived",
+    "archive_value": "true",
+    "unarchive_value": "false",
+    "archive_app_filter": true,
+    "accountability": "all",
+    "icon": "outgoing_mail",
+    "note": "FOX-66: FCM / DIY push send logs for TWAQI. Store token_suffix only \u2014 never full FCM tokens. Soft-delete via archived only \u2014 no hard deletes. Slice 2 sender will write rows later.",
+    "display_template": "{{status}} {{station}} {{trigger}} {{token_suffix}}"
+  },
+  "fields": [
+    {
+      "field": "id",
+      "type": "integer",
+      "default": "nextval('twaqi_push_logs_id_seq'::regclass)",
+      "nullable": false,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "numeric",
+      "options": null,
+      "note": null
+    },
+    {
+      "field": "token_suffix",
+      "type": "string",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "input",
+      "options": null,
+      "note": "Last few characters of FCM token only \u2014 never store the full token."
+    },
+    {
+      "field": "status",
+      "type": "string",
+      "default": "queued",
+      "nullable": false,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "select-dropdown",
+      "options": {
+        "choices": [
+          {
+            "text": "queued",
+            "value": "queued"
+          },
+          {
+            "text": "sent",
+            "value": "sent"
+          },
+          {
+            "text": "failed",
+            "value": "failed"
+          },
+          {
+            "text": "unregistered",
+            "value": "unregistered"
+          }
+        ]
+      },
+      "note": "Send outcome"
+    },
+    {
+      "field": "station",
+      "type": "string",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "input",
+      "options": null,
+      "note": "Station id/code for the alert"
+    },
+    {
+      "field": "trigger",
+      "type": "string",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "select-dropdown",
+      "options": {
+        "choices": [
+          {
+            "text": "pollution",
+            "value": "pollution"
+          },
+          {
+            "text": "cleanliness",
+            "value": "cleanliness"
+          },
+          {
+            "text": "test",
+            "value": "test"
+          },
+          {
+            "text": "manual",
+            "value": "manual"
+          }
+        ],
+        "allowOther": true
+      },
+      "note": "Why the push was sent (allowOther for free string)"
+    },
+    {
+      "field": "device",
+      "type": "integer",
+      "default": null,
+      "nullable": true,
+      "fk_table": "twaqi_push_devices",
+      "fk_column": "id",
+      "special": [
+        "m2o"
+      ],
+      "interface": "select-dropdown-m2o",
+      "options": {
+        "template": "{{environment}} {{device_id}}"
+      },
+      "note": "Optional FK to twaqi_push_devices.id"
+    },
+    {
+      "field": "fcm_message_id",
+      "type": "string",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "input",
+      "options": null,
+      "note": "FCM HTTP v1 message name/id from send response"
+    },
+    {
+      "field": "error",
+      "type": "text",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "input-multiline",
+      "options": null,
+      "note": "Human-readable send error (nullable)"
+    },
+    {
+      "field": "error_code",
+      "type": "string",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": null,
+      "interface": "input",
+      "options": null,
+      "note": "Machine error code from FCM / sender (nullable)"
+    },
+    {
+      "field": "archived",
+      "type": "boolean",
+      "default": false,
+      "nullable": false,
+      "fk_table": null,
+      "fk_column": null,
+      "special": [
+        "cast-boolean"
+      ],
+      "interface": "boolean",
+      "options": null,
+      "note": "Soft-delete flag (Directus Archive). Never hard-delete rows."
+    },
+    {
+      "field": "date_created",
+      "type": "timestamp",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": [
+        "date-created"
+      ],
+      "interface": "datetime",
+      "options": null,
+      "note": null
+    },
+    {
+      "field": "date_updated",
+      "type": "timestamp",
+      "default": null,
+      "nullable": true,
+      "fk_table": null,
+      "fk_column": null,
+      "special": [
+        "date-updated"
+      ],
+      "interface": "datetime",
+      "options": null,
+      "note": null
+    }
+  ],
+  "relations": [
+    {
+      "collection": "twaqi_push_logs",
+      "field": "device",
+      "related_collection": "twaqi_push_devices",
+      "schema": {
+        "constraint_name": "twaqi_push_logs_device_foreign",
+        "table": "twaqi_push_logs",
+        "column": "device",
+        "foreign_key_schema": "public",
+        "foreign_key_table": "twaqi_push_devices",
+        "foreign_key_column": "id",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      },
+      "meta": {
+        "id": 2,
+        "many_collection": "twaqi_push_logs",
+        "many_field": "device",
+        "one_collection": "twaqi_push_devices",
+        "one_field": null,
+        "one_collection_field": null,
+        "one_allowed_collections": null,
+        "junction_field": null,
+        "sort_field": null,
+        "one_deselect_action": "nullify"
+      }
+    }
+  ]
+}
