@@ -16,13 +16,18 @@ only when the ticket or PR names it.
 
 | Check | Workflow | Runs on | Fails when |
 |---|---|---|---|
-| `Unit tests` | `ci.yml` | non-draft `feature/*` | the `-only-testing` subset fails. Skips itself (green) when only docs, media, `assets/`, `fastlane/`, `web/` or `workers/` changed. |
+| `Unit tests` | `ci.yml` | non-draft `feature/*` | the `-only-testing` subset fails (built from the CI-only `TWAQI-CI` scheme, which leaves out the UI-test runner). Skips itself (green) when only docs, media, `assets/`, `fastlane/`, `web/` or `workers/` changed. |
 | `Vulnerability checks` | `ci.yml` | non-draft `feature/*` | TruffleHog **verified** a secret in the PR's commits. Unverified findings, osv-scanner results and tool failures are warnings, posted as a PR comment. |
 | `PR policy` | `pr-policy.yml` | every PR, drafts too | the branch isn't `feature/…`; no `FOX-nn` in the branch or title; a `Depends on #N` PR isn't merged; Fastfile `APP_VERSION`, `MARKETING_VERSION`, build numbers or What's New disagree (`tools/check_release_consistency.py`). |
 | `Secret files` | `pr-policy.yml` | every PR, drafts too | the net diff adds or changes `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env*`, `.dev.vars*`, signing keys or profiles; force-adds a gitignored file; or adds a real-looking secret value (`tools/check_secret_files.py`). Example and placeholder files pass. |
 | `Workers` | `workers.yml` | non-draft PRs | a changed Worker fails its typecheck or `wrangler deploy --dry-run`. Green when no Worker changed. |
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
+
+`Unit tests` speed-ups (FOX-64): the simulator is picked and booted in the background
+before checkout, and Swift packages and `Pods/` are cached with `actions/cache`. Caches
+are scoped to the PR (and `master`, which has no CI run to fill one), so each PR's first
+run is cold; a miss just downloads and builds as before.
 
 "CI green" for undrafting means everything except `LGTM`, which stays pending until
 a reviewer's LGTM covers the head.

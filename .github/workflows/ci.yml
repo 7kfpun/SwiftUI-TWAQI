@@ -89,6 +89,62 @@ jobs:
               handle.write(f"run={decision}\n")
           PY
 
+      - name: Boot simulator
+        if: steps.scope.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          # A fresh simulator takes minutes to boot on the runner, and the first
+          # simctl call can take a minute too. Pick and boot one in the
+          # background now, so both overlap checkout, pod install and the build.
+          # "Build for testing" waits for the pick; "Run unit tests" for the boot.
+          state="$RUNNER_TEMP/simulator"
+          mkdir -p "$state"
+          # generic/platform=iOS Simulator cannot execute tests. Pick the newest
+          # iOS runtime, and on it the highest-numbered plain iPhone ("iPhone 17"
+          # over "iPhone 17 Pro"), instead of pinning a model name.
+          cat > "$state/pick.py" <<'PY'
+          import json, re, sys
+          data = json.load(sys.stdin)
+          best = None
+          for runtime, devices in data.get("devices", {}).items():
+              match = re.search(r"SimRuntime\.iOS-([0-9-]+)$", runtime)
+              if not match:
+                  continue
+              version = tuple(int(part) for part in match.group(1).split("-"))
+              phones = [d for d in devices if d.get("isAvailable") and d.get("name", "").startswith("iPhone")]
+              if not phones:
+                  continue
+              plain = [d for d in phones if len(d["name"].split()) == 2] or phones
+              def model(device):
+                  try:
+                      return int(device["name"].split()[1])
+                  except (IndexError, ValueError):
+                      return -1
+              device = sorted(plain, key=model)[-1]
+              if best is None or version > best[0]:
+                  best = (version, device)
+          if best is None:
+              sys.exit("No available iPhone simulator")
+          version, device = best
+          print(device["udid"], device["name"], "iOS " + ".".join(map(str, version)), sep="\t")
+          PY
+          cat > "$state/boot.sh" <<'SH'
+          set -euo pipefail
+          state="$1"
+          trap 'echo $? > "$state/exit"' EXIT
+          xcrun simctl list devices available -j > "$state/devices.json"
+          python3 "$state/pick.py" < "$state/devices.json" > "$state/picked.tmp"
+          mv "$state/picked.tmp" "$state/picked"
+          udid="$(cut -f1 "$state/picked")"
+          echo "$(date -u +%T) booting $(tr '\t' ' ' < "$state/picked")"
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid"
+          echo "$(date -u +%T) booted"
+          SH
+          nohup bash "$state/boot.sh" "$state" > "$state/boot.log" 2>&1 &
+          echo "Simulator boot started in the background (log: $state/boot.log)."
+
+
       - name: Checkout repository
         if: steps.scope.outputs.run == 'true'
         uses: actions/checkout@v4
@@ -162,6 +218,28 @@ jobs:
           </plist>
           EOF
 
+      # Caches are scoped to this PR (and master), so a PR's first run is cold.
+      # A miss only means a full download or build, the same as before caching.
+      - name: Cache Swift packages
+        if: steps.scope.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/SourcePackages
+          key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Pods
+        if: steps.scope.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          # Podfile too: its post_install hook patches the pods' sources.
+          key: pods-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Podfile.lock', 'Podfile') }}
+          restore-keys: |
+            pods-${{ runner.os }}-${{ runner.arch }}-
+
+
       - name: Install CocoaPods dependencies
         if: steps.scope.outputs.run == 'true'
         run: |
@@ -171,37 +249,58 @@ jobs:
           fi
           pod install
 
-      - name: Run unit tests
+      - name: Build for testing
+        id: build
         if: steps.scope.outputs.run == 'true'
         run: |
           set -euo pipefail
-          # generic/platform=iOS Simulator cannot execute tests. Pick an
-          # installed iPhone simulator instead of pinning a model name.
-          device="$(
-            xcrun simctl list devices available -j | python3 -c '
-          import json, sys
-          data = json.load(sys.stdin)
-          names = []
-          for runtime, devices in data.get("devices", {}).items():
-              if "iOS" not in runtime:
-                  continue
-              for device in devices:
-                  name = device.get("name", "")
-                  if device.get("isAvailable") and name.startswith("iPhone"):
-                      names.append(name)
-          plain = [name for name in names if len(name.split()) == 2]
-          pool = plain or names
-          if not pool:
-              sys.exit("No available iPhone simulator")
-          def model(name):
-              try:
-                  return int(name.split()[1])
-              except (IndexError, ValueError):
-                  return -1
-          print(sorted(pool, key=model)[-1])
-          '
-          )"
-          echo "Using iOS Simulator: ${device}"
+          state="$RUNNER_TEMP/simulator"
+          for _ in $(seq 1 300); do
+            if [ -s "$state/picked" ] || [ -s "$state/exit" ]; then break; fi
+            sleep 1
+          done
+          if [ ! -s "$state/picked" ]; then
+            cat "$state/boot.log" || true
+            echo "::error::No iPhone simulator was picked. See the log above."
+            exit 1
+          fi
+          udid="$(cut -f1 "$state/picked")"
+          echo "Using iOS Simulator: $(tr '\t' ' ' < "$state/picked") (${udid})"
+          echo "udid=${udid}" >> "$GITHUB_OUTPUT"
+          # TWAQI-CI is the TWAQI scheme without the TWAQIUITests runner, which
+          # CI never runs. The local full-suite command keeps using TWAQI.
+          # COMPILER_INDEX_STORE_ENABLE=NO: the index is only for Xcode's editor.
+          xcodebuild build-for-testing \
+            -workspace TWAQI.xcworkspace \
+            -scheme TWAQI-CI \
+            -destination "id=${udid}" \
+            -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
+            -clonedSourcePackagesDirPath "${RUNNER_TEMP}/SourcePackages" \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Run unit tests
+        if: steps.scope.outputs.run == 'true'
+        env:
+          UDID: ${{ steps.build.outputs.udid }}
+        run: |
+          set -euo pipefail
+          state="$RUNNER_TEMP/simulator"
+          # Normally booted long ago. If the background boot is still going, wait
+          # for it; if it failed, bootstatus -b boots the simulator here instead.
+          for _ in $(seq 1 600); do
+            if [ -s "$state/exit" ]; then break; fi
+            sleep 1
+          done
+          cat "$state/boot.log" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xctestrun="$(find "${RUNNER_TEMP}/DerivedData/Build/Products" -maxdepth 1 -name 'TWAQI-CI_*.xctestrun' | head -n 1)"
+          if [ -z "$xctestrun" ]; then
+            echo "::error::Build for testing produced no TWAQI-CI .xctestrun file."
+            exit 1
+          fi
           # A small, high-signal subset: the suites guarding crash- and
           # regression-prone code. The full TWAQITests suite runs locally
           # (Mac mini / Orca) before merge — see README "Tests".
@@ -211,10 +310,9 @@ jobs:
           #     StationCamFrameCacheTests, StationCamHistoryCacheTests
           #   SettingsStore persistence: AppLanguageTests
           #   Directus create-only forms: FeedbackServiceTests, CooperateServiceTests
-          xcodebuild test \
-            -workspace TWAQI.xcworkspace \
-            -scheme TWAQI \
-            -destination "platform=iOS Simulator,name=${device},OS=latest" \
+          xcodebuild test-without-building \
+            -xctestrun "$xctestrun" \
+            -destination "id=${UDID}" \
             -only-testing:TWAQITests/PollutantCacheTests \
             -only-testing:TWAQITests/OfflineCacheRetentionTests \
             -only-testing:TWAQITests/PushServiceTests \
@@ -225,10 +323,8 @@ jobs:
             -only-testing:TWAQITests/AppLanguageTests \
             -only-testing:TWAQITests/FeedbackServiceTests \
             -only-testing:TWAQITests/CooperateServiceTests \
-            -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            -derivedDataPath "${RUNNER_TEMP}/DerivedData"
+
 
   vulnerability-checks:
     name: Vulnerability checks
