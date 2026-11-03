@@ -104,7 +104,7 @@ describe('send', () => {
     }) as typeof fetch
 
     const res = await send({ FCM_SERVICE_ACCOUNT: account }, { token: 'tok', title: 'T', body: 'B' })
-    assert.deepEqual(res, { ok: true, status: 200, messageId: 'projects/kf-twaqi/messages/123', deadToken: false })
+    assert.deepEqual(res, { ok: true, status: 200, messageId: 'projects/kf-twaqi/messages/123', deadToken: false, attempts: 1 })
 
     const assertion = new URLSearchParams(calls[0].body).get('assertion') ?? ''
     const [header, claims, signature] = assertion.split('.')
@@ -140,7 +140,7 @@ describe('send', () => {
         { status: 404 },
       )) as typeof fetch
     const dead = await send({ FCM_SERVICE_ACCOUNT: account }, { token: 'gone', title: 'T', body: 'B' })
-    assert.deepEqual(dead, { ok: false, status: 404, errorCode: 'UNREGISTERED', deadToken: true })
+    assert.deepEqual(dead, { ok: false, status: 404, errorCode: 'UNREGISTERED', deadToken: true, attempts: 1 })
   })
 })
 

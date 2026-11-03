@@ -110,6 +110,8 @@ export function crossingFilter(readings: Array<{ stationId: number; aqi: number 
 export async function crossingSubscriptions(
   env: DirectusConfig,
   readings: Array<{ stationId: number; aqi: number }>,
+  /** Counts the requests made, for the run's subrequest budget. */
+  counter: { requests: number } = { requests: 0 },
 ): Promise<Subscription[]> {
   const all: Subscription[] = []
   for (let i = 0; i < readings.length; i += STATIONS_PER_REQUEST) {
@@ -122,6 +124,7 @@ export async function crossingSubscriptions(
         limit: String(PAGE_SIZE),
         page: String(page),
       })
+      counter.requests++
       const { data } = await request<{ data: Subscription[] }>(env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
       // A device the token can't read comes back as null; nothing to send to.
       for (const s of data) {

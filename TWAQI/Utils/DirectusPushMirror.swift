@@ -44,6 +44,9 @@ final class DirectusPushMirror {
         static let fcmToken = "directusPushFcmToken"
         /// `PushDevicePayload.profile` as last written: language and Pro.
         static let profile = "directusPushDeviceProfile"
+        /// The user changed do-not-disturb on this install: a restore never
+        /// overwrites it with the window Directus holds.
+        static let dndEdited = "directusPushDndEditedLocally"
         static let lastDeviceSyncAt = "directusPushLastDeviceSyncAt"
         /// Station id → alerts as the user set them (or as restored).
         static let wanted = "directusPushWantedAlerts"
@@ -131,15 +134,14 @@ final class DirectusPushMirror {
         }
     }
 
-    /// Help's do-not-disturb, already saved to `SettingsStore`. Only updates a
-    /// device that already has a row.
+    /// Help's do-not-disturb, already saved to `SettingsStore`. Marked as a
+    /// local edit, so a restore still in flight (reinstall) can't overwrite
+    /// it, and synced whenever there is a row: the window is part of the
+    /// row's profile, so the write is retried until it lands, even across
+    /// launches. With no row and no alert on, the flush writes nothing.
     func dndChanged() {
-        later("dnd") { mirror in
-            guard mirror.defaults.object(forKey: Keys.deviceId) != nil else { return }
-            // The window is part of the row's profile, so this write is
-            // retried until it lands, even across launches.
-            mirror.flush()
-        }
+        defaults.set(true, forKey: Keys.dndEdited)
+        later("dnd") { $0.flush() }
     }
 
     /// The user just answered the notification prompt (or changed it): the
@@ -168,8 +170,13 @@ final class DirectusPushMirror {
             .merging(synced) { current, _ in current }
             .mapValues { _ in StationAlerts.off }
         save(wanted, Keys.wanted)
-        // Kept until done, so a cancel made offline still happens later.
-        defaults.set(defaults.object(forKey: Keys.deviceId) != nil, forKey: Keys.archiveAll)
+        // Kept until done, so a cancel made offline still happens later, and
+        // one made while a restore is pending (reinstall, row not known yet)
+        // stops the restore bringing the alerts back.
+        defaults.set(
+            Self.keepsCancelAll(hasDevice: defaults.object(forKey: Keys.deviceId) != nil, restored: defaults.bool(forKey: Keys.restored)),
+            forKey: Keys.archiveAll
+        )
         flush()
     }
 
@@ -283,13 +290,17 @@ final class DirectusPushMirror {
 
         let restored = try await PushService.restore(deviceToken: token, config: config)
         guard let stored = restored.device else {
+            // Nothing in Directus for this phone: a pending cancel has
+            // nothing to archive.
+            defaults.set(false, forKey: Keys.archiveAll)
             defaults.set(true, forKey: Keys.restored)
             return
         }
 
         let remote = StationAlerts.byStation(restored.subscriptions)
+        let cancelPending = defaults.bool(forKey: Keys.archiveAll)
 
-        if isFreshInstall {
+        if Self.restoresDnd(isFreshInstall: isFreshInstall, editedLocally: defaults.bool(forKey: Keys.dndEdited)) {
             if let enabled = stored.dndEnabled {
                 settings.isDndEnabled = enabled
             }
@@ -301,10 +312,10 @@ final class DirectusPushMirror {
             }
         }
 
-        var wanted = load([String: StationAlerts].self, Keys.wanted) ?? [:]
+        let local = load([String: StationAlerts].self, Keys.wanted) ?? [:]
+        let wanted = Self.restoredWanted(local: local, remote: remote, cancelPending: cancelPending)
         var restoredStations: [Int: StationAlerts] = [:]
-        for (key, alerts) in remote where wanted[key] == nil {
-            wanted[key] = alerts
+        for (key, alerts) in wanted where local[key] == nil {
             restoredStations[Int(key) ?? -1] = alerts
         }
         save(wanted, Keys.wanted)
@@ -382,6 +393,32 @@ final class DirectusPushMirror {
         defaults.set(payload.profile, forKey: Keys.profile)
         defaults.set(Date(), forKey: Keys.lastDeviceSyncAt)
         return id
+    }
+
+    // MARK: - Restore decisions (pure, for tests)
+
+    /// Whether "cancel all" must be remembered until it can be done: with a
+    /// row to archive, or while a restore may still find one.
+    nonisolated static func keepsCancelAll(hasDevice: Bool, restored: Bool) -> Bool {
+        hasDevice || !restored
+    }
+
+    /// A restore takes the Directus DND window only on a fresh install, and
+    /// never over a change the user made here meanwhile.
+    nonisolated static func restoresDnd(isFreshInstall: Bool, editedLocally: Bool) -> Bool {
+        isFreshInstall && !editedLocally
+    }
+
+    /// What a restore leaves as the local alerts: Directus's, under any not
+    /// yet written here, unless "cancel all" was tapped meanwhile, when none
+    /// come back (the archive then runs against the adopted row).
+    nonisolated static func restoredWanted(
+        local: [String: StationAlerts],
+        remote: [String: StationAlerts],
+        cancelPending: Bool
+    ) -> [String: StationAlerts] {
+        guard !cancelPending else { return local }
+        return local.merging(remote) { mine, _ in mine }
     }
 
     // MARK: - Recovering from the push API

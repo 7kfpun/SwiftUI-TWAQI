@@ -339,6 +339,32 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(OneSignalTags.isStationTag("isDndEnabled"))
     }
 
+    // MARK: - Restore interleavings (Copilot review)
+
+    func testDndEditedDuringRestoreIsKept() {
+        // Reinstall: restore takes the Directus window...
+        XCTAssertTrue(DirectusPushMirror.restoresDnd(isFreshInstall: true, editedLocally: false))
+        // ...but not over a change made in Help while it was in flight.
+        XCTAssertFalse(DirectusPushMirror.restoresDnd(isFreshInstall: true, editedLocally: true))
+        XCTAssertFalse(DirectusPushMirror.restoresDnd(isFreshInstall: false, editedLocally: false))
+    }
+
+    func testCancelAllDuringRestoreKeepsAlertsOff() {
+        // Cancel tapped before the row is known: kept while a restore is pending.
+        XCTAssertTrue(DirectusPushMirror.keepsCancelAll(hasDevice: false, restored: false))
+        XCTAssertTrue(DirectusPushMirror.keepsCancelAll(hasDevice: true, restored: true))
+        XCTAssertFalse(DirectusPushMirror.keepsCancelAll(hasDevice: false, restored: true))
+
+        let remote = ["105": StationAlerts(above: 120), "126": StationAlerts(below: 30)]
+        // With the cancel pending, none of the remote alerts come back.
+        XCTAssertEqual(DirectusPushMirror.restoredWanted(local: ["105": .off], remote: remote, cancelPending: true), ["105": .off])
+        // Without it, remote alerts fill in under local ones.
+        XCTAssertEqual(
+            DirectusPushMirror.restoredWanted(local: ["105": StationAlerts(above: 150)], remote: remote, cancelPending: false),
+            ["105": StationAlerts(above: 150), "126": StationAlerts(below: 30)]
+        )
+    }
+
     func testRecoveryFromThePushApi() {
         // Another install holds this id: new Keychain identity, new row.
         XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 403)), .newIdentity)

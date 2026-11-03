@@ -39,6 +39,9 @@ export interface FcmResult {
   errorCode?: string
   /** The token will never work again: archive the device. */
   deadToken: boolean
+  /** FCM requests this send made (1, or 2 with a retry), for the run's
+   * subrequest budget. */
+  attempts?: number
 }
 
 const SCOPE = 'https://www.googleapis.com/auth/firebase.messaging'
@@ -110,9 +113,9 @@ const RETRY_DELAY_MS = 500
 
 export async function send(config: FcmConfig, m: FcmMessage): Promise<FcmResult> {
   const first = await sendOnce(config, m)
-  if (first.ok || !(first.status === 429 || first.status >= 500)) return first
+  if (first.ok || !(first.status === 429 || first.status >= 500)) return { ...first, attempts: 1 }
   await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
-  return sendOnce(config, m)
+  return { ...(await sendOnce(config, m)), attempts: 2 }
 }
 
 async function sendOnce(config: FcmConfig, m: FcmMessage): Promise<FcmResult> {

@@ -30,6 +30,8 @@ export interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
   MAX_DATA_AGE_MINUTES?: string
   /** Sends per run; the rest wait for the next run. */
   MAX_SENDS_PER_RUN?: string
+  /** Must match `limits.subrequests` in wrangler.jsonc. */
+  SUBREQUEST_LIMIT?: string
 }
 
 interface RunOptions {
@@ -54,6 +56,8 @@ export interface RunResult {
   logged: number
   /** Sends recorded in Analytics Engine (every one). */
   events: number
+  /** Outgoing requests this run made (or reserved), against SUBREQUEST_LIMIT. */
+  requests: number
   dryRun: boolean
   decisions?: { subscription: number; device: number; station: number | null; aqi: number; outcome: string }[]
 }
@@ -143,7 +147,8 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
   }
 
   // Directus does the matching: only rows whose zone disagrees with this AQI.
-  const subs = (await crossingSubscriptions(env, [...fresh.values()].map((r) => ({ stationId: r.stationId, aqi: r.aqi })))).filter(
+  const reads = { requests: 0 }
+  const subs = (await crossingSubscriptions(env, [...fresh.values()].map((r) => ({ stationId: r.stationId, aqi: r.aqi })), reads)).filter(
     (s) => typeof s.station_id === 'number' && fresh.has(s.station_id),
   )
 
@@ -155,6 +160,7 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     updated: 0,
     logged: 0,
     events: 0,
+    requests: 0,
     dryRun,
     decisions: dryRun ? [] : undefined,
   }
@@ -196,11 +202,14 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     }
   }
 
+  // Every outgoing request counts against the Worker's per-run limit: the
+  // AQI call, the reads, and (reserved) an OAuth exchange.
+  result.requests = 1 + reads.requests + 2
   if (dryRun) return result
 
   // Re-arms and skipped crossings first, so they're saved even if sending
   // runs out of budget later.
-  await saveUpdates()
+  result.requests += await saveUpdates()
 
   // A run sends at most this many; the rest stay unsent (in_zone false) and
   // go out on the next run. Keeps every run inside the Worker's subrequest
@@ -212,20 +221,35 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     console.warn('sends deferred to the next run', deferred.length)
   }
 
+  const limit = Number(env.SUBREQUEST_LIMIT ?? 60000)
   const dead = new Set<number>()
   for (let i = 0; i < toSend.length; i += SAVE_EVERY) {
     const logs: PushLog[] = []
     const chunk = toSend.slice(i, i + SAVE_EVERY)
+    // A chunk starts only if its worst case still fits: every send retried
+    // once, every state-write try, one dead-token write and one log write.
+    // Otherwise the rest wait for the next run, with what was sent saved.
+    const worstCase = chunk.length * 2 + SAVE_ATTEMPTS + 2
+    if (result.requests + worstCase > limit) {
+      const left = toSend.length - i
+      result.counts.deferred = (result.counts.deferred ?? 0) + left
+      console.warn('sends deferred to the next run (subrequest budget)', left)
+      break
+    }
     await pool(chunk, SEND_CONCURRENCY, async ({ sub, reading }) => {
       if (dead.has(sub.device.id)) return
-      logs.push(await sendOne(sub, reading))
+      const { log, attempts } = await sendOne(sub, reading)
+      result.requests += attempts
+      logs.push(log)
     })
     // Saved per chunk: what was sent is marked sent before the next chunk.
     const newlyDead = [...dead].filter((id) => !result.archivedDevices.includes(id))
+    if (newlyDead.length) result.requests++
     await archiveDevices(env, newlyDead)
     result.archivedDevices.push(...newlyDead)
-    await saveUpdates()
+    result.requests += await saveUpdates()
     const written = await logQuietly(env, logs)
+    if (written.rows) result.requests++
     result.logged += written.rows
     result.events += written.events
   }
@@ -234,10 +258,14 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
   /** Marks what was sent. Retried with backoff, and cleared only once it
    * lands; if Directus still refuses, the run stops here, so no further
    * alerts go out unmarked (those already sent would go again next run). */
-  async function saveUpdates() {
+  /** Returns the requests it made, for the budget. */
+  async function saveUpdates(): Promise<number> {
     const changed = [...updates.values()].filter((u) => Object.keys(u).length > 1)
+    const perTry = Math.ceil(changed.length / 100)
+    let made = 0
     for (let attempt = 1; ; attempt++) {
       try {
+        made += perTry
         await updateSubscriptions(env, changed)
         break
       } catch (e) {
@@ -248,9 +276,10 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     }
     updates.clear()
     result.updated += changed.length
+    return made
   }
 
-  async function sendOne(sub: Subscription, reading: Reading): Promise<PushLog> {
+  async function sendOne(sub: Subscription, reading: Reading): Promise<{ log: PushLog; attempts: number }> {
     const token = sub.device.fcm_token as string
     const name = stationName(sub.device.locale, reading, sub.station_id)
     const log: PushLog = {
@@ -263,6 +292,7 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
       fcm_message_id: null,
       error_code: null,
     }
+    let attempts = 1
     try {
       const res = await send(env, {
         token,
@@ -272,6 +302,7 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
         threadId: `station-${sub.station_id}`,
         expiresInSeconds: ALERT_EXPIRY_SECONDS,
       })
+      attempts = res.attempts ?? 1
       if (res.ok) {
         count('sent')
         log.status = 'sent'
@@ -293,7 +324,7 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
       log.error_code = 'EXCEPTION'
       console.warn('fcm error', sub.id, String(e))
     }
-    return log
+    return { log, attempts }
   }
 }
 
