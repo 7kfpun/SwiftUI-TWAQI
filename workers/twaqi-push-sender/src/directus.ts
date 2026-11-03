@@ -63,7 +63,7 @@ const LIVE: Filter[] = [
 
 /** The Directus filter for the subscriptions whose zone changes at these
  * readings, and only those: at AQI `a`, an "above" one is in its zone when
- * threshold < a, a "below" one when threshold > a (strict, as the app says).
+ * threshold ≤ a, a "below" one when threshold ≥ a (inclusive, see isInZone).
  * A row comes back when that disagrees with its stored `in_zone`, so a run
  * reads only alerts to send and alerts to re-arm, never the rest. */
 export function crossingFilter(readings: Array<{ stationId: number; aqi: number }>): Filter {
@@ -78,8 +78,8 @@ export function crossingFilter(readings: Array<{ stationId: number; aqi: number 
               { direction: { _eq: 'above' } },
               {
                 _or: [
-                  { _and: [{ threshold: { _lt: aqiOf(r) } }, notInZone] },
-                  { _and: [{ threshold: { _gte: aqiOf(r) } }, { in_zone: { _eq: true } }] },
+                  { _and: [{ threshold: { _lte: aqiOf(r) } }, notInZone] },
+                  { _and: [{ threshold: { _gt: aqiOf(r) } }, { in_zone: { _eq: true } }] },
                 ],
               },
             ],
@@ -89,8 +89,8 @@ export function crossingFilter(readings: Array<{ stationId: number; aqi: number 
               { direction: { _eq: 'below' } },
               {
                 _or: [
-                  { _and: [{ threshold: { _gt: aqiOf(r) } }, notInZone] },
-                  { _and: [{ threshold: { _lte: aqiOf(r) } }, { in_zone: { _eq: true } }] },
+                  { _and: [{ threshold: { _gte: aqiOf(r) } }, notInZone] },
+                  { _and: [{ threshold: { _lt: aqiOf(r) } }, { in_zone: { _eq: true } }] },
                 ],
               },
             ],
@@ -195,7 +195,8 @@ export class DirectusError extends Error {
   }
 }
 
-async function request<T = unknown>(env: DirectusConfig, method: string, path: string, body?: unknown): Promise<T> {
+/** Directus REST with the push worker's token. `path` starts with `/`. */
+export async function request<T = unknown>(env: DirectusConfig, method: string, path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${env.DIRECTUS_URL.replace(/\/+$/, '')}${path}`, {
     method,
     headers: {

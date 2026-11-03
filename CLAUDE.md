@@ -13,6 +13,8 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - **Push is Firebase Cloud Messaging** (FOX-13). Alerts and do-not-disturb live in
   Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`), written by
   `DirectusPushMirror`: saved on the device first, synced in the background and retried.
+  The app holds **no Directus token for push**: it calls the Worker's `/app/v1` API, signed
+  with its Keychain device id and secret, and only the Worker writes Directus (FOX-37 M5).
   The device row carries the APNs and FCM tokens; `workers/twaqi-push-sender` reads it and
   sends through FCM, logging to `twaqi_push_logs` (token suffix only). No OneSignal in the
   app; the old OneSignal tracker in `ai-playground` still serves pre-FOX-13 builds.

@@ -3,10 +3,11 @@
 
 export type Direction = 'above' | 'below'
 
-/** Whether `value` is past the threshold the user set. "Above 100" means
- * more than 100, "below 30" less than 30; equal is outside both. */
+/** Whether `value` has reached the threshold the user set: "above 100"
+ * alerts at AQI 100 or more, "below 30" at 30 or less (FOX-13, as the
+ * OneSignal tracker matched: pollution ≥ threshold, cleanliness ≤ threshold). */
 export function isInZone(direction: Direction, threshold: number, value: number): boolean {
-  return direction === 'above' ? value > threshold : value < threshold
+  return direction === 'above' ? value >= threshold : value <= threshold
 }
 
 /** `"HH:mm"` or `"HH:mm:ss"` → minutes after midnight, or null if unreadable. */

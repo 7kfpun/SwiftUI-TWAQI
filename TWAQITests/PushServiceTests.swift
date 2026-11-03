@@ -115,11 +115,15 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(body.keys.contains("id"))
     }
 
-    func testSubscriptionChangesUseThreshold() throws {
-        let body = try json(PushService.SubscriptionChanges(siteId: "A12", threshold: 30, enabled: true))
-        XCTAssertEqual(body["threshold"] as? Int, 30)
+    func testStationChangeSendsOffAsNull() throws {
+        let body = try json(PushService.StationChange(siteId: "A12", above: 120, below: nil))
+        XCTAssertEqual(body["above"] as? Int, 120)
         XCTAssertEqual(body["site_id"] as? String, "A12")
-        XCTAssertNil(body["therhold"])
+        // Off is an explicit null, not a missing key.
+        XCTAssertTrue(body.keys.contains("below"))
+        XCTAssertTrue(body["below"] is NSNull)
+        // Unknown cam: left out.
+        XCTAssertFalse(try json(PushService.StationChange(siteId: nil, above: nil, below: 30)).keys.contains("site_id"))
     }
 
     func testSubscriptionDecodesNumericColumns() throws {
@@ -130,12 +134,13 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(item.direction, .below)
     }
 
-    func testArchiveIsSoft() throws {
-        let body = try json(PushService.BatchUpdate(keys: [1, 2], data: PushService.ArchiveChanges()))
-        XCTAssertEqual(body["keys"] as? [Int], [1, 2])
-        let data = try XCTUnwrap(body["data"] as? [String: Any])
-        XCTAssertEqual(data["archived"] as? Bool, true)
-        XCTAssertEqual(data["enabled"] as? Bool, false)
+    func testRestoreDecodesDeviceAndAlerts() throws {
+        let data = Data(#"{"device":{"id":5,"dnd_enabled":true,"dnd_start":"22:00","dnd_end":"07:00"},"subscriptions":[{"id":7,"station_id":"105","site_id":"015","metric":"aqi","direction":"above","threshold":120,"enabled":true}]}"#.utf8)
+        let restored = try JSONDecoder().decode(PushService.Restored.self, from: data)
+        XCTAssertEqual(restored.device?.id, 5)
+        XCTAssertEqual(StationAlerts.byStation(restored.subscriptions), ["105": StationAlerts(above: 120)])
+        let none = try JSONDecoder().decode(PushService.Restored.self, from: Data(#"{"device":null,"subscriptions":[]}"#.utf8))
+        XCTAssertNil(none.device)
     }
 
     // MARK: - Device encoding
@@ -195,7 +200,7 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(payload(isPro: false, language: .system).locale, Bundle.main.preferredLocalizations.first)
 
         // Either one changing changes the profile the mirror compares.
-        XCTAssertEqual(payload(isPro: true, language: .traditionalChinese).profile, "zh-Hant|true")
+        XCTAssertTrue(payload(isPro: true, language: .traditionalChinese).profile.hasPrefix("zh-Hant|true|"))
         XCTAssertNotEqual(payload(isPro: true, language: .english).profile, payload(isPro: false, language: .english).profile)
     }
 
@@ -208,47 +213,6 @@ final class PushServiceTests: XCTestCase {
         // Left out, not cleared: a row keeps its last FCM token until a new one.
         XCTAssertFalse(body.keys.contains("fcm_token"))
         XCTAssertFalse(body.keys.contains("external_id"))
-    }
-
-    // MARK: - Reconcile plan
-
-    func testPlanCreatesRowsForNewAlerts() {
-        let plan = PushService.plan(existing: [], stationId: "5", siteId: "A1", alerts: StationAlerts(above: 120, below: 30))
-        XCTAssertEqual(plan.save, [
-            PushSubscription(stationId: "5", siteId: "A1", direction: .above, threshold: 120, enabled: true),
-            PushSubscription(stationId: "5", siteId: "A1", direction: .below, threshold: 30, enabled: true),
-        ])
-        XCTAssertEqual(plan.archive, [])
-    }
-
-    func testPlanUpdatesChangedThresholdAndArchivesSwitchedOff() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 100, enabled: true),
-            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: StationAlerts(above: 150))
-        XCTAssertEqual(plan.save, [PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 150, enabled: true)])
-        XCTAssertEqual(plan.archive, [2])
-    }
-
-    func testPlanLeavesMatchingRowsAndArchivesDuplicates() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
-            PushSubscription(id: 4, stationId: "5", siteId: nil, direction: .above, threshold: 90, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: StationAlerts(above: 120))
-        XCTAssertEqual(plan.save, [])
-        XCTAssertEqual(plan.archive, [4])
-    }
-
-    func testPlanArchivesEverythingWhenOff() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
-            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: .off)
-        XCTAssertEqual(plan.save, [])
-        XCTAssertEqual(plan.archive, [1, 2])
     }
 
     // MARK: - Device sync gate
@@ -265,9 +229,9 @@ final class PushServiceTests: XCTestCase {
     func testNewFcmTokenAloneForcesUpsert() {
         let now = Date()
         let recent = now.addingTimeInterval(-60)
-        func current(force: Bool = false, token: String = "apns", fcm: String? = "fcm-1", lastSync: Date? = recent) -> Bool {
+        func current(token: String = "apns", fcm: String? = "fcm-1", lastSync: Date? = recent) -> Bool {
             DirectusPushMirror.isDeviceCurrent(
-                force: force, syncedToken: "apns", token: token,
+                syncedToken: "apns", token: token,
                 syncedFcmToken: "fcm-1", fcmToken: fcm, lastSync: lastSync, now: now
             )
         }
@@ -277,7 +241,6 @@ final class PushServiceTests: XCTestCase {
         // Messaging hasn't issued a token yet: not a change.
         XCTAssertTrue(current(fcm: nil))
         XCTAssertFalse(current(token: "apns-new"))
-        XCTAssertFalse(current(force: true))
         XCTAssertFalse(current(lastSync: nil))
         XCTAssertFalse(current(lastSync: now.addingTimeInterval(-DirectusPushMirror.deviceRefreshInterval - 1)))
     }
@@ -286,7 +249,7 @@ final class PushServiceTests: XCTestCase {
         let now = Date()
         func current(synced: String?, profile: String?) -> Bool {
             DirectusPushMirror.isDeviceCurrent(
-                force: false, syncedToken: "apns", token: "apns",
+                syncedToken: "apns", token: "apns",
                 syncedFcmToken: "fcm", fcmToken: "fcm", lastSync: now.addingTimeInterval(-60),
                 syncedProfile: synced, profile: profile, now: now
             )
@@ -299,22 +262,48 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(current(synced: nil, profile: "en|false"))
     }
 
-    // MARK: - Config
-
-    func testConfigPrefersPushTokenThenFeedbackToken() {
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: "push", feedbackToken: "fb")?.token, "push")
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: " ", feedbackToken: "fb")?.token, "fb")
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: nil, feedbackToken: "fb")?.token, "fb")
-        XCTAssertNil(PushService.Config.make(baseURL: "https://cms.example", pushToken: "", feedbackToken: ""))
-        XCTAssertNil(PushService.Config.make(baseURL: "", pushToken: "push", feedbackToken: nil))
+    func testDndChangeStaysPendingUntilWritten() {
+        // The DND window is in the profile, which is saved only after a write
+        // succeeds: a failed write leaves the old profile, so the next flush,
+        // even after a relaunch, still sees a change (review: no lost DND).
+        func payload(dnd: Bool, start: Date) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: dnd,
+                dndStart: start, dndEnd: date(7, 0, in: taipei), environment: .production, calendar: taipei
+            )
+        }
+        let before = payload(dnd: false, start: date(22, 0, in: taipei)).profile
+        XCTAssertNotEqual(payload(dnd: true, start: date(22, 0, in: taipei)).profile, before)
+        XCTAssertNotEqual(payload(dnd: false, start: date(23, 30, in: taipei)).profile, before)
+        XCTAssertFalse(DirectusPushMirror.isDeviceCurrent(
+            syncedToken: "apns", token: "apns", syncedFcmToken: "f", fcmToken: "f",
+            lastSync: Date(), syncedProfile: before, profile: payload(dnd: true, start: date(22, 0, in: taipei)).profile
+        ))
     }
 
-    func testRequestCarriesBearerToken() {
-        let config = PushService.Config(baseURL: URL(string: "https://cms.example")!, token: "secret")
-        let request = PushService.makeRequest(config: config, method: "GET", path: PushService.subscriptionsPath, query: [("filter[archived][_eq]", "false")])
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
-        XCTAssertEqual(request.url?.path, "/items/twaqi_push_subscriptions")
-        XCTAssertEqual(request.url?.query?.removingPercentEncoding, "filter[archived][_eq]=false")
+    // MARK: - Config
+
+    func testConfigNeedsAnHttpsPushApi() {
+        XCTAssertEqual(PushService.Config.make(baseURL: "https://push.example", deviceId: "d", secret: "s")?.baseURL.host, "push.example")
+        XCTAssertNil(PushService.Config.make(baseURL: "", deviceId: "d", secret: "s"))
+        XCTAssertNil(PushService.Config.make(baseURL: nil, deviceId: "d", secret: "s"))
+        XCTAssertNil(PushService.Config.make(baseURL: "http://push.example", deviceId: "d", secret: "s"))
+    }
+
+    func testRequestSignsWithTheDeviceNotADirectusToken() {
+        let config = PushService.Config(baseURL: URL(string: "https://push.example")!, deviceId: "6f1c2e7a-0000-4000-8000-000000000001", secret: "s3cret")
+        let request = PushService.makeRequest(config: config, method: "PUT", path: "app/v1/stations/105", body: PushService.StationChange(siteId: nil, above: 100, below: nil))
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Device-Id"), "6f1c2e7a-0000-4000-8000-000000000001")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer s3cret")
+        XCTAssertEqual(request.url?.absoluteString, "https://push.example/app/v1/stations/105")
+        XCTAssertEqual(request.httpMethod, "PUT")
+        let restore = PushService.makeRequest(config: config, method: "GET", path: "app/v1/device", query: [("device_token", "abcd")])
+        XCTAssertEqual(restore.url?.query, "device_token=abcd")
+    }
+
+    func testDeviceSecretIsBase64url() {
+        XCTAssertEqual(PushDeviceIdentity.base64url(Data([0xfb, 0xff, 0xfe])), "-__-")
+        XCTAssertEqual(PushDeviceIdentity.base64url(Data(repeating: 0, count: 32)).count, 43)
     }
 }
 

@@ -28,6 +28,10 @@
     // plan's ~1,000 subrequests per run, with room for reads and writes.
     "MAX_SENDS_PER_RUN": "800"
   },
+  // Per-IP limit on the app's /app/v1 routes (Workers Rate Limiting).
+  "ratelimits": [
+    { "name": "APP_LIMITER", "namespace_id": "1301", "simple": { "limit": 60, "period": 60 } }
+  ],
   "secrets": {
     "required": [
       "FCM_SERVICE_ACCOUNT",

@@ -58,7 +58,6 @@ final class DirectusPushMirror {
 
     private var isFlushing = false
     private var flushAgain = false
-    private var forceDevice = false
     private var timers: [String: Task<Void, Never>] = [:]
 
     init(defaults: UserDefaults = .standard) {
@@ -134,7 +133,8 @@ final class DirectusPushMirror {
     func dndChanged() {
         later("dnd") { mirror in
             guard mirror.defaults.object(forKey: Keys.deviceId) != nil else { return }
-            mirror.forceDevice = true
+            // The window is part of the row's profile, so this write is
+            // retried until it lands, even across launches.
             mirror.flush()
         }
     }
@@ -201,10 +201,8 @@ final class DirectusPushMirror {
         }
 
         if defaults.bool(forKey: Keys.archiveAll), defaults.object(forKey: Keys.deviceId) != nil {
-            let device = defaults.integer(forKey: Keys.deviceId)
             do {
-                let ids = try await PushService.subscriptions(device: device, config: config).compactMap(\.id)
-                try await PushService.archive(subscriptions: ids, config: config)
+                try await PushService.archiveAll(config: config)
                 defaults.set(false, forKey: Keys.archiveAll)
                 // Everything is archived now; only changes made since remain.
                 let wanted = (load([String: StationAlerts].self, Keys.wanted) ?? [:]).filter { !$0.value.isOff }
@@ -231,9 +229,8 @@ final class DirectusPushMirror {
         let pending = wanted.filter { synced[$0.key] != $0.value }
         guard Self.needsDevice(hasDevice: hasDevice, pending: pending) else { return }
 
-        let device: Int
         do {
-            device = try await deviceId(token: token, fcmToken: fcmToken, config: config)
+            _ = try await deviceId(token: token, fcmToken: fcmToken, config: config)
         } catch {
             print("Directus push: device sync failed: \(error)")
             return
@@ -244,7 +241,7 @@ final class DirectusPushMirror {
         let siteIds = load([String: String].self, Keys.siteIds) ?? [:]
         for (key, alerts) in wanted where refreshed[key] != alerts {
             do {
-                try await PushService.reconcile(stationId: key, siteId: siteIds[key], alerts: alerts, device: device, config: config)
+                try await PushService.reconcile(stationId: key, siteId: siteIds[key], alerts: alerts, config: config)
                 var done = self.synced
                 var latest = load([String: StationAlerts].self, Keys.wanted) ?? [:]
                 done[key] = alerts
@@ -265,19 +262,15 @@ final class DirectusPushMirror {
     /// takes its alerts, and on a fresh install its do-not-disturb window.
     /// Local changes not yet written win over what's restored.
     private func restore(token: String, config: PushService.Config) async throws {
-        guard let stableId = PushDeviceIdentity.id() else { throw PushError.noDeviceId }
         let isFreshInstall = defaults.object(forKey: Keys.deviceId) == nil
 
-        var stored = try await PushService.storedDevice(field: PushDevicePayload.deviceIdField, value: stableId, config: config)
-        if stored == nil {
-            stored = try await PushService.storedDevice(field: "device_token", value: token, config: config)
-        }
-        guard let stored = stored else {
+        let restored = try await PushService.restore(deviceToken: token, config: config)
+        guard let stored = restored.device else {
             defaults.set(true, forKey: Keys.restored)
             return
         }
 
-        let remote = StationAlerts.byStation(try await PushService.subscriptions(device: stored.id, config: config))
+        let remote = StationAlerts.byStation(restored.subscriptions)
 
         if isFreshInstall {
             if let enabled = stored.dndEnabled {
@@ -346,7 +339,6 @@ final class DirectusPushMirror {
         )
         if let knownId = knownId,
            Self.isDeviceCurrent(
-               force: forceDevice,
                syncedToken: defaults.string(forKey: Keys.deviceToken),
                token: token,
                syncedFcmToken: defaults.string(forKey: Keys.fcmToken),
@@ -358,7 +350,6 @@ final class DirectusPushMirror {
             return knownId
         }
 
-        forceDevice = false
         let id = try await PushService.upsertDevice(payload, config: config)
         if id != knownId {
             save([String: StationAlerts](), Keys.synced)
@@ -387,7 +378,6 @@ final class DirectusPushMirror {
     /// new language or Pro status (`profile`) is written too; a row written
     /// before the profile was tracked (no `syncedProfile`) is rewritten once.
     nonisolated static func isDeviceCurrent(
-        force: Bool,
         syncedToken: String?,
         token: String,
         syncedFcmToken: String?,
@@ -397,7 +387,7 @@ final class DirectusPushMirror {
         profile: String? = nil,
         now: Date = Date()
     ) -> Bool {
-        guard !force, syncedToken == token, let lastSync = lastSync else { return false }
+        guard syncedToken == token, let lastSync = lastSync else { return false }
         if let fcmToken = fcmToken, fcmToken != syncedFcmToken { return false }
         if let profile = profile, profile != syncedProfile { return false }
         return now.timeIntervalSince(lastSync) < deviceRefreshInterval
@@ -430,13 +420,37 @@ final class DirectusPushMirror {
 enum PushDeviceIdentity {
     static let service = "com.kfpun.twaqi.push"
     static let account = "directusDeviceId"
+    static let secretAccount = "pushDeviceSecret"
 
     /// The stored id, made on first use. Nil only if the Keychain refuses.
     static func id() -> String? {
-        if let existing = read() {
+        value(account: account) { UUID().uuidString.lowercased() }
+    }
+
+    /// This install's secret for the push API (FOX-37 M5): 32 random bytes,
+    /// base64url. Made on first use next to the id, with the same "this
+    /// device only" access, so a reinstall keeps both and a backup restored
+    /// to another phone carries neither. The Worker stores only its hash.
+    static func secret() -> String? {
+        value(account: secretAccount) {
+            var bytes = [UInt8](repeating: 0, count: 32)
+            guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { return nil }
+            return base64url(Data(bytes))
+        }
+    }
+
+    static func base64url(_ data: Data) -> String {
+        data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    private static func value(account: String, make: () -> String?) -> String? {
+        if let existing = read(account: account) {
             return existing
         }
-        let made = UUID().uuidString.lowercased()
+        guard let made = make() else { return nil }
         let add: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -448,14 +462,14 @@ enum PushDeviceIdentity {
         case errSecSuccess:
             return made
         case errSecDuplicateItem:
-            return read()
+            return read(account: account)
         case let status:
-            print("Directus push: Keychain refused the device id (\(status))")
+            print("Push: Keychain refused \(account) (\(status))")
             return nil
         }
     }
 
-    private static func read() -> String? {
+    private static func read(account: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -466,11 +480,11 @@ enum PushDeviceIdentity {
         var item: CFTypeRef?
         guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
               let data = item as? Data,
-              let id = String(data: data, encoding: .utf8),
-              !id.isEmpty
+              let value = String(data: data, encoding: .utf8),
+              !value.isEmpty
         else {
             return nil
         }
-        return id
+        return value
     }
 }

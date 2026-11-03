@@ -40,10 +40,10 @@ InAppPurchaseProductId = test
 DirectusUrl = https:\/\/cms.wahthefox.com
 DirectusFeedbackToken =
 
-// Push settings dual-write (Directus twaqi_push_devices / twaqi_push_subscriptions):
-// a token that may create, read and update those collections. Optional: when
-// empty the app uses DirectusFeedbackToken, whose role already has that access.
-DirectusPushToken =
+// Push: the twaqi-push-sender Worker's app API (FOX-13 / FOX-37 M5). The app
+// holds no Directus token for the push collections; each install signs its
+// requests with a Keychain secret. Not a secret itself.
+PushApiUrl = https:\/\/twaqi-push-sender.710kfpun.workers.dev
 
 // Business partner form (Directus twaqi_cooperate, create only; the app
 // sends archived=false and never deletes). Optional: when empty the app uses

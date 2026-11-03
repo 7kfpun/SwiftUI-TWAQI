@@ -4,7 +4,7 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
 
 - **Cron** `20 */2 * * *` (every 2 hours, at :20 past even hours, UTC and Taiwan alike):
   1. Read every station's current AQI in one request to the app's own API (`AQI_API_BASE` + `/v1/current-pollutants?country=twn`): the same numbers the station screen shows.
-  2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold < AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer passes (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
+  2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold ≤ AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer reaches (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
   3. Send an alert to each one that crossed in, and write back only the rows whose state changed.
 - **Only devices with an `fcm_token`**, i.e. builds from FOX-13 on. Older builds have no FCM token and are still served by the OneSignal tracker in `ai-playground`, which this Worker does not touch.
 - **Directus** (`https://cms.wahthefox.com`) is the database. The app creates and updates rows; this Worker reads them and updates state. Nothing is deleted: dead rows get `archived = true`.
@@ -13,7 +13,7 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
 
 | | |
 | --- | --- |
-| Criteria | `direction = above`: AQI **>** threshold. `below`: AQI **<** threshold (the app says 「高於／低於此數值」). Metric is `aqi` only. |
+| Criteria | `direction = above`: AQI **≥** threshold. `below`: AQI **≤** threshold (FOX-13; the OneSignal tracker matched the same way). Metric is `aqi` only. |
 | Edge trigger | Alert when a subscription **enters** the zone (`in_zone` false/null → true), not on every run spent inside it. Leaving the zone sets `in_zone = false` and re-arms it. |
 | Cool-down | A crossing within `COOLDOWN_MINUTES` (180) of `last_fired_at` is recorded but not sent, for values bouncing around the threshold. With runs 2 hours apart, a subscription alerts at most every 4 hours. |
 | Quiet hours | If the device has `dnd_enabled` and the current time in its `timezone` is in `dnd_start`–`dnd_end` (`HH:mm`, may run past midnight, e.g. 23:00–07:00), the crossing is recorded and the alert is **dropped**. No backlog, no digest. |
@@ -31,6 +31,22 @@ The text is written here, in the app's language (`device.locale`, which the app 
 | below | **中山 AQI 24** 空氣品質指標已低於你設定的 30，空氣變好了。 | **Zhongshan: AQI 24** Air quality is now below your alert level of 30. The air has cleared up. |
 
 The FCM `data` carries `station_id`, `site_id`, `subscription_id`, `direction`, `threshold` and `aqi` (strings), for the app to open the station from a tap once it reads them.
+
+## App API (FOX-37 M5)
+
+The app has **no Directus token for the push collections**. It writes its own row and alerts through this Worker, the only holder of a Directus token for them (`src/app-api.ts`):
+
+| Route | |
+| --- | --- |
+| `PUT /app/v1/device` | Upsert this device's row (tokens, `environment`, `app_version`, `locale`, `is_pro`, `last_seen_at`, DND, `timezone`) → `{ id }`. Other fields in the body are dropped. |
+| `GET /app/v1/device?device_token=…` | For a restore: `{ device: { id, dnd_* } \| null, subscriptions: [...] }`. |
+| `PUT /app/v1/stations/:stationId` | `{ site_id, above, below }` (a whole AQI, or `null` for off): brings that station's rows in line, archiving what's off. Refuses (409) a 4th station with alerts. |
+| `POST /app/v1/archive-all` | Help's "cancel all": archives this device's live alerts. |
+
+- **Auth:** every request carries `X-Device-Id` (the Keychain UUID) and `Authorization: Bearer <secret>`, 32 random bytes the app makes once and keeps in the Keychain next to the id ("this device only").
+- **Only a SHA-256 of the secret** is stored, in `twaqi_push_devices.secret_hash`. A row with another hash gets 403.
+- **Rows from before the secret** are claimed by the first request that names their `device_id`. On a restore, a row known only by its APNs token is claimed the same way, unless another install already owns it.
+- **Rate limit:** 60 requests a minute per IP (`APP_LIMITER`).
 
 ## Send log (`twaqi_push_logs`, FOX-66)
 
@@ -64,11 +80,16 @@ curl -X POST "$WORKER/test"    -H "Authorization: Bearer $SYNC_TOKEN" -d '{"devi
 
 ## Directus
 
-`twaqi_push_devices`: `device_id` (Keychain), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
+`twaqi_push_devices`: `device_id` (Keychain), `secret_hash` (SHA-256 of the app's secret, hidden), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
 
 `twaqi_push_subscriptions`: `device` (M2O), `station_id` (AQI API station id, stored as a string), `site_id` (MOENV SiteId, for cams only), `metric` (`aqi`), `direction` (`above`|`below`), `threshold`, `enabled`, `last_value`, `in_zone`, `last_fired_at`, `archived`.
 
-The Worker's token belongs to the **TWAQI Push Worker** user: it reads unarchived rows, updates `last_value` / `in_zone` / `last_fired_at` on subscriptions and `archived` on devices, and creates `twaqi_push_logs` rows.
+The Worker's token belongs to the **TWAQI Push Worker** user. It needs:
+- `twaqi_push_devices`: create, read and update, including `secret_hash`;
+- `twaqi_push_subscriptions`: create, read and update;
+- `twaqi_push_logs`: create.
+
+It never deletes. The app's static token (TWAQI App role) needs **no** access to the push collections: remove the "TWAQI App Push" policy once builds before this one no longer matter, since their dual-write is what still uses it.
 
 ## Secrets
 

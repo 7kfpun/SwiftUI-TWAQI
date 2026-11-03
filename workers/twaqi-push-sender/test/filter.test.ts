@@ -39,23 +39,26 @@ describe('crossingFilter', () => {
 
   it('returns an "above" alert that just crossed in, not one still outside', () => {
     assert.equal(matches(at(121), sub({})), true)
-    assert.equal(matches(at(120), sub({})), false) // equal is outside: strict
+    assert.equal(matches(at(120), sub({})), true) // equal counts: inclusive
+    assert.equal(matches(at(119), sub({})), false)
     assert.equal(matches(at(80), sub({})), false)
     // New rows (in_zone null) count as outside.
     assert.equal(matches(at(121), sub({ in_zone: null })), true)
   })
 
   it('returns an "above" alert to re-arm once AQI falls back, not one still inside', () => {
-    assert.equal(matches(at(120), sub({ in_zone: true })), true)
+    assert.equal(matches(at(119), sub({ in_zone: true })), true)
+    assert.equal(matches(at(120), sub({ in_zone: true })), false)
     assert.equal(matches(at(150), sub({ in_zone: true })), false)
   })
 
   it('mirrors it for "below"', () => {
     const below = (over: Row) => sub({ direction: 'below', threshold: 30, ...over })
     assert.equal(matches(at(29), below({})), true)
-    assert.equal(matches(at(30), below({})), false)
-    assert.equal(matches(at(30), below({ in_zone: true })), true)
-    assert.equal(matches(at(20), below({ in_zone: true })), false)
+    assert.equal(matches(at(30), below({})), true)
+    assert.equal(matches(at(31), below({})), false)
+    assert.equal(matches(at(31), below({ in_zone: true })), true)
+    assert.equal(matches(at(30), below({ in_zone: true })), false)
   })
 
   it('only reads the stations it was given', () => {

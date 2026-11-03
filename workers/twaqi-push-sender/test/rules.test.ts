@@ -21,11 +21,13 @@ const base = {
 }
 
 describe('isInZone', () => {
-  it('is strict on both sides', () => {
+  it('includes the threshold on both sides (FOX-13: ≥ / ≤)', () => {
     assert.equal(isInZone('above', 100, 101), true)
-    assert.equal(isInZone('above', 100, 100), false)
+    assert.equal(isInZone('above', 100, 100), true)
+    assert.equal(isInZone('above', 100, 99), false)
     assert.equal(isInZone('below', 30, 29), true)
-    assert.equal(isInZone('below', 30, 30), false)
+    assert.equal(isInZone('below', 30, 30), true)
+    assert.equal(isInZone('below', 30, 31), false)
   })
 })
 

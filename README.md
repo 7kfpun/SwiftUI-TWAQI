@@ -40,7 +40,7 @@ $ open TWAQI/Config/debug.xcconfig
 # Create a Firebase project and download the config file, GoogleService-Info.plist, to the folder, https://firebase.google.com/docs/ios/setup
 $ cp ~/GoogleService-Info.plist TWAQI/GoogleService-Info.plist
 
-# Directus: set DirectusFeedbackToken (and optionally DirectusPushToken / DirectusCooperateToken) in debug.xcconfig — see the comments in example.xcconfig
+# Directus: set DirectusFeedbackToken (and optionally DirectusCooperateToken) in debug.xcconfig, and PushApiUrl for push — see the comments in example.xcconfig
 
 # Open Xcode and run with Command (⌘)-R
 $ open TWAQI.xcworkspace
@@ -74,6 +74,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 ### Push notifications: Firebase Cloud Messaging (FOX-13)
 
 - **Delivery:** Firebase Messaging (SPM) gets an FCM token from the APNs token; `AppDelegate` hands both to `DirectusPushMirror`. [`workers/twaqi-push-sender`](workers/twaqi-push-sender/README.md) reads every station's AQI every 2 hours, asks Directus for only the subscriptions whose zone that changes (filtered per station), and sends through FCM HTTP v1 when a station crosses a threshold (edge-triggered, quiet hours honoured), logging each send to `twaqi_push_logs` without the full token. It only sends to devices with an FCM token; builds before FOX-13 stay on the OneSignal tracker (`ai-playground`), which is untouched. The Firebase project needs the APNs auth key. The app clears the icon badge when it opens; alerts set none.
+- **Write path (FOX-37 M5):** the app has no Directus token for the push collections. `PushService` calls the `twaqi-push-sender` Worker (`PushApiUrl`: `PUT /app/v1/device`, `GET /app/v1/device`, `PUT /app/v1/stations/:id`, `POST /app/v1/archive-all`), each request signed with the install's Keychain `device_id` and a random secret. The Worker stores only a SHA-256 of the secret and touches only that device's rows; it also enforces the 3-station limit.
 - **Settings:** station alerts and the do-not-disturb window live in Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`). Changes are saved on the device first and synced in the background, retried on the next change, launch, foreground or token change. Switching an alert off archives its row; nothing is deleted. A reinstall restores alerts and do-not-disturb from the device's row (Keychain device id).
 - **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`). Alerts can be on for at most 3 stations (`FavouriteAlerts.maxAlertedStations`); the station screen locks its switches once 3 others have them.
 

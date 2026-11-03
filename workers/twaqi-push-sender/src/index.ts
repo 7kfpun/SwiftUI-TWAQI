@@ -4,6 +4,7 @@
 // devices with an FCM token are sent to; older builds stay on OneSignal,
 // whose sender is untouched. See README.md for the rules and secrets.
 import { allReadings, type AqiConfig, type Reading } from './aqi.ts'
+import { handleApp, type AppApiEnv } from './app-api.ts'
 import {
   archiveDevices,
   crossingSubscriptions,
@@ -20,7 +21,7 @@ import { isConfigured as fcmConfigured, send, type FcmConfig } from './fcm.ts'
 import { alertText, stationName, testText } from './message.ts'
 import { decide, isQuiet, publishedAt, type Outcome } from './rules.ts'
 
-interface Env extends FcmConfig, DirectusConfig, AqiConfig {
+interface Env extends FcmConfig, DirectusConfig, AqiConfig, AppApiEnv {
   /** Bearer token for the manual POST routes, shared with twaqi-workers. */
   SYNC_TOKEN: string
   COOLDOWN_MINUTES?: string
@@ -73,6 +74,10 @@ export default {
 
   async fetch(request, env) {
     const url = new URL(request.url)
+
+    // The app's own push API, authenticated per device (app-api.ts).
+    const app = await handleApp(request, env)
+    if (app) return app
 
     if (url.pathname === '/' && (request.method === 'GET' || request.method === 'HEAD')) {
       return json({ ok: true, service: 'twaqi-push-sender', fcmConfigured: fcmConfigured(env) })
