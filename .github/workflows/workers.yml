@@ -201,6 +201,7 @@ jobs:
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
           DIRECTUS_PUSH_TOKEN: ${{ secrets.DIRECTUS_PUSH_TOKEN }}
           AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
+          OPENROUTER_FORECAST_API_KEY: ${{ secrets.OPENROUTER_FORECAST_API_KEY }}
         run: |
           set -euo pipefail
           # Copy only the names this Worker lists under secrets.required, and
