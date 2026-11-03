@@ -24,6 +24,11 @@ struct AqiForecast: Codable, Equatable {
     let content: String?
     /// Taiwan local time as MOENV publishes it, e.g. `"2026-10-31 16:30:00"`.
     let publishTime: String?
+    /// The Worker's translations of `content` by language code, plus the
+    /// source they were made from under `"zh-Hant"`:
+    /// `{ "zh-Hant": "今日…", "en": "Today…" }`. Nil on rows not translated
+    /// yet, and before the field exists in Directus.
+    var contentI18n: [String: String]? = nil
 
     enum CodingKeys: String, CodingKey {
         case area, aqi, content
@@ -32,7 +37,24 @@ struct AqiForecast: Codable, Equatable {
         case minorPollutant = "minor_pollutant"
         case minorPollutantAqi = "minor_pollutant_aqi"
         case publishTime = "publish_time"
+        case contentI18n = "content_i18n"
     }
+
+    /// The Worker's translation of `content` into `language` ("en"), only when
+    /// it was made from this exact text; nil means fall back to the original
+    /// (and on-device translation).
+    func translatedContent(_ language: String?) -> String? {
+        guard let language = language,
+              let source = content?.trimmingCharacters(in: .whitespacesAndNewlines), !source.isEmpty,
+              let map = contentI18n,
+              map[AqiForecast.sourceLanguage]?.trimmingCharacters(in: .whitespacesAndNewlines) == source,
+              let text = map[language]?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty
+        else { return nil }
+        return text
+    }
+
+    /// Key in `content_i18n` holding the text the translations were made from.
+    static let sourceLanguage = "zh-Hant"
 
     var status: AirStatuses {
         AirStatuses.checkAirStatus(airIndexType: .aqi, value: Double(aqi ?? 0))
@@ -46,6 +68,22 @@ struct AqiForecast: Codable, Equatable {
     /// symbol otherwise. Nil when MOENV names none (normal for 良好 days).
     var displayMajorPollutant: String? {
         majorPollutant.flatMap { AqiForecastPollutant.display($0, chinese: Locale.isChinese) }
+    }
+}
+
+extension AqiForecast {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        area = try container.decode(String.self, forKey: .area)
+        forecastDate = try container.decode(String.self, forKey: .forecastDate)
+        aqi = try container.decodeIfPresent(Int.self, forKey: .aqi)
+        majorPollutant = try container.decodeIfPresent(String.self, forKey: .majorPollutant)
+        minorPollutant = try container.decodeIfPresent(String.self, forKey: .minorPollutant)
+        minorPollutantAqi = try container.decodeIfPresent(Int.self, forKey: .minorPollutantAqi)
+        content = try container.decodeIfPresent(String.self, forKey: .content)
+        publishTime = try container.decodeIfPresent(String.self, forKey: .publishTime)
+        // Optional extra: a malformed map costs the translation, never the row.
+        contentI18n = (try? container.decodeIfPresent([String: String].self, forKey: .contentI18n)) ?? nil
     }
 }
 
@@ -68,11 +106,20 @@ struct AreaForecast: Equatable {
 
     /// MOENV repeats one forecast text on every row of a publish; show it once.
     var content: String? {
+        contentDay?.content?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// The Worker's translation of `content` into `language`, from the same
+    /// row, or nil to show `content` (translated on device if possible).
+    func translatedContent(_ language: String?) -> String? {
+        contentDay?.translatedContent(language)
+    }
+
+    /// The newest-published day with forecast text.
+    private var contentDay: AqiForecast? {
         days
             .sorted { ($0.publishTime ?? "") > ($1.publishTime ?? "") }
-            .lazy
-            .compactMap { $0.content?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .first { !$0.isEmpty }
+            .first { !($0.content?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) }
     }
 }
 
@@ -243,6 +290,16 @@ enum ForecastTabOrdering {
         let contents = areas.compactMap(\.forecast.content)
         guard contents.count > 1, Set(contents).count == 1 else { return nil }
         return contents.first
+    }
+
+    /// The Worker's translation of `sharedContent` into `language`, from any
+    /// area carrying that text, or nil to translate it on device.
+    static func sharedTranslation(_ areas: [ForecastTabArea], language: String?) -> String? {
+        guard let shared = sharedContent(areas) else { return nil }
+        return areas.lazy
+            .filter { $0.forecast.content == shared }
+            .compactMap { $0.forecast.translatedContent(language) }
+            .first
     }
 
     /// English names as the station API gives them ("North"); the islands,

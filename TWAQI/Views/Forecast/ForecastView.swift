@@ -57,7 +57,10 @@ struct ForecastView: View {
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
                 if let shared = shared {
-                    ForecastContentText(content: shared)
+                    ForecastContentText(
+                        content: shared,
+                        translated: ForecastTabOrdering.sharedTranslation(areas, language: OnDeviceTranslation.target)
+                    )
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: AreaForecastView.cornerRadius, style: .continuous))
                         .padding(.horizontal)
