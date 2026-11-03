@@ -47,19 +47,7 @@ class HelpViewModel: ObservableObject {
         didSet {
             settings.isDndEnabled = isDndEnabled
 
-            if isDndEnabled {
-                pushDndWindow()
-            } else {
-                OneSignalManager.disableDnd { result in
-                    switch result {
-                    case .success(let result):
-                        print(result)
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    }
-                }
-                mirrorDnd()
-            }
+            pushDndWindow()
 
             TrackingManager.logEvent(eventName: "set_dnd_notification", parameters: [
                 "label": isDndEnabled ? "on" : "off",
@@ -71,45 +59,24 @@ class HelpViewModel: ObservableObject {
 
     @Published var showingAlert: Bool = false
 
-    /// "Cancel all" didn't reach OneSignal, so nothing was cancelled.
-    @Published private(set) var cancelAllFailed = false
-
     init() {
         self.isDndEnabled = settings.isDndEnabled
         self.dndStartTime = settings.dndStartTime
         self.dndEndTime = settings.dndEndTime
     }
 
+    /// Directus takes the window from `SettingsStore`, already saved above.
     private func pushDndWindow() {
-        OneSignalManager.enableDnd(dndStartTime: dndStartTime, dndEndTime: dndEndTime) { result in
-            switch result {
-            case .success(let result):
-                print(result)
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-        mirrorDnd()
-    }
-
-    /// Dual-write: Directus gets a copy of the window from `SettingsStore`,
-    /// after OneSignal has been sent it.
-    private func mirrorDnd() {
         Task { @MainActor in
             DirectusPushMirror.shared.dndChanged()
         }
     }
 
-    /// Turns every station's alerts off: OneSignal first, the Directus copy
-    /// only once OneSignal has taken it. Says whether it worked either way.
+    /// Turns every station's alerts off: on the device at once, in Directus
+    /// as soon as it can be reached.
     func removeAllNotification() {
-        FavouriteAlerts.cancelAll { [weak self] cancelled in
-            guard let self = self else { return }
-            if cancelled {
-                TrackingManager.logEvent(eventName: "favourite_station_all_removed")
-            }
-            self.cancelAllFailed = !cancelled
-            self.showingAlert = true
-        }
+        FavouriteAlerts.cancelAll()
+        TrackingManager.logEvent(eventName: "favourite_station_all_removed")
+        showingAlert = true
     }
 }

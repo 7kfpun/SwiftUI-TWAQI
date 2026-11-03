@@ -10,12 +10,12 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
   writes `twaqi_feedback` and the business partner form (`CooperateView`) writes
   `twaqi_cooperate`, both create-only with soft delete via `archived`; the 空品區 forecast
   is read from `twaqi_aqi_forecast`.
-- **Push is OneSignal**, dual-written to Directus (`twaqi_push_devices`,
-  `twaqi_push_subscriptions`) by `DirectusPushMirror`, always *after* the OneSignal write
-  and best-effort. The FCM cutover (`feature/twaqi-fcm-cutover`) is not merged.
+- **Push is Firebase Cloud Messaging** (FOX-13). Alerts and do-not-disturb live in
+  Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`), written by
+  `DirectusPushMirror`: saved on the device first, synced in the background and retried.
+  The device row carries the APNs and FCM tokens; the FCM sender reads it. No OneSignal.
 - **Favourites ↔ alerts** (`FavouriteAlerts`): an alert on ⇒ the station is a favourite;
-  removing a favourite turns its alerts off. OneSignal tag codes: English name in Taiwan,
-  numeric id elsewhere.
+  removing a favourite turns its alerts off. Alerts are keyed by station id.
 - **Station cams** are R2 behind `https://twaqi.app.wahthefox.com`: latest
   `stations/{siteId}.jpg`, hourly `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`, rolling 24 h.
   `siteId` is the MOENV image site id, not a station id. A missing hour is a normal 404.
@@ -57,9 +57,9 @@ Run through this — it is what the Claude Code Review workflow checks:
    from the views *and* its `Localizable.strings` keys (en + zh-Hant)?
 2. **PR body claims.** Every behavioral claim ("no behavior change", "removes X",
    "tests cover Y") is backed by the diff. Quote the ticket scope in the body.
-3. **Blocking invariants.** OneSignal write first, Directus mirror after, never instead;
-   a Directus failure never blocks or reverts OneSignal; switching off archives, never
-   deletes; favourites ↔ alerts stay in step; reordering favourites leaves alerts alone.
+3. **Blocking invariants.** Alert changes are saved on the device first and reach
+   Directus later, never lost on a failed write; switching off archives, never deletes;
+   favourites ↔ alerts stay in step; reordering favourites leaves alerts alone.
 4. **Correctness:** force unwraps, optionals, off-by-one, `Asia/Taipei` vs device time
    zone, Codable key mismatches; UI updates on the main actor; widget/App Group sharing.
 5. **Tests:** full `TWAQITests` passed locally; new logic in a CI-subset area has a test.

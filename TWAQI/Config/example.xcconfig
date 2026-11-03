@@ -22,7 +22,6 @@ ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2
 BugsnagApiKey =
 GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
 GMSServicesApiKey = // Required
-OneSignalAppId =
 SentryDSN =
 
 // AdMob AdUnitId

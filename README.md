@@ -48,7 +48,7 @@ $ open TWAQI.xcworkspace
 
 `debug.xcconfig`, `release.xcconfig` and `GoogleService-Info.plist` are gitignored; they hold real keys.
 
-Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS), `OneSignalNotificationServiceExtension`. Cloudflare Workers live under `workers/<name>/`.
+Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS). Cloudflare Workers live under `workers/<name>/`.
 
 ## Services
 
@@ -59,7 +59,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | 空品區 AQI forecast | Directus `twaqi_aqi_forecast`, filled hourly from MOENV `AQF_P_01` by [`workers/twaqi-workers`](workers/twaqi-workers/README.md); the app only reads it |
 | Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
 | Station webcams | R2 bucket `twaqi-station-cams` behind `https://twaqi.app.wahthefox.com`, synced every 10 min by `workers/twaqi-workers` |
-| Push alerts | OneSignal, with settings dual-written to Directus (see below) |
+| Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
@@ -71,12 +71,11 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 - `siteId` is the MOENV image site id (`001`), not a TWAQI station id; the app matches cams to stations by name, then by distance.
 - On device, fetched frames and hourly frames are cached for offline use and purged after a week, along with the other offline caches.
 
-### Push notifications: OneSignal today, FCM not yet
+### Push notifications: Firebase Cloud Messaging (FOX-13)
 
-- **Live on master:** OneSignal (`OneSignalXCFramework` 3.x) owns permission, APNs registration and delivery. Station alerts and the do-not-disturb window are OneSignal tags.
-- **Dual-write:** `DirectusPushMirror` copies the same settings to Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`) *after* each OneSignal write. It is best-effort: a Directus failure never blocks or undoes the OneSignal write. Switching an alert off archives its row; nothing is deleted.
+- **Delivery:** Firebase Messaging (SPM) gets an FCM token from the APNs token; `AppDelegate` hands both to `DirectusPushMirror`. The sender (outside this repo) reads Directus and sends through FCM HTTP v1. The Firebase project needs the APNs auth key.
+- **Settings:** station alerts and the do-not-disturb window live in Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`). Changes are saved on the device first and synced in the background, retried on the next change, launch, foreground or token change. Switching an alert off archives its row; nothing is deleted. A reinstall restores alerts and do-not-disturb from the device's row (Keychain device id).
 - **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`).
-- **FCM:** a Firebase Cloud Messaging cutover is on branch `feature/twaqi-fcm-cutover` (FOX-13) and is **not merged**. Firebase Messaging is not in the shipping app.
 
 ## Tests
 

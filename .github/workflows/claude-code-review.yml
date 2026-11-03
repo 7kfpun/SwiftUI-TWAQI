@@ -98,22 +98,19 @@ jobs:
 
             ## Blocking invariants (always Blocking when broken)
 
-            - Push settings: OneSignal tags stay the source of truth for delivery. The
-              Directus mirror (`DirectusPushMirror`, `twaqi_push_devices` /
-              `twaqi_push_subscriptions`) writes after OneSignal, never before or instead,
-              and its failure never blocks or reverts the OneSignal write. Switching an
-              alert off soft-archives the Directus row, never deletes it.
+            - Push settings live in Directus (`DirectusPushMirror`, `twaqi_push_devices` /
+              `twaqi_push_subscriptions`), where the FCM sender reads them. A change is
+              saved on the device first and synced after, retried until it lands; a failed
+              write must never drop it. Switching an alert off soft-archives the Directus
+              row, never deletes it.
             - Favourites ↔ alerts (`FavouriteAlerts`): a station with an alert on is always
-              a favourite, and leaving Favourites turns its alerts off (OneSignal, then
-              Directus). Alert state reads and writes the same OneSignal tag codes the
-              station screen uses (English name in Taiwan, numeric id elsewhere).
-              Reordering favourites must not touch alerts.
-            - Any change that makes the OneSignal and Directus copies disagree.
+              a favourite, and leaving Favourites turns its alerts off. Alerts are keyed
+              by station id. Reordering favourites must not touch alerts.
 
             ## Domain notes
 
-            - Push is OneSignal, dual-written to Directus on cms.wahthefox.com. An FCM
-              cutover exists on a separate branch and is not on master; don't assume it.
+            - Push is Firebase Cloud Messaging (FOX-13); settings in Directus on
+              cms.wahthefox.com. OneSignal is gone from the app.
             - Station cams: R2 behind `https://twaqi.app.wahthefox.com`. Latest frame
               `stations/{siteId}.jpg`, hourly history `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
               `siteId` is the MOENV image site id, not a TWAQI station id. History is a

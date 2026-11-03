@@ -7,7 +7,6 @@ PODS:
     - GoogleMaps/Maps (= 9.4.0)
   - GoogleMaps/Maps (9.4.0)
   - GoogleUserMessagingPlatform (3.0.0)
-  - OneSignalXCFramework (3.9.1)
   - SDWebImage (5.10.4):
     - SDWebImage/Core (= 5.10.4)
   - SDWebImage/Core (5.10.4)
@@ -25,7 +24,6 @@ DEPENDENCIES:
   - Bugsnag (~> 5.23)
   - Google-Mobile-Ads-SDK (~> 12.5)
   - GoogleMaps (~> 9.4)
-  - OneSignalXCFramework (< 4.0, >= 3.0.0)
   - SDWebImageSwiftUI (~> 1.4.0)
   - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `5.0.4`)
   - SnapKit (~> 5.0)
@@ -39,7 +37,6 @@ SPEC REPOS:
     - Google-Mobile-Ads-SDK
     - GoogleMaps
     - GoogleUserMessagingPlatform
-    - OneSignalXCFramework
     - SDWebImage
     - SDWebImageSwiftUI
     - SnapKit
@@ -62,7 +59,6 @@ SPEC CHECKSUMS:
   Google-Mobile-Ads-SDK: 6df9aadcee32bce0ff05bcad56ef2c88a4a5e82b
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   GoogleUserMessagingPlatform: f8d0cdad3ca835406755d0a69aa634f00e76d576
-  OneSignalXCFramework: 27159b0a150cdfe528c85325215c9d78b2f973c7
   SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   SDWebImageSwiftUI: 034806fc7e19e0a36157fb8ecb9fc0437cc75230
   Sentry: 4531afa474771d2c21c2605f05125cd1dc36a072
@@ -70,6 +66,6 @@ SPEC CHECKSUMS:
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: c2e4af0bd6254de4088c28b389a418b823a46875
+PODFILE CHECKSUM: b1a01f78cb9d323c4e0825a3b2953776330291bd
 
 COCOAPODS: 1.17.0
