@@ -59,9 +59,11 @@ const LIVE: Filter[] = [
   { _or: [{ metric: { _eq: 'aqi' } }, { metric: { _null: true } }] },
   { device: { archived: { _eq: false } } },
   { device: { fcm_token: { _nnull: true } } },
-  // Opted out in iOS Settings: not sent to until the app reports otherwise.
-  // Null (a row from before the field) is sent to.
-  { _or: [{ device: { notifications_allowed: { _eq: true } } }, { device: { notifications_allowed: { _null: true } } }] },
+  // Only devices that can show the alert: notifications allowed in iOS
+  // Settings. Not asked yet (null) waits: a crossing before the user allows
+  // them stays unmarked and fires on the first run after they do (Grok
+  // review). Rows from before this build have no FCM token anyway.
+  { device: { notifications_allowed: { _eq: true } } },
 ]
 
 /** The Directus filter for the subscriptions whose zone changes at these

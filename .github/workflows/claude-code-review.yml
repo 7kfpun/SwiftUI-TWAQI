@@ -110,7 +110,10 @@ jobs:
             ## Domain notes
 
             - Push is Firebase Cloud Messaging (FOX-13); settings in Directus on
-              cms.wahthefox.com. OneSignal is gone from the app.
+              cms.wahthefox.com, written through the twaqi-push-sender Worker's
+              /app/v1 API (no Directus token in the app). The OneSignal SDK stays
+              on purpose with the same alert tags (OneSignalTags), so OneSignal
+              can be switched back on; it does not send. That is not a regression.
             - Station cams: R2 behind `https://twaqi.app.wahthefox.com`. Latest frame
               `stations/{siteId}.jpg`, hourly history `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
               `siteId` is the MOENV image site id, not a TWAQI station id. History is a

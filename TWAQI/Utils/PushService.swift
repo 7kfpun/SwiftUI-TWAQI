@@ -91,7 +91,8 @@ struct PushDevicePayload: Encodable, Equatable {
     /// Whether iOS lets the app show notifications: false once the user
     /// turns them off in Settings, and the sender stops sending until it's
     /// true again. Nil, before the user has been asked, leaves the row as it
-    /// was (empty on a new row, which the sender treats as "send").
+    /// was (empty on a new row): the sender waits for true, which the answer
+    /// to the prompt writes at once.
     var notificationsAllowed: Bool?
     var lastSeenAt: String
     var dndEnabled: Bool
@@ -361,11 +362,11 @@ enum PushService {
         return try JSONDecoder().decode(IdOnly.self, from: data).id
     }
 
-    /// What a reinstall restores from: this device's row (found by device id,
-    /// else by `deviceToken`) with its do-not-disturb window, and its live
-    /// alerts. Nil device when there is none.
-    static func restore(deviceToken: String, config: Config, session: URLSession = .shared) async throws -> Restored {
-        let request = makeRequest(config: config, method: "GET", path: "app/v1/device", query: [("device_token", deviceToken)])
+    /// What a reinstall restores from: the row this device's Keychain id and
+    /// secret own, with its do-not-disturb window, and its live alerts. Nil
+    /// device when there is none. No token goes in the URL.
+    static func restore(config: Config, session: URLSession = .shared) async throws -> Restored {
+        let request = makeRequest(config: config, method: "GET", path: "app/v1/device")
         return try JSONDecoder().decode(Restored.self, from: try await send(request, session: session))
     }
 

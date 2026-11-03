@@ -28,7 +28,7 @@ function matches(filter: Record<string, unknown>, row: Row): boolean {
   })
 }
 
-const device = { archived: false, fcm_token: 'tok' }
+const device = { archived: false, fcm_token: 'tok', notifications_allowed: true }
 const sub = (over: Row): Row => ({
   station_id: '105', direction: 'above', threshold: 120, in_zone: false,
   enabled: true, archived: false, metric: 'aqi', device, ...over,
@@ -75,10 +75,10 @@ describe('crossingFilter', () => {
     assert.equal(matches(at(200), sub({ metric: null })), true)
     assert.equal(matches(at(200), sub({ device: { archived: true, fcm_token: 'tok' } })), false)
     assert.equal(matches(at(200), sub({ device: { archived: false, fcm_token: null } })), false)
-    // Notifications turned off in iOS Settings: skipped; unknown (older row): sent.
+    // Only devices that can show it: off in iOS Settings, or not asked yet, waits.
     assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: false } })), false)
     assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: true } })), true)
-    assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: null } })), true)
+    assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: null } })), false)
   })
 
   it('agrees with decide(): every row it returns changes state, and no row it skips does', () => {

@@ -297,8 +297,9 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer s3cret")
         XCTAssertEqual(request.url?.absoluteString, "https://push.example/app/v1/stations/105")
         XCTAssertEqual(request.httpMethod, "PUT")
-        let restore = PushService.makeRequest(config: config, method: "GET", path: "app/v1/device", query: [("device_token", "abcd")])
-        XCTAssertEqual(restore.url?.query, "device_token=abcd")
+        let restore = PushService.makeRequest(config: config, method: "GET", path: "app/v1/device")
+        // The device is named by its headers; no token goes in the URL.
+        XCTAssertNil(restore.url?.query)
     }
 
     // MARK: - OneSignal tags (kept alongside FCM)
@@ -380,7 +381,8 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(PushDevicePayload.notificationsAllowed(.provisional), true)
         XCTAssertEqual(PushDevicePayload.notificationsAllowed(.denied), false)
         // Not asked yet is unknown, not "no": onboarding writes the row before
-        // it asks (Grok review), and an empty field is still sent to.
+        // it asks (Grok review). The sender waits for true, which the
+        // answer to the prompt writes at once.
         XCTAssertNil(PushDevicePayload.notificationsAllowed(.notDetermined))
 
         func payload(_ allowed: Bool?) -> PushDevicePayload {

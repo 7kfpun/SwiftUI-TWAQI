@@ -212,7 +212,7 @@ final class DirectusPushMirror {
 
         if !defaults.bool(forKey: Keys.restored) {
             do {
-                try await restore(token: token, config: config)
+                try await restore(config: config)
             } catch {
                 // Writing now could overwrite the row being restored from.
                 print("Directus push: restore failed: \(error)")
@@ -285,10 +285,10 @@ final class DirectusPushMirror {
     /// reinstall (same Keychain id), or one made for its APNs token — and
     /// takes its alerts, and on a fresh install its do-not-disturb window.
     /// Local changes not yet written win over what's restored.
-    private func restore(token: String, config: PushService.Config) async throws {
+    private func restore(config: PushService.Config) async throws {
         let isFreshInstall = defaults.object(forKey: Keys.deviceId) == nil
 
-        let restored = try await PushService.restore(deviceToken: token, config: config)
+        let restored = try await PushService.restore(config: config)
         guard let stored = restored.device else {
             // Nothing in Directus for this phone: a pending cancel has
             // nothing to archive.

@@ -229,6 +229,9 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     // A chunk starts only if its worst case still fits: every send retried
     // once, every state-write try, one dead-token write and one log write.
     // Otherwise the rest wait for the next run, with what was sent saved.
+    // That worst case is charged up front, not what the chunk turns out to
+    // use: a retry whose request throws never reports back, so counting
+    // actual attempts undercounts (Copilot review).
     const worstCase = chunk.length * 2 + SAVE_ATTEMPTS + 2
     if (result.requests + worstCase > limit) {
       const left = toSend.length - i
@@ -236,20 +239,17 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
       console.warn('sends deferred to the next run (subrequest budget)', left)
       break
     }
+    result.requests += worstCase
     await pool(chunk, SEND_CONCURRENCY, async ({ sub, reading }) => {
       if (dead.has(sub.device.id)) return
-      const { log, attempts } = await sendOne(sub, reading)
-      result.requests += attempts
-      logs.push(log)
+      logs.push((await sendOne(sub, reading)).log)
     })
     // Saved per chunk: what was sent is marked sent before the next chunk.
     const newlyDead = [...dead].filter((id) => !result.archivedDevices.includes(id))
-    if (newlyDead.length) result.requests++
     await archiveDevices(env, newlyDead)
     result.archivedDevices.push(...newlyDead)
-    result.requests += await saveUpdates()
+    await saveUpdates()
     const written = await logQuietly(env, logs)
-    if (written.rows) result.requests++
     result.logged += written.rows
     result.events += written.events
   }
