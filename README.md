@@ -40,7 +40,7 @@ $ open TWAQI/Config/debug.xcconfig
 # Create a Firebase project and download the config file, GoogleService-Info.plist, to the folder, https://firebase.google.com/docs/ios/setup
 $ cp ~/GoogleService-Info.plist TWAQI/GoogleService-Info.plist
 
-# Directus: set DirectusFeedbackToken (and optionally DirectusPushToken / DirectusCooperateToken) in debug.xcconfig — see the comments in example.xcconfig
+# Directus: set DirectusFeedbackToken (and optionally DirectusCooperateToken) in debug.xcconfig, and PushApiUrl for push — see the comments in example.xcconfig
 
 # Open Xcode and run with Command (⌘)-R
 $ open TWAQI.xcworkspace
@@ -48,7 +48,7 @@ $ open TWAQI.xcworkspace
 
 `debug.xcconfig`, `release.xcconfig` and `GoogleService-Info.plist` are gitignored; they hold real keys.
 
-Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS), `OneSignalNotificationServiceExtension`. Cloudflare Workers live under `workers/<name>/`.
+Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS). Cloudflare Workers live under `workers/<name>/`.
 
 ## Services
 
@@ -59,7 +59,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | 空品區 AQI forecast | Directus `twaqi_aqi_forecast`, filled hourly from MOENV `AQF_P_01` by [`workers/twaqi-workers`](workers/twaqi-workers/README.md); the app only reads it |
 | Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
 | Station webcams | R2 bucket `twaqi-station-cams` behind `https://twaqi.app.wahthefox.com`, synced every 10 min by `workers/twaqi-workers` |
-| Push alerts | OneSignal, with settings dual-written to Directus (see below) |
+| Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
@@ -71,12 +71,12 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 - `siteId` is the MOENV image site id (`001`), not a TWAQI station id; the app matches cams to stations by name, then by distance.
 - On device, fetched frames and hourly frames are cached for offline use and purged after a week, along with the other offline caches.
 
-### Push notifications: OneSignal today, FCM not yet
+### Push notifications: Firebase Cloud Messaging (FOX-13)
 
-- **Live on master:** OneSignal (`OneSignalXCFramework` 3.x) owns permission, APNs registration and delivery. Station alerts and the do-not-disturb window are OneSignal tags.
-- **Dual-write:** `DirectusPushMirror` copies the same settings to Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`) *after* each OneSignal write. It is best-effort: a Directus failure never blocks or undoes the OneSignal write. Switching an alert off archives its row; nothing is deleted.
-- **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`).
-- **FCM:** a Firebase Cloud Messaging cutover is on branch `feature/twaqi-fcm-cutover` (FOX-13) and is **not merged**. Firebase Messaging is not in the shipping app.
+- **Delivery:** Firebase Messaging (SPM) gets an FCM token from the APNs token; `AppDelegate` hands both to `DirectusPushMirror`. [`workers/twaqi-push-sender`](workers/twaqi-push-sender/README.md) reads every station's AQI every 2 hours, asks Directus for only the subscriptions whose zone that changes (filtered per station), and sends through FCM HTTP v1 when a station crosses a threshold (edge-triggered, quiet hours honoured), logging each send to `twaqi_push_logs` without the full token. It only sends to devices with an FCM token; The app also keeps the OneSignal SDK (no service extension) and writes the same alert and DND tags there (`OneSignalTags`), so OneSignal can be switched back on as a sender; its sending (the `ai-playground` tracker) is being turned off, after which builds before FOX-13, which have no FCM token, get no alerts until they update. The Firebase project needs the APNs auth key. The app clears the icon badge when it opens; alerts set none.
+- **Write path (FOX-37 M5):** the app has no Directus token for the push collections. `PushService` calls the `twaqi-push-sender` Worker (`PushApiUrl`: `PUT /app/v1/device`, `GET /app/v1/device`, `PUT /app/v1/stations/:id`, `POST /app/v1/archive-all`), each request signed with the install's Keychain `device_id` and a random secret. The Worker stores only a SHA-256 of the secret and touches only that device's rows; the 3-station limit is enforced in the app only.
+- **Settings:** station alerts and the do-not-disturb window live in Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`). Changes are saved on the device first and synced in the background, retried on the next change, launch, foreground or token change. Switching an alert off archives its row; nothing is deleted. A reinstall restores alerts and do-not-disturb from the device's row (Keychain device id).
+- **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`). Alerts can be on for at most 3 stations (`FavouriteAlerts.maxAlertedStations`); the station screen locks its switches once 3 others have them.
 
 ## Tests
 
@@ -90,7 +90,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
 - **GitHub CI runs a small, high-signal subset** (`-only-testing` in `.github/workflows/ci.yml`) covering the crash- and regression-prone areas: networking/offline caches (`PollutantCacheTests`, `OfflineCacheRetentionTests`), push dual-write and favourites ↔ alerts (`PushServiceTests`, `FavouriteAlertsTests`), the station-cam history loader and caches (`StationCamTests`, `StationCamFrameCacheTests`, `StationCamHistoryCacheTests`), `SettingsStore` persistence (`AppLanguageTests`) and the Directus create-only forms (`FeedbackServiceTests`, `CooperateServiceTests`). Add a suite there only if it guards one of those areas.
 - CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild). Caches are per PR, so a PR's first run is cold.
-- Workers have their own tests: `cd workers/twaqi-workers && npm test`.
+- Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
 
 ## Branches, CI and review
 

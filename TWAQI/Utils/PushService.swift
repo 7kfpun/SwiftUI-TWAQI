@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 /// Which APNs host a device token belongs to. Xcode debug builds get sandbox
 /// tokens; TestFlight and App Store builds get production ones.
@@ -44,10 +45,16 @@ enum PushEnvironment: String, Codable {
     }
 }
 
+/// The station page's two alerts, by the names its settings have always used.
+enum NotificationTypes: String {
+    case pollution
+    case cleanliness
+}
+
 enum PushDirection: String, Codable, CaseIterable {
-    /// AQI more than the threshold. OneSignal's `pollution` alert.
+    /// AQI more than the threshold: the `pollution` alert.
     case above
-    /// AQI less than the threshold. OneSignal's `cleanliness` alert.
+    /// AQI less than the threshold: the `cleanliness` alert.
     case below
 
     init(_ type: NotificationTypes) {
@@ -65,16 +72,29 @@ struct PushDevicePayload: Encodable, Equatable {
     static let deviceIdField = CodingKeys.deviceId.rawValue
 
     /// Stable per device (a Keychain UUID, kept across reinstalls), unlike
-    /// the APNs token, which rotates.
+    /// the APNs and FCM tokens, which rotate.
     var deviceId: String
+    /// The APNs token, hex. Kept alongside the FCM token so a row is still
+    /// matched to the phone, and reachable directly over APNs if need be.
     var deviceToken: String
+    /// The Firebase Cloud Messaging registration token: what the sender
+    /// addresses. Nil until Messaging has one; left out rather than cleared.
+    var fcmToken: String?
     var environment: PushEnvironment
     var appVersion: String?
+    /// The app's language: the one chosen under Help, else iOS's ("zh-Hant",
+    /// "en"). The sender writes each alert in it.
     var locale: String?
+    /// Taiwan Air Pro is active (subscription or lifetime), as last read
+    /// from StoreKit on this device.
+    var isPro: Bool
+    /// Whether iOS lets the app show notifications: false once the user
+    /// turns them off in Settings, and the sender stops sending until it's
+    /// true again. Nil, before the user has been asked, leaves the row as it
+    /// was (empty on a new row): the sender waits for true, which the answer
+    /// to the prompt writes at once.
+    var notificationsAllowed: Bool?
     var lastSeenAt: String
-    /// OneSignal's player id while OneSignal still sends; lets the two be
-    /// matched up at cutover.
-    var externalId: String?
     var dndEnabled: Bool
     /// "HH:mm", wall-clock time in `timezone`.
     var dndStart: String
@@ -88,25 +108,30 @@ struct PushDevicePayload: Encodable, Equatable {
         /// See `deviceIdField`.
         case deviceId = "device_id"
         case deviceToken = "device_token"
+        case fcmToken = "fcm_token"
         case appVersion = "app_version"
+        case isPro = "is_pro"
+        case notificationsAllowed = "notifications_allowed"
         case lastSeenAt = "last_seen_at"
-        case externalId = "external_id"
         case dndEnabled = "dnd_enabled"
         case dndStart = "dnd_start"
         case dndEnd = "dnd_end"
     }
 
-    // Leaves external_id alone rather than clearing it when OneSignal has no
-    // player id yet.
+    // Never writes `external_id`: that held OneSignal's player id and is left
+    // as it was. Leaves `fcm_token` alone, rather than clearing it, until
+    // Messaging has one.
     func encode(to encoder: Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(deviceId, forKey: .deviceId)
         try values.encode(deviceToken, forKey: .deviceToken)
+        try values.encodeIfPresent(fcmToken, forKey: .fcmToken)
         try values.encode(environment, forKey: .environment)
         try values.encodeIfPresent(appVersion, forKey: .appVersion)
         try values.encodeIfPresent(locale, forKey: .locale)
+        try values.encode(isPro, forKey: .isPro)
+        try values.encodeIfPresent(notificationsAllowed, forKey: .notificationsAllowed)
         try values.encode(lastSeenAt, forKey: .lastSeenAt)
-        try values.encodeIfPresent(externalId, forKey: .externalId)
         try values.encode(dndEnabled, forKey: .dndEnabled)
         try values.encode(dndStart, forKey: .dndStart)
         try values.encode(dndEnd, forKey: .dndEnd)
@@ -117,10 +142,13 @@ struct PushDevicePayload: Encodable, Equatable {
     static func make(
         deviceId: String,
         deviceToken: String,
-        externalId: String?,
+        fcmToken: String?,
         dndEnabled: Bool,
         dndStart: Date,
         dndEnd: Date,
+        isPro: Bool = false,
+        notificationsAllowed: Bool? = nil,
+        language: AppLanguage = .current,
         now: Date = Date(),
         environment: PushEnvironment = .current,
         bundle: Bundle = .main,
@@ -129,17 +157,42 @@ struct PushDevicePayload: Encodable, Equatable {
         PushDevicePayload(
             deviceId: deviceId,
             deviceToken: deviceToken,
+            fcmToken: fcmToken,
             environment: environment,
             appVersion: bundle.infoDictionary?["CFBundleShortVersionString"] as? String,
             // The app's language, not the region: alert text follows it.
-            locale: bundle.preferredLocalizations.first ?? Locale.current.identifier,
+            // Help's choice wins over the one iOS picked for the app.
+            locale: language.localeIdentifier ?? bundle.preferredLocalizations.first ?? Locale.current.identifier,
+            isPro: isPro,
+            notificationsAllowed: notificationsAllowed,
             lastSeenAt: ISO8601DateFormatter().string(from: now),
-            externalId: externalId,
             dndEnabled: dndEnabled,
             dndStart: hourMinute(dndStart, calendar: calendar),
             dndEnd: hourMinute(dndEnd, calendar: calendar),
             timezone: calendar.timeZone.identifier
         )
+    }
+
+    /// What, besides the tokens, makes the row out of date when it changes:
+    /// the language alerts are written in, Pro, whether notifications are
+    /// allowed, and the do-not-disturb window with its time zone. Saved only after a write succeeds, so a failed one
+    /// is retried on the next flush, even after a relaunch.
+    var profile: String {
+        [locale ?? "", String(isPro), notificationsAllowed.map(String.init) ?? "", String(dndEnabled), dndStart, dndEnd, timezone].joined(separator: "|")
+    }
+
+    /// Allowed means iOS will show the alert: authorised, provisional or
+    /// ephemeral; denied means the user said no. Not asked yet is unknown
+    /// (nil), not "no": onboarding favourites a station, writing the row,
+    /// before it asks, and a "no" there would hold back alerts until the
+    /// next write after the user taps Allow.
+    static func notificationsAllowed(_ status: UNAuthorizationStatus) -> Bool? {
+        switch status {
+        case .authorized, .provisional, .ephemeral: return true
+        case .denied: return false
+        case .notDetermined: return nil
+        @unknown default: return nil
+        }
     }
 
     static func hourMinute(_ date: Date, calendar: Calendar = .current) -> String {
@@ -214,7 +267,7 @@ struct PushSubscription: Codable, Equatable {
     }
 }
 
-/// A station's two alerts as OneSignal holds them: a threshold when on, nil
+/// A station's two alerts as Directus holds them: a threshold when on, nil
 /// when off.
 struct StationAlerts: Codable, Equatable {
     var above: Int?
@@ -227,14 +280,30 @@ struct StationAlerts: Codable, Equatable {
         self.below = below
     }
 
-    /// From the tags the station row writes: `<station>_pollution_therhold`
-    /// is the above alert, `<station>_cleanliness_therhold` the below one.
-    init(_ setting: OneSignalStationSetting) {
+    /// From the station row's switches: pollution is the above alert,
+    /// cleanliness the below one.
+    init(_ setting: StationAlertSetting) {
         above = setting.isPollutionNotificationEnabled ? Int(setting.pollutionTherhold.rounded()) : nil
         below = setting.isCleanlinessNotificationEnabled ? Int(setting.cleanlinessTherhold.rounded()) : nil
     }
 
     var isOff: Bool { above == nil && below == nil }
+
+    /// Live subscriptions grouped by station. Of several rows for one
+    /// direction (an earlier race), the first wins, as in `reconcile`.
+    static func byStation(_ subscriptions: [PushSubscription]) -> [String: StationAlerts] {
+        var result: [String: StationAlerts] = [:]
+        for item in subscriptions where item.enabled {
+            var alerts = result[item.stationId] ?? .off
+            switch item.direction {
+            case .above where alerts.above == nil: alerts.above = item.threshold
+            case .below where alerts.below == nil: alerts.below = item.threshold
+            default: break
+            }
+            result[item.stationId] = alerts
+        }
+        return result.filter { !$0.value.isOff }
+    }
 
     func threshold(_ direction: PushDirection) -> Int? {
         switch direction {
@@ -245,7 +314,7 @@ struct StationAlerts: Codable, Equatable {
 }
 
 enum PushError: Error, Equatable {
-    /// The Directus URL or token is missing from the build's xcconfig.
+    /// `PushApiUrl` is missing from the build's xcconfig.
     case notConfigured
     case noDeviceToken
     /// The Keychain wouldn't hold the device id.
@@ -255,167 +324,114 @@ enum PushError: Error, Equatable {
     case network
 }
 
-/// Directus REST for the push collections, with the app's static token.
-/// The token may create, read and update, never delete: an alert the user
-/// clears is archived.
+/// The push API on the `twaqi-push-sender` Worker (FOX-13 / FOX-37 M5). The
+/// app holds no Directus token for the push collections: each request names
+/// this install's Keychain device id and carries its secret, and the Worker
+/// reads and writes only this device's rows. Nothing is hard-deleted: an
+/// alert the user clears is archived.
 enum PushService {
-    static let devicesPath = "items/twaqi_push_devices"
-    static let subscriptionsPath = "items/twaqi_push_subscriptions"
-
     struct Config {
         var baseURL: URL
-        var token: String
+        var deviceId: String
+        var secret: String
 
-        /// `DirectusPushToken` when the build sets one, else the feedback
-        /// token, whose role also covers the push collections.
+        /// `PushApiUrl` from the build's xcconfig, with this install's
+        /// Keychain id and secret. Nil when either is missing.
         static var current: Config? {
-            make(baseURL: getEnv("DirectusUrl"), pushToken: getEnv("DirectusPushToken"), feedbackToken: getEnv("DirectusFeedbackToken"))
+            guard let deviceId = PushDeviceIdentity.id(), let secret = PushDeviceIdentity.secret() else { return nil }
+            return make(baseURL: getEnv("PushApiUrl"), deviceId: deviceId, secret: secret)
         }
 
-        static func make(baseURL: String?, pushToken: String?, feedbackToken: String?) -> Config? {
-            make(
-                baseURL: baseURL,
-                token: [pushToken, feedbackToken]
-                    .compactMap { $0?.trimmingCharacters(in: .whitespaces) }
-                    .first { !$0.isEmpty }
-            )
-        }
-
-        static func make(baseURL: String?, token: String?) -> Config? {
+        static func make(baseURL: String?, deviceId: String, secret: String) -> Config? {
             guard let baseURL = baseURL?.trimmingCharacters(in: .whitespaces), !baseURL.isEmpty,
-                  let token = token?.trimmingCharacters(in: .whitespaces), !token.isEmpty,
-                  let url = URL(string: baseURL)
+                  let url = URL(string: baseURL), url.scheme == "https"
             else {
                 return nil
             }
-            return Config(baseURL: url, token: token)
+            return Config(baseURL: url, deviceId: deviceId, secret: secret)
         }
     }
 
     // MARK: - Devices
 
-    /// Creates or updates this device's row and returns its id. The row is
-    /// found by the app's stable device id, never by APNs token, which
-    /// rotates. A row this device's token already has (from a build before the
-    /// device id) is adopted instead of tripping the token's unique index. A
-    /// lost race to create falls back to the row the other request made.
+    /// Creates or updates this device's row and returns its id. The Worker
+    /// finds it by the device id (or adopts a row made for this APNs token
+    /// before there was one).
     static func upsertDevice(_ payload: PushDevicePayload, config: Config, session: URLSession = .shared) async throws -> Int {
-        let byDeviceId = (PushDevicePayload.deviceIdField, payload.deviceId)
-        let byToken = ("device_token", payload.deviceToken)
+        let data = try await send(makeRequest(config: config, method: "PUT", path: "app/v1/device", body: payload), session: session)
+        return try JSONDecoder().decode(IdOnly.self, from: data).id
+    }
 
-        for (field, value) in [byDeviceId, byToken] {
-            if let id = try await deviceRowId(field: field, value: value, config: config, session: session) {
-                _ = try await send(makeRequest(config: config, method: "PATCH", path: "\(devicesPath)/\(id)", query: [("fields", "id")], body: payload), session: session)
-                return id
+    /// What a reinstall restores from: the row this device's Keychain id and
+    /// secret own, with its do-not-disturb window, and its live alerts. Nil
+    /// device when there is none. No token goes in the URL.
+    static func restore(config: Config, session: URLSession = .shared) async throws -> Restored {
+        let request = makeRequest(config: config, method: "GET", path: "app/v1/device")
+        return try JSONDecoder().decode(Restored.self, from: try await send(request, session: session))
+    }
+
+    struct Restored: Decodable, Equatable {
+        let device: StoredDevice?
+        let subscriptions: [PushSubscription]
+    }
+
+    struct StoredDevice: Decodable, Equatable {
+        let id: Int
+        let dndEnabled: Bool?
+        /// "HH:mm" (Directus may add seconds).
+        let dndStart: String?
+        let dndEnd: String?
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case dndEnabled = "dnd_enabled"
+            case dndStart = "dnd_start"
+            case dndEnd = "dnd_end"
+        }
+
+        /// "HH:mm" or "HH:mm:ss" as today's date at that time.
+        static func time(_ text: String?, calendar: Calendar = .current, now: Date = Date()) -> Date? {
+            guard let parts = text?.split(separator: ":").compactMap({ Int($0) }),
+                  parts.count >= 2, (0..<24).contains(parts[0]), (0..<60).contains(parts[1])
+            else {
+                return nil
             }
-        }
-
-        do {
-            let data = try await send(makeRequest(config: config, method: "POST", path: devicesPath, query: [("fields", "id")], body: payload), session: session)
-            return try JSONDecoder().decode(Item<IdOnly>.self, from: data).data.id
-        } catch PushError.server(let status) where status == 400 {
-            if let id = try await deviceRowId(field: byDeviceId.0, value: byDeviceId.1, config: config, session: session) {
-                return id
-            }
-            throw PushError.server(statusCode: status)
+            return calendar.date(bySettingHour: parts[0], minute: parts[1], second: 0, of: now)
         }
     }
 
-    /// The first row whose `field` equals `value`.
-    static func deviceRowId(field: String, value: String, config: Config, session: URLSession = .shared) async throws -> Int? {
-        let request = makeRequest(config: config, method: "GET", path: devicesPath, query: [
-            ("fields", "id"),
-            ("filter[\(field)][_eq]", value),
-            ("sort", "id"),
-            ("limit", "1"),
-        ])
-        let data = try await send(request, session: session)
-        return try JSONDecoder().decode(Items<IdOnly>.self, from: data).data.first?.id
+    // MARK: - Alerts
+
+    /// Brings one station's alerts in Directus in line with `alerts`: on
+    /// updates (or makes) its row, off archives it. The Worker does the rows.
+    static func reconcile(stationId: String, siteId: String?, alerts: StationAlerts, config: Config, session: URLSession = .shared) async throws {
+        let body = StationChange(siteId: siteId, above: alerts.above, below: alerts.below)
+        _ = try await send(makeRequest(config: config, method: "PUT", path: "app/v1/stations/\(stationId)", body: body), session: session)
     }
 
-    // MARK: - Subscriptions
+    /// Help's "cancel all": archives every live alert of this device.
+    static func archiveAll(config: Config, session: URLSession = .shared) async throws {
+        _ = try await send(makeRequest(config: config, method: "POST", path: "app/v1/archive-all"), session: session)
+    }
 
-    /// The device's live (not archived) alerts, for one station or all.
-    static func subscriptions(device: Int, stationId: String? = nil, config: Config, session: URLSession = .shared) async throws -> [PushSubscription] {
-        var query: [(String, String)] = [
-            ("fields", "id,device,station_id,site_id,metric,direction,threshold,enabled"),
-            ("filter[device][_eq]", String(device)),
-            ("filter[archived][_eq]", "false"),
-            ("sort", "id"),
-            ("limit", "-1"),
-        ]
-        if let stationId = stationId {
-            query.append(("filter[station_id][_eq]", stationId))
+    /// A station's two alerts: a threshold when on, null when off.
+    struct StationChange: Encodable, Equatable {
+        var siteId: String?
+        var above: Int?
+        var below: Int?
+
+        enum CodingKeys: String, CodingKey {
+            case above, below
+            case siteId = "site_id"
         }
-        let data = try await send(makeRequest(config: config, method: "GET", path: subscriptionsPath, query: query), session: session)
-        return try JSONDecoder().decode(Items<PushSubscription>.self, from: data).data
-    }
 
-    /// Creates the subscription, or updates the one with its id. Returns the id.
-    static func save(_ subscription: PushSubscription, device: Int, config: Config, session: URLSession = .shared) async throws -> Int {
-        var item = subscription
-        item.device = device
-        if let id = item.id {
-            let changes = SubscriptionChanges(siteId: item.siteId, threshold: item.threshold, enabled: item.enabled)
-            _ = try await send(makeRequest(config: config, method: "PATCH", path: "\(subscriptionsPath)/\(id)", query: [("fields", "id")], body: changes), session: session)
-            return id
+        // Nulls are sent: null is "off", not "unchanged".
+        func encode(to encoder: Encoder) throws {
+            var values = encoder.container(keyedBy: CodingKeys.self)
+            try values.encodeIfPresent(siteId, forKey: .siteId)
+            try values.encode(above, forKey: .above)
+            try values.encode(below, forKey: .below)
         }
-        item.id = nil
-        let data = try await send(makeRequest(config: config, method: "POST", path: subscriptionsPath, query: [("fields", "id")], body: item), session: session)
-        return try JSONDecoder().decode(Item<IdOnly>.self, from: data).data.id
-    }
-
-    /// Soft-deletes: the rows stay, with `archived` set and alerts off.
-    static func archive(subscriptions ids: [Int], config: Config, session: URLSession = .shared) async throws {
-        guard !ids.isEmpty else { return }
-        let body = BatchUpdate(keys: ids, data: ArchiveChanges())
-        _ = try await send(makeRequest(config: config, method: "PATCH", path: subscriptionsPath, query: [("fields", "id")], body: body), session: session)
-    }
-
-    /// Brings one station's live rows in line with `alerts`: each alert that
-    /// is on updates its row (or creates one); each that is off has its rows
-    /// archived. Extra rows for a direction, from an earlier race, are archived.
-    static func reconcile(
-        stationId: String,
-        siteId: String?,
-        alerts: StationAlerts,
-        device: Int,
-        config: Config,
-        session: URLSession = .shared
-    ) async throws {
-        let existing = try await subscriptions(device: device, stationId: stationId, config: config, session: session)
-        let plan = plan(existing: existing, stationId: stationId, siteId: siteId, alerts: alerts)
-        for item in plan.save {
-            _ = try await save(item, device: device, config: config, session: session)
-        }
-        try await archive(subscriptions: plan.archive, config: config, session: session)
-    }
-
-    /// The writes `reconcile` makes, apart from the network.
-    static func plan(existing: [PushSubscription], stationId: String, siteId: String?, alerts: StationAlerts) -> (save: [PushSubscription], archive: [Int]) {
-        var saves: [PushSubscription] = []
-        var archives: [Int] = []
-        for direction in PushDirection.allCases {
-            let rows = existing.filter { $0.direction == direction }
-            guard let threshold = alerts.threshold(direction) else {
-                archives += rows.compactMap(\.id)
-                continue
-            }
-            let keep = rows.first
-            archives += rows.dropFirst().compactMap(\.id)
-            if let keep = keep, keep.threshold == threshold, keep.enabled, siteId == nil || keep.siteId == siteId {
-                continue
-            }
-            saves.append(PushSubscription(
-                id: keep?.id,
-                stationId: stationId,
-                siteId: siteId,
-                direction: direction,
-                threshold: threshold,
-                enabled: true
-            ))
-        }
-        return (saves, archives)
     }
 
     // MARK: - HTTP
@@ -435,7 +451,8 @@ enum PushService {
         var request = URLRequest(url: components.url!)
         request.httpMethod = method
         request.timeoutInterval = 20
-        request.setValue("Bearer \(config.token)", forHTTPHeaderField: "Authorization")
+        request.setValue(config.deviceId, forHTTPHeaderField: "X-Device-Id")
+        request.setValue("Bearer \(config.secret)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let body = body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -465,35 +482,5 @@ enum PushService {
         return data
     }
 
-    private struct Item<T: Decodable>: Decodable { let data: T }
-    private struct Items<T: Decodable>: Decodable { let data: [T] }
     private struct IdOnly: Decodable { let id: Int }
-
-    struct SubscriptionChanges: Encodable, Equatable {
-        var siteId: String?
-        var threshold: Int
-        var enabled: Bool
-
-        enum CodingKeys: String, CodingKey {
-            case threshold, enabled
-            case siteId = "site_id"
-        }
-
-        func encode(to encoder: Encoder) throws {
-            var values = encoder.container(keyedBy: CodingKeys.self)
-            try values.encodeIfPresent(siteId, forKey: .siteId)
-            try values.encode(threshold, forKey: .threshold)
-            try values.encode(enabled, forKey: .enabled)
-        }
-    }
-
-    struct ArchiveChanges: Encodable, Equatable {
-        var archived = true
-        var enabled = false
-    }
-
-    struct BatchUpdate<T: Encodable>: Encodable {
-        let keys: [Int]
-        let data: T
-    }
 }

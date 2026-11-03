@@ -42,7 +42,7 @@ Funnel exploration, with steps 1–3 above and **Breakdown** set to the
 event-scoped custom dimension `source`. Register `source` and `plan` under
 Custom definitions first.
 
-Related events: `alert_limit_shown` (the "at most two stations" note on a
+Related events: `alert_limit_shown` (the "at most three stations" note, `FavouriteAlerts.maxAlertedStations`, on a
 station's alerts) and `ad_banner_tapped` (`placement`: `main`, `details`,
 `details_list`, `favourites`, `help`). Neither opens the Pro screen today.
 

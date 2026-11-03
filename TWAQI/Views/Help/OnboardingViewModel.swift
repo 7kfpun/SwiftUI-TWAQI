@@ -8,7 +8,6 @@
 
 import CoreLocation
 import Foundation
-import OneSignal
 import UIKit
 import UserNotifications
 
@@ -47,7 +46,7 @@ final class OnboardingViewModel: ObservableObject {
 
     /// The station screen's own model for the suggested station, so adding it
     /// goes the way the heart on the station screen goes: a favourite, and
-    /// its alerts switched on with it (FOX-31), OneSignal first, Directus after.
+    /// its alerts switched on with it (FOX-31).
     @Published private(set) var stationModel: DetailsViewModel?
 
     /// The Watch app's one-shot locator, shared with the phone.
@@ -144,8 +143,7 @@ final class OnboardingViewModel: ObservableObject {
             closest = .loaded(resolved)
 
             let model = DetailsViewModel(stationId: resolved.pollutant.stationId)
-            // Loads the station record, which names the OneSignal tag the
-            // alerts go under.
+            // Loads the station's cam, whose SiteId its alerts are stored with.
             model.getData()
             stationModel = model
         }
@@ -195,14 +193,17 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
-    /// The system notification prompt, through OneSignal, which owns push
-    /// permission and APNs registration. Only the notifications step calls this.
+    /// The system notification prompt. The app registered with APNs at
+    /// launch already (see `AppDelegate`). Only the notifications step calls
+    /// this.
     func requestNotifications() {
         guard notificationState != .asking else { return }
         notificationState = .asking
 
         let answered: (Bool) -> Void = { accepted in
             Task { @MainActor in
+                // Tell the sender now whether this device can show alerts.
+                DirectusPushMirror.shared.notificationsChanged()
                 self.notificationState = accepted ? .on : .off
                 TrackingManager.logEvent(.onboardingNotifications, parameters: [
                     "label": accepted ? "on" : "off",
@@ -211,12 +212,8 @@ final class OnboardingViewModel: ObservableObject {
             }
         }
 
-        if getEnv("OneSignalAppId") != nil {
-            OneSignal.promptForPushNotifications(userResponse: answered)
-        } else {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { accepted, _ in
-                answered(accepted)
-            }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { accepted, _ in
+            answered(accepted)
         }
     }
 

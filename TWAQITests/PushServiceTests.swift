@@ -33,9 +33,8 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(PushDirection(.cleanliness), .below)
     }
 
-    func testStationAlertsFromOneSignalSetting() {
-        let setting = OneSignalStationSetting(
-            stationName: "Banqiao",
+    func testStationAlertsFromSetting() {
+        let setting = StationAlertSetting(
             isPollutionNotificationEnabled: true,
             isCleanlinessNotificationEnabled: true,
             pollutionTherhold: 150,
@@ -45,8 +44,7 @@ final class PushServiceTests: XCTestCase {
     }
 
     func testStationAlertsOffWhenSwitchedOff() {
-        let setting = OneSignalStationSetting(
-            stationName: "Banqiao",
+        let setting = StationAlertSetting(
             isPollutionNotificationEnabled: false,
             isCleanlinessNotificationEnabled: true,
             pollutionTherhold: 150,
@@ -56,7 +54,48 @@ final class PushServiceTests: XCTestCase {
         XCTAssertNil(alerts.above)
         XCTAssertEqual(alerts.below, 25)
         XCTAssertFalse(alerts.isOff)
-        XCTAssertTrue(StationAlerts(OneSignalStationSetting(stationName: "x", isPollutionNotificationEnabled: false, isCleanlinessNotificationEnabled: false)).isOff)
+        XCTAssertTrue(StationAlerts(StationAlertSetting.off).isOff)
+    }
+
+    func testSettingRoundTripsThroughAlerts() {
+        let alerts = StationAlerts(above: 150, below: nil)
+        let setting = StationAlertSetting(alerts)
+        XCTAssertTrue(setting.isPollutionNotificationEnabled)
+        XCTAssertFalse(setting.isCleanlinessNotificationEnabled)
+        XCTAssertEqual(setting.pollutionTherhold, 150)
+        // An alert that's off keeps its slider's default.
+        XCTAssertEqual(setting.cleanlinessTherhold, 30)
+        XCTAssertEqual(StationAlerts(setting), alerts)
+    }
+
+    func testAlertsByStationTakesFirstLiveRowPerDirection() {
+        let rows = [
+            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
+            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .above, threshold: 200, enabled: true),
+            PushSubscription(id: 3, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: false),
+            PushSubscription(id: 4, stationId: "9", siteId: nil, direction: .below, threshold: 25, enabled: true),
+            PushSubscription(id: 5, stationId: "7", siteId: nil, direction: .below, threshold: 25, enabled: false),
+        ]
+        XCTAssertEqual(StationAlerts.byStation(rows), [
+            "5": StationAlerts(above: 120),
+            "9": StationAlerts(below: 25),
+        ])
+    }
+
+    func testStoredDeviceDecodesAndParsesTimes() throws {
+        let data = Data(#"{"id":7,"dnd_enabled":true,"dnd_start":"22:30:00","dnd_end":"07:05"}"#.utf8)
+        let device = try JSONDecoder().decode(PushService.StoredDevice.self, from: data)
+        XCTAssertEqual(device.id, 7)
+        XCTAssertEqual(device.dndEnabled, true)
+
+        let now = date(12, 0, in: taipei)
+        let start = try XCTUnwrap(PushService.StoredDevice.time(device.dndStart, calendar: taipei, now: now))
+        let end = try XCTUnwrap(PushService.StoredDevice.time(device.dndEnd, calendar: taipei, now: now))
+        XCTAssertEqual(PushDevicePayload.hourMinute(start, calendar: taipei), "22:30")
+        XCTAssertEqual(PushDevicePayload.hourMinute(end, calendar: taipei), "07:05")
+        XCTAssertNil(PushService.StoredDevice.time(nil))
+        XCTAssertNil(PushService.StoredDevice.time("25:00"))
+        XCTAssertNil(PushService.StoredDevice.time("noon"))
     }
 
     // MARK: - Subscription encoding
@@ -76,11 +115,15 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(body.keys.contains("id"))
     }
 
-    func testSubscriptionChangesUseThreshold() throws {
-        let body = try json(PushService.SubscriptionChanges(siteId: "A12", threshold: 30, enabled: true))
-        XCTAssertEqual(body["threshold"] as? Int, 30)
+    func testStationChangeSendsOffAsNull() throws {
+        let body = try json(PushService.StationChange(siteId: "A12", above: 120, below: nil))
+        XCTAssertEqual(body["above"] as? Int, 120)
         XCTAssertEqual(body["site_id"] as? String, "A12")
-        XCTAssertNil(body["therhold"])
+        // Off is an explicit null, not a missing key.
+        XCTAssertTrue(body.keys.contains("below"))
+        XCTAssertTrue(body["below"] is NSNull)
+        // Unknown cam: left out.
+        XCTAssertFalse(try json(PushService.StationChange(siteId: nil, above: nil, below: 30)).keys.contains("site_id"))
     }
 
     func testSubscriptionDecodesNumericColumns() throws {
@@ -91,12 +134,13 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(item.direction, .below)
     }
 
-    func testArchiveIsSoft() throws {
-        let body = try json(PushService.BatchUpdate(keys: [1, 2], data: PushService.ArchiveChanges()))
-        XCTAssertEqual(body["keys"] as? [Int], [1, 2])
-        let data = try XCTUnwrap(body["data"] as? [String: Any])
-        XCTAssertEqual(data["archived"] as? Bool, true)
-        XCTAssertEqual(data["enabled"] as? Bool, false)
+    func testRestoreDecodesDeviceAndAlerts() throws {
+        let data = Data(#"{"device":{"id":5,"dnd_enabled":true,"dnd_start":"22:00","dnd_end":"07:00"},"subscriptions":[{"id":7,"station_id":"105","site_id":"015","metric":"aqi","direction":"above","threshold":120,"enabled":true}]}"#.utf8)
+        let restored = try JSONDecoder().decode(PushService.Restored.self, from: data)
+        XCTAssertEqual(restored.device?.id, 5)
+        XCTAssertEqual(StationAlerts.byStation(restored.subscriptions), ["105": StationAlerts(above: 120)])
+        let none = try JSONDecoder().decode(PushService.Restored.self, from: Data(#"{"device":null,"subscriptions":[]}"#.utf8))
+        XCTAssertNil(none.device)
     }
 
     // MARK: - Device encoding
@@ -111,7 +155,7 @@ final class PushServiceTests: XCTestCase {
         let payload = PushDevicePayload.make(
             deviceId: "6f1c2e7a-0000-4000-8000-000000000001",
             deviceToken: "abcd",
-            externalId: "player",
+            fcmToken: "fcm:abc",
             dndEnabled: true,
             dndStart: date(22, 30, in: taipei),
             dndEnd: date(7, 0, in: taipei),
@@ -127,169 +171,247 @@ final class PushServiceTests: XCTestCase {
         XCTAssertEqual(PushDevicePayload.deviceIdField, "device_id")
         XCTAssertEqual(body["device_id"] as? String, "6f1c2e7a-0000-4000-8000-000000000001")
         XCTAssertNil(body["install_id"])
-        XCTAssertEqual(body["external_id"] as? String, "player")
+        XCTAssertEqual(body["fcm_token"] as? String, "fcm:abc")
+        // OneSignal's player id is no longer written; the column is left as is.
+        XCTAssertFalse(body.keys.contains("external_id"))
         XCTAssertEqual(body["dnd_enabled"] as? Bool, true)
         XCTAssertEqual(body["dnd_start"] as? String, "22:30")
         XCTAssertEqual(body["dnd_end"] as? String, "07:00")
         XCTAssertEqual(body["timezone"] as? String, "Asia/Taipei")
         XCTAssertEqual(body["last_seen_at"] as? String, "1970-01-01T00:00:00Z")
         XCTAssertEqual(body["archived"] as? Bool, false)
+        XCTAssertEqual(body["is_pro"] as? Bool, false)
     }
 
-    func testDevicePayloadOmitsMissingExternalId() throws {
+    func testDevicePayloadCarriesProAndHelpLanguage() throws {
+        func payload(isPro: Bool, language: AppLanguage) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: false,
+                dndStart: Date(), dndEnd: Date(), isPro: isPro, language: language,
+                environment: .production, calendar: taipei
+            )
+        }
+        let chinese = try json(payload(isPro: true, language: .traditionalChinese))
+        XCTAssertEqual(chinese["is_pro"] as? Bool, true)
+        // Help's choice, not the language iOS picked for the app.
+        XCTAssertEqual(chinese["locale"] as? String, "zh-Hant")
+        XCTAssertEqual(try json(payload(isPro: false, language: .english))["locale"] as? String, "en")
+        // "Follow the system" falls back to what iOS gives the app.
+        XCTAssertEqual(payload(isPro: false, language: .system).locale, Bundle.main.preferredLocalizations.first)
+
+        // Either one changing changes the profile the mirror compares.
+        XCTAssertTrue(payload(isPro: true, language: .traditionalChinese).profile.hasPrefix("zh-Hant|true|"))
+        XCTAssertNotEqual(payload(isPro: true, language: .english).profile, payload(isPro: false, language: .english).profile)
+    }
+
+    func testDevicePayloadOmitsMissingFcmToken() throws {
         let payload = PushDevicePayload.make(
-            deviceId: "d", deviceToken: "abcd", externalId: nil, dndEnabled: false,
+            deviceId: "d", deviceToken: "abcd", fcmToken: nil, dndEnabled: false,
             dndStart: Date(), dndEnd: Date(), environment: .production, calendar: taipei
         )
-        XCTAssertFalse(try json(payload).keys.contains("external_id"))
+        let body = try json(payload)
+        // Left out, not cleared: a row keeps its last FCM token until a new one.
+        XCTAssertFalse(body.keys.contains("fcm_token"))
+        XCTAssertFalse(body.keys.contains("external_id"))
     }
 
-    // MARK: - Reconcile plan
+    // MARK: - Device sync gate
 
-    func testPlanCreatesRowsForNewAlerts() {
-        let plan = PushService.plan(existing: [], stationId: "5", siteId: "A1", alerts: StationAlerts(above: 120, below: 30))
-        XCTAssertEqual(plan.save, [
-            PushSubscription(stationId: "5", siteId: "A1", direction: .above, threshold: 120, enabled: true),
-            PushSubscription(stationId: "5", siteId: "A1", direction: .below, threshold: 30, enabled: true),
-        ])
-        XCTAssertEqual(plan.archive, [])
+    func testDeviceWithNoPendingAlertsStillSyncs() {
+        // An FCM token refresh arrives with no station changes pending.
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: true, pending: [:]))
+        // No row yet: only an alert being switched on makes one.
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: [:]))
+        XCTAssertFalse(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": .off]))
+        XCTAssertTrue(DirectusPushMirror.needsDevice(hasDevice: false, pending: ["5": StationAlerts(above: 120)]))
     }
 
-    func testPlanUpdatesChangedThresholdAndArchivesSwitchedOff() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 100, enabled: true),
-            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: StationAlerts(above: 150))
-        XCTAssertEqual(plan.save, [PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 150, enabled: true)])
-        XCTAssertEqual(plan.archive, [2])
+    func testNewFcmTokenAloneForcesUpsert() {
+        let now = Date()
+        let recent = now.addingTimeInterval(-60)
+        func current(token: String = "apns", fcm: String? = "fcm-1", lastSync: Date? = recent) -> Bool {
+            DirectusPushMirror.isDeviceCurrent(
+                syncedToken: "apns", token: token,
+                syncedFcmToken: "fcm-1", fcmToken: fcm, lastSync: lastSync, now: now
+            )
+        }
+        XCTAssertTrue(current())
+        // Same APNs token, refreshed recently, but FCM rotated: write it.
+        XCTAssertFalse(current(fcm: "fcm-2"))
+        // Messaging hasn't issued a token yet: not a change.
+        XCTAssertTrue(current(fcm: nil))
+        XCTAssertFalse(current(token: "apns-new"))
+        XCTAssertFalse(current(lastSync: nil))
+        XCTAssertFalse(current(lastSync: now.addingTimeInterval(-DirectusPushMirror.deviceRefreshInterval - 1)))
     }
 
-    func testPlanLeavesMatchingRowsAndArchivesDuplicates() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
-            PushSubscription(id: 4, stationId: "5", siteId: nil, direction: .above, threshold: 90, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: StationAlerts(above: 120))
-        XCTAssertEqual(plan.save, [])
-        XCTAssertEqual(plan.archive, [4])
+    func testNewLanguageOrProForcesUpsert() {
+        let now = Date()
+        func current(synced: String?, profile: String?) -> Bool {
+            DirectusPushMirror.isDeviceCurrent(
+                syncedToken: "apns", token: "apns",
+                syncedFcmToken: "fcm", fcmToken: "fcm", lastSync: now.addingTimeInterval(-60),
+                syncedProfile: synced, profile: profile, now: now
+            )
+        }
+        XCTAssertTrue(current(synced: "en|false", profile: "en|false"))
+        // Language changed under Help, or Pro started or lapsed: write it.
+        XCTAssertFalse(current(synced: "en|false", profile: "zh-Hant|false"))
+        XCTAssertFalse(current(synced: "en|false", profile: "en|true"))
+        // A row written before the profile was tracked is rewritten once.
+        XCTAssertFalse(current(synced: nil, profile: "en|false"))
     }
 
-    func testPlanArchivesEverythingWhenOff() {
-        let existing = [
-            PushSubscription(id: 1, stationId: "5", siteId: nil, direction: .above, threshold: 120, enabled: true),
-            PushSubscription(id: 2, stationId: "5", siteId: nil, direction: .below, threshold: 30, enabled: true),
-        ]
-        let plan = PushService.plan(existing: existing, stationId: "5", siteId: nil, alerts: .off)
-        XCTAssertEqual(plan.save, [])
-        XCTAssertEqual(plan.archive, [1, 2])
+    func testDndChangeStaysPendingUntilWritten() {
+        // The DND window is in the profile, which is saved only after a write
+        // succeeds: a failed write leaves the old profile, so the next flush,
+        // even after a relaunch, still sees a change (review: no lost DND).
+        func payload(dnd: Bool, start: Date) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: dnd,
+                dndStart: start, dndEnd: date(7, 0, in: taipei), environment: .production, calendar: taipei
+            )
+        }
+        let before = payload(dnd: false, start: date(22, 0, in: taipei)).profile
+        XCTAssertNotEqual(payload(dnd: true, start: date(22, 0, in: taipei)).profile, before)
+        XCTAssertNotEqual(payload(dnd: false, start: date(23, 30, in: taipei)).profile, before)
+        XCTAssertFalse(DirectusPushMirror.isDeviceCurrent(
+            syncedToken: "apns", token: "apns", syncedFcmToken: "f", fcmToken: "f",
+            lastSync: Date(), syncedProfile: before, profile: payload(dnd: true, start: date(22, 0, in: taipei)).profile
+        ))
     }
 
     // MARK: - Config
 
-    func testConfigPrefersPushTokenThenFeedbackToken() {
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: "push", feedbackToken: "fb")?.token, "push")
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: " ", feedbackToken: "fb")?.token, "fb")
-        XCTAssertEqual(PushService.Config.make(baseURL: "https://cms.example", pushToken: nil, feedbackToken: "fb")?.token, "fb")
-        XCTAssertNil(PushService.Config.make(baseURL: "https://cms.example", pushToken: "", feedbackToken: ""))
-        XCTAssertNil(PushService.Config.make(baseURL: "", pushToken: "push", feedbackToken: nil))
+    func testConfigNeedsAnHttpsPushApi() {
+        XCTAssertEqual(PushService.Config.make(baseURL: "https://push.example", deviceId: "d", secret: "s")?.baseURL.host, "push.example")
+        XCTAssertNil(PushService.Config.make(baseURL: "", deviceId: "d", secret: "s"))
+        XCTAssertNil(PushService.Config.make(baseURL: nil, deviceId: "d", secret: "s"))
+        XCTAssertNil(PushService.Config.make(baseURL: "http://push.example", deviceId: "d", secret: "s"))
     }
 
-    func testRequestCarriesBearerToken() {
-        let config = PushService.Config(baseURL: URL(string: "https://cms.example")!, token: "secret")
-        let request = PushService.makeRequest(config: config, method: "GET", path: PushService.subscriptionsPath, query: [("filter[archived][_eq]", "false")])
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer secret")
-        XCTAssertEqual(request.url?.path, "/items/twaqi_push_subscriptions")
-        XCTAssertEqual(request.url?.query?.removingPercentEncoding, "filter[archived][_eq]=false")
+    func testRequestSignsWithTheDeviceNotADirectusToken() {
+        let config = PushService.Config(baseURL: URL(string: "https://push.example")!, deviceId: "6f1c2e7a-0000-4000-8000-000000000001", secret: "s3cret")
+        let request = PushService.makeRequest(config: config, method: "PUT", path: "app/v1/stations/105", body: PushService.StationChange(siteId: nil, above: 100, below: nil))
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Device-Id"), "6f1c2e7a-0000-4000-8000-000000000001")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer s3cret")
+        XCTAssertEqual(request.url?.absoluteString, "https://push.example/app/v1/stations/105")
+        XCTAssertEqual(request.httpMethod, "PUT")
+        let restore = PushService.makeRequest(config: config, method: "GET", path: "app/v1/device")
+        // The device is named by its headers; no token goes in the URL.
+        XCTAssertNil(restore.url?.query)
+    }
+
+    // MARK: - OneSignal tags (kept alongside FCM)
+
+    func testOneSignalTagsMirrorAlertsAndDnd() {
+        let tags = OneSignalTags.tags(
+            wanted: ["105": StationAlerts(above: 120, below: 30), "126": StationAlerts(above: 90)],
+            dndEnabled: true, dndStart: date(22, 30, in: taipei), dndEnd: date(7, 0, in: taipei), calendar: taipei
+        )
+        XCTAssertEqual(tags, [
+            "105_pollution_therhold": "120",
+            "105_cleanliness_therhold": "30",
+            "126_pollution_therhold": "90",
+            "isDndEnabled": "true",
+            "dndStartTime": "1350",
+            "dndEndTime": "420",
+            "isDndStartEarlierThanEnd": "true",
+        ])
+        // DND off: its tags aren't wanted.
+        XCTAssertEqual(OneSignalTags.tags(wanted: [:], dndEnabled: false, dndStart: Date(), dndEnd: Date()), [:])
+    }
+
+    func testOneSignalTagChangesSendOnlyDifferencesAndDeleteTheRest() {
+        let written = ["105_pollution_therhold": "120", "126_pollution_therhold": "90", "isDndEnabled": "true"]
+        let desired = ["105_pollution_therhold": "150", "126_pollution_therhold": "90"]
+        XCTAssertEqual(OneSignalTags.changes(desired: desired, written: written), [
+            "105_pollution_therhold": "150",
+            "isDndEnabled": "",
+        ])
+        // Nothing new: nothing to send.
+        XCTAssertEqual(OneSignalTags.changes(desired: desired, written: desired), [:])
+        // An earlier build's name-keyed tag found on OneSignal is cleared.
+        XCTAssertEqual(
+            OneSignalTags.changes(desired: desired, written: desired, stale: ["Zhongshan_pollution_therhold", "105_pollution_therhold"]),
+            ["Zhongshan_pollution_therhold": ""]
+        )
+        XCTAssertTrue(OneSignalTags.isStationTag("Zhongshan_cleanliness_therhold"))
+        XCTAssertFalse(OneSignalTags.isStationTag("isDndEnabled"))
+    }
+
+    // MARK: - Restore interleavings (Copilot review)
+
+    func testDndEditedDuringRestoreIsKept() {
+        // Reinstall: restore takes the Directus window...
+        XCTAssertTrue(DirectusPushMirror.restoresDnd(isFreshInstall: true, editedLocally: false))
+        // ...but not over a change made in Help while it was in flight.
+        XCTAssertFalse(DirectusPushMirror.restoresDnd(isFreshInstall: true, editedLocally: true))
+        XCTAssertFalse(DirectusPushMirror.restoresDnd(isFreshInstall: false, editedLocally: false))
+    }
+
+    func testCancelAllDuringRestoreKeepsAlertsOff() {
+        // Cancel tapped before the row is known: kept while a restore is pending.
+        XCTAssertTrue(DirectusPushMirror.keepsCancelAll(hasDevice: false, restored: false))
+        XCTAssertTrue(DirectusPushMirror.keepsCancelAll(hasDevice: true, restored: true))
+        XCTAssertFalse(DirectusPushMirror.keepsCancelAll(hasDevice: false, restored: true))
+
+        let remote = ["105": StationAlerts(above: 120), "126": StationAlerts(below: 30)]
+        // With the cancel pending, none of the remote alerts come back.
+        XCTAssertEqual(DirectusPushMirror.restoredWanted(local: ["105": .off], remote: remote, cancelPending: true), ["105": .off])
+        // Without it, remote alerts fill in under local ones.
+        XCTAssertEqual(
+            DirectusPushMirror.restoredWanted(local: ["105": StationAlerts(above: 150)], remote: remote, cancelPending: false),
+            ["105": StationAlerts(above: 150), "126": StationAlerts(below: 30)]
+        )
+    }
+
+    func testRecoveryFromThePushApi() {
+        // Another install holds this id: new Keychain identity, new row.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 403)), .newIdentity)
+        // Row retired by a newer registration of this phone: register again.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 404)), .register)
+        // Anything else is retried as it is.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 502)), .none)
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.offline), .none)
+    }
+
+    func testDeviceRowCarriesWhetherNotificationsAreAllowed() throws {
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.authorized), true)
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.provisional), true)
+        XCTAssertEqual(PushDevicePayload.notificationsAllowed(.denied), false)
+        // Not asked yet is unknown, not "no": onboarding writes the row before
+        // it asks (Grok review). The sender waits for true, which the
+        // answer to the prompt writes at once.
+        XCTAssertNil(PushDevicePayload.notificationsAllowed(.notDetermined))
+
+        func payload(_ allowed: Bool?) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: false,
+                dndStart: Date(), dndEnd: Date(), notificationsAllowed: allowed,
+                environment: .production, calendar: taipei
+            )
+        }
+        XCTAssertEqual(try json(payload(false))["notifications_allowed"] as? Bool, false)
+        XCTAssertFalse(try json(payload(nil)).keys.contains("notifications_allowed"))
+        // Turning notifications off (or back on) rewrites the row.
+        XCTAssertNotEqual(payload(true).profile, payload(false).profile)
+    }
+
+    func testDeviceSecretIsBase64url() {
+        XCTAssertEqual(PushDeviceIdentity.base64url(Data([0xfb, 0xff, 0xfe])), "-__-")
+        XCTAssertEqual(PushDeviceIdentity.base64url(Data(repeating: 0, count: 32)).count, 43)
     }
 }
 
 /// Lets the tests encode an existential.
-// MARK: - Reading OneSignal's tags (FOX-36, FOX-37 M2)
-
-extension PushServiceTests {
-    func testTagsParseIntoStationsAndDnd() {
-        let settings = OneSignalManager.settings(fromTags: [
-            "isDndEnabled": "true",
-            "dndStartTime": "1320",
-            "dndEndTime": "420",
-            "Songshan_pollution_therhold": "150.0",
-            "Songshan_cleanliness_therhold": "25",
-            "901_cleanliness_therhold": "20",
-        ])
-        XCTAssertEqual(settings.isDndEnabled, true)
-        XCTAssertEqual(settings.dndStartTime, 1320)
-        XCTAssertEqual(settings.dndEndTime, 420)
-        XCTAssertEqual(settings.stationSettings.count, 2)
-        XCTAssertEqual(settings.stationSettings["Songshan"].map { StationAlerts($0) }, StationAlerts(above: 150, below: 25))
-        XCTAssertEqual(settings.stationSettings["901"].map { StationAlerts($0) }, StationAlerts(below: 20))
-        XCTAssertEqual(settings.stationSettings["901"]?.stationName, "901")
-    }
-
-    func testNoTagsParseAsNoSettings() {
-        let settings = OneSignalManager.settings(fromTags: nil)
-        XCTAssertNil(settings.isDndEnabled)
-        XCTAssertTrue(settings.stationSettings.isEmpty)
-    }
-
-    func testBadTagsAreSkippedAndTheRestStillRead() {
-        // A non-string tag used to end the whole read without an answer, and
-        // a threshold typed by hand in the dashboard crashed on `Double(_)!`.
-        let settings = OneSignalManager.settings(fromTags: [
-            42: "not a string key",
-            "dndStartTime": 1320,
-            "Banqiao_pollution_therhold": "high",
-            "Banqiao_cleanliness_therhold": "",
-            "_pollution_therhold": "100",
-            "Songshan_pollution_therhold": "120",
-        ])
-        XCTAssertNil(settings.dndStartTime)
-        XCTAssertNil(settings.stationSettings["Banqiao"])
-        XCTAssertNil(settings.stationSettings[""])
-        XCTAssertEqual(settings.stationSettings.keys.sorted(), ["Songshan"])
-        XCTAssertEqual(settings.stationSettings["Songshan"].map { StationAlerts($0) }, StationAlerts(above: 120))
-        // Still known as tags, so "cancel all" can remove them.
-        XCTAssertEqual(settings.unreadableStationTagCodes, ["Banqiao"])
-    }
-
-    func testReadThatNeverAnswersFailsAfterTheTimeout() {
-        let done = expectation(description: "answered")
-        OneSignalManager.readOnce(timeout: 0.05, read: { (_: @escaping (Result<Int, OneSignalError>) -> Void) in }) { result in
-            if case .success = result {
-                XCTFail("A read with no answer should fail")
-            }
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-    }
-
-    func testReadAnswersOnceEvenWhenItAlsoTimesOut() {
-        let done = expectation(description: "answered once")
-        done.assertForOverFulfill = true
-        var answers: [Int?] = []
-        OneSignalManager.readOnce(timeout: 0.05, read: { answer in
-            answer(.success(1))
-            answer(.success(2))
-        }) { result in
-            answers.append(try? result.get())
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-        // Let the timeout fire; it must not answer again.
-        let settle = expectation(description: "timeout passed")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { settle.fulfill() }
-        wait(for: [settle], timeout: 2)
-        XCTAssertEqual(answers, [1])
-    }
-}
-
 private struct AnyEncodable: Encodable {
     let value: Encodable
     init(_ value: Encodable) { self.value = value }
     func encode(to encoder: Encoder) throws { try value.encode(to: encoder) }
 }
 
-/// FOX-20: the pure parts of keeping alerts and Favourites together.
+/// FOX-20/31: keeping alerts and Favourites together.
 final class FavouriteAlertsTests: XCTestCase {
     private var suiteName: String!
     private var defaults: UserDefaults!
@@ -305,27 +427,67 @@ final class FavouriteAlertsTests: XCTestCase {
         super.tearDown()
     }
 
-    private func store(_ alerts: [String: StationAlerts], key: String) throws {
-        defaults.set(try JSONEncoder().encode(alerts), forKey: key)
+    /// An in-memory alert store that records each write.
+    private final class FakeServices {
+        var denied = false
+        var alerted: [Int: StationAlerts] = [:]
+        var writes: [(stationId: Int, alerts: StationAlerts, settled: Bool)] = []
+        var cancelledAll = 0
+
+        var services: FavouriteAlerts.Services {
+            FavouriteAlerts.Services(
+                notificationsDenied: { [unowned self] completion in completion(self.denied) },
+                alertedStations: { [unowned self] in self.alerted },
+                write: { [unowned self] stationId, _, alerts, settled in
+                    self.writes.append((stationId, alerts, settled))
+                    self.alerted[stationId] = alerts.isOff ? nil : alerts
+                },
+                cancelAll: { [unowned self] in
+                    self.cancelledAll += 1
+                    self.alerted = [:]
+                }
+            )
+        }
     }
 
-    func testTagCodeIsEnglishNameInTaiwanAndIdElsewhere() {
-        XCTAssertEqual(FavouriteAlerts.tagCode(countryCode: "twn", name: "Songshan", stationId: 126), "Songshan")
-        XCTAssertEqual(FavouriteAlerts.tagCode(countryCode: "tha", name: "Bangkok", stationId: 901), "901")
+    /// The `changed` notifications posted while `work` runs, as station → on.
+    private func posts(_ work: () -> Void) -> [(Int, Bool)] {
+        var seen: [(Int, Bool)] = []
+        let observer = NotificationCenter.default.addObserver(forName: FavouriteAlerts.changed, object: nil, queue: nil) { note in
+            if let id = note.userInfo?[FavouriteAlerts.stationIdKey] as? Int,
+               let isOn = note.userInfo?[FavouriteAlerts.isOnKey] as? Bool {
+                seen.append((id, isOn))
+            }
+        }
+        work()
+        NotificationCenter.default.removeObserver(observer)
+        return seen
     }
 
-    func testCandidateTagCodesTryNameThenIdAndSkipBlankName() {
-        XCTAssertEqual(FavouriteAlerts.candidateTagCodes(name: "Songshan", stationId: 126), ["Songshan", "126"])
-        XCTAssertEqual(FavouriteAlerts.candidateTagCodes(name: "", stationId: 126), ["126"])
+    private func enable(_ stationId: Int, _ fake: FakeServices, isStillFavourite: Bool = true) -> FavouriteAlerts.NewFavouriteOutcome? {
+        let done = expectation(description: "enabled")
+        var outcome: FavouriteAlerts.NewFavouriteOutcome?
+        FavouriteAlerts.enableForNewFavourite(
+            stationId: stationId,
+            siteId: nil,
+            isStillFavourite: { isStillFavourite },
+            services: fake.services
+        ) {
+            outcome = $0
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 2)
+        return outcome
     }
 
-    func testKnownAlertsPrefersUnsentOverSent() throws {
-        try store(["126": StationAlerts(above: 150)], key: "directusPushWantedAlerts")
-        try store(["126": StationAlerts(above: 100), "7": StationAlerts(below: 20)], key: "directusPushSyncedAlerts")
+    func testStoredAlertsReadOnlyStationsWithAnAlertOn() throws {
+        let wanted: [String: StationAlerts] = ["126": StationAlerts(above: 150), "7": .off, "x": StationAlerts(below: 20)]
+        defaults.set(try JSONEncoder().encode(wanted), forKey: "directusPushWantedAlerts")
 
-        XCTAssertEqual(DirectusPushMirror.knownAlerts(stationId: 126, defaults: defaults), StationAlerts(above: 150))
-        XCTAssertEqual(DirectusPushMirror.knownAlerts(stationId: 7, defaults: defaults), StationAlerts(below: 20))
-        XCTAssertNil(DirectusPushMirror.knownAlerts(stationId: 8, defaults: defaults))
+        XCTAssertEqual(DirectusPushMirror.alertedStations(defaults: defaults), [126: StationAlerts(above: 150)])
+        XCTAssertEqual(DirectusPushMirror.alerts(stationId: 126, defaults: defaults), StationAlerts(above: 150))
+        XCTAssertEqual(DirectusPushMirror.alerts(stationId: 7, defaults: defaults), .off)
+        XCTAssertEqual(DirectusPushMirror.alerts(stationId: 8, defaults: defaults), .off)
     }
 
     func testChangedNotificationIsReadForItsStationOnly() {
@@ -337,527 +499,130 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertNil(FavouriteAlerts.isOn(in: notification, stationId: 7))
     }
 
+    func testCapIsThreeAndCountsOtherStationsOnly() {
+        XCTAssertEqual(FavouriteAlerts.maxAlertedStations, 3)
+        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1, 3], excluding: 2))
+        XCTAssertTrue(FavouriteAlerts.isAtCap(alertedStationIds: [1, 3, 4], excluding: 2))
+        // Its own alerts don't count against it.
+        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1, 2, 3], excluding: 2))
+    }
+
     // MARK: FOX-31 — favouriting switches alerts on
 
-    private func on(_ code: String, above: Double? = 120, below: Double? = nil) -> OneSignalStationSetting {
-        OneSignalStationSetting(
-            stationName: code,
-            isPollutionNotificationEnabled: above != nil,
-            isCleanlinessNotificationEnabled: below != nil,
-            pollutionTherhold: above ?? 120,
-            cleanlinessTherhold: below ?? 30
-        )
-    }
-
-    private func settings(_ stations: [OneSignalStationSetting]) -> OneSignalSettings {
-        OneSignalSettings(stationSettings: Dictionary(uniqueKeysWithValues: stations.map { ($0.stationName, $0) }))
-    }
-
     func testDefaultAlertsAreTheStationScreensFirstAboveAlert() {
-        let setting = FavouriteAlerts.defaultAlerts(tagCode: "Songshan")
-        XCTAssertEqual(StationAlerts(setting), StationAlerts(above: 120))
-        XCTAssertEqual(setting.getTags(), [
-            "Songshan_pollution_therhold": "120.0",
-            "Songshan_cleanliness_therhold": "",
-        ])
+        XCTAssertEqual(StationAlerts(FavouriteAlerts.defaultAlerts), StationAlerts(above: 120))
     }
 
-    func testNewFavouriteIsEnabledUnderTheCap() {
-        XCTAssertEqual(
-            FavouriteAlerts.newFavouriteDecision(settings: settings([]), tagCode: "Songshan"),
-            .enabled(FavouriteAlerts.defaultAlerts(tagCode: "Songshan"))
-        )
-        XCTAssertEqual(
-            FavouriteAlerts.newFavouriteDecision(settings: settings([on("Banqiao")]), tagCode: "Songshan"),
-            .enabled(FavouriteAlerts.defaultAlerts(tagCode: "Songshan"))
-        )
+    func testNewFavouriteDecision() {
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3, 4], stationId: 2), .capReached)
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 2, 3], stationId: 2), .alreadyOn)
     }
 
-    func testNewFavouriteAtTheCapStaysOff() {
-        XCTAssertEqual(
-            FavouriteAlerts.newFavouriteDecision(settings: settings([on("Banqiao"), on("901", above: nil, below: 20)]), tagCode: "Songshan"),
-            .capReached
-        )
-    }
-
-    func testNewFavouriteWithAlertsAlreadyOnKeepsItsThresholds() {
-        // At the cap too: its own alerts count towards it, and are left alone.
-        XCTAssertEqual(
-            FavouriteAlerts.newFavouriteDecision(settings: settings([on("Banqiao"), on("Songshan", above: 150)]), tagCode: "Songshan"),
-            .alreadyOn
-        )
-    }
-
-    /// Records calls in order; answers synchronously, or holds OneSignal
-    /// writes on the wire while `holdSends` is set.
-    private final class FakeServices {
-        var denied = false
-        var read: Result<OneSignalSettings, OneSignalError> = .success(OneSignalSettings(stationSettings: [:]))
-        var send: Result<Bool, OneSignalError> = .success(true)
-        var holdSends = false
-        var heldSends: [(Result<Bool, OneSignalError>) -> Void] = []
-        var calls: [String] = []
-        var sentTags: [String: String]?
-        var mirrored: (stationId: Int, siteId: String?, alerts: StationAlerts)?
-        var mirroredSettled: Bool?
-        var sentTagWrites: [[String: String]] = []
-        let defaults: UserDefaults
-
-        init(defaults: UserDefaults) {
-            self.defaults = defaults
+    func testEnablingWritesAndTellsTheStationScreen() {
+        let fake = FakeServices()
+        fake.alerted = [1: StationAlerts(below: 20)]
+        var setting: StationAlertSetting?
+        var count: Int?
+        let observer = NotificationCenter.default.addObserver(forName: FavouriteAlerts.changed, object: nil, queue: nil) { note in
+            setting = FavouriteAlerts.setting(in: note)
+            count = FavouriteAlerts.alertedStationCount(in: note)
         }
+        defer { NotificationCenter.default.removeObserver(observer) }
 
-        var services: FavouriteAlerts.Services {
-            FavouriteAlerts.Services(
-                notificationsDenied: { [unowned self] in self.calls.append("permission"); $0(self.denied) },
-                readSettings: { [unowned self] in self.calls.append("read"); $0(self.read) },
-                sendTags: { [unowned self] tags, completion in
-                    self.calls.append("onesignal")
-                    self.sentTags = tags
-                    self.sentTagWrites.append(tags)
-                    if self.holdSends {
-                        self.heldSends.append(completion)
-                    } else {
-                        completion(self.send)
-                    }
-                },
-                mirror: { [unowned self] in
-                    self.calls.append("directus")
-                    self.mirrored = ($0, $1, $2)
-                    self.mirroredSettled = $3
-                },
-                mirrorCancelAll: { [unowned self] in
-                    self.calls.append("directus-cancel-all")
-                },
-                defaults: defaults
-            )
-        }
+        XCTAssertEqual(enable(126, fake), .enabled(FavouriteAlerts.defaultAlerts))
+        XCTAssertEqual(fake.writes.map(\.stationId), [126])
+        XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 120))
+        XCTAssertEqual(fake.writes.first?.settled, true)
+        XCTAssertEqual(setting, FavouriteAlerts.defaultAlerts)
+        XCTAssertEqual(count, 2)
     }
 
-    private func run(_ fake: FakeServices, isStillFavourite: Bool = true) -> FavouriteAlerts.NewFavouriteOutcome? {
-        let done = expectation(description: "completion")
-        var outcome: FavouriteAlerts.NewFavouriteOutcome?
-        FavouriteAlerts.enableForNewFavourite(
-            stationId: 126,
-            tagCode: "Songshan",
-            siteId: "012",
-            isStillFavourite: { isStillFavourite },
-            services: fake.services
-        ) {
-            XCTAssertTrue(Thread.isMainThread)
-            outcome = $0
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-        return outcome
-    }
-
-    func testEnablingWritesOneSignalThenDirectusAndTellsTheStationScreen() {
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .success(settings([on("Banqiao")]))
-        let posted = expectation(forNotification: FavouriteAlerts.changed, object: nil) { notification in
-            FavouriteAlerts.isOn(in: notification, stationId: 126) == true
-                && FavouriteAlerts.setting(in: notification) == FavouriteAlerts.defaultAlerts(tagCode: "Songshan")
-                && FavouriteAlerts.alertedStationCount(in: notification) == 2
-        }
-
-        XCTAssertEqual(run(fake), .enabled(FavouriteAlerts.defaultAlerts(tagCode: "Songshan")))
-        wait(for: [posted], timeout: 2)
-        XCTAssertEqual(fake.calls, ["permission", "read", "onesignal", "directus"])
-        XCTAssertEqual(fake.sentTags, FavouriteAlerts.defaultAlerts(tagCode: "Songshan").getTags())
-        XCTAssertEqual(fake.mirrored?.stationId, 126)
-        XCTAssertEqual(fake.mirrored?.siteId, "012")
-        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 120))
+    func testAlreadyOnKeepsItsThresholds() {
+        let fake = FakeServices()
+        fake.alerted = [126: StationAlerts(above: 90)]
+        XCTAssertEqual(enable(126, fake), .alreadyOn)
+        XCTAssertTrue(fake.writes.isEmpty)
+        XCTAssertEqual(fake.alerted[126], StationAlerts(above: 90))
     }
 
     func testCapReachedWritesNothing() {
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .success(settings([on("Banqiao"), on("Zhongshan")]))
-        XCTAssertEqual(run(fake), .capReached)
-        XCTAssertEqual(fake.calls, ["permission", "read"])
+        let fake = FakeServices()
+        fake.alerted = [1: StationAlerts(above: 100), 3: StationAlerts(above: 100), 4: StationAlerts(below: 30)]
+        XCTAssertEqual(enable(126, fake), .capReached)
+        XCTAssertTrue(fake.writes.isEmpty)
+    }
+
+    func testWriteRefusesAStationPastTheCap() {
+        // Two windows: both switches still looked unlocked, the first already
+        // saved, so 3 other stations are on when the second one writes.
+        let fake = FakeServices()
+        fake.alerted = [1: StationAlerts(above: 100), 2: StationAlerts(above: 100), 3: StationAlerts(below: 30)]
+        let on = StationAlertSetting(isPollutionNotificationEnabled: true, isCleanlinessNotificationEnabled: false)
+        XCTAssertFalse(FavouriteAlerts.write(on, stationId: 126, siteId: nil, services: fake.services))
+        XCTAssertTrue(fake.writes.isEmpty)
+        XCTAssertNil(fake.alerted[126])
+
+        // A station already on can still change, and any can go off.
+        XCTAssertTrue(FavouriteAlerts.write(on, stationId: 2, siteId: nil, services: fake.services))
+        let off = StationAlertSetting(isPollutionNotificationEnabled: false, isCleanlinessNotificationEnabled: false)
+        XCTAssertTrue(FavouriteAlerts.write(off, stationId: 3, siteId: nil, services: fake.services))
+        // ...which makes room.
+        XCTAssertTrue(FavouriteAlerts.write(on, stationId: 126, siteId: nil, services: fake.services))
     }
 
     func testNotificationsDeniedWritesNothing() {
-        let fake = FakeServices(defaults: defaults)
+        let fake = FakeServices()
         fake.denied = true
-        XCTAssertEqual(run(fake), .notificationsDenied)
-        XCTAssertEqual(fake.calls, ["permission"])
-    }
-
-    func testOneSignalUnreadableWritesNothing() {
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .failure(.oneSignalError)
-        XCTAssertEqual(run(fake), .notChanged)
-        XCTAssertEqual(fake.calls, ["permission", "read"])
-    }
-
-    func testOneSignalWriteFailureSkipsTheDirectusCopy() {
-        let fake = FakeServices(defaults: defaults)
-        fake.send = .failure(.oneSignalError)
-        XCTAssertEqual(run(fake), .notChanged)
-        XCTAssertEqual(fake.calls, ["permission", "read", "onesignal"])
-        XCTAssertNil(fake.mirrored)
+        XCTAssertEqual(enable(126, fake), .notificationsDenied)
+        XCTAssertTrue(fake.writes.isEmpty)
     }
 
     func testUnfavouritedBeforeTheWriteIsLeftAlone() {
-        let fake = FakeServices(defaults: defaults)
-        XCTAssertEqual(run(fake, isStillFavourite: false), .notChanged)
-        XCTAssertEqual(fake.calls, ["permission", "read"])
+        let fake = FakeServices()
+        XCTAssertEqual(enable(126, fake, isStillFavourite: false), .notChanged)
+        XCTAssertTrue(fake.writes.isEmpty)
     }
 
-    /// Lets work already queued on the main thread run.
-    private func drainMain() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+    // MARK: Leaving Favourites, cancel all, the switches
+
+    func testClearTurnsAlertsOffAndSaysSo() {
+        let fake = FakeServices()
+        fake.alerted = [126: StationAlerts(above: 120, below: 30)]
+        let seen = posts { FavouriteAlerts.clear(stationId: 126, services: fake.services) }
+
+        XCTAssertEqual(fake.writes.map(\.alerts), [.off])
+        XCTAssertEqual(fake.writes.first?.settled, true)
+        XCTAssertNil(fake.alerted[126])
+        XCTAssertEqual(seen.map(\.0), [126])
+        XCTAssertEqual(seen.map(\.1), [false])
     }
 
-    /// Answers the OneSignal write held longest, and stops holding new ones.
-    private func answerHeldSend(_ fake: FakeServices, _ result: Result<Bool, OneSignalError> = .success(true)) {
-        fake.holdSends = false
-        fake.heldSends.removeFirst()(result)
+    func testClearWithAlertsOffWritesNothing() {
+        let fake = FakeServices()
+        let seen = posts { FavouriteAlerts.clear(stationId: 126, services: fake.services) }
+        XCTAssertTrue(fake.writes.isEmpty)
+        XCTAssertTrue(seen.isEmpty)
     }
 
-    func testNewFavouriteWaitsForAClearOnTheWireAndWritesAfterIt() {
-        let fake = FakeServices(defaults: defaults)
-        fake.holdSends = true
-        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
-        XCTAssertTrue(FavouriteAlerts.isClearInFlight(stationId: 126))
+    func testCancelAllTurnsEveryStationOff() {
+        let fake = FakeServices()
+        fake.alerted = [126: StationAlerts(above: 120), 7: StationAlerts(below: 20)]
+        let seen = posts { FavouriteAlerts.cancelAll(services: fake.services) }
 
-        let done = expectation(description: "enabled")
-        var outcome: FavouriteAlerts.NewFavouriteOutcome?
-        FavouriteAlerts.enableForNewFavourite(
-            stationId: 126,
-            tagCode: "Songshan",
-            siteId: "012",
-            isStillFavourite: { true },
-            services: fake.services
-        ) {
-            outcome = $0
-            done.fulfill()
-        }
-        drainMain()
-        // Nothing read or written while the clear may still land.
-        XCTAssertEqual(fake.calls, ["onesignal"])
-
-        answerHeldSend(fake)
-        wait(for: [done], timeout: 2)
-        XCTAssertEqual(outcome, .enabled(FavouriteAlerts.defaultAlerts(tagCode: "Songshan")))
-        // The clear lands and is copied first; the new alerts after it, so
-        // OneSignal and Directus both end on.
-        XCTAssertEqual(fake.calls, ["onesignal", "directus", "permission", "read", "onesignal", "directus"])
-        XCTAssertEqual(fake.sentTagWrites.last, FavouriteAlerts.defaultAlerts(tagCode: "Songshan").getTags())
-        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 120))
-        XCTAssertFalse(FavouriteAlerts.isClearInFlight(stationId: 126))
+        XCTAssertEqual(fake.cancelledAll, 1)
+        XCTAssertTrue(fake.alerted.isEmpty)
+        XCTAssertEqual(seen.map(\.0), [7, 126])
+        XCTAssertTrue(seen.allSatisfy { !$0.1 })
     }
 
-    func testNewFavouriteAfterAFailedClearOnTheWireReadsItsAlertsStillOn() {
-        let fake = FakeServices(defaults: defaults)
-        fake.holdSends = true
-        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
-        let done = expectation(description: "enabled")
-        var outcome: FavouriteAlerts.NewFavouriteOutcome?
-        FavouriteAlerts.enableForNewFavourite(
-            stationId: 126, tagCode: "Songshan", siteId: nil, isStillFavourite: { true }, services: fake.services
-        ) {
-            outcome = $0
-            done.fulfill()
-        }
-        fake.read = .success(settings([on("Songshan", above: 150)]))
+    func testSwitchWriteWaitsForTheSliderToStop() {
+        let fake = FakeServices()
+        let setting = StationAlertSetting(isPollutionNotificationEnabled: true, isCleanlinessNotificationEnabled: false, pollutionTherhold: 150)
+        FavouriteAlerts.write(setting, stationId: 126, siteId: "12", services: fake.services)
 
-        answerHeldSend(fake, .failure(.oneSignalError))
-        wait(for: [done], timeout: 2)
-        XCTAssertEqual(outcome, .alreadyOn)
-        XCTAssertEqual(fake.calls, ["onesignal", "permission", "read"])
-        XCTAssertNil(fake.mirrored)
-        // Favourited again, so not retried later either.
-        XCTAssertNil(FavouriteAlerts.pendingClears(defaults: defaults)[126])
-    }
-
-    func testRetryLeavesAClearStillOnTheWireAlone() {
-        let fake = FakeServices(defaults: defaults)
-        fake.holdSends = true
-        FavouriteAlerts.clear(stationId: removed, tagCodes: ["Songshan"], services: fake.services)
-        FavouriteAlerts.retryPendingClears(isFavourite: { _ in false }, services: fake.services)
-        XCTAssertEqual(fake.sentTagWrites.count, 1)
-
-        answerHeldSend(fake)
-        drainMain()
-        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
-    }
-
-    func testSwitchWriteWaitsForAClearOnTheWireAndTheScreenKeepsIt() {
-        let fake = FakeServices(defaults: defaults)
-        fake.holdSends = true
-        FavouriteAlerts.clear(stationId: 126, tagCodes: ["Songshan"], services: fake.services)
-        let saidOff = expectation(forNotification: FavouriteAlerts.changed, object: nil) { notification in
-            FavouriteAlerts.isOn(in: notification, stationId: 126) == false
-        }
-        saidOff.isInverted = true
-
-        let written = expectation(description: "written")
-        FavouriteAlerts.write(on("Songshan", above: 150), stationId: 126, siteId: "012", isCurrent: { true }, services: fake.services) {
-            XCTAssertTrue($0)
-            written.fulfill()
-        }
-        drainMain()
-        XCTAssertEqual(fake.sentTagWrites.count, 1)
-
-        answerHeldSend(fake)
-        wait(for: [written, saidOff], timeout: 0.5)
-        XCTAssertEqual(fake.calls, ["onesignal", "directus", "onesignal", "directus"])
-        XCTAssertEqual(fake.sentTagWrites.last, on("Songshan", above: 150).getTags())
-        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 150))
-    }
-
-    func testNewFavouriteCancelsAClearStillWaiting() throws {
-        try storePending([126: ["Songshan"]])
-        let fake = FakeServices(defaults: defaults)
-        _ = run(fake)
-        XCTAssertNil(FavouriteAlerts.pendingClears(defaults: defaults)[126])
-    }
-
-    // MARK: FOX-36 — the cap counts other stations (FOX-37 M3)
-
-    func testCapCountsOtherStationsOnly() {
-        // Its own "above" alert on and one other station: its "below" switch
-        // adds no station, so it isn't locked.
-        XCTAssertFalse(FavouriteAlerts.isAtCap(settings([on("Songshan"), on("Banqiao")]), excluding: "Songshan"))
-        XCTAssertTrue(FavouriteAlerts.isAtCap(settings([on("Zhongshan"), on("Banqiao")]), excluding: "Songshan"))
-        XCTAssertTrue(FavouriteAlerts.isAtCap(settings([on("Songshan"), on("Zhongshan"), on("Banqiao")]), excluding: "Songshan"))
-        // Entries with both alerts off don't count.
-        XCTAssertFalse(FavouriteAlerts.isAtCap(settings([on("Zhongshan", above: nil), on("Banqiao")]), excluding: "Songshan"))
-        XCTAssertEqual(FavouriteAlerts.alertedStationCount(settings([on("Zhongshan", above: nil), on("Banqiao")])), 1)
-    }
-
-    // MARK: FOX-36 — leaving Favourites turns alerts off (FOX-37 M1, M4)
-
-    private let removed = 9_001
-
-    private func storePending(_ pending: [Int: [String]]) throws {
-        let stored = Dictionary(uniqueKeysWithValues: pending.map { (String($0.key), $0.value) })
-        defaults.set(try JSONEncoder().encode(stored), forKey: "favouriteAlertsPendingClears")
-    }
-
-    private func clear(_ fake: FakeServices, codes: [String]) -> Bool? {
-        let done = expectation(description: "cleared")
-        var cleared: Bool?
-        FavouriteAlerts.clear(stationId: removed, tagCodes: codes, services: fake.services) {
-            XCTAssertTrue(Thread.isMainThread)
-            cleared = $0
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-        return cleared
-    }
-
-    func testStationScreenClearsEveryCandidateWhileAlertStateIsUnknown() {
-        // The station record says where this app writes alerts, not where
-        // an alert of unknown state is.
-        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: nil, exactTagCode: "Songshan", candidates: ["126"]), ["126", "Songshan"])
-        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: nil, exactTagCode: nil, candidates: ["Songshan", "126"]), ["126", "Songshan"])
-        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: true, exactTagCode: "Songshan", candidates: ["Songshan", "126"]), ["Songshan"])
-        XCTAssertEqual(DetailsViewModel.tagCodesToClear(alertsOn: false, exactTagCode: "Songshan", candidates: ["Songshan", "126"]), [])
-    }
-
-    func testFavouriteAfterTheStationRecordFailedSaysSoAndTryAgainStillEnables() {
-        var deferred = DeferredAlertsEnable()
-        // Opened offline: the latest request already failed, then the heart.
-        XCTAssertEqual(deferred.favourited(isAwaitingStation: false), .tellNotChanged)
-        XCTAssertTrue(deferred.isWaiting)
-        // Try Again fails too: told once already.
-        XCTAssertEqual(deferred.stationAnswered(hasStation: false, isLatest: true), .nothing)
-        // Try Again loads the record: alerts go on.
-        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .enable)
-        XCTAssertFalse(deferred.isWaiting)
-        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .nothing)
-    }
-
-    func testFavouriteWhileTheStationRecordIsOnTheWireWaitsForTheLatestAnswer() {
-        var deferred = DeferredAlertsEnable()
-        XCTAssertEqual(deferred.favourited(isAwaitingStation: true), .nothing)
-        // A failure from an older pair while the latest is still on the wire.
-        XCTAssertEqual(deferred.stationAnswered(hasStation: false, isLatest: false), .nothing)
-        XCTAssertTrue(deferred.isWaiting)
-        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .enable)
-
-        // The latest failing does say so.
-        var failed = DeferredAlertsEnable()
-        _ = failed.favourited(isAwaitingStation: true)
-        XCTAssertEqual(failed.stationAnswered(hasStation: false, isLatest: true), .tellNotChanged)
-    }
-
-    func testUnfavouriteStopsAWaitingEnable() {
-        var deferred = DeferredAlertsEnable()
-        _ = deferred.favourited(isAwaitingStation: true)
-        deferred.cancel()
-        XCTAssertEqual(deferred.stationAnswered(hasStation: true, isLatest: true), .nothing)
-        var neverFavourited = DeferredAlertsEnable()
-        XCTAssertEqual(neverFavourited.stationAnswered(hasStation: false, isLatest: true), .nothing)
-    }
-
-    func testTagCodesToClearWhenStateIsKnownOrNot() {
-        let candidates = ["Songshan", "126"]
-        XCTAssertEqual(FavouriteAlerts.tagCodesToClear(alertsOn: false, knownTagCode: "Songshan", candidates: candidates), [])
-        XCTAssertEqual(FavouriteAlerts.tagCodesToClear(alertsOn: true, knownTagCode: "Songshan", candidates: candidates), ["Songshan"])
-        XCTAssertEqual(FavouriteAlerts.tagCodesToClear(alertsOn: true, knownTagCode: nil, candidates: candidates), candidates)
-        // No record and OneSignal not read: cleared anyway, under every prefix.
-        XCTAssertEqual(FavouriteAlerts.tagCodesToClear(alertsOn: nil, knownTagCode: nil, candidates: candidates), candidates)
-    }
-
-    func testClearWritesOneSignalThenDirectusThenSaysOff() {
-        let fake = FakeServices(defaults: defaults)
-        let posted = expectation(forNotification: FavouriteAlerts.changed, object: nil) { [removed] notification in
-            FavouriteAlerts.isOn(in: notification, stationId: removed) == false
-        }
-
-        XCTAssertEqual(clear(fake, codes: ["Songshan", "126", "Songshan"]), true)
-        wait(for: [posted], timeout: 2)
-        XCTAssertEqual(fake.calls, ["onesignal", "directus"])
-        XCTAssertEqual(fake.sentTagWrites.count, 1)
-        XCTAssertEqual(fake.sentTags, [
-            "Songshan": "", "Songshan_pollution_therhold": "", "Songshan_cleanliness_therhold": "",
-            "126": "", "126_pollution_therhold": "", "126_cleanliness_therhold": "",
-        ])
-        XCTAssertEqual(fake.mirrored?.stationId, removed)
-        XCTAssertEqual(fake.mirrored?.alerts, .off)
-        XCTAssertEqual(fake.mirroredSettled, true)
-        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
-    }
-
-    func testClearOneSignalFailureSkipsDirectusAndIsKeptForLater() {
-        let fake = FakeServices(defaults: defaults)
-        fake.send = .failure(.oneSignalError)
-        let posted = expectation(forNotification: FavouriteAlerts.changed, object: nil) { [removed] notification in
-            FavouriteAlerts.isOn(in: notification, stationId: removed) != nil
-        }
-        posted.isInverted = true
-
-        XCTAssertEqual(clear(fake, codes: ["Songshan"]), false)
-        wait(for: [posted], timeout: 0.3)
-        XCTAssertEqual(fake.calls, ["onesignal"])
-        XCTAssertNil(fake.mirrored)
-        XCTAssertEqual(FavouriteAlerts.pendingClears(defaults: defaults), [removed: ["Songshan"]])
-    }
-
-    func testPendingClearsAreRetriedUnlessFavouritedAgain() throws {
-        try storePending([removed: ["Songshan"], 126: ["126"]])
-        let fake = FakeServices(defaults: defaults)
-        let posted = expectation(forNotification: FavouriteAlerts.changed, object: nil) { [removed] notification in
-            FavouriteAlerts.isOn(in: notification, stationId: removed) == false
-        }
-
-        FavouriteAlerts.retryPendingClears(isFavourite: { $0 == 126 }, services: fake.services)
-        wait(for: [posted], timeout: 2)
-        XCTAssertEqual(fake.calls, ["onesignal", "directus"])
-        XCTAssertEqual(fake.sentTags?["Songshan_pollution_therhold"], "")
-        XCTAssertNil(fake.sentTags?["126_pollution_therhold"])
-        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
-    }
-
-    // MARK: FOX-36 — Help's "cancel all" (FOX-37 M1)
-
-    private func cancelAll(_ fake: FakeServices) -> Bool? {
-        let done = expectation(description: "cancelled")
-        var cancelled: Bool?
-        FavouriteAlerts.cancelAll(services: fake.services) {
-            XCTAssertTrue(Thread.isMainThread)
-            cancelled = $0
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-        return cancelled
-    }
-
-    func testCancelAllWritesOneSignalThenDirectus() throws {
-        try storePending([removed: ["Songshan"]])
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .success(settings([on("Banqiao"), on("901", above: nil, below: 20)]))
-
-        XCTAssertEqual(cancelAll(fake), true)
-        XCTAssertEqual(fake.calls, ["read", "onesignal", "directus-cancel-all"])
-        XCTAssertEqual(fake.sentTags?["Banqiao_pollution_therhold"], "")
-        XCTAssertEqual(fake.sentTags?["901_cleanliness_therhold"], "")
-        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
-    }
-
-    func testCancelAllAlsoClearsWaitingClearsAndUnreadableTags() throws {
-        try storePending([removed: ["Xindian"]])
-        let fake = FakeServices(defaults: defaults)
-        var read = settings([])
-        read.unreadableStationTagCodes = ["Banqiao"]
-        fake.read = .success(read)
-
-        XCTAssertEqual(cancelAll(fake), true)
-        XCTAssertEqual(fake.calls, ["read", "onesignal", "directus-cancel-all"])
-        XCTAssertEqual(fake.sentTags?["Xindian_pollution_therhold"], "")
-        XCTAssertEqual(fake.sentTags?["Banqiao_pollution_therhold"], "")
-        XCTAssertTrue(FavouriteAlerts.pendingClears(defaults: defaults).isEmpty)
-    }
-
-    func testCancelAllRefusedKeepsWaitingClears() throws {
-        try storePending([removed: ["Xindian"]])
-        let fake = FakeServices(defaults: defaults)
-        fake.send = .failure(.oneSignalError)
-        XCTAssertEqual(cancelAll(fake), false)
-        XCTAssertEqual(FavouriteAlerts.pendingClears(defaults: defaults), [removed: ["Xindian"]])
-    }
-
-    func testCancelAllWithNothingOnStillClearsTheDirectusCopy() {
-        let fake = FakeServices(defaults: defaults)
-        XCTAssertEqual(cancelAll(fake), true)
-        XCTAssertEqual(fake.calls, ["read", "directus-cancel-all"])
-    }
-
-    func testCancelAllLeavesDirectusWhenOneSignalCantBeRead() {
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .failure(.oneSignalError)
-        XCTAssertEqual(cancelAll(fake), false)
-        XCTAssertEqual(fake.calls, ["read"])
-    }
-
-    func testCancelAllLeavesDirectusWhenOneSignalRefusesTheWrite() {
-        let fake = FakeServices(defaults: defaults)
-        fake.read = .success(settings([on("Banqiao")]))
-        fake.send = .failure(.oneSignalError)
-        XCTAssertEqual(cancelAll(fake), false)
-        XCTAssertEqual(fake.calls, ["read", "onesignal"])
-    }
-
-    // MARK: FOX-36 — the station screen's switches (FOX-37 M1)
-
-    private func write(_ fake: FakeServices, isCurrent: Bool = true) -> Bool? {
-        let done = expectation(description: "written")
-        var taken: Bool?
-        FavouriteAlerts.write(on("Songshan", above: 150), stationId: 126, siteId: "012", isCurrent: { isCurrent }, services: fake.services) {
-            XCTAssertTrue(Thread.isMainThread)
-            taken = $0
-            done.fulfill()
-        }
-        wait(for: [done], timeout: 2)
-        return taken
-    }
-
-    func testSwitchWriteCopiesToDirectusOnlyAfterOneSignal() {
-        let fake = FakeServices(defaults: defaults)
-        XCTAssertEqual(write(fake), true)
-        XCTAssertEqual(fake.calls, ["onesignal", "directus"])
-        XCTAssertEqual(fake.sentTags, on("Songshan", above: 150).getTags())
-        XCTAssertEqual(fake.mirrored?.alerts, StationAlerts(above: 150))
-        XCTAssertEqual(fake.mirrored?.siteId, "012")
-        // A slider sends a value per step: the copy waits for it to settle.
-        XCTAssertEqual(fake.mirroredSettled, false)
-    }
-
-    func testSwitchWriteOneSignalFailureSkipsDirectus() {
-        let fake = FakeServices(defaults: defaults)
-        fake.send = .failure(.oneSignalError)
-        XCTAssertEqual(write(fake), false)
-        XCTAssertEqual(fake.calls, ["onesignal"])
-        XCTAssertNil(fake.mirrored)
-    }
-
-    func testSwitchWriteOvertakenByALaterChangeLeavesTheCopyToIt() {
-        let fake = FakeServices(defaults: defaults)
-        XCTAssertEqual(write(fake, isCurrent: false), true)
-        XCTAssertEqual(fake.calls, ["onesignal"])
+        XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 150))
+        XCTAssertEqual(fake.writes.first?.settled, false)
     }
 }
