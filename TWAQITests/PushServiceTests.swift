@@ -554,6 +554,31 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertTrue(fake.writes.isEmpty)
     }
 
+    func testWriteRefusesAStationPastTheCap() {
+        // Two windows: both switches still looked unlocked, the first already
+        // saved, so 3 other stations are on when the second one writes.
+        let fake = FakeServices()
+        fake.alerted = [1: StationAlerts(above: 100), 2: StationAlerts(above: 100), 3: StationAlerts(below: 30)]
+        let on = StationAlertSetting(isPollutionNotificationEnabled: true, isCleanlinessNotificationEnabled: false)
+        XCTAssertFalse(FavouriteAlerts.write(on, stationId: 126, siteId: nil, services: fake.services))
+        XCTAssertTrue(fake.writes.isEmpty)
+        XCTAssertNil(fake.alerted[126])
+
+        // A station already on can still change, and any can go off.
+        XCTAssertTrue(FavouriteAlerts.write(on, stationId: 2, siteId: nil, services: fake.services))
+        let off = StationAlertSetting(isPollutionNotificationEnabled: false, isCleanlinessNotificationEnabled: false)
+        XCTAssertTrue(FavouriteAlerts.write(off, stationId: 3, siteId: nil, services: fake.services))
+        // ...which makes room.
+        XCTAssertTrue(FavouriteAlerts.write(on, stationId: 126, siteId: nil, services: fake.services))
+    }
+
+    func testStationRefusedByTheWorkerIsRecognised() {
+        // A 409 from PUT /app/v1/stations: dropped, not retried forever.
+        XCTAssertTrue(DirectusPushMirror.isStationRefused(PushError.server(statusCode: 409)))
+        XCTAssertFalse(DirectusPushMirror.isStationRefused(PushError.server(statusCode: 502)))
+        XCTAssertFalse(DirectusPushMirror.isStationRefused(PushError.offline))
+    }
+
     func testNotificationsDeniedWritesNothing() {
         let fake = FakeServices()
         fake.denied = true

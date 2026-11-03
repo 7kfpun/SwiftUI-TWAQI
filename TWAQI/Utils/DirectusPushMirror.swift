@@ -274,6 +274,17 @@ final class DirectusPushMirror {
                     save(latest, Keys.wanted)
                 }
                 save(done, Keys.synced)
+            } catch where Self.isStationRefused(error) {
+                // The Worker holds the cap too (409): this station would be
+                // one too many. Drop it here rather than retry it forever,
+                // and let its screen show the switches off.
+                print("Directus push: station \(key) refused (station limit)")
+                var latest = load([String: StationAlerts].self, Keys.wanted) ?? [:]
+                latest[key] = nil
+                save(latest, Keys.wanted)
+                if let stationId = Int(key) {
+                    FavouriteAlerts.post(stationId: stationId, isOn: false)
+                }
             } catch {
                 print("Directus push: station \(key) failed: \(error)")
                 recover(from: error)
@@ -431,6 +442,13 @@ final class DirectusPushMirror {
         /// APNs token (404): register again with the same identity.
         case register
         case none
+    }
+
+    /// The Worker refused a station's alerts because the device already has
+    /// alerts on for `FavouriteAlerts.maxAlertedStations` others.
+    nonisolated static func isStationRefused(_ error: Error) -> Bool {
+        if case PushError.server(statusCode: 409) = error { return true }
+        return false
     }
 
     nonisolated static func recovery(for error: Error) -> Recovery {

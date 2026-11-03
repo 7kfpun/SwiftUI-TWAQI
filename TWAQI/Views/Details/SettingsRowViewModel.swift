@@ -60,10 +60,19 @@ class SettingsRowViewModel: ObservableObject {
     /// copy once the slider stops.
     private func save(_ setting: StationAlertSetting) {
         let isOn = !StationAlerts(setting).isOff
+        guard FavouriteAlerts.write(setting, stationId: station.id, siteId: siteId) else {
+            // Other stations reached the cap since this screen last looked
+            // (another window): the switches go back off and lock.
+            isApplyingStoredSettings = true
+            stationSetting.isPollutionNotificationEnabled = false
+            stationSetting.isCleanlinessNotificationEnabled = false
+            isApplyingStoredSettings = false
+            isAtCap = true
+            return
+        }
         if isOn {
             addToFavourites()
         }
-        FavouriteAlerts.write(setting, stationId: station.id, siteId: siteId)
         FavouriteAlerts.post(stationId: station.id, isOn: isOn)
     }
 

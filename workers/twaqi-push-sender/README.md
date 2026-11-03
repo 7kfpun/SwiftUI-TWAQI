@@ -128,7 +128,8 @@ npx wrangler dev  # secrets from .dev.vars (gitignored)
 `/run?dry` works locally against the live Directus and AQI API with only `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` in `.dev.vars`; it reads and never writes.
 
 Each run makes one AQI request, 9 Directus reads (more pages only when over 500 subscriptions change at once), one subrequest per alert sent, an OAuth exchange when the access token is older than ~55 minutes, and one write each for state, dead tokens and logs. **Sized for 40,000 alerts per 2-hour run** on Workers Paid.
-- **Requests:** a run may make up to `limits.subrequests` = 60,000 outgoing requests (Paid allows 10,000 by default, up to 10M). That covers one per alert plus reads and writes.
+- **Requests:** a run may make up to `limits.subrequests` = 100,000 outgoing requests (Paid allows 10,000 by default, up to 10M). Each alert takes one FCM request, or two when a 429/5xx is retried, plus reads and writes, so 45,000 alerts fit even if every one is retried.
+- **Budget:** the run counts its own requests against `SUBREQUEST_LIMIT`, which must equal `limits.subrequests`. A batch of 100 starts only if its worst case still fits, and is then charged what it actually used. A send that threw counts as two.
 - **Time:** sends go 25 at a time, so 40k at ~100 ms each take about 3 minutes. A cron every 2 h gets 15 min of CPU and 15 min of wall time.
 - **Cap:** `MAX_SENDS_PER_RUN` is 45,000. Anything past it stays unsent and goes out on the next run.
 - **No repeats:** state is saved to Directus after every 100 sends, so a run cut short never resends what it already delivered.

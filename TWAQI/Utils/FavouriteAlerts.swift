@@ -83,8 +83,20 @@ enum FavouriteAlerts {
 
     /// Writes a station's alerts as set on its screen. The Directus copy
     /// waits for a slider to stop.
-    static func write(_ setting: StationAlertSetting, stationId: Int, siteId: String?, services: Services = .live) {
-        services.write(stationId, siteId, StationAlerts(setting), false)
+    ///
+    /// Returns false, writing nothing, when it would switch on a station past
+    /// the cap: checked here, against what is saved, so two screens whose
+    /// switches both still looked unlocked (two iPad windows) can't both get
+    /// past it. Changing or switching off a station that is on always works.
+    @discardableResult
+    static func write(_ setting: StationAlertSetting, stationId: Int, siteId: String?, services: Services = .live) -> Bool {
+        let alerts = StationAlerts(setting)
+        let alerted = alertedStationIds(services: services)
+        if !alerts.isOff, !alerted.contains(stationId), isAtCap(alertedStationIds: alerted, excluding: stationId) {
+            return false
+        }
+        services.write(stationId, siteId, alerts, false)
+        return true
     }
 
     // MARK: - Leaving Favourites turns alerts off

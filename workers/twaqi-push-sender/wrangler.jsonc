@@ -25,17 +25,17 @@
     // Readings older than this are ignored rather than alerted on.
     "MAX_DATA_AGE_MINUTES": "180",
     // Alerts sent per run; the rest go out on the next run, never twice.
-    // Aimed at 40k per 2-hour run; must stay under limits.subrequests minus
-    // the reads and per-100 writes (~1.5k at 45k sends).
+    // Aimed at 40k per 2-hour run. With every send retried, 45k alerts need
+    // ~90k FCM requests plus ~2k reads and writes, inside limits.subrequests.
     "MAX_SENDS_PER_RUN": "45000",
     // The run's own count of outgoing requests stops before this; keep it
     // equal to limits.subrequests below.
-    "SUBREQUEST_LIMIT": "60000"
+    "SUBREQUEST_LIMIT": "100000"
   },
   // Workers Paid: 10,000 outgoing requests per run by default, up to 10M.
-  // One per alert sent, plus reads and writes. Cron every 2 h gets 15 min
-  // CPU and 15 min wall time; 40k sends take ~3 min.
-  "limits": { "subrequests": 60000 },
+  // One or two per alert (a 429/5xx is retried once), plus reads and writes.
+  // Cron every 2 h gets 15 min CPU and 15 min wall time; 40k sends ~3 min.
+  "limits": { "subrequests": 100000 },
   // Every send, for delivery stats (Directus keeps only failures and tests).
   "analytics_engine_datasets": [
     { "binding": "PUSH_EVENTS", "dataset": "twaqi_push_events" }

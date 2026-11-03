@@ -221,7 +221,7 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     console.warn('sends deferred to the next run', deferred.length)
   }
 
-  const limit = Number(env.SUBREQUEST_LIMIT ?? 60000)
+  const limit = Number(env.SUBREQUEST_LIMIT ?? 100000)
   const dead = new Set<number>()
   for (let i = 0; i < toSend.length; i += SAVE_EVERY) {
     const logs: PushLog[] = []
@@ -229,9 +229,10 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     // A chunk starts only if its worst case still fits: every send retried
     // once, every state-write try, one dead-token write and one log write.
     // Otherwise the rest wait for the next run, with what was sent saved.
-    // That worst case is charged up front, not what the chunk turns out to
-    // use: a retry whose request throws never reports back, so counting
-    // actual attempts undercounts (Copilot review).
+    // After the chunk, what it actually used is charged instead, so a
+    // healthy run isn't cut short by retries it never made (Grok review). A
+    // send that threw counts as two: its retry may have gone out without
+    // reporting back (Copilot review), so the count never runs low.
     const worstCase = chunk.length * 2 + SAVE_ATTEMPTS + 2
     if (result.requests + worstCase > limit) {
       const left = toSend.length - i
@@ -239,17 +240,22 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
       console.warn('sends deferred to the next run (subrequest budget)', left)
       break
     }
-    result.requests += worstCase
+    let used = 0
     await pool(chunk, SEND_CONCURRENCY, async ({ sub, reading }) => {
       if (dead.has(sub.device.id)) return
-      logs.push((await sendOne(sub, reading)).log)
+      const sent = await sendOne(sub, reading)
+      used += sent.attempts
+      logs.push(sent.log)
     })
     // Saved per chunk: what was sent is marked sent before the next chunk.
     const newlyDead = [...dead].filter((id) => !result.archivedDevices.includes(id))
+    if (newlyDead.length) used++
     await archiveDevices(env, newlyDead)
     result.archivedDevices.push(...newlyDead)
-    await saveUpdates()
+    used += await saveUpdates()
     const written = await logQuietly(env, logs)
+    if (written.rows) used++
+    result.requests += used
     result.logged += written.rows
     result.events += written.events
   }
@@ -322,6 +328,8 @@ export async function run(env: Env, options: RunOptions = {}): Promise<RunResult
     } catch (e) {
       count('failed')
       log.error_code = 'EXCEPTION'
+      // Unknown how far it got: a first try and a retry may both have gone out.
+      attempts = 2
       console.warn('fcm error', sub.id, String(e))
     }
     return { log, attempts }
