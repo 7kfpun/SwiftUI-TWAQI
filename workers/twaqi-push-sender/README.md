@@ -40,7 +40,7 @@ The app has **no Directus token for the push collections**. It writes its own ro
 | Route | |
 | --- | --- |
 | `PUT /app/v1/device` | Upsert this device's row (tokens, `environment`, `app_version`, `locale`, `is_pro`, `last_seen_at`, DND, `timezone`) → `{ id }`. Other fields in the body are dropped. |
-| `GET /app/v1/device?device_token=…` | For a restore: `{ device: { id, dnd_* } \| null, subscriptions: [...] }`. |
+| `GET /app/v1/device` | For a restore: `{ device: { id, dnd_* } \| null, subscriptions: [...] }`. Takes no query: the device is named by its signed headers, and no token goes in a URL. |
 | `PUT /app/v1/stations/:stationId` | `{ site_id, above, below }` (a whole AQI, or `null` for off): brings that station's rows in line, archiving what's off. The station limit is the app's; the Worker doesn't check it. |
 | `POST /app/v1/archive-all` | Help's "cancel all": archives this device's live alerts. |
 
