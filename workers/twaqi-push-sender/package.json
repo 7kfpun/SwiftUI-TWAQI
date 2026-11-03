@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --test-scheduled",
+    "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "send": "node --experimental-strip-types --no-warnings scripts/run.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test 'test/*.test.ts'"
   },

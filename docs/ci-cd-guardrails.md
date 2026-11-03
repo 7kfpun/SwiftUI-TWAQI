@@ -9,8 +9,9 @@ Linear FOX-nn → Orca codes on feature/fox-nn-… → draft PR → self-review 
 ```
 
 A merge ships nothing to users except Cloudflare Workers, which deploy on merge when
-`workers/` changes. Every other release step is a separate, deliberate action, taken
-only when the ticket or PR names it.
+`workers/` changes (after the owner approves the deploy), and the scheduled push sends,
+which run from whatever `master` holds. Every other release step is a separate,
+deliberate action, taken only when the ticket or PR names it.
 
 ## Checks on a PR to `master`
 
@@ -62,6 +63,7 @@ exposed: rotate the key, then rewrite the branch.
 |---|---|---|
 | **Squash-merge** | GitHub merge button / `gh pr merge --squash`, after the user's greenlight | ruleset: required checks + `LGTM` (another agent's review); PR template checkboxes |
 | **Cloudflare Workers** | `workers.yml` on push to `master` (changed Workers only); `workflow_dispatch` to redeploy | the PR's `Workers` check; deploy runs from `master` only |
+| **Push sends** (scheduled AQI alerts) | `push-sender.yml`: `schedule` `20 */2 * * *` and `workflow_dispatch` (dry run on by default), running `workers/twaqi-push-sender`'s `run()` under Node | `push-sender` environment (master only, **no reviewers**, so the schedule can run); the workflow also refuses other branches before the environment is used. See below. |
 | **Firebase Hosting** | `firebase-hosting.yml`, `workflow_dispatch` only, from `master`: `check-domain` · `deploy-main` · `deploy-legacy` | `firebase-hosting` environment (owner approval); `deploy-legacy` refuses until `check-domain` passes |
 | **DNS cutover** | by hand, Cloudflare zone `wahthefox.com` + Firebase console custom domain | [web-hosting.md](web-hosting.md) steps 3-5; verify with the `check-domain` action |
 | **TestFlight** | `fastlane release_build` on the Mac mini (cloud-managed signing needs the Xcode Apple ID, so it can't run on GitHub's runners) | named in the ticket/PR; the lane runs `check_release_consistency.py` first |
@@ -99,6 +101,34 @@ gh api --method POST repos/7kfpun/SwiftUI-TWAQI/environments/firebase-hosting/de
 
 `2672802` is the `7kfpun` user id. Until the secret is added, deploy the site from a
 laptop as in [web-hosting.md](web-hosting.md). The same order applies there.
+
+### Push sender environment (FOX-71)
+
+The AQI alert sends moved from the `twaqi-push-sender` Worker's cron to GitHub Actions:
+the Cloudflare account is on the Workers Free plan, whose 50 subrequests per run can't
+carry them, and which rejects the `limits` block they needed. The Worker keeps the app's
+`/app/v1` API, the manual `/run` / `/test` routes, and `POST /internal/events`, which
+writes the GitHub run's per-send events to Analytics Engine (`twaqi_push_events`, same data
+points as before). It still deploys through `workers.yml` (`workers-production`).
+
+`push-sender.yml` runs in its own environment, `push-sender`: deployment branches
+limited to `master`, **no required reviewers** (`workers-production` makes every job wait
+for an approval, which a schedule can't). Its secrets, copies of the Worker's:
+`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, and `SYNC_TOKEN` (for the
+event forward to the Worker, whose URL is `PUSH_SENDER_URL` in the workflow). Create the environment before
+the workflow's first run, since a workflow that names a missing environment creates it
+unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#the-push-sender-environment-github-actions).
+
+- One run at a time (`concurrency: push-sender`), `timeout-minutes: 30` (40k sends take
+  about 3 minutes). The job fails when the run throws or any alert failed to send (dead
+  tokens and sends deferred to the next run don't count). Events that couldn't be
+  forwarded (one retry per 250) are a warning, never a re-send or a failure. The log shows
+  counts only.
+- GitHub's schedule is best effort: runs can start late or be skipped, and scheduled
+  workflows switch off after 60 days without repository activity (re-enable under Actions).
+  A late run loses nothing: unsent crossings go out on the next run, never twice.
+- Back on Workers Paid: restore the cron, `limits` and the scheduled handler in the Worker,
+  and delete `push-sender.yml` in the same PR.
 
 ## After the merge: TestFlight
 
