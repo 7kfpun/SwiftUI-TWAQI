@@ -140,7 +140,7 @@ gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env push-sender
 
 Create it before the workflow's first run: a workflow that names a missing environment creates it with no branch rule. Rotating a secret means setting it in both environments.
 
-The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. A run that throws fails the job. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
+The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. The job fails when `run()` throws, or when it finishes with any alert that failed to send (`counts.failed`, after state and logs are saved; those alerts stay unsent and are retried next run). Dead tokens and sends deferred to the next run don't fail it. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
 
 **GitHub's schedule is best effort.** A scheduled run can start late or be skipped when GitHub is busy, and scheduled workflows are switched off after **60 days without activity** in the repository (turn it back on under Actions → Push sender). A late or skipped run loses nothing: a crossing stays unsent until a run sends it, and nothing is sent twice.
 

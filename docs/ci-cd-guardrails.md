@@ -118,7 +118,8 @@ the workflow's first run, since a workflow that names a missing environment crea
 unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#the-push-sender-environment-github-actions).
 
 - One run at a time (`concurrency: push-sender`), `timeout-minutes: 30` (40k sends take
-  about 3 minutes); a run that throws fails the job.
+  about 3 minutes). The job fails when the run throws or any alert failed to send (dead
+  tokens and sends deferred to the next run don't count).
 - GitHub's schedule is best effort: runs can start late or be skipped, and scheduled
   workflows switch off after 60 days without repository activity (re-enable under Actions).
   A late run loses nothing: unsent crossings go out on the next run, never twice.

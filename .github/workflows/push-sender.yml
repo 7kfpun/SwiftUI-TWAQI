@@ -93,5 +93,6 @@ jobs:
           if [ -n "$host" ]; then echo "::add-mask::$host"; fi
           args=()
           if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
-          # A thrown run() exits non-zero and fails the job.
+          # Exits non-zero, failing the job, when run() throws or any alert
+          # failed to send (dead tokens and deferred sends don't count).
           npm run --silent send -- "${args[@]}"

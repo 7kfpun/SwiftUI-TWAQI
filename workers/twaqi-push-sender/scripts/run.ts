@@ -14,7 +14,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { run, type Env } from '../src/index.ts'
+import { run, type Env, type RunResult } from '../src/index.ts'
 
 export const SECRETS = ['FCM_SERVICE_ACCOUNT', 'DIRECTUS_PUSH_TOKEN', 'AQI_API_BASE'] as const
 
@@ -50,13 +50,27 @@ export function parseArgs(argv: string[]): { dryRun: boolean } {
   return { dryRun: argv.includes('--dry-run') }
 }
 
+/** Why the job should fail after a run that finished, or null. A send FCM
+ * refused (`failed`) fails it, after run() has saved state and logs, so a run
+ * where FCM rejects every alert doesn't go green. Dead tokens (the device is
+ * archived) and deferred sends (they go out next run) are expected. */
+export function failure(result: RunResult): string | null {
+  const failed = result.counts.failed ?? 0
+  return failed ? `${failed} alert(s) failed to send; they stay unsent and are retried next run` : null
+}
+
 async function main(): Promise<void> {
   const { dryRun } = parseArgs(process.argv.slice(2))
   const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
   const result = await run(nodeEnv(config, process.env), { dryRun })
   // The log is public (public repo): counts only, no per-device decisions.
   const { decisions, ...summary } = result
-  console.log('run ok', JSON.stringify({ ...summary, decisions: decisions?.length }))
+  const failed = failure(result)
+  console.log(failed ? 'run finished with failures' : 'run ok', JSON.stringify({ ...summary, decisions: decisions?.length }))
+  if (failed) {
+    console.error(`::error::${failed}`)
+    process.exitCode = 1
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
