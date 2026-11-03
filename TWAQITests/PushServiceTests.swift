@@ -374,13 +374,6 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertNil(FavouriteAlerts.isOn(in: notification, stationId: 7))
     }
 
-    func testCapCountsOtherStationsOnly() {
-        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1], excluding: 2))
-        XCTAssertTrue(FavouriteAlerts.isAtCap(alertedStationIds: [1, 3], excluding: 2))
-        // Its own alerts don't count against it.
-        XCTAssertFalse(FavouriteAlerts.isAtCap(alertedStationIds: [1, 2], excluding: 2))
-    }
-
     // MARK: FOX-31 — favouriting switches alerts on
 
     func testDefaultAlertsAreTheStationScreensFirstAboveAlert() {
@@ -389,7 +382,9 @@ final class FavouriteAlertsTests: XCTestCase {
 
     func testNewFavouriteDecision() {
         XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
-        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3], stationId: 2), .capReached)
+        // No cap (FOX-41): two, or any number of, other stations don't stop it.
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 3], stationId: 2), .enabled(FavouriteAlerts.defaultAlerts))
+        XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: Set(1...40), stationId: 41), .enabled(FavouriteAlerts.defaultAlerts))
         XCTAssertEqual(FavouriteAlerts.newFavouriteDecision(alertedStationIds: [1, 2], stationId: 2), .alreadyOn)
     }
 
@@ -397,10 +392,8 @@ final class FavouriteAlertsTests: XCTestCase {
         let fake = FakeServices()
         fake.alerted = [1: StationAlerts(below: 20)]
         var setting: StationAlertSetting?
-        var count: Int?
         let observer = NotificationCenter.default.addObserver(forName: FavouriteAlerts.changed, object: nil, queue: nil) { note in
             setting = FavouriteAlerts.setting(in: note)
-            count = FavouriteAlerts.alertedStationCount(in: note)
         }
         defer { NotificationCenter.default.removeObserver(observer) }
 
@@ -409,7 +402,6 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 120))
         XCTAssertEqual(fake.writes.first?.settled, true)
         XCTAssertEqual(setting, FavouriteAlerts.defaultAlerts)
-        XCTAssertEqual(count, 2)
     }
 
     func testAlreadyOnKeepsItsThresholds() {
@@ -420,11 +412,12 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertEqual(fake.alerted[126], StationAlerts(above: 90))
     }
 
-    func testCapReachedWritesNothing() {
+    func testAThirdStationGetsAlertsToo() {
         let fake = FakeServices()
         fake.alerted = [1: StationAlerts(above: 100), 3: StationAlerts(above: 100)]
-        XCTAssertEqual(enable(126, fake), .capReached)
-        XCTAssertTrue(fake.writes.isEmpty)
+        XCTAssertEqual(enable(126, fake), .enabled(FavouriteAlerts.defaultAlerts))
+        XCTAssertEqual(fake.writes.map(\.stationId), [126])
+        XCTAssertEqual(fake.writes.first?.alerts, StationAlerts(above: 120))
     }
 
     func testNotificationsDeniedWritesNothing() {

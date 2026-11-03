@@ -73,9 +73,9 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
 ### Push notifications: Firebase Cloud Messaging (FOX-13)
 
-- **Delivery:** Firebase Messaging (SPM) gets an FCM token from the APNs token; `AppDelegate` hands both to `DirectusPushMirror`. The sender (outside this repo) reads Directus and sends through FCM HTTP v1. The Firebase project needs the APNs auth key.
+- **Delivery:** Firebase Messaging (SPM) gets an FCM token from the APNs token; `AppDelegate` hands both to `DirectusPushMirror`. [`workers/twaqi-push-sender`](workers/twaqi-push-sender/README.md) reads Directus every 10 minutes and sends through FCM HTTP v1 when a station crosses a threshold (edge-triggered, quiet hours honoured), logging each send to `twaqi_push_logs` without the full token. It only sends to devices with an FCM token; builds before FOX-13 stay on the OneSignal tracker (`ai-playground`), which is untouched. The Firebase project needs the APNs auth key. The app clears the icon badge when it opens; alerts set none.
 - **Settings:** station alerts and the do-not-disturb window live in Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`). Changes are saved on the device first and synced in the background, retried on the next change, launch, foreground or token change. Switching an alert off archives its row; nothing is deleted. A reinstall restores alerts and do-not-disturb from the device's row (Keychain device id).
-- **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`).
+- **Favourites ↔ alerts:** a station with an alert on is always a favourite, and removing a favourite turns its alerts off (`FavouriteAlerts`). There is no limit on how many stations have alerts (FOX-41).
 
 ## Tests
 
@@ -89,7 +89,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
 - **GitHub CI runs a small, high-signal subset** (`-only-testing` in `.github/workflows/ci.yml`) covering the crash- and regression-prone areas: networking/offline caches (`PollutantCacheTests`, `OfflineCacheRetentionTests`), push dual-write and favourites ↔ alerts (`PushServiceTests`, `FavouriteAlertsTests`), the station-cam history loader and caches (`StationCamTests`, `StationCamFrameCacheTests`, `StationCamHistoryCacheTests`), `SettingsStore` persistence (`AppLanguageTests`) and the Directus create-only forms (`FeedbackServiceTests`, `CooperateServiceTests`). Add a suite there only if it guards one of those areas.
 - CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild). Caches are per PR, so a PR's first run is cold.
-- Workers have their own tests: `cd workers/twaqi-workers && npm test`.
+- Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
 
 ## Branches, CI and review
 

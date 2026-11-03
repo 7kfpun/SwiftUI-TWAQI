@@ -25,7 +25,6 @@
 "Favourites.remove_and_turn_off_alerts" = "移除並關閉通知";
 "Favourites.cancel" = "取消";
 "Favourites.added_to_favourites" = "已加入我的最愛";
-"Favourites.alerts_cap_reached_message" = "已有 2 個測站開啟通知，已達上限，這個測站的通知暫不開啟。到其中一個測站頁面關閉通知後，即可為這個測站開啟。";
 "Favourites.notifications_off_message" = "Taiwan Air 的通知已關閉，因此這個測站的通知暫不開啟。請到「設定」開啟通知，再於下方開啟測站通知。";
 "Favourites.open_settings" = "開啟設定";
 "Favourites.ok" = "好";
@@ -41,7 +40,6 @@
 "Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "數值設定偏低，可能會收到大量通知";
 "Settings.notice_me_when_aqi_is_below" = "當 AQI 低於此數值時通知我";
 "Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "數值設定偏高，可能會收到大量通知";
-"Settings.you_can_only_enable_at_most_for_two_stations" = "最多只能設定 2 個測站";
 
 "Help.help" = "說明";
 "Help.select_a_topic" = "選擇一個項目";

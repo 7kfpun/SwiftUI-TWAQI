@@ -156,14 +156,16 @@ extension AppDelegate: MessagingDelegate {
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    /// Alerts still show while the app is open.
+    /// Alerts still show while the app is open, but leave the icon's number
+    /// alone: it is cleared each time the app opens, and an alert seen in
+    /// the app is already read.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         Messaging.messaging().appDidReceiveMessage(notification.request.content.userInfo)
-        completionHandler([.banner, .list, .sound, .badge])
+        completionHandler([.banner, .list, .sound])
     }
 
     func userNotificationCenter(

@@ -21,10 +21,6 @@ class SettingsRowViewModel: ObservableObject {
     private let settings = SettingsStore()
     private var changesObserver: NSObjectProtocol?
 
-    /// Two other stations already have alerts, so switches that are off stay
-    /// locked.
-    @Published private(set) var isAtCap = false
-
     @Published var stationSetting: StationAlertSetting {
         // `didSet` rather than `willSet`: the side effect must not run while
         // SwiftUI is still evaluating the view that owns the binding.
@@ -37,7 +33,6 @@ class SettingsRowViewModel: ObservableObject {
     init(station: Station) {
         self.station = station
         self.stationSetting = StationAlertSetting(DirectusPushMirror.alerts(stationId: station.id))
-        self.isAtCap = FavouriteAlerts.isAtCap(alertedStationIds: FavouriteAlerts.alertedStationIds(), excluding: station.id)
 
         followChanges()
 
@@ -75,18 +70,15 @@ class SettingsRowViewModel: ObservableObject {
 
     /// Alerts changed elsewhere follow here, without being written back:
     /// cleared because the station left Favourites, switched on because it
-    /// was just favourited (FOX-31) or restored after a reinstall. Any
-    /// station's change can move the cap.
+    /// was just favourited (FOX-31) or restored after a reinstall.
     private func followChanges() {
         changesObserver = NotificationCenter.default.addObserver(
             forName: FavouriteAlerts.changed,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self = self else { return }
-            self.isAtCap = FavouriteAlerts.isAtCap(alertedStationIds: FavouriteAlerts.alertedStationIds(), excluding: self.station.id)
-
-            guard let isOn = FavouriteAlerts.isOn(in: notification, stationId: self.station.id) else { return }
+            guard let self = self,
+                  let isOn = FavouriteAlerts.isOn(in: notification, stationId: self.station.id) else { return }
             if !isOn {
                 guard !StationAlerts(self.stationSetting).isOff else { return }
                 self.isApplyingStoredSettings = true

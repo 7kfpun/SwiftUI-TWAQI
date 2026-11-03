@@ -13,9 +13,11 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - **Push is Firebase Cloud Messaging** (FOX-13). Alerts and do-not-disturb live in
   Directus (`twaqi_push_devices`, `twaqi_push_subscriptions`), written by
   `DirectusPushMirror`: saved on the device first, synced in the background and retried.
-  The device row carries the APNs and FCM tokens; the FCM sender reads it. No OneSignal.
+  The device row carries the APNs and FCM tokens; `workers/twaqi-push-sender` reads it and
+  sends through FCM, logging to `twaqi_push_logs` (token suffix only). No OneSignal in the
+  app; the old OneSignal tracker in `ai-playground` still serves pre-FOX-13 builds.
 - **Favourites ↔ alerts** (`FavouriteAlerts`): an alert on ⇒ the station is a favourite;
-  removing a favourite turns its alerts off. Alerts are keyed by station id.
+  removing a favourite turns its alerts off. Alerts are keyed by station id. No station cap (FOX-41).
 - **Station cams** are R2 behind `https://twaqi.app.wahthefox.com`: latest
   `stations/{siteId}.jpg`, hourly `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`, rolling 24 h.
   `siteId` is the MOENV image site id, not a station id. A missing hour is a normal 404.
@@ -46,7 +48,7 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - CI builds the CI-only `TWAQI-CI` scheme (`TWAQI` minus the `TWAQIUITests` runner) with
   `build-for-testing` + `test-without-building`. Use `-scheme TWAQI` locally; if you change
   the `TWAQI` scheme's build or test targets, mirror it in `TWAQI-CI`.
-- Workers: `cd workers/twaqi-workers && npm test`.
+- Workers: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
 
 ## Self-review before opening a PR
 

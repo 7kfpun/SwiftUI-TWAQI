@@ -312,9 +312,8 @@ final class DirectusPushMirror {
         if favourites != settings.savedFavouriteStations {
             settings.savedFavouriteStations = favourites
         }
-        let count = Self.alertedStations(defaults: defaults).count
         for (id, alerts) in restored {
-            FavouriteAlerts.post(stationId: id, isOn: true, setting: StationAlertSetting(alerts), alertedStationCount: count)
+            FavouriteAlerts.post(stationId: id, isOn: true, setting: StationAlertSetting(alerts))
         }
     }
 

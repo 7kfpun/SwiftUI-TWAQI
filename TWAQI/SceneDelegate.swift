@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import UserNotifications
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -69,9 +70,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        Self.clearBadge()
         if let url = pendingURL {
             pendingURL = nil
             open(url)
+        }
+    }
+
+    /// Opening the app reads its alerts, so the number on the icon goes.
+    /// OneSignal's SDK did this before FOX-13; nothing else does now.
+    static func clearBadge() {
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0)
+        } else {
+            UIApplication.shared.applicationIconBadgeNumber = 0
         }
     }
 

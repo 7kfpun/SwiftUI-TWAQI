@@ -115,7 +115,7 @@ Everything claimed in the new copy was checked in the working tree on branch
 | Favourites with health guidance per card | `Views/Favourites/FavouriteListView.swift` |
 | Search grouped by air-quality region, matches name / township / county | `Views/Details/DetailsListView.swift` — `groupedStations`, first-seen (≈N→S) order |
 | Station detail: all six pollutants, wind, address, coordinates, station type, region, publish time + "n hours ago" | `Views/Details/StationHeaderView.swift`, `StationInfoView.swift` |
-| Threshold push, above **and** below, max 2 stations | `Views/Details/SettingsRow.swift`, `Utils/DirectusPushMirror.swift` (FCM token + alerts in Directus) |
+| Threshold push, above **and** below, any number of stations (FOX-41) | `Views/Details/SettingsRow.swift`, `Utils/DirectusPushMirror.swift` (FCM token + alerts in Directus) |
 | Do Not Disturb window | `Views/Help/HelpView.swift`, `Utils/PushService.swift` |
 | Ad-free non-consumable IAP | `Utils/IAPManager.swift` (`com.kfpun.twaqi.adfree`) |
 | 4 languages: en, zh-Hant, zh-Hans, th | `TWAQI/Localization/*.lproj/Localizable.strings` |
