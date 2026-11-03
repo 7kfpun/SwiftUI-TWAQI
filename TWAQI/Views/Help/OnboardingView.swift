@@ -11,12 +11,16 @@ import SwiftUI
 /// The welcome flow (FOX-34), one step at a time.
 ///
 /// Skipping: every step can be continued without doing what it asks ("Not
-/// now"), and "Skip" at the top ends the whole flow. Ending it either way
-/// counts as done, so it won't open by itself again; Help runs it anytime.
+/// now"), and "Skip" at the top ends the whole flow. It opens by itself once
+/// (FOX-49), counted when it opens rather than when it ends; Help runs it
+/// anytime.
 struct OnboardingView: View {
     /// Quiet hours, written as Help writes them. Help passes its own model;
     /// at launch the flow has one of its own.
     private let sharedDoNotDisturb: HelpViewModel?
+    /// Opened by itself at launch, rather than from Help. Only that run ends
+    /// the launch-time hold on the location and review prompts.
+    private let isLaunchFlow: Bool
     private let onFinish: () -> Void
 
     @StateObject private var settings = SettingsStore()
@@ -27,8 +31,9 @@ struct OnboardingView: View {
 
     private let accent = Color(0x5AC8FA)
 
-    init(doNotDisturb: HelpViewModel? = nil, onFinish: @escaping () -> Void) {
+    init(doNotDisturb: HelpViewModel? = nil, isLaunchFlow: Bool = false, onFinish: @escaping () -> Void) {
         self.sharedDoNotDisturb = doNotDisturb
+        self.isLaunchFlow = isLaunchFlow
         self.onFinish = onFinish
     }
 
@@ -330,7 +335,7 @@ struct OnboardingView: View {
     }
 
     private func finish(skippedAt step: Onboarding.Step? = nil) {
-        viewModel.finish(skippedAt: step)
+        viewModel.finish(skippedAt: step, isLaunchFlow: isLaunchFlow)
         onFinish()
     }
 }

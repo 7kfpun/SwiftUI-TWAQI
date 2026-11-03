@@ -21,9 +21,18 @@ struct ContentView: View {
     /// Kept outside the rebuilt tabs so changing language stays on Help.
     @State private var selectedTab: AppTab = .main
 
-    /// The welcome flow, on a fresh install until it is finished or skipped.
-    /// Help opens it again on its own.
-    @State private var showingOnboarding = OnboardingStore().showsOnLaunch
+    /// The welcome flow, opened by itself once per flow version for every
+    /// user (FOX-49). Help opens it again on its own.
+    @State private var showingOnboarding: Bool
+
+    /// `opensOnboarding`: whether this scene opens the welcome flow by
+    /// itself. `SceneDelegate` decides it, so it knows which scene holds the
+    /// launch-time prompts back (via `Onboarding.claimLaunchFlow`). No
+    /// default, so a new call site can't open the flow without owning it.
+    init(router: AppRouter, opensOnboarding: Bool) {
+        self.router = router
+        _showingOnboarding = State(initialValue: opensOnboarding)
+    }
 
     enum AppTab: Hashable {
         case main, favourites, detailsList, help
@@ -42,8 +51,18 @@ struct ContentView: View {
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
         .fullScreenCover(isPresented: $showingOnboarding) {
-            OnboardingView { showingOnboarding = false }
+            OnboardingView(isLaunchFlow: true) { showingOnboarding = false }
                 .environment(\.locale, language.locale())
+                // Shown counts from the moment it opens, so quitting or
+                // skipping it doesn't bring it back on the next launch.
+                .onAppear {
+                    // `onAppear` can run again for the same cover; log once.
+                    if OnboardingStore().markShown() {
+                        TrackingManager.logEvent(eventName: "onboarding_shown", parameters: [
+                            "label": "launch",
+                        ])
+                    }
+                }
         }
         // On the root rather than a tab, so it opens whichever tab is showing.
         .sheet(isPresented: $router.showingPro) {
@@ -117,7 +136,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(["zh-Hant", "en"], id: \.self) { localIdentifier in
-            ContentView(router: AppRouter())
+            ContentView(router: AppRouter(), opensOnboarding: false)
                 .environmentObject(SettingsStore())
                 .environment(\.locale, .init(identifier: localIdentifier))
                 .previewDisplayName(localIdentifier)

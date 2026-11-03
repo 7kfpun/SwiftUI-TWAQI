@@ -19,12 +19,18 @@ import SwiftDate
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    /// Asks for a review once the welcome flow that opened at launch is
+    /// finished, skipped, or gone with its scene.
+    private var reviewAfterOnboarding: NSObjectProtocol?
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 
-        // Before this launch is counted below: an install that has run before
-        // pre-dates the welcome flow and is not walked through it.
-        OnboardingStore().adoptExistingInstall(hasLaunchedBefore: StoreReviewHelper.hasLaunchedBefore)
+        // Before this launch is counted below: notes an install that pre-dates
+        // the welcome flow, then whether the flow opens by itself this launch.
+        let onboarding = OnboardingStore()
+        onboarding.prepareForLaunch(hasLaunchedBefore: StoreReviewHelper.hasLaunchedBefore)
+        Onboarding.isOpenAtLaunch = onboarding.showsOnLaunch
 
         SettingsStore.observeProTransactions()
         Task { await SettingsStore.refreshPro() }
@@ -80,8 +86,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             // A fresh install is asked on the welcome flow's notifications
             // step instead, so the two prompts never stack (FOX-34). Installs
-            // from before the flow keep this; it is a no-op once answered.
-            if OnboardingStore().promptsForPushAtLaunch {
+            // from before the flow keep this, except on the launch the flow
+            // opens (FOX-49); it is a no-op once answered.
+            if onboarding.promptsForPushAtLaunch {
                 OneSignal.promptForPushNotifications(userResponse: { accepted in
                     print("User accepted notifications: \(accepted)")
                 })
@@ -129,7 +136,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         StoreReviewHelper.incrementAppOpenedCount()
-        StoreReviewHelper.checkAndAskForReview()
+        // Not over the welcome flow: after it, so a 10/30/60/100 milestone
+        // that falls on this launch isn't lost.
+        if !Onboarding.isOpenAtLaunch {
+            StoreReviewHelper.checkAndAskForReview()
+        } else {
+            reviewAfterOnboarding = NotificationCenter.default.addObserver(
+                forName: Onboarding.didFinish, object: nil, queue: .main
+            ) { [weak self] _ in
+                self?.reviewAfterOnboarding.map(NotificationCenter.default.removeObserver)
+                self?.reviewAfterOnboarding = nil
+                StoreReviewHelper.checkAndAskForReview()
+            }
+        }
 
         return true
     }
