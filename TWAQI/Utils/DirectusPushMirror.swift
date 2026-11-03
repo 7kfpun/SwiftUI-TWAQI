@@ -9,6 +9,7 @@
 import Foundation
 import OneSignal
 import UIKit
+import UserNotifications
 import Security
 
 /// Keeps the push settings — each station's alerts and the do-not-disturb
@@ -200,6 +201,7 @@ final class DirectusPushMirror {
             } catch {
                 // Writing now could overwrite the row being restored from.
                 print("Directus push: restore failed: \(error)")
+                recover(from: error)
                 return
             }
         }
@@ -214,6 +216,7 @@ final class DirectusPushMirror {
                 save([String: StationAlerts](), Keys.synced)
             } catch {
                 print("Directus push: cancel all failed: \(error)")
+                recover(from: error)
                 return
             }
         }
@@ -237,6 +240,7 @@ final class DirectusPushMirror {
             _ = try await deviceId(token: token, fcmToken: fcmToken, config: config)
         } catch {
             print("Directus push: device sync failed: \(error)")
+            recover(from: error)
             return
         }
 
@@ -257,6 +261,7 @@ final class DirectusPushMirror {
                 save(done, Keys.synced)
             } catch {
                 print("Directus push: station \(key) failed: \(error)")
+                recover(from: error)
             }
         }
     }
@@ -339,6 +344,9 @@ final class DirectusPushMirror {
             dndStart: settings.dndStartTime,
             dndEnd: settings.dndEndTime,
             isPro: settings.isPro,
+            notificationsAllowed: PushDevicePayload.notificationsAllowed(
+                await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            ),
             language: settings.appLanguage
         )
         if let knownId = knownId,
@@ -366,6 +374,41 @@ final class DirectusPushMirror {
         defaults.set(payload.profile, forKey: Keys.profile)
         defaults.set(Date(), forKey: Keys.lastDeviceSyncAt)
         return id
+    }
+
+    // MARK: - Recovering from the push API
+
+    enum Recovery: Equatable {
+        /// Another install holds this device id (403): start over with a new
+        /// Keychain id and secret, and a new row.
+        case newIdentity
+        /// The row is gone, retired by a newer registration of this phone's
+        /// APNs token (404): register again with the same identity.
+        case register
+        case none
+    }
+
+    nonisolated static func recovery(for error: Error) -> Recovery {
+        switch error {
+        case PushError.server(statusCode: 403): return .newIdentity
+        case PushError.server(statusCode: 404): return .register
+        default: return .none
+        }
+    }
+
+    /// After either recovery the next flush (a change, launch or foreground,
+    /// never at once, so a refusing API can't spin it) registers a row and,
+    /// seeing a new id, writes every alert again from the device.
+    private func recover(from error: Error) {
+        let recovery = Self.recovery(for: error)
+        guard recovery != .none else { return }
+        if recovery == .newIdentity {
+            PushDeviceIdentity.reset()
+        }
+        for key in [Keys.deviceId, Keys.deviceToken, Keys.fcmToken, Keys.profile, Keys.lastDeviceSyncAt] {
+            defaults.removeObject(forKey: key)
+        }
+        save([String: StationAlerts](), Keys.synced)
     }
 
     // MARK: - Decisions
@@ -440,6 +483,19 @@ enum PushDeviceIdentity {
             var bytes = [UInt8](repeating: 0, count: 32)
             guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { return nil }
             return base64url(Data(bytes))
+        }
+    }
+
+    /// Forgets the id and secret, so the next use makes new ones: after the
+    /// push API refused them (another install holds this id).
+    static func reset() {
+        for account in [account, secretAccount] {
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account,
+            ]
+            SecItemDelete(query as CFDictionary)
         }
     }
 

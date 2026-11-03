@@ -59,6 +59,9 @@ const LIVE: Filter[] = [
   { _or: [{ metric: { _eq: 'aqi' } }, { metric: { _null: true } }] },
   { device: { archived: { _eq: false } } },
   { device: { fcm_token: { _nnull: true } } },
+  // Opted out in iOS Settings: not sent to until the app reports otherwise.
+  // Null (a row from before the field) is sent to.
+  { _or: [{ device: { notifications_allowed: { _eq: true } } }, { device: { notifications_allowed: { _null: true } } }] },
 ]
 
 /** The Directus filter for the subscriptions whose zone changes at these

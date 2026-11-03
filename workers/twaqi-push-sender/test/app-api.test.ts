@@ -22,7 +22,7 @@ function fakeDirectus(url: string, init: RequestInit = {}): Response {
   if (method === 'GET' && id) return Response.json({ data: rows.find((r) => r.id === Number(id)) ?? null })
   if (method === 'GET') return Response.json({ data: rows.filter(match).sort((a, b) => a.id - b.id) })
   if (method === 'POST') {
-    if (collection === 'twaqi_push_devices' && rows.some((r) => r.device_id === body.device_id)) {
+    if (collection === 'twaqi_push_devices' && rows.some((r) => r.device_id === body.device_id || r.device_token === body.device_token)) {
       return new Response('{"errors":[{"message":"unique"}]}', { status: 400 })
     }
     const row = { id: nextId++, ...body }
@@ -77,7 +77,7 @@ describe('app API auth', () => {
 
   it('creates the row with only a hash of the secret', async () => {
     const res = await call('PUT', '/app/v1/device', device())
-    assert.deepEqual(res, { status: 200, body: { id: 1 } })
+    assert.deepEqual(res, { status: 200, body: { id: 1, created: true } })
     const row = tables.twaqi_push_devices[0]
     assert.equal(row.device_id, ME)
     assert.equal(row.secret_hash, await sha256(SECRET))
@@ -92,24 +92,50 @@ describe('app API auth', () => {
     assert.equal((await call('PUT', '/app/v1/stations/105', { above: 100 }, { id: ME, secret: 'b'.repeat(43) })).status, 403)
   })
 
-  it('claims a row from before the secret, then holds it', async () => {
+  it('never hands over a row from before the secret: it is retired with its alerts', async () => {
     tables.twaqi_push_devices.push({ id: 7, ...device(), secret_hash: null })
+    tables.twaqi_push_subscriptions.push({ id: 70, device: 7, station_id: '105', direction: 'above', threshold: 120, enabled: true, archived: false })
     nextId = 8
-    assert.deepEqual((await call('PUT', '/app/v1/device', device())).body, { id: 7 })
-    assert.equal(tables.twaqi_push_devices[0].secret_hash, await sha256(SECRET))
-    assert.equal(tables.twaqi_push_devices.length, 1)
+    // Not even a restore reads it.
+    assert.deepEqual((await call('GET', '/app/v1/device')).body, { device: null, subscriptions: [] })
+
+    assert.deepEqual((await call('PUT', '/app/v1/device', device())).body, { id: 8, created: true })
+    const [old, fresh] = tables.twaqi_push_devices
+    assert.deepEqual([old.archived, old.device_id, old.device_token, old.fcm_token], [true, 'retired-7', 'retired-7', null])
+    assert.equal(fresh.secret_hash, await sha256(SECRET))
+    assert.equal(tables.twaqi_push_subscriptions[0].archived, true)
+    // The new row starts empty; the app sends its own alerts again.
+    assert.deepEqual((await call('GET', '/app/v1/device')).body.subscriptions, [])
   })
 
-  it('adopts a row known only by its APNs token, but not one another install owns', async () => {
+  it('stops the takeover Codex described: a known device_id buys nothing', async () => {
+    // A victim's row from an older build, whose device_id an attacker read
+    // with the old shared token.
+    tables.twaqi_push_devices.push({ id: 7, ...device(), secret_hash: null })
+    tables.twaqi_push_subscriptions.push({ id: 70, device: 7, station_id: '105', direction: 'above', threshold: 120, enabled: true, archived: false })
+    nextId = 8
+    const attacker = { id: ME, secret: 'e'.repeat(43) }
+    await call('PUT', '/app/v1/device', device({ device_token: 'cd'.repeat(32), fcm_token: 'attacker' }), attacker)
+    // The victim's alerts were archived, not moved to the attacker's row.
+    assert.deepEqual((await call('GET', '/app/v1/device', undefined, attacker)).body.subscriptions, [])
+    assert.equal(tables.twaqi_push_subscriptions.find((r) => r.id === 70)?.archived, true)
+    // The real app now gets 403 for that id, and starts over with a new one.
+    assert.equal((await call('PUT', '/app/v1/device', device())).status, 403)
+  })
+
+  it('retires an older row holding this APNs token instead of adopting it', async () => {
     tables.twaqi_push_devices.push({ id: 3, ...device({ device_id: null }), secret_hash: null })
     nextId = 4
-    const restore = await call('GET', `/app/v1/device?device_token=${TOKEN}`)
-    assert.equal((restore.body as { device: { id: number } }).device.id, 3)
-    assert.equal(tables.twaqi_push_devices[0].device_id, ME)
+    assert.deepEqual((await call('PUT', '/app/v1/device', device())).body, { id: 4, created: true })
+    assert.equal(tables.twaqi_push_devices[0].archived, true)
+    assert.equal(tables.twaqi_push_devices[0].device_token, 'retired-3')
+  })
 
-    const other = '6f1c2e7a-0000-4000-8000-000000000002'
-    const res = await call('GET', `/app/v1/device?device_token=${TOKEN}`, undefined, { id: other, secret: 'c'.repeat(43) })
-    assert.deepEqual(res.body, { device: null, subscriptions: [] })
+  it('updates its own row in place', async () => {
+    await call('PUT', '/app/v1/device', device())
+    assert.deepEqual((await call('PUT', '/app/v1/device', device({ locale: 'en' }))).body, { id: 1, created: false })
+    assert.equal(tables.twaqi_push_devices.length, 1)
+    assert.equal(tables.twaqi_push_devices[0].locale, 'en')
   })
 
   it('writes only the fields the app may set', async () => {

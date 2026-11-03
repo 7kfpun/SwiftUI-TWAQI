@@ -19,6 +19,7 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
 | Quiet hours | If the device has `dnd_enabled` and the current time in its `timezone` is in `dnd_start`–`dnd_end` (`HH:mm`, may run past midnight, e.g. 23:00–07:00), the crossing is recorded and the alert is **dropped**. No backlog, no digest. |
 | Stale data | Stations whose `publish_time` is older than `MAX_DATA_AGE_MINUTES` (180), or whose AQI is ≤ 0, are left out of the filter, so nothing on them changes. |
 | Limit | The app allows alerts on at most **3 stations** per device (`FavouriteAlerts.maxAlertedStations`). |
+| Opted out | The app reports `notifications_allowed` on its row (false when notifications are off for it in iOS Settings, or never allowed). Those devices are left out of the filter, so nothing is sent to them until the app reports true again. A row without the field (older build) is sent to. |
 | Failed send | `in_zone` is left as it was, so the next run retries. |
 | Dead token | FCM `UNREGISTERED`, `SENDER_ID_MISMATCH`, or `INVALID_ARGUMENT` about the registration token → device `archived = true`. Its subscriptions stop matching until the app writes its row again (which sets `archived = false`). |
 | Expiry | An alert APNs can't deliver within an hour is dropped (`apns-expiration`). Same subscription → same `apns-collapse-id`; a station's alerts share a `thread-id`. No badge. |
@@ -45,7 +46,8 @@ The app has **no Directus token for the push collections**. It writes its own ro
 
 - **Auth:** every request carries `X-Device-Id` (the Keychain UUID) and `Authorization: Bearer <secret>`, 32 random bytes the app makes once and keeps in the Keychain next to the id ("this device only").
 - **Only a SHA-256 of the secret** is stored, in `twaqi_push_devices.secret_hash`. A row with another hash gets 403.
-- **Rows from before the secret** are claimed by the first request that names their `device_id`. On a restore, a row known only by its APNs token is claimed the same way, unless another install already owns it.
+- **Rows from before the secret are never handed over.** Older builds' shared token could read device ids, so knowing one proves nothing. A device that finds its id, or its APNs token, on a row it can't prove is its own **retires** that row: its alerts are archived, the row archived, and its `device_id` and token freed. It then gets a new row, which the app fills again from the alerts saved on the phone. A restore never reads such a row.
+- **Self-healing:** if another install holds this device's id, the app gets 403, makes a new Keychain id and secret, and registers again. If its row was retired (404), it registers again with the same identity.
 - **Rate limit:** 60 requests a minute per IP (`APP_LIMITER`).
 
 ## Send log (`twaqi_push_logs`, FOX-66)
@@ -82,7 +84,7 @@ curl -X POST "$WORKER/test"    -H "Authorization: Bearer $SYNC_TOKEN" -d '{"devi
 
 ## Directus
 
-`twaqi_push_devices`: `device_id` (Keychain), `secret_hash` (SHA-256 of the app's secret, hidden), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
+`twaqi_push_devices`: `device_id` (Keychain), `secret_hash` (SHA-256 of the app's secret, hidden), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `notifications_allowed` (iOS lets the app show notifications), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
 
 `twaqi_push_subscriptions`: `device` (M2O), `station_id` (AQI API station id, stored as a string), `site_id` (MOENV SiteId, for cams only), `metric` (`aqi`), `direction` (`above`|`below`), `threshold`, `enabled`, `last_value`, `in_zone`, `last_fired_at`, `archived`.
 

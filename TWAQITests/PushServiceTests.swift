@@ -339,6 +339,35 @@ final class PushServiceTests: XCTestCase {
         XCTAssertFalse(OneSignalTags.isStationTag("isDndEnabled"))
     }
 
+    func testRecoveryFromThePushApi() {
+        // Another install holds this id: new Keychain identity, new row.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 403)), .newIdentity)
+        // Row retired by a newer registration of this phone: register again.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 404)), .register)
+        // Anything else is retried as it is.
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.server(statusCode: 502)), .none)
+        XCTAssertEqual(DirectusPushMirror.recovery(for: PushError.offline), .none)
+    }
+
+    func testDeviceRowCarriesWhetherNotificationsAreAllowed() throws {
+        XCTAssertTrue(PushDevicePayload.notificationsAllowed(.authorized))
+        XCTAssertTrue(PushDevicePayload.notificationsAllowed(.provisional))
+        XCTAssertFalse(PushDevicePayload.notificationsAllowed(.denied))
+        XCTAssertFalse(PushDevicePayload.notificationsAllowed(.notDetermined))
+
+        func payload(_ allowed: Bool?) -> PushDevicePayload {
+            PushDevicePayload.make(
+                deviceId: "d", deviceToken: "abcd", fcmToken: "f", dndEnabled: false,
+                dndStart: Date(), dndEnd: Date(), notificationsAllowed: allowed,
+                environment: .production, calendar: taipei
+            )
+        }
+        XCTAssertEqual(try json(payload(false))["notifications_allowed"] as? Bool, false)
+        XCTAssertFalse(try json(payload(nil)).keys.contains("notifications_allowed"))
+        // Turning notifications off (or back on) rewrites the row.
+        XCTAssertNotEqual(payload(true).profile, payload(false).profile)
+    }
+
     func testDeviceSecretIsBase64url() {
         XCTAssertEqual(PushDeviceIdentity.base64url(Data([0xfb, 0xff, 0xfe])), "-__-")
         XCTAssertEqual(PushDeviceIdentity.base64url(Data(repeating: 0, count: 32)).count, 43)

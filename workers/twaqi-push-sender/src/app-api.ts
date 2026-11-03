@@ -7,13 +7,14 @@
 //   X-Device-Id: <device_id>          Authorization: Bearer <secret>
 //
 //   PUT  /app/v1/device                  upsert this device's row → { id }
-//   GET  /app/v1/device?device_token=…   { device, subscriptions } for a restore
+//   GET  /app/v1/device                  { device, subscriptions } for a restore
 //   PUT  /app/v1/stations/:stationId     { site_id, above, below } → one station's alerts
 //   POST /app/v1/archive-all             Help's "cancel all"
 //
 // Only a SHA-256 of the secret is stored (`secret_hash`). A row made before
-// the secret existed is claimed by the first request that names its
-// device_id (or, on a restore, its APNs token), then needs that secret.
+// the secret existed is never handed over to whoever names its device_id
+// (older builds' shared token could read those): it is retired, its alerts
+// archived, and the device gets a new row that the app fills again itself.
 
 import { request, DirectusError, type DirectusConfig } from './directus.ts'
 
@@ -47,7 +48,7 @@ interface DeviceRow {
 /** The fields the app may set on its own row. Anything else in the body is
  * dropped, so a device can't touch the sender's state or another row. */
 const DEVICE_FIELDS = [
-  'device_token', 'fcm_token', 'environment', 'app_version', 'locale', 'is_pro',
+  'device_token', 'fcm_token', 'environment', 'app_version', 'locale', 'is_pro', 'notifications_allowed',
   'last_seen_at', 'dnd_enabled', 'dnd_start', 'dnd_end', 'timezone',
 ] as const
 
@@ -77,7 +78,7 @@ export async function handleApp(request_: Request, env: AppApiEnv): Promise<Resp
       return json(await putDevice(env, auth, await body(request_)))
     }
     if (route === 'device' && request_.method === 'GET') {
-      return json(await getDevice(env, auth, url.searchParams.get('device_token')))
+      return json(await getDevice(env, auth))
     }
     const station = /^stations\/([0-9]{1,9})$/.exec(route)
     if (station && request_.method === 'PUT') {
@@ -123,27 +124,29 @@ function sameHash(a: string, b: string): boolean {
   return diff === 0
 }
 
-/** This device's row id, or null when it has none. A row with another secret
- * is refused (403); one with no secret yet is claimed. With `deviceToken`, a
- * row that only knows this APNs token (from a build before the device id) is
- * adopted the same way. */
-export async function ownDevice(env: DirectusConfig, auth: Credentials, deviceToken?: string | null): Promise<number | null> {
-  let row = await findDevice(env, 'device_id', auth.deviceId)
-  if (!row && deviceToken && /^[0-9a-f]{16,200}$/i.test(deviceToken)) {
-    row = await findDevice(env, 'device_token', deviceToken)
-    // A token row that already belongs to another install isn't this one's.
-    if (row && (row.secret_hash || (row.device_id && row.device_id !== auth.deviceId))) row = null
-  }
-  if (!row) return null
-  if (row.secret_hash) {
-    if (!sameHash(row.secret_hash, auth.secretHash)) throw new ApiError(403, 'device credentials do not match')
-    return row.id
-  }
-  await request(env, 'PATCH', `/items/twaqi_push_devices/${row.id}?fields=id`, {
-    device_id: auth.deviceId,
-    secret_hash: auth.secretHash,
-  })
+/** This device's row id, or null when it has none of its own. A row under
+ * this device_id with another secret is refused (403). A row with no secret,
+ * from a build before there was one, is never handed over: older builds'
+ * shared Directus token could read device ids, so knowing one proves
+ * nothing. `putDevice` retires such a row and makes a new one instead. */
+export async function ownDevice(env: DirectusConfig, auth: Credentials): Promise<number | null> {
+  const row = await findDevice(env, 'device_id', auth.deviceId)
+  if (!row?.secret_hash) return null
+  if (!sameHash(row.secret_hash, auth.secretHash)) throw new ApiError(403, 'device credentials do not match')
   return row.id
+}
+
+/** Takes a row out of use: its live alerts archived, the row archived, and
+ * its device_id and APNs token freed (both are unique), so nothing on it is
+ * sent to or carried over again. Soft: the row stays. */
+async function retire(env: DirectusConfig, rowId: number) {
+  await archiveRows(env, (await liveSubscriptions(env, rowId)).map((s) => s.id))
+  await request(env, 'PATCH', `/items/twaqi_push_devices/${rowId}?fields=id`, {
+    archived: true,
+    device_id: `retired-${rowId}`,
+    device_token: `retired-${rowId}`,
+    fcm_token: null,
+  })
 }
 
 async function findDevice(env: DirectusConfig, field: string, value: string): Promise<DeviceRow | null> {
@@ -173,7 +176,7 @@ export function deviceFields(input: Record<string, unknown>): Record<string, unk
       throw new ApiError(400, `${key} must be a short string`)
     }
   }
-  for (const key of ['is_pro', 'dnd_enabled']) {
+  for (const key of ['is_pro', 'dnd_enabled', 'notifications_allowed']) {
     if (out[key] !== undefined && typeof out[key] !== 'boolean') throw new ApiError(400, `${key} must be true or false`)
   }
   return out
@@ -181,36 +184,48 @@ export function deviceFields(input: Record<string, unknown>): Record<string, unk
 
 async function putDevice(env: DirectusConfig, auth: Credentials, input: Record<string, unknown>) {
   const fields = deviceFields(input)
-  const existing = await ownDevice(env, auth, fields.device_token as string)
   // A device seen again is alive, even if FCM once rejected its token.
   const row = { ...fields, archived: false }
-  if (existing !== null) {
-    await request(env, 'PATCH', `/items/twaqi_push_devices/${existing}?fields=id`, row)
-    return { id: existing }
+  const token = fields.device_token as string
+
+  const mine = await findDevice(env, 'device_id', auth.deviceId)
+  if (mine?.secret_hash) {
+    if (!sameHash(mine.secret_hash, auth.secretHash)) throw new ApiError(403, 'device credentials do not match')
+    await request(env, 'PATCH', `/items/twaqi_push_devices/${mine.id}?fields=id`, row)
+    return { id: mine.id, created: false }
   }
+
+  // Rows this request can't prove are its own, never adopted: one under this
+  // device_id without a secret (from before there was one), and any row
+  // holding this APNs token, which is this phone's now. Their alerts are
+  // archived, not moved: the app sends its own again to the new row, which
+  // it sees by the new id.
+  if (mine) await retire(env, mine.id)
+  const byToken = await findDevice(env, 'device_token', token)
+  if (byToken) await retire(env, byToken.id)
+
   try {
     const { data } = await request<{ data: { id: number } }>(env, 'POST', '/items/twaqi_push_devices?fields=id', {
       ...row,
       device_id: auth.deviceId,
       secret_hash: auth.secretHash,
     })
-    return { id: data.id }
+    return { id: data.id, created: true }
   } catch (e) {
-    // Lost a race to create (unique device_id or device_token): use the row
-    // the other request made, if it's ours.
+    // Lost a race with another request from this device: use its row.
     if (e instanceof DirectusError && e.status === 400) {
-      const id = await ownDevice(env, auth, fields.device_token as string)
+      const id = await ownDevice(env, auth)
       if (id !== null) {
         await request(env, 'PATCH', `/items/twaqi_push_devices/${id}?fields=id`, row)
-        return { id }
+        return { id, created: false }
       }
     }
     throw e
   }
 }
 
-async function getDevice(env: DirectusConfig, auth: Credentials, deviceToken: string | null) {
-  const id = await ownDevice(env, auth, deviceToken)
+async function getDevice(env: DirectusConfig, auth: Credentials) {
+  const id = await ownDevice(env, auth)
   if (id === null) return { device: null, subscriptions: [] }
   const params = new URLSearchParams({ fields: 'id,dnd_enabled,dnd_start,dnd_end' })
   const { data: device } = await request<{ data: unknown }>(env, 'GET', `/items/twaqi_push_devices/${id}?${params}`)

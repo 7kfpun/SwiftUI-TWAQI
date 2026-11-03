@@ -75,6 +75,10 @@ describe('crossingFilter', () => {
     assert.equal(matches(at(200), sub({ metric: null })), true)
     assert.equal(matches(at(200), sub({ device: { archived: true, fcm_token: 'tok' } })), false)
     assert.equal(matches(at(200), sub({ device: { archived: false, fcm_token: null } })), false)
+    // Notifications turned off in iOS Settings: skipped; unknown (older row): sent.
+    assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: false } })), false)
+    assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: true } })), true)
+    assert.equal(matches(at(200), sub({ device: { ...device, notifications_allowed: null } })), true)
   })
 
   it('agrees with decide(): every row it returns changes state, and no row it skips does', () => {

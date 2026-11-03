@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 /// Which APNs host a device token belongs to. Xcode debug builds get sandbox
 /// tokens; TestFlight and App Store builds get production ones.
@@ -87,6 +88,10 @@ struct PushDevicePayload: Encodable, Equatable {
     /// Taiwan Air Pro is active (subscription or lifetime), as last read
     /// from StoreKit on this device.
     var isPro: Bool
+    /// Whether iOS lets the app show notifications: false once the user
+    /// turns them off in Settings (or never allowed them), and the sender
+    /// stops sending until it's true again. Nil leaves the row as it was.
+    var notificationsAllowed: Bool?
     var lastSeenAt: String
     var dndEnabled: Bool
     /// "HH:mm", wall-clock time in `timezone`.
@@ -104,6 +109,7 @@ struct PushDevicePayload: Encodable, Equatable {
         case fcmToken = "fcm_token"
         case appVersion = "app_version"
         case isPro = "is_pro"
+        case notificationsAllowed = "notifications_allowed"
         case lastSeenAt = "last_seen_at"
         case dndEnabled = "dnd_enabled"
         case dndStart = "dnd_start"
@@ -122,6 +128,7 @@ struct PushDevicePayload: Encodable, Equatable {
         try values.encodeIfPresent(appVersion, forKey: .appVersion)
         try values.encodeIfPresent(locale, forKey: .locale)
         try values.encode(isPro, forKey: .isPro)
+        try values.encodeIfPresent(notificationsAllowed, forKey: .notificationsAllowed)
         try values.encode(lastSeenAt, forKey: .lastSeenAt)
         try values.encode(dndEnabled, forKey: .dndEnabled)
         try values.encode(dndStart, forKey: .dndStart)
@@ -138,6 +145,7 @@ struct PushDevicePayload: Encodable, Equatable {
         dndStart: Date,
         dndEnd: Date,
         isPro: Bool = false,
+        notificationsAllowed: Bool? = nil,
         language: AppLanguage = .current,
         now: Date = Date(),
         environment: PushEnvironment = .current,
@@ -154,6 +162,7 @@ struct PushDevicePayload: Encodable, Equatable {
             // Help's choice wins over the one iOS picked for the app.
             locale: language.localeIdentifier ?? bundle.preferredLocalizations.first ?? Locale.current.identifier,
             isPro: isPro,
+            notificationsAllowed: notificationsAllowed,
             lastSeenAt: ISO8601DateFormatter().string(from: now),
             dndEnabled: dndEnabled,
             dndStart: hourMinute(dndStart, calendar: calendar),
@@ -163,11 +172,21 @@ struct PushDevicePayload: Encodable, Equatable {
     }
 
     /// What, besides the tokens, makes the row out of date when it changes:
-    /// the language alerts are written in, Pro, and the do-not-disturb window
-    /// with its time zone. Saved only after a write succeeds, so a failed one
+    /// the language alerts are written in, Pro, whether notifications are
+    /// allowed, and the do-not-disturb window with its time zone. Saved only after a write succeeds, so a failed one
     /// is retried on the next flush, even after a relaunch.
     var profile: String {
-        [locale ?? "", String(isPro), String(dndEnabled), dndStart, dndEnd, timezone].joined(separator: "|")
+        [locale ?? "", String(isPro), notificationsAllowed.map(String.init) ?? "", String(dndEnabled), dndStart, dndEnd, timezone].joined(separator: "|")
+    }
+
+    /// Allowed means iOS will show the alert: authorised, provisional or
+    /// ephemeral. Denied, or never asked, means it won't.
+    static func notificationsAllowed(_ status: UNAuthorizationStatus) -> Bool {
+        switch status {
+        case .authorized, .provisional, .ephemeral: return true
+        case .denied, .notDetermined: return false
+        @unknown default: return true
+        }
     }
 
     static func hourMinute(_ date: Date, calendar: Calendar = .current) -> String {
