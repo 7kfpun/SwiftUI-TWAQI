@@ -58,7 +58,9 @@ enum WatchStore {
 
     /// Whether `homeReading` came from the reader's location, not the 中正
     /// default: location permission was given. The watch Smart Stack's "near
-    /// home" hint needs it and never asks for permission itself.
+    /// home" hint needs it and never asks for permission itself. Written only
+    /// when home is resolved, so pinning another station leaves both home and
+    /// this as they were: "near home" stays near home.
     static var homeIsLocated: Bool {
         get { defaults.bool(forKey: Keys.homeIsLocated) }
         set { defaults.set(newValue, forKey: Keys.homeIsLocated) }

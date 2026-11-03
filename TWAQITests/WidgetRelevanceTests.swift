@@ -212,6 +212,33 @@ final class WidgetRelevanceTests: XCTestCase {
         XCTAssertEqual(many.last?.stationId, WidgetRelevance.historyLimit + 5)
     }
 
+    // MARK: - Stored in the app group
+
+    func testAlertThresholdsRoundTripThroughTheAppGroup() {
+        let saved = WatchStore.alertThresholds
+        defer { WatchStore.alertThresholds = saved }
+
+        WatchStore.alertThresholds = [12: 120, 345: 80]
+        XCTAssertEqual(WatchStore.alertThresholds, [12: 120, 345: 80])
+        WatchStore.alertThresholds = [:]
+        XCTAssertEqual(WatchStore.alertThresholds, [:])
+    }
+
+    /// Against the real clock: the store leaves out readings a week old.
+    func testRecordForRelevanceReturnsTheEarlierPublish() {
+        let saved = WatchStore.relevanceHistory
+        defer { WatchStore.relevanceHistory = saved }
+        WatchStore.relevanceHistory = []
+
+        let earlier = reading(aqi: 50, publishTime: Self.publishTime(Date().addingTimeInterval(-80 * 60)))
+        let later = reading(aqi: 70, publishTime: Self.publishTime(Date().addingTimeInterval(-20 * 60)))
+        XCTAssertNil(WatchStore.recordForRelevance(earlier))
+        XCTAssertEqual(WatchStore.recordForRelevance(later), earlier)
+        // The next refresh in the same hour still sees the earlier publish.
+        XCTAssertEqual(WatchStore.recordForRelevance(later), earlier)
+        XCTAssertEqual(WatchStore.relevanceHistory, [earlier, later])
+    }
+
     // MARK: - Smart Stack windows
 
     /// The windows are Taiwan clock times even when the device is set to
