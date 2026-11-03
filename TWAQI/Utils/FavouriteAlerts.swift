@@ -34,7 +34,9 @@ enum FavouriteAlerts {
 
     /// Alerts can be on for at most this many stations; the station screen
     /// locks its switches once other stations reach it. Two under OneSignal,
-    /// briefly none (FOX-41), now three: it bounds the FCM sender's load.
+    /// briefly none (FOX-41), now three. Enforced in the app only: the Worker
+    /// takes whatever the app sends, so raising this as the sender's capacity
+    /// allows needs no server change (strings take the number).
     static let maxAlertedStations = 3
 
     static func post(stationId: Int, isOn: Bool, setting: StationAlertSetting? = nil, alertedStationCount: Int? = nil) {

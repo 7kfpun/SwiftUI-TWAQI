@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { afterEach, beforeEach, describe, it } from 'node:test'
-import { MAX_STATIONS, handleApp, plan, sha256 } from '../src/app-api.ts'
+import { handleApp, plan, sha256 } from '../src/app-api.ts'
 
 // An in-memory Directus with just the REST the app API uses.
 type Row = Record<string, unknown> & { id: number }
@@ -174,13 +174,9 @@ describe('app API alerts', () => {
     ])
   })
 
-  it(`stops at ${MAX_STATIONS} stations`, async () => {
-    for (const id of [1, 2, 3]) assert.equal((await call('PUT', `/app/v1/stations/${id}`, { above: 100 })).status, 200)
-    assert.equal((await call('PUT', '/app/v1/stations/4', { above: 100 })).status, 409)
-    // A station already on can still change, and one can go off to make room.
-    assert.equal((await call('PUT', '/app/v1/stations/2', { above: 150 })).status, 200)
-    assert.equal((await call('PUT', '/app/v1/stations/3', { above: null })).status, 200)
-    assert.equal((await call('PUT', '/app/v1/stations/4', { above: 100 })).status, 200)
+  it('leaves the station limit to the app', async () => {
+    for (const id of [1, 2, 3, 4]) assert.equal((await call('PUT', `/app/v1/stations/${id}`, { above: 100 })).status, 200)
+    assert.equal(tables.twaqi_push_subscriptions.filter((r) => !r.archived).length, 4)
   })
 
   it('cancel-all archives only this device\'s alerts', async () => {

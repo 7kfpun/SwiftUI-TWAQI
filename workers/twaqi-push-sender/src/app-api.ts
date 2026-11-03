@@ -18,10 +18,6 @@
 
 import { request, DirectusError, type DirectusConfig } from './directus.ts'
 
-/** Alerts may be on for at most this many stations per device, as in the
- * app (`FavouriteAlerts.maxAlertedStations`). */
-export const MAX_STATIONS = 3
-
 export interface AppApiEnv extends DirectusConfig {
   /** Optional Workers rate limiter keyed by client IP. */
   APP_LIMITER?: { limit(options: { key: string }): Promise<{ success: boolean }> }
@@ -260,13 +256,9 @@ async function putStation(env: DirectusConfig, auth: Credentials, stationId: str
   // The app writes its row before any alert, so there is one by now.
   if (device === null) throw new ApiError(404, 'register the device first')
 
-  const all = await liveSubscriptions(env, device)
-  const existing = all.filter((s) => s.station_id === stationId)
-  const turningOn = alerts.above !== null || alerts.below !== null
-  const others = new Set(all.filter((s) => s.station_id !== stationId && s.enabled).map((s) => s.station_id))
-  if (turningOn && !existing.some((s) => s.enabled) && others.size >= MAX_STATIONS) {
-    throw new ApiError(409, `alerts are already on for ${MAX_STATIONS} stations`)
-  }
+  // The station limit is the app's (FavouriteAlerts.maxAlertedStations),
+  // not checked here.
+  const existing = await liveSubscriptions(env, device, stationId)
 
   const { save, archive } = plan(existing, stationId, siteId, alerts)
   for (const item of save) {

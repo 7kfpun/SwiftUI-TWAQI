@@ -572,13 +572,6 @@ final class FavouriteAlertsTests: XCTestCase {
         XCTAssertTrue(FavouriteAlerts.write(on, stationId: 126, siteId: nil, services: fake.services))
     }
 
-    func testStationRefusedByTheWorkerIsRecognised() {
-        // A 409 from PUT /app/v1/stations: dropped, not retried forever.
-        XCTAssertTrue(DirectusPushMirror.isStationRefused(PushError.server(statusCode: 409)))
-        XCTAssertFalse(DirectusPushMirror.isStationRefused(PushError.server(statusCode: 502)))
-        XCTAssertFalse(DirectusPushMirror.isStationRefused(PushError.offline))
-    }
-
     func testNotificationsDeniedWritesNothing() {
         let fake = FakeServices()
         fake.denied = true

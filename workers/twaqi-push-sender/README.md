@@ -18,7 +18,7 @@ Cloudflare Worker that sends the TWAQI iOS app's AQI alerts through **Firebase C
 | Cool-down | A crossing within `COOLDOWN_MINUTES` (180) of `last_fired_at` is recorded but not sent, for values bouncing around the threshold. With runs 2 hours apart, a subscription alerts at most every 4 hours. |
 | Quiet hours | If the device has `dnd_enabled` and the current time in its `timezone` is in `dnd_start`–`dnd_end` (`HH:mm`, may run past midnight, e.g. 23:00–07:00), the crossing is recorded and the alert is **dropped**. No backlog, no digest. |
 | Stale data | Stations whose `publish_time` is older than `MAX_DATA_AGE_MINUTES` (180), or whose AQI is ≤ 0, are left out of the filter, so nothing on them changes. |
-| Limit | The app allows alerts on at most **3 stations** per device (`FavouriteAlerts.maxAlertedStations`). |
+| Limit | The app allows alerts on at most **3 stations** per device (`FavouriteAlerts.maxAlertedStations`). Enforced in the app only. |
 | Opted out | The app reports `notifications_allowed` on its row (false when notifications are off for it in iOS Settings, or never allowed). Only devices where it is **true** are sent to. Not asked yet (empty) waits: a crossing before the user allows notifications stays unmarked and fires on the first run after they do, which the app reports at once. Rows from before this build have no FCM token, so they're not sent to anyway. |
 | Failed send | `in_zone` is left as it was, so the next run retries. |
 | Dead token | FCM `UNREGISTERED`, `SENDER_ID_MISMATCH`, or `INVALID_ARGUMENT` about the registration token → device `archived = true`. Its subscriptions stop matching until the app writes its row again (which sets `archived = false`). |
@@ -41,7 +41,7 @@ The app has **no Directus token for the push collections**. It writes its own ro
 | --- | --- |
 | `PUT /app/v1/device` | Upsert this device's row (tokens, `environment`, `app_version`, `locale`, `is_pro`, `last_seen_at`, DND, `timezone`) → `{ id }`. Other fields in the body are dropped. |
 | `GET /app/v1/device?device_token=…` | For a restore: `{ device: { id, dnd_* } \| null, subscriptions: [...] }`. |
-| `PUT /app/v1/stations/:stationId` | `{ site_id, above, below }` (a whole AQI, or `null` for off): brings that station's rows in line, archiving what's off. Refuses (409) a 4th station with alerts. |
+| `PUT /app/v1/stations/:stationId` | `{ site_id, above, below }` (a whole AQI, or `null` for off): brings that station's rows in line, archiving what's off. The station limit is the app's; the Worker doesn't check it. |
 | `POST /app/v1/archive-all` | Help's "cancel all": archives this device's live alerts. |
 
 - **Auth:** every request carries `X-Device-Id` (the Keychain UUID) and `Authorization: Bearer <secret>`, 32 random bytes the app makes once and keeps in the Keychain next to the id ("this device only").
