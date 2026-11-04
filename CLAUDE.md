@@ -36,15 +36,15 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 
 - Branch `feature/fox-nn-*` off `master`; open a **draft** PR to `master` using the PR
   template. CI (unit-test subset, vulnerability checks, Claude review) runs only on
-  non-draft `feature/*` PRs, `Workers` on every non-draft PR; `PR policy`, `Secret files`
-  and the `LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
+  non-draft `feature/*` PRs, `Workers` and `Public text` on every non-draft PR; `PR policy`,
+  `Secret files` and the `LGTM` status on every PR. Map: `docs/ci-cd-guardrails.md`.
 - Merge only after another agent's LGTM covers the head and the user gives the greenlight, squash only. The LGTM is a pull request review or comment whose first line is `**<Name> LGTM**`, with any reviewer name, e.g. `**Grok LGTM** (head abc1234)`. A later `**<Name> — changes needed**` cancels it. The advisory Claude Code Review bot doesn't count. That turns the `LGTM` status green. Rebasing or updating the branch from `master` keeps it, as long as the PR's own changes stay the same; conflict fixes or new commits need a fresh LGTM. Don't start a comment with "LGTM" unless you reviewed the head.
 - Don't merge, bump versions, archive, or upload to TestFlight/App Store unless asked.
 - Workers deploy on merge to `master`; don't deploy them from a branch.
 - **The repo is public.** Commits, PR descriptions (and their edit history), PR and issue
   comments, and docs are readable by anyone. Keep out of them: IP addresses, network
-  ranges and allow-lists, firewall or authorized-network changes, which services are or
-  were exposed, incident details (attacker IPs, outage causes, what got hit), secret
+  ranges and allow-lists, changes to network access rules, which services are or were
+  reachable from anywhere, incident details (attacker IPs, outage causes, what got hit), secret
   values or any part of them, database hosts, and account emails. **Hostnames:** only the
   public websites (`taiwanair.wahthefox.com`, `kf-twaqi.web.app`, `kf-nihongo.web.app`) may
   be named; every other host (API, webcam, Directus, Workers, Cloud Run, the Lambda) is

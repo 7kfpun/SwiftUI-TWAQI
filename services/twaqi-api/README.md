@@ -107,10 +107,11 @@ kill %1
 matches the Makefile), then `make health`:
 
 ```sh
+P=kf-personal-tools
 gcloud run deploy twaqi-api \
-  --project kf-personal-tools --region asia-east1 \
+  --project $P --region asia-east1 \
   --source . \
-  --service-account twaqi-api@kf-personal-tools.iam.gserviceaccount.com \
+  --service-account "twaqi-api@$P.iam.gserviceaccount.com" \
   --add-cloudsql-instances kf-personal-tools:asia-east1:mysql \
   --set-env-vars DB_SOCKET=/cloudsql/kf-personal-tools:asia-east1:mysql,DB_USER=twaqi_read,DB_NAME=aqi,DB_CONNECTION_LIMIT=3 \
   --set-secrets DB_PASSWORD=twaqi-api-db-password:latest,ORIGIN_TOKEN=twaqi-api-origin-token:latest \
