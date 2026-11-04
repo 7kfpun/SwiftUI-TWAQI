@@ -14,7 +14,7 @@ final class HelpSectionOrderTests: XCTestCase {
     func testFreeUserSeesPremiumFirst() {
         XCTAssertEqual(
             HelpSection.order(isPro: false, developerMode: false),
-            [.purchase, .doNotDisturb, .language, .welcome, .contact, .widgetsAndWatch, .definition, .about]
+            [.purchase, .doNotDisturb, .language, .appearance, .welcome, .contact, .widgetsAndWatch, .definition, .about]
         )
     }
 

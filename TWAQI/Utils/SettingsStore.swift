@@ -10,6 +10,49 @@ import Combine
 import StoreKit
 import SwiftDate
 import SwiftUI
+import UIKit
+
+/// Light or dark look chosen under Help (FOX-43); `.system` follows iOS.
+///
+/// Applied as `overrideUserInterfaceStyle` on the app's windows, so sheets,
+/// alerts and the UIKit map follow it too, not only the SwiftUI views.
+enum AppAppearance: String, CaseIterable, Identifiable {
+    /// Whatever iOS is set to, changing with it.
+    case system
+    case light
+    case dark
+
+    static let defaultsKey = "appAppearance"
+
+    var id: String { rawValue }
+
+    /// The window override; `.unspecified` follows the system.
+    var userInterfaceStyle: UIUserInterfaceStyle {
+        switch self {
+        case .system: return .unspecified
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+
+    static func stored(in defaults: UserDefaults = .standard) -> AppAppearance {
+        defaults.string(forKey: defaultsKey).flatMap(AppAppearance.init(rawValue:)) ?? .system
+    }
+
+    /// Sets the look of `windows`. Call on the main thread.
+    func apply(to windows: [UIWindow]) {
+        for window in windows where window.overrideUserInterfaceStyle != userInterfaceStyle {
+            window.overrideUserInterfaceStyle = userInterfaceStyle
+        }
+    }
+
+    /// Every window of every scene: an iPad can have several open.
+    static var appWindows: [UIWindow] {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+    }
+}
 
 final class SettingsStore: ObservableObject {
     private enum Keys {
@@ -94,6 +137,21 @@ final class SettingsStore: ObservableObject {
             TrackingManager.logEvent(.selectLanguage, parameters: ["label": newValue.rawValue])
         }
         get { AppLanguage.stored(in: defaults) }
+    }
+
+    /// Look chosen under Help; `.system` follows iOS. Set from the main
+    /// thread: it restyles the open windows at once.
+    var appearance: AppAppearance {
+        set {
+            if newValue == .system {
+                defaults.removeObject(forKey: AppAppearance.defaultsKey)
+            } else {
+                defaults.set(newValue.rawValue, forKey: AppAppearance.defaultsKey)
+            }
+            newValue.apply(to: AppAppearance.appWindows)
+            TrackingManager.logEvent(.selectAppearance, parameters: ["label": newValue.rawValue])
+        }
+        get { AppAppearance.stored(in: defaults) }
     }
 
     var isDndEnabled: Bool {
