@@ -5,7 +5,7 @@
 // MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
-import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepHour } from './history'
+import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepDue } from './history'
 
 interface Env extends ForecastEnv {
   CAMS: R2Bucket
@@ -174,7 +174,11 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   const prev = await readManifest(env)
   if (!force && prev?.source?.url === row.url) {
-    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, hours: 0, expired: 0, stations: Object.keys(prev.stations).length }
+    // Nothing new to file, but a sweep that failed on an earlier run is still
+    // owed: retry it against the manifest's anchors and record it once done.
+    const { expired, sweptHour } = await sweepIfDue(env, stationAnchors(prev.stations), prev.sweptHour)
+    if (sweptHour !== prev.sweptHour) await writeManifest(env, { ...prev, sweptHour })
+    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, hours: 0, expired, stations: Object.keys(prev.stations).length }
   }
 
   const zipRes = await fetch(row.url)
@@ -260,27 +264,13 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
   // the 24 hours the app shows, including frames of hours a site skipped, of
   // sites that stopped reporting, and of a failed earlier sweep. A failure
   // only leaves frames behind until the next sync retries.
-  const anchors = Object.fromEntries(Object.entries(stations).map(([id, s]) => [id, s.hourKey]))
-  const hourNow = sweepHour(anchors)
-  let sweptHour = prev?.sweptHour
-  let expired = 0
-  if (hourNow && hourNow !== sweptHour) {
-    try {
-      expired = await sweepHistory(env, anchors)
-      sweptHour = hourNow
-    } catch (e) {
-      console.error('history sweep failed', e)
-    }
-  }
+  const { expired, sweptHour } = await sweepIfDue(env, stationAnchors(stations), prev?.sweptHour)
 
-  const manifest: Manifest = {
+  await writeManifest(env, {
     updatedAt: new Date().toISOString(),
     source: { filename: row.filename ?? '', url: row.url, uploadDate: row.upload_date ?? '' },
     stations: Object.fromEntries(Object.entries(stations).sort(([a], [b]) => a.localeCompare(b))),
     sweptHour,
-  }
-  await env.CAMS.put(MANIFEST_KEY, JSON.stringify(manifest), {
-    httpMetadata: { contentType: 'application/json; charset=utf-8', cacheControl: 'public, max-age=60' },
   })
 
   return {
@@ -292,6 +282,36 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
     hours,
     expired,
     stations: Object.keys(stations).length,
+  }
+}
+
+function stationAnchors(stations: Record<string, Station>): Record<string, string | undefined> {
+  return Object.fromEntries(Object.entries(stations).map(([id, s]) => [id, s.hourKey]))
+}
+
+async function writeManifest(env: Env, manifest: Manifest): Promise<void> {
+  await env.CAMS.put(MANIFEST_KEY, JSON.stringify(manifest), {
+    httpMetadata: { contentType: 'application/json; charset=utf-8', cacheControl: 'public, max-age=60' },
+  })
+}
+
+/**
+ * Sweeps when one is owed (`sweepDue`). Returns how many objects went and the
+ * `sweptHour` to record: the new hour on success, the old one on failure, so
+ * the next sync tries again. Never throws.
+ */
+async function sweepIfDue(
+  env: Env,
+  anchors: Record<string, string | undefined>,
+  sweptHour: string | undefined,
+): Promise<{ expired: number; sweptHour: string | undefined }> {
+  const due = sweepDue(anchors, sweptHour)
+  if (!due) return { expired: 0, sweptHour }
+  try {
+    return { expired: await sweepHistory(env, anchors), sweptHour: due }
+  } catch (e) {
+    console.error('history sweep failed', e)
+    return { expired: 0, sweptHour }
   }
 }
 

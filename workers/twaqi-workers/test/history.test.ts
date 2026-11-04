@@ -1,7 +1,7 @@
 // Run with `npm test` (Node 23.6+ strips the types; no extra dependencies).
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { HISTORY_ROUTE, hourKey, parseHourKey, shouldWriteHour, staleHourKeys, sweepHour } from '../src/history.ts'
+import { HISTORY_ROUTE, hourKey, parseHourKey, shouldWriteHour, staleHourKeys, sweepDue, sweepHour } from '../src/history.ts'
 
 test('hour key comes straight off the Taiwan-local MOENV stamp', () => {
   assert.equal(hourKey('001', '202610302200'), 'stations/001/2026-10-30/22.jpg')
@@ -87,6 +87,20 @@ test('sweep hour is the newest anchor hour, so the sweep runs once per hour', ()
     '003': undefined,
   }), '2026-10-31/00')
   assert.equal(sweepHour({ '001': undefined }), null)
+})
+
+test('a sweep stays owed until one succeeds, even with no new frame filed', () => {
+  const anchors = { '001': 'stations/001/2026-10-31/00.jpg', '002': 'stations/002/2026-10-30/23.jpg' }
+  // A new hour was filed: a sweep is owed for it.
+  assert.equal(sweepDue(anchors, '2026-10-30/23'), '2026-10-31/00')
+  // That sweep failed, so the manifest kept the old sweptHour. The next sync
+  // sees the same MOENV ZIP and files nothing, but the same anchors still owe it.
+  assert.equal(sweepDue(anchors, '2026-10-30/23'), '2026-10-31/00')
+  // First deploy: no sweep has run yet.
+  assert.equal(sweepDue(anchors, undefined), '2026-10-31/00')
+  // Once it succeeds, nothing more is owed until the next hour is filed.
+  assert.equal(sweepDue(anchors, '2026-10-31/00'), null)
+  assert.equal(sweepDue({ '001': undefined }, undefined), null)
 })
 
 test('only the first frame of an hour is filed', () => {

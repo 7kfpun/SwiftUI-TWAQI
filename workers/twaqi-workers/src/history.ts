@@ -95,6 +95,18 @@ export function sweepHour(anchors: Record<string, string | undefined>): string |
 }
 
 /**
+ * The hour a history sweep is owed for, or null when none is: the newest
+ * anchor hour (`sweepHour`) when it differs from `sweptHour`, the hour the
+ * last successful sweep ran for. A sweep that failed leaves `sweptHour`
+ * behind, so the next sync owes it again, even when the MOENV ZIP is
+ * unchanged and nothing new gets filed.
+ */
+export function sweepDue(anchors: Record<string, string | undefined>, sweptHour: string | undefined): string | null {
+  const hour = sweepHour(anchors)
+  return hour && hour !== sweptHour ? hour : null
+}
+
+/**
  * Whether a frame should be written as its hour's history object.
  *
  * The first frame seen in each clock hour is kept — the :00 frame whenever a
