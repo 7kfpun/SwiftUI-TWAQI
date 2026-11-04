@@ -16,7 +16,7 @@ import Foundation
 final class StationCamStore {
     static let shared = StationCamStore()
 
-    static let manifestURL = StationCam.baseURL.appendingPathComponent("manifest.json")
+    static let manifestURL = StationCamManifest.url
 
     /// Cams are re-synced about hourly, and each frame's URL is versioned by
     /// the capture time in the manifest — so this is also how stale a frame

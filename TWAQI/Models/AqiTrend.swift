@@ -84,6 +84,15 @@ struct AqiTrend: Equatable {
         )
     }
 
+    /// `from(values:steadyThreshold:)` with the threshold for `airIndexType`:
+    /// AQI has a meaningful absolute one; every other pollutant needs one
+    /// scaled to its own units. The station page and the extra-large widget
+    /// both judge the trend this way.
+    static func from(values: [Double], airIndexType: AirIndexTypes) -> AqiTrend? {
+        let threshold = airIndexType == .aqi ? steadyThreshold : relativeThreshold(for: values)
+        return from(values: values, steadyThreshold: threshold)
+    }
+
     /// The three readings ending `lookBack` hours before the newest one, or the
     /// oldest three when there isn't that much history.
     private static func earlierWindow(in values: [Double]) -> [Double] {

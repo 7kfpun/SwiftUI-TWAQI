@@ -45,7 +45,8 @@ enum OfflineCacheRetention {
     /// Deletes every offline cache file last written more than `maxAge` ago:
     /// the station lists, last good pollutants, the area forecast, the cam
     /// manifest, saved cam frames and saved hourly cam frames (the scrubber's)
-    /// in `directory` (Application Support).
+    /// in `directory` (Application Support), and the extra-large widget's
+    /// station details and cam frames in `widgetDirectory` (app group).
     /// Returns the files removed.
     ///
     /// Each store also ignores an expired file when it reads one, so this is
@@ -53,6 +54,7 @@ enum OfflineCacheRetention {
     @discardableResult
     static func purge(
         directory: URL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0],
+        widgetDirectory: URL? = nil,
         now: Date = Date()
     ) -> [URL] {
         let fileManager = FileManager.default
@@ -71,6 +73,7 @@ enum OfflineCacheRetention {
         let candidates = contents(of: directory).filter { isCacheFile(named: $0.lastPathComponent) }
             + contents(of: cams)
             + contents(of: cams.appendingPathComponent(StationCamHistoryCache.directoryName, isDirectory: true))
+            + (widgetDirectory.map(contents(of:)) ?? [])
 
         var removed: [URL] = []
         for file in candidates where isExpiredFile(file) {
@@ -85,7 +88,7 @@ enum OfflineCacheRetention {
     /// Called at launch.
     static func purgeInBackground() {
         DispatchQueue.global(qos: .utility).async {
-            let removed = purge()
+            let removed = purge(widgetDirectory: WidgetStationDetailCache.defaultDirectory)
             if !removed.isEmpty {
                 print("OfflineCacheRetention purged", removed.map(\.lastPathComponent))
             }

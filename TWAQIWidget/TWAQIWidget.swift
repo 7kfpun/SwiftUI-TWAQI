@@ -15,9 +15,11 @@ import WidgetKit
 /// `WatchStore` keys in the app group so a reading written by the phone is
 /// what the extension shows offline.
 ///
-/// Home Screen families also list the reader's other favourite stations.
-/// Medium and large are Pro; without it they say so instead. The Lock Screen
-/// families stay single-station. Bundled with the Control Center control
+/// Small, medium and large also list the reader's other favourite stations.
+/// Extra large (iPad) shows the one station in detail instead: history,
+/// forecast and cam (FOX-72). Medium, large and extra large are Pro; without
+/// it they say so instead. The Lock Screen families stay single-station.
+/// Bundled with the Control Center control
 /// (`TWAQIWidgetBundle`).
 struct TWAQIWidget: Widget {
     var body: some WidgetConfiguration {
@@ -32,6 +34,7 @@ struct TWAQIWidget: Widget {
             .systemSmall,
             .systemMedium,
             .systemLarge,
+            .systemExtraLarge,
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline,
@@ -108,6 +111,11 @@ struct ReadingEntry: TimelineEntry {
     /// A Pro family placed without Pro: stations are shown, their numbers
     /// blurred under a line selling Pro.
     var isLocked = false
+    /// Extra large only: the station's history, forecast and cam, each
+    /// possibly missing.
+    var detail: WidgetStationDetail?
+    /// Extra large only: the cam's latest frame, downsampled.
+    var camFrame: UIImage?
     /// How far up a StandBy or Home Screen Smart Rotate stack this entry
     /// should go (`WidgetRelevance`).
     var relevance: TimelineEntryRelevance?
@@ -123,20 +131,16 @@ struct ReadingProvider: AppIntentTimelineProvider {
     /// publish behind without spending the refresh budget.
     private static let refreshInterval: TimeInterval = 30 * 60
 
-    /// Home Screen families list favourites; Lock Screen ones have no room.
+    /// Small, medium and large list favourites; extra large shows one
+    /// station in detail, and Lock Screen ones have no room.
     static func listsFavourites(in family: WidgetFamily) -> Bool {
-        switch family {
-        case .systemSmall, .systemMedium, .systemLarge: return true
-        default: return false
-        }
+        WidgetFamilyRules.listsFavourites(family)
     }
 
-    /// Medium and large are Pro. The gallery still previews them unlocked.
+    /// Medium, large and extra large are Pro. The gallery still previews
+    /// them unlocked.
     static func isLocked(in context: Context) -> Bool {
-        switch context.family {
-        case .systemMedium, .systemLarge: return !WatchStore.isProUnlocked && !context.isPreview
-        default: return false
-        }
+        WidgetFamilyRules.isLocked(context.family, isPro: WatchStore.isProUnlocked, isPreview: context.isPreview)
     }
 
     /// The favourite a widget leads with, when it's set to. `nil` means the
@@ -166,7 +170,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let lists = Self.listsFavourites(in: context.family)
         return ReadingEntry(
             date: Date(), reading: .placeholder, airIndexType: .aqi,
-            listsFavourites: lists, favourites: lists ? WatchReading.placeholderFavourites : []
+            listsFavourites: lists, favourites: lists ? WatchReading.placeholderFavourites : [],
+            detail: WidgetFamilyRules.showsStationDetail(context.family) ? .placeholder : nil
         )
     }
 
@@ -182,9 +187,19 @@ struct ReadingProvider: AppIntentTimelineProvider {
                 favourites = WatchReading.placeholderFavourites
             }
         }
+        var detail: WidgetStationDetail?
+        var camFrame: UIImage?
+        if WidgetFamilyRules.showsStationDetail(context.family) {
+            (detail, camFrame) = StationDetailLoader.cached(stationId: reading.stationId)
+            // The gallery shows what the size can do, before any fetch.
+            if detail == nil, context.isPreview {
+                detail = .placeholder
+            }
+        }
         return ReadingEntry(
             date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context)
+            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context),
+            detail: detail, camFrame: camFrame
         )
     }
 
@@ -196,13 +211,16 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let favouriteIds = lists ? WatchStore.favouriteStationIds : []
 
         var fetched: Pollutants = []
+        /// The leading station as this refresh fetched it, for extra large.
+        var primary: Pollutant?
         if let leadingId = Self.leadingFavouriteId(for: configuration) {
             // The first favourite is one of the favourites, so one request
             // covers both. Its reading goes to the favourite cache only:
             // `latestReading` tracks the closest station.
             let ids = favouriteIds.isEmpty ? [leadingId] : favouriteIds
             fetched = (try? await WatchAPI.currentPollutants(stationIds: ids)) ?? []
-            reading = fetched.first { $0.stationId == leadingId }.map(WatchReading.init)
+            primary = fetched.first { $0.stationId == leadingId }
+            reading = primary.map(WatchReading.init)
                 ?? Self.cachedFavourite(leadingId) ?? reading
         } else {
             // The app resolves home from the reader's location; the extension
@@ -228,6 +246,7 @@ struct ReadingProvider: AppIntentTimelineProvider {
                 reading = WatchReading(pollutant)
                 WatchStore.latestReading = reading
             }
+            primary = pollutant
         }
 
         let savedIds = Set(WatchStore.favouriteStationIds)
@@ -244,9 +263,19 @@ struct ReadingProvider: AppIntentTimelineProvider {
             alertThreshold: reading.flatMap { WatchStore.alertThresholds[$0.stationId] },
             isLocked: isLocked, now: now
         )
+        // Extra large only: history, forecast and cam, fetched together,
+        // each falling back to its last good copy.
+        var detail: WidgetStationDetail?
+        var camFrame: UIImage?
+        if WidgetFamilyRules.showsStationDetail(context.family), let stationId = reading?.stationId {
+            let place = primary.flatMap { $0.stationId == stationId ? WidgetStationDetail.Place($0) : nil }
+            (detail, camFrame) = await StationDetailLoader.refresh(stationId: stationId, place: place)
+        }
+
         let entry = ReadingEntry(
             date: now, reading: reading, airIndexType: configuration.index.airIndexType,
             listsFavourites: lists, favourites: favourites, isLocked: isLocked,
+            detail: detail, camFrame: camFrame,
             relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
         )
         return Timeline(entries: [entry], policy: .after(next))
@@ -280,7 +309,7 @@ struct ReadingWidgetView: View {
                 empty
             }
         }
-        // Locked medium / large: a tap opens the app on the Pro screen.
+        // Locked medium / large / extra large: a tap opens the app on the Pro screen.
         // Unlocked widgets keep opening the app as before.
         .widgetURL(entry.isLocked ? DeepLink.proURL(source: .widgetLocked) : nil)
     }
@@ -307,6 +336,13 @@ struct ReadingWidgetView: View {
         // falling back to the plain layout.
         case .systemLarge where entry.listsFavourites:
             largeWithFavourites(reading)
+
+        // One station in detail, never a favourites list (FOX-72).
+        case .systemExtraLarge:
+            StationDetailWidgetView(
+                reading: reading, type: type, detail: entry.detail, camFrame: entry.camFrame,
+                isLocked: entry.isLocked
+            )
 
         case .systemSmall:
             VStack(alignment: .leading, spacing: 4) {
@@ -651,7 +687,7 @@ struct ReadingWidgetView: View {
     private var empty: some View {
         Group {
             switch family {
-            case .systemSmall, .systemMedium, .systemLarge:
+            case .systemSmall, .systemMedium, .systemLarge, .systemExtraLarge:
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Widget.widget_name")
                         .font(.headline)
@@ -685,7 +721,7 @@ struct ReadingWidgetView: View {
         .background(Color(.systemBackground).opacity(0.9), in: Capsule())
     }
 
-    /// Medium and large without Pro and with no reading yet to tease.
+    /// Medium, large and extra large without Pro and with no reading yet to tease.
     private var proOnly: some View {
         VStack(alignment: .leading, spacing: 6) {
             Label {
@@ -703,7 +739,7 @@ struct ReadingWidgetView: View {
     }
 }
 
-private extension View {
+extension View {
     /// Blurs a reading on a locked widget, and keeps VoiceOver from reading it.
     func proBlurred(_ isLocked: Bool) -> some View {
         blur(radius: isLocked ? 6 : 0)
@@ -777,6 +813,23 @@ private extension ReadingEntry {
     TWAQIWidget()
 } timeline: {
     ReadingEntry.preview(isLocked: true)
+    ReadingEntry(date: Date(), reading: nil, airIndexType: .aqi, isLocked: true)
+}
+
+#Preview("Extra large", as: .systemExtraLarge) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi, detail: .placeholder)
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .pm25, detail: .placeholder)
+    // Every extra source failed and nothing is saved: the header, indices
+    // and wind still show.
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
+}
+
+#Preview("Extra large · no Pro", as: .systemExtraLarge) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi, isLocked: true, detail: .placeholder)
     ReadingEntry(date: Date(), reading: nil, airIndexType: .aqi, isLocked: true)
 }
 #endif

@@ -117,13 +117,13 @@
 "Help.widgets_shows_header" = "顯示內容";
 "Help.widgets_shows_body" = "顯示最近測站或第一個最愛測站目前的數值。編輯小工具即可選擇。";
 "Help.widgets_favourites_header" = "最愛測站";
-"Help.widgets_favourites_body" = "主畫面小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。中、大尺寸小工具屬於 Pro。";
+"Help.widgets_favourites_body" = "小、中、大尺寸的主畫面小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。特大尺寸（iPad）則改為詳細顯示單一測站：各項指標、風向風速、過去 24 小時、空品區預報與測站即時影像。中、大、特大尺寸小工具屬於 Pro。";
 "Help.widgets_favourites_add" = "開啟測站並點一下愛心，即可加入最愛。小工具會依「我的最愛」的順序列出：在該頁點「編輯」並拖移即可調整順序。";
 "Help.widgets_favourites_offline" = "沒有網路時，小工具會顯示最後一次儲存的數值。";
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
 "Help.widgets_sizes_header" = "尺寸";
-"Help.widgets_home_sizes" = "主畫面：小、中、大。";
+"Help.widgets_home_sizes" = "主畫面：小、中、大、特大（iPad）。";
 "Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
 "Help.widgets_standby_header" = "待機模式與小工具堆疊";
 "Help.widgets_standby_body" = "待機模式：iPhone 橫放充電時，按住待機畫面，點一下 +，加入小尺寸的 Taiwan Air 小工具。空氣變差時，它會自動排到最前面。";
@@ -268,7 +268,7 @@
 "Widget.station_closest" = "最近測站";
 "Widget.station_first_favourite" = "第一個最愛測站";
 "Widget.pro_only_title" = "Pro 小工具";
-"Widget.pro_only_body" = "中、大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。";
+"Widget.pro_only_body" = "中、大、特大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。";
 "Widget.pro_unlock" = "升級 Pro，解鎖所有數值";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
@@ -286,8 +286,8 @@
 "Pro.feature_no_ads_detail" = "所有畫面都不再顯示廣告，包含地圖。";
 "Pro.feature_complications" = "錶面數值與更多樣式";
 "Pro.feature_complications_detail" = "在錶面顯示數值與更多樣式，AQI、PM2.5 等 7 項指標任選。表情樣式與手錶 App 免費。";
-"Pro.feature_widgets" = "中、大尺寸小工具";
-"Pro.feature_widgets_detail" = "在主畫面查看目前測站與最愛測站。";
+"Pro.feature_widgets" = "中、大、特大尺寸小工具";
+"Pro.feature_widgets_detail" = "在主畫面查看目前測站與最愛測站，或在 iPad 上詳細查看單一測站。";
 "Pro.feature_support" = "支持獨立開發";
 "Pro.feature_support_detail" = "讓 App 持續維護、資料持續更新。";
 "Pro.choose_plan" = "選擇方案";

@@ -44,6 +44,8 @@ struct StationCam: Equatable {
 
 /// `manifest.json`: `{ "updatedAt": …, "stations": { "001": { name, lat, lon, time, key } } }`
 struct StationCamManifest: Decodable {
+    static let url = StationCam.baseURL.appendingPathComponent("manifest.json")
+
     let cams: [StationCam]
 
     private struct Entry: Decodable {
