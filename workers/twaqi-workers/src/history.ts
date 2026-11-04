@@ -2,14 +2,15 @@
 //
 //   stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg   e.g. stations/001/2026-10-30/22.jpg
 //
-// The app builds these URLs from a site id and an hour, so nothing has to list
-// the bucket. Kept to plain functions (no Workers APIs) so they can be tested
-// with `node --test`.
+// The app builds these URLs from a site id and an hour, so it never lists the
+// bucket. The sync lists it about once an hour to delete every hourly object
+// outside the 24 hours the app shows (`staleHourKeys`). Kept to plain
+// functions (no Workers APIs) so they can be tested with `node --test`.
 
 /**
- * Days of hourly frames kept in R2: 1, so each site holds a rolling 24 hourly
- * slots (writing hour H deletes hour H the day before). The app scrubs those 24
- * hours and keeps its own offline copies for up to a week.
+ * Days of hourly frames kept in R2: 1, so each site holds the 24 clock-hour
+ * slots the app scrubs and nothing else. The app keeps its own offline copies
+ * for up to a week.
  */
 export const HISTORY_DAYS = 1
 
@@ -17,6 +18,7 @@ export const HISTORY_DAYS = 1
 export const HISTORY_CACHE_CONTROL = 'public, max-age=86400'
 
 const STAMP = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/
+const HOUR_KEY = /^stations\/([0-9A-Za-z]+)\/(\d{4})-(\d{2})-(\d{2})\/(\d{2})\.jpg$/
 
 /**
  * `001`, `202610302210` → `stations/001/2026-10-30/22.jpg`.
@@ -32,18 +34,64 @@ export function hourKey(siteId: string, stamp: string): string | null {
 }
 
 /**
- * The hourly key `days` before the one `stamp` falls in: what to delete when
- * that hour is written, so R2 keeps a rolling `days` of history without
- * listing the bucket.
+ * `stations/001/2026-10-30/22.jpg` → its site and clock hour, the hour as a
+ * count of hours (Taiwan wall clock read as UTC: no DST, so a day is always
+ * 24). Null for any other key, such as the latest `stations/001.jpg`.
  */
-export function expiredHourKey(siteId: string, stamp: string, days = HISTORY_DAYS): string | null {
-  const m = stamp.match(STAMP)
+export function parseHourKey(key: string): { siteId: string; hour: number } | null {
+  const m = key.match(HOUR_KEY)
   if (!m) return null
-  const [, y, mo, d, h] = m.map(Number)
-  // Wall-clock arithmetic in UTC: Taiwan has no DST, so a day is always 24 h.
-  const t = new Date(Date.UTC(y, mo - 1, d - days, h))
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `stations/${siteId}/${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}/${pad(t.getUTCHours())}.jpg`
+  const [, siteId, y, mo, d, h] = m
+  const ms = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h))
+  return Number.isNaN(ms) ? null : { siteId, hour: ms / 3_600_000 }
+}
+
+/**
+ * The hourly objects to delete: every hourly key outside the
+ * `HISTORY_DAYS × 24` clock hours up to and including its site's anchor hour.
+ *
+ * `anchors` maps a site id to the hourly key last filed for it (the
+ * manifest's `hourKey`), which is the hour the app's scrubber ends on. A site
+ * that stopped reporting keeps the 24 hours before it stopped, as the app
+ * still shows them. Keys of a site with no anchor are measured against the
+ * newest anchor of all. Anything that isn't an hourly key is kept.
+ */
+export function staleHourKeys(
+  keys: Iterable<string>,
+  anchors: Record<string, string | undefined>,
+  days = HISTORY_DAYS,
+): string[] {
+  const anchorHours = new Map<string, number>()
+  let newest: number | undefined
+  for (const [siteId, key] of Object.entries(anchors)) {
+    const hour = key ? parseHourKey(key)?.hour : undefined
+    if (hour === undefined) continue
+    anchorHours.set(siteId, hour)
+    if (newest === undefined || hour > newest) newest = hour
+  }
+  const window = days * 24
+  const stale: string[] = []
+  for (const key of keys) {
+    const parsed = parseHourKey(key)
+    if (!parsed) continue
+    const anchor = anchorHours.get(parsed.siteId) ?? newest
+    if (anchor !== undefined && parsed.hour <= anchor - window) stale.push(key)
+  }
+  return stale
+}
+
+/**
+ * The newest anchor hour as its `yyyy-MM-dd/HH` (e.g. `2026-10-30/22`), or
+ * null when there is none. The sync sweeps once each time this changes, so
+ * about once an hour rather than every 10 minutes.
+ */
+export function sweepHour(anchors: Record<string, string | undefined>): string | null {
+  let best: { hour: number; key: string } | null = null
+  for (const key of Object.values(anchors)) {
+    const parsed = key ? parseHourKey(key) : null
+    if (parsed && (!best || parsed.hour > best.hour)) best = { hour: parsed.hour, key: key! }
+  }
+  return best ? best.key.replace(/^stations\/[0-9A-Za-z]+\//, '').replace(/\.jpg$/, '') : null
 }
 
 /**
