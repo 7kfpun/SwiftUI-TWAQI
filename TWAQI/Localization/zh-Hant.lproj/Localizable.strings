@@ -81,6 +81,8 @@
 "Feedback.send" = "送出";
 "Feedback.sent_title" = "謝謝您！";
 "Feedback.sent_message" = "已收到您的意見回饋。";
+"Feedback.sent_message_may_reply" = "已收到您的意見回饋，我們可能會以電子郵件回覆您。";
+"Feedback.rate_on_app_store" = "到 App Store 評分";
 "Feedback.error_title" = "無法送出意見回饋";
 "Feedback.error_offline" = "目前似乎沒有網路連線，請確認後再試一次。";
 "Feedback.error_generic" = "發生錯誤，請稍後再試。";

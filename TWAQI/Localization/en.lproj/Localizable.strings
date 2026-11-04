@@ -77,6 +77,8 @@
 "Feedback.send" = "Send";
 "Feedback.sent_title" = "Thank you!";
 "Feedback.sent_message" = "Your feedback has been sent.";
+"Feedback.sent_message_may_reply" = "Your feedback has been sent. We may reply to you by email.";
+"Feedback.rate_on_app_store" = "Rate on the App Store";
 "Feedback.error_title" = "Couldn't send feedback";
 "Feedback.error_offline" = "You seem to be offline. Check your connection and try again.";
 "Feedback.error_generic" = "Something went wrong. Please try again later.";

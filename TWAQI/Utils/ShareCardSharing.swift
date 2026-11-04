@@ -25,7 +25,7 @@ enum ShareCardAction: String {
 /// sheet or Photos. The preview sheet (`ShareCardPreviewView`) comes first.
 @MainActor
 enum ShareCardSharing {
-    static let appStoreURL = URL(string: "https://apps.apple.com/app/id1286516443")!
+    nonisolated static let appStoreURL = URL(string: "https://apps.apple.com/app/id1286516443")!
 
     /// The line sent with the card: "Keelung: AQI 54, Moderate — via Taiwan Air".
     /// `bundle` is the app's language; tests pass an `.lproj`.
