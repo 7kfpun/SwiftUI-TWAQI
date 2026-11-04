@@ -148,94 +148,8 @@ struct DetailsHistoryView: View {
 
     // MARK: - Trend
 
-    private struct TrendVerdict {
-        var title: LocalizedStringKey
-        var detail: String
-        var symbol: String
-        var tint: Color
-    }
-
-    /// Presentation for the computed trend. The judgement itself lives in
-    /// `AqiTrend` so it can be tested.
-    ///
-    /// The icons carry good-or-bad, not up-or-down. Direction arrows read
-    /// backwards here: falling AQI is *good* news, so a down arrow beside
-    /// "Improving" made readers double-take. The title and the detail line
-    /// already state the direction in words.
     private var trend: TrendVerdict {
-        // AQI has a meaningful absolute threshold; every other pollutant needs
-        // one scaled to its own units.
-        let threshold = airIndexType == .aqi
-            ? AqiTrend.steadyThreshold
-            : AqiTrend.relativeThreshold(for: values)
-
-        guard let result = AqiTrend.from(values: values, steadyThreshold: threshold) else {
-            return TrendVerdict(
-                title: "Details.trend_steady",
-                detail: "",
-                symbol: "equal.circle.fill",
-                tint: .secondary
-            )
-        }
-
-        switch result.direction {
-        case .steady:
-            return TrendVerdict(
-                title: "Details.trend_steady",
-                detail: steadyDetail(result),
-                symbol: "equal.circle.fill",
-                tint: .secondary
-            )
-
-        case .improving:
-            return TrendVerdict(
-                title: "Details.trend_improving",
-                detail: changeDetail("Details.trend_improving_detail", result),
-                symbol: "checkmark.circle.fill",
-                tint: Color(AirStatuses.good.getColor())
-            )
-
-        case .worsening:
-            return TrendVerdict(
-                title: "Details.trend_worsening",
-                detail: changeDetail("Details.trend_worsening_detail", result),
-                symbol: "exclamationmark.circle.fill",
-                tint: Color(AirStatuses.checkAirStatus(
-                    airIndexType: airIndexType,
-                    value: result.current
-                ).getColor())
-            )
-        }
-    }
-
-    /// The localized detail strings are phrased in whole AQI points, so they
-    /// only apply to AQI. Anything measured in ppm rounds to zero there, and is
-    /// shown as a value in its own unit instead.
-    private func changeDetail(_ key: String, _ result: AqiTrend) -> String {
-        guard airIndexType == .aqi else {
-            // A bare "0.1 ppb" is true but unreadable — a tenth of a ppb means
-            // nothing without the baseline it moved from. Its share of the
-            // reading carries the same fact and needs no reference point.
-            let baseline = result.direction == .improving
-                ? result.current + result.magnitude
-                : result.current - result.magnitude
-            guard baseline > 0 else {
-                return "\(result.magnitude.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
-            }
-            let percent = Int((result.magnitude / baseline * 100).rounded())
-            return result.direction == .improving ? "−\(percent)%" : "+\(percent)%"
-        }
-        return String(format: NSLocalizedString(key, bundle: .appLanguage, comment: ""), result.change)
-    }
-
-    private func steadyDetail(_ result: AqiTrend) -> String {
-        guard airIndexType == .aqi else {
-            return "\(result.current.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
-        }
-        return String(
-            format: NSLocalizedString("Details.trend_steady_detail", bundle: .appLanguage, comment: ""),
-            Int(result.current.rounded())
-        )
+        TrendVerdict(values: values, airIndexType: airIndexType)
     }
 
     // MARK: - Geometry
@@ -269,5 +183,101 @@ struct DetailsHistoryView: View {
     init(historicalPollutants: HistoricalPollutants, airIndexType: AirIndexTypes = .aqi) {
         self.historicalPollutants = historicalPollutants
         self.airIndexType = airIndexType
+    }
+}
+
+/// Presentation for the computed trend: getting better, worse or steady. The
+/// judgement itself lives in `AqiTrend` so it can be tested. Shared with the
+/// extra-large Home Screen widget (FOX-72).
+///
+/// The icons carry good-or-bad, not up-or-down. Direction arrows read
+/// backwards here: falling AQI is *good* news, so a down arrow beside
+/// "Improving" made readers double-take. The title and the detail line
+/// already state the direction in words.
+struct TrendVerdict {
+    var title: LocalizedStringKey
+    var detail: String
+    var symbol: String
+    var tint: Color
+
+    init(values: [Double], airIndexType: AirIndexTypes) {
+        self = Self.make(values: values, airIndexType: airIndexType)
+    }
+
+    private init(title: LocalizedStringKey, detail: String, symbol: String, tint: Color) {
+        self.title = title
+        self.detail = detail
+        self.symbol = symbol
+        self.tint = tint
+    }
+
+    private static func make(values: [Double], airIndexType: AirIndexTypes) -> TrendVerdict {
+        guard let result = AqiTrend.from(values: values, airIndexType: airIndexType) else {
+            return TrendVerdict(
+                title: "Details.trend_steady",
+                detail: "",
+                symbol: "equal.circle.fill",
+                tint: .secondary
+            )
+        }
+
+        switch result.direction {
+        case .steady:
+            return TrendVerdict(
+                title: "Details.trend_steady",
+                detail: steadyDetail(result, airIndexType),
+                symbol: "equal.circle.fill",
+                tint: .secondary
+            )
+
+        case .improving:
+            return TrendVerdict(
+                title: "Details.trend_improving",
+                detail: changeDetail("Details.trend_improving_detail", result, airIndexType),
+                symbol: "checkmark.circle.fill",
+                tint: Color(AirStatuses.good.getColor())
+            )
+
+        case .worsening:
+            return TrendVerdict(
+                title: "Details.trend_worsening",
+                detail: changeDetail("Details.trend_worsening_detail", result, airIndexType),
+                symbol: "exclamationmark.circle.fill",
+                tint: Color(AirStatuses.checkAirStatus(
+                    airIndexType: airIndexType,
+                    value: result.current
+                ).getColor())
+            )
+        }
+    }
+
+    /// The localized detail strings are phrased in whole AQI points, so they
+    /// only apply to AQI. Anything measured in ppm rounds to zero there, and is
+    /// shown as a value in its own unit instead.
+    private static func changeDetail(_ key: String, _ result: AqiTrend, _ airIndexType: AirIndexTypes) -> String {
+        guard airIndexType == .aqi else {
+            // A bare "0.1 ppb" is true but unreadable — a tenth of a ppb means
+            // nothing without the baseline it moved from. Its share of the
+            // reading carries the same fact and needs no reference point.
+            let baseline = result.direction == .improving
+                ? result.current + result.magnitude
+                : result.current - result.magnitude
+            guard baseline > 0 else {
+                return "\(result.magnitude.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+            }
+            let percent = Int((result.magnitude / baseline * 100).rounded())
+            return result.direction == .improving ? "−\(percent)%" : "+\(percent)%"
+        }
+        return String(format: NSLocalizedString(key, bundle: .appLanguage, comment: ""), result.change)
+    }
+
+    private static func steadyDetail(_ result: AqiTrend, _ airIndexType: AirIndexTypes) -> String {
+        guard airIndexType == .aqi else {
+            return "\(result.current.format(f: airIndexType.getFormat())) \(airIndexType.getUnit())"
+        }
+        return String(
+            format: NSLocalizedString("Details.trend_steady_detail", bundle: .appLanguage, comment: ""),
+            Int(result.current.rounded())
+        )
     }
 }

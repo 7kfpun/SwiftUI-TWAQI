@@ -10,7 +10,7 @@ import Foundation
 
 typealias HistoricalPollutants = [HistoricalPollutant]
 
-struct HistoricalPollutant: Codable {
+struct HistoricalPollutant: Codable, Equatable {
     let aqi: Double
     let pm25: Double
     let pm10: Double
