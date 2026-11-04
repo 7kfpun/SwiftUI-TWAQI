@@ -13,6 +13,7 @@ import SwiftUI
 /// automatically and never shown.
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     /// Where the form was opened from, for the `open_feedback_form` event.
     private let source: FeedbackSource
@@ -26,6 +27,8 @@ struct FeedbackView: View {
 
     @State private var isSending = false
     @State private var showingSuccess = false
+    /// What was sent, for the thank-you's wording and buttons.
+    @State private var sent: FeedbackSubmission?
     @State private var failure: FeedbackError?
 
     var body: some View {
@@ -44,14 +47,25 @@ struct FeedbackView: View {
             TrackingManager.logEvent(.openFeedbackForm, parameters: source.openFormEventParameters)
         }
         .alert("Feedback.sent_title", isPresented: $showingSuccess) {
-            Button("OK") {
-                // In a wide window this is the column beside Help, which
-                // `dismiss` can't close: empty it so it can't be sent twice.
-                clear()
-                dismiss()
+            #if os(iOS)
+            if offersAppStoreReview {
+                // User-initiated only: no custom rating pop-up (5.6.1).
+                Button("Feedback.rate_on_app_store") {
+                    TrackingManager.logEvent(
+                        .writeReviewTapped,
+                        parameters: ["source": ReviewRequestSource.feedback.rawValue]
+                    )
+                    openURL(StoreReviewHelper.writeReviewURL)
+                    finish()
+                }
             }
+            #endif
+            Button("OK", action: finish)
         } message: {
-            Text("Feedback.sent_message")
+            Text(LocalizedStringKey(Self.thankYouMessageKey(
+                offersAppStoreReview: offersAppStoreReview,
+                email: sent?.email ?? ""
+            )))
         }
         .alert(
             "Feedback.error_title",
@@ -70,6 +84,27 @@ struct FeedbackView: View {
                 ? LocalizedStringKey("Feedback.error_offline")
                 : LocalizedStringKey("Feedback.error_generic"))
         }
+    }
+
+    /// How long the thank-you shows before the system review prompt.
+    nonisolated static let reviewPromptDelay: UInt64 = 1_000_000_000
+
+    /// The thank-you's message: a 4- or 5-star feedback offers the App
+    /// Store instead; a lower one with an email says we may reply.
+    nonisolated static func thankYouMessageKey(offersAppStoreReview: Bool, email: String) -> String {
+        if !offersAppStoreReview, !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "Feedback.sent_message_may_reply"
+        }
+        return "Feedback.sent_message"
+    }
+
+    /// Whether the thank-you offers "Rate on the App Store" (iPhone/iPad only).
+    private var offersAppStoreReview: Bool {
+        #if os(iOS)
+        return sent.map { StoreReviewHelper.shouldRequestReview(afterFeedbackRating: $0.rating) } ?? false
+        #else
+        return false
+        #endif
     }
 
     // Explicit: the private `@State` properties would make the memberwise
@@ -199,6 +234,13 @@ struct FeedbackView: View {
             && FeedbackSubmission.isValidEmail(email)
     }
 
+    /// Closes the thank-you. In a wide window this is the column beside
+    /// Help, which `dismiss` can't close: empty it so it can't be sent twice.
+    private func finish() {
+        clear()
+        dismiss()
+    }
+
     private func clear() {
         rating = nil
         message = ""
@@ -232,7 +274,15 @@ struct FeedbackView: View {
                     ]
                 )
                 isSending = false
+                sent = submission
                 showingSuccess = true
+                #if os(iOS)
+                // After the thank-you appears, not over the form; 4–5 stars only.
+                if StoreReviewHelper.shouldRequestReview(afterFeedbackRating: submission.rating) {
+                    try? await Task.sleep(nanoseconds: Self.reviewPromptDelay)
+                    StoreReviewHelper.requestReviewAfterFeedback(rating: submission.rating)
+                }
+                #endif
             } catch {
                 let feedbackError = error as? FeedbackError ?? .network
                 debugPrint("FeedbackService.submit failed: \(feedbackError)")

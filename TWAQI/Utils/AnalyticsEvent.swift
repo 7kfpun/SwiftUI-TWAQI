@@ -62,9 +62,13 @@ enum AnalyticsEvent: String, CaseIterable {
     case submitCooperate = "submit_cooperate"
     /// `reason`.
     case submitCooperateFailed = "submit_cooperate_failed"
-    /// `app_open_count`: the app opens that triggered it. iOS decides
-    /// whether the prompt actually shows.
+    /// `source` (`ReviewRequestSource`: `app_opens` / `feedback`), plus
+    /// `app_open_count` (the opens that triggered it) or `rating` (the
+    /// feedback's stars). iOS decides whether the prompt actually shows.
     case reviewRequested = "review_requested"
+    /// `source`: feedback. "Rate on the App Store" tapped in the thank-you
+    /// after a 4- or 5-star feedback.
+    case writeReviewTapped = "write_review_tapped"
 
     // MARK: Onboarding
 

@@ -26,4 +26,62 @@ final class StoreReviewTests: XCTestCase {
         XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: 0))
         XCTAssertFalse(StoreReviewHelper.shouldRequestReview(appOpenCount: -20))
     }
+
+    // MARK: - After feedback (FOX-80)
+
+    func testRequestsReviewAfterFourOrFiveStarFeedback() {
+        XCTAssertTrue(StoreReviewHelper.shouldRequestReview(afterFeedbackRating: 4))
+        XCTAssertTrue(StoreReviewHelper.shouldRequestReview(afterFeedbackRating: 5))
+    }
+
+    func testDoesNotRequestReviewAfterOneToThreeStarFeedback() {
+        for rating in [1, 2, 3] {
+            XCTAssertFalse(StoreReviewHelper.shouldRequestReview(afterFeedbackRating: rating), "\(rating) stars")
+        }
+    }
+
+    func testDoesNotRequestReviewForRatingsOutsideOneToFive() {
+        for rating in [-1, 0, 6, 10] {
+            XCTAssertFalse(StoreReviewHelper.shouldRequestReview(afterFeedbackRating: rating), "\(rating) stars")
+        }
+    }
+
+    func testWriteReviewURLOpensTheAppStoreReviewPage() {
+        XCTAssertEqual(
+            StoreReviewHelper.writeReviewURL.absoluteString,
+            "https://apps.apple.com/app/id1286516443?action=write-review"
+        )
+        XCTAssertTrue(StoreReviewHelper.writeReviewURL.absoluteString.hasPrefix(ShareCardSharing.appStoreURL.absoluteString))
+    }
+
+    func testReviewRequestSourceNames() {
+        XCTAssertEqual(ReviewRequestSource.feedback.rawValue, "feedback")
+        XCTAssertEqual(ReviewRequestSource.appOpens.rawValue, "app_opens")
+    }
+
+    func testThankYouSaysWeMayReplyOnlyWithoutTheAppStoreOffer() {
+        XCTAssertEqual(
+            FeedbackView.thankYouMessageKey(offersAppStoreReview: false, email: "a@b.co"),
+            "Feedback.sent_message_may_reply"
+        )
+        XCTAssertEqual(
+            FeedbackView.thankYouMessageKey(offersAppStoreReview: true, email: "a@b.co"),
+            "Feedback.sent_message"
+        )
+        XCTAssertEqual(
+            FeedbackView.thankYouMessageKey(offersAppStoreReview: false, email: "  "),
+            "Feedback.sent_message"
+        )
+    }
+
+    func testThankYouMessagesAreLocalized() throws {
+        for language in ["en", "zh-Hant"] {
+            let path = try XCTUnwrap(Bundle.main.path(forResource: language, ofType: "lproj"), language)
+            let bundle = try XCTUnwrap(Bundle(path: path), language)
+            for key in ["Feedback.sent_message_may_reply", "Feedback.rate_on_app_store"] {
+                let value = bundle.localizedString(forKey: key, value: "MISSING", table: nil)
+                XCTAssertNotEqual(value, "MISSING", "\(language): \(key)")
+            }
+        }
+    }
 }
