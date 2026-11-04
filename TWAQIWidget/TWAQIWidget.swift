@@ -16,8 +16,10 @@ import WidgetKit
 /// what the extension shows offline.
 ///
 /// Home Screen families also list the reader's other favourite stations.
-/// Medium and large are Pro; without it they say so instead. The Lock Screen
-/// families stay single-station. Bundled with the Control Center control
+/// Medium and large are Pro; without it they say so instead. With Pro they
+/// page through the favourites with ‹ ›, and every Home Screen size cycles
+/// its index when the label is tapped (FOX-76, `WidgetPaging`). The Lock
+/// Screen families stay single-station. Bundled with the Control Center control
 /// (`TWAQIWidgetBundle`).
 struct TWAQIWidget: Widget {
     var body: some WidgetConfiguration {
@@ -99,8 +101,9 @@ struct SelectIndexIntent: WidgetConfigurationIntent {
 
 struct ReadingEntry: TimelineEntry {
     let date: Date
-    let reading: WatchReading?
-    let airIndexType: AirIndexTypes
+    /// The station shown: the widget's own, or the favourite paged to.
+    var reading: WatchReading?
+    var airIndexType: AirIndexTypes
     /// Whether this family lists favourites (see `ReadingProvider.listsFavourites`).
     var listsFavourites = false
     /// Saved favourites other than `reading`, in the reader's order.
@@ -111,11 +114,23 @@ struct ReadingEntry: TimelineEntry {
     /// How far up a StandBy or Home Screen Smart Rotate stack this entry
     /// should go (`WidgetRelevance`).
     var relevance: TimelineEntryRelevance?
+    /// This widget's key for its page state (`WidgetPaging.key`). Nil where
+    /// there are no buttons: Lock Screen families and placeholders.
+    var widgetKey: String?
+    /// The stations ‹ › page through, the widget's own first
+    /// (`WidgetPaging.pageIds`), and which of them is shown.
+    var pageIds: [Int] = []
+    var page = 0
+    /// Medium and large with Pro and at least two favourites (FOX-76).
+    var showsPager = false
 
     var tintColor: Color {
         guard let reading, !isLocked else { return Color(0x676767) }
         return Color(reading.status(airIndexType).getColor())
     }
+
+    /// The index label cycles on tap, except on a locked widget.
+    var cyclesIndex: Bool { widgetKey != nil && !isLocked }
 }
 
 struct ReadingProvider: AppIntentTimelineProvider {
@@ -131,12 +146,30 @@ struct ReadingProvider: AppIntentTimelineProvider {
         }
     }
 
+    /// Medium and large page through favourites with ‹ › (FOX-76).
+    static func pagesFavourites(in family: WidgetFamily) -> Bool {
+        family == .systemMedium || family == .systemLarge
+    }
+
     /// Medium and large are Pro. The gallery still previews them unlocked.
     static func isLocked(in context: Context) -> Bool {
         switch context.family {
         case .systemMedium, .systemLarge: return !WatchStore.isProUnlocked && !context.isPreview
         default: return false
         }
+    }
+
+    /// The key a Home Screen widget keeps its page and index under. Nil for
+    /// Lock Screen families, which have no buttons.
+    static func widgetKey(family: WidgetFamily, configuration: SelectIndexIntent) -> String? {
+        let name: String
+        switch family {
+        case .systemSmall: name = "small"
+        case .systemMedium: name = "medium"
+        case .systemLarge: name = "large"
+        default: return nil
+        }
+        return WidgetPaging.key(family: name, station: configuration.station.rawValue, index: configuration.index.rawValue)
     }
 
     /// The favourite a widget leads with, when it's set to. `nil` means the
@@ -149,17 +182,60 @@ struct ReadingProvider: AppIntentTimelineProvider {
         WatchStore.favouriteReadings.first { $0.stationId == stationId }
     }
 
-    /// Favourites in the reader's order, minus the primary station, from the
-    /// cache. A station never fetched yet is left out rather than shown blank.
-    private static func cachedFavourites(excluding primaryId: Int?) -> [WatchReading] {
-        let cached = Dictionary(
+    /// The widget's own station from saved readings only, as the last
+    /// timeline left it.
+    private static func cachedLeadingReading(for configuration: SelectIndexIntent) -> WatchReading? {
+        leadingFavouriteId(for: configuration).flatMap(cachedFavourite) ?? WatchStore.latestReading
+    }
+
+    /// What the widget draws, from saved readings: the page `state` points
+    /// at (the widget's own station, `leading`, by default), the other
+    /// favourites under it, and the index the label was cycled to. A
+    /// favourite never fetched yet is left out rather than shown blank.
+    static func makeEntry(
+        date: Date, leading: WatchReading?, configuration: SelectIndexIntent, family: WidgetFamily,
+        isPreview: Bool, isLocked: Bool, state: WidgetPageState, relevance: TimelineEntryRelevance? = nil
+    ) -> ReadingEntry {
+        let configuredIndex = configuration.index.airIndexType
+        let key = widgetKey(family: family, configuration: configuration)
+        var entry = ReadingEntry(date: date, reading: leading, airIndexType: configuredIndex, relevance: relevance)
+        guard listsFavourites(in: family) else { return entry }
+
+        entry.listsFavourites = true
+        entry.isLocked = isLocked
+        entry.widgetKey = key
+        if entry.cyclesIndex {
+            entry.airIndexType = WidgetPaging.index(state, configured: configuredIndex)
+        }
+
+        let favouriteIds = WatchStore.favouriteStationIds
+        var readings = Dictionary(
             WatchStore.favouriteReadings.map { ($0.stationId, $0) }, uniquingKeysWith: { _, latest in latest }
         )
-        var seen: Set<Int> = []
-        return WatchStore.favouriteStationIds.compactMap { id in
-            guard id != primaryId, seen.insert(id).inserted else { return nil }
-            return cached[id]
+        let saved = favouriteIds.filter { readings[$0] != nil }
+        if let leading {
+            readings[leading.stationId] = leading
         }
+        let pageIds = WidgetPaging.pageIds(defaultId: leading?.stationId, favouriteIds: saved)
+        entry.pageIds = pageIds
+        entry.showsPager = pagesFavourites(in: family) && entry.cyclesIndex && leading != nil
+            && WidgetPaging.showsPager(favouriteCount: favouriteIds.count, pageCount: pageIds.count)
+        if entry.showsPager {
+            entry.page = WidgetPaging.currentPage(state, pageIds: pageIds, now: date)
+            entry.reading = readings[pageIds[entry.page]] ?? leading
+        }
+
+        // The station shown is never listed again under itself.
+        var seen: Set<Int> = []
+        entry.favourites = saved.compactMap { id in
+            guard id != entry.reading?.stationId, seen.insert(id).inserted else { return nil }
+            return readings[id]
+        }
+        // The gallery shows what the size can do, even before any favourite.
+        if entry.favourites.isEmpty, isPreview {
+            entry.favourites = WatchReading.placeholderFavourites
+        }
+        return entry
     }
 
     func placeholder(in context: Context) -> ReadingEntry {
@@ -171,37 +247,43 @@ struct ReadingProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: SelectIndexIntent, in context: Context) async -> ReadingEntry {
-        let reading = Self.leadingFavouriteId(for: configuration).flatMap(Self.cachedFavourite)
-            ?? WatchStore.latestReading ?? .placeholder
-        let lists = Self.listsFavourites(in: context.family)
-        var favourites: [WatchReading] = []
-        if lists {
-            favourites = Self.cachedFavourites(excluding: reading.stationId)
-            // The gallery shows what the size can do, even before any favourite.
-            if favourites.isEmpty, context.isPreview {
-                favourites = WatchReading.placeholderFavourites
-            }
-        }
-        return ReadingEntry(
-            date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites, isLocked: Self.isLocked(in: context)
+        let state = Self.widgetKey(family: context.family, configuration: configuration)
+            .map { WidgetPageStore.state(for: $0, in: WatchStore.sharedDefaults) } ?? WidgetPageState()
+        return Self.makeEntry(
+            date: Date(), leading: Self.cachedLeadingReading(for: configuration) ?? .placeholder,
+            configuration: configuration, family: context.family, isPreview: context.isPreview,
+            isLocked: Self.isLocked(in: context), state: state
         )
     }
 
     func timeline(for configuration: SelectIndexIntent, in context: Context) async -> Timeline<ReadingEntry> {
         let now = Date()
         let next = now.addingTimeInterval(Self.refreshInterval)
+        let isLocked = Self.isLocked(in: context)
+        let key = Self.widgetKey(family: context.family, configuration: configuration)
+        let defaults = WatchStore.sharedDefaults
+        var state = key.map { WidgetPageStore.state(for: $0, in: defaults) } ?? WidgetPageState()
+
+        // A ‹ › or index tap: redraw from saved readings at once, no network.
+        if key != nil, WidgetPaging.isTapReload(state, now: now) {
+            return Self.tapTimeline(
+                configuration: configuration, context: context, isLocked: isLocked, state: state, now: now
+            )
+        }
+
         var reading = WatchStore.latestReading
         let lists = Self.listsFavourites(in: context.family)
         let favouriteIds = lists ? WatchStore.favouriteStationIds : []
 
         var fetched: Pollutants = []
+        var hasNewData = false
         if let leadingId = Self.leadingFavouriteId(for: configuration) {
             // The first favourite is one of the favourites, so one request
             // covers both. Its reading goes to the favourite cache only:
             // `latestReading` tracks the closest station.
             let ids = favouriteIds.isEmpty ? [leadingId] : favouriteIds
             fetched = (try? await WatchAPI.currentPollutants(stationIds: ids)) ?? []
+            hasNewData = !fetched.isEmpty
             reading = fetched.first { $0.stationId == leadingId }.map(WatchReading.init)
                 ?? Self.cachedFavourite(leadingId) ?? reading
         } else {
@@ -228,28 +310,80 @@ struct ReadingProvider: AppIntentTimelineProvider {
                 reading = WatchReading(pollutant)
                 WatchStore.latestReading = reading
             }
+            hasNewData = pollutant != nil || !fetched.isEmpty
         }
 
         let savedIds = Set(WatchStore.favouriteStationIds)
         WatchStore.cacheFavouriteReadings(fetched.filter { savedIds.contains($0.stationId) }.map(WatchReading.init))
-        // The leading station is never listed again under itself.
-        let favourites = lists ? Self.cachedFavourites(excluding: reading?.stationId) : []
+
+        // New readings send the widget back to its own station (FOX-76);
+        // offline, the page stays. A cycled index stays either way. Read the
+        // state again: a ‹ › or index tap during the fetch is newer and stays.
+        if let key {
+            let current = WidgetPageStore.state(for: key, in: defaults)
+            state = WidgetPaging.afterFetch(current, readBefore: state, hasNewData: hasNewData, now: now)
+            WidgetPageStore.save(state, for: key, in: defaults)
+        }
 
         // Locked widgets still fetch, so the stations they tease are current.
         // Buying Pro reloads every timeline (`WidgetBridge.publish(isPro:)`).
-        let isLocked = Self.isLocked(in: context)
         let previous = reading.flatMap(WatchStore.recordForRelevance)
         let score = WidgetRelevance.score(
             for: reading, airIndexType: configuration.index.airIndexType, previous: previous,
             alertThreshold: reading.flatMap { WatchStore.alertThresholds[$0.stationId] },
             isLocked: isLocked, now: now
         )
-        let entry = ReadingEntry(
-            date: now, reading: reading, airIndexType: configuration.index.airIndexType,
-            listsFavourites: lists, favourites: favourites, isLocked: isLocked,
-            relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
+        let relevance = TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
+        func entry(at date: Date) -> ReadingEntry {
+            Self.makeEntry(
+                date: date, leading: reading, configuration: configuration, family: context.family,
+                isPreview: context.isPreview, isLocked: isLocked, state: state, relevance: relevance
+            )
+        }
+        return Timeline(entries: Self.entriesWithReset(entry(at: now), state: state, now: now, entry: entry),
+                        policy: .after(next))
+    }
+
+    /// `shown`, then the widget's own station again when a paged widget's
+    /// 30 minutes run out, so the return happens on every timeline, offline
+    /// ones included, not only after a tap.
+    private static func entriesWithReset(
+        _ shown: ReadingEntry, state: WidgetPageState, now: Date, entry: (Date) -> ReadingEntry
+    ) -> [ReadingEntry] {
+        guard shown.showsPager, let reset = WidgetPaging.resetDate(state, pageIds: shown.pageIds, now: now) else {
+            return [shown]
+        }
+        return [shown, entry(reset)]
+    }
+
+    /// The reload after a tap: the page or index it chose, from saved
+    /// readings, then the widget's own station again `WidgetPaging.resetInterval`
+    /// after the tap. The next fetch stays when the last one planned it.
+    private static func tapTimeline(
+        configuration: SelectIndexIntent, context: Context, isLocked: Bool, state: WidgetPageState, now: Date
+    ) -> Timeline<ReadingEntry> {
+        let leading = cachedLeadingReading(for: configuration)
+        // Relevance follows the widget's own station, as a refresh scores it.
+        let score = WidgetRelevance.score(
+            for: leading, airIndexType: configuration.index.airIndexType,
+            previous: leading.flatMap { WidgetRelevance.previous(of: $0, in: WatchStore.relevanceHistory) },
+            alertThreshold: leading.flatMap { WatchStore.alertThresholds[$0.stationId] },
+            isLocked: isLocked, now: now
         )
-        return Timeline(entries: [entry], policy: .after(next))
+        let relevance = TimelineEntryRelevance(score: score, duration: refreshInterval)
+
+        func entry(at date: Date) -> ReadingEntry {
+            makeEntry(
+                date: date, leading: leading, configuration: configuration, family: context.family,
+                isPreview: context.isPreview, isLocked: isLocked, state: state, relevance: relevance
+            )
+        }
+
+        let entries = entriesWithReset(entry(at: now), state: state, now: now, entry: entry)
+        let nextRefresh = max(
+            (state.refreshedAt ?? now).addingTimeInterval(refreshInterval), now.addingTimeInterval(60)
+        )
+        return Timeline(entries: entries, policy: .after(nextRefresh))
     }
 }
 
@@ -280,9 +414,18 @@ struct ReadingWidgetView: View {
                 empty
             }
         }
-        // Locked medium / large: a tap opens the app on the Pro screen.
-        // Unlocked widgets keep opening the app as before.
-        .widgetURL(entry.isLocked ? DeepLink.proURL(source: .widgetLocked) : nil)
+        .widgetURL(tapURL)
+    }
+
+    /// Locked medium / large: a tap opens the app on the Pro screen. Unlocked
+    /// medium / large open the station shown, the page paged to included
+    /// (FOX-76). The other sizes open the app as before.
+    private var tapURL: URL? {
+        if entry.isLocked { return DeepLink.proURL(source: .widgetLocked) }
+        guard ReadingProvider.pagesFavourites(in: family),
+              let stationId = entry.reading?.stationId, stationId > 0
+        else { return nil }
+        return DeepLink.stationURL(stationId: stationId, source: .widget)
     }
 
     @ViewBuilder
@@ -300,7 +443,9 @@ struct ReadingWidgetView: View {
         case .systemSmall where !entry.favourites.isEmpty:
             smallWithFavourites(reading)
 
-        case .systemMedium where !entry.favourites.isEmpty:
+        // The ‹ › buttons live in this layout, so a page whose side list
+        // is empty keeps it.
+        case .systemMedium where !entry.favourites.isEmpty || entry.showsPager:
             mediumWithFavourites(reading)
 
         // With nothing saved, large says how to add favourites rather than
@@ -310,7 +455,7 @@ struct ReadingWidgetView: View {
 
         case .systemSmall:
             VStack(alignment: .leading, spacing: 4) {
-                Text(verbatim: type.toString())
+                indexLabel()
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(verbatim: value)
@@ -340,9 +485,8 @@ struct ReadingWidgetView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                     if family == .systemLarge {
-                        Text(verbatim: "\(type.toString()) \(value) \(type.getUnit())".trimmingCharacters(in: .whitespaces))
+                        indexValue(value, unit: true)
                             .font(.title2.monospacedDigit().weight(.semibold))
-                            .proBlurred(entry.isLocked)
                         Spacer(minLength: 0)
                         if !reading.publishTime.isEmpty {
                             Text(verbatim: reading.publishTime)
@@ -350,9 +494,8 @@ struct ReadingWidgetView: View {
                                 .foregroundStyle(.secondary)
                         }
                     } else {
-                        Text(verbatim: "\(type.toString()) \(value)")
+                        indexValue(value, unit: false)
                             .font(.title3.monospacedDigit().weight(.semibold))
-                            .proBlurred(entry.isLocked)
                     }
                 }
                 Spacer(minLength: 0)
@@ -426,7 +569,7 @@ struct ReadingWidgetView: View {
 
         return VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .top, spacing: 4) {
-                Text(verbatim: type.toString())
+                indexLabel()
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
@@ -470,9 +613,12 @@ struct ReadingWidgetView: View {
         return VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .center, spacing: 4) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(reading.displayName)
-                        .font(.caption2.weight(.semibold))
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        indexLabel()
+                        Text(reading.displayName)
+                            .lineLimit(1)
+                    }
+                    .font(.caption2.weight(.semibold))
                     Text(verbatim: reading.formatted(type))
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .monospacedDigit()
@@ -512,11 +658,11 @@ struct ReadingWidgetView: View {
                     .foregroundStyle(tint)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
+                detailLine(reading)
                 Spacer(minLength: 0)
                 HStack(alignment: .center, spacing: 6) {
-                    Text(verbatim: "\(type.toString()) \(reading.formatted(type))")
+                    indexValue(reading.formatted(type), unit: false)
                         .font(.title3.monospacedDigit().weight(.semibold))
-                        .proBlurred(entry.isLocked)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 0)
@@ -528,8 +674,12 @@ struct ReadingWidgetView: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 6) {
-                favouriteRows(limit: 3, showsStatus: false)
+                favouriteRows(limit: entry.showsPager ? 2 : 3, showsStatus: false)
                 Spacer(minLength: 0)
+                if entry.showsPager {
+                    pager
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -552,36 +702,166 @@ struct ReadingWidgetView: View {
                         .foregroundStyle(tint)
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
-                    Text(verbatim: "\(type.toString()) \(value) \(type.getUnit())".trimmingCharacters(in: .whitespaces))
+                    indexValue(value, unit: true)
                         .font(.title2.monospacedDigit().weight(.semibold))
-                        .proBlurred(entry.isLocked)
                 }
                 Spacer(minLength: 0)
                 face(status, value: value, size: 72)
             }
 
+            detailLine(reading)
+            otherIndices(reading)
+
             Divider()
 
-            Text("Widget.favourites")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                Text("Widget.favourites")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                if entry.showsPager {
+                    pager
+                }
+            }
             if entry.favourites.isEmpty {
                 Text("Widget.no_favourites")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else {
-                favouriteRows(limit: 5, showsStatus: true)
+                favouriteRows(limit: 4, showsStatus: true)
             }
 
             Spacer(minLength: 0)
-            if !reading.publishTime.isEmpty {
-                Text(verbatim: reading.publishTime)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(4)
+    }
+
+    // MARK: - Buttons (FOX-76)
+
+    /// The index's name. Tapping it steps to the next index
+    /// (`WidgetPaging.indexCycle`), except on a locked widget.
+    @ViewBuilder
+    private func indexLabel() -> some View {
+        if entry.cyclesIndex, let key = entry.widgetKey,
+           let next = IndexOption(rawValue: WidgetPaging.nextIndex(after: type).rawValue) {
+            Button(intent: CycleWidgetIndexIntent(widgetKey: key, index: next)) {
+                Text(verbatim: type.toString())
+                    .padding(.horizontal, 4)
+                    .background(Color.primary.opacity(0.1), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Widget.show_index \(next.airIndexType.toString())"))
+        } else {
+            Text(verbatim: type.toString())
+        }
+    }
+
+    /// "AQI 42", or "PM2.5 17 μg/m3" with `unit`: the label cycles the index.
+    private func indexValue(_ value: String, unit: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            indexLabel()
+            Text(verbatim: unit ? "\(value) \(type.getUnit())".trimmingCharacters(in: .whitespaces) : value)
+                .proBlurred(entry.isLocked)
+        }
+    }
+
+    /// ‹ 2 / 5 ›: steps through the widget's station and the favourites,
+    /// wrapping at both ends.
+    @ViewBuilder
+    private var pager: some View {
+        if let key = entry.widgetKey {
+            let count = entry.pageIds.count
+            HStack(spacing: 6) {
+                pageButton(key: key, step: -1, systemName: "chevron.left", label: "Widget.previous_station")
+                Text(verbatim: "\(entry.page + 1) / \(count)")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("Widget.page_position \(entry.page + 1) \(count)"))
+                pageButton(key: key, step: 1, systemName: "chevron.right", label: "Widget.next_station")
+            }
+        }
+    }
+
+    private func pageButton(key: String, step: Int, systemName: String, label: LocalizedStringKey) -> some View {
+        let page = WidgetPaging.page(from: entry.page, step: step, count: entry.pageIds.count)
+        return Button(intent: ShowWidgetPageIntent(
+            widgetKey: key, stationId: WidgetPaging.target(ofPage: page, in: entry.pageIds)
+        )) {
+            Image(systemName: systemName)
+                .font(.caption.weight(.semibold))
+                .frame(width: 26, height: 26)
+                .background(Color.primary.opacity(0.1), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(label))
+    }
+
+    // MARK: - Station detail
+
+    /// "Main pollutant: PM2.5 · 11/4 10:00": what MOENV names past good, and
+    /// when the reading was published, in Taiwan time.
+    @ViewBuilder
+    private func detailLine(_ reading: WatchReading) -> some View {
+        let pollutant = AirQualityAnswer.mainPollutant(of: reading)
+        let updated = Self.updatedText(reading)
+        if pollutant != nil || updated != nil {
+            HStack(spacing: 4) {
+                if let pollutant {
+                    Text("Forecast.major_pollutant \(pollutant.toString())")
+                        .proBlurred(entry.isLocked)
+                }
+                if pollutant != nil, updated != nil {
+                    Text(verbatim: "·")
+                }
+                if let updated {
+                    Text(verbatim: updated)
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+        }
+    }
+
+    /// Large: the indices other than the one shown, each in its level's tint.
+    private func otherIndices(_ reading: WatchReading) -> some View {
+        HStack(spacing: 4) {
+            ForEach(WidgetPaging.indexCycle.filter { $0 != type }, id: \.self) { other in
+                VStack(spacing: 1) {
+                    Text(verbatim: other.toString())
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(verbatim: reading.formatted(other))
+                        .font(.caption.weight(.semibold).monospacedDigit())
+                        .proBlurred(entry.isLocked)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+                .background(
+                    Color(reading.status(other).getColor()).opacity(0.18),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+            }
+        }
+    }
+
+    /// `publish_time` is Taiwan local time; shown as such whatever the
+    /// device's zone.
+    private static let updatedFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/d HH:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Taipei")
+        return formatter
+    }()
+
+    private static func updatedText(_ reading: WatchReading) -> String? {
+        guard !reading.publishTime.isEmpty else { return nil }
+        return WatchStore.publishedDate(of: reading).map(updatedFormatter.string(from:)) ?? reading.publishTime
     }
 
     private func favouriteRows(limit: Int, showsStatus: Bool) -> some View {

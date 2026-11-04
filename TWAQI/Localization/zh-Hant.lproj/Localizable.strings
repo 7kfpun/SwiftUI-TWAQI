@@ -124,6 +124,10 @@
 "Help.widgets_favourites_offline" = "沒有網路時，小工具會顯示最後一次儲存的數值。";
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
+"Help.widgets_paging_header" = "瀏覽最愛測站";
+"Help.widgets_paging_body" = "在中、大尺寸小工具上點一下 ‹ 或 ›，即可逐一瀏覽最愛測站；中間的數字（例如 2 / 5）顯示目前位置。點其他地方，會在 App 中開啟該測站。30 分鐘沒有點按，或有新數值時，小工具會回到原本的測站。需要 Pro 及至少兩個最愛測站。";
+"Help.widgets_cycle_body" = "點一下主畫面小工具上的指標名稱（AQI、PM2.5…），即可切換到下一個指標。會從「編輯小工具」選擇的指標開始。";
+"Help.widgets_stack_tip" = "小技巧：把幾個 Taiwan Air 小工具疊成一個堆疊（將一個拖到另一個上），各自設定不同，例如最近測站與第一個最愛測站，或 AQI 與 PM2.5，再滑動切換。";
 "Help.widgets_sizes_header" = "尺寸";
 "Help.widgets_home_sizes" = "主畫面：小、中、大。";
 "Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
@@ -272,6 +276,13 @@
 "Widget.pro_only_title" = "Pro 小工具";
 "Widget.pro_only_body" = "中、大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。";
 "Widget.pro_unlock" = "升級 Pro，解鎖所有數值";
+"Widget.next_station" = "下一個測站";
+"Widget.previous_station" = "上一個測站";
+"Widget.show_index %@" = "顯示 %@";
+"Widget.page_position %lld %lld" = "第 %1$lld 個測站，共 %2$lld 個";
+"Widget.intent_page_title" = "在小工具顯示測站";
+"Widget.intent_index_title" = "切換小工具的指標";
+"Widget.intent_widget" = "小工具";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";

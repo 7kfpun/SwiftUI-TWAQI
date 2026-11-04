@@ -29,6 +29,9 @@ enum StationLinkSource: String {
     case control
     /// The "Open station" App Shortcut.
     case shortcut
+    /// A tap on a medium or large Home Screen widget, on the station it
+    /// shows (FOX-76).
+    case widget
     /// `twaqi://station` with no `source`, or one this build doesn't know.
     case deepLink = "deep_link"
 }
