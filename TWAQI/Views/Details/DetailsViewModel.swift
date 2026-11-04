@@ -67,8 +67,11 @@ class DetailsViewModel: ObservableObject {
     /// screen then shows no forecast section at all.
     @Published var forecast: AreaForecast?
 
-    init(stationId: Int, historicalPollutants: HistoricalPollutants = []) {
+    /// `pollutant` seeds a reading the caller already holds, so the heart
+    /// works before the first load answers.
+    init(stationId: Int, historicalPollutants: HistoricalPollutants = [], pollutant: Pollutant? = nil) {
         self.stationId = stationId
+        self.pollutant = pollutant
         self.historicalPollutants = historicalPollutants
         self.hasAlerts = FavouriteAlerts.isOn(stationId: stationId)
         self.alertsObserver = NotificationCenter.default.addObserver(

@@ -137,6 +137,19 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertTrue(viewModel.canAddFavourite)
     }
 
+    func testSeededReadingCanBeFavouritedBeforeFirstLoad() throws {
+        let id = 987_654_322
+        let json = """
+        {"station_id": \(id), "lat": 25.0, "lon": 121.5, "aqi": 42, "pm25": 9, "pm10": 21,
+         "no2": 1, "so2": 1, "co": 0.3, "o3": 31, "wind_direction": 0, "wind_speed": 1,
+         "publish_time": "2026-11-04T10:00:00", "name": {"zh": "測試"}, "address": {},
+         "area": {}, "additional_info": {}}
+        """
+        let reading = try JSONDecoder().decode(Pollutant.self, from: Data(json.utf8))
+        let viewModel = DetailsViewModel(stationId: id, pollutant: reading)
+        XCTAssertTrue(viewModel.canAddFavourite)
+    }
+
     // MARK: - Router
 
     func testRouterOpensProWithTheLinksSource() throws {

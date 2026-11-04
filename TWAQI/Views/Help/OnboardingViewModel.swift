@@ -142,7 +142,7 @@ final class OnboardingViewModel: ObservableObject {
             }
             closest = .loaded(resolved)
 
-            let model = DetailsViewModel(stationId: resolved.pollutant.stationId)
+            let model = DetailsViewModel(stationId: resolved.pollutant.stationId, pollutant: resolved.pollutant)
             // Loads the station's cam, whose SiteId its alerts are stored with.
             model.getData()
             stationModel = model
@@ -151,6 +151,7 @@ final class OnboardingViewModel: ObservableObject {
 
     func addClosestStationToFavourites() {
         guard let model = stationModel, !model.isFavourited else { return }
+        guard model.canAddFavourite else { return }
         model.favouriteStationToggle()
         objectWillChange.send()
         TrackingManager.logEvent(.onboardingAddFavourite, parameters: [
