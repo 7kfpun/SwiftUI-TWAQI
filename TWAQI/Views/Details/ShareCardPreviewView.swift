@@ -24,8 +24,8 @@ struct ShareCardPreviewView: View {
     @State private var image: UIImage?
     @State private var saveResult: ShareCardSharing.SaveResult?
     @State private var isSaving = false
-    /// Shared or saved at least once: closing is then not a cancel.
-    @State private var didAct = false
+    /// Decides when closing counts as a cancel.
+    @State private var session = ShareCardSession()
     @State private var didLogOpen = false
     /// Behind the Share button, for the share popover in a wide window.
     @State private var shareAnchor = PopoverAnchor()
@@ -82,6 +82,7 @@ struct ShareCardPreviewView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
+            session.appeared()
             render()
             guard !didLogOpen else { return }
             didLogOpen = true
@@ -93,7 +94,7 @@ struct ShareCardPreviewView: View {
         }
         // Cancel, a swipe down, or the station page going away.
         .onDisappear {
-            guard !didAct else { return }
+            guard session.disappeared() else { return }
             ShareCardSharing.log(.cancel, card: shapedCard, stationId: stationId)
         }
     }
@@ -144,26 +145,28 @@ struct ShareCardPreviewView: View {
 
     private func share() {
         guard let image = image else { return }
-        didAct = true
+        session.shared()
         ShareCardSharing.share(image: image, card: shapedCard, from: shareAnchor.view)
         ShareCardSharing.log(.share, card: shapedCard, stationId: stationId)
     }
 
     private func save() {
-        guard let image = image else { return }
+        guard let image = image, !isSaving else { return }
         let card = shapedCard
+        let session = session
         isSaving = true
-        // Set before the save finishes: closing the sheet meanwhile is not a
-        // cancel, or one session would count as both.
-        didAct = true
+        session.saveStarted()
         Task { @MainActor in
             let result = await ShareCardSharing.saveToPhotos(image)
             isSaving = false
             saveResult = result
             if result == .saved {
                 ShareCardSharing.log(.save, card: card, stationId: stationId)
-            } else {
-                didAct = false
+            }
+            // The sheet may be gone by now: a failed save then ends the
+            // session as a cancel.
+            if session.saveFinished(saved: result == .saved) {
+                ShareCardSharing.log(.cancel, card: card, stationId: stationId)
             }
         }
     }

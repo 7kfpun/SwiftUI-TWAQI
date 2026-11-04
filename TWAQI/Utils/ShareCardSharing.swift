@@ -161,6 +161,52 @@ enum ShareCardSharing {
     }
 }
 
+/// One opening of the share preview (FOX-73), for its `cancel` event: the
+/// sheet closed with no share and no successful save.
+///
+/// A share or a successful save commits the session for good; a failed or
+/// denied save never undoes that. A save still running when the sheet goes
+/// leaves the call to that save: it logs `cancel` only if it fails. A class,
+/// so a save that ends after the sheet is gone still reaches it.
+@MainActor
+final class ShareCardSession {
+    private(set) var isCommitted = false
+    private var savesInFlight = 0
+    private var isGone = false
+    private var didCancel = false
+
+    func appeared() {
+        isGone = false
+    }
+
+    func shared() {
+        isCommitted = true
+    }
+
+    func saveStarted() {
+        savesInFlight += 1
+    }
+
+    /// Whether to log `cancel` now.
+    func saveFinished(saved: Bool) -> Bool {
+        savesInFlight = max(0, savesInFlight - 1)
+        if saved { isCommitted = true }
+        return cancelIfDue()
+    }
+
+    /// Whether to log `cancel` now.
+    func disappeared() -> Bool {
+        isGone = true
+        return cancelIfDue()
+    }
+
+    private func cancelIfDue() -> Bool {
+        guard isGone, !isCommitted, savesInFlight == 0, !didCancel else { return false }
+        didCancel = true
+        return true
+    }
+}
+
 /// Holds the UIKit view behind a SwiftUI button, for a popover to point at.
 /// Its frame can't be read reliably from SwiftUI: navigation bar items are
 /// hosted apart from the page, so `.global` there isn't the window's space.

@@ -81,6 +81,69 @@ final class ShareCardTests: XCTestCase {
         }
     }
 
+    // MARK: - Session (cancel)
+
+    func testClosingUntouchedSessionCancelsOnce() {
+        let session = ShareCardSession()
+        session.appeared()
+        XCTAssertTrue(session.disappeared())
+        XCTAssertFalse(session.disappeared())
+    }
+
+    func testShareThenFailedSaveIsNotACancel() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.shared()
+        session.saveStarted()
+        XCTAssertFalse(session.saveFinished(saved: false))
+        XCTAssertFalse(session.disappeared())
+        XCTAssertTrue(session.isCommitted)
+    }
+
+    func testFailedSaveAfterSuccessfulSaveIsNotACancel() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.saveStarted()
+        session.saveStarted()
+        XCTAssertFalse(session.saveFinished(saved: true))
+        XCTAssertFalse(session.saveFinished(saved: false))
+        XCTAssertFalse(session.disappeared())
+    }
+
+    func testDeniedSaveThenCloseCancels() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.saveStarted()
+        XCTAssertFalse(session.saveFinished(saved: false))
+        XCTAssertTrue(session.disappeared())
+    }
+
+    func testCloseDuringSaveThatFailsCancelsFromTheSave() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.saveStarted()
+        XCTAssertFalse(session.disappeared())
+        XCTAssertTrue(session.saveFinished(saved: false))
+    }
+
+    func testCloseDuringSaveThatSucceedsIsNotACancel() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.saveStarted()
+        XCTAssertFalse(session.disappeared())
+        XCTAssertFalse(session.saveFinished(saved: true))
+    }
+
+    func testReappearingAfterDisappearDoesNotCancelEarly() {
+        let session = ShareCardSession()
+        session.appeared()
+        session.saveStarted()
+        XCTAssertFalse(session.disappeared())
+        session.appeared()
+        XCTAssertFalse(session.saveFinished(saved: false))
+        XCTAssertTrue(session.disappeared())
+    }
+
     // MARK: - Message
 
     func testMessageInEnglish() throws {
