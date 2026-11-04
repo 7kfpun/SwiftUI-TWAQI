@@ -15,6 +15,8 @@ import XCTest
 /// keeps the last good copy of each source.
 final class WidgetExtraLargeTests: XCTestCase {
     private let today = "2026-11-04"
+    private let now = Date()
+    private let day: TimeInterval = 24 * 60 * 60
 
     private let place = WidgetStationDetail.Place(
         nameLocal: "松山", lat: 25.05, lon: 121.578, county: "Taipei City", countyLocal: "臺北市",
@@ -84,17 +86,20 @@ final class WidgetExtraLargeTests: XCTestCase {
     private let songshanCam = StationCam(siteId: "012", name: "松山", lat: 25.05, lon: 121.578, time: "2026-11-04T10:30:00+08:00")
     private let farCam = StationCam(siteId: "099", name: "恆春", lat: 22.0, lon: 120.7, time: nil)
 
+    /// Every part fetched an hour ago.
     private var previous: WidgetStationDetail {
         WidgetStationDetail(
-            stationId: 1, place: place, history: history([50, 60]),
-            forecast: [forecast("北部", today, aqi: 40)], cam: .init(siteId: "012", time: "old")
+            stationId: 1, place: place,
+            history: history([50, 60]), historyFetchedAt: now.addingTimeInterval(-3600),
+            forecast: [forecast("北部", today, aqi: 40)], forecastFetchedAt: now.addingTimeInterval(-3600),
+            cam: .init(siteId: "012", time: "old"), camFetchedAt: now.addingTimeInterval(-3600)
         )
     }
 
     func testFailedFetchesKeepThePreviousCopy() {
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 1, place: nil,
-            history: nil, forecasts: nil, cams: nil, today: today
+            history: nil, forecasts: nil, cams: nil, today: today, now: now
         )
         XCTAssertEqual(merged, previous)
     }
@@ -102,7 +107,7 @@ final class WidgetExtraLargeTests: XCTestCase {
     func testEmptyResponsesCountAsFailed() {
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 1, place: place,
-            history: [], forecasts: [], cams: nil, today: today
+            history: [], forecasts: [], cams: nil, today: today, now: now
         )
         XCTAssertEqual(merged.history, previous.history)
         XCTAssertEqual(merged.forecast, previous.forecast)
@@ -117,18 +122,58 @@ final class WidgetExtraLargeTests: XCTestCase {
         ]
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 1, place: place,
-            history: history([70, 71, 72]), forecasts: rows, cams: [farCam, songshanCam], today: today
+            history: history([70, 71, 72]), forecasts: rows, cams: [farCam, songshanCam], today: today, now: now
         )
         XCTAssertEqual(merged.history.map(\.aqi), [70, 71, 72])
         // The station's 空品區 only, today on.
         XCTAssertEqual(merged.forecast.map(\.aqi), [55, 80])
         XCTAssertEqual(merged.cam, .init(siteId: "012", time: "2026-11-04T10:30:00+08:00"))
+        XCTAssertEqual(merged.historyFetchedAt, now)
+        XCTAssertEqual(merged.forecastFetchedAt, now)
+        XCTAssertEqual(merged.camFetchedAt, now)
+    }
+
+    /// A failed part keeps its old copy and its old date: refreshing the
+    /// others (and saving the file again) doesn't make it any younger.
+    func testAFailedPartKeepsItsOldDate() {
+        let merged = WidgetStationDetail.merged(
+            previous: previous, stationId: 1, place: place,
+            history: nil, forecasts: [forecast("北部", today, aqi: 55)], cams: nil, today: today, now: now
+        )
+        XCTAssertEqual(merged.history, previous.history)
+        XCTAssertEqual(merged.historyFetchedAt, previous.historyFetchedAt)
+        XCTAssertEqual(merged.cam, previous.cam)
+        XCTAssertEqual(merged.camFetchedAt, previous.camFetchedAt)
+        XCTAssertEqual(merged.forecastFetchedAt, now)
+    }
+
+    /// A part that keeps failing goes a week after its last good fetch,
+    /// while the parts that still refresh stay.
+    func testAPartThatKeepsFailingExpiresAfterAWeek() {
+        var stale = previous
+        stale.historyFetchedAt = now.addingTimeInterval(-8 * day)
+        stale.camFetchedAt = now.addingTimeInterval(-8 * day)
+        stale.forecastFetchedAt = now.addingTimeInterval(-6 * day)
+
+        let merged = WidgetStationDetail.merged(
+            previous: stale, stationId: 1, place: place,
+            history: nil, forecasts: nil, cams: nil, today: today, now: now
+        )
+        XCTAssertTrue(merged.history.isEmpty)
+        XCTAssertNil(merged.historyFetchedAt)
+        XCTAssertNil(merged.cam)
+        XCTAssertEqual(merged.forecast, previous.forecast)
+    }
+
+    func testAPartNeverDatedIsDropped() {
+        let undated = WidgetStationDetail(stationId: 1, place: place, history: history([50, 60]))
+        XCTAssertTrue(undated.droppingExpired(now: now).history.isEmpty)
     }
 
     func testAManifestWithoutTheStationDropsItsCam() {
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 1, place: place,
-            history: nil, forecasts: nil, cams: [farCam], today: today
+            history: nil, forecasts: nil, cams: [farCam], today: today, now: now
         )
         XCTAssertNil(merged.cam)
     }
@@ -136,7 +181,7 @@ final class WidgetExtraLargeTests: XCTestCase {
     func testAnAreaWithoutAForecastDropsIt() {
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 1, place: place,
-            history: nil, forecasts: [forecast("中部", today, aqi: 90)], cams: nil, today: today
+            history: nil, forecasts: [forecast("中部", today, aqi: 90)], cams: nil, today: today, now: now
         )
         XCTAssertTrue(merged.forecast.isEmpty)
         XCTAssertNil(merged.areaForecast(today: today))
@@ -145,7 +190,7 @@ final class WidgetExtraLargeTests: XCTestCase {
     func testAnotherStationsDetailIsNotReused() {
         let merged = WidgetStationDetail.merged(
             previous: previous, stationId: 2, place: nil,
-            history: nil, forecasts: nil, cams: nil, today: today
+            history: nil, forecasts: nil, cams: nil, today: today, now: now
         )
         XCTAssertEqual(merged, WidgetStationDetail(stationId: 2))
     }
@@ -192,11 +237,22 @@ final class WidgetExtraLargeTests: XCTestCase {
     func testCacheRoundTripsAndIgnoresAWeekOldCopy() throws {
         let cache = WidgetStationDetailCache(directory: directory)
         cache.save(previous)
-        XCTAssertEqual(cache.detail(stationId: 1), previous)
-        XCTAssertNil(cache.detail(stationId: 2))
+        XCTAssertEqual(cache.detail(stationId: 1, now: now), previous)
+        XCTAssertNil(cache.detail(stationId: 2, now: now))
 
-        let eightDays = Date().addingTimeInterval(8 * 24 * 60 * 60)
-        XCTAssertNil(cache.detail(stationId: 1, now: eightDays))
+        XCTAssertNil(cache.detail(stationId: 1, now: Date().addingTimeInterval(8 * day)))
+    }
+
+    /// A file written just now still leaves out a part last fetched a week ago.
+    func testCacheDropsAnExpiredPartOfAFreshFile() {
+        let cache = WidgetStationDetailCache(directory: directory)
+        var stale = previous
+        stale.historyFetchedAt = now.addingTimeInterval(-8 * day)
+        cache.save(stale)
+
+        let read = cache.detail(stationId: 1, now: now)
+        XCTAssertEqual(read?.history, [])
+        XCTAssertEqual(read?.forecast, previous.forecast)
     }
 
     func testFrameFilesAreSavedAndRemoved() {

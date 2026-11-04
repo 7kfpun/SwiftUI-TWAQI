@@ -68,7 +68,11 @@ enum StationDetailLoader {
                     hasSavedFrame: hasSavedFrame
                 )
                 if detail.cam == nil {
+                    detail.camFetchedAt = nil
                     cache?.removeFrame(stationId: stationId)
+                } else if detail.cam != cam {
+                    // The saved frame stands in: it is as old as it was.
+                    detail.camFetchedAt = previous?.camFetchedAt
                 }
             }
         }

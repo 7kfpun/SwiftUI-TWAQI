@@ -14,7 +14,9 @@ import Foundation
 ///
 /// Every part is optional and kept from the last good fetch, so a failed
 /// history, forecast or cam request drops nothing that was already there,
-/// and the widget still shows all of it offline.
+/// and the widget still shows all of it offline. Each part carries when it
+/// was last fetched, and goes once that is a week ago
+/// (`WatchStore.maxReadingAge`), however often the others refresh.
 struct WidgetStationDetail: Codable, Equatable {
     /// Where the station is, from the current-pollutants response: what the
     /// header names and what the forecast and cam joins need.
@@ -41,10 +43,15 @@ struct WidgetStationDetail: Codable, Equatable {
     var place: Place?
     /// Hourly readings, oldest first.
     var history: HistoricalPollutants = []
+    var historyFetchedAt: Date?
     /// The station's 空品區 only, every day from the fetch on; past days are
     /// dropped when shown.
     var forecast: [AqiForecast] = []
+    var forecastFetchedAt: Date?
     var cam: Cam?
+    /// When the manifest last named `cam`, or, while its new frame fails to
+    /// download, when the saved frame was.
+    var camFetchedAt: Date?
 
     /// "Taipei City" / "臺北市", in the reader's language.
     var displayCounty: String? {
@@ -86,7 +93,8 @@ extension WidgetStationDetail {
     /// keeps what `previous` had; a fetch that worked replaces it.
     ///
     /// - Parameters:
-    ///   - previous: the cached detail; ignored when it is another station's.
+    ///   - previous: the cached detail; ignored when it is another station's,
+    ///     and each part of it a week past its fetch is dropped.
     ///   - place: from this refresh's current-pollutants response.
     ///   - history: hourly readings, oldest first. Empty counts as failed.
     ///   - forecasts: every area's rows from `twaqi_aqi_forecast`. Empty
@@ -94,6 +102,7 @@ extension WidgetStationDetail {
     ///   - cams: the cam manifest. A station with no cam in a manifest that
     ///     loaded has its cam dropped.
     ///   - today: Taiwan's calendar day, `YYYY-MM-DD`.
+    ///   - now: when this refresh ran; a part fetched now is dated with it.
     static func merged(
         previous: WidgetStationDetail?,
         stationId: Int,
@@ -101,29 +110,59 @@ extension WidgetStationDetail {
         history: HistoricalPollutants?,
         forecasts: [AqiForecast]?,
         cams: [StationCam]?,
-        today: String
+        today: String,
+        now: Date = Date()
     ) -> WidgetStationDetail {
-        let previous = previous?.stationId == stationId ? previous : nil
-        var detail = WidgetStationDetail(stationId: stationId)
-        detail.place = place ?? previous?.place
+        let previous = previous?.stationId == stationId ? previous?.droppingExpired(now: now) : nil
+        // Starts as the previous copy: a part that fails to fetch keeps it,
+        // with its old date.
+        var detail = previous ?? WidgetStationDetail(stationId: stationId)
+        if let place = place {
+            detail.place = place
+        }
 
-        detail.history = history.flatMap { $0.isEmpty ? nil : $0 } ?? previous?.history ?? []
+        if let history = history, !history.isEmpty {
+            detail.history = history
+            detail.historyFetchedAt = now
+        }
 
         if let forecasts = forecasts, !forecasts.isEmpty, let place = detail.place {
             let areas = Array(Set(forecasts.filter { $0.forecastDate >= today }.map(\.area))).sorted()
             detail.forecast = AqiForecastMatcher
                 .area(areaLocal: place.areaLocal, countyLocal: place.countyLocal, in: areas)
                 .map { AqiForecastMatcher.days(area: $0, in: forecasts, today: today) } ?? []
-        } else {
-            detail.forecast = previous?.forecast ?? []
+            detail.forecastFetchedAt = now
         }
 
         if let cams = cams, let place = detail.place {
             // Matched by the Chinese name and position, as the station page does.
             detail.cam = StationCamMatcher.match(name: place.nameLocal, lat: place.lat, lon: place.lon, in: cams)
                 .map { Cam(siteId: $0.siteId, time: $0.time) }
-        } else {
-            detail.cam = previous?.cam
+            detail.camFetchedAt = detail.cam == nil ? nil : now
+        }
+        return detail
+    }
+
+    /// This detail without the parts fetched more than `WatchStore.maxReadingAge`
+    /// ago (or never). Saving the file again on every refresh doesn't keep a
+    /// part that keeps failing alive.
+    func droppingExpired(now: Date = Date()) -> WidgetStationDetail {
+        func isExpired(_ date: Date?) -> Bool {
+            guard let date = date else { return true }
+            return now.timeIntervalSince(date) > WatchStore.maxReadingAge
+        }
+        var detail = self
+        if isExpired(historyFetchedAt) {
+            detail.history = []
+            detail.historyFetchedAt = nil
+        }
+        if isExpired(forecastFetchedAt) {
+            detail.forecast = []
+            detail.forecastFetchedAt = nil
+        }
+        if isExpired(camFetchedAt) {
+            detail.cam = nil
+            detail.camFetchedAt = nil
         }
         return detail
     }
@@ -182,14 +221,16 @@ struct WidgetStationDetailCache {
     }
 
     /// The saved detail, unless it was written more than
-    /// `WatchStore.maxReadingAge` ago (the same week as every offline cache).
+    /// `WatchStore.maxReadingAge` ago (the same week as every offline cache),
+    /// without its parts fetched longer ago than that.
     func detail(stationId: Int, now: Date = Date()) -> WidgetStationDetail? {
         let file = detailFile(stationId: stationId)
         guard let modified = Self.modificationDate(of: file),
               now.timeIntervalSince(modified) <= WatchStore.maxReadingAge,
-              let data = try? Data(contentsOf: file)
+              let data = try? Data(contentsOf: file),
+              let detail = try? JSONDecoder().decode(WidgetStationDetail.self, from: data)
         else { return nil }
-        return try? JSONDecoder().decode(WidgetStationDetail.self, from: data)
+        return detail.droppingExpired(now: now)
     }
 
     func save(_ detail: WidgetStationDetail) {
