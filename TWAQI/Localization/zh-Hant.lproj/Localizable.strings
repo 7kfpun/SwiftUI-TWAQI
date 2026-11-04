@@ -56,7 +56,7 @@
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
 "Help.in_app_purchase" = "App 內購買";
-"Help.ad_free" = "移除廣告並解鎖錶面複雜功能";
+"Help.ad_free" = "移除廣告並解鎖錶面數值";
 "Help.restore_purchase" = "回復購買項目";
 "Help.contact_us" = "聯絡我們";
 "Help.interested_to_be_our_business_partner" = "想成為我們的合作夥伴嗎？";
@@ -138,7 +138,7 @@
 "Help.watch_app_header" = "手錶 App";
 "Help.watch_app_body" = "免費。顯示最近測站或你選定的測站目前數值，以及過去 12 小時。";
 "Help.watch_complications_header" = "錶面複雜功能";
-"Help.watch_complications_body" = "屬於 Pro。AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。樣式包含指標名稱加數值、僅數值、表情，以及狀態文字。手錶 App 本身免費。";
+"Help.watch_complications_body" = "表情樣式免費：以等級顏色顯示表情，AQI、PM2.5 等 7 項指標任選。Pro 加上數值與更多樣式：指標名稱加數值、僅數值，以及狀態文字。手錶 App 本身免費。";
 "Help.watch_smart_stack_header" = "智慧型堆疊";
 "Help.watch_smart_stack_body" = "屬於 Pro。在錶面上轉動數位錶冠打開智慧型堆疊，按住後點一下 +，加入 Taiwan Air。空氣變差時和通勤時段，它會自動出現。";
 "Help.watch_add_header" = "如何加入複雜功能";
@@ -253,11 +253,12 @@
 "Watch.loading_failed" = "無法載入資料";
 "Watch.retry" = "重試";
 "Watch.widget_name" = "空氣品質";
-"Watch.widget_description" = "在 App 中選擇的測站 AQI。";
+"Watch.widget_description" = "在 App 中選擇的測站空氣品質。表情樣式免費；數值與其他樣式屬於 Pro。";
 "Watch.widget_short %@" = "%@（僅數值）";
 "Watch.widget_face %@" = "%@（表情）";
 "Watch.widget_status %@" = "%@（狀態）";
 "Watch.widget_no_station %@" = "%@，不含測站";
+"Watch.widget_pro %@" = "%@・Pro";
 
 "Widget.widget_name" = "空氣品質";
 "Widget.widget_description" = "顯示最近測站或第一個最愛測站的目前 AQI，並列出你其他的最愛測站。";
@@ -273,9 +274,9 @@
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";
 "Watch.default_station" = "預設測站（未定位）";
-"Watch.pro_title" = "錶面複雜功能・Pro";
+"Watch.pro_title" = "錶面數值與樣式・Pro";
 "Watch.pro_failed" = "找不到購買項目，請再試一次或回復購買。";
-"Watch.pro_locked" = "請在 App 中解鎖";
+"Watch.pro_locked" = "Pro・開啟 App 解鎖";
 
 /* Pro */
 "Pro.title" = "Taiwan Air Pro";
@@ -283,8 +284,8 @@
 "Pro.features" = "Pro 包含";
 "Pro.feature_no_ads" = "移除廣告";
 "Pro.feature_no_ads_detail" = "所有畫面都不再顯示廣告，包含地圖。";
-"Pro.feature_complications" = "錶面複雜功能";
-"Pro.feature_complications_detail" = "AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。手錶 App 本身免費。";
+"Pro.feature_complications" = "錶面數值與更多樣式";
+"Pro.feature_complications_detail" = "在錶面顯示數值與更多樣式，AQI、PM2.5 等 7 項指標任選。表情樣式與手錶 App 免費。";
 "Pro.feature_widgets" = "中、大尺寸小工具";
 "Pro.feature_widgets_detail" = "在主畫面查看目前測站與最愛測站。";
 "Pro.feature_support" = "支持獨立開發";
@@ -298,10 +299,10 @@
 "Pro.terms_of_use" = "使用條款";
 "Pro.privacy_policy" = "隱私權政策";
 "Pro.purchase_failed" = "無法完成購買，請再試一次。";
-"Watch.pro_feature_complications" = "空氣品質顯示在錶面";
+"Watch.pro_feature_complications" = "在錶面顯示數值";
 "Watch.pro_feature_no_ads" = "iPhone 無廣告";
 "Watch.pro_feature_indices" = "AQI、PM2.5 等 7 項指標";
-"Watch.pro_complications_cta" = "加到錶面";
+"Watch.pro_complications_cta" = "在錶面顯示數值";
 
 /* Guide */
 "Guide.section_what" = "這是什麼";
@@ -445,6 +446,6 @@
 "Onboarding.data_title" = "資料來源";
 "Onboarding.data_body" = "數值來自環境部「空氣品質監測網」開放資料。環境部每小時發布最新數值，Taiwan Air 依發布內容呈現。";
 "Onboarding.data_independent" = "Taiwan Air 是獨立開發的 App，並非政府經營。";
-"Onboarding.premium_body" = "通知、我的最愛、地圖與手錶 App 皆可免費使用。Pro 會移除廣告，並加入錶面複雜功能與中、大尺寸小工具。";
+"Onboarding.premium_body" = "通知、我的最愛、地圖、手錶 App 與錶面表情皆可免費使用。Pro 會移除廣告，並加入錶面數值、更多樣式與中、大尺寸小工具。";
 "Onboarding.see_pro_plans" = "查看 Pro 方案";
 "Onboarding.premium_active" = "你已是 Pro 用戶，感謝支持！";

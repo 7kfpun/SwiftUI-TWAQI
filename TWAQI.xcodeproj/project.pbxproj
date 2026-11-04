@@ -275,6 +275,16 @@
 		F44A00000000000000000011 /* AnalyticsEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44A00000000000000000001 /* AnalyticsEvent.swift */; };
 		F44A00000000000000000012 /* AnalyticsEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44A00000000000000000001 /* AnalyticsEvent.swift */; };
 		F44A00000000000000000013 /* AnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F44A00000000000000000002 /* AnalyticsTests.swift */; };
+		F63A00000000000000000011 /* ComplicationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000001 /* ComplicationStyle.swift */; };
+		F63A00000000000000000012 /* ComplicationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000001 /* ComplicationStyle.swift */; };
+		F63A00000000000000000014 /* ComplicationStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000001 /* ComplicationStyle.swift */; };
+		F63A00000000000000000013 /* ComplicationStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000002 /* ComplicationStyleTests.swift */; };
+		F63A00000000000000000021 /* LockedComplicationLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000003 /* LockedComplicationLog.swift */; };
+		F63A00000000000000000022 /* LockedComplicationLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000003 /* LockedComplicationLog.swift */; };
+		F63A00000000000000000023 /* LockedComplicationLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000003 /* LockedComplicationLog.swift */; };
+		F63A00000000000000000024 /* PhoneRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000004 /* PhoneRelay.swift */; };
+		F63A00000000000000000025 /* WatchEventRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000005 /* WatchEventRelay.swift */; };
+		F63A00000000000000000026 /* LockedComplicationLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000006 /* LockedComplicationLogTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -544,6 +554,12 @@
 		F0A47D1E0000000000000003 /* DeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkTests.swift; sourceTree = "<group>"; };
 		F44A00000000000000000001 /* AnalyticsEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsEvent.swift; sourceTree = "<group>"; };
 		F44A00000000000000000002 /* AnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsTests.swift; sourceTree = "<group>"; };
+		F63A00000000000000000001 /* ComplicationStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationStyle.swift; sourceTree = "<group>"; };
+		F63A00000000000000000002 /* ComplicationStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationStyleTests.swift; sourceTree = "<group>"; };
+		F63A00000000000000000003 /* LockedComplicationLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockedComplicationLog.swift; sourceTree = "<group>"; };
+		F63A00000000000000000004 /* PhoneRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneRelay.swift; sourceTree = "<group>"; };
+		F63A00000000000000000005 /* WatchEventRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchEventRelay.swift; sourceTree = "<group>"; };
+		F63A00000000000000000006 /* LockedComplicationLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockedComplicationLogTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -681,6 +697,8 @@
 				B433C84CFDE96BDCDA1C8CE1 /* AppLanguageTests.swift */,
 				F0A47D1E0000000000000003 /* DeepLinkTests.swift */,
 				F44A00000000000000000002 /* AnalyticsTests.swift */,
+				F63A00000000000000000002 /* ComplicationStyleTests.swift */,
+				F63A00000000000000000006 /* LockedComplicationLogTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
@@ -722,6 +740,7 @@
 				BAB2AA4FD4850D8878556FE8 /* Shared */,
 				D7EAB76B0E108BC376109CA7 /* Views */,
 				913DCC07EB40441B55E33524 /* TWAQIWatchApp.swift */,
+				F63A00000000000000000004 /* PhoneRelay.swift */,
 				137AA5506D82FA067FB434C8 /* Assets.xcassets */,
 				EFD9B78BF035DE1C74154479 /* Info.plist */,
 				646913868DEDA24BF4E1A3F3 /* TWAQIWatch.entitlements */,
@@ -924,6 +943,7 @@
 				9E1C9B13238974120052E115 /* StringExtension.swift */,
 				9E34B4F1237079F400B6E600 /* TrackingManager.swift */,
 				F44A00000000000000000001 /* AnalyticsEvent.swift */,
+				F63A00000000000000000005 /* WatchEventRelay.swift */,
 				32CD323794AA44C233EB7C35 /* WidgetBridge.swift */,
 				F0A47D1E0000000000000001 /* DeepLink.swift */,
 				F0A47D1E0000000000000002 /* AppRouter.swift */,
@@ -1016,6 +1036,8 @@
 				784409635AE04EAEB993A06A /* WidgetRelevance.swift */,
 				A93D2C90EF31D7DA04FB6444 /* WatchAPI.swift */,
 				D92DB7F473AB70324C3565E8 /* WatchPro.swift */,
+				F63A00000000000000000001 /* ComplicationStyle.swift */,
+				F63A00000000000000000003 /* LockedComplicationLog.swift */,
 				1B24479F966EFE547F09CCC2 /* Faces.xcassets */,
 			);
 			path = Shared;
@@ -1456,11 +1478,14 @@
 			files = (
 				FD1B86AADA1245A9BC76CE8A /* SmartStackHints.swift in Sources */,
 				C22DE6B929A64EB49B7657AF /* WatchWidgetIntent.swift in Sources */,
+				F63A00000000000000000014 /* ComplicationStyle.swift in Sources */,
 				00C0EE453AC44B429EF69316 /* WidgetRelevance.swift in Sources */,
 				60ACE5CC2339E00371880F9B /* WatchReading.swift in Sources */,
 				E55CC5B527165474BB49EE6B /* WatchStore.swift in Sources */,
 				12DEFE8B8E8F5182DB4EEC42 /* WatchAPI.swift in Sources */,
 				B23ACB37132260BB9C6ED867 /* TWAQIWatchApp.swift in Sources */,
+				F63A00000000000000000022 /* LockedComplicationLog.swift in Sources */,
+				F63A00000000000000000024 /* PhoneRelay.swift in Sources */,
 				8CC4C77AA1742366A9DF74CC /* ReadingView.swift in Sources */,
 				E697D1D7FAEB50207772B74C /* StationPickerView.swift in Sources */,
 				7B2B0C25FF31C651C073C327 /* AirIndexTypes.swift in Sources */,
@@ -1490,6 +1515,9 @@
 				F0A45D1E0000000000000002 /* StoreReviewTests.swift in Sources */,
 				F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */,
 				F44A00000000000000000013 /* AnalyticsTests.swift in Sources */,
+				F63A00000000000000000013 /* ComplicationStyleTests.swift in Sources */,
+				F63A00000000000000000026 /* LockedComplicationLogTests.swift in Sources */,
+				F63A00000000000000000012 /* ComplicationStyle.swift in Sources */,
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
 				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
@@ -1546,6 +1574,8 @@
 				15D8737F0C6E779BF0E98A6F /* WatchStore.swift in Sources */,
 				889DDC5B1F30E2ED74BA565B /* WatchAPI.swift in Sources */,
 				8249C2C83B32D720E58F53D6 /* TWAQIWatchWidget.swift in Sources */,
+				F63A00000000000000000011 /* ComplicationStyle.swift in Sources */,
+				F63A00000000000000000021 /* LockedComplicationLog.swift in Sources */,
 				DB10FBCCA8F474B8F2A7C858 /* AirIndexTypes.swift in Sources */,
 				D4307F75BEBEA6931C58CE82 /* AirStatusTypes.swift in Sources */,
 				4456899E76DFBCF8C5D22EDE /* StationTypes.swift in Sources */,
@@ -1573,6 +1603,8 @@
 				B3B4EC36CE2E6B47C7044C4E /* Onboarding.swift in Sources */,
 				F0A47D1E0000000000000011 /* DeepLink.swift in Sources */,
 				F44A00000000000000000011 /* AnalyticsEvent.swift in Sources */,
+				F63A00000000000000000023 /* LockedComplicationLog.swift in Sources */,
+				F63A00000000000000000025 /* WatchEventRelay.swift in Sources */,
 				F0A47D1E0000000000000013 /* AppRouter.swift in Sources */,
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,

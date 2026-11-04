@@ -1,0 +1,44 @@
+//
+//  WatchEventRelay.swift
+//  TWAQI
+//
+//  Created by kf on 4/11/26.
+//  Copyright © 2026 kf. All rights reserved.
+//
+
+import Foundation
+import WatchConnectivity
+
+/// Logs to Firebase what the watch sends over WatchConnectivity: the watch has
+/// no Firebase of its own. Today that is a free reader's complication set to a
+/// Pro style (`LockedComplicationLog`, FOX-63).
+final class WatchEventRelay: NSObject, WCSessionDelegate {
+    static let shared = WatchEventRelay()
+
+    /// Call once at launch, after `TrackingManager.applyExclusionAtLaunch()`.
+    func start() {
+        guard WCSession.isSupported() else { return }
+        WCSession.default.delegate = self
+        WCSession.default.activate()
+    }
+
+    /// Logs every hit in `userInfo`; anything else in it is ignored.
+    static func logEvents(fromUserInfo userInfo: [String: Any], log: (AnalyticsEvent, [String: Any]) -> Void = TrackingManager.logEvent) {
+        for hit in LockedComplicationLog.hits(fromUserInfo: userInfo) {
+            log(.watchComplicationLocked, hit.parameters)
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        Self.logEvents(fromUserInfo: userInfo)
+    }
+
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+
+    /// After switching to another watch: activate again for the new one.
+    func sessionDidDeactivate(_ session: WCSession) {
+        session.activate()
+    }
+}

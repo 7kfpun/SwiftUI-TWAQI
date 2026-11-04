@@ -16,6 +16,8 @@ struct TWAQIWatchApp: App {
     init() {
         // Readings cached more than a week ago are never shown; drop them.
         WatchStore.purgeExpiredReadings()
+        // Locked-style hits the complications queued go to the phone's Firebase.
+        PhoneRelay.shared.start()
     }
 
     var body: some Scene {
@@ -56,7 +58,8 @@ final class WatchModel: ObservableObject {
     var isHome: Bool { source != .pinned }
 
     /// Re-asks StoreKit; a purchase or refund on any device lands here.
-    /// The app itself is free; only the complications depend on the answer.
+    /// The app and the face complication are free; only the complication's
+    /// number and other styles depend on the answer.
     func checkPro() async {
         let unlocked = await WatchPro.refresh()
         guard unlocked != isPro else { return }
@@ -161,6 +164,7 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                PhoneRelay.shared.flush()
                 Task {
                     await model.checkPro()
                     await model.refresh()

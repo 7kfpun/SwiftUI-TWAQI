@@ -34,6 +34,10 @@ enum WatchStore {
         UserDefaults(suiteName: appGroup) ?? .standard
     }
 
+    /// The app group's defaults, for state kept outside this type
+    /// (`LockedComplicationLog`).
+    static var sharedDefaults: UserDefaults { defaults }
+
     /// A station the reader picked by hand. `nil` means home: the closest
     /// station, or the 中正 default without a location.
     static var pinnedStationId: Int? {
