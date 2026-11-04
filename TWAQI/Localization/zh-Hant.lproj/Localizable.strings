@@ -449,3 +449,37 @@
 "Onboarding.premium_body" = "通知、我的最愛、地圖、手錶 App 與錶面表情皆可免費使用。Pro 會移除廣告，並加入錶面數值、更多樣式與中、大尺寸小工具。";
 "Onboarding.see_pro_plans" = "查看 Pro 方案";
 "Onboarding.premium_active" = "你已是 Pro 用戶，感謝支持！";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "測站";
+"Intent.station_nearest" = "最近的測站";
+"Intent.get_air_quality_title" = "查詢空氣品質";
+"Intent.get_air_quality_description" = "說出最近測站或最愛測站目前的 AQI、等級、主要污染物與活動建議。";
+"Intent.get_air_quality_short" = "空氣品質";
+"Intent.open_station_title" = "開啟測站";
+"Intent.open_station_description" = "開啟 Taiwan Air 並顯示測站頁面。";
+"Intent.open_station_short" = "開啟測站";
+"Get the air at ${station}" = "查詢${station}的空氣";
+"Open ${station}" = "開啟${station}";
+"Intent.answer_fallback_favourite" = "Taiwan Air 無法取得你的位置，以下是你的第一個最愛測站。";
+"Intent.answer_fallback_default" = "Taiwan Air 無法取得你的位置，你也還沒有最愛測站，以下是臺北市中正區附近的測站。";
+"Intent.answer_no_reading" = "目前還沒有數值。請在有網路時開啟 Taiwan Air 一次。";
+"Intent.answer_no_aqi" = "%@目前沒有 AQI 數值。";
+"Intent.answer_reading" = "%1$@：AQI %2$@，%3$@。";
+"Intent.answer_main_pollutant" = "主要污染物：%@。";
+"Intent.answer_guidance" = "%@。";
+"Intent.answer_cached_age" = "目前沒有網路，這是最後儲存的數值，為 %@前的資料。";
+"Intent.answer_cached" = "目前沒有網路，這是最後儲存的數值。";
+"Intent.answer_old_age" = "這筆數值是 %@前發布的。";
+"Control.display_name" = "空氣品質";
+"Control.description" = "顯示最近測站或最愛測站的 AQI，點一下即可開啟。";
+"Control.configuration_title" = "測站";
+"Help.shortcuts_title" = "Siri、捷徑與控制中心";
+"Help.shortcuts_siri_header" = "問 Siri";
+"Help.shortcuts_siri_body" = "說「Taiwan Air 空氣如何」可查詢最近的測站，或說「Taiwan Air 松山空氣如何」查詢最愛測站。Siri 會說出 AQI、等級、主要污染物與活動建議。沒有網路時，會說出最後儲存的數值與它的時間。";
+"Help.shortcuts_location_body" = "只有在你已允許本 App 使用位置時，才會查詢最近的測站；否則會改用你的第一個最愛測站。";
+"Help.shortcuts_app_header" = "捷徑、Spotlight 與動作按鈕";
+"Help.shortcuts_app_body" = "「查詢空氣品質」與「開啟測站」不必設定，就會出現在「捷徑」App 與 Spotlight。若 iPhone 有動作按鈕：前往「設定」→「動作按鈕」→「捷徑」，再選擇其中一個。";
+"Help.shortcuts_control_header" = "控制中心";
+"Help.shortcuts_control_body" = "iOS 18 以上：打開控制中心，按住空白處，點「加入控制項目」並搜尋 Taiwan Air。它會顯示最近測站或最愛測站的 AQI，點一下即可開啟測站頁面。也可以放在鎖定畫面的控制按鈕。";
+"Help.shortcuts_footer" = "所有人皆可免費使用。Siri 與捷徑需要 iOS 16 以上。";

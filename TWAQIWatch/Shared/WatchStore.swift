@@ -28,6 +28,7 @@ enum WatchStore {
         static let favouriteReadings = "favouriteReadings"
         static let relevanceHistory = "relevanceHistory"
         static let alertThresholds = "alertThresholds"
+        static let appLocationAllowed = "appLocationAllowed"
     }
 
     private static var defaults: UserDefaults {
@@ -182,6 +183,15 @@ enum WatchStore {
         set {
             defaults.set(Dictionary(uniqueKeysWithValues: newValue.map { (String($0.key), $0.value) }), forKey: Keys.alertThresholds)
         }
+    }
+
+    /// Mirror of whether the phone app may use location, for the Control
+    /// Center control's "Nearest" (FOX-74): the widget extension doesn't
+    /// see the app's permission (no `NSWidgetWantsLocation`). Only
+    /// `WidgetBridge` writes this; false on the watch.
+    static var appLocationAllowed: Bool {
+        get { defaults.bool(forKey: Keys.appLocationAllowed) }
+        set { defaults.set(newValue, forKey: Keys.appLocationAllowed) }
     }
 
     /// Cache of `WatchPro.refresh()` on the watch, and of `SettingsStore.refreshPro()`

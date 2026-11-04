@@ -85,6 +85,34 @@ struct WatchGuideView: View {
     }
 }
 
+/// Siri, Shortcuts, the Action button and the Control Center control (FOX-74).
+struct ShortcutsGuideView: View {
+    var body: some View {
+        List {
+            Section(header: Text("Help.shortcuts_siri_header")) {
+                guideText("Help.shortcuts_siri_body")
+                guideText("Help.shortcuts_location_body")
+            }
+
+            Section(header: Text("Help.shortcuts_app_header")) {
+                guideText("Help.shortcuts_app_body")
+            }
+
+            Section(
+                header: Text("Help.shortcuts_control_header"),
+                footer: Text("Help.shortcuts_footer").fontWeight(.light)
+            ) {
+                guideText("Help.shortcuts_control_body")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationBarTitle("Help.shortcuts_title", displayMode: .inline)
+        .onAppear {
+            TrackingManager.logEvent(.openShortcutsGuide)
+        }
+    }
+}
+
 private func guideText(_ key: LocalizedStringKey) -> some View {
     Text(key)
         .fontWeight(.light)
@@ -104,6 +132,14 @@ struct WatchGuideView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             WatchGuideView()
+        }
+    }
+}
+
+struct ShortcutsGuideView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            ShortcutsGuideView()
         }
     }
 }

@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		308DD02779510386C6F02B68 /* AirQualityAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */; };
+		336A325C9C3483B3334702A0 /* AirQualityAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */; };
+		59D032B70F1CC4216394CF09 /* StationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C4BFA857FEEE037C6C242B /* StationEntity.swift */; };
+		708DB99E3A834420516790CD /* StationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C4BFA857FEEE037C6C242B /* StationEntity.swift */; };
+		191461EA337F551BDF4C95F2 /* AirQualityLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 549AAEBA6AFF896A47350745 /* AirQualityLookup.swift */; };
+		840E63F2582E4A98BF980A33 /* GetAirQualityIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9CA51E1BD5848043AF9D8AF /* GetAirQualityIntent.swift */; };
+		3BBFEE8E4F9A6DE08CDDB964 /* OpenStationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 247176FA486427F6C3F34AEC /* OpenStationIntent.swift */; };
+		DE5D589F94037248D2BC1502 /* TWAQIShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = C47F3F19C53BAA67F5B18723 /* TWAQIShortcuts.swift */; };
+		DF854E0A946408CD3DE034E7 /* AirQualityControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3EF5703753441C307F1D3F /* AirQualityControl.swift */; };
+		770E61E5B1EA99B320C16058 /* AirQualityIntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 384632A1684CD77DE80F997D /* AirQualityIntentTests.swift */; };
+		88EAE1FB01D306EE96BC1FAD /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = ED7CFA2BAB6FBFFAFA5EE33A /* AppShortcuts.strings */; };
 		8238948F2B134126BC272BA3 /* WidgetRelevanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB032C4EF1224FBBA5C5EA5B /* WidgetRelevanceTests.swift */; };
 		145BB5DE24694FDCB2894BC7 /* SmartStackHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA93917C7744C06BD0DDBFE /* SmartStackHints.swift */; };
 		FD1B86AADA1245A9BC76CE8A /* SmartStackHints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FA93917C7744C06BD0DDBFE /* SmartStackHints.swift */; };
@@ -362,6 +373,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityAnswer.swift; sourceTree = "<group>"; };
+		30C4BFA857FEEE037C6C242B /* StationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationEntity.swift; sourceTree = "<group>"; };
+		549AAEBA6AFF896A47350745 /* AirQualityLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityLookup.swift; sourceTree = "<group>"; };
+		F9CA51E1BD5848043AF9D8AF /* GetAirQualityIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAirQualityIntent.swift; sourceTree = "<group>"; };
+		247176FA486427F6C3F34AEC /* OpenStationIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenStationIntent.swift; sourceTree = "<group>"; };
+		C47F3F19C53BAA67F5B18723 /* TWAQIShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TWAQIShortcuts.swift; sourceTree = "<group>"; };
+		1E3EF5703753441C307F1D3F /* AirQualityControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityControl.swift; sourceTree = "<group>"; };
+		384632A1684CD77DE80F997D /* AirQualityIntentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityIntentTests.swift; sourceTree = "<group>"; };
+		50C74C7DBD4777F0396D37D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
+		83E1BC22180F3303632E5351 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
 		C087A9241D43CECA11D0085C /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
 		8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		55099A312B9E5B7CBDAD497C /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -625,6 +646,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C5387673B80D8BA75A83693 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */,
+				30C4BFA857FEEE037C6C242B /* StationEntity.swift */,
+				549AAEBA6AFF896A47350745 /* AirQualityLookup.swift */,
+				F9CA51E1BD5848043AF9D8AF /* GetAirQualityIntent.swift */,
+				247176FA486427F6C3F34AEC /* OpenStationIntent.swift */,
+				C47F3F19C53BAA67F5B18723 /* TWAQIShortcuts.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
 		1AB7AF6BE37510AECA4ED2DF /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -684,6 +718,7 @@
 		67678988171B643CA9475889 /* TWAQITests */ = {
 			isa = PBXGroup;
 			children = (
+				384632A1684CD77DE80F997D /* AirQualityIntentTests.swift */,
 				92DB686663069F57E2CD5660 /* OnboardingTests.swift */,
 				F0A45D1E0000000000000001 /* StoreReviewTests.swift */,
 				64E981DA93B17D87FE1657D7 /* AirStatusesTests.swift */,
@@ -726,6 +761,7 @@
 		760B27B02AB347B2996EEF43 /* TWAQIWidget */ = {
 			isa = PBXGroup;
 			children = (
+				1E3EF5703753441C307F1D3F /* AirQualityControl.swift */,
 				96A46181C1E12824CB176C23 /* TWAQIWidget.swift */,
 				7BC0B12F1DAE6B6A76E21715 /* Info.plist */,
 				BAE72D9B93DECAF904CC4F5E /* TWAQIWidget.entitlements */,
@@ -801,6 +837,7 @@
 		9E1AC53A233F981700AC862D /* TWAQI */ = {
 			isa = PBXGroup;
 			children = (
+				3C5387673B80D8BA75A83693 /* Intents */,
 				9E34B4F92371D4EC00B6E600 /* Localization */,
 				9EC596072351BC0500B8AA99 /* Config */,
 				9E942E322372BA810010915D /* Constants */,
@@ -955,6 +992,7 @@
 		9E34B4F92371D4EC00B6E600 /* Localization */ = {
 			isa = PBXGroup;
 			children = (
+				ED7CFA2BAB6FBFFAFA5EE33A /* AppShortcuts.strings */,
 				9E34B5032371E7B700B6E600 /* Localizable.strings */,
 				7F3A73C10B2E4D5F8A9B0C24 /* InfoPlist.strings */,
 			);
@@ -1304,6 +1342,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88EAE1FB01D306EE96BC1FAD /* AppShortcuts.strings in Resources */,
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
 				9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */,
 				7F3A73C10B2E4D5F8A9B0C25 /* InfoPlist.strings in Resources */,
@@ -1510,6 +1549,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				770E61E5B1EA99B320C16058 /* AirQualityIntentTests.swift in Sources */,
 				8238948F2B134126BC272BA3 /* WidgetRelevanceTests.swift in Sources */,
 				FEC3DE3DAF39B017A6EFB46A /* OnboardingTests.swift in Sources */,
 				F0A45D1E0000000000000002 /* StoreReviewTests.swift in Sources */,
@@ -1543,6 +1583,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				336A325C9C3483B3334702A0 /* AirQualityAnswer.swift in Sources */,
+				708DB99E3A834420516790CD /* StationEntity.swift in Sources */,
+				DF854E0A946408CD3DE034E7 /* AirQualityControl.swift in Sources */,
 				0B3C4913BD074C00B642F919 /* WidgetRelevance.swift in Sources */,
 				F0A47D1E0000000000000012 /* DeepLink.swift in Sources */,
 				C3876FFC2DC1987EC72823BD /* TWAQIWidget.swift in Sources */,
@@ -1596,6 +1639,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				308DD02779510386C6F02B68 /* AirQualityAnswer.swift in Sources */,
+				59D032B70F1CC4216394CF09 /* StationEntity.swift in Sources */,
+				191461EA337F551BDF4C95F2 /* AirQualityLookup.swift in Sources */,
+				840E63F2582E4A98BF980A33 /* GetAirQualityIntent.swift in Sources */,
+				3BBFEE8E4F9A6DE08CDDB964 /* OpenStationIntent.swift in Sources */,
+				DE5D589F94037248D2BC1502 /* TWAQIShortcuts.swift in Sources */,
 				30955AA3222449509DC46C05 /* WidgetRelevance.swift in Sources */,
 				2FD81BE457A4FB709E291D6D /* Locator.swift in Sources */,
 				55E1C42FC16E2766D66B3A88 /* OnboardingViewModel.swift in Sources */,
@@ -1805,6 +1854,15 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		ED7CFA2BAB6FBFFAFA5EE33A /* AppShortcuts.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				50C74C7DBD4777F0396D37D8 /* en */,
+				83E1BC22180F3303632E5351 /* zh-Hant */,
+			);
+			name = AppShortcuts.strings;
+			sourceTree = "<group>";
+		};
 		9E1AC546233F981900AC862D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

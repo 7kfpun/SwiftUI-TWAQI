@@ -12,6 +12,9 @@ struct ContentView: View {
     /// Screens opened by URL, such as Pro from the locked widget.
     @ObservedObject var router: AppRouter
 
+    /// Handed on to a station page opened by link, which is a sheet.
+    @EnvironmentObject private var settings: SettingsStore
+
     /// The language chosen under Help. Watched here so a change applies at
     /// once: SwiftUI `Text("Key")` follows `\.locale`, and rebuilding the
     /// tabs refreshes text produced in code (`.localized`, the UIKit map
@@ -63,6 +66,17 @@ struct ContentView: View {
                         ])
                     }
                 }
+        }
+        // A station from the Control Center control or the "Open station"
+        // shortcut (FOX-74), over whichever tab is showing.
+        .sheet(item: $router.openedStation) { station in
+            NavigationView {
+                DetailsView(stationId: station.id, onClose: { router.openedStation = nil })
+                    .navigationBarTitleDisplayMode(.inline)
+                    .environmentObject(settings)
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
+            .environment(\.locale, language.locale())
         }
         // On the root rather than a tab, so it opens whichever tab is showing.
         .sheet(isPresented: $router.showingPro) {

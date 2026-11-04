@@ -17,8 +17,8 @@ import WidgetKit
 ///
 /// Home Screen families also list the reader's other favourite stations.
 /// Medium and large are Pro; without it they say so instead. The Lock Screen
-/// families stay single-station.
-@main
+/// families stay single-station. Bundled with the Control Center control
+/// (`TWAQIWidgetBundle`).
 struct TWAQIWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "TWAQIWidget", intent: SelectIndexIntent.self, provider: ReadingProvider()) { entry in

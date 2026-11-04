@@ -6,6 +6,7 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
+import CoreLocation
 import Foundation
 import WidgetKit
 
@@ -26,6 +27,10 @@ import WidgetKit
 ///   relevance peaks there (FOX-75).
 /// - `appLanguage` — mirror of `SettingsStore.appLanguage` (Help → Language),
 ///   so the widget shows the language the app does.
+///
+/// The Control Center control reads the same keys, so it is reloaded with
+/// the widget; Siri's station phrases list the favourites, so they are
+/// refreshed when those change (FOX-74).
 enum WidgetBridge {
     private static let homeWidgetKind = "TWAQIWidget"
 
@@ -43,6 +48,7 @@ enum WidgetBridge {
         }
 
         WidgetCenter.shared.reloadAllTimelines()
+        reloadControls()
     }
 
     /// When pollutants reload, refresh the cached reading for a pinned station
@@ -57,6 +63,7 @@ enum WidgetBridge {
                 WatchStore.homeReading = WatchReading(closest)
             }
             WidgetCenter.shared.reloadAllTimelines()
+            reloadControls()
             return
         }
         publish(closest: closest)
@@ -69,6 +76,8 @@ enum WidgetBridge {
         WatchStore.favouriteStationIds = ids
         WatchStore.favouriteReadings = WatchStore.favouriteReadings.filter { ids.contains($0.stationId) }
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
+        reloadControls()
+        updateShortcutStations()
     }
 
     /// Refreshes the cached reading of any favourite station in `pollutants`,
@@ -76,9 +85,13 @@ enum WidgetBridge {
     /// fetches favourites itself and only falls back to this cache.
     static func cacheFavourites(from pollutants: Pollutants) {
         let ids = Set(WatchStore.favouriteStationIds)
-        WatchStore.cacheFavouriteReadings(
-            pollutants.filter { ids.contains($0.stationId) }.map(WatchReading.init)
-        )
+        let named = Set(WatchStore.favouriteReadings.map(\.stationId))
+        let fresh = pollutants.filter { ids.contains($0.stationId) }
+        WatchStore.cacheFavouriteReadings(fresh.map(WatchReading.init))
+        // A favourite seen for the first time now has a name Siri can match.
+        if fresh.contains(where: { !named.contains($0.stationId) }) {
+            updateShortcutStations()
+        }
     }
 
     /// Mirrors the "above" alert thresholds into the app group, so a widget
@@ -102,6 +115,8 @@ enum WidgetBridge {
     static func publish(appLanguage: AppLanguage) {
         guard AppLanguage.mirror(appLanguage, to: AppLanguage.shared) else { return }
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
+        reloadControls()
+        updateShortcutStations()
     }
 
     /// The large widget lists favourites only with Pro. The phone's app group
@@ -110,5 +125,35 @@ enum WidgetBridge {
         guard isPro != WatchStore.isProUnlocked else { return }
         WatchStore.isProUnlocked = isPro
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
+    }
+
+    /// Mirrors whether the app may use location into the app group, for the
+    /// control's "Nearest" (FOX-74). Called at launch, whenever the app
+    /// becomes active (after the system prompt, or a change in Settings)
+    /// and when it leaves the foreground. Never asks for permission.
+    static func publishLocationPermission() {
+        let allowed: Bool
+        switch CLLocationManager().authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse: allowed = true
+        default: allowed = false
+        }
+        guard allowed != WatchStore.appLocationAllowed else { return }
+        WatchStore.appLocationAllowed = allowed
+        reloadControls()
+    }
+
+    /// The Control Center control shows the same reading as the widget.
+    private static func reloadControls() {
+        if #available(iOS 18.0, *) {
+            ControlCenter.shared.reloadAllControls()
+        }
+    }
+
+    /// Siri's "air at <station>" phrases list "Nearest" and the favourites
+    /// by name. Also called once at launch.
+    static func updateShortcutStations() {
+        if #available(iOS 16.0, *) {
+            TWAQIShortcuts.favouritesChanged()
+        }
     }
 }
