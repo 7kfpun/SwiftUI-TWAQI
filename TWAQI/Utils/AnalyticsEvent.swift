@@ -141,6 +141,6 @@ enum AnalyticsEvent: String, CaseIterable {
     /// (live / cached / none, or opened). iOS doesn't tell an intent whether
     /// Siri, Shortcuts, Spotlight or the Action button ran it.
     case appIntentRun = "app_intent_run"
-    /// `source` (`StationLinkSource`: control, shortcut), `stationId`.
+    /// `source` (`StationLinkSource`: control, shortcut, widget), `stationId`.
     case stationLinkOpened = "station_link_opened"
 }

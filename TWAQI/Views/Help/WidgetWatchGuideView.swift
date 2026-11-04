@@ -26,6 +26,12 @@ struct WidgetGuideView: View {
                 guideText("Help.widgets_index_body")
             }
 
+            Section(header: Text("Help.widgets_paging_header")) {
+                guideText("Help.widgets_paging_body")
+                guideText("Help.widgets_cycle_body")
+                guideText("Help.widgets_stack_tip")
+            }
+
             Section(header: Text("Help.widgets_sizes_header")) {
                 guideText("Help.widgets_home_sizes")
                 guideText("Help.widgets_lock_sizes")
