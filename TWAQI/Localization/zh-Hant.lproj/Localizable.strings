@@ -235,6 +235,18 @@
 /* Share card */
 "Share.share" = "分享";
 "Share.message" = "%1$@：AQI %2$d，%3$@ — 來自 Taiwan Air";
+"Share.preview_title" = "分享卡片";
+"Share.shape" = "尺寸";
+"Share.shape_feed" = "貼文 4:5";
+"Share.shape_story" = "限動 9:16";
+"Share.shape_square" = "聊天 1:1";
+"Share.save_to_photos" = "儲存到照片";
+"Share.saved" = "已儲存到照片";
+"Share.save_denied" = "Taiwan Air 沒有加入照片的權限，可以到「設定」開啟。";
+"Share.save_failed" = "無法儲存卡片，請再試一次。";
+"Share.open_settings" = "打開設定";
+"Share.cancel" = "取消";
+"Share.download" = "在 App Store 下載 Taiwan Air";
 
 /* Watch */
 "Watch.stations" = "測站";

@@ -1,0 +1,2 @@
+/* 分享預覽把卡片存到照片時詢問（僅加入）。 */
+"NSPhotoLibraryAddUsageDescription" = "將你選擇分享的空氣品質卡片儲存到照片圖庫。";
