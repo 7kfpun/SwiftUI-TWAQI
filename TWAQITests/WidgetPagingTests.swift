@@ -116,11 +116,20 @@ final class WidgetPagingTests: XCTestCase {
     func testRefreshGoesBackToDefaultAndKeepsTheIndex() {
         var paged = state(on: 2, tappedSecondsAgo: 60)
         paged.index = AirIndexTypes.pm25.rawValue
-        let refreshed = WidgetPaging.refreshed(paged, now: now)
+        let refreshed = WidgetPaging.refreshed(paged, hasNewData: true, now: now)
         XCTAssertNil(refreshed.stationId)
         XCTAssertEqual(refreshed.refreshedAt, now)
         XCTAssertEqual(refreshed.index, "pm25")
         XCTAssertEqual(WidgetPaging.currentPage(refreshed, pageIds: pages, now: now), 0)
+    }
+
+    func testRefreshWithoutNewDataKeepsThePage() {
+        // Offline or a failed request: the same saved readings, so the page stays.
+        let paged = state(on: 2, tappedSecondsAgo: 60)
+        let refreshed = WidgetPaging.refreshed(paged, hasNewData: false, now: now)
+        XCTAssertEqual(refreshed.stationId, 2)
+        XCTAssertEqual(refreshed.refreshedAt, now)
+        XCTAssertEqual(WidgetPaging.currentPage(refreshed, pageIds: pages, now: now), 2)
     }
 
     // MARK: - Tap reloads
@@ -183,5 +192,10 @@ final class WidgetPagingTests: XCTestCase {
         WidgetPageStore.save(large, for: "large", in: defaults)
         XCTAssertEqual(WidgetPageStore.state(for: "medium", in: defaults), medium)
         XCTAssertEqual(WidgetPageStore.state(for: "large", in: defaults), large)
+        // Each widget under its own key, so concurrent writers never rewrite
+        // another widget's state.
+        XCTAssertNotNil(defaults.data(forKey: WidgetPageStore.defaultsKey(for: "medium")))
+        XCTAssertNotNil(defaults.data(forKey: WidgetPageStore.defaultsKey(for: "large")))
+        XCTAssertNotEqual(WidgetPageStore.defaultsKey(for: "medium"), WidgetPageStore.defaultsKey(for: "large"))
     }
 }

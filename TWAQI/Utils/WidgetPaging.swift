@@ -136,32 +136,35 @@ enum WidgetPaging {
         return state
     }
 
-    /// After a timeline fetched new readings: back to the default page. The
-    /// cycled index stays.
-    static func refreshed(_ state: WidgetPageState, now: Date) -> WidgetPageState {
+    /// After a scheduled timeline: with new readings (`hasNewData`), back to
+    /// the default page. Offline, or when the request failed, the page stays
+    /// and only the 30-minute rule sends it back. The cycled index stays.
+    static func refreshed(_ state: WidgetPageState, hasNewData: Bool, now: Date) -> WidgetPageState {
         var state = state
-        state.stationId = nil
+        if hasNewData {
+            state.stationId = nil
+        }
         state.refreshedAt = now
         return state
     }
 }
 
-/// `WidgetPageState` per widget, in the app group's defaults.
+/// `WidgetPageState` per widget, in the app group's defaults. One key per
+/// widget: a tap's intent and another widget's timeline run in separate
+/// processes, and a shared blob rewritten by both would lose one's write.
 enum WidgetPageStore {
-    private static let key = "widgetPageStates"
+    private static let prefix = "widgetPageState."
+
+    static func defaultsKey(for widgetKey: String) -> String {
+        prefix + widgetKey
+    }
 
     static func state(for widgetKey: String, in defaults: UserDefaults) -> WidgetPageState {
-        all(in: defaults)[widgetKey] ?? WidgetPageState()
+        defaults.data(forKey: defaultsKey(for: widgetKey))
+            .flatMap { try? JSONDecoder().decode(WidgetPageState.self, from: $0) } ?? WidgetPageState()
     }
 
     static func save(_ state: WidgetPageState, for widgetKey: String, in defaults: UserDefaults) {
-        var states = all(in: defaults)
-        states[widgetKey] = state
-        defaults.set(try? JSONEncoder().encode(states), forKey: key)
-    }
-
-    private static func all(in defaults: UserDefaults) -> [String: WidgetPageState] {
-        defaults.data(forKey: key)
-            .flatMap { try? JSONDecoder().decode([String: WidgetPageState].self, from: $0) } ?? [:]
+        defaults.set(try? JSONEncoder().encode(state), forKey: defaultsKey(for: widgetKey))
     }
 }

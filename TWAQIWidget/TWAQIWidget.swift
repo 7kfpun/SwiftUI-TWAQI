@@ -276,12 +276,14 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let favouriteIds = lists ? WatchStore.favouriteStationIds : []
 
         var fetched: Pollutants = []
+        var hasNewData = false
         if let leadingId = Self.leadingFavouriteId(for: configuration) {
             // The first favourite is one of the favourites, so one request
             // covers both. Its reading goes to the favourite cache only:
             // `latestReading` tracks the closest station.
             let ids = favouriteIds.isEmpty ? [leadingId] : favouriteIds
             fetched = (try? await WatchAPI.currentPollutants(stationIds: ids)) ?? []
+            hasNewData = !fetched.isEmpty
             reading = fetched.first { $0.stationId == leadingId }.map(WatchReading.init)
                 ?? Self.cachedFavourite(leadingId) ?? reading
         } else {
@@ -308,15 +310,16 @@ struct ReadingProvider: AppIntentTimelineProvider {
                 reading = WatchReading(pollutant)
                 WatchStore.latestReading = reading
             }
+            hasNewData = pollutant != nil || !fetched.isEmpty
         }
 
         let savedIds = Set(WatchStore.favouriteStationIds)
         WatchStore.cacheFavouriteReadings(fetched.filter { savedIds.contains($0.stationId) }.map(WatchReading.init))
 
-        // A refresh goes back to the widget's own station (FOX-76); a cycled
-        // index stays.
+        // New readings send the widget back to its own station (FOX-76);
+        // offline, the page stays. A cycled index stays either way.
         if let key {
-            state = WidgetPaging.refreshed(state, now: now)
+            state = WidgetPaging.refreshed(state, hasNewData: hasNewData, now: now)
             WidgetPageStore.save(state, for: key, in: defaults)
         }
 
