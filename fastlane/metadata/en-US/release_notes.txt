@@ -1,15 +1,15 @@
-A redesigned station screen that tells you, in one line, whether the air is getting better or worse.
+Ask Siri about the air, check the forecast in its own tab, and page through your favourites right on the widget.
 
-24-HOUR AIR QUALITY TREND
-Open any station and see its last 24 hours of AQI, colour-coded hour by hour, with a plain-language verdict above the chart: improving, getting worse, or holding steady. The day's low, high and average sit underneath. The verdict compares averages rather than single readings, so one bad hour doesn't flip the answer.
+SIRI, SHORTCUTS AND CONTROL CENTER
+Say "What's the air in Taiwan Air" for your nearest station, or "Taiwan Air air at Songshan" for a favourite: Siri tells you the AQI, its level, the main pollutant and what to do. "Get Air Quality" and "Open Station" are ready in Shortcuts and Spotlight and can go on the Action button. On iOS 18, add a Control Center control that shows the AQI and opens the station. Free for everyone.
 
-A NEW STATION SCREEN
-Station name, township, county and air quality zone now sit together in one header. All six pollutants are listed at once — no more switching between them one at a time. Wind, address, coordinates and health advice each have their own place, and every reading shows how many hours old it is.
+A NEW FORECAST TAB
+Air quality forecasts for every area of Taiwan now have their own tab, second from the left. Your area comes first, then your favourites' areas, with every day the forecast covers. The forecast text is now in English too.
 
-BETTER SEARCH
-Stations are grouped by air quality zone and ordered roughly north to south, and you can now search by township or county name instead of only by station name.
+WIDGETS AND APPLE WATCH
+On medium and large widgets (Pro), tap ‹ or › to step through your favourites. Tap the index name on a Home Screen widget to switch between AQI, PM2.5, PM10, O3, CO, SO2 and NO2. In StandBy and Smart Stacks the widget comes to the top by itself when the air turns bad, and it now follows the language you choose in the app. On Apple Watch, the face complication is free; the number and more styles are part of Pro.
 
-FASTER AND MORE STABLE
-Rebuilt with the latest tooling, with updated maps and components throughout, plus a range of stability and performance fixes.
+ALERTS, SHARING AND MORE
+Favouriting a station now switches its alerts on, for up to 3 stations, and the alert settings sit near the top of every station page. Alerts are sent through a new delivery service. Share cards come in three shapes (post 4:5, story 9:16, chat 1:1), with a preview first and Save to Photos. Plus a welcome tour that opens once and can be replayed from Help, and faster map updates when you move through the timeline.
 
 Questions or suggestions? Write to info@dllm.io — we read every one.
