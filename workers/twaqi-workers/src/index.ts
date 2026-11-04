@@ -6,8 +6,9 @@
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
 import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, expiredHourKey, hourKey, shouldWriteHour } from './history'
+import { handleApi, isApiPath, type ApiEnv } from './api'
 
-interface Env extends ForecastEnv {
+interface Env extends ForecastEnv, ApiEnv {
   CAMS: R2Bucket
   MOENV_API_KEY: string
   SYNC_TOKEN: string
@@ -72,9 +73,15 @@ export default {
     )
   },
 
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
     const path = url.pathname
+
+    // Read API (FOX-82): the webcam host's /v1/* is routed here; see api.ts.
+    // Wrap fetch: called as deps.fetch(...) it would get the wrong `this` ("Illegal invocation").
+    if (isApiPath(path)) {
+      return handleApi(request, env, ctx, { cache: caches.default, fetch: (input, init) => fetch(input, init) })
+    }
 
     // Each feature lives under its own prefix; this one is /station-cams.
     if (path === '/station-cams/sync') {

@@ -2,8 +2,9 @@
 
 Cloudflare Worker that:
 
-- mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the R2 custom domain `twaqi.app.wahthefox.com`;
-- mirrors the MOENV 空品區 AQI forecast (`aqf_p_01`) into the Directus collection `twaqi_aqi_forecast` on `cms.wahthefox.com`, which the app reads directly.
+- mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the bucket's R2 custom domain (the webcam host);
+- mirrors the MOENV 空品區 AQI forecast (`aqf_p_01`) into the Directus collection `twaqi_aqi_forecast`, which the app reads directly.
+- fronts the TWAQI read API (FOX-82) at `/v1/...` on the webcam host, the same host as the webcam images (see [Read API](#read-api-v1)).
 
 ## Station webcams
 
@@ -16,11 +17,11 @@ Cloudflare Worker that:
 
 Public images are served straight from R2 via the bucket's custom domain — no Worker in the path:
 
-- `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg`
-- `https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (hourly history)
-- `https://twaqi.app.wahthefox.com/manifest.json`
+- `<webcam host>/stations/{siteId}.jpg`
+- `<webcam host>/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (hourly history)
+- `<webcam host>/manifest.json`
 
-The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev`. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
+The Worker's own routes run on its `workers.dev` URL; on the webcam host it takes only `/v1/*` (the read API below), everything else there is R2. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
 
 | Route | |
 | --- | --- |
@@ -54,10 +55,11 @@ npm test
 Checking a deploy by hand:
 
 ```sh
-curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" https://twaqi-workers.710kfpun.workers.dev/station-cams/sync
+# WORKER = the Worker's workers.dev URL, HOST = the webcam host (wrangler.jsonc)
+curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" "$WORKER/station-cams/sync"
 # → { …, "hours": 81, "expired": 81, … } on the first sync of an hour, then "hours": 0 until the next hour
-curl -s https://twaqi.app.wahthefox.com/manifest.json | jq '.stations["001"].hourKey'
-curl -sI "https://twaqi.app.wahthefox.com/$(curl -s https://twaqi.app.wahthefox.com/manifest.json | jq -r '.stations["001"].hourKey')"
+curl -s "https://$HOST/manifest.json" | jq '.stations["001"].hourKey'
+curl -sI "https://$HOST/$(curl -s "https://$HOST/manifest.json" | jq -r '.stations["001"].hourKey')"
 ```
 
 ## AQI forecast (`aqf_p_01`)
@@ -118,3 +120,33 @@ Local development:
 npm install
 npx wrangler dev
 ```
+
+## Read API (`/v1`)
+
+FOX-82. A route for `/v1/*` on the webcam host (`routes` in `wrangler.jsonc`): the Lambda's four reads,
+answered by the Cloud Run service [`services/twaqi-api`](../../services/twaqi-api/README.md)
+with the Lambda's exact bytes. The webcam paths on the same host (`/stations/…`,
+`/manifest.json`) never reach the Worker. Code: `src/api.ts`.
+
+| Route | |
+| --- | --- |
+| `GET /v1/countries` | Countries |
+| `GET /v1/stations?country=…` / `country_id=…` | A country's stations |
+| `GET /v1/current-pollutants?country=…` / `station_id=1,2,3` | Latest readings |
+| `GET /v1/historical-pollutants?station_id=…&limit=…` | A station's history (max 100) |
+
+- Forwards to `TWAQI_API_ORIGIN_URL` with the header `x-twaqi-origin-token: TWAQI_API_ORIGIN_TOKEN`
+  (secret; same value as Secret Manager `twaqi-api-origin-token` and the `workers-production`
+  environment secret). Cloud Run answers 403 without it.
+- Successful answers are cached at the edge for `TWAQI_API_CACHE_SECONDS` (600, 10 minutes)
+  and carry `x-twaqi-cache: HIT|MISS`. The data changes every 20 minutes. The cache key and
+  the origin query keep only the route's own params (first value each, fixed order), so an
+  extra `?_=N` or a reordered query can't bypass the cache.
+- The Worker sets `cache-control` itself on every 200: `public, max-age=600` on a MISS, and on
+  a HIT `max-age` = 600 minus the cached copy's `age`, at least 0, so a reading is at most
+  10 minutes old in total. What `caches.default.match` returns would otherwise carry the
+  zone's 4-hour Browser Cache TTL (`max-age=14400`).
+- Cloud Run errors never reach the apps as HTML: an origin 4xx becomes 502
+  `{"success":false,"error":"Upstream error"}`, a 5xx keeps its status, an unreachable origin is
+  502. None are cached. Other `/v1/` paths are 404; writes are 405.
+- Check a deploy against the Lambda: `cd services/twaqi-api && make compare BASE=https://<webcam host>`.

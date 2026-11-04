@@ -6,7 +6,7 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 
 ## Facts that are easy to get wrong
 
-- **Backend is Directus on `https://cms.wahthefox.com`**, not Airtable. In-app feedback
+- **Backend is Directus** (the app's `DirectusUrl`), not Airtable. In-app feedback
   writes `twaqi_feedback` and the business partner form (`CooperateView`) writes
   `twaqi_cooperate`, both create-only with soft delete via `archived`; the 空品區 forecast
   is read from `twaqi_aqi_forecast`.
@@ -22,7 +22,7 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - **Favourites ↔ alerts** (`FavouriteAlerts`): an alert on ⇒ the station is a favourite;
   removing a favourite turns its alerts off. Alerts are keyed by station id. At most 3 stations
   have alerts (`FavouriteAlerts.maxAlertedStations`).
-- **Station cams** are R2 behind `https://twaqi.app.wahthefox.com`: latest
+- **Station cams** are R2 behind the webcam host (`StationCams` base URL; it also serves the `/v1` read API): latest
   `stations/{siteId}.jpg`, hourly `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`, rolling 24 h.
   `siteId` is the MOENV image site id, not a station id. A missing hour is a normal 404.
 - **Time zone:** Taiwan-local logic (cam hour keys, forecast dates, MOENV publish times)
@@ -41,6 +41,17 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - Merge only after another agent's LGTM covers the head and the user gives the greenlight, squash only. The LGTM is a pull request review or comment whose first line is `**<Name> LGTM**`, with any reviewer name, e.g. `**Grok LGTM** (head abc1234)`. A later `**<Name> — changes needed**` cancels it. The advisory Claude Code Review bot doesn't count. That turns the `LGTM` status green. Rebasing or updating the branch from `master` keeps it, as long as the PR's own changes stay the same; conflict fixes or new commits need a fresh LGTM. Don't start a comment with "LGTM" unless you reviewed the head.
 - Don't merge, bump versions, archive, or upload to TestFlight/App Store unless asked.
 - Workers deploy on merge to `master`; don't deploy them from a branch.
+- **The repo is public.** Commits, PR descriptions (and their edit history), PR and issue
+  comments, and docs are readable by anyone. Keep out of them: IP addresses, network
+  ranges and allow-lists, firewall or authorized-network changes, which services are or
+  were exposed, incident details (attacker IPs, outage causes, what got hit), secret
+  values or any part of them, database hosts, and account emails. **Hostnames:** only the
+  public websites (`taiwanair.wahthefox.com`, `kf-twaqi.web.app`, `kf-nihongo.web.app`) may
+  be named; every other host (API, webcam, Directus, Workers, Cloud Run, the Lambda) is
+  named by its role ("the webcam host", "Directus") and lives only in the code or config
+  that needs it. Name a resource only when a runbook or the code needs the name (a
+  secret's name, never its value). Infra state, hosts, security changes and incident notes
+  go in the Linear ticket (internal, so fine there); the PR links to it. Details: `docs/ci-cd-guardrails.md#public-repo-what-stays-out`.
 
 ## Tests
 

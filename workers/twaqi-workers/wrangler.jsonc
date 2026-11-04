@@ -5,19 +5,22 @@
 // the `workers-production` GitHub environment secrets of the same names on every deploy.
 // OPENROUTER_FORECAST_API_KEY pre-translates the forecast text (src/translate.ts).
 //
-// Public URLs:
-//   Images (R2 custom domain on bucket twaqi-station-cams, not a Worker route):
-//     https://twaqi.app.wahthefox.com/stations/{siteId}.jpg
-//     https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg  (hourly, Taiwan time, rolling 24 hours)
-//     https://twaqi.app.wahthefox.com/manifest.json
-//   Worker (health, webcam status/sync/reads under /station-cams, forecast status/sync under /forecast):
-//     https://twaqi-workers.710kfpun.workers.dev
+// Public paths:
+//   Images (the R2 custom domain of bucket twaqi-station-cams, the "webcam host"; not a Worker route):
+//     /stations/{siteId}.jpg, /stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg (hourly, Taiwan time,
+//     rolling 24 hours), /manifest.json
+//   Worker, on its workers.dev URL (health, webcam status/sync/reads under /station-cams,
+//   forecast status/sync under /forecast).
+//   Read API (FOX-82, src/api.ts): the `routes` entry below puts /v1/* on the webcam host;
+//   every other path there stays R2. It forwards to Cloud Run `twaqi-api`
+//   (services/twaqi-api, TWAQI_API_ORIGIN_URL) with TWAQI_API_ORIGIN_TOKEN.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "twaqi-workers",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-30",
   "workers_dev": true,
+  "routes": [{ "pattern": "twaqi.app.wahthefox.com/v1/*", "zone_name": "wahthefox.com" }],
   "r2_buckets": [
     { "binding": "CAMS", "bucket_name": "twaqi-station-cams" }
   ],
@@ -25,10 +28,12 @@
     "crons": ["*/10 * * * *", "35 * * * *"]
   },
   "vars": {
-    "DIRECTUS_URL": "https://cms.wahthefox.com"
+    "DIRECTUS_URL": "https://cms.wahthefox.com",
+    "TWAQI_API_ORIGIN_URL": "https://twaqi-api-994450234819.asia-east1.run.app",
+    "TWAQI_API_CACHE_SECONDS": "600"
   },
   "secrets": {
-    "required": ["MOENV_API_KEY", "SYNC_TOKEN", "DIRECTUS_FORECAST_TOKEN", "OPENROUTER_FORECAST_API_KEY"]
+    "required": ["MOENV_API_KEY", "SYNC_TOKEN", "DIRECTUS_FORECAST_TOKEN", "OPENROUTER_FORECAST_API_KEY", "TWAQI_API_ORIGIN_TOKEN"]
   },
   "observability": { "enabled": true }
 }
