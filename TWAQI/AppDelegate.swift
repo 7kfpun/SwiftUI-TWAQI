@@ -43,6 +43,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         WidgetBridge.publish(appLanguage: AppLanguage.stored())
         // Siri's station phrases, for favourites saved by an older build.
         WidgetBridge.updateShortcutStations()
+        // The Control Center control's "Nearest" follows the app's permission.
+        WidgetBridge.publishLocationPermission()
         // Alert thresholds lift the widget's relevance. Also mirrored each
         // time the app leaves the foreground (`SceneDelegate`).
         WidgetBridge.publishAlertThresholds()

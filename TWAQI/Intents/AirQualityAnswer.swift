@@ -49,6 +49,24 @@ struct StationResolution: Equatable {
         }
         return StationResolution(plan: .defaultLocation, note: .defaultLocation)
     }
+
+    /// The station the Control Center control shows. "Nearest" (nil) is the
+    /// widget's "closest", `appClosestId`, the station the app last showed,
+    /// when the app may use location; otherwise the first favourite. Nil
+    /// only when there is neither (before the app has ever run).
+    static func controlStationId(
+        requestedStationId: Int?, appClosestId: Int?, favouriteIds: [Int], locationAllowed: Bool
+    ) -> Int? {
+        let resolution = resolve(
+            requestedStationId: requestedStationId,
+            favouriteIds: favouriteIds,
+            locationAvailable: locationAllowed && appClosestId != nil
+        )
+        switch resolution.plan {
+        case .station(let id): return id
+        case .nearest, .defaultLocation: return appClosestId
+        }
+    }
 }
 
 /// One entry in the station picker of the intents and the control: "Nearest"

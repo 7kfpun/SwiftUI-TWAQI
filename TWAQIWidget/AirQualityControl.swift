@@ -7,7 +7,6 @@
 //
 
 import AppIntents
-import CoreLocation
 import SwiftUI
 import WidgetKit
 
@@ -109,18 +108,12 @@ struct AirQualityControlProvider: AppIntentControlValueProvider {
     func currentValue(configuration: AirQualityControlConfiguration) async throws -> AirQualityControlValue {
         // The widget's "closest": the extension can't locate the reader, so
         // it follows the station the app last showed.
-        let appClosest = WatchStore.pinnedStationId ?? WatchStore.latestReading?.stationId
-        let resolution = StationResolution.resolve(
+        let stationId = StationResolution.controlStationId(
             requestedStationId: configuration.station?.stationId,
+            appClosestId: WatchStore.pinnedStationId ?? WatchStore.latestReading?.stationId,
             favouriteIds: WatchStore.favouriteStationIds,
-            locationAvailable: Self.locationAllowed && appClosest != nil
+            locationAllowed: WatchStore.appLocationAllowed
         )
-
-        let stationId: Int?
-        switch resolution.plan {
-        case .station(let id): stationId = id
-        case .nearest, .defaultLocation: stationId = appClosest
-        }
 
         guard let stationId else {
             // Before the app has ever run: the 中正 default, as the widget.
@@ -137,14 +130,6 @@ struct AirQualityControlProvider: AppIntentControlValueProvider {
             return AirQualityControlValue(reading: reading)
         }
         return AirQualityControlValue(reading: WatchStore.newestCachedReading(stationId: stationId))
-    }
-
-    /// An extension shares its app's location permission; this never asks.
-    private static var locationAllowed: Bool {
-        switch CLLocationManager().authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse: return true
-        default: return false
-        }
     }
 }
 

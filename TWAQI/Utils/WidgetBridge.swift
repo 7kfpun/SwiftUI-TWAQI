@@ -6,6 +6,7 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
+import CoreLocation
 import Foundation
 import WidgetKit
 
@@ -124,6 +125,21 @@ enum WidgetBridge {
         guard isPro != WatchStore.isProUnlocked else { return }
         WatchStore.isProUnlocked = isPro
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
+    }
+
+    /// Mirrors whether the app may use location into the app group, for the
+    /// control's "Nearest" (FOX-74). Called at launch, whenever the app
+    /// becomes active (after the system prompt, or a change in Settings)
+    /// and when it leaves the foreground. Never asks for permission.
+    static func publishLocationPermission() {
+        let allowed: Bool
+        switch CLLocationManager().authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse: allowed = true
+        default: allowed = false
+        }
+        guard allowed != WatchStore.appLocationAllowed else { return }
+        WatchStore.appLocationAllowed = allowed
+        reloadControls()
     }
 
     /// The Control Center control shows the same reading as the widget.

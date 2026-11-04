@@ -90,6 +90,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
         Self.clearBadge()
+        // Permission may have changed: the system prompt, or Settings.
+        WidgetBridge.publishLocationPermission()
         if let url = pendingURL ?? PendingLink.take() {
             pendingURL = nil
             open(url)
@@ -138,6 +140,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Alerts switched or dragged while the app was open reach the widget
         // here, once, rather than on every step of a slider.
         WidgetBridge.publishAlertThresholds()
+        WidgetBridge.publishLocationPermission()
     }
 
     /// Hands `url` to the router. The Pro screen and a linked station page

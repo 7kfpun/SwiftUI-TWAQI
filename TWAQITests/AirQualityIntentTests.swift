@@ -60,6 +60,41 @@ final class AirQualityIntentTests: XCTestCase {
         XCTAssertEqual(resolution, StationResolution(plan: .defaultLocation, note: .defaultLocation))
     }
 
+    // MARK: - Control Center control's station
+
+    func testControlShowsTheChosenStation() {
+        XCTAssertEqual(StationResolution.controlStationId(
+            requestedStationId: 7, appClosestId: 2, favouriteIds: [3], locationAllowed: true
+        ), 7)
+    }
+
+    func testControlNearestFollowsTheAppsClosestWithLocation() {
+        XCTAssertEqual(StationResolution.controlStationId(
+            requestedStationId: nil, appClosestId: 2, favouriteIds: [3], locationAllowed: true
+        ), 2)
+    }
+
+    func testControlNearestWithoutLocationShowsTheFirstFavourite() {
+        XCTAssertEqual(StationResolution.controlStationId(
+            requestedStationId: nil, appClosestId: 2, favouriteIds: [3, 4], locationAllowed: false
+        ), 3)
+    }
+
+    func testControlNearestWithoutLocationOrFavouritesShowsTheAppsLastStation() {
+        XCTAssertEqual(StationResolution.controlStationId(
+            requestedStationId: nil, appClosestId: 2, favouriteIds: [], locationAllowed: false
+        ), 2)
+        XCTAssertNil(StationResolution.controlStationId(
+            requestedStationId: nil, appClosestId: nil, favouriteIds: [], locationAllowed: true
+        ))
+    }
+
+    func testControlNearestWithLocationButNoStationYetShowsTheFirstFavourite() {
+        XCTAssertEqual(StationResolution.controlStationId(
+            requestedStationId: nil, appClosestId: nil, favouriteIds: [3], locationAllowed: true
+        ), 3)
+    }
+
     // MARK: - Station picker
 
     func testChoicesListNearestFirstThenFavouritesInTheReadersOrder() throws {
