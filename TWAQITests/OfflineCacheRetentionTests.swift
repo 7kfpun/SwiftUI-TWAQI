@@ -121,6 +121,34 @@ final class OfflineCacheRetentionTests: XCTestCase {
         // Gallery placeholders have no time; they are kept.
         XCTAssertFalse(WatchStore.isExpired(try reading(""), now: now))
     }
+
+    /// The widget's relevance history (FOX-75) is a reading cache like the
+    /// others: purged once a week old. Checked on what is stored, since reads
+    /// already skip expired readings.
+    func testWatchStorePurgesWeekOldRelevanceHistory() throws {
+        func reading(_ stationId: Int, _ publishTime: String) throws -> WatchReading {
+            try JSONDecoder().decode(WatchReading.self, from: Data("""
+            { "stationId": \(stationId), "code": "KL", "name": "Keelung", "nameLocal": "基隆", "aqi": 42,
+              "pm25": 9, "pm10": 21, "o3": 31, "co": 0.3, "so2": 1, "no2": 12,
+              "windDirection": 90, "windSpeed": 2, "publishTime": "\(publishTime)" }
+            """.utf8))
+        }
+        let key = "relevanceHistory"
+        let defaults = UserDefaults(suiteName: WatchStore.appGroup) ?? .standard
+        let saved = defaults.object(forKey: key)
+        defer { defaults.set(saved, forKey: key) }
+
+        // 2026-10-31 12:00 in Taiwan is 04:00 UTC.
+        let now = ISO8601DateFormatter().date(from: "2026-10-31T04:00:00Z")!
+        let old = try reading(91, "2026-10-24T11:00:00")
+        let fresh = try reading(92, "2026-10-31T11:00:00")
+        defaults.set(try JSONEncoder().encode([old, fresh]), forKey: key)
+
+        WatchStore.purgeExpiredReadings(now: now)
+
+        let stored = try JSONDecoder().decode([WatchReading].self, from: XCTUnwrap(defaults.data(forKey: key)))
+        XCTAssertEqual(stored, [fresh])
+    }
 }
 
 final class StationCamFrameCacheTests: XCTestCase {

@@ -116,6 +116,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        // Alerts switched or dragged while the app was open reach the widget
+        // here, once, rather than on every step of a slider.
+        WidgetBridge.publishAlertThresholds()
     }
 
     /// Hands `url` to the router. The Pro screen is a sheet on the root view,

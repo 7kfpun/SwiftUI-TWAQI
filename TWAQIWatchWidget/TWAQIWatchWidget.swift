@@ -17,78 +17,13 @@ import WidgetKit
 @main
 struct TWAQIWatchWidget: Widget {
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: "TWAQIWatchWidget", intent: SelectIndexIntent.self, provider: ReadingProvider()) { entry in
+        AppIntentConfiguration(kind: SelectIndexIntent.widgetKind, intent: SelectIndexIntent.self, provider: ReadingProvider()) { entry in
             ReadingWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Watch.widget_name")
         .description("Watch.widget_description")
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular, .accessoryInline])
-    }
-}
-
-/// Which index a complication shows. Mirrors `AirIndexTypes`, which can't
-/// conform to `AppEnum` itself without dragging AppIntents into the iOS app.
-enum IndexOption: String, AppEnum {
-    case aqi, pm25, pm10, o3, co, so2, no2
-
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Index"
-
-    static var caseDisplayRepresentations: [IndexOption: DisplayRepresentation] = [
-        .aqi: "AQI",
-        .pm25: "PM2.5",
-        .pm10: "PM10",
-        .o3: "O3",
-        .co: "CO",
-        .so2: "SO2",
-        .no2: "NO2",
-    ]
-
-    var airIndexType: AirIndexTypes {
-        AirIndexTypes(rawValue: rawValue) ?? .aqi
-    }
-}
-
-/// How a complication shows its index.
-enum ComplicationStyle: String, AppEnum {
-    /// "AQI 42": the index name, the number and, with room, the unit.
-    case labelled
-    /// "42": just the number, for small slots and readers who know the index.
-    case numberOnly
-    /// The phone app's face for the band, with the number where it fits.
-    case face
-    /// "Moderate": the health level in words, no number at all.
-    case status
-
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Style"
-
-    static var caseDisplayRepresentations: [ComplicationStyle: DisplayRepresentation] = [
-        .labelled: "With label",
-        .numberOnly: "Number only",
-        .face: "Face",
-        .status: "Status",
-    ]
-}
-
-struct SelectIndexIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "Index"
-
-    @Parameter(title: "Index", default: .aqi)
-    var index: IndexOption
-
-    @Parameter(title: "Style", default: .labelled)
-    var style: ComplicationStyle
-
-    /// Only the rectangular and inline slots have room for the name.
-    @Parameter(title: "Show Station", default: true)
-    var showsStation: Bool
-
-    init() {}
-
-    init(index: IndexOption, style: ComplicationStyle = .labelled, showsStation: Bool = true) {
-        self.index = index
-        self.style = style
-        self.showsStation = showsStation
     }
 }
 
@@ -100,6 +35,8 @@ struct ReadingEntry: TimelineEntry {
     var showsStation = true
     /// Without the upgrade the complication shows a lock, not the reading.
     var isLocked = false
+    /// How far up the Smart Stack this entry should go (`WidgetRelevance`).
+    var relevance: TimelineEntryRelevance?
 }
 
 struct ReadingProvider: AppIntentTimelineProvider {
@@ -121,12 +58,16 @@ struct ReadingProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: SelectIndexIntent, in context: Context) async -> Timeline<ReadingEntry> {
-        let next = Date().addingTimeInterval(Self.refreshInterval)
+        let now = Date()
+        let next = now.addingTimeInterval(Self.refreshInterval)
         guard await WatchPro.refresh() else {
-            // The app reloads every timeline the moment a purchase lands.
+            // The app reloads every timeline the moment a purchase lands. A
+            // lock is never pushed up the Smart Stack.
+            await SmartStackHints.update(isPro: false, now: now)
             let entry = ReadingEntry(
-                date: Date(), reading: nil, airIndexType: configuration.index.airIndexType,
-                style: configuration.style, showsStation: configuration.showsStation, isLocked: true
+                date: now, reading: nil, airIndexType: configuration.index.airIndexType,
+                style: configuration.style, showsStation: configuration.showsStation, isLocked: true,
+                relevance: TimelineEntryRelevance(score: 0, duration: Self.refreshInterval)
             )
             return Timeline(entries: [entry], policy: .after(next))
         }
@@ -149,9 +90,17 @@ struct ReadingProvider: AppIntentTimelineProvider {
             WatchStore.latestReading = reading
         }
 
+        // The watch has no copy of the phone's alerts, so no threshold here.
+        let previous = reading.flatMap(WatchStore.recordForRelevance)
+        let score = WidgetRelevance.score(
+            for: reading, airIndexType: configuration.index.airIndexType, previous: previous, now: now
+        )
+        await SmartStackHints.update(isPro: true, now: now)
+
         let entry = ReadingEntry(
-            date: Date(), reading: reading, airIndexType: configuration.index.airIndexType,
-            style: configuration.style, showsStation: configuration.showsStation
+            date: now, reading: reading, airIndexType: configuration.index.airIndexType,
+            style: configuration.style, showsStation: configuration.showsStation,
+            relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
         )
         return Timeline(entries: [entry], policy: .after(next))
     }
