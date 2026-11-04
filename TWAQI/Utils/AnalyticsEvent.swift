@@ -128,4 +128,15 @@ enum AnalyticsEvent: String, CaseIterable {
     case openDefinitionPage = "open_definition_page"
     case openWidgetGuide = "open_widget_guide"
     case openWatchGuide = "open_watch_guide"
+    case openShortcutsGuide = "open_shortcuts_guide"
+
+    // MARK: Siri, Shortcuts and Control Center (FOX-74)
+
+    /// `intent` (get_air_quality / open_station), `station` (nearest,
+    /// favourite, station, default: which station answered), `result`
+    /// (live / cached / none, or opened). iOS doesn't tell an intent whether
+    /// Siri, Shortcuts, Spotlight or the Action button ran it.
+    case appIntentRun = "app_intent_run"
+    /// `source` (`StationLinkSource`: control, shortcut), `stationId`.
+    case stationLinkOpened = "station_link_opened"
 }

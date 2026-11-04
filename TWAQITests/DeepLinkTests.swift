@@ -58,6 +58,40 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertNil(DeepLink.route(try url("twaqi://station/126"), isPro: false))
     }
 
+    // MARK: - Station (FOX-74)
+
+    func testStationURLRoundTrips() throws {
+        let url = try XCTUnwrap(DeepLink.stationURL(stationId: 126, source: .control))
+        XCTAssertEqual(url.absoluteString, "twaqi://station?id=126&source=control")
+        XCTAssertEqual(DeepLink(url: url), .station(id: 126, source: .control))
+        XCTAssertEqual(DeepLink(url: try XCTUnwrap(DeepLink.stationURL(stationId: 7, source: .shortcut))), .station(id: 7, source: .shortcut))
+    }
+
+    func testStationWithoutOrWithUnknownSourceIsStillAStation() throws {
+        XCTAssertEqual(DeepLink(url: try url("twaqi://station?id=126")), .station(id: 126, source: .deepLink))
+        XCTAssertEqual(DeepLink(url: try url("TWAQI://STATION?id=126&source=new")), .station(id: 126, source: .deepLink))
+    }
+
+    func testStationWithoutAValidIdIsNotALink() throws {
+        for string in ["twaqi://station", "twaqi://station?id=", "twaqi://station?id=abc", "twaqi://station?id=0", "twaqi://station?id=-3"] {
+            XCTAssertNil(DeepLink(url: try url(string)), string)
+        }
+    }
+
+    func testStationRoutesWithOrWithoutPro() throws {
+        let url = try url("twaqi://station?id=126&source=control")
+        XCTAssertEqual(DeepLink.route(url, isPro: false), .station(id: 126, source: .control))
+        XCTAssertEqual(DeepLink.route(url, isPro: true), .station(id: 126, source: .control))
+    }
+
+    func testRouterOpensTheLinkedStation() throws {
+        let router = AppRouter()
+
+        XCTAssertTrue(router.open(try url("twaqi://station?id=126&source=control"), isPro: true))
+        XCTAssertEqual(router.openedStation, AppRouter.OpenedStation(id: 126))
+        XCTAssertFalse(router.showingPro)
+    }
+
     // MARK: - Router
 
     func testRouterOpensProWithTheLinksSource() throws {

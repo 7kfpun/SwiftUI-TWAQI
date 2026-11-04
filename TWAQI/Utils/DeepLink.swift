@@ -22,15 +22,29 @@ enum ProScreenSource: String {
     case deepLink = "deep_link"
 }
 
+/// What opened a station's page by link (FOX-74). Logged as `source` with
+/// `station_link_opened`.
+enum StationLinkSource: String {
+    /// The Control Center / Lock Screen / Action button control.
+    case control
+    /// The "Open station" App Shortcut.
+    case shortcut
+    /// `twaqi://station` with no `source`, or one this build doesn't know.
+    case deepLink = "deep_link"
+}
+
 /// URLs the app opens on (`twaqi://`, declared in the app's Info.plist).
 /// Shared with the widget, which builds the URL it opens the app with.
-/// Only the Pro screen is routed; anything else is ignored.
+/// The Pro screen and a station's page are routed; anything else is ignored.
 enum DeepLink: Equatable {
     case pro(source: ProScreenSource)
+    case station(id: Int, source: StationLinkSource)
 
     static let scheme = "twaqi"
     private static let proHost = "pro"
+    private static let stationHost = "station"
     private static let sourceItem = "source"
+    private static let idItem = "id"
 
     /// `twaqi://pro?source=…`
     static func proURL(source: ProScreenSource) -> URL? {
@@ -41,19 +55,43 @@ enum DeepLink: Equatable {
         return components.url
     }
 
+    /// `twaqi://station?id=…&source=…`
+    static func stationURL(stationId: Int, source: StationLinkSource) -> URL? {
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = stationHost
+        components.queryItems = [
+            URLQueryItem(name: idItem, value: String(stationId)),
+            URLQueryItem(name: sourceItem, value: source.rawValue),
+        ]
+        return components.url
+    }
+
     /// Nil for any URL that isn't one of ours.
     init?(url: URL) {
         guard url.scheme?.lowercased() == Self.scheme,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.host?.lowercased() == Self.proHost,
               components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")).isEmpty
         else { return nil }
 
-        let source = components.queryItems?
-            .first { $0.name == Self.sourceItem }?
-            .value
-            .flatMap(ProScreenSource.init(rawValue:))
-        self = .pro(source: source ?? .deepLink)
+        func item(_ name: String) -> String? {
+            components.queryItems?.first { $0.name == name }?.value
+        }
+
+        switch components.host?.lowercased() {
+        case Self.proHost:
+            self = .pro(source: item(Self.sourceItem).flatMap(ProScreenSource.init(rawValue:)) ?? .deepLink)
+        case Self.stationHost:
+            guard let id = item(Self.idItem).flatMap(Int.init), id > 0 else { return nil }
+            self = .station(id: id, source: item(Self.sourceItem).flatMap(StationLinkSource.init(rawValue:)) ?? .deepLink)
+        default:
+            return nil
+        }
+    }
+
+    var isPro: Bool {
+        if case .pro = self { return true }
+        return false
     }
 
     /// What the app should open for `url`, or nil to ignore it: unknown URLs,
@@ -63,6 +101,8 @@ enum DeepLink: Equatable {
         switch link {
         case .pro:
             return isPro ? nil : link
+        case .station:
+            return link
         }
     }
 }

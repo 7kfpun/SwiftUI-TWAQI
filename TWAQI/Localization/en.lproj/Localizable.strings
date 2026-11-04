@@ -445,3 +445,37 @@
 "Onboarding.premium_body" = "Alerts, favourites, the map, the watch app and the face complication are free. Pro removes ads and adds the complication's number, more styles and larger widgets.";
 "Onboarding.see_pro_plans" = "See Pro Plans";
 "Onboarding.premium_active" = "You have Pro. Thank you for your support!";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "Station";
+"Intent.station_nearest" = "Nearest station";
+"Intent.get_air_quality_title" = "Get Air Quality";
+"Intent.get_air_quality_description" = "Says the current AQI, its level, the main pollutant and what to do, for your nearest station or a favourite.";
+"Intent.get_air_quality_short" = "Air Quality";
+"Intent.open_station_title" = "Open Station";
+"Intent.open_station_description" = "Opens Taiwan Air on a station's page.";
+"Intent.open_station_short" = "Open Station";
+"Get the air at ${station}" = "Get the air at ${station}";
+"Open ${station}" = "Open ${station}";
+"Intent.answer_fallback_favourite" = "Taiwan Air doesn't have your location, so here is your first favourite.";
+"Intent.answer_fallback_default" = "Taiwan Air doesn't have your location and you have no favourites, so here is central Taipei.";
+"Intent.answer_no_reading" = "There's no reading yet. Open Taiwan Air once while online.";
+"Intent.answer_no_aqi" = "%@ has no AQI reading right now.";
+"Intent.answer_reading" = "%1$@: AQI %2$@, %3$@.";
+"Intent.answer_main_pollutant" = "Main pollutant: %@.";
+"Intent.answer_guidance" = "%@.";
+"Intent.answer_cached_age" = "You're offline, so this is the last saved reading, from %@ ago.";
+"Intent.answer_cached" = "You're offline, so this is the last saved reading.";
+"Intent.answer_old_age" = "This reading is from %@ ago.";
+"Control.display_name" = "Air Quality";
+"Control.description" = "The AQI of your nearest station or a favourite. Tap to open it.";
+"Control.configuration_title" = "Station";
+"Help.shortcuts_title" = "Siri, Shortcuts & Control Center";
+"Help.shortcuts_siri_header" = "Ask Siri";
+"Help.shortcuts_siri_body" = "Say “What's the air in Taiwan Air” for your nearest station, or “Taiwan Air air at Songshan” for a favourite. Siri says the AQI, its level, the main pollutant and what to do. Without a connection, it gives the last saved reading and how old it is.";
+"Help.shortcuts_location_body" = "Nearest uses your location only if you have already allowed it for this app. Otherwise you get your first favourite.";
+"Help.shortcuts_app_header" = "Shortcuts, Spotlight & Action button";
+"Help.shortcuts_app_body" = "“Get Air Quality” and “Open Station” are in the Shortcuts app and Spotlight with no setup. On an iPhone with an Action button: Settings → Action Button → Shortcut, then choose one.";
+"Help.shortcuts_control_header" = "Control Center";
+"Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
+"Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";

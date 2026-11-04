@@ -25,6 +25,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// This scene opened the welcome flow by itself (FOX-49).
     private var opensOnboarding = false
 
+    /// Links posted by an App Intent running in this process (FOX-74).
+    private var pendingLinkObserver: NSObjectProtocol?
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -47,6 +50,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Launched by a URL, e.g. a tap on the locked Pro widget.
         pendingURL = connectionOptions.urlContexts.first?.url
 
+        // "Open station" from Shortcuts or the Action button runs in this
+        // process, before or after the scene is active.
+        pendingLinkObserver = NotificationCenter.default.addObserver(
+            forName: PendingLink.didPost, object: nil, queue: .main
+        ) { [weak self, weak scene] _ in
+            Task { @MainActor in
+                // Not active yet: `sceneDidBecomeActive` takes it.
+                guard let self, scene?.activationState == .foregroundActive,
+                      let url = PendingLink.take() else { return }
+                self.open(url)
+            }
+        }
+
         // An opaque background would cover the Liquid Glass tab bar on iOS 26.
         if #unavailable(iOS 26.0) {
             UITabBar.appearance().backgroundColor = UIColor.systemBackground
@@ -65,13 +81,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if opensOnboarding {
             Onboarding.releaseLaunchHold()
         }
+        if let pendingLinkObserver {
+            NotificationCenter.default.removeObserver(pendingLinkObserver)
+        }
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
         Self.clearBadge()
-        if let url = pendingURL {
+        if let url = pendingURL ?? PendingLink.take() {
             pendingURL = nil
             open(url)
         }
@@ -121,13 +140,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         WidgetBridge.publishAlertThresholds()
     }
 
-    /// Hands `url` to the router. The Pro screen is a sheet on the root view,
-    /// so a sheet left open (a station, Help's own Pro screen, a share sheet)
-    /// is closed first; otherwise the new one could not be shown.
+    /// Hands `url` to the router. The Pro screen and a linked station page
+    /// are sheets on the root view, so a sheet left open (a station, Help's
+    /// own Pro screen, a share sheet) is closed first; otherwise the new one
+    /// could not be shown. The Pro screen already open is left as it is.
     private func open(_ url: URL) {
         let isPro = settings.isPro
-        guard DeepLink.route(url, isPro: isPro) != nil,
-              !router.showingPro,
+        guard let link = DeepLink.route(url, isPro: isPro),
+              !(router.showingPro && link.isPro),
               let root = window?.rootViewController,
               root.presentedViewController != nil
         else {

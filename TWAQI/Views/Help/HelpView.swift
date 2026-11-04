@@ -189,6 +189,11 @@ struct HelpView: View {
                 Text("Help.watch_title")
                     .fontWeight(.light)
             }
+
+            NavigationLink(destination: ShortcutsGuideView()) {
+                Text("Help.shortcuts_title")
+                    .fontWeight(.light)
+            }
         }
     }
 
