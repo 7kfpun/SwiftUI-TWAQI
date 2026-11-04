@@ -92,6 +92,40 @@ struct AqiForecastResponse: Codable {
     let data: [AqiForecast]
 }
 
+/// The read of `twaqi_aqi_forecast`, shared by `AqiForecastStore` and the
+/// extra-large widget (FOX-72), which has no store of its own.
+enum AqiForecastRequest {
+    static let collectionPath = "items/twaqi_aqi_forecast"
+
+    /// `GET /items/twaqi_aqi_forecast` for today onwards, archived rows left out.
+    static func make(baseURL: String?, token: String?, today: String) -> URLRequest? {
+        guard let baseURL = baseURL?.trimmingCharacters(in: .whitespaces), !baseURL.isEmpty,
+              let token = token?.trimmingCharacters(in: .whitespaces), !token.isEmpty,
+              let base = URL(string: baseURL),
+              var components = URLComponents(url: base.appendingPathComponent(collectionPath), resolvingAgainstBaseURL: false)
+        else {
+            return nil
+        }
+
+        components.queryItems = [
+            URLQueryItem(name: "filter[archived][_neq]", value: "true"),
+            URLQueryItem(name: "filter[forecast_date][_gte]", value: today),
+            // content_i18n only when the field exists and this token may read
+            // it: naming it in `fields` before then would fail the whole read.
+            URLQueryItem(name: "fields", value: "*"),
+            URLQueryItem(name: "sort", value: "forecast_date,area"),
+            URLQueryItem(name: "limit", value: "200"),
+        ]
+        guard let url = components.url else { return nil }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 20
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        return request
+    }
+}
+
 /// A station's 空品區 and its forecast days, today onwards.
 struct AreaForecast: Equatable {
     /// The station's own area label in the app language, e.g. "北部空品區" or

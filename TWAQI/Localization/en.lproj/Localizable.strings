@@ -115,7 +115,7 @@
 "Help.widgets_shows_header" = "What it shows";
 "Help.widgets_shows_body" = "The current reading for your nearest station, or your first favourite. Edit the widget to choose.";
 "Help.widgets_favourites_header" = "Favourite stations";
-"Help.widgets_favourites_body" = "Home Screen widgets list your other favourite stations under the main one, without repeating it. Medium and large widgets are part of Pro.";
+"Help.widgets_favourites_body" = "Small, medium and large Home Screen widgets list your other favourite stations under the main one, without repeating it. Extra large (iPad) shows one station in detail rather than favourites: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and extra large widgets are part of Pro.";
 "Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.";
 "Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
@@ -125,7 +125,7 @@
 "Help.widgets_cycle_body" = "Tap the index name (AQI, PM2.5…) on a Home Screen widget to switch to the next index. It starts from the index chosen in Edit Widget.";
 "Help.widgets_stack_tip" = "Tip: put several Taiwan Air widgets in one widget stack (drag one onto another), set each one differently, for example nearest station and first favourite, or AQI and PM2.5, and swipe between them.";
 "Help.widgets_sizes_header" = "Sizes";
-"Help.widgets_home_sizes" = "Home Screen: small, medium, and large.";
+"Help.widgets_home_sizes" = "Home Screen: small, medium, large, and extra large (iPad).";
 "Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
 "Help.widgets_standby_header" = "StandBy and stacks";
 "Help.widgets_standby_body" = "StandBy: with iPhone charging on its side, touch and hold StandBy, tap +, and add the small Taiwan Air widget. It comes to the top by itself when the air turns bad.";
@@ -270,7 +270,7 @@
 "Widget.station_closest" = "Closest station";
 "Widget.station_first_favourite" = "First favourite";
 "Widget.pro_only_title" = "Pro widget";
-"Widget.pro_only_body" = "Medium and large widgets are for Pro users. Open the app to upgrade.";
+"Widget.pro_only_body" = "Medium, large and extra large widgets are for Pro users. Open the app to upgrade.";
 "Widget.pro_unlock" = "Unlock every reading with Pro";
 "Widget.next_station" = "Next station";
 "Widget.previous_station" = "Previous station";
@@ -295,8 +295,8 @@
 "Pro.feature_no_ads_detail" = "Every screen, the map included.";
 "Pro.feature_complications" = "Complication numbers & styles";
 "Pro.feature_complications_detail" = "The number and more styles on your watch face, for AQI, PM2.5 or any of 7 indices. The face style and the watch app are free.";
-"Pro.feature_widgets" = "Medium and large widgets";
-"Pro.feature_widgets_detail" = "Your station and favourite stations on the Home Screen.";
+"Pro.feature_widgets" = "Medium, large and extra large widgets";
+"Pro.feature_widgets_detail" = "Your station and favourite stations on the Home Screen, or on iPad one station in full detail.";
 "Pro.feature_support" = "Support an independent app";
 "Pro.feature_support_detail" = "Keeps the app maintained and the readings coming.";
 "Pro.choose_plan" = "Choose a plan";

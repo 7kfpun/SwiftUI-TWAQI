@@ -8,6 +8,10 @@
 	<string>$(ApiEnpointCurrentPollutants)</string>
 	<key>ApiEnpointHistoricalPollutants</key>
 	<string>$(ApiEnpointHistoricalPollutants)</string>
+	<key>DirectusFeedbackToken</key>
+	<string>$(DirectusFeedbackToken)</string>
+	<key>DirectusUrl</key>
+	<string>$(DirectusUrl)</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>

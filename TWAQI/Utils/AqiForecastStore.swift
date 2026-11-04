@@ -22,7 +22,7 @@ import Foundation
 final class AqiForecastStore {
     static let shared = AqiForecastStore()
 
-    static let collectionPath = "items/twaqi_aqi_forecast"
+    static let collectionPath = AqiForecastRequest.collectionPath
 
     /// MOENV publishes a few times a day; the Worker syncs hourly.
     static let ttl: TimeInterval = 30 * 60
@@ -108,30 +108,7 @@ final class AqiForecastStore {
 
     /// `GET /items/twaqi_aqi_forecast` for today onwards, archived rows left out.
     static func makeRequest(baseURL: String?, token: String?, today: String) -> URLRequest? {
-        guard let baseURL = baseURL?.trimmingCharacters(in: .whitespaces), !baseURL.isEmpty,
-              let token = token?.trimmingCharacters(in: .whitespaces), !token.isEmpty,
-              let base = URL(string: baseURL),
-              var components = URLComponents(url: base.appendingPathComponent(collectionPath), resolvingAgainstBaseURL: false)
-        else {
-            return nil
-        }
-
-        components.queryItems = [
-            URLQueryItem(name: "filter[archived][_neq]", value: "true"),
-            URLQueryItem(name: "filter[forecast_date][_gte]", value: today),
-            // content_i18n only when the field exists and this token may read
-            // it: naming it in `fields` before then would fail the whole read.
-            URLQueryItem(name: "fields", value: "*"),
-            URLQueryItem(name: "sort", value: "forecast_date,area"),
-            URLQueryItem(name: "limit", value: "200"),
-        ]
-        guard let url = components.url else { return nil }
-
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 20
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        return request
+        AqiForecastRequest.make(baseURL: baseURL, token: token, today: today)
     }
 
     /// A file older than `OfflineCacheRetention.maxAge` is not used, even as

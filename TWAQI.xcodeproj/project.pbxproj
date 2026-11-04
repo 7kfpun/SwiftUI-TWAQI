@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		97DD8D3099A1D036F4AA8A65 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
+		88B20C7BB8243B3114D5DB73 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
+		54208C6AB262712EACEB6141 /* WidgetStationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */; };
+		2617111BE81559B4AFDEA9CB /* WidgetStationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */; };
+		4B5BD018818CBE05240227A0 /* StationDetailLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3670A7238663AB08BCE2EFBE /* StationDetailLoader.swift */; };
+		77E4686BF3FBD605B73BB80E /* StationDetailWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EDAD0E57C69F1017C43D8DB /* StationDetailWidgetView.swift */; };
+		DCA0CA716C7F1D54B67ADA31 /* WidgetExtraLargeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8544981F11CA37788E5429C /* WidgetExtraLargeTests.swift */; };
+		CF50F4B7F741003C021C9242 /* AqiTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D50685ABB6D7832C10DAFD /* AqiTrend.swift */; };
+		13AAD3D743417DF8583A5445 /* AqiForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B92A7319F203C7207887169 /* AqiForecast.swift */; };
+		CE5ECEE5002E832D827CBB70 /* StationCams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BAAB62CFA3EB870547CDDC /* StationCams.swift */; };
+		7131DB94C9E1BF98A1C05859 /* DetailsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E205FC323536C6A00C6D3C1 /* DetailsHistoryView.swift */; };
 		F0A76D1E0000000000000002 /* WidgetPaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000001 /* WidgetPaging.swift */; };
 		F0A76D1E0000000000000003 /* WidgetPaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000001 /* WidgetPaging.swift */; };
 		F0A76D1E0000000000000005 /* WidgetPagingIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000004 /* WidgetPagingIntents.swift */; };
@@ -377,6 +388,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		41069023CE2A01483825C22B /* WidgetFamilyRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetFamilyRules.swift; sourceTree = "<group>"; };
+		C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetStationDetail.swift; sourceTree = "<group>"; };
+		3670A7238663AB08BCE2EFBE /* StationDetailLoader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationDetailLoader.swift; sourceTree = "<group>"; };
+		7EDAD0E57C69F1017C43D8DB /* StationDetailWidgetView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationDetailWidgetView.swift; sourceTree = "<group>"; };
+		A8544981F11CA37788E5429C /* WidgetExtraLargeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetExtraLargeTests.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000001 /* WidgetPaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPaging.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000004 /* WidgetPagingIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingIntents.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000006 /* WidgetPagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingTests.swift; sourceTree = "<group>"; };
@@ -725,6 +741,7 @@
 		67678988171B643CA9475889 /* TWAQITests */ = {
 			isa = PBXGroup;
 			children = (
+				A8544981F11CA37788E5429C /* WidgetExtraLargeTests.swift */,
 				384632A1684CD77DE80F997D /* AirQualityIntentTests.swift */,
 				92DB686663069F57E2CD5660 /* OnboardingTests.swift */,
 				F0A45D1E0000000000000001 /* StoreReviewTests.swift */,
@@ -769,6 +786,8 @@
 		760B27B02AB347B2996EEF43 /* TWAQIWidget */ = {
 			isa = PBXGroup;
 			children = (
+				7EDAD0E57C69F1017C43D8DB /* StationDetailWidgetView.swift */,
+				3670A7238663AB08BCE2EFBE /* StationDetailLoader.swift */,
 				1E3EF5703753441C307F1D3F /* AirQualityControl.swift */,
 				96A46181C1E12824CB176C23 /* TWAQIWidget.swift */,
 				F0A76D1E0000000000000004 /* WidgetPagingIntents.swift */,
@@ -961,6 +980,8 @@
 		9E1AC565233FB09000AC862D /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */,
+				41069023CE2A01483825C22B /* WidgetFamilyRules.swift */,
 				C087A9241D43CECA11D0085C /* Onboarding.swift */,
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
@@ -1559,6 +1580,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCA0CA716C7F1D54B67ADA31 /* WidgetExtraLargeTests.swift in Sources */,
 				770E61E5B1EA99B320C16058 /* AirQualityIntentTests.swift in Sources */,
 				8238948F2B134126BC272BA3 /* WidgetRelevanceTests.swift in Sources */,
 				F0A76D1E0000000000000007 /* WidgetPagingTests.swift in Sources */,
@@ -1594,6 +1616,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7131DB94C9E1BF98A1C05859 /* DetailsHistoryView.swift in Sources */,
+				CE5ECEE5002E832D827CBB70 /* StationCams.swift in Sources */,
+				13AAD3D743417DF8583A5445 /* AqiForecast.swift in Sources */,
+				CF50F4B7F741003C021C9242 /* AqiTrend.swift in Sources */,
+				77E4686BF3FBD605B73BB80E /* StationDetailWidgetView.swift in Sources */,
+				4B5BD018818CBE05240227A0 /* StationDetailLoader.swift in Sources */,
+				2617111BE81559B4AFDEA9CB /* WidgetStationDetail.swift in Sources */,
+				88B20C7BB8243B3114D5DB73 /* WidgetFamilyRules.swift in Sources */,
 				336A325C9C3483B3334702A0 /* AirQualityAnswer.swift in Sources */,
 				708DB99E3A834420516790CD /* StationEntity.swift in Sources */,
 				DF854E0A946408CD3DE034E7 /* AirQualityControl.swift in Sources */,
@@ -1652,6 +1682,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54208C6AB262712EACEB6141 /* WidgetStationDetail.swift in Sources */,
+				97DD8D3099A1D036F4AA8A65 /* WidgetFamilyRules.swift in Sources */,
 				308DD02779510386C6F02B68 /* AirQualityAnswer.swift in Sources */,
 				59D032B70F1CC4216394CF09 /* StationEntity.swift in Sources */,
 				191461EA337F551BDF4C95F2 /* AirQualityLookup.swift in Sources */,

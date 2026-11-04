@@ -52,6 +52,7 @@ jobs:
         AppLanguageTests
         FeedbackServiceTests
         CooperateServiceTests
+        WidgetExtraLargeTests
       # Keep in step with CI_TEST_SUITES (FOX-79): the suites' test files and the
       # source files they test. A PR touching one of these runs the subset; any
       # other app change only builds. Adding a suite means adding its test file
@@ -67,9 +68,12 @@ jobs:
         TWAQITests/AppLanguageTests.swift
         TWAQITests/FeedbackServiceTests.swift
         TWAQITests/CooperateServiceTests.swift
-        # Offline caches (PollutantCacheTests, OfflineCacheRetentionTests; the watch's
+        TWAQITests/WidgetExtraLargeTests.swift
+        # Offline caches (PollutantCacheTests, OfflineCacheRetentionTests,
+        # WidgetExtraLargeTests for the widget's station detail cache; the watch's
         # reading expiry is checked against the same ceiling)
         TWAQI/Utils/PollutantCache.swift
+        TWAQI/Utils/WidgetStationDetail.swift
         TWAQI/Utils/OfflineCacheRetention.swift
         TWAQIWatch/Shared/WatchStore.swift
         TWAQIWatch/Shared/WatchReading.swift
