@@ -81,17 +81,18 @@ enum ShareCardSharing {
     }
 
     static func log(_ action: ShareCardAction, card: ShareCardView, stationId: Int) {
-        var parameters = parameters(card: card, stationId: stationId)
-        parameters["action"] = action.rawValue
-        TrackingManager.logEvent(.shareCard, parameters: parameters)
+        TrackingManager.logEvent(.shareCard, parameters: parameters(card: card, stationId: stationId, action: action))
     }
 
-    private static func parameters(card: ShareCardView, stationId: Int) -> [String: Any] {
-        [
+    /// The analytics parameters; `action` only on `.shareCard`.
+    static func parameters(card: ShareCardView, stationId: Int, action: ShareCardAction? = nil) -> [String: Any] {
+        var parameters: [String: Any] = [
             "stationId": stationId,
             "aqi": Int(card.aqi),
             "shape": card.shape.rawValue,
         ]
+        parameters["action"] = action?.rawValue
+        return parameters
     }
 
     /// At the card's shape, 1080 px wide.

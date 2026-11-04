@@ -153,13 +153,17 @@ struct ShareCardPreviewView: View {
         guard let image = image else { return }
         let card = shapedCard
         isSaving = true
+        // Set before the save finishes: closing the sheet meanwhile is not a
+        // cancel, or one session would count as both.
+        didAct = true
         Task { @MainActor in
             let result = await ShareCardSharing.saveToPhotos(image)
             isSaving = false
             saveResult = result
             if result == .saved {
-                didAct = true
                 ShareCardSharing.log(.save, card: card, stationId: stationId)
+            } else {
+                didAct = false
             }
         }
     }

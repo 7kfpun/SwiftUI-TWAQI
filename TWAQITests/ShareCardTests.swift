@@ -65,6 +65,22 @@ final class ShareCardTests: XCTestCase {
         }
     }
 
+    // MARK: - Analytics
+
+    func testAnalyticsParameters() {
+        let opened = ShareCardSharing.parameters(card: card(aqi: 54.7, shape: .story), stationId: 12)
+        XCTAssertEqual(opened["stationId"] as? Int, 12)
+        XCTAssertEqual(opened["aqi"] as? Int, 54)
+        XCTAssertEqual(opened["shape"] as? String, "9x16")
+        XCTAssertNil(opened["action"])
+
+        for (action, value) in [(ShareCardAction.share, "share"), (.save, "save"), (.cancel, "cancel")] {
+            let parameters = ShareCardSharing.parameters(card: card(aqi: 54, shape: .square), stationId: 12, action: action)
+            XCTAssertEqual(parameters["action"] as? String, value)
+            XCTAssertEqual(parameters["shape"] as? String, "1x1")
+        }
+    }
+
     // MARK: - Message
 
     func testMessageInEnglish() throws {
