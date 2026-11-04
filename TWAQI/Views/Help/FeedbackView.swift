@@ -280,6 +280,8 @@ struct FeedbackView: View {
                 // After the thank-you appears, not over the form; 4–5 stars only.
                 if StoreReviewHelper.shouldRequestReview(afterFeedbackRating: submission.rating) {
                     try? await Task.sleep(nanoseconds: Self.reviewPromptDelay)
+                    // Closed within the delay: not over the screen behind.
+                    guard showingSuccess else { return }
                     StoreReviewHelper.requestReviewAfterFeedback(rating: submission.rating)
                 }
                 #endif
