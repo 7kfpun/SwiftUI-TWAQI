@@ -78,8 +78,8 @@ enum StationDetailLoader {
         }
 
         cache?.save(detail)
-        let frame = detail.cam == nil ? nil : cache.flatMap { frame(stationId: stationId, in: $0) }
-        return (detail, frame)
+        let savedFrame = detail.cam == nil ? nil : cache.flatMap { Self.frame(stationId: stationId, in: $0) }
+        return (detail, savedFrame)
     }
 
     // MARK: - Sources
