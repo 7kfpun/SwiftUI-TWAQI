@@ -215,8 +215,9 @@ enum ProPlan: String {
     }
 }
 
-/// Only what Pro actually adds today. Alerts, favourites, the map and the
-/// watch app itself stay free.
+/// Only what Pro actually adds today. Alerts, favourites, the map, the
+/// watch app and the face complication stay free; `complications` is the
+/// number and the other styles.
 enum ProFeature: String, CaseIterable, Identifiable {
     case noAds
     case complications

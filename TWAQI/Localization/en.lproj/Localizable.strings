@@ -52,7 +52,7 @@
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";
-"Help.ad_free" = "Remove ads & get watch complications";
+"Help.ad_free" = "Remove ads & get complication numbers";
 "Help.restore_purchase" = "Restore purchase";
 "Help.contact_us" = "Contact us";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
@@ -77,6 +77,8 @@
 "Feedback.send" = "Send";
 "Feedback.sent_title" = "Thank you!";
 "Feedback.sent_message" = "Your feedback has been sent.";
+"Feedback.sent_message_may_reply" = "Your feedback has been sent. We may reply to you by email.";
+"Feedback.rate_on_app_store" = "Rate on the App Store";
 "Feedback.error_title" = "Couldn't send feedback";
 "Feedback.error_offline" = "You seem to be offline. Check your connection and try again.";
 "Feedback.error_generic" = "Something went wrong. Please try again later.";
@@ -118,9 +120,16 @@
 "Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
 "Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
+"Help.widgets_paging_header" = "Page through favourites";
+"Help.widgets_paging_body" = "On a medium or large widget, tap ‹ or › to step through your favourites one station at a time; the number between them, like 2 / 5, shows where you are. Tap anywhere else to open that station in the app. The widget goes back to its own station after 30 minutes without a tap, or when new readings come in. Needs Pro and at least two favourites.";
+"Help.widgets_cycle_body" = "Tap the index name (AQI, PM2.5…) on a Home Screen widget to switch to the next index. It starts from the index chosen in Edit Widget.";
+"Help.widgets_stack_tip" = "Tip: put several Taiwan Air widgets in one widget stack (drag one onto another), set each one differently, for example nearest station and first favourite, or AQI and PM2.5, and swipe between them.";
 "Help.widgets_sizes_header" = "Sizes";
 "Help.widgets_home_sizes" = "Home Screen: small, medium, and large.";
 "Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
+"Help.widgets_standby_header" = "StandBy and stacks";
+"Help.widgets_standby_body" = "StandBy: with iPhone charging on its side, touch and hold StandBy, tap +, and add the small Taiwan Air widget. It comes to the top by itself when the air turns bad.";
+"Help.widgets_smart_rotate_body" = "In a Home Screen stack with Smart Rotate on, the widget moves to the top by itself on a bad-air day.";
 "Help.widgets_add_header" = "How to add";
 "Help.widgets_add_1" = "1. Touch and hold the Home Screen or Lock Screen, then tap Add Widget.";
 "Help.widgets_add_2" = "2. Search for Taiwan Air, TWAQI, or Air quality.";
@@ -131,7 +140,9 @@
 "Help.watch_app_header" = "The watch app";
 "Help.watch_app_body" = "Free. It shows the current reading for the closest station, or one you pick, and the past 12 hours.";
 "Help.watch_complications_header" = "Watch-face complications";
-"Help.watch_complications_body" = "Part of Pro. AQI, PM2.5 or any of 7 indices, on your watch face. Styles include a label with the number, number only, the status face, and the status in words. The watch app itself is free.";
+"Help.watch_complications_body" = "The face style is free: the level's face in its colour, for AQI, PM2.5 or any of 7 indices. Pro adds the number and more styles: a label with the number, number only, and the status in words. The watch app itself is free.";
+"Help.watch_smart_stack_header" = "Smart Stack";
+"Help.watch_smart_stack_body" = "Part of Pro. Turn the Digital Crown on the watch face to open the Smart Stack, touch and hold it, tap +, and add Taiwan Air. It comes up by itself when the air turns bad, and at commute times.";
 "Help.watch_add_header" = "How to add a complication";
 "Help.watch_add_1" = "1. Edit your watch face and add a complication.";
 "Help.watch_add_2" = "2. Choose Taiwan Air, TWAQI, or Air quality.";
@@ -226,17 +237,30 @@
 /* Share card */
 "Share.share" = "Share";
 "Share.message" = "%1$@: AQI %2$d, %3$@ — via Taiwan Air";
+"Share.preview_title" = "Share Card";
+"Share.shape" = "Shape";
+"Share.shape_feed" = "Post 4:5";
+"Share.shape_story" = "Story 9:16";
+"Share.shape_square" = "Chat 1:1";
+"Share.save_to_photos" = "Save to Photos";
+"Share.saved" = "Saved to Photos";
+"Share.save_denied" = "Taiwan Air isn't allowed to add photos. You can allow it in Settings.";
+"Share.save_failed" = "The card couldn't be saved. Please try again.";
+"Share.open_settings" = "Open Settings";
+"Share.cancel" = "Cancel";
+"Share.download" = "Download Taiwan Air on the App Store";
 
 /* Watch */
 "Watch.stations" = "Stations";
 "Watch.loading_failed" = "Couldn't load readings";
 "Watch.retry" = "Retry";
 "Watch.widget_name" = "Air quality";
-"Watch.widget_description" = "AQI at the station you chose in the app.";
+"Watch.widget_description" = "Air quality at the station you chose in the app. The face is free; the number and other styles are Pro.";
 "Watch.widget_short %@" = "%@ (number only)";
 "Watch.widget_face %@" = "%@ (face)";
 "Watch.widget_status %@" = "%@ (status)";
 "Watch.widget_no_station %@" = "%@, no station";
+"Watch.widget_pro %@" = "%@ · Pro";
 
 "Widget.widget_name" = "Air quality";
 "Widget.widget_description" = "Current AQI at your nearest station or first favourite, plus your other favourites.";
@@ -248,13 +272,20 @@
 "Widget.pro_only_title" = "Pro widget";
 "Widget.pro_only_body" = "Medium and large widgets are for Pro users. Open the app to upgrade.";
 "Widget.pro_unlock" = "Unlock every reading with Pro";
+"Widget.next_station" = "Next station";
+"Widget.previous_station" = "Previous station";
+"Widget.show_index %@" = "Show %@";
+"Widget.page_position %lld %lld" = "Station %1$lld of %2$lld";
+"Widget.intent_page_title" = "Show a station in the widget";
+"Widget.intent_index_title" = "Change the widget's index";
+"Widget.intent_widget" = "Widget";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";
 "Watch.default_station" = "Default · no location";
-"Watch.pro_title" = "Complications · Pro";
+"Watch.pro_title" = "Numbers & styles · Pro";
 "Watch.pro_failed" = "Purchase not found. Try again, or restore.";
-"Watch.pro_locked" = "Unlock in the app";
+"Watch.pro_locked" = "Pro · Open the app to unlock";
 
 /* Pro */
 "Pro.title" = "Taiwan Air Pro";
@@ -262,8 +293,8 @@
 "Pro.features" = "What you get";
 "Pro.feature_no_ads" = "No ads";
 "Pro.feature_no_ads_detail" = "Every screen, the map included.";
-"Pro.feature_complications" = "Watch-face complications";
-"Pro.feature_complications_detail" = "AQI, PM2.5 or any of 7 indices, right on your watch face. The watch app itself is free.";
+"Pro.feature_complications" = "Complication numbers & styles";
+"Pro.feature_complications_detail" = "The number and more styles on your watch face, for AQI, PM2.5 or any of 7 indices. The face style and the watch app are free.";
 "Pro.feature_widgets" = "Medium and large widgets";
 "Pro.feature_widgets_detail" = "Your station and favourite stations on the Home Screen.";
 "Pro.feature_support" = "Support an independent app";
@@ -277,10 +308,10 @@
 "Pro.terms_of_use" = "Terms of Use";
 "Pro.privacy_policy" = "Privacy Policy";
 "Pro.purchase_failed" = "The purchase couldn't be completed. Please try again.";
-"Watch.pro_feature_complications" = "Air quality on your watch face";
+"Watch.pro_feature_complications" = "The number on your watch face";
 "Watch.pro_feature_no_ads" = "No ads on iPhone";
 "Watch.pro_feature_indices" = "AQI, PM2.5 and 5 more indices";
-"Watch.pro_complications_cta" = "Add to watch face";
+"Watch.pro_complications_cta" = "Numbers on the watch face";
 
 /* Guide */
 "Guide.section_what" = "What it is";
@@ -424,6 +455,40 @@
 "Onboarding.data_title" = "Where the data comes from";
 "Onboarding.data_body" = "Readings come from the open data of the Ministry of Environment (MOENV) air quality monitoring network. MOENV publishes new readings every hour, and Taiwan Air shows them as published.";
 "Onboarding.data_independent" = "Taiwan Air is an independent app, not run by the government.";
-"Onboarding.premium_body" = "Alerts, favourites, the map and the watch app are free. Pro removes ads and adds watch-face complications and larger widgets.";
+"Onboarding.premium_body" = "Alerts, favourites, the map, the watch app and the face complication are free. Pro removes ads and adds the complication's number, more styles and larger widgets.";
 "Onboarding.see_pro_plans" = "See Pro Plans";
 "Onboarding.premium_active" = "You have Pro. Thank you for your support!";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "Station";
+"Intent.station_nearest" = "Nearest station";
+"Intent.get_air_quality_title" = "Get Air Quality";
+"Intent.get_air_quality_description" = "Says the current AQI, its level, the main pollutant and what to do, for your nearest station or a favourite.";
+"Intent.get_air_quality_short" = "Air Quality";
+"Intent.open_station_title" = "Open Station";
+"Intent.open_station_description" = "Opens Taiwan Air on a station's page.";
+"Intent.open_station_short" = "Open Station";
+"Get the air at ${station}" = "Get the air at ${station}";
+"Open ${station}" = "Open ${station}";
+"Intent.answer_fallback_favourite" = "Taiwan Air doesn't have your location, so here is your first favourite.";
+"Intent.answer_fallback_default" = "Taiwan Air doesn't have your location and you have no favourites, so here is central Taipei.";
+"Intent.answer_no_reading" = "There's no reading yet. Open Taiwan Air once while online.";
+"Intent.answer_no_aqi" = "%@ has no AQI reading right now.";
+"Intent.answer_reading" = "%1$@: AQI %2$@, %3$@.";
+"Intent.answer_main_pollutant" = "Main pollutant: %@.";
+"Intent.answer_guidance" = "%@.";
+"Intent.answer_cached_age" = "You're offline, so this is the last saved reading, from %@ ago.";
+"Intent.answer_cached" = "You're offline, so this is the last saved reading.";
+"Intent.answer_old_age" = "This reading is from %@ ago.";
+"Control.display_name" = "Air Quality";
+"Control.description" = "The AQI of your nearest station or a favourite. Tap to open it.";
+"Control.configuration_title" = "Station";
+"Help.shortcuts_title" = "Siri, Shortcuts & Control Center";
+"Help.shortcuts_siri_header" = "Ask Siri";
+"Help.shortcuts_siri_body" = "Say “What's the air in Taiwan Air” for your nearest station, or “Taiwan Air air at Songshan” for a favourite. Siri says the AQI, its level, the main pollutant and what to do. Without a connection, it gives the last saved reading and how old it is.";
+"Help.shortcuts_location_body" = "Nearest uses your location only if you have already allowed it for this app. Otherwise you get your first favourite.";
+"Help.shortcuts_app_header" = "Shortcuts, Spotlight & Action button";
+"Help.shortcuts_app_body" = "“Get Air Quality” and “Open Station” are in the Shortcuts app and Spotlight with no setup. On an iPhone with an Action button: Settings → Action Button → Shortcut, then choose one.";
+"Help.shortcuts_control_header" = "Control Center";
+"Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
+"Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";

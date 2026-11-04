@@ -8,6 +8,33 @@
 
 import SwiftUI
 
+/// The Help tab's sections, top to bottom.
+enum HelpSection: String, CaseIterable, Identifiable {
+    case purchase
+    case doNotDisturb
+    case language
+    case welcome
+    case contact
+    case widgetsAndWatch
+    case definition
+    case about
+    case developer
+
+    var id: String { rawValue }
+
+    /// Premium leads the list so free users see it first (FOX-68); Pro users
+    /// don't get it. The developer section shows only in developer mode.
+    static func order(isPro: Bool, developerMode: Bool) -> [HelpSection] {
+        allCases.filter { section in
+            switch section {
+            case .purchase: return !isPro
+            case .developer: return developerMode
+            default: return true
+            }
+        }
+    }
+}
+
 struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: HelpViewModel
@@ -27,21 +54,8 @@ struct HelpView: View {
         // beside the list in a wide window, as stations do in the lists.
         AdaptiveNavigation(placeholderIcon: "questionmark.circle", placeholderMessage: "Help.select_a_topic") {
             Form {
-                doNotDisturbSection
-                languageSection
-                welcomeSection
-
-                if !settings.isPro {
-                    purchaseSection
-                }
-
-                contactSection
-                widgetsAndWatchSection
-                definitionSection
-                aboutSection
-
-                if developerMode {
-                    developerSection
+                ForEach(HelpSection.order(isPro: settings.isPro, developerMode: developerMode)) { section in
+                    view(for: section)
                 }
             }
             .navigationBarTitle("Help.help")
@@ -56,6 +70,21 @@ struct HelpView: View {
             // Help's own quiet-hours model, so its switch shows what the flow set.
             OnboardingView(doNotDisturb: viewModel) { showingOnboarding = false }
                 .environment(\.locale, settings.appLanguage.locale())
+        }
+    }
+
+    @ViewBuilder
+    private func view(for section: HelpSection) -> some View {
+        switch section {
+        case .purchase: purchaseSection
+        case .doNotDisturb: doNotDisturbSection
+        case .language: languageSection
+        case .welcome: welcomeSection
+        case .contact: contactSection
+        case .widgetsAndWatch: widgetsAndWatchSection
+        case .definition: definitionSection
+        case .about: aboutSection
+        case .developer: developerSection
         }
     }
 
@@ -158,6 +187,11 @@ struct HelpView: View {
 
             NavigationLink(destination: WatchGuideView()) {
                 Text("Help.watch_title")
+                    .fontWeight(.light)
+            }
+
+            NavigationLink(destination: ShortcutsGuideView()) {
+                Text("Help.shortcuts_title")
                     .fontWeight(.light)
             }
         }

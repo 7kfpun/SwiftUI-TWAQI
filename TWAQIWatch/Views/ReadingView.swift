@@ -66,7 +66,8 @@ struct ReadingView: View {
                     }
                 }
 
-                // The app is free; complications are Pro. Last, so it never
+                // The app and the face complication are free; the number and
+                // the other styles are Pro. Last, so it never
                 // pushes a reading off screen.
                 if !model.isPro {
                     Section {

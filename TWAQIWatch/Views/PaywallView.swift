@@ -9,7 +9,8 @@
 import StoreKit
 import SwiftUI
 
-/// Pro on the watch: the app is free, the watch-face complications are not.
+/// Pro on the watch: the app and the face complication are free; the
+/// complication's number and its other styles are not (FOX-63).
 ///
 /// Buying and restoring both work from the watch itself: App Review expects a
 /// locked feature to be unlockable where it's locked, not only on the phone.

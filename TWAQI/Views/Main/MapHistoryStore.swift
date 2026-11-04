@@ -48,7 +48,14 @@ final class MapHistoryStore {
     /// `yyyy-MM-ddTHH:mm:ss` within the hour.
     func reading(stationId: Int, publishTime: String) -> HistoricalPollutant? {
         guard let hour = MapTimeline.hourKey(publishTime) else { return nil }
-        return readings[stationId]?[hour]
+        return reading(stationId: stationId, hour: hour)
+    }
+
+    /// That hour's reading, for an hour already snapped by
+    /// `MapTimeline.hourKey` / `publishTime(_:hoursAgo:)`. Skips re-parsing the
+    /// time for every station on every redraw.
+    func reading(stationId: Int, hour: String) -> HistoricalPollutant? {
+        readings[stationId]?[hour]
     }
 
     /// Queues history for these stations, in priority order, ahead of anything

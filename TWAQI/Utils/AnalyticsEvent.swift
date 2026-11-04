@@ -44,6 +44,10 @@ enum AnalyticsEvent: String, CaseIterable {
     case alertLimitShown = "alert_limit_shown"
     /// `placement` (`AdPlacement`): AdMob recorded a click on a banner.
     case adBannerTapped = "ad_banner_tapped"
+    /// `style`, `family`, `index`: a free reader's watch complication set to a
+    /// Pro style, so it shows the lock (FOX-63). Once per setup; relayed from
+    /// the watch (`WatchEventRelay`).
+    case watchComplicationLocked = "watch_complication_locked"
 
     // MARK: Feedback and review
 
@@ -58,9 +62,13 @@ enum AnalyticsEvent: String, CaseIterable {
     case submitCooperate = "submit_cooperate"
     /// `reason`.
     case submitCooperateFailed = "submit_cooperate_failed"
-    /// `app_open_count`: the app opens that triggered it. iOS decides
-    /// whether the prompt actually shows.
+    /// `source` (`ReviewRequestSource`: `app_opens` / `feedback`), plus
+    /// `app_open_count` (the opens that triggered it) or `rating` (the
+    /// feedback's stars). iOS decides whether the prompt actually shows.
     case reviewRequested = "review_requested"
+    /// `source`: feedback. "Rate on the App Store" tapped in the thank-you
+    /// after a 4- or 5-star feedback.
+    case writeReviewTapped = "write_review_tapped"
 
     // MARK: Onboarding
 
@@ -104,7 +112,12 @@ enum AnalyticsEvent: String, CaseIterable {
     case changeDeviceOrientation = "change_device_orientation"
     /// `name`, `nameLocal`, `stationId`.
     case checkMainDetails = "check_main_details"
-    /// `stationId`, `aqi`.
+    /// The share preview opened (FOX-73): `stationId`, `aqi`, `shape`
+    /// (`4x5`, `9x16`, `1x1`). Against `shareCard`, how many back out.
+    case shareCardPreviewOpened = "share_card_preview_opened"
+    /// `stationId`, `aqi`, `shape`, `action`: `share` (the system sheet
+    /// opened), `save` (saved to Photos) or `cancel` (closed the preview
+    /// without either).
     case shareCard = "share_card"
 
     // MARK: Help and settings
@@ -119,4 +132,15 @@ enum AnalyticsEvent: String, CaseIterable {
     case openDefinitionPage = "open_definition_page"
     case openWidgetGuide = "open_widget_guide"
     case openWatchGuide = "open_watch_guide"
+    case openShortcutsGuide = "open_shortcuts_guide"
+
+    // MARK: Siri, Shortcuts and Control Center (FOX-74)
+
+    /// `intent` (get_air_quality / open_station), `station` (nearest,
+    /// favourite, station, default: which station answered), `result`
+    /// (live / cached / none, or opened). iOS doesn't tell an intent whether
+    /// Siri, Shortcuts, Spotlight or the Action button ran it.
+    case appIntentRun = "app_intent_run"
+    /// `source` (`StationLinkSource`: control, shortcut, widget), `stationId`.
+    case stationLinkOpened = "station_link_opened"
 }

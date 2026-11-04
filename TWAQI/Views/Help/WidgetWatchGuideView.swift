@@ -26,9 +26,20 @@ struct WidgetGuideView: View {
                 guideText("Help.widgets_index_body")
             }
 
+            Section(header: Text("Help.widgets_paging_header")) {
+                guideText("Help.widgets_paging_body")
+                guideText("Help.widgets_cycle_body")
+                guideText("Help.widgets_stack_tip")
+            }
+
             Section(header: Text("Help.widgets_sizes_header")) {
                 guideText("Help.widgets_home_sizes")
                 guideText("Help.widgets_lock_sizes")
+            }
+
+            Section(header: Text("Help.widgets_standby_header")) {
+                guideText("Help.widgets_standby_body")
+                guideText("Help.widgets_smart_rotate_body")
             }
 
             Section(
@@ -48,7 +59,7 @@ struct WidgetGuideView: View {
     }
 }
 
-/// The free watch app, and the Pro complications on the watch face.
+/// The free watch app and face complication, and the Pro number and styles.
 struct WatchGuideView: View {
     var body: some View {
         List {
@@ -58,6 +69,10 @@ struct WatchGuideView: View {
 
             Section(header: Text("Help.watch_complications_header")) {
                 guideText("Help.watch_complications_body")
+            }
+
+            Section(header: Text("Help.watch_smart_stack_header")) {
+                guideText("Help.watch_smart_stack_body")
             }
 
             Section(
@@ -72,6 +87,34 @@ struct WatchGuideView: View {
         .navigationBarTitle("Help.watch_title", displayMode: .inline)
         .onAppear {
             TrackingManager.logEvent(.openWatchGuide)
+        }
+    }
+}
+
+/// Siri, Shortcuts, the Action button and the Control Center control (FOX-74).
+struct ShortcutsGuideView: View {
+    var body: some View {
+        List {
+            Section(header: Text("Help.shortcuts_siri_header")) {
+                guideText("Help.shortcuts_siri_body")
+                guideText("Help.shortcuts_location_body")
+            }
+
+            Section(header: Text("Help.shortcuts_app_header")) {
+                guideText("Help.shortcuts_app_body")
+            }
+
+            Section(
+                header: Text("Help.shortcuts_control_header"),
+                footer: Text("Help.shortcuts_footer").fontWeight(.light)
+            ) {
+                guideText("Help.shortcuts_control_body")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationBarTitle("Help.shortcuts_title", displayMode: .inline)
+        .onAppear {
+            TrackingManager.logEvent(.openShortcutsGuide)
         }
     }
 }
@@ -95,6 +138,14 @@ struct WatchGuideView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             WatchGuideView()
+        }
+    }
+}
+
+struct ShortcutsGuideView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            ShortcutsGuideView()
         }
     }
 }

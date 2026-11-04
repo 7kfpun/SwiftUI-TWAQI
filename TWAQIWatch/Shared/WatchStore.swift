@@ -22,14 +22,22 @@ enum WatchStore {
         static let pinnedStationId = "pinnedStationId"
         static let latestReading = "latestReading"
         static let homeReading = "homeReading"
+        static let homeIsLocated = "homeIsLocated"
         static let isProUnlocked = "isProUnlocked"
         static let favouriteStationIds = "favouriteStationIds"
         static let favouriteReadings = "favouriteReadings"
+        static let relevanceHistory = "relevanceHistory"
+        static let alertThresholds = "alertThresholds"
+        static let appLocationAllowed = "appLocationAllowed"
     }
 
     private static var defaults: UserDefaults {
         UserDefaults(suiteName: appGroup) ?? .standard
     }
+
+    /// The app group's defaults, for state kept outside this type
+    /// (`LockedComplicationLog`).
+    static var sharedDefaults: UserDefaults { defaults }
 
     /// A station the reader picked by hand. `nil` means home: the closest
     /// station, or the 中正 default without a location.
@@ -53,6 +61,16 @@ enum WatchStore {
         set { setReading(newValue, forKey: Keys.homeReading) }
     }
 
+    /// Whether `homeReading` came from the reader's location, not the 中正
+    /// default: location permission was given. The watch Smart Stack's "near
+    /// home" hint needs it and never asks for permission itself. Written only
+    /// when home is resolved, so pinning another station leaves both home and
+    /// this as they were: "near home" stays near home.
+    static var homeIsLocated: Bool {
+        get { defaults.bool(forKey: Keys.homeIsLocated) }
+        set { defaults.set(newValue, forKey: Keys.homeIsLocated) }
+    }
+
     /// Readings older than this are not shown, and are removed by
     /// `purgeExpiredReadings`: past a week a cached reading says more about
     /// when the device was last online than about the air. The same ceiling as
@@ -62,8 +80,14 @@ enum WatchStore {
     /// True when `reading` was published more than `maxReadingAge` ago. A
     /// publish time that doesn't parse (the gallery placeholders) is kept.
     static func isExpired(_ reading: WatchReading, now: Date = Date()) -> Bool {
-        guard let published = publishTimeFormatter.date(from: reading.publishTime) else { return false }
+        guard let published = publishedDate(of: reading) else { return false }
         return now.timeIntervalSince(published) > maxReadingAge
+    }
+
+    /// When `reading` was published, or nil when its publish time doesn't
+    /// parse (the gallery placeholders).
+    static func publishedDate(of reading: WatchReading) -> Date? {
+        publishTimeFormatter.date(from: reading.publishTime)
     }
 
     /// Deletes cached readings older than `maxReadingAge`. Reads already skip
@@ -78,6 +102,11 @@ enum WatchStore {
         let kept = favourites.filter { !isExpired($0, now: now) }
         if kept.count != favourites.count {
             favouriteReadings = kept
+        }
+        let history = storedRelevanceHistory
+        let keptHistory = history.filter { !isExpired($0, now: now) }
+        if keptHistory.count != history.count {
+            relevanceHistory = keptHistory
         }
     }
 
@@ -117,6 +146,52 @@ enum WatchStore {
         guard !fresh.isEmpty else { return }
         let freshIds = Set(fresh.map(\.stationId))
         favouriteReadings = favouriteReadings.filter { !freshIds.contains($0.stationId) } + fresh
+    }
+
+    /// The widget's own record of each station's last two publishes, so its
+    /// relevance can tell a worsening reading (`WidgetRelevance.recording`).
+    /// Written by the widget extensions only. Readings older than
+    /// `maxReadingAge` are left out.
+    static var relevanceHistory: [WatchReading] {
+        get { storedRelevanceHistory.filter { !isExpired($0) } }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.relevanceHistory) }
+    }
+
+    private static var storedRelevanceHistory: [WatchReading] {
+        defaults.data(forKey: Keys.relevanceHistory)
+            .flatMap { try? JSONDecoder().decode([WatchReading].self, from: $0) } ?? []
+    }
+
+    /// Adds `reading` to `relevanceHistory` and returns the station's reading
+    /// from the publish before it, if one is held.
+    @discardableResult
+    static func recordForRelevance(_ reading: WatchReading) -> WatchReading? {
+        let history = WidgetRelevance.recording(reading, in: relevanceHistory)
+        relevanceHistory = history
+        return WidgetRelevance.previous(of: reading, in: history)
+    }
+
+    /// Mirror of the phone's "above" alert thresholds (AQI) by station id, for
+    /// the Home Screen widget's relevance. `DirectusPushMirror` on the phone is
+    /// the source of truth; only `WidgetBridge` writes this. Empty on the
+    /// watch, which has no copy of the phone's alerts.
+    static var alertThresholds: [Int: Int] {
+        get {
+            let stored = defaults.dictionary(forKey: Keys.alertThresholds) as? [String: Int] ?? [:]
+            return Dictionary(uniqueKeysWithValues: stored.compactMap { key, value in Int(key).map { ($0, value) } })
+        }
+        set {
+            defaults.set(Dictionary(uniqueKeysWithValues: newValue.map { (String($0.key), $0.value) }), forKey: Keys.alertThresholds)
+        }
+    }
+
+    /// Mirror of whether the phone app may use location, for the Control
+    /// Center control's "Nearest" (FOX-74): the widget extension doesn't
+    /// see the app's permission (no `NSWidgetWantsLocation`). Only
+    /// `WidgetBridge` writes this; false on the watch.
+    static var appLocationAllowed: Bool {
+        get { defaults.bool(forKey: Keys.appLocationAllowed) }
+        set { defaults.set(newValue, forKey: Keys.appLocationAllowed) }
     }
 
     /// Cache of `WatchPro.refresh()` on the watch, and of `SettingsStore.refreshPro()`

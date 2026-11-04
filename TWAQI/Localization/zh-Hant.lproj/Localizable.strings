@@ -56,7 +56,7 @@
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
 "Help.in_app_purchase" = "App 內購買";
-"Help.ad_free" = "移除廣告並解鎖錶面複雜功能";
+"Help.ad_free" = "移除廣告並解鎖錶面數值";
 "Help.restore_purchase" = "回復購買項目";
 "Help.contact_us" = "聯絡我們";
 "Help.interested_to_be_our_business_partner" = "想成為我們的合作夥伴嗎？";
@@ -81,6 +81,8 @@
 "Feedback.send" = "送出";
 "Feedback.sent_title" = "謝謝您！";
 "Feedback.sent_message" = "已收到您的意見回饋。";
+"Feedback.sent_message_may_reply" = "已收到您的意見回饋，我們可能會以電子郵件回覆您。";
+"Feedback.rate_on_app_store" = "到 App Store 評分";
 "Feedback.error_title" = "無法送出意見回饋";
 "Feedback.error_offline" = "目前似乎沒有網路連線，請確認後再試一次。";
 "Feedback.error_generic" = "發生錯誤，請稍後再試。";
@@ -122,9 +124,16 @@
 "Help.widgets_favourites_offline" = "沒有網路時，小工具會顯示最後一次儲存的數值。";
 "Help.widgets_index_header" = "選擇指標";
 "Help.widgets_index_body" = "編輯小工具，可顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。";
+"Help.widgets_paging_header" = "瀏覽最愛測站";
+"Help.widgets_paging_body" = "在中、大尺寸小工具上點一下 ‹ 或 ›，即可逐一瀏覽最愛測站；中間的數字（例如 2 / 5）顯示目前位置。點其他地方，會在 App 中開啟該測站。30 分鐘沒有點按，或有新數值時，小工具會回到原本的測站。需要 Pro 及至少兩個最愛測站。";
+"Help.widgets_cycle_body" = "點一下主畫面小工具上的指標名稱（AQI、PM2.5…），即可切換到下一個指標。會從「編輯小工具」選擇的指標開始。";
+"Help.widgets_stack_tip" = "小技巧：把幾個 Taiwan Air 小工具疊成一個堆疊（將一個拖到另一個上），各自設定不同，例如最近測站與第一個最愛測站，或 AQI 與 PM2.5，再滑動切換。";
 "Help.widgets_sizes_header" = "尺寸";
 "Help.widgets_home_sizes" = "主畫面：小、中、大。";
 "Help.widgets_lock_sizes" = "鎖定畫面：圓形、矩形、單行。";
+"Help.widgets_standby_header" = "待機模式與小工具堆疊";
+"Help.widgets_standby_body" = "待機模式：iPhone 橫放充電時，按住待機畫面，點一下 +，加入小尺寸的 Taiwan Air 小工具。空氣變差時，它會自動排到最前面。";
+"Help.widgets_smart_rotate_body" = "在開啟「智慧型旋轉」的主畫面小工具堆疊中，空氣變差的日子小工具會自動移到最上方。";
 "Help.widgets_add_header" = "如何加入";
 "Help.widgets_add_1" = "1. 按住主畫面或鎖定畫面，點一下「加入小工具」。";
 "Help.widgets_add_2" = "2. 搜尋 Taiwan Air、TWAQI 或「空氣品質」。";
@@ -135,7 +144,9 @@
 "Help.watch_app_header" = "手錶 App";
 "Help.watch_app_body" = "免費。顯示最近測站或你選定的測站目前數值，以及過去 12 小時。";
 "Help.watch_complications_header" = "錶面複雜功能";
-"Help.watch_complications_body" = "屬於 Pro。AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。樣式包含指標名稱加數值、僅數值、表情，以及狀態文字。手錶 App 本身免費。";
+"Help.watch_complications_body" = "表情樣式免費：以等級顏色顯示表情，AQI、PM2.5 等 7 項指標任選。Pro 加上數值與更多樣式：指標名稱加數值、僅數值，以及狀態文字。手錶 App 本身免費。";
+"Help.watch_smart_stack_header" = "智慧型堆疊";
+"Help.watch_smart_stack_body" = "屬於 Pro。在錶面上轉動數位錶冠打開智慧型堆疊，按住後點一下 +，加入 Taiwan Air。空氣變差時和通勤時段，它會自動出現。";
 "Help.watch_add_header" = "如何加入複雜功能";
 "Help.watch_add_1" = "1. 編輯錶面，加入複雜功能。";
 "Help.watch_add_2" = "2. 選擇 Taiwan Air、TWAQI 或「空氣品質」。";
@@ -230,17 +241,30 @@
 /* Share card */
 "Share.share" = "分享";
 "Share.message" = "%1$@：AQI %2$d，%3$@ — 來自 Taiwan Air";
+"Share.preview_title" = "分享卡片";
+"Share.shape" = "尺寸";
+"Share.shape_feed" = "貼文 4:5";
+"Share.shape_story" = "限動 9:16";
+"Share.shape_square" = "聊天 1:1";
+"Share.save_to_photos" = "儲存到照片";
+"Share.saved" = "已儲存到照片";
+"Share.save_denied" = "Taiwan Air 沒有加入照片的權限，可以到「設定」開啟。";
+"Share.save_failed" = "無法儲存卡片，請再試一次。";
+"Share.open_settings" = "打開設定";
+"Share.cancel" = "取消";
+"Share.download" = "在 App Store 下載 Taiwan Air";
 
 /* Watch */
 "Watch.stations" = "測站";
 "Watch.loading_failed" = "無法載入資料";
 "Watch.retry" = "重試";
 "Watch.widget_name" = "空氣品質";
-"Watch.widget_description" = "在 App 中選擇的測站 AQI。";
+"Watch.widget_description" = "在 App 中選擇的測站空氣品質。表情樣式免費；數值與其他樣式屬於 Pro。";
 "Watch.widget_short %@" = "%@（僅數值）";
 "Watch.widget_face %@" = "%@（表情）";
 "Watch.widget_status %@" = "%@（狀態）";
 "Watch.widget_no_station %@" = "%@，不含測站";
+"Watch.widget_pro %@" = "%@・Pro";
 
 "Widget.widget_name" = "空氣品質";
 "Widget.widget_description" = "顯示最近測站或第一個最愛測站的目前 AQI，並列出你其他的最愛測站。";
@@ -252,13 +276,20 @@
 "Widget.pro_only_title" = "Pro 小工具";
 "Widget.pro_only_body" = "中、大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。";
 "Widget.pro_unlock" = "升級 Pro，解鎖所有數值";
+"Widget.next_station" = "下一個測站";
+"Widget.previous_station" = "上一個測站";
+"Widget.show_index %@" = "顯示 %@";
+"Widget.page_position %lld %lld" = "第 %1$lld 個測站，共 %2$lld 個";
+"Widget.intent_page_title" = "在小工具顯示測站";
+"Widget.intent_index_title" = "切換小工具的指標";
+"Widget.intent_widget" = "小工具";
 "Watch.no_station" = "開啟 App 選擇測站";
 "Watch.history" = "過去 12 小時";
 "Watch.closest" = "最近測站";
 "Watch.default_station" = "預設測站（未定位）";
-"Watch.pro_title" = "錶面複雜功能・Pro";
+"Watch.pro_title" = "錶面數值與樣式・Pro";
 "Watch.pro_failed" = "找不到購買項目，請再試一次或回復購買。";
-"Watch.pro_locked" = "請在 App 中解鎖";
+"Watch.pro_locked" = "Pro・開啟 App 解鎖";
 
 /* Pro */
 "Pro.title" = "Taiwan Air Pro";
@@ -266,8 +297,8 @@
 "Pro.features" = "Pro 包含";
 "Pro.feature_no_ads" = "移除廣告";
 "Pro.feature_no_ads_detail" = "所有畫面都不再顯示廣告，包含地圖。";
-"Pro.feature_complications" = "錶面複雜功能";
-"Pro.feature_complications_detail" = "AQI、PM2.5 等 7 項指標任選，直接顯示在錶面上。手錶 App 本身免費。";
+"Pro.feature_complications" = "錶面數值與更多樣式";
+"Pro.feature_complications_detail" = "在錶面顯示數值與更多樣式，AQI、PM2.5 等 7 項指標任選。表情樣式與手錶 App 免費。";
 "Pro.feature_widgets" = "中、大尺寸小工具";
 "Pro.feature_widgets_detail" = "在主畫面查看目前測站與最愛測站。";
 "Pro.feature_support" = "支持獨立開發";
@@ -281,10 +312,10 @@
 "Pro.terms_of_use" = "使用條款";
 "Pro.privacy_policy" = "隱私權政策";
 "Pro.purchase_failed" = "無法完成購買，請再試一次。";
-"Watch.pro_feature_complications" = "空氣品質顯示在錶面";
+"Watch.pro_feature_complications" = "在錶面顯示數值";
 "Watch.pro_feature_no_ads" = "iPhone 無廣告";
 "Watch.pro_feature_indices" = "AQI、PM2.5 等 7 項指標";
-"Watch.pro_complications_cta" = "加到錶面";
+"Watch.pro_complications_cta" = "在錶面顯示數值";
 
 /* Guide */
 "Guide.section_what" = "這是什麼";
@@ -428,6 +459,40 @@
 "Onboarding.data_title" = "資料來源";
 "Onboarding.data_body" = "數值來自環境部「空氣品質監測網」開放資料。環境部每小時發布最新數值，Taiwan Air 依發布內容呈現。";
 "Onboarding.data_independent" = "Taiwan Air 是獨立開發的 App，並非政府經營。";
-"Onboarding.premium_body" = "通知、我的最愛、地圖與手錶 App 皆可免費使用。Pro 會移除廣告，並加入錶面複雜功能與中、大尺寸小工具。";
+"Onboarding.premium_body" = "通知、我的最愛、地圖、手錶 App 與錶面表情皆可免費使用。Pro 會移除廣告，並加入錶面數值、更多樣式與中、大尺寸小工具。";
 "Onboarding.see_pro_plans" = "查看 Pro 方案";
 "Onboarding.premium_active" = "你已是 Pro 用戶，感謝支持！";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "測站";
+"Intent.station_nearest" = "最近的測站";
+"Intent.get_air_quality_title" = "查詢空氣品質";
+"Intent.get_air_quality_description" = "說出最近測站或最愛測站目前的 AQI、等級、主要污染物與活動建議。";
+"Intent.get_air_quality_short" = "空氣品質";
+"Intent.open_station_title" = "開啟測站";
+"Intent.open_station_description" = "開啟 Taiwan Air 並顯示測站頁面。";
+"Intent.open_station_short" = "開啟測站";
+"Get the air at ${station}" = "查詢${station}的空氣";
+"Open ${station}" = "開啟${station}";
+"Intent.answer_fallback_favourite" = "Taiwan Air 無法取得你的位置，以下是你的第一個最愛測站。";
+"Intent.answer_fallback_default" = "Taiwan Air 無法取得你的位置，你也還沒有最愛測站，以下是臺北市中正區附近的測站。";
+"Intent.answer_no_reading" = "目前還沒有數值。請在有網路時開啟 Taiwan Air 一次。";
+"Intent.answer_no_aqi" = "%@目前沒有 AQI 數值。";
+"Intent.answer_reading" = "%1$@：AQI %2$@，%3$@。";
+"Intent.answer_main_pollutant" = "主要污染物：%@。";
+"Intent.answer_guidance" = "%@。";
+"Intent.answer_cached_age" = "目前沒有網路，這是最後儲存的數值，為 %@前的資料。";
+"Intent.answer_cached" = "目前沒有網路，這是最後儲存的數值。";
+"Intent.answer_old_age" = "這筆數值是 %@前發布的。";
+"Control.display_name" = "空氣品質";
+"Control.description" = "顯示最近測站或最愛測站的 AQI，點一下即可開啟。";
+"Control.configuration_title" = "測站";
+"Help.shortcuts_title" = "Siri、捷徑與控制中心";
+"Help.shortcuts_siri_header" = "問 Siri";
+"Help.shortcuts_siri_body" = "說「Taiwan Air 空氣如何」可查詢最近的測站，或說「Taiwan Air 松山空氣如何」查詢最愛測站。Siri 會說出 AQI、等級、主要污染物與活動建議。沒有網路時，會說出最後儲存的數值與它的時間。";
+"Help.shortcuts_location_body" = "只有在你已允許本 App 使用位置時，才會查詢最近的測站；否則會改用你的第一個最愛測站。";
+"Help.shortcuts_app_header" = "捷徑、Spotlight 與動作按鈕";
+"Help.shortcuts_app_body" = "「查詢空氣品質」與「開啟測站」不必設定，就會出現在「捷徑」App 與 Spotlight。若 iPhone 有動作按鈕：前往「設定」→「動作按鈕」→「捷徑」，再選擇其中一個。";
+"Help.shortcuts_control_header" = "控制中心";
+"Help.shortcuts_control_body" = "iOS 18 以上：打開控制中心，按住空白處，點「加入控制項目」並搜尋 Taiwan Air。它會顯示最近測站或最愛測站的 AQI，點一下即可開啟測站頁面。也可以放在鎖定畫面的控制按鈕。";
+"Help.shortcuts_footer" = "所有人皆可免費使用。Siri 與捷徑需要 iOS 16 以上。";
