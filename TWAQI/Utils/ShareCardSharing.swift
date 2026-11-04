@@ -7,50 +7,101 @@
 //
 
 import LinkPresentation
+import Photos
 import SwiftUI
 import UIKit
 
+/// What the reader did with the card, for `.shareCard`'s `action`.
+enum ShareCardAction: String {
+    /// Opened the system share sheet with the card.
+    case share
+    /// Saved the card to Photos.
+    case save
+    /// Closed the preview without sharing or saving.
+    case cancel
+}
+
 /// Turns a `ShareCardView` into an image and hands it to the system share
-/// sheet.
+/// sheet or Photos. The preview sheet (`ShareCardPreviewView`) comes first.
 @MainActor
 enum ShareCardSharing {
     static let appStoreURL = URL(string: "https://apps.apple.com/app/id1286516443")!
 
-    /// 3x the card's point size: 1080 × 1350, the 4:5 size feeds and stories
-    /// take without cropping.
-    private static let scale: CGFloat = 3
-
-    /// `sourceView` sits behind the share button, for the popover's arrow in
-    /// a wide window. Without one it points at the top-right corner, where
-    /// the button usually is.
-    static func share(card: ShareCardView, stationId: Int, from sourceView: UIView? = nil) {
-        guard let image = render(card) else { return }
-
-        let status = AirStatuses.checkAirStatus(airIndexType: .aqi, value: card.aqi)
-        let message = String(
-            format: "Share.message".localized,
-            card.title,
-            Int(card.aqi),
-            "AirStatus.\(status.rawValue)".localized
+    /// The line sent with the card: "Keelung: AQI 54, Moderate — via Taiwan Air".
+    /// `bundle` is the app's language; tests pass an `.lproj`.
+    static func message(title: String, aqi: Double, bundle: Bundle = .appLanguage) -> String {
+        let status = AirStatuses.checkAirStatus(airIndexType: .aqi, value: aqi)
+        return String(
+            format: NSLocalizedString("Share.message", bundle: bundle, comment: ""),
+            title,
+            Int(aqi),
+            NSLocalizedString("AirStatus.\(status.rawValue)", bundle: bundle, comment: "")
         )
-
-        present(
-            items: [CardItemSource(image: image, title: message), "\(message)\n\(appStoreURL.absoluteString)"],
-            sourceView: sourceView
-        )
-
-        TrackingManager.logEvent(.shareCard, parameters: [
-            "stationId": stationId,
-            "aqi": Int(card.aqi),
-        ])
     }
 
+    /// The message and the App Store link, as the share sheet's text.
+    static func shareText(title: String, aqi: Double, bundle: Bundle = .appLanguage) -> String {
+        "\(message(title: title, aqi: aqi, bundle: bundle))\n\(appStoreURL.absoluteString)"
+    }
+
+    /// `sourceView` sits behind the share button, for the popover's arrow in
+    /// a wide window. Without one it points at the top-right corner.
+    static func share(image: UIImage, card: ShareCardView, from sourceView: UIView? = nil) {
+        let message = message(title: card.title, aqi: card.aqi)
+        present(
+            items: [CardItemSource(image: image, title: message), shareText(title: card.title, aqi: card.aqi)],
+            sourceView: sourceView
+        )
+    }
+
+    enum SaveResult: Equatable {
+        case saved
+        /// The reader has said no to adding photos; only Settings can undo it.
+        case denied
+        case failed
+    }
+
+    /// Asks only for add-only access, which can't read the library.
+    static func saveToPhotos(_ image: UIImage) async -> SaveResult {
+        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        guard status == .authorized || status == .limited else { return .denied }
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }
+            return .saved
+        } catch {
+            return .failed
+        }
+    }
+
+    /// The preview opened: the top of the share funnel.
+    static func logPreviewOpened(card: ShareCardView, stationId: Int) {
+        TrackingManager.logEvent(.shareCardPreviewOpened, parameters: parameters(card: card, stationId: stationId))
+    }
+
+    static func log(_ action: ShareCardAction, card: ShareCardView, stationId: Int) {
+        var parameters = parameters(card: card, stationId: stationId)
+        parameters["action"] = action.rawValue
+        TrackingManager.logEvent(.shareCard, parameters: parameters)
+    }
+
+    private static func parameters(card: ShareCardView, stationId: Int) -> [String: Any] {
+        [
+            "stationId": stationId,
+            "aqi": Int(card.aqi),
+            "shape": card.shape.rawValue,
+        ]
+    }
+
+    /// At the card's shape, 1080 px wide.
     static func render(_ card: ShareCardView) -> UIImage? {
+        let size = card.shape.size
         // Rendered outside the SwiftUI tree, so the Help language is passed in.
         let card = card.environment(\.locale, .app)
         if #available(iOS 16.0, *) {
             let renderer = ImageRenderer(content: card)
-            renderer.scale = scale
+            renderer.scale = ShareCardShape.renderScale
             return renderer.uiImage
         }
 
@@ -58,21 +109,20 @@ enum ShareCardSharing {
         // in a window has no safe area, so the card lays out at exactly its
         // frame.
         let controller = UIHostingController(rootView: card)
-        let bounds = CGRect(origin: .zero, size: ShareCardView.size)
+        let bounds = CGRect(origin: .zero, size: size)
         controller.view.bounds = bounds
         controller.view.backgroundColor = .clear
         controller.view.layoutIfNeeded()
 
         let format = UIGraphicsImageRendererFormat()
-        format.scale = scale
+        format.scale = ShareCardShape.renderScale
         return UIGraphicsImageRenderer(bounds: bounds, format: format).image { _ in
             controller.view.drawHierarchy(in: bounds, afterScreenUpdates: true)
         }
     }
 
-    /// Presented from UIKit rather than a SwiftUI sheet: the station screen is
-    /// also shown in a sheet over the map, and a share sheet inside a sheet
-    /// looks wrong on iPad.
+    /// Presented from UIKit, over whatever is on top: the preview sheet, which
+    /// may itself be over the station sheet on the map.
     private static func present(items: [Any], sourceView: UIView?) {
         guard let presenter = topViewController() else { return }
 
@@ -80,13 +130,13 @@ enum ShareCardSharing {
         // Only in a wide window: a narrow one shows the sheet from the bottom.
         if let popover = activity.popoverPresentationController {
             if let sourceView = sourceView, sourceView.window != nil {
-                // On an unfolded iPhone Duo or an iPad the page may be the
-                // right-hand pane, the left-hand one, or the whole window.
+                // On an unfolded iPhone Duo or an iPad the preview is a form
+                // sheet; the arrow points at its Share button.
                 popover.sourceView = sourceView
                 popover.sourceRect = sourceView.bounds
                 popover.permittedArrowDirections = [.up, .down]
             } else {
-                // The share button sits in the top-right of the navigation bar.
+                // No button to point at: the top-right corner.
                 let view = presenter.view!
                 popover.sourceView = view
                 popover.sourceRect = CGRect(x: view.bounds.maxX - 60, y: view.safeAreaInsets.top, width: 1, height: 1)

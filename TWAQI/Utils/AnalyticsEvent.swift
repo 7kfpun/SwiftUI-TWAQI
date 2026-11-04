@@ -104,7 +104,12 @@ enum AnalyticsEvent: String, CaseIterable {
     case changeDeviceOrientation = "change_device_orientation"
     /// `name`, `nameLocal`, `stationId`.
     case checkMainDetails = "check_main_details"
-    /// `stationId`, `aqi`.
+    /// The share preview opened (FOX-73): `stationId`, `aqi`, `shape`
+    /// (`4x5`, `9x16`, `1x1`). Against `shareCard`, how many back out.
+    case shareCardPreviewOpened = "share_card_preview_opened"
+    /// `stationId`, `aqi`, `shape`, `action`: `share` (the system sheet
+    /// opened), `save` (saved to Photos) or `cancel` (closed the preview
+    /// without either).
     case shareCard = "share_card"
 
     // MARK: Help and settings

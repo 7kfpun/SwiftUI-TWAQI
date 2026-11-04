@@ -1,0 +1,2 @@
+/* Asked when the share preview saves a card to Photos (add-only). */
+"NSPhotoLibraryAddUsageDescription" = "Saves air quality cards you choose to share to your photo library.";

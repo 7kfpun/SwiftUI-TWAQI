@@ -142,6 +142,8 @@
 		9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC560233F9A8500AC862D /* DetailsView.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E12 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E14 /* ShareCardSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */; };
+		7F3A73C10B2E4D5F8A9B0C21 /* ShareCardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3A73C10B2E4D5F8A9B0C20 /* ShareCardPreviewView.swift */; };
+		7F3A73C10B2E4D5F8A9B0C25 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F3A73C10B2E4D5F8A9B0C24 /* InfoPlist.strings */; };
 		9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC563233F9AC100AC862D /* DetailsListView.swift */; };
 		9E1AC567233FB0A400AC862D /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC566233FB0A400AC862D /* ColorExtensions.swift */; };
 		9E1C9B14238974120052E115 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1C9B13238974120052E115 /* StringExtension.swift */; };
@@ -439,6 +441,9 @@
 		9E1AC560233F9A8500AC862D /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E13 /* ShareCardSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardSharing.swift; sourceTree = "<group>"; };
+		7F3A73C10B2E4D5F8A9B0C20 /* ShareCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewView.swift; sourceTree = "<group>"; };
+		7F3A73C10B2E4D5F8A9B0C22 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7F3A73C10B2E4D5F8A9B0C23 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
@@ -875,6 +880,7 @@
 				9E03DF6023969E54002F8DA4 /* DetailsListViewModel.swift */,
 				9E1AC560233F9A8500AC862D /* DetailsView.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E11 /* ShareCardView.swift */,
+				7F3A73C10B2E4D5F8A9B0C20 /* ShareCardPreviewView.swift */,
 				9E205FC52353759100C6D3C1 /* DetailsViewModel.swift */,
 				9E794A682340A6090064D874 /* SettingsRow.swift */,
 				9EA1BC6C2369B907008C3942 /* SettingsRowViewModel.swift */,
@@ -930,6 +936,7 @@
 			isa = PBXGroup;
 			children = (
 				9E34B5032371E7B700B6E600 /* Localizable.strings */,
+				7F3A73C10B2E4D5F8A9B0C24 /* InfoPlist.strings */,
 			);
 			path = Localization;
 			sourceTree = "<group>";
@@ -1277,6 +1284,7 @@
 			files = (
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
 				9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */,
+				7F3A73C10B2E4D5F8A9B0C25 /* InfoPlist.strings in Resources */,
 				9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */,
 				9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */,
 				9E1AC542233F981900AC862D /* Assets.xcassets in Resources */,
@@ -1593,6 +1601,7 @@
 				9E1AC561233F9A8500AC862D /* DetailsView.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E12 /* ShareCardView.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E14 /* ShareCardSharing.swift in Sources */,
+				7F3A73C10B2E4D5F8A9B0C21 /* ShareCardPreviewView.swift in Sources */,
 				9EF3D3482393B318009CED32 /* APIResponses.swift in Sources */,
 				9EFCDAB7237809CA00EA2203 /* IndexSelectorView.swift in Sources */,
 				9EC0FFEE2A10000000000001 /* MapHistoryStore.swift in Sources */,
@@ -1780,6 +1789,15 @@
 				9E34B5042371E7BB00B6E600 /* zh-Hant */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		7F3A73C10B2E4D5F8A9B0C24 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7F3A73C10B2E4D5F8A9B0C22 /* en */,
+				7F3A73C10B2E4D5F8A9B0C23 /* zh-Hant */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

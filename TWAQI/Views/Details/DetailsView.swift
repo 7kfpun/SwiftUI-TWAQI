@@ -31,11 +31,8 @@ struct DetailsView: View {
     /// Bumped when an on-device translation of the township or address lands.
     @State private var translationRevision = 0
 
-    /// Behind the share button. In a wide window (iPad, an unfolded iPhone
-    /// Duo) the share sheet is a popover, and it should point at the button
-    /// wherever the page sits: the panel beside the map, or the details
-    /// column beside a list.
-    @State private var shareAnchor = PopoverAnchor()
+    /// The share button opens a preview of the card first (FOX-73).
+    @State private var showingSharePreview = false
 
     /// Behind the "Send feedback" link at the foot of the page.
     @State private var showingFeedback = false
@@ -63,13 +60,10 @@ struct DetailsView: View {
     /// Disabled until there is a reading: a card saying "—" is not worth
     /// sending anyone.
     private var shareButton: some View {
-        Button(action: {
-            ShareCardSharing.share(card: shareCard, stationId: viewModel.stationId, from: shareAnchor.view)
-        }) {
+        Button(action: { showingSharePreview = true }) {
             Image(systemName: "square.and.arrow.up")
         }
         .buttonStyle(PlainButtonStyle())
-        .background(PopoverAnchorView(anchor: shareAnchor))
         .disabled(currentAqi <= 0)
         .accessibilityLabel(Text("Share.share"))
     }
@@ -241,6 +235,13 @@ struct DetailsView: View {
             }
             .navigationViewStyle(StackNavigationViewStyle())
             .environment(\.locale, settings.appLanguage.locale())
+        }
+        // On the page, not the button: a sheet on a navigation-bar item's
+        // content may not present on iOS 15. The system share sheet then
+        // opens from the preview, its popover on the preview's Share button.
+        .sheet(isPresented: $showingSharePreview) {
+            ShareCardPreviewView(card: shareCard, stationId: viewModel.stationId)
+                .environment(\.locale, settings.appLanguage.locale())
         }
         // On the page, not the heart: an alert on a navigation-bar item's
         // content may not present on iOS 15.

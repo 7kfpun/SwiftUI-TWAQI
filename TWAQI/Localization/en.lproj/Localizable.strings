@@ -231,6 +231,18 @@
 /* Share card */
 "Share.share" = "Share";
 "Share.message" = "%1$@: AQI %2$d, %3$@ — via Taiwan Air";
+"Share.preview_title" = "Share Card";
+"Share.shape" = "Shape";
+"Share.shape_feed" = "Post 4:5";
+"Share.shape_story" = "Story 9:16";
+"Share.shape_square" = "Chat 1:1";
+"Share.save_to_photos" = "Save to Photos";
+"Share.saved" = "Saved to Photos";
+"Share.save_denied" = "Taiwan Air isn't allowed to add photos. You can allow it in Settings.";
+"Share.save_failed" = "The card couldn't be saved. Please try again.";
+"Share.open_settings" = "Open Settings";
+"Share.cancel" = "Cancel";
+"Share.download" = "Download Taiwan Air on the App Store";
 
 /* Watch */
 "Watch.stations" = "Stations";

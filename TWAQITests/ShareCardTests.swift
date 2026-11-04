@@ -12,27 +12,78 @@ import XCTest
 @MainActor
 final class ShareCardTests: XCTestCase {
 
-    private func card(aqi: Double, title: String = "Keelung") -> ShareCardView {
+    private func card(aqi: Double, title: String = "Keelung", shape: ShareCardShape = .feed) -> ShareCardView {
         ShareCardView(
             title: title,
             locality: "Xinyi District, Keelung City",
             aqi: aqi,
             pollutant: nil,
-            publishTime: "2026-08-07T22:00:00"
+            publishTime: "2026-08-07T22:00:00",
+            shape: shape
         )
     }
 
-    /// 1080 × 1350 is the 4:5 size feeds and stories take without cropping.
-    func testRendersAtFourByFive() throws {
-        let image = try XCTUnwrap(ShareCardSharing.render(card(aqi: 54)))
-        XCTAssertEqual(image.size.width * image.scale, 1080)
-        XCTAssertEqual(image.size.height * image.scale, 1350)
+    private func lproj(_ identifier: String) throws -> Bundle {
+        let path = try XCTUnwrap(Bundle.main.path(forResource: identifier, ofType: "lproj"))
+        return try XCTUnwrap(Bundle(path: path))
     }
 
-    /// A long station name shrinks rather than pushing the card taller.
+    // MARK: - Shapes
+
+    /// 4:5 for a feed post, 9:16 for a story, 1:1 for a chat, all 1080 px wide.
+    func testShapePixelSizes() {
+        XCTAssertEqual(ShareCardShape.feed.pixelSize, CGSize(width: 1080, height: 1350))
+        XCTAssertEqual(ShareCardShape.story.pixelSize, CGSize(width: 1080, height: 1920))
+        XCTAssertEqual(ShareCardShape.square.pixelSize, CGSize(width: 1080, height: 1080))
+    }
+
+    /// The picker's order, and the values analytics and the stored choice use.
+    func testShapeOrderAndRawValues() {
+        XCTAssertEqual(ShareCardShape.allCases, [.feed, .story, .square])
+        XCTAssertEqual(ShareCardShape.allCases.map(\.rawValue), ["4x5", "9x16", "1x1"])
+    }
+
+    func testCardDefaultsToFeed() {
+        let card = ShareCardView(title: "Keelung", locality: nil, aqi: 54, pollutant: nil, publishTime: nil)
+        XCTAssertEqual(card.shape, .feed)
+    }
+
+    func testRendersEachShapeAtItsPixelSize() throws {
+        for shape in ShareCardShape.allCases {
+            let image = try XCTUnwrap(ShareCardSharing.render(card(aqi: 54, shape: shape)))
+            XCTAssertEqual(image.size.width * image.scale, shape.pixelSize.width, "\(shape)")
+            XCTAssertEqual(image.size.height * image.scale, shape.pixelSize.height, "\(shape)")
+        }
+    }
+
+    /// A long station name shrinks or wraps rather than pushing the card taller.
     func testLongTitleKeepsCardSize() throws {
         let long = String(repeating: "Very long station name ", count: 6)
-        let image = try XCTUnwrap(ShareCardSharing.render(card(aqi: 162, title: long)))
-        XCTAssertEqual(image.size.height * image.scale, 1350)
+        for shape in ShareCardShape.allCases {
+            let image = try XCTUnwrap(ShareCardSharing.render(card(aqi: 162, title: long, shape: shape)))
+            XCTAssertEqual(image.size.height * image.scale, shape.pixelSize.height, "\(shape)")
+        }
+    }
+
+    // MARK: - Message
+
+    func testMessageInEnglish() throws {
+        let bundle = try lproj("en")
+        XCTAssertEqual(
+            ShareCardSharing.message(title: "Keelung", aqi: 54, bundle: bundle),
+            "Keelung: AQI 54, Moderate — via Taiwan Air"
+        )
+        XCTAssertEqual(
+            ShareCardSharing.shareText(title: "Keelung", aqi: 54, bundle: bundle),
+            "Keelung: AQI 54, Moderate — via Taiwan Air\nhttps://apps.apple.com/app/id1286516443"
+        )
+    }
+
+    func testMessageInTraditionalChinese() throws {
+        let bundle = try lproj("zh-Hant")
+        XCTAssertEqual(
+            ShareCardSharing.message(title: "基隆", aqi: 120.6, bundle: bundle),
+            "基隆：AQI 120，對敏感族群不健康 — 來自 Taiwan Air"
+        )
     }
 }
