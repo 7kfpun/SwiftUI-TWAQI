@@ -46,16 +46,16 @@ final class DeepLinkTests: XCTestCase {
     // MARK: - Routing
 
     func testProURLRoutesForFreeUser() throws {
-        let link = DeepLink.route(try url("twaqi://pro?source=widget_locked"), isPro: false)
+        let link = DeepLink.route(try url("twaqi://pro?source=widget_locked"), isPro: false, isKnownStation: { _ in true })
         XCTAssertEqual(link, .pro(source: .widgetLocked))
     }
 
     func testProURLIsIgnoredForProUser() throws {
-        XCTAssertNil(DeepLink.route(try url("twaqi://pro?source=widget_locked"), isPro: true))
+        XCTAssertNil(DeepLink.route(try url("twaqi://pro?source=widget_locked"), isPro: true, isKnownStation: { _ in true }))
     }
 
     func testUnknownURLIsIgnored() throws {
-        XCTAssertNil(DeepLink.route(try url("twaqi://station/126"), isPro: false))
+        XCTAssertNil(DeepLink.route(try url("twaqi://station/126"), isPro: false, isKnownStation: { _ in true }))
     }
 
     // MARK: - Station (FOX-74)
@@ -80,16 +80,61 @@ final class DeepLinkTests: XCTestCase {
 
     func testStationRoutesWithOrWithoutPro() throws {
         let url = try url("twaqi://station?id=126&source=control")
-        XCTAssertEqual(DeepLink.route(url, isPro: false), .station(id: 126, source: .control))
-        XCTAssertEqual(DeepLink.route(url, isPro: true), .station(id: 126, source: .control))
+        XCTAssertEqual(DeepLink.route(url, isPro: false, isKnownStation: { $0 == 126 }), .station(id: 126, source: .control))
+        XCTAssertEqual(DeepLink.route(url, isPro: true, isKnownStation: { $0 == 126 }), .station(id: 126, source: .control))
+    }
+
+    func testUnknownStationIsNotRouted() throws {
+        // Any web page or app can open the scheme with a made-up id.
+        let url = try url("twaqi://station?id=999999")
+        XCTAssertNil(DeepLink.route(url, isPro: false, isKnownStation: { $0 == 126 }))
+        XCTAssertNil(DeepLink.route(url, isPro: true, isKnownStation: { _ in false }))
     }
 
     func testRouterOpensTheLinkedStation() throws {
         let router = AppRouter()
 
-        XCTAssertTrue(router.open(try url("twaqi://station?id=126&source=control"), isPro: true))
+        XCTAssertTrue(router.open(try url("twaqi://station?id=126&source=control"), isPro: true, isKnownStation: { $0 == 126 }))
         XCTAssertEqual(router.openedStation, AppRouter.OpenedStation(id: 126))
         XCTAssertFalse(router.showingPro)
+    }
+
+    func testRouterDropsAnUnknownStation() throws {
+        let router = AppRouter()
+
+        XCTAssertFalse(router.open(try url("twaqi://station?id=999999&source=shortcut"), isPro: false, isKnownStation: { $0 == 126 }))
+        XCTAssertNil(router.openedStation)
+    }
+
+    func testMadeUpIdIsNotAKnownStation() {
+        XCTAssertFalse(KnownStations.contains(Int.max))
+    }
+
+    // MARK: - Favouriting a linked station
+
+    func testUnknownStationCannotBeFavourited() {
+        let id = 987_654_321
+        let settings = SettingsStore()
+        XCTAssertFalse(settings.savedFavouriteStations.contains(id))
+        let viewModel = DetailsViewModel(stationId: id)
+        XCTAssertFalse(viewModel.canAddFavourite)
+
+        viewModel.favouriteStationToggle()
+
+        XCTAssertFalse(SettingsStore().savedFavouriteStations.contains(id))
+        // Leave nothing behind if the guard ever regresses.
+        if settings.savedFavouriteStations.contains(id) {
+            settings.savedFavouriteStations.removeAll { $0 == id }
+        }
+    }
+
+    func testLoadedStationCanBeFavourited() {
+        let viewModel = DetailsViewModel(stationId: 126)
+        viewModel.station = Station(
+            id: 126, countryId: 1, countryCode: "TW", code: "XX",
+            lat: 25.0, lon: 121.5, imageUrl: nil, name: "Test", nameLocal: "測試"
+        )
+        XCTAssertTrue(viewModel.canAddFavourite)
     }
 
     // MARK: - Router

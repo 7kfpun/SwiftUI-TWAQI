@@ -171,8 +171,18 @@ class DetailsViewModel: ObservableObject {
         settings.savedFavouriteStations.contains(stationId)
     }
 
+    /// Whether this id is a station at all: its record or a reading loaded,
+    /// now or from the cache. Until then the heart can't add it, so a page
+    /// opened for an unknown id (a stale or made-up link) never puts that id
+    /// in Favourites, the widget or Siri's list (FOX-74). Removing one already
+    /// there is always allowed.
+    var canAddFavourite: Bool {
+        station != nil || pollutant != nil
+    }
+
     func favouriteStationToggle() {
         if !isFavourited {
+            guard canAddFavourite else { return }
             settings.savedFavouriteStations.append(stationId)
             logFavourite(on: true)
             enableAlertsForNewFavourite()

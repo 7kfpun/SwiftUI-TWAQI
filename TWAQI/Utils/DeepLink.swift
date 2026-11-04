@@ -95,14 +95,17 @@ enum DeepLink: Equatable {
     }
 
     /// What the app should open for `url`, or nil to ignore it: unknown URLs,
-    /// and the Pro screen for someone who already has Pro.
-    static func route(_ url: URL, isPro: Bool) -> DeepLink? {
+    /// the Pro screen for someone who already has Pro, and a station the app
+    /// doesn't know. The custom scheme can be opened by any web page or app,
+    /// so `twaqi://station?id=999999` must not open a page for a station that
+    /// isn't there (FOX-74).
+    static func route(_ url: URL, isPro: Bool, isKnownStation: (Int) -> Bool) -> DeepLink? {
         guard let link = DeepLink(url: url) else { return nil }
         switch link {
         case .pro:
             return isPro ? nil : link
-        case .station:
-            return link
+        case .station(let id, _):
+            return isKnownStation(id) ? link : nil
         }
     }
 }

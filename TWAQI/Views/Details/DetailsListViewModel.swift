@@ -17,12 +17,7 @@ class DetailsListViewModel: ObservableObject {
     @Published var loadFailed = false
 
     private(set) lazy var getData: () -> Void = {
-        let settings = SettingsStore()
-        // Scoped to the supported country: those are the only stations whose
-        // detail screen and notifications work.
-        let countryCode = settings.supportedCountryCode.isEmpty
-            ? settings.closestCountryCode
-            : settings.supportedCountryCode
+        let countryCode = Self.countryCode
 
         // The station list barely changes, so show the last one at once and
         // let the request only refresh it.
@@ -42,6 +37,20 @@ class DetailsListViewModel: ObservableObject {
                 self.loadFailed = self.stations.isEmpty
             }
         }
+    }
+
+    /// Scoped to the supported country: those are the only stations whose
+    /// detail screen and notifications work.
+    private static var countryCode: String {
+        let settings = SettingsStore()
+        return settings.supportedCountryCode.isEmpty
+            ? settings.closestCountryCode
+            : settings.supportedCountryCode
+    }
+
+    /// Ids in the saved station list, for checking a station link (FOX-74).
+    static func cachedStationIds() -> Set<Int> {
+        Set(cachedStations(countryCode: countryCode).map(\.id))
     }
 
     /// Application Support rather than Caches, like `StationCamStore`: the

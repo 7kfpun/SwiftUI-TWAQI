@@ -149,7 +149,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// could not be shown. The Pro screen already open is left as it is.
     private func open(_ url: URL) {
         let isPro = settings.isPro
-        guard let link = DeepLink.route(url, isPro: isPro),
+        // Unknown stations are dropped here too, so they don't close a sheet.
+        guard let link = DeepLink.route(url, isPro: isPro, isKnownStation: KnownStations.contains),
               !(router.showingPro && link.isPro),
               let root = window?.rootViewController,
               root.presentedViewController != nil

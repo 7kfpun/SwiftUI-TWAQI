@@ -89,6 +89,8 @@ struct DetailsView: View {
             Image(systemName: isFavourited ? "heart.fill" : "heart")
         }
         .buttonStyle(PlainButtonStyle())
+        // Not until the station is known to exist (FOX-74).
+        .disabled(!isFavourited && !viewModel.canAddFavourite)
         .accessibilityLabel(Text(isFavourited
             ? LocalizedStringKey("Favourites.remove_from_favourites")
             : LocalizedStringKey("Favourites.add_to_favourites")))
