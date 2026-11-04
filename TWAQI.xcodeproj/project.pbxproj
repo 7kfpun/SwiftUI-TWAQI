@@ -119,6 +119,7 @@
 		9E03DF6623975D4F002F8DA4 /* FavouriteListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */; };
 		F0A32D1E0000000000000002 /* ForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A32D1E0000000000000001 /* ForecastView.swift */; };
 		F0A32D1E0000000000000004 /* ForecastViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A32D1E0000000000000003 /* ForecastViewModel.swift */; };
+		F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */; };
 		F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
@@ -410,6 +411,7 @@
 		9E03DF6523975D4F002F8DA4 /* FavouriteListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListViewModel.swift; sourceTree = "<group>"; };
 		F0A32D1E0000000000000001 /* ForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastView.swift; sourceTree = "<group>"; };
 		F0A32D1E0000000000000003 /* ForecastViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastViewModel.swift; sourceTree = "<group>"; };
+		F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSectionOrderTests.swift; sourceTree = "<group>"; };
 		F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastTabOrderingTests.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -664,6 +666,7 @@
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
 				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
+				F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */,
 				F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
 				9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */,
@@ -1461,6 +1464,7 @@
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
 				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
 				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
+				F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */,
 				F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */,
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
