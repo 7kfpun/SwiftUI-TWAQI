@@ -84,7 +84,8 @@ curl -sI "https://$HOST/$(curl -s "https://$HOST/manifest.json" | jq -r '.statio
 - **Model:** pinned in `TRANSLATION_MODEL` (`deepseek/deepseek-v4.1-flash`), `temperature: 0`, a short system prompt plus the glossary terms found in the text (the 10 forecast areas, pollutants, AQI levels, MOENV alerts). Output must be plain English with no Chinese left, or it is rejected.
 - **Limits:** 30 s per call, at most 40 distinct texts and 120 s of translating per run; the rest waits for the next hour.
 - **Never blocks the forecast.** Translation runs after the rows are stored. A failed call, a missing `OPENROUTER_FORECAST_API_KEY`, a missing `content_i18n` field or a refused write leaves `content_i18n` as it was and is retried next run.
-- `GET /forecast` reports `translated` (texts translated), `translatedRows`, `translationFailed`, `translationDeferred`, and `translationSkipped` with the reason when translation did not run or could not save.
+- **Saves in batches.** Rows that only copy an existing translation are saved first (no model call), then the translations after every 5 model calls (`TRANSLATION_SAVE_BATCH`). Once Directus refuses a save (e.g. 403: the Worker role lacks update on `content_i18n`), the run makes no more model calls, so a refused save costs at most one batch per run instead of up to 40 calls; the unsent texts count as `translationDeferred`.
+- `GET /forecast` reports `translated` (texts translated and saved), `translatedRows`, `translationFailed` (including texts translated but not saved), `translationDeferred`, and `translationSkipped` with the reason when translation did not run or could not save; after a refused save it ends with `model calls stopped after N, M left for next run`.
 - Directus: `content_i18n` is a JSON field on `twaqi_aqi_forecast`; the **TWAQI Forecast Worker** role needs read and update on it, and the app's role read.
 
 | Route | |
