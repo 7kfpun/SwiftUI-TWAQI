@@ -317,9 +317,11 @@ struct ReadingProvider: AppIntentTimelineProvider {
         WatchStore.cacheFavouriteReadings(fetched.filter { savedIds.contains($0.stationId) }.map(WatchReading.init))
 
         // New readings send the widget back to its own station (FOX-76);
-        // offline, the page stays. A cycled index stays either way.
+        // offline, the page stays. A cycled index stays either way. Read the
+        // state again: a ‹ › or index tap during the fetch is newer and stays.
         if let key {
-            state = WidgetPaging.refreshed(state, hasNewData: hasNewData, now: now)
+            let current = WidgetPageStore.state(for: key, in: defaults)
+            state = WidgetPaging.afterFetch(current, readBefore: state, hasNewData: hasNewData, now: now)
             WidgetPageStore.save(state, for: key, in: defaults)
         }
 
@@ -331,12 +333,27 @@ struct ReadingProvider: AppIntentTimelineProvider {
             alertThreshold: reading.flatMap { WatchStore.alertThresholds[$0.stationId] },
             isLocked: isLocked, now: now
         )
-        let entry = Self.makeEntry(
-            date: now, leading: reading, configuration: configuration, family: context.family,
-            isPreview: context.isPreview, isLocked: isLocked, state: state,
-            relevance: TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
-        )
-        return Timeline(entries: [entry], policy: .after(next))
+        let relevance = TimelineEntryRelevance(score: score, duration: Self.refreshInterval)
+        func entry(at date: Date) -> ReadingEntry {
+            Self.makeEntry(
+                date: date, leading: reading, configuration: configuration, family: context.family,
+                isPreview: context.isPreview, isLocked: isLocked, state: state, relevance: relevance
+            )
+        }
+        return Timeline(entries: Self.entriesWithReset(entry(at: now), state: state, now: now, entry: entry),
+                        policy: .after(next))
+    }
+
+    /// `shown`, then the widget's own station again when a paged widget's
+    /// 30 minutes run out, so the return happens on every timeline, offline
+    /// ones included, not only after a tap.
+    private static func entriesWithReset(
+        _ shown: ReadingEntry, state: WidgetPageState, now: Date, entry: (Date) -> ReadingEntry
+    ) -> [ReadingEntry] {
+        guard shown.showsPager, let reset = WidgetPaging.resetDate(state, pageIds: shown.pageIds, now: now) else {
+            return [shown]
+        }
+        return [shown, entry(reset)]
     }
 
     /// The reload after a tap: the page or index it chose, from saved
@@ -362,11 +379,7 @@ struct ReadingProvider: AppIntentTimelineProvider {
             )
         }
 
-        let shown = entry(at: now)
-        var entries = [shown]
-        if shown.showsPager, let reset = WidgetPaging.resetDate(state, pageIds: shown.pageIds, now: now) {
-            entries.append(entry(at: reset))
-        }
+        let entries = entriesWithReset(entry(at: now), state: state, now: now, entry: entry)
         let nextRefresh = max(
             (state.refreshedAt ?? now).addingTimeInterval(refreshInterval), now.addingTimeInterval(60)
         )
@@ -430,7 +443,9 @@ struct ReadingWidgetView: View {
         case .systemSmall where !entry.favourites.isEmpty:
             smallWithFavourites(reading)
 
-        case .systemMedium where !entry.favourites.isEmpty:
+        // The ‹ › buttons live in this layout, so a page whose side list
+        // is empty keeps it.
+        case .systemMedium where !entry.favourites.isEmpty || entry.showsPager:
             mediumWithFavourites(reading)
 
         // With nothing saved, large says how to add favourites rather than

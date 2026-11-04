@@ -128,9 +128,20 @@ enum WidgetPaging {
         return state
     }
 
-    /// After a tap on the index label: show `index`.
+    /// True when the page stored in `state` is `resetInterval` past its last
+    /// tap, so the widget is back on its own station whatever is stored.
+    static func isExpired(_ state: WidgetPageState, now: Date) -> Bool {
+        guard let tappedAt = state.tappedAt else { return true }
+        return now.timeIntervalSince(tappedAt) >= resetInterval
+    }
+
+    /// After a tap on the index label: show `index`. A page that already
+    /// went back to the default stays there: the tap doesn't revive it.
     static func cycled(_ state: WidgetPageState, to index: AirIndexTypes, now: Date) -> WidgetPageState {
         var state = state
+        if isExpired(state, now: now) {
+            state.stationId = nil
+        }
         state.index = index.rawValue
         state.tappedAt = now
         return state
@@ -138,14 +149,30 @@ enum WidgetPaging {
 
     /// After a scheduled timeline: with new readings (`hasNewData`), back to
     /// the default page. Offline, or when the request failed, the page stays
-    /// and only the 30-minute rule sends it back. The cycled index stays.
+    /// and only the 30-minute rule sends it back; an expired page is cleared.
+    /// The cycled index stays.
     static func refreshed(_ state: WidgetPageState, hasNewData: Bool, now: Date) -> WidgetPageState {
         var state = state
-        if hasNewData {
+        if hasNewData || isExpired(state, now: now) {
             state.stationId = nil
         }
         state.refreshedAt = now
         return state
+    }
+
+    /// What a scheduled timeline saves after its fetch. `current` is the
+    /// state read again after the fetch, `readBefore` the one read before
+    /// it. A tap in between (a different `tappedAt`) is newer than the
+    /// readings, so its page and index stay; otherwise `refreshed`.
+    static func afterFetch(
+        _ current: WidgetPageState, readBefore: WidgetPageState, hasNewData: Bool, now: Date
+    ) -> WidgetPageState {
+        guard current.tappedAt == readBefore.tappedAt else {
+            var state = current
+            state.refreshedAt = now
+            return state
+        }
+        return refreshed(current, hasNewData: hasNewData, now: now)
     }
 }
 

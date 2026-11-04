@@ -132,6 +132,41 @@ final class WidgetPagingTests: XCTestCase {
         XCTAssertEqual(WidgetPaging.currentPage(refreshed, pageIds: pages, now: now), 2)
     }
 
+    func testRefreshClearsAnExpiredPageEvenOffline() {
+        // Paged to 2 at 10:10, offline since: the 11:00 refresh clears it.
+        let expired = state(on: 2, tappedSecondsAgo: 50 * 60)
+        let refreshed = WidgetPaging.refreshed(expired, hasNewData: false, now: now)
+        XCTAssertNil(refreshed.stationId)
+        XCTAssertNil(WidgetPaging.resetDate(refreshed, pageIds: pages, now: now))
+    }
+
+    func testOfflineRefreshStillPlansTheReturn() {
+        // Paged at 10:10, offline refresh at 10:30: the page stays and the
+        // return at 10:40 is still planned.
+        let paged = state(on: 2, tappedSecondsAgo: 20 * 60)
+        let refreshed = WidgetPaging.refreshed(paged, hasNewData: false, now: now)
+        XCTAssertEqual(WidgetPaging.resetDate(refreshed, pageIds: pages, now: now), now.addingTimeInterval(10 * 60))
+    }
+
+    func testTapDuringTheFetchIsKept() {
+        let before = state(on: nil, tappedSecondsAgo: 40 * 60)
+        let tapped = WidgetPaging.paged(before, to: 3, now: now.addingTimeInterval(2))
+        for hasNewData in [true, false] {
+            let saved = WidgetPaging.afterFetch(tapped, readBefore: before, hasNewData: hasNewData, now: now)
+            XCTAssertEqual(saved.stationId, 3)
+            XCTAssertEqual(saved.tappedAt, tapped.tappedAt)
+            XCTAssertEqual(saved.refreshedAt, now)
+            XCTAssertEqual(WidgetPaging.currentPage(saved, pageIds: pages, now: now), 3)
+        }
+    }
+
+    func testNoTapDuringTheFetchIsARefresh() {
+        let before = state(on: 2, tappedSecondsAgo: 60)
+        let saved = WidgetPaging.afterFetch(before, readBefore: before, hasNewData: true, now: now)
+        XCTAssertEqual(saved, WidgetPaging.refreshed(before, hasNewData: true, now: now))
+        XCTAssertNil(saved.stationId)
+    }
+
     // MARK: - Tap reloads
 
     func testReloadRightAfterATapDrawsFromSavedReadings() {
@@ -166,6 +201,14 @@ final class WidgetPagingTests: XCTestCase {
         let paged = state(on: 3, tappedSecondsAgo: 20 * 60)
         let cycled = WidgetPaging.cycled(paged, to: .pm10, now: now)
         XCTAssertEqual(WidgetPaging.currentPage(cycled, pageIds: pages, now: now), 3)
+    }
+
+    func testIndexTapDoesNotReviveAnExpiredPage() {
+        let expired = state(on: 2, tappedSecondsAgo: 50 * 60)
+        let cycled = WidgetPaging.cycled(expired, to: .pm25, now: now)
+        XCTAssertNil(cycled.stationId)
+        XCTAssertEqual(WidgetPaging.currentPage(cycled, pageIds: pages, now: now), 0)
+        XCTAssertEqual(cycled.index, "pm25")
     }
 
     // MARK: - Keys and storage
