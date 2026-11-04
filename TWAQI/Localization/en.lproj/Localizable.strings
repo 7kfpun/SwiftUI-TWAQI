@@ -77,6 +77,8 @@
 "Feedback.send" = "Send";
 "Feedback.sent_title" = "Thank you!";
 "Feedback.sent_message" = "Your feedback has been sent.";
+"Feedback.sent_message_may_reply" = "Your feedback has been sent. We may reply to you by email.";
+"Feedback.rate_on_app_store" = "Rate on the App Store";
 "Feedback.error_title" = "Couldn't send feedback";
 "Feedback.error_offline" = "You seem to be offline. Check your connection and try again.";
 "Feedback.error_generic" = "Something went wrong. Please try again later.";
@@ -118,6 +120,10 @@
 "Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
 "Help.widgets_index_header" = "Which index";
 "Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
+"Help.widgets_paging_header" = "Page through favourites";
+"Help.widgets_paging_body" = "On a medium or large widget, tap ‹ or › to step through your favourites one station at a time; the number between them, like 2 / 5, shows where you are. Tap anywhere else to open that station in the app. The widget goes back to its own station after 30 minutes without a tap, or when new readings come in. Needs Pro and at least two favourites.";
+"Help.widgets_cycle_body" = "Tap the index name (AQI, PM2.5…) on a Home Screen widget to switch to the next index. It starts from the index chosen in Edit Widget.";
+"Help.widgets_stack_tip" = "Tip: put several Taiwan Air widgets in one widget stack (drag one onto another), set each one differently, for example nearest station and first favourite, or AQI and PM2.5, and swipe between them.";
 "Help.widgets_sizes_header" = "Sizes";
 "Help.widgets_home_sizes" = "Home Screen: small, medium, large, and extra large (iPad).";
 "Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
@@ -266,6 +272,13 @@
 "Widget.pro_only_title" = "Pro widget";
 "Widget.pro_only_body" = "Medium, large and extra large widgets are for Pro users. Open the app to upgrade.";
 "Widget.pro_unlock" = "Unlock every reading with Pro";
+"Widget.next_station" = "Next station";
+"Widget.previous_station" = "Previous station";
+"Widget.show_index %@" = "Show %@";
+"Widget.page_position %lld %lld" = "Station %1$lld of %2$lld";
+"Widget.intent_page_title" = "Show a station in the widget";
+"Widget.intent_index_title" = "Change the widget's index";
+"Widget.intent_widget" = "Widget";
 "Watch.no_station" = "Open the app to choose a station";
 "Watch.history" = "Past 12 hours";
 "Watch.closest" = "Closest station";

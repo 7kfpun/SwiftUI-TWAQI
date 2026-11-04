@@ -67,6 +67,13 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertEqual(DeepLink(url: try XCTUnwrap(DeepLink.stationURL(stationId: 7, source: .shortcut))), .station(id: 7, source: .shortcut))
     }
 
+    func testWidgetStationURLRoundTrips() throws {
+        // FOX-76: a tap on a medium or large widget opens the station it shows.
+        let url = try XCTUnwrap(DeepLink.stationURL(stationId: 42, source: .widget))
+        XCTAssertEqual(url.absoluteString, "twaqi://station?id=42&source=widget")
+        XCTAssertEqual(DeepLink(url: url), .station(id: 42, source: .widget))
+    }
+
     func testStationWithoutOrWithUnknownSourceIsStillAStation() throws {
         XCTAssertEqual(DeepLink(url: try url("twaqi://station?id=126")), .station(id: 126, source: .deepLink))
         XCTAssertEqual(DeepLink(url: try url("TWAQI://STATION?id=126&source=new")), .station(id: 126, source: .deepLink))
