@@ -146,7 +146,8 @@ fun ClosestStationCard(
                 UpdatedLabel(pollutant, lastGood, Modifier.padding(top = 3.dp))
             }
             Column(
-                modifier = Modifier.width(72.dp).fillMaxHeight().padding(top = 12.dp),
+                // At least iOS's 72 dp; a longer reading ("PM2.5 21") takes what it needs.
+                modifier = Modifier.widthIn(min = 72.dp).fillMaxHeight().padding(top = 12.dp, end = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ValuePill(type, value)
