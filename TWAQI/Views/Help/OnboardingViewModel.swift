@@ -57,6 +57,9 @@ final class OnboardingViewModel: ObservableObject {
     /// Only read for its status: reading never prompts.
     private let statusManager = CLLocationManager()
     private var location: CLLocation?
+    /// The location prompt's answer and the pause after a grant. Cancelled
+    /// when the flow ends, so nothing moves the step after Skip or Done.
+    private var locationTask: Task<Void, Never>?
 
     init() {
         refreshLocationState()
@@ -108,7 +111,7 @@ final class OnboardingViewModel: ObservableObject {
         // Only a real prompt's answer is logged, not a status decided earlier.
         let prompts = statusManager.authorizationStatus == .notDetermined
         locationState = .asking
-        Task {
+        locationTask = Task {
             location = await locator.current()
             refreshLocationState()
             if prompts, locationState == .on || locationState == .off {
@@ -125,7 +128,7 @@ final class OnboardingViewModel: ObservableObject {
             if locationState == .on, prompts {
                 // Let the step's success show, unless the reader moved on already.
                 try? await Task.sleep(nanoseconds: Self.successPause)
-                if step == .location {
+                if !Task.isCancelled, step == .location {
                     goForward()
                 }
             } else if locationState == .on || locationState == .off {
@@ -150,6 +153,8 @@ final class OnboardingViewModel: ObservableObject {
 
             let stations = await Self.currentStations()
             self.stations = stations
+            // A station chosen meanwhile stays.
+            if case .loaded = closest { return }
             guard let resolved = OnboardingClosestStation.resolve(location: location, in: stations) else {
                 closest = .failed
                 return
@@ -267,6 +272,7 @@ final class OnboardingViewModel: ObservableObject {
     /// `isLaunchFlow`: this run opened by itself at launch, so finishing it
     /// ends the launch-time hold; a Help run leaves the hold alone.
     func finish(skippedAt skipped: Onboarding.Step? = nil, isLaunchFlow: Bool) {
+        locationTask?.cancel()
         Onboarding.flowEnded(isLaunchFlow: isLaunchFlow)
         if let skipped {
             TrackingManager.logEvent(.onboardingSkipped, parameters: [
