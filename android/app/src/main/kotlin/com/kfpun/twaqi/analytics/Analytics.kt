@@ -84,6 +84,11 @@ object Analytics {
     /** `source`: where the feedback form was opened from (`station_page`). */
     const val OPEN_FEEDBACK_FORM = "open_feedback_form"
 
+    // Widgets (FOX-59), as on iOS.
+
+    /** `source` (widget, tile, deep_link), `stationId`: a `twaqi://station` link opened its station. */
+    const val STATION_LINK_OPENED = "station_link_opened"
+
     /** Does nothing when Firebase is not set up (no `google-services.json`). */
     fun logEvent(context: Context, name: String, parameters: Map<String, String> = emptyMap()) {
         if (FirebaseApp.getApps(context).isEmpty()) return

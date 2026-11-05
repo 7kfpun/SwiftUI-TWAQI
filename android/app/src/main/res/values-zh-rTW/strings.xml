@@ -266,6 +266,16 @@
     <string name="widget_page_position">第 %1$d 個測站，共 %2$d 個</string>
     <string name="widget_intent_page_title">在小工具顯示測站</string>
     <string name="widget_intent_index_title">切換小工具的指標</string>
+    <!-- FOX-59: Android widgets. -->
+    <string name="widget_index">指標</string>
+    <string name="widget_configure_title">設定小工具</string>
+    <string name="widget_configure_save">儲存</string>
+    <string name="widget_all_stations">所有測站</string>
+    <string name="widget_detail_name">測站詳情</string>
+    <string name="widget_detail_description">詳細顯示單一測站：各項指標、風向風速、過去 24 小時與空品區預報。</string>
+    <string name="widget_pro_only_body_android">中、大尺寸與測站詳情小工具屬於 Pro。輕觸即可升級。</string>
+    <string name="widget_updated_at">%s 更新</string>
+    <string name="widget_offline_saved_at">離線 · %s 儲存</string>
     <string name="widget_intent_widget">小工具</string>
     <string name="watch_no_station">開啟 App 選擇測站</string>
 

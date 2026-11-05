@@ -10,6 +10,7 @@ import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.data.remote.ApiConfig
 import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
+import com.kfpun.twaqi.widget.WidgetHistoryCache
 import java.io.File
 
 /**
@@ -24,6 +25,9 @@ class AppContainer(context: Context, config: ApiConfig = ApiConfig.fromBuildConf
 
     val airQuality = AirQualityRepository(api, store, PollutantCache(store))
     val forecasts = ForecastRepository(api, store)
+
+    /** FOX-59: the station detail widget's last 24 hours. */
+    val widgetHistory = WidgetHistoryCache(store)
 
     /** FOX-55; FOX-57 passes its alerts gateway here. */
     val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context))

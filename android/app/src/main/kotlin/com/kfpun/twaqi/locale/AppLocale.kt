@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.widget.WidgetUpdater
 import java.util.Locale
 
 /**
@@ -56,6 +57,8 @@ object AppLocale {
             if (language.localeTag == null) remove(KEY) else putString(KEY, language.id)
         }
         AppCompatDelegate.setApplicationLocales(localeList(language))
+        // Widgets have no activity to recreate; they redraw in the new language (FOX-59).
+        WidgetUpdater.requestRedrawAll(context)
         Analytics.logEvent(context, Analytics.SELECT_LANGUAGE, mapOf("label" to language.id))
     }
 
