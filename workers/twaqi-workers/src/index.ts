@@ -3,12 +3,16 @@
 // Object keys use the MOENV site id from the JPEG filename (e.g. 001), not a TWAQI station id.
 //
 // MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
+//
+// CWA weather sync: F-C0032-001 + O-A0003-001 -> R2 `weather/latest.json` (see weather.ts),
+// hourly at :40 in its own invocation, so it never shares the forecast's CPU or subrequest budget.
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
+import { errorText, syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
 import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepDue } from './history'
 import { handleApi, isApiPath, type ApiEnv } from './api'
 
-interface Env extends ForecastEnv, ApiEnv {
+interface Env extends ForecastEnv, ApiEnv, WeatherEnv {
   CAMS: R2Bucket
   MOENV_API_KEY: string
   SYNC_TOKEN: string
@@ -17,6 +21,7 @@ interface Env extends ForecastEnv, ApiEnv {
 /** Must match `triggers.crons` in wrangler.jsonc. */
 const CAMS_CRON = '*/10 * * * *'
 const FORECAST_CRON = '35 * * * *'
+const WEATHER_CRON = '40 * * * *'
 const FORECAST_STATUS_KEY = 'forecast/last-sync.json'
 
 interface Station {
@@ -63,6 +68,10 @@ export default {
       ctx.waitUntil(runForecastSync(env))
       return
     }
+    if (controller.cron === WEATHER_CRON) {
+      ctx.waitUntil(runWeatherSync(env))
+      return
+    }
     if (controller.cron !== CAMS_CRON) console.warn('unknown cron, running cam sync', controller.cron)
     ctx.waitUntil(
       sync(env).then(
@@ -104,6 +113,14 @@ export default {
       return json(status, status.ok ? 200 : 502)
     }
 
+    // Weather: /weather (last sync status) and POST /weather/sync (manual run).
+    if (path === '/weather/sync') {
+      if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
+      if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
+      const status = await runWeatherSync(env)
+      return json(status, status.ok ? 200 : 502)
+    }
+
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return json({ error: 'method not allowed' }, 405, { Allow: 'GET, HEAD' })
     }
@@ -127,6 +144,12 @@ export default {
       const obj = await env.CAMS.get(FORECAST_STATUS_KEY)
       const last = obj ? await obj.json() : null
       return json({ ok: true, service: 'forecast', last }, 200, { 'Cache-Control': 'no-store' })
+    }
+
+    if (path === '/weather') {
+      const obj = await env.CAMS.get(WEATHER_STATUS_KEY)
+      const last = obj ? await obj.json() : null
+      return json({ ok: true, service: 'weather', last }, 200, { 'Cache-Control': 'no-store' })
     }
 
     if (path === '/station-cams/manifest.json') {
@@ -168,6 +191,42 @@ async function runForecastSync(env: Env): Promise<ForecastStatus> {
     })
   } catch (e) {
     console.error('forecast status write failed', e)
+  }
+  return status
+}
+
+interface WeatherStatus {
+  ok: boolean
+  at: string
+  result?: WeatherSyncResult
+  error?: string
+}
+
+/** Runs the CWA weather sync, logs it, and records the outcome in R2 for GET /weather. Never throws. */
+async function runWeatherSync(env: Env): Promise<WeatherStatus> {
+  let status: WeatherStatus
+  try {
+    const result = await syncWeather(env)
+    // One set failing keeps its last good section and still counts as ok;
+    // a warning makes it visible to the Worker's observability.
+    if (result.forecast !== 'updated' || result.observations !== 'updated') {
+      console.warn('weather sync partial', JSON.stringify(result))
+    } else {
+      console.log('weather sync ok', JSON.stringify(result))
+    }
+    status = { ok: true, at: new Date().toISOString(), result }
+  } catch (e) {
+    // weather/latest.json keeps the last good file; nothing to undo.
+    const error = errorText(e)
+    console.error('weather sync failed', error)
+    status = { ok: false, at: new Date().toISOString(), error }
+  }
+  try {
+    await env.CAMS.put(WEATHER_STATUS_KEY, JSON.stringify(status), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' },
+    })
+  } catch (e) {
+    console.error('weather status write failed', e)
   }
   return status
 }

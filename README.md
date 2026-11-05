@@ -59,6 +59,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | 空品區 AQI forecast | Directus `twaqi_aqi_forecast`, filled hourly from MOENV `AQF_P_01` by [`workers/twaqi-workers`](workers/twaqi-workers/README.md); the app only reads it |
 | Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
 | Station webcams | R2 bucket `twaqi-station-cams` behind the webcam host (its custom domain), synced every 10 min by `workers/twaqi-workers` |
+| Weather on the station page (FOX-11) | Central Weather Administration (CWA) open data (`F-C0032-001` county forecast, `O-A0003-001` observations), written hourly by [`workers/twaqi-workers`](workers/twaqi-workers/README.md#cwa-weather-fox-11) to `weather/latest.json` in the same bucket, read from the webcam host. The CWA key stays in the Worker |
 | Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics only (Swift Package Manager) |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
@@ -70,6 +71,13 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 - R2 keeps a **rolling 24 h** of hourly frames. A missing hour is a plain 404; the app treats it as missing, not as a failure.
 - `siteId` is the MOENV image site id (`001`), not a TWAQI station id; the app matches cams to stations by name, then by distance.
 - On device, fetched frames and hourly frames are cached for offline use and purged after a week, along with the other offline caches.
+
+### Weather (CWA)
+
+- The station page's **Weather** card (free, not Pro) sits above the cam: the latest reading of the nearest CWA staffed station within 20 km (temperature, humidity, rain since midnight, wind, with the station's distance and the reading's age), then the next three 12-hour periods of the county's 36-hour forecast (icon, weather text, chance of rain, min–max °C).
+- CWA station ids are unrelated to MOENV's; the app joins by position (observations) and by county name (forecast; the nearest CWA station's county when the station has none). The card hides itself when nothing is in range or fresh: readings older than 3 hours and periods that have ended are dropped.
+- Weather codes map to the app's own en / zh-Hant strings and SF Symbols (`WeatherCode`). In Chinese the card shows CWA's own text; CWA's free text (descriptions, station names) is never shown in English.
+- The last good file is cached on device (`cwa-weather.json` in Application Support) and purged after a week with the other offline caches. Times are Taiwan time.
 
 ### Push notifications: Firebase Cloud Messaging (FOX-13)
 
