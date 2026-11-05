@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -26,6 +25,8 @@ import com.kfpun.twaqi.pro.ProNavigation
 import com.kfpun.twaqi.pro.ProScreenSource
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
+import com.kfpun.twaqi.ui.navigation.StationDestination
+import com.kfpun.twaqi.ui.navigation.StationRoute
 import com.kfpun.twaqi.ui.theme.TWAQITheme
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 /**
- * The tabs (FOX-97: Help); the map, list and details come with the later Android tickets.
+ * The tabs, with the map as home (FOX-54) and Help (FOX-97), and the station screen over them.
  * [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen.
  */
 @Composable
@@ -81,18 +82,18 @@ fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = 
     val context = LocalContext.current
     val pro = remember(context) { ProGraph.repository(context) }
     val entitlement by pro.entitlement.collectAsState()
-    MainTabs(
-        isPro = entitlement == Entitlement.PRO,
-        onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
-        onOpenDataScreen = onOpenDataScreen,
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenPreview() {
-    TWAQITheme {
-        HomeScreen()
+    var stationId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val station = stationId
+    if (station != null) {
+        BackHandler { stationId = null }
+        StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)
+    } else {
+        MainTabs(
+            isPro = entitlement == Entitlement.PRO,
+            onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
+            onOpenStation = { stationId = it.stationId },
+            onOpenDataScreen = onOpenDataScreen,
+            modifier = modifier
+        )
     }
 }
