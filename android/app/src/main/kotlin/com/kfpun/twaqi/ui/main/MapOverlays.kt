@@ -98,6 +98,8 @@ fun ValuePill(type: AirIndexType, value: Double, modifier: Modifier = Modifier) 
  *
  * @param lastGood the reading is the last saved one, because the latest request failed: says so
  *   with its age instead of a bare clock time.
+ * @param timelineContext set while the map timeline is scrubbed back, e.g. 「昨天 17:00・24 小時前」.
+ *   Replaces "Last updated HH:mm", which reads the same 24 hours ago as it does now.
  */
 @Composable
 fun ClosestStationCard(
@@ -105,7 +107,8 @@ fun ClosestStationCard(
     type: AirIndexType,
     lastGood: Boolean,
     onClick: (() -> Unit)?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    timelineContext: String? = null
 ) {
     val context = LocalContext.current
     val chinese = AppLocale.isChinese(context)
@@ -143,7 +146,17 @@ fun ClosestStationCard(
                     )
                 }
                 Text(text = maxLength(stringResource(status.label), 20), fontSize = 12.sp, maxLines = 1)
-                UpdatedLabel(pollutant, lastGood, Modifier.padding(top = 3.dp))
+                if (timelineContext != null) {
+                    Text(
+                        text = timelineContext,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Light,
+                        maxLines = 1,
+                        modifier = Modifier.padding(top = 3.dp)
+                    )
+                } else {
+                    UpdatedLabel(pollutant, lastGood, Modifier.padding(top = 3.dp))
+                }
             }
             Column(
                 // At least iOS's 72 dp; a longer reading ("PM2.5 21") takes what it needs.
@@ -280,6 +293,30 @@ fun MapRoundButton(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(painterResource(icon), contentDescription = contentDescription, tint = MapAccent)
+        }
+    }
+}
+
+/**
+ * The wind mode toggle (iOS `WindModeButton`): a round 60 dp button, filled with the accent and a
+ * white icon while on, the plain card colour while off.
+ */
+@Composable
+fun WindModeButton(isWindMode: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        checked = isWindMode,
+        onCheckedChange = { onToggle() },
+        modifier = modifier.size(60.dp),
+        shape = CircleShape,
+        color = if (isWindMode) MapAccent else MaterialTheme.colorScheme.surface,
+        shadowElevation = 4.dp
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painterResource(R.drawable.ic_map_wind),
+                contentDescription = stringResource(R.string.details_wind),
+                tint = if (isWindMode) Color.White else MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

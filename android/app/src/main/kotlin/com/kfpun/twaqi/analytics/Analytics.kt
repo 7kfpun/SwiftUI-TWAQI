@@ -97,6 +97,14 @@ object Analytics {
     /** A map marker opened its station: `name`, `nameLocal`, `stationId`. */
     const val CHECK_MAIN_DETAILS = "check_main_details"
 
+    // Map wind mode and timeline (FOX-91), as on iOS.
+
+    /** The wind button: `label` on / off. */
+    const val SET_WIND_MODE = "set_wind_mode"
+
+    /** Play on the map timeline (not pause). */
+    const val MAP_TIMELINE_PLAY = "map_timeline_play"
+
     // Station page and Favourites (FOX-55).
 
     /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
