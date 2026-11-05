@@ -1,12 +1,12 @@
 // Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes,
 // the MOENV air-quality forecast (aqf_p_01) into Directus hourly at :35, and CWA weather
-// (F-C0032-001, O-A0003-001) into R2 hourly at :40.
+// (F-C0032-001, O-A0003-001) into R2 every 15 minutes.
 // Deployed by GitHub Actions (.github/workflows/workers.yml) on merge to master.
 // Secrets (never in git) are listed in secrets.required; CI uploads them from
 // the `workers-production` GitHub environment secrets of the same names on every deploy.
 // OPENROUTER_FORECAST_API_KEY pre-translates the forecast text (src/translate.ts).
-// CWA_API_KEY is the CWA open-data key for the weather sync (src/weather.ts, FOX-11), hourly at
-// :40: it writes weather/latest.json to the bucket, served from the webcam host.
+// CWA_API_KEY is the CWA open-data key for the weather sync (src/weather.ts, FOX-11), every 15 minutes:
+// it writes weather/latest.json to the bucket, served from the webcam host.
 //
 // Public paths:
 //   Images (the R2 custom domain of bucket twaqi-station-cams, the "webcam host"; not a Worker route):
@@ -28,7 +28,7 @@
     { "binding": "CAMS", "bucket_name": "twaqi-station-cams" }
   ],
   "triggers": {
-    "crons": ["*/10 * * * *", "35 * * * *", "40 * * * *"]
+    "crons": ["*/10 * * * *", "35 * * * *", "*/15 * * * *"]
   },
   "vars": {
     "DIRECTUS_URL": "https://cms.wahthefox.com",

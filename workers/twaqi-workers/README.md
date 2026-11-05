@@ -103,7 +103,7 @@ curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 
 ## CWA weather (FOX-11)
 
-- **Cron** `40 * * * *` (hourly, its own invocation so it never shares the forecast's CPU or subrequest budget): fetch two CWA open-data sets with `CWA_API_KEY` → one compact JSON → R2 `weather/latest.json`, `Cache-Control: public, max-age=300`, served straight from the webcam host like `manifest.json` (no Worker in the path). Code: `src/weather.ts`.
+- **Cron** `*/15 * * * *` (every 15 minutes, its own invocation so it never shares the forecast's CPU or subrequest budget): fetch two CWA open-data sets with `CWA_API_KEY` → one compact JSON → R2 `weather/latest.json`, `Cache-Control: public, max-age=300`, served straight from the webcam host like `manifest.json` (no Worker in the path). Code: `src/weather.ts`.
   - `F-C0032-001`: the 36-hour county (縣市) forecast. Kept per county and period: start/end (Taiwan time, ISO 8601 with `+08:00`), Wx code and CWA's text, PoP, MinT, MaxT. CI (comfort) is dropped: the app doesn't show it.
   - `O-A0003-001`: CWA's staffed stations. Kept per station: id, name, county, WGS84 lat/lon, observation time, temperature, humidity, rain since midnight (`Now.Precipitation`), wind speed. CWA's missing-value markers (`-99`, `-990`, `X`, …) become `null`; for rain, `T` (trace) and `-98` (no rain in 6 h) are `0`. A station with no reading left is dropped.
 - **Shape:** `{ version: 1, updatedAt, forecast: { fetchedAt, counties: { "臺北市": [period…] } } | null, observations: { fetchedAt, stations: [station…] } | null }`. County names use 臺 as CWA writes them. Free text (Wx descriptions, station names) stays zh-Hant; the app maps Wx codes to its own strings.
