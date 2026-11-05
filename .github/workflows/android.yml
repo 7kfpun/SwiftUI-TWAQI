@@ -1,0 +1,103 @@
+name: Android
+
+# The Android app under android/ (FOX-52): ktlint, Android lint, JVM unit tests
+# and a debug build, with the example config only (no secrets in CI).
+#
+# Every pull request to master gets a single "Android" check, so branch
+# protection can require it (docs/master-protection.md). It is green straight
+# away when nothing under android/ and not this file changed, and on drafts.
+# That is why pull_request has no paths filter: a filtered-out workflow never
+# reports, and a required check that never reports blocks the merge (the same
+# pattern as workers.yml).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
+  push:
+    branches: [master]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find Android changes
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          paths=(android/ .github/workflows/android.yml)
+          build=true
+          case "$EVENT" in
+            pull_request)
+              if [ "$DRAFT" = true ]; then
+                build=false
+              elif git diff --quiet "$PR_BASE...$PR_HEAD" -- "${paths[@]}"; then
+                build=false
+              fi
+              ;;
+            push)
+              # A first push or a force push may leave no usable base: build.
+              if [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ] \
+                && git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null \
+                && git diff --quiet "$PUSH_BEFORE" "$PUSH_AFTER" -- "${paths[@]}"; then
+                build=false
+              fi
+              ;;
+          esac
+          echo "Build Android: $build"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        if: steps.changes.outputs.build == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle (with cache)
+        if: steps.changes.outputs.build == 'true'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # Only master writes the cache; pull requests read it.
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Lint, unit tests and debug build
+        if: steps.changes.outputs.build == 'true'
+        working-directory: android
+        # The runner's preinstalled Android SDK (ANDROID_HOME); AGP fetches a
+        # missing platform or build-tools on its own. No secrets: the build
+        # uses secrets.example.properties and no google-services.json.
+        run: ./gradlew ktlintCheck lint test assembleDebug --stacktrace
+
+      - name: Upload lint and test reports
+        if: failure() && steps.changes.outputs.build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-reports
+          path: |
+            android/app/build/reports/
+            android/app/build/test-results/
+          retention-days: 7

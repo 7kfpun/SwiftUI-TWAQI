@@ -1,0 +1,19 @@
+# Gradle and IDE
+.gradle/
+.kotlin/
+build/
+captures/
+.idea/
+*.iml
+.externalNativeBuild/
+.cxx/
+
+# Local config and secrets (copy from the *.example.properties files)
+/local.properties
+/secrets.properties
+/keystore.properties
+/app/google-services.json
+*.jks
+*.keystore
+/play-service-account.json
+*service-account*.json
