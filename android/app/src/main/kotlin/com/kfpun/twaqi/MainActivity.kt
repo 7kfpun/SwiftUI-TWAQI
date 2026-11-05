@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
+import com.kfpun.twaqi.ui.favourites.FavouritesHost
 import com.kfpun.twaqi.ui.settings.LanguageSection
 import com.kfpun.twaqi.ui.theme.TWAQITheme
 
@@ -39,11 +40,19 @@ class MainActivity : AppCompatActivity() {
                 // Debug builds can open the data-layer check screen (FOX-53) until the real
                 // screens land; back returns home.
                 var showDataScreen by rememberSaveable { mutableStateOf(false) }
+                // Favourites (FOX-55) until the tab bar lands; back returns home.
+                var showFavourites by rememberSaveable { mutableStateOf(false) }
                 if (showDataScreen) {
                     BackHandler { showDataScreen = false }
                     DataDebugScreen()
+                } else if (showFavourites) {
+                    BackHandler { showFavourites = false }
+                    FavouritesHost()
                 } else {
-                    HomeScreen(onOpenDataScreen = if (BuildConfig.DEBUG) ({ showDataScreen = true }) else null)
+                    HomeScreen(
+                        onOpenDataScreen = if (BuildConfig.DEBUG) ({ showDataScreen = true }) else null,
+                        onOpenFavourites = { showFavourites = true }
+                    )
                 }
             }
         }
@@ -53,10 +62,14 @@ class MainActivity : AppCompatActivity() {
 /**
  * Placeholder home screen; the map, list and details come with the later Android tickets. The
  * language picker sits here until the Help screen exists. [onOpenDataScreen] (debug builds only)
- * adds a button to the data-layer check screen.
+ * adds a button to the data-layer check screen, [onOpenFavourites] one to Favourites (FOX-55).
  */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = null) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onOpenDataScreen: (() -> Unit)? = null,
+    onOpenFavourites: (() -> Unit)? = null
+) {
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
@@ -69,6 +82,11 @@ fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = 
                 color = MaterialTheme.colorScheme.primary
             )
             LanguageSection(Modifier.fillMaxWidth().padding(top = 24.dp))
+            if (onOpenFavourites != null) {
+                OutlinedButton(onClick = onOpenFavourites, modifier = Modifier.padding(top = 24.dp)) {
+                    Text(stringResource(R.string.tabbar_favourites))
+                }
+            }
             if (onOpenDataScreen != null) {
                 OutlinedButton(onClick = onOpenDataScreen, modifier = Modifier.padding(top = 24.dp)) {
                     Text(stringResource(R.string.debug_data_title))

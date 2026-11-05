@@ -52,7 +52,11 @@ class AirQualityRepository(
         saved = { savedPollutants(countryCode) }
     )
 
-    /** One station's current reading, for its own screen. Falls back to the newest reading seen from either endpoint. */
+    /**
+     * One station's current reading, for its own screen. Falls back to the newest reading seen from
+     * either endpoint. When the API answers with no reading for the station (retired, or offline for
+     * maintenance), the error is [NoCurrentReadingException]: not an outage.
+     */
     suspend fun currentPollutant(stationId: Int): DataResult<Pollutant> = withContext(io) {
         try {
             val body = api.currentPollutants(stationId)
@@ -62,12 +66,30 @@ class AirQualityRepository(
             if (reading != null) {
                 DataResult.Fresh(reading, now())
             } else {
-                fallback(ApiFormatException("no reading for $stationId"), pollutantCache.pollutant(stationId))
+                fallback(NoCurrentReadingException(stationId), pollutantCache.pollutant(stationId))
             }
         } catch (e: IOException) {
             fallback(e, pollutantCache.pollutant(stationId))
         } catch (e: ApiFormatException) {
             fallback(e, pollutantCache.pollutant(stationId))
+        }
+    }
+
+    /**
+     * Current readings for [stationIds] (Favourites), in the API's order; each is saved for the
+     * station page and the next offline open. A failure carries no fallback: the caller shows
+     * [savedPollutants] for the ids it has.
+     */
+    suspend fun currentPollutants(stationIds: List<Int>): DataResult<List<Pollutant>> = withContext(io) {
+        try {
+            val body = api.currentPollutants(stationIds)
+            val list = ApiParser.pollutants(body)
+            pollutantCache.saveStations(body)
+            DataResult.Fresh(list, now())
+        } catch (e: IOException) {
+            DataResult.Failed(e)
+        } catch (e: ApiFormatException) {
+            DataResult.Failed(e)
         }
     }
 
@@ -134,3 +156,6 @@ class AirQualityRepository(
     private fun <T> fallback(error: Throwable, saved: Saved<T>?): DataResult<T> =
         saved?.let { DataResult.Stale(it.value, it.savedAt, error) } ?: DataResult.Failed(error)
 }
+
+/** The API answered and has no current reading for [stationId] (iOS `DetailsViewModel.isNotReporting`). */
+class NoCurrentReadingException(val stationId: Int) : Exception("no reading for $stationId")

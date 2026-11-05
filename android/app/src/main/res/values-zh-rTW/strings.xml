@@ -483,4 +483,13 @@
     <!-- Debug builds only: the data-layer check screen (FOX-53). -->
     <string name="debug_data_title">資料層</string>
     <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>
+
+    <!-- Android only (FOX-55): the Favourites edit mode and the station page's controls. iOS uses system buttons. -->
+    <string name="favourites_edit">編輯</string>
+    <string name="favourites_done">完成</string>
+    <string name="favourites_move_up">上移</string>
+    <string name="favourites_move_down">下移</string>
+    <string name="details_back">返回</string>
+    <string name="details_about_index">關於 %s</string>
+    <string name="details_map">測站位置地圖</string>
 </resources>
