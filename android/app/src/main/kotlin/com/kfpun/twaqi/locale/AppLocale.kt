@@ -11,6 +11,7 @@ import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.shortcuts.StationShortcuts
 import com.kfpun.twaqi.widget.WidgetUpdater
 import java.util.Locale
 
@@ -62,6 +63,8 @@ object AppLocale {
         (context.applicationContext as? TwaqiApplication)?.container?.translation?.clearCache()
         // Widgets have no activity to recreate; they redraw in the new language (FOX-59).
         WidgetUpdater.requestRedrawAll(context)
+        // Launcher shortcuts are named in the app language too (FOX-95).
+        StationShortcuts.requestRefresh(context)
         Analytics.logEvent(context, Analytics.SELECT_LANGUAGE, mapOf("label" to language.id))
     }
 

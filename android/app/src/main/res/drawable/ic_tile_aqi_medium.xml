@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick Settings tile icon (FOX-95): medium AQI, drawn as how dense the particles are
+     (iOS aqi.medium). Tiles tint it; the level is also in words. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M2.8,6a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM9.8,4a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM16.8,7a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM5.8,12a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM13.8,13a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM2.8,19a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM9.8,19a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0zM16.8,19a2.2,2.2 0,1 1,4.4,0a2.2,2.2 0,1 1,-4.4,0z" />
+</vector>

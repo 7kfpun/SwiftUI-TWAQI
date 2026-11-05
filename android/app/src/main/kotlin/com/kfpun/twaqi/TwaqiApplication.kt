@@ -7,6 +7,7 @@ import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.data.AppContainer
 import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.settings.AppAppearanceStore
+import com.kfpun.twaqi.shortcuts.StationShortcuts
 import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,8 @@ class TwaqiApplication : Application() {
         // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
         WidgetUpdater.observeFavourites(this, container.favourites.favourites)
         WidgetUpdater.redrawIfLanguageChanged(this)
+        // FOX-95: the launcher's station shortcuts follow the favourites (and are rebuilt at start).
+        StationShortcuts.observe(this, container.favourites.favourites)
         // Push alerts (FOX-57): the channel in the app language, before any alert arrives.
         AlertNotifications.ensureChannel(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
@@ -38,9 +41,10 @@ class TwaqiApplication : Application() {
         }
     }
 
-    /** Android 13+: the app language changed in the phone's settings; widgets follow it (FOX-56). */
+    /** Android 13+: the app language changed in the phone's settings; widgets and shortcuts follow it (FOX-56). */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         WidgetUpdater.requestRedrawAll(this)
+        StationShortcuts.requestRefresh(this)
     }
 }
