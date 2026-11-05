@@ -13,6 +13,7 @@ enum HelpSection: String, CaseIterable, Identifiable {
     case purchase
     case doNotDisturb
     case language
+    case appearance
     case welcome
     case contact
     case widgetsAndWatch
@@ -79,6 +80,7 @@ struct HelpView: View {
         case .purchase: purchaseSection
         case .doNotDisturb: doNotDisturbSection
         case .language: languageSection
+        case .appearance: appearanceSection
         case .welcome: welcomeSection
         case .contact: contactSection
         case .widgetsAndWatch: widgetsAndWatchSection
@@ -150,6 +152,23 @@ struct HelpView: View {
                 Text(verbatim: "English").tag(AppLanguage.english)
             } label: {
                 Text("Help.language")
+            }
+        }
+    }
+
+    /// Light, dark, or following iOS (FOX-43). The setter restyles every
+    /// open window; see `SettingsStore.appearance`.
+    private var appearanceSection: some View {
+        Section(header: Label("Help.appearance", systemImage: "circle.lefthalf.filled")) {
+            Picker(selection: Binding(
+                get: { settings.appearance },
+                set: { settings.appearance = $0 }
+            )) {
+                Text("Help.appearance_system").tag(AppAppearance.system)
+                Text("Help.appearance_light").tag(AppAppearance.light)
+                Text("Help.appearance_dark").tag(AppAppearance.dark)
+            } label: {
+                Text("Help.appearance")
             }
         }
     }

@@ -708,15 +708,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         // Exposes the markers, by their titles, to VoiceOver.
         mapView.accessibilityElementsHidden = false
 
-        if self.traitCollection.userInterfaceStyle == .dark {
-            // User Interface is Dark
-            do {
-                // Set the map style by passing a valid JSON string.
-                mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
-            } catch {
-                NSLog("One or more of the map styles failed to load. \(error)")
-            }
-        }
+        applyMapStyle()
 
         self.callGetCountriesApi()
 
@@ -756,6 +748,29 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         isProLayout = isPro
         bottomBarBottom?.update(offset: Self.bannerClearance(isPro: isPro))
         UIView.animate(withDuration: 0.25) { self.view.layoutIfNeeded() }
+    }
+
+    /// Dark map in dark mode, Google's default otherwise.
+    private func applyMapStyle() {
+        guard traitCollection.userInterfaceStyle == .dark else {
+            mapView.mapStyle = nil
+            return
+        }
+        do {
+            // Set the map style by passing a valid JSON string.
+            mapView.mapStyle = try GMSMapStyle(jsonString: GoogleMapStyles.dark.rawValue)
+        } catch {
+            NSLog("One or more of the map styles failed to load. \(error)")
+        }
+    }
+
+    /// The look can change while the map is open: Help's appearance picker
+    /// (FOX-43), or the system switching between light and dark.
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            applyMapStyle()
+        }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
