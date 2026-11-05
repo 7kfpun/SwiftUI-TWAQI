@@ -115,6 +115,7 @@ struct StationWeatherView: View {
                 Text(Self.timeRange(period))
                     .font(.caption2.monospacedDigit())
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(width: 76, alignment: .leading)
 
@@ -161,7 +162,9 @@ struct StationWeatherView: View {
         return AreaForecastView.dayTitle(WeatherDates.day(start), now: now)
     }
 
-    /// 「18:00–06:00」, Taiwan time.
+    /// 「18:00–06:00」, Taiwan time. A period that ends on another Taiwan day
+    /// than it starts gets the start date in front (「11/4 18:00–06:00」), so
+    /// the night in progress reads differently from tonight's.
     static func timeRange(_ period: WeatherPeriod) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -169,7 +172,13 @@ struct StationWeatherView: View {
         formatter.dateFormat = "HH:mm"
         let start = period.startDate.map(formatter.string(from:)) ?? "—"
         let end = period.endDate.map(formatter.string(from:)) ?? "—"
-        return "\(start)–\(end)"
+        var text = "\(start)–\(end)"
+        if let from = period.startDate, let to = period.endDate,
+           WeatherDates.day(from) != WeatherDates.day(to) {
+            formatter.dateFormat = "M/d"
+            text = "\(formatter.string(from: from)) \(text)"
+        }
+        return text
     }
 
     /// 「24°」, rounded; 「—」 when missing.

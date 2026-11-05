@@ -88,7 +88,7 @@ final class StationWeatherTests: XCTestCase {
         XCTAssertEqual(period.startDate, ISO8601DateFormatter().date(from: "2026-11-05T10:00:00Z"))
         XCTAssertTrue(period.isNight)
         XCTAssertFalse(try XCTUnwrap(file().forecast?.counties["臺北市"]?[0]).isNight)
-        XCTAssertEqual(StationWeatherView.timeRange(period), "18:00–06:00")
+        XCTAssertEqual(StationWeatherView.timeRange(period), "11/5 18:00–06:00")
         // No offset: read as Taiwan time.
         XCTAssertEqual(WeatherDates.parse("2026-11-05 18:00:00"), period.startDate)
     }
@@ -278,6 +278,11 @@ final class StationWeatherTests: XCTestCase {
         XCTAssertEqual(StationWeatherView.dayTitle(tonight, now: eightPM), today)
         let sixAM = try XCTUnwrap(WeatherDates.parse("2026-11-05T06:00:00+08:00"))
         XCTAssertNotEqual(StationWeatherView.dayTitle(night, now: sixAM), today)
+
+        // The running night and tonight both read 18:00–06:00; the start date tells them apart.
+        XCTAssertEqual(StationWeatherView.timeRange(night), "11/4 18:00–06:00")
+        XCTAssertEqual(StationWeatherView.timeRange(tonight), "11/5 18:00–06:00")
+        XCTAssertEqual(StationWeatherView.timeRange(day), "06:00–18:00")
 
         // A later period keeps its own day.
         let next = WeatherPeriod(start: "2026-11-06T06:00:00+08:00", end: "2026-11-06T18:00:00+08:00",
