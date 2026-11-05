@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Share cards (FOX-94): PNGs written to cacheDir/share-cards and handed to the share sheet
+     as content:// URIs. Nothing else is exposed. -->
+<paths>
+    <cache-path
+        name="share_cards"
+        path="share-cards/" />
+</paths>
