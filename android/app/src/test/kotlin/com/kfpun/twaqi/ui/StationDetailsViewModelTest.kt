@@ -83,12 +83,8 @@ class StationDetailsViewModelTest {
         assertEquals("2026-11-06T00:00:00", state.latestPublishTime)
         assertEquals(54.0, state.currentAqi(now), 0.0)
         assertTrue(state.showsHistory(now))
-        // check_main_details, once, with the names.
-        assertEquals(1, events.count { it.first == Analytics.CHECK_MAIN_DETAILS })
-        assertEquals(
-            mapOf("name" to "Keelung", "nameLocal" to "基隆", "stationId" to "91"),
-            events.first { it.first == Analytics.CHECK_MAIN_DETAILS }.second
-        )
+        // The map marker logs check_main_details (FOX-54, as iOS); the page itself doesn't.
+        assertTrue(events.none { it.first == "check_main_details" })
     }
 
     @Test

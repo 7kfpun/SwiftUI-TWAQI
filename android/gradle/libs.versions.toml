@@ -18,13 +18,16 @@ junit = "4.13.2"
 okhttp = "4.12.0"
 kotlinxSerialization = "1.12.0"
 coroutines = "1.11.0"
+# Maps Compose and its clustering utils (FOX-54 map, FOX-55 station page). 8.3.1+ needs
+# compileSdk 37 (its AAR metadata), so this stays on 8.3.0.
+mapsCompose = "8.3.0"
 # FOX-58: Pro (Play Billing), the cached entitlement, AdMob and UMP consent.
 billing = "9.1.0"
 datastore = "1.3.0"
 playServicesAds = "25.5.0"
 ump = "4.0.0"
-# FOX-55: the station page's location map. 8.3.1+ needs compileSdk 37.
-mapsCompose = "8.3.0"
+# FOX-54: the fold line for the wide map layout.
+window = "1.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,11 +51,13 @@ okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "billing" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
 google-ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "mapsCompose" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -126,7 +126,6 @@ class StationDetailsViewModel(
      */
     private var generation = 0
     private val answers = mutableListOf<Boolean>()
-    private var loggedOpen = false
 
     init {
         viewModelScope.launch {
@@ -146,7 +145,6 @@ class StationDetailsViewModel(
             if (state.value.pollutant == null) {
                 source.savedPollutant(stationId)?.let { saved ->
                     state.update { if (it.pollutant == null) it.copy(pollutant = saved) else it }
-                    logOpen()
                 }
             }
             launch { loadHistory(generation) }
@@ -171,7 +169,6 @@ class StationDetailsViewModel(
                         history = result.value.readings
                     )
                 }
-                logOpen()
                 finished(failed = false, generation = generation)
             }
 
@@ -191,7 +188,6 @@ class StationDetailsViewModel(
                 state.update {
                     it.copy(pollutant = result.value, isShowingLastGood = false, isNotReporting = false)
                 }
-                logOpen()
                 finished(failed = false, generation = generation)
             }
 
@@ -265,19 +261,6 @@ class StationDetailsViewModel(
         logEvent(
             Analytics.FAVOURITE_STATION_SAVED,
             mapOf("label" to if (on) "on" else "off", "stationId" to stationId.toString())
-        )
-    }
-
-    /** Once per page, when the station's names are known (iOS logs it as a map marker opens the page). */
-    private fun logOpen() {
-        if (loggedOpen) return
-        val current = state.value
-        val name = current.pollutant?.name ?: current.station?.name ?: return
-        val nameLocal = current.pollutant?.nameLocal ?: current.station?.nameLocal ?: return
-        loggedOpen = true
-        logEvent(
-            Analytics.CHECK_MAIN_DETAILS,
-            mapOf("name" to name, "nameLocal" to nameLocal, "stationId" to stationId.toString())
         )
     }
 

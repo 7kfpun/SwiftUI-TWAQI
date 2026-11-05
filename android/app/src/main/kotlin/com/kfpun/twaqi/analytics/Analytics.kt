@@ -62,10 +62,20 @@ object Analytics {
     /** `placement`: AdMob recorded a click on a banner. */
     const val AD_BANNER_TAPPED = "ad_banner_tapped"
 
-    // Station page and Favourites (FOX-55).
+    // Map (FOX-54), as on iOS.
 
-    /** `name`, `nameLocal`, `stationId`: a station page opened. */
+    /** `label`: the index (`aqi`, `pm25`, …). */
+    const val SELECT_INDEX = "select_index"
+    const val MOVE_TO_CURRENT_LOCATION = "move_to_current_location"
+    const val MOVE_TO_DEFAULT_LOCATION = "move_to_default_location"
+
+    /** `label`: landscape / portrait. */
+    const val CHANGE_DEVICE_ORIENTATION = "change_device_orientation"
+
+    /** A map marker opened its station: `name`, `nameLocal`, `stationId`. */
     const val CHECK_MAIN_DETAILS = "check_main_details"
+
+    // Station page and Favourites (FOX-55).
 
     /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
     const val FAVOURITE_STATION_SAVED = "favourite_station_saved"

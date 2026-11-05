@@ -503,6 +503,12 @@
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
 
+    <!-- Map (FOX-54): Android-only labels for TalkBack and the station screen stub. -->
+    <string name="map_my_location">Move to my location</string>
+    <string name="map_default_location">Move to the default location</string>
+    <string name="map_clear_search">Clear search</string>
+    <string name="map_back">Back</string>
+
     <!-- Debug builds only: the data-layer check screen (FOX-53). -->
     <string name="debug_data_title">Data layer</string>
     <string name="debug_data_counts">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>

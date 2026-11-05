@@ -21,12 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,10 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
 import com.kfpun.twaqi.data.model.AirIndexType
@@ -49,33 +43,8 @@ import com.kfpun.twaqi.ui.common.OfflineEmptyState
 import com.kfpun.twaqi.ui.common.OfflineNotice
 import com.kfpun.twaqi.ui.common.StationRow
 import com.kfpun.twaqi.ui.common.StationRowReading
-import com.kfpun.twaqi.ui.station.StationScreen
 
-/**
- * The Favourites tab: the list, and a station page pushed over it. Drop it into the tab bar as is;
- * back from a station returns to the list.
- */
-@Composable
-fun FavouritesHost(modifier: Modifier = Modifier) {
-    var openStation by rememberSaveable { mutableStateOf<Int?>(null) }
-    val stationId = openStation
-    if (stationId != null) {
-        BackHandler { openStation = null }
-        // Its own view model each time it opens, cleared on back, as iOS builds a new one per push.
-        val owner = remember(stationId) {
-            object : ViewModelStoreOwner {
-                override val viewModelStore = ViewModelStore()
-            }
-        }
-        DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
-        CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
-            StationScreen(stationId = stationId, onBack = { openStation = null }, modifier = modifier)
-        }
-    } else {
-        FavouritesScreen(onOpenStation = { openStation = it }, modifier = modifier)
-    }
-}
-
+/** The Favourites tab (iOS `FavouriteListView`); [onOpenStation] pushes the station page (`StationRoute`). */
 @Composable
 fun FavouritesScreen(
     onOpenStation: (Int) -> Unit,

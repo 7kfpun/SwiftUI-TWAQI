@@ -189,6 +189,9 @@ dependencies {
 
     // Station page location map (FOX-55); the key is MAPS_API_KEY in secrets.properties.
     implementation(libs.maps.compose)
+    // Map tab (FOX-54): marker clustering, and the fold line for the wide layout.
+    implementation(libs.maps.compose.utils)
+    implementation(libs.androidx.window)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
