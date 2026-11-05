@@ -32,7 +32,7 @@ plus these:
 |---|---|---|
 | `pull_request` | required, 0 approvals, squash only | Blocks direct pushes, including release bumps, which now go through a PR (see [ci-cd-guardrails.md](ci-cd-guardrails.md#after-the-merge-testflight)). 0 approvals because the account that opens every PR can't approve its own. The `LGTM` status takes the place of an approval. It turns green on a review from another agent. |
 | `required_status_checks` | `strict: true` | The branch must be up to date with `master` before merging. Stacked PRs then merge in order, and each one is tested against what is actually on `master`. |
-| required: `Unit tests` | CI | Skips itself (green) for docs, media, `fastlane/`, `web/` and `workers/`-only PRs. |
+| required: `Unit tests` | CI | Reports at every level: green in seconds for docs, media, `android/`, `assets/`, `ios/fastlane/`, `web/`, `workers/` and `.github/`-only PRs (other than `ci.yml`); build only for other app changes; build + subset for guarded paths ([ci-cd-guardrails.md](ci-cd-guardrails.md)). |
 | required: `Vulnerability checks` | CI | Fails only on TruffleHog **verified** secrets. osv-scanner and unverified findings are warnings. |
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
@@ -76,8 +76,14 @@ then sets the `LGTM` status on the head commit:
   again when the branch changes after it.
 - **success** when the latest verdict is an LGTM left on the head commit, or on an earlier
   commit with the same net change. The second case covers a rebase or "Update branch"
-  with no edits of its own. A comment has no commit, so it covers the head only when it
-  was written at or after that commit.
+  (a merge from `master`) with no edits of its own, so keeping a PR up to date with
+  `master` never needs another LGTM. "Same net change" compares the PR's own added and
+  removed lines per file against the merge base; blob ids, hunk positions and the
+  unchanged context lines around each hunk are ignored, since they move whenever
+  `master` edits nearby. Resolving a conflict, or any other edit of the branch's own
+  changes, needs a fresh LGTM. A review is tied to its commit. A comment is tied to the
+  commit in its `(head <sha>)` note, so it survives a rebase too; without a note it
+  covers the head only when it was written at or after that commit.
 - Dismissing the review withdraws it. The latest verdict wins: a review or comment whose
   first line is "changes needed" or "changes requested" (optionally after a name, e.g.
   `**Codex — changes needed**`), or a review in GitHub's `CHANGES_REQUESTED` state, sets

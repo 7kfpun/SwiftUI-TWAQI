@@ -77,10 +77,10 @@ Dependencies/
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/#source-control
 
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots/**/*.png
+ios/fastlane/test_output
 
 # Code Injection
 #
@@ -98,23 +98,23 @@ GoogleService-Info.plist
 # Generated files
 .codegraph/
 context/
-fastlane/.frameit_work/
-fastlane/.watch_upload/
-fastlane/.duo_upload/
-fastlane/.ios_upload/
+ios/fastlane/.frameit_work/
+ios/fastlane/.watch_upload/
+ios/fastlane/.duo_upload/
+ios/fastlane/.ios_upload/
 
 # Firebase Hosting
 .firebase/
 
 # fastlane secrets
-fastlane/.env
+ios/fastlane/.env
 
 # macOS
 .DS_Store
 
-fastlane/.vision_upload/
+ios/fastlane/.vision_upload/
 
-# Building from TWAQI.xcodeproj directly (as the visionOS target can) makes
+# Building from ios/TWAQI.xcodeproj directly (as the visionOS target can) makes
 # Xcode write a second Package.resolved here. The one that counts is
-# TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved.
-TWAQI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+# ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved.
+ios/TWAQI.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/

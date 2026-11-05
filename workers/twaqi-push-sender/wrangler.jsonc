@@ -1,0 +1,54 @@
+// AQI threshold alerts for the TWAQI iOS app, sent through Firebase Cloud
+// Messaging (HTTP v1). The sends run every 2 hours (:20 past even hours) in
+// GitHub Actions (.github/workflows/push-sender.yml), which calls this
+// Worker's run() under Node (scripts/run.ts) with the vars below: the account
+// is on the Workers Free plan, whose 50 subrequests per run can't carry them
+// (FOX-71). This Worker serves the app's /app/v1 API plus the manual /run and
+// /test routes, and has no cron. Deployed by GitHub Actions
+// (.github/workflows/workers.yml).
+//
+// Secrets (never in git) are listed in secrets.required; CI uploads them from
+// GitHub environment secrets of the same names on every deploy. See README.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twaqi-push-sender",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+  "workers_dev": true,
+  "vars": {
+    "DIRECTUS_URL": "https://cms.wahthefox.com",
+    "AQI_COUNTRIES": "twn",
+    // Minimum gap between two alerts for one subscription, in case the value
+    // bounces around the threshold.
+    "COOLDOWN_MINUTES": "180",
+    // Readings older than this are ignored rather than alerted on.
+    "MAX_DATA_AGE_MINUTES": "180",
+    // Alerts sent per run; the rest go out on the next run, never twice.
+    // Aimed at 40k per 2-hour run. With every send retried, 45k alerts need
+    // ~90k FCM requests plus ~2k reads and writes.
+    "MAX_SENDS_PER_RUN": "45000",
+    // The run's own count of outgoing requests stops before this. It is the
+    // Workers Free plan's 50 subrequests per request, so a manual /run on the
+    // Worker defers what doesn't fit instead of failing mid-run. The GitHub
+    // Actions run (scripts/run.ts) has no such limit and lifts it.
+    // Back on Workers Paid: set it equal to a restored "limits.subrequests".
+    "SUBREQUEST_LIMIT": "50"
+  },
+  // Every send, for delivery stats (Directus keeps only failures and tests).
+  "analytics_engine_datasets": [
+    { "binding": "PUSH_EVENTS", "dataset": "twaqi_push_events" }
+  ],
+  // Per-IP limit on the app's /app/v1 routes (Workers Rate Limiting).
+  "ratelimits": [
+    { "name": "APP_LIMITER", "namespace_id": "1301", "simple": { "limit": 60, "period": 60 } }
+  ],
+  "secrets": {
+    "required": [
+      "FCM_SERVICE_ACCOUNT",
+      "DIRECTUS_PUSH_TOKEN",
+      "AQI_API_BASE",
+      "SYNC_TOKEN"
+    ]
+  },
+  "observability": { "enabled": true }
+}

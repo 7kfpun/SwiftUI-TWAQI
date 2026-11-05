@@ -1,0 +1,127 @@
+name: CI cache
+
+# Fills the Unit tests job's three caches (Swift packages, Pods, DerivedData)
+# from master (FOX-65). CI itself runs only on pull_request, and a PR's caches
+# are saved under refs/pull/<n>/merge, which no other PR can read, so every
+# PR's first run used to be cold and each PR stored its own ~880 MB copy of the
+# same keys. Caches saved here, on master, can be read by every PR to master.
+#
+# The build is the Unit tests job's own (.github/actions/unit-tests-build), so
+# the keys and flags cannot drift apart. No simulator, no tests.
+
+on:
+  push:
+    branches: [master]
+    # What the cache keys or the build depend on.
+    paths:
+      - ios/Podfile
+      - ios/Podfile.lock
+      - ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
+      - ios/TWAQI.xcodeproj/xcshareddata/xcschemes/TWAQI-CI.xcscheme
+      - .github/workflows/ci.yml
+      - .github/workflows/ci-cache.yml
+      - .github/actions/unit-tests-build/**
+  # A runner image with a new Xcode build changes the DerivedData key, and
+  # caches unused for 7 days are evicted. Daily, so PRs fall back to saving
+  # their own copy for a day at most after an image update. When all three
+  # keys exist the run only restores them (a restore counts as a use), about a
+  # minute.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+# A newer master commit supersedes an older fill.
+concurrency:
+  group: ci-cache
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fill:
+    name: Fill Unit tests caches
+    # Only master's caches are readable by every PR. A dispatch from another
+    # branch would fill caches that only that branch can read.
+    if: github.ref == 'refs/heads/master'
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      COCOAPODS_DISABLE_STATS: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # A copy of ci.yml's step (the placeholders the PR job builds with).
+      # tools/ci_test_level.py check fails when the two differ.
+      - name: Prepare gitignored config
+        run: |
+          set -euo pipefail
+          # The project will not build without these, and they are gitignored
+          # because they hold local API keys. Example values are enough to
+          # compile and launch the host app for unit tests.
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/debug.xcconfig
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/release.xcconfig
+          # example.xcconfig sets GMSServicesApiKey to an empty value
+          # (`= // Required` is a comment). An empty key skips meaningful
+          # GMSServices.provideAPIKey, and creating GMSMapView then crashes
+          # the test host with GMSServicesException.
+          python3 - <<'PY'
+          from pathlib import Path
+          key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
+          for name in ("debug.xcconfig", "release.xcconfig"):
+              path = Path("ios/TWAQI/Config") / name
+              lines = path.read_text().splitlines()
+              out, replaced = [], False
+              for line in lines:
+                  if line.strip().startswith("GMSServicesApiKey"):
+                      out.append(key_line)
+                      replaced = True
+                  else:
+                      out.append(line)
+              if not replaced:
+                  out.append(key_line)
+              path.write_text("\n".join(out) + "\n")
+          PY
+          cat > ios/TWAQI/GoogleService-Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>API_KEY</key>
+            <!-- 39 chars, starts with A, not an AIza key. Firebase Installations
+                 rejects anything else and crashes the test host at launch. -->
+            <string>AciPlaceholderKeyForUnitTests0000000000</string>
+            <key>GCM_SENDER_ID</key>
+            <string>123456789012</string>
+            <key>PLIST_VERSION</key>
+            <string>1</string>
+            <key>BUNDLE_ID</key>
+            <string>com.kfpun.twaqi</string>
+            <key>PROJECT_ID</key>
+            <string>ci-placeholder</string>
+            <key>STORAGE_BUCKET</key>
+            <string>ci-placeholder.appspot.com</string>
+            <key>IS_ADS_ENABLED</key>
+            <false/>
+            <key>IS_ANALYTICS_ENABLED</key>
+            <false/>
+            <key>IS_APPINVITE_ENABLED</key>
+            <true/>
+            <key>IS_GCM_ENABLED</key>
+            <true/>
+            <key>IS_SIGNIN_ENABLED</key>
+            <true/>
+            <key>GOOGLE_APP_ID</key>
+            <string>1:123456789012:ios:abcdefabcdefabcdefabcdef</string>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Restore caches and build for testing
+        uses: ./.github/actions/unit-tests-build
+        with:
+          skip-build-if-cached: "true"

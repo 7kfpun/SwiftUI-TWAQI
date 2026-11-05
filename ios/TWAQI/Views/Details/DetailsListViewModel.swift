@@ -1,0 +1,84 @@
+//
+//  DetailsListViewModel.swift
+//  TWAQI
+//
+//  Created by kf on 3/12/19.
+//  Copyright © 2019 kf. All rights reserved.
+//
+
+import Combine
+import Foundation
+
+class DetailsListViewModel: ObservableObject {
+
+    @Published var stations: Stations = []
+
+    /// The latest request failed and there was no saved list to show.
+    @Published var loadFailed = false
+
+    private(set) lazy var getData: () -> Void = {
+        let countryCode = Self.countryCode
+
+        // The station list barely changes, so show the last one at once and
+        // let the request only refresh it.
+        if self.stations.isEmpty {
+            self.stations = Self.cachedStations(countryCode: countryCode)
+        }
+
+        self.loadFailed = false
+        APIManager.getStations(countryCode: countryCode) { result in
+            switch result {
+            case .success(let stations):
+                guard !stations.isEmpty, stations != self.stations else { return }
+                self.stations = stations
+                Self.cache(stations, countryCode: countryCode)
+            case .failure(let error):
+                print(error.localizedDescription)
+                self.loadFailed = self.stations.isEmpty
+            }
+        }
+    }
+
+    /// Scoped to the supported country: those are the only stations whose
+    /// detail screen and notifications work.
+    private static var countryCode: String {
+        let settings = SettingsStore()
+        return settings.supportedCountryCode.isEmpty
+            ? settings.closestCountryCode
+            : settings.supportedCountryCode
+    }
+
+    /// Ids in the saved station list, for checking a station link (FOX-74).
+    static func cachedStationIds() -> Set<Int> {
+        Set(cachedStations(countryCode: countryCode).map(\.id))
+    }
+
+    /// Application Support rather than Caches, like `StationCamStore`: the
+    /// system purges Caches under storage pressure. A file rather than
+    /// defaults, since every defaults write refreshes `SettingsStore`.
+    private static func cacheFile(countryCode: String) -> URL {
+        let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        return directory.appendingPathComponent("stations-\(countryCode).json")
+    }
+
+    /// Nothing older than `OfflineCacheRetention.maxAge`.
+    private static func cachedStations(countryCode: String) -> Stations {
+        let file = cacheFile(countryCode: countryCode)
+        guard
+            !OfflineCacheRetention.isExpired(OfflineCacheRetention.modificationDate(of: file)),
+            let data = try? Data(contentsOf: file)
+        else { return [] }
+        // A file an older build wrote may no longer decode; refetch instead.
+        return (try? JSONDecoder().decode(Stations.self, from: data)) ?? []
+    }
+
+    private static func cache(_ stations: Stations, countryCode: String) {
+        guard let data = try? JSONEncoder().encode(stations) else { return }
+        let file = cacheFile(countryCode: countryCode)
+        try? FileManager.default.createDirectory(
+            at: file.deletingLastPathComponent(), withIntermediateDirectories: true
+        )
+        try? data.write(to: file, options: .atomic)
+    }
+
+}

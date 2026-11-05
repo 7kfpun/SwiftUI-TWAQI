@@ -1,0 +1,7 @@
+/* App Shortcut phrases (FOX-74). Keys are the phrases in TWAQIShortcuts.swift. */
+"What's the air in ${applicationName}" = "What's the air in ${applicationName}";
+"${applicationName} air quality" = "${applicationName} air quality";
+"${applicationName} air at ${station}" = "${applicationName} air at ${station}";
+"What's the air at ${station} in ${applicationName}" = "What's the air at ${station} in ${applicationName}";
+"Open ${station} in ${applicationName}" = "Open ${station} in ${applicationName}";
+"Open a station in ${applicationName}" = "Open a station in ${applicationName}";

@@ -3,11 +3,16 @@
 // Object keys use the MOENV site id from the JPEG filename (e.g. 001), not a TWAQI station id.
 //
 // MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
+//
+// CWA weather sync: F-C0032-001 + O-A0003-001 -> R2 `weather/latest.json` (see weather.ts),
+// every 15 minutes in its own invocation, so it never shares the forecast's CPU or subrequest budget.
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
-import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, expiredHourKey, hourKey, shouldWriteHour } from './history'
+import { errorText, syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
+import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepDue } from './history'
+import { handleApi, isApiPath, type ApiEnv } from './api'
 
-interface Env extends ForecastEnv {
+interface Env extends ForecastEnv, ApiEnv, WeatherEnv {
   CAMS: R2Bucket
   MOENV_API_KEY: string
   SYNC_TOKEN: string
@@ -16,6 +21,7 @@ interface Env extends ForecastEnv {
 /** Must match `triggers.crons` in wrangler.jsonc. */
 const CAMS_CRON = '*/10 * * * *'
 const FORECAST_CRON = '35 * * * *'
+const WEATHER_CRON = '*/15 * * * *'
 const FORECAST_STATUS_KEY = 'forecast/last-sync.json'
 
 interface Station {
@@ -32,6 +38,8 @@ interface Manifest {
   updatedAt: string
   source: { filename: string; url: string; uploadDate: string } | null
   stations: Record<string, Station>
+  /** Newest filed hour (`yyyy-MM-dd/HH`) the last successful history sweep ran for. */
+  sweptHour?: string
 }
 
 interface SyncResult {
@@ -42,7 +50,7 @@ interface SyncResult {
   unchanged: number
   /** Hourly history objects written this run. */
   hours: number
-  /** Hourly objects past `HISTORY_DAYS` deleted this run. */
+  /** Hourly objects outside the 24 hours the app shows, deleted this run. */
   expired: number
   stations: number
 }
@@ -60,6 +68,10 @@ export default {
       ctx.waitUntil(runForecastSync(env))
       return
     }
+    if (controller.cron === WEATHER_CRON) {
+      ctx.waitUntil(runWeatherSync(env))
+      return
+    }
     if (controller.cron !== CAMS_CRON) console.warn('unknown cron, running cam sync', controller.cron)
     ctx.waitUntil(
       sync(env).then(
@@ -72,9 +84,15 @@ export default {
     )
   },
 
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
     const path = url.pathname
+
+    // Read API (FOX-82): the webcam host's /v1/* is routed here; see api.ts.
+    // Wrap fetch: called as deps.fetch(...) it would get the wrong `this` ("Illegal invocation").
+    if (isApiPath(path)) {
+      return handleApi(request, env, ctx, { cache: caches.default, fetch: (input, init) => fetch(input, init) })
+    }
 
     // Each feature lives under its own prefix; this one is /station-cams.
     if (path === '/station-cams/sync') {
@@ -92,6 +110,14 @@ export default {
       if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
       if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
       const status = await runForecastSync(env)
+      return json(status, status.ok ? 200 : 502)
+    }
+
+    // Weather: /weather (last sync status) and POST /weather/sync (manual run).
+    if (path === '/weather/sync') {
+      if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405, { Allow: 'POST' })
+      if (!(await authorized(request, env))) return json({ error: 'unauthorized' }, 401)
+      const status = await runWeatherSync(env)
       return json(status, status.ok ? 200 : 502)
     }
 
@@ -118,6 +144,12 @@ export default {
       const obj = await env.CAMS.get(FORECAST_STATUS_KEY)
       const last = obj ? await obj.json() : null
       return json({ ok: true, service: 'forecast', last }, 200, { 'Cache-Control': 'no-store' })
+    }
+
+    if (path === '/weather') {
+      const obj = await env.CAMS.get(WEATHER_STATUS_KEY)
+      const last = obj ? await obj.json() : null
+      return json({ ok: true, service: 'weather', last }, 200, { 'Cache-Control': 'no-store' })
     }
 
     if (path === '/station-cams/manifest.json') {
@@ -163,6 +195,42 @@ async function runForecastSync(env: Env): Promise<ForecastStatus> {
   return status
 }
 
+interface WeatherStatus {
+  ok: boolean
+  at: string
+  result?: WeatherSyncResult
+  error?: string
+}
+
+/** Runs the CWA weather sync, logs it, and records the outcome in R2 for GET /weather. Never throws. */
+async function runWeatherSync(env: Env): Promise<WeatherStatus> {
+  let status: WeatherStatus
+  try {
+    const result = await syncWeather(env)
+    // One set failing keeps its last good section and still counts as ok;
+    // a warning makes it visible to the Worker's observability.
+    if (result.forecast !== 'updated' || result.observations !== 'updated') {
+      console.warn('weather sync partial', JSON.stringify(result))
+    } else {
+      console.log('weather sync ok', JSON.stringify(result))
+    }
+    status = { ok: true, at: new Date().toISOString(), result }
+  } catch (e) {
+    // weather/latest.json keeps the last good file; nothing to undo.
+    const error = errorText(e)
+    console.error('weather sync failed', error)
+    status = { ok: false, at: new Date().toISOString(), error }
+  }
+  try {
+    await env.CAMS.put(WEATHER_STATUS_KEY, JSON.stringify(status), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' },
+    })
+  } catch (e) {
+    console.error('weather status write failed', e)
+  }
+  return status
+}
+
 async function sync(env: Env, force = false): Promise<SyncResult> {
   const listRes = await fetch(`${MOENV_LIST}&api_key=${encodeURIComponent(env.MOENV_API_KEY)}`)
   if (!listRes.ok) throw new Error(`MOENV list ${listRes.status}`)
@@ -172,7 +240,11 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   const prev = await readManifest(env)
   if (!force && prev?.source?.url === row.url) {
-    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, hours: 0, expired: 0, stations: Object.keys(prev.stations).length }
+    // Nothing new to file, but a sweep that failed on an earlier run is still
+    // owed: retry it against the manifest's anchors and record it once done.
+    const { expired, sweptHour } = await sweepIfDue(env, stationAnchors(prev.stations), prev.sweptHour)
+    if (sweptHour !== prev.sweptHour) await writeManifest(env, { ...prev, sweptHour })
+    return { skipped: true, source: row.filename ?? row.url, images: 0, uploaded: 0, unchanged: 0, hours: 0, expired, stations: Object.keys(prev.stations).length }
   }
 
   const zipRes = await fetch(row.url)
@@ -203,7 +275,6 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
 
   const stations: Record<string, Station> = { ...(prev?.stations ?? {}) }
   const pending: Array<() => Promise<unknown>> = []
-  const expired: string[] = []
   let uploaded = 0
   let hours = 0
   let unchanged = 0
@@ -236,8 +307,6 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
           customMetadata: { siteId, time, source: base },
         }),
       )
-      const gone = expiredHourKey(siteId, stamp)
-      if (gone) expired.push(gone)
     }
 
     if (!force && old?.time === time) {
@@ -257,23 +326,17 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
     await Promise.all(pending.slice(i, i + UPLOAD_BATCH).map((run) => run()))
   }
 
-  // Rolling retention: as each hour is filed, the same hour HISTORY_DAYS ago
-  // goes. Missing keys are fine. A failure here only leaves old frames behind.
-  for (let i = 0; i < expired.length; i += DELETE_BATCH) {
-    try {
-      await env.CAMS.delete(expired.slice(i, i + DELETE_BATCH))
-    } catch (e) {
-      console.error('history expiry failed', e)
-    }
-  }
+  // Retention: once per newly filed hour, delete every hourly object outside
+  // the 24 hours the app shows, including frames of hours a site skipped, of
+  // sites that stopped reporting, and of a failed earlier sweep. A failure
+  // only leaves frames behind until the next sync retries.
+  const { expired, sweptHour } = await sweepIfDue(env, stationAnchors(stations), prev?.sweptHour)
 
-  const manifest: Manifest = {
+  await writeManifest(env, {
     updatedAt: new Date().toISOString(),
     source: { filename: row.filename ?? '', url: row.url, uploadDate: row.upload_date ?? '' },
     stations: Object.fromEntries(Object.entries(stations).sort(([a], [b]) => a.localeCompare(b))),
-  }
-  await env.CAMS.put(MANIFEST_KEY, JSON.stringify(manifest), {
-    httpMetadata: { contentType: 'application/json; charset=utf-8', cacheControl: 'public, max-age=60' },
+    sweptHour,
   })
 
   return {
@@ -283,9 +346,56 @@ async function sync(env: Env, force = false): Promise<SyncResult> {
     uploaded,
     unchanged,
     hours,
-    expired: expired.length,
+    expired,
     stations: Object.keys(stations).length,
   }
+}
+
+function stationAnchors(stations: Record<string, Station>): Record<string, string | undefined> {
+  return Object.fromEntries(Object.entries(stations).map(([id, s]) => [id, s.hourKey]))
+}
+
+async function writeManifest(env: Env, manifest: Manifest): Promise<void> {
+  await env.CAMS.put(MANIFEST_KEY, JSON.stringify(manifest), {
+    httpMetadata: { contentType: 'application/json; charset=utf-8', cacheControl: 'public, max-age=60' },
+  })
+}
+
+/**
+ * Sweeps when one is owed (`sweepDue`). Returns how many objects went and the
+ * `sweptHour` to record: the new hour on success, the old one on failure, so
+ * the next sync tries again. Never throws.
+ */
+async function sweepIfDue(
+  env: Env,
+  anchors: Record<string, string | undefined>,
+  sweptHour: string | undefined,
+): Promise<{ expired: number; sweptHour: string | undefined }> {
+  const due = sweepDue(anchors, sweptHour)
+  if (!due) return { expired: 0, sweptHour }
+  try {
+    return { expired: await sweepHistory(env, anchors), sweptHour: due }
+  } catch (e) {
+    console.error('history sweep failed', e)
+    return { expired: 0, sweptHour }
+  }
+}
+
+/** Lists the hourly objects and deletes those outside each site's 24 hours. Returns how many went. */
+async function sweepHistory(env: Env, anchors: Record<string, string | undefined>): Promise<number> {
+  const keys: string[] = []
+  let cursor: string | undefined
+  do {
+    const page = await env.CAMS.list({ prefix: 'stations/', cursor })
+    for (const obj of page.objects) keys.push(obj.key)
+    cursor = page.truncated ? page.cursor : undefined
+  } while (cursor)
+
+  const stale = staleHourKeys(keys, anchors)
+  for (let i = 0; i < stale.length; i += DELETE_BATCH) {
+    await env.CAMS.delete(stale.slice(i, i + DELETE_BATCH))
+  }
+  return stale.length
 }
 
 // <image><site>基隆</site><file>001-202610302200.jpg</file><time>…</time><TWD97Lon>…</TWD97Lon><TWD97Lat>…</TWD97Lat>…</image>

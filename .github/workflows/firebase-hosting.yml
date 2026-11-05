@@ -7,10 +7,10 @@ name: Firebase Hosting
 #   check-domain     read-only: does taiwanair.wahthefox.com serve HTTPS yet?
 #                    (runbook step 5, after the DNS change). No approval needed.
 #   deploy-main      firebase deploy --only hosting:main   (runbook step 2)
-#   deploy-legacy    firebase deploy --config firebase.legacy-redirect.json
-#                    --only hosting:legacy                 (runbook step 6)
-#                    Refuses to run until check-domain passes, so kf-twaqi.web.app
-#                    can't 301 to a domain that doesn't resolve yet.
+#
+# The old site kf-twaqi.web.app already 301s every path to the new domain; its
+# redirect config and placeholder page were removed from the repo (FOX-82), and
+# Firebase keeps serving the deployed redirects.
 #
 # The DNS record itself (Cloudflare, zone wahthefox.com) and the custom domain
 # in the Firebase console stay manual: runbook steps 3-4.
@@ -30,7 +30,6 @@ on:
         options:
           - check-domain
           - deploy-main
-          - deploy-legacy
 
 permissions:
   contents: read
@@ -44,12 +43,11 @@ env:
   PROJECT: kf-twaqi
   DOMAIN: https://taiwanair.wahthefox.com
   MAIN_SITE: https://taiwanair-wahthefox.web.app
-  LEGACY_SITE: https://kf-twaqi.web.app
 
 jobs:
   check-domain:
     name: Check taiwanair.wahthefox.com
-    if: inputs.action != 'deploy-main'
+    if: inputs.action == 'check-domain'
     runs-on: ubuntu-latest
     steps:
       - name: Custom domain serves the site over HTTPS
@@ -68,12 +66,7 @@ jobs:
 
   deploy:
     name: ${{ inputs.action }}
-    needs: check-domain
-    # deploy-main does not depend on the domain; deploy-legacy needs it to pass.
-    if: >-
-      always() &&
-      inputs.action != 'check-domain' &&
-      (inputs.action == 'deploy-main' || needs.check-domain.result == 'success')
+    if: inputs.action == 'deploy-main'
     runs-on: ubuntu-latest
     environment: firebase-hosting
     steps:
@@ -109,40 +102,17 @@ jobs:
       - name: Deploy
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
-          ACTION: ${{ inputs.action }}
-        run: |
-          set -euo pipefail
-          case "$ACTION" in
-            deploy-main)
-              npx --yes "$FIREBASE_TOOLS" deploy --only hosting:main --project "$PROJECT" --non-interactive
-              ;;
-            deploy-legacy)
-              npx --yes "$FIREBASE_TOOLS" deploy --config firebase.legacy-redirect.json \
-                --only hosting:legacy --project "$PROJECT" --non-interactive
-              ;;
-          esac
+        run: npx --yes "$FIREBASE_TOOLS" deploy --only hosting:main --project "$PROJECT" --non-interactive
 
       - name: Verify
-        env:
-          ACTION: ${{ inputs.action }}
         run: |
           set -uo pipefail
           failed=0
-          if [ "$ACTION" = deploy-main ]; then
-            for path in / /zh-Hant/ /privacy.html /zh-Hant/privacy.html /terms.html /zh-Hant/terms.html; do
-              code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${MAIN_SITE}${path}")"
-              echo "${MAIN_SITE}${path} -> ${code}"
-              [ "$code" = 200 ] || failed=1
-            done
-          else
-            for path in / /zh-Hant/privacy.html; do
-              headers="$(curl -sI --max-time 20 "${LEGACY_SITE}${path}")"
-              code="$(printf '%s' "$headers" | head -1 | awk '{print $2}')"
-              location="$(printf '%s' "$headers" | tr -d '\r' | awk 'tolower($1)=="location:" {print $2}')"
-              echo "${LEGACY_SITE}${path} -> ${code} ${location}"
-              [ "$code" = 301 ] && [ "$location" = "${DOMAIN}${path}" ] || failed=1
-            done
-          fi
+          for path in / /zh-Hant/ /privacy.html /zh-Hant/privacy.html /terms.html /zh-Hant/terms.html; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${MAIN_SITE}${path}")"
+            echo "${MAIN_SITE}${path} -> ${code}"
+            [ "$code" = 200 ] || failed=1
+          done
           [ "$failed" = 0 ] || { echo "::error::Post-deploy check failed."; exit 1; }
 
       - name: Remove service account key

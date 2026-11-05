@@ -1,0 +1,105 @@
+name: Push sender
+
+# The scheduled AQI alert sends (FOX-71). They used to be the twaqi-push-sender
+# Worker's cron, but the Cloudflare account is on the Workers Free plan, whose
+# 50 subrequests per run can't carry them. This workflow runs the Worker's
+# own run() (workers/twaqi-push-sender/src/index.ts) under Node through
+# scripts/run.ts, with the vars from its wrangler.jsonc plus three secrets.
+# The Worker keeps the app's /app/v1 API and the manual /run and /test routes,
+# and takes this run's per-send events on POST /internal/events (SYNC_TOKEN),
+# writing them to Analytics Engine (twaqi_push_events) as it did for its own
+# sends. A failed forward is a warning, never a re-send or a failed job.
+#
+# Runs in the `push-sender` environment (master only, no reviewers), not
+# `workers-production`, whose every job waits for an approval. Its secrets:
+# FCM_SERVICE_ACCOUNT, DIRECTUS_PUSH_TOKEN, AQI_API_BASE, SYNC_TOKEN.
+#
+# GitHub's schedule is best effort: a run can start late or be skipped at busy
+# times, and scheduled workflows are turned off after 60 days without activity
+# in the repository (re-enable under Actions). A late run is fine: a crossing
+# stays unsent until a run sends it, and nothing is sent twice.
+#
+# Back on Workers Paid: restore the cron and "limits" in wrangler.jsonc (and the
+# scheduled handler), set SUBREQUEST_LIMIT to match, and delete this workflow.
+# See workers/twaqi-push-sender/README.md.
+
+on:
+  schedule:
+    # Every 2 hours at :20 past even hours (UTC; Taiwan's even hours too), as
+    # the Worker's cron was.
+    - cron: "20 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run (read only, send and write nothing)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Two runs never overlap: a run that starts while one is going waits for it
+# (and a newer one replaces a run that is still waiting).
+concurrency:
+  group: push-sender
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Only from master
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse other branches and forks
+        env:
+          REF: ${{ github.ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$REPO" != 7kfpun/SwiftUI-TWAQI ]; then
+            echo "::error::Push sends run only in 7kfpun/SwiftUI-TWAQI (this is ${REPO})."
+            exit 1
+          fi
+          if [ "$REF" != refs/heads/master ]; then
+            echo "::error::Push sends run from master only (this run is on ${REF})."
+            exit 1
+          fi
+
+  send:
+    name: ${{ inputs.dry_run && 'Dry run' || 'Send alerts' }}
+    needs: guard
+    runs-on: ubuntu-latest
+    environment: push-sender
+    # 40k sends take about 3 minutes; this leaves room for slow APIs.
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: workers/twaqi-push-sender
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No npm ci: run() and scripts/run.ts use only Node built-ins.
+      - name: Run the push sender
+        env:
+          FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
+          DIRECTUS_PUSH_TOKEN: ${{ secrets.DIRECTUS_PUSH_TOKEN }}
+          AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          # The Worker that writes the forwarded events to Analytics Engine.
+          PUSH_SENDER_URL: https://twaqi-push-sender.710kfpun.workers.dev
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          # The secret is masked as a whole; a network error can print just its host.
+          host="$(node -e 'try { console.log(new URL(process.env.AQI_API_BASE).host) } catch {}')"
+          if [ -n "$host" ]; then echo "::add-mask::$host"; fi
+          args=()
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          # Exits non-zero, failing the job, when run() throws or any alert
+          # failed to send (dead tokens and deferred sends don't count). Events
+          # that couldn't be forwarded are a warning only.
+          npm run --silent send -- "${args[@]}"

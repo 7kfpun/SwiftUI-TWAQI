@@ -1,0 +1,157 @@
+name: Unit tests build
+description: >-
+  The build half of the Unit tests job, shared by ci.yml (pull requests) and
+  ci-cache.yml (master): the three dependency caches, pod install and
+  build-for-testing of TWAQI-CI. One copy, so the cache keys and build flags
+  the master run fills are the ones pull requests restore (FOX-65). Run after
+  actions/checkout and the workflow's "Prepare gitignored config" step.
+
+inputs:
+  skip-build-if-cached:
+    description: >-
+      'true' skips pod install and the build when all three caches hit their
+      exact keys (the master run: nothing new to save). Pull requests leave it
+      'false': they need the build products.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Show Xcode
+      id: xcode
+      shell: bash
+      run: |
+        set -euo pipefail
+        xcodebuild -version
+        echo "build=$(xcodebuild -version | awk '/Build version/ {print $3}')" >> "$GITHUB_OUTPUT"
+
+    # Restore here, save explicitly at the end, and only on a miss. A pull
+    # request can read master's caches but not another PR's. When master's
+    # ci-cache.yml run has filled a key, every PR restores it and saves nothing,
+    # instead of each PR storing its own ~880 MB copy under the same key.
+    - name: Restore Swift packages
+      id: spm
+      uses: actions/cache/restore@v4
+      with:
+        # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
+        # runs DerivedData/SourcePackages/checkouts/firebase-ios-sdk/...
+        path: ${{ runner.temp }}/DerivedData/SourcePackages
+        key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+        restore-keys: |
+          spm-${{ runner.os }}-${{ runner.arch }}-
+
+    - name: Restore Pods
+      id: pods
+      uses: actions/cache/restore@v4
+      with:
+        path: ios/Pods
+        # Podfile too: its post_install hook patches the pods' sources.
+        key: pods-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile') }}
+        restore-keys: |
+          pods-${{ runner.os }}-${{ runner.arch }}-
+
+    # Build products of a run with the same dependencies and Xcode. Exact key
+    # only, no restore-keys: products built against other pods, packages or
+    # Xcode are never restored. Inside a hit, Xcode still rebuilds whatever
+    # changed: checkout gives every app and test source a new mtime, so only
+    # the cached Pods / package products can be reused.
+    - name: Restore DerivedData
+      id: deriveddata
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ${{ runner.temp }}/DerivedData/Build
+          ${{ runner.temp }}/DerivedData/ModuleCache.noindex
+        key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile', 'ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
+    - name: Check the cache hits
+      id: cached
+      shell: bash
+      env:
+        SPM_HIT: ${{ steps.spm.outputs.cache-hit }}
+        PODS_HIT: ${{ steps.pods.outputs.cache-hit }}
+        DERIVEDDATA_HIT: ${{ steps.deriveddata.outputs.cache-hit }}
+        SKIP_IF_CACHED: ${{ inputs.skip-build-if-cached }}
+      run: |
+        set -euo pipefail
+        # cache-hit is 'true' only for the exact key; a restore-keys match or
+        # a miss is saved under the exact key after the build.
+        echo "Exact-key hits: Swift packages=${SPM_HIT:-false} Pods=${PODS_HIT:-false} DerivedData=${DERIVEDDATA_HIT:-false}"
+        all=false
+        if [ "$SPM_HIT" = true ] && [ "$PODS_HIT" = true ] && [ "$DERIVEDDATA_HIT" = true ]; then
+          all=true
+        fi
+        skip=false
+        if [ "$all" = true ] && [ "$SKIP_IF_CACHED" = true ]; then
+          skip=true
+          echo "All three caches are current. Nothing to build or save."
+        fi
+        echo "skip=${skip}" >> "$GITHUB_OUTPUT"
+
+    - name: Install CocoaPods dependencies
+      if: steps.cached.outputs.skip != 'true'
+      shell: bash
+      working-directory: ios
+      env:
+        COCOAPODS_DISABLE_STATS: "true"
+      run: |
+        set -euo pipefail
+        if ! command -v pod >/dev/null 2>&1; then
+          sudo gem install cocoapods -N
+        fi
+        pod install
+
+    - name: Build for testing
+      if: steps.cached.outputs.skip != 'true'
+      shell: bash
+      working-directory: ios
+      run: |
+        set -euo pipefail
+        # Generic destination, so the build does not depend on a simulator.
+        # ARCHS=arm64 keeps it to the runner's own simulator architecture.
+        # TWAQI-CI is the TWAQI scheme without the TWAQIUITests runner, which
+        # CI never runs. The local full-suite command keeps using TWAQI.
+        # COMPILER_INDEX_STORE_ENABLE=NO: the index is only for Xcode's editor.
+        # A restored cache gives every file a new inode. Let Xcode compare
+        # mtime and size only, so unchanged cached products are reused.
+        # -showBuildTimingSummary prints where the build time went (FOX-65).
+        defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
+        xcodebuild build-for-testing \
+          -workspace TWAQI.xcworkspace \
+          -scheme TWAQI-CI \
+          -destination "generic/platform=iOS Simulator" \
+          -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
+          -clonedSourcePackagesDirPath "${RUNNER_TEMP}/DerivedData/SourcePackages" \
+          -showBuildTimingSummary \
+          ARCHS=arm64 \
+          COMPILER_INDEX_STORE_ENABLE=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY=""
+
+    # Saved after a successful build, before any simulator work, and only for
+    # a cache that missed its exact key. A key another run saved first is
+    # skipped with a warning by actions/cache/save, not a failure.
+    - name: Save Swift packages
+      if: steps.cached.outputs.skip != 'true' && steps.spm.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ runner.temp }}/DerivedData/SourcePackages
+        key: ${{ steps.spm.outputs.cache-primary-key }}
+
+    - name: Save Pods
+      if: steps.cached.outputs.skip != 'true' && steps.pods.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ios/Pods
+        key: ${{ steps.pods.outputs.cache-primary-key }}
+
+    - name: Save DerivedData
+      if: steps.cached.outputs.skip != 'true' && steps.deriveddata.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ runner.temp }}/DerivedData/Build
+          ${{ runner.temp }}/DerivedData/ModuleCache.noindex
+        key: ${{ steps.deriveddata.outputs.cache-primary-key }}

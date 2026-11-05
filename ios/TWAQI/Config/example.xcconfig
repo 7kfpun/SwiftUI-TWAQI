@@ -1,0 +1,54 @@
+//
+//  example.xcconfig
+//  TWAQI
+//
+//  Created by kf on 22/10/19.
+//  Copyright © 2019 kf. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+// Please copy the file and rename to debug.xcconfig and release.xcconfig
+
+// APIs
+API_DOMAIN = https:\/\/firebasestorage.googleapis.com
+ApiEnpointCountries = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcountries.json?alt=media&token=96a901ae-6325-4a8f-ae5d-3ae04a21a4e3
+ApiEnpointStations = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fstations.json?alt=media&token=c2937b0e-1391-403e-8db8-0f087f3ebf39
+ApiEnpointCurrentPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcurrent-pollutants.json?alt=media&token=1ba8f3fd-b0fb-44fe-a4a3-e0085a25ba1f
+ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fhistorical-pollutants.json?alt=media&token=63729049-76eb-4836-ab28-c5dd371769ed
+
+// Services
+GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
+GMSServicesApiKey = // Required
+// OneSignal stays registered alongside FCM (same alert tags), so it can be
+// switched back on as a sender. Optional: empty leaves OneSignal off.
+OneSignalAppId =
+
+// AdMob AdUnitId
+AdUnitIdMainFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdDetailsListFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdDetailsFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdFavouritesFooter = ca-app-pub-3940256099942544/2934735716
+AdUnitIdHelpFooter = ca-app-pub-3940256099942544/2934735716
+
+// In-App Purchase
+InAppPurchaseProductId = test
+
+// Directus (in-app feedback, and the 空品區 forecast read from twaqi_aqi_forecast).
+// The TWAQI App static token: create on twaqi_feedback, read on twaqi_aqi_forecast.
+// Keep the real value in debug.xcconfig / release.xcconfig, which are gitignored.
+DirectusUrl = https:\/\/cms.wahthefox.com
+DirectusFeedbackToken =
+
+// Push: the twaqi-push-sender Worker's app API (FOX-13 / FOX-37 M5). The app
+// holds no Directus token for the push collections; each install signs its
+// requests with a Keychain secret. Not a secret itself.
+PushApiUrl = https:\/\/twaqi-push-sender.710kfpun.workers.dev
+
+// Business partner form (Directus twaqi_cooperate, create only; the app
+// sends archived=false and never deletes). Optional: when empty the app uses
+// DirectusFeedbackToken, so the TWAQI App role needs create on twaqi_cooperate
+// for the fields in CooperateSubmission, including archived. Set this only
+// to use a separate create-only token.
+DirectusCooperateToken =

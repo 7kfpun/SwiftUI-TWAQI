@@ -1,0 +1,574 @@
+/*
+  Localizable.strings
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "Main";
+"Tabbar.forecast" = "Forecast";
+"Tabbar.favourites" = "Favourites";
+"Tabbar.details_list" = "Search";
+"Tabbar.help" = "Help";
+
+"FavouriteList.favourites" = "Favourites";
+"Favourites.add_your_first_favourite_station" = "Add your first favourite station";
+"Favourites.add_to_favourites" = "Add to Favourites";
+"Favourites.remove_from_favourites" = "Remove from Favourites";
+"Favourites.alerts_on" = "Alerts on";
+"Favourites.remove_station_with_alerts_title" = "Remove from Favourites?";
+"Favourites.remove_station_with_alerts_message" = "This station has AQI alerts on. Removing it from Favourites also turns its alerts off.";
+"Favourites.remove_and_turn_off_alerts" = "Remove and Turn Off Alerts";
+"Favourites.cancel" = "Cancel";
+"Favourites.added_to_favourites" = "Added to Favourites";
+"Favourites.alerts_cap_reached_message %lld" = "Alerts are already on for %lld stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.";
+"Favourites.notifications_off_message" = "Notifications are off for Taiwan Air, so alerts for this station stay off. Turn them on in Settings, then switch alerts on below.";
+"Favourites.open_settings" = "Open Settings";
+"Favourites.ok" = "OK";
+"Favourites.removed_from_favourites" = "Removed from Favourites";
+
+"DetailsList.details" = "Details";
+"DetailsList.search" = "Search";
+
+"Details.general_public" = "General public";
+"Details.sensitive_group" = "Sensitive group";
+
+"Settings.notice_me_when_aqi_is_above" = "Notice me when AQI is above";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "The value is too small, you would get lots of notifications";
+"Settings.notice_me_when_aqi_is_below" = "Notice me when AQI is below";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "The value is too large, you would get lots of notifications";
+"Settings.alerts_station_limit %lld" = "You can turn on alerts for up to %lld stations.";
+
+"Help.help" = "Help";
+"Help.select_a_topic" = "Select a topic";
+"Help.do_not_disturb" = "Do Not Disturb";
+"Help.turn_on_do_not_disturb" = "Turn on Do Not Disturb";
+"Help.start_time" = "Start Time";
+"Help.end_time" = "End Time";
+"Help.language" = "Language";
+"Help.language_system" = "System default";
+"Help.language_footer" = "Addresses and forecast text from the government are in Chinese. In other languages they are translated on this device, once that language is downloaded for Translate in Settings.";
+"Help.appearance" = "Appearance";
+"Help.appearance_system" = "System default";
+"Help.appearance_light" = "Light";
+"Help.appearance_dark" = "Dark";
+"Help.cancel_site_notification" = "Cancel site notification";
+"Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
+"Help.in_app_purchase" = "In-app purchase";
+"Help.ad_free" = "Remove ads & get complication numbers";
+"Help.restore_purchase" = "Restore purchase";
+"Help.contact_us" = "Contact us";
+"Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
+"Help.feedback_or_contact_us" = "Feedback / Contact us";
+"Help.definition" = "Understanding the readings";
+"Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
+
+"Feedback.title" = "Feedback";
+"Feedback.rating_header" = "How satisfied are you with the app?";
+"Feedback.rating_stars %lld" = "%lld stars";
+"Feedback.message_header" = "Suggestions";
+"Feedback.message_placeholder" = "Which feature do you think we need to improve?";
+"Feedback.other_header" = "Other feedback / questions";
+"Feedback.optional" = "Optional";
+"Feedback.interview" = "Interested in our user interviews?";
+"Feedback.interview_footer" = "We hold user interviews in Taipei from time to time. Turn this on and we may email you to invite you.";
+"Feedback.name_placeholder" = "Name (optional)";
+"Feedback.email_placeholder" = "Email *";
+"Feedback.email_footer" = "So we can reply to you.";
+"Feedback.email_invalid" = "Please check the email address.";
+"Feedback.privacy_footer" = "To help us look into it, the app version, device model, OS version and language are sent with your feedback.";
+"Feedback.send" = "Send";
+"Feedback.sent_title" = "Thank you!";
+"Feedback.sent_message" = "Your feedback has been sent.";
+"Feedback.sent_message_may_reply" = "Your feedback has been sent. We may reply to you by email.";
+"Feedback.rate_on_app_store" = "Rate on the App Store";
+"Feedback.error_title" = "Couldn't send feedback";
+"Feedback.error_offline" = "You seem to be offline. Check your connection and try again.";
+"Feedback.error_generic" = "Something went wrong. Please try again later.";
+"Feedback.try_again" = "Try Again";
+"Feedback.cancel" = "Cancel";
+
+"Cooperate.title" = "Business Partnership";
+"Cooperate.intro_header" = "Partnership enquiry";
+"Cooperate.intro_footer" = "Brands, media, schools and public bodies are all welcome. We'll reply by email as soon as we can.";
+"Cooperate.type" = "Type";
+"Cooperate.type_choose" = "Choose";
+"Cooperate.type_advertising" = "Advertising";
+"Cooperate.type_data_api" = "Data & API";
+"Cooperate.type_sponsorship" = "Sponsorship";
+"Cooperate.type_media" = "Media & PR";
+"Cooperate.type_other" = "Other";
+"Cooperate.company_header" = "Company or organisation";
+"Cooperate.company_placeholder" = "Company or organisation name *";
+"Cooperate.website_placeholder" = "Website (optional)";
+"Cooperate.contact_header" = "Contact";
+"Cooperate.name_placeholder" = "Name *";
+"Cooperate.job_title_placeholder" = "Job title (optional)";
+"Cooperate.phone_placeholder" = "Phone (optional)";
+"Cooperate.contact_footer" = "We'll get back to you by email.";
+"Cooperate.message_header" = "About the partnership";
+"Cooperate.message_placeholder" = "Tell us your idea, and any timeline or budget.";
+"Cooperate.privacy_footer" = "We use what you enter only to reply to this enquiry. The app version, device model, OS version, language and time zone are sent with it.";
+"Cooperate.sent_title" = "Thank you!";
+"Cooperate.sent_message" = "We've received your enquiry and will be in touch soon.";
+"Cooperate.error_title" = "Couldn't send enquiry";
+
+"Help.widgets_and_watch" = "Widgets & Apple Watch";
+"Help.widgets_title" = "Home Screen & Lock Screen widgets";
+"Help.widgets_shows_header" = "What it shows";
+"Help.widgets_shows_body" = "The current reading for your nearest station, or your first favourite. Edit the widget to choose.";
+"Help.widgets_favourites_header" = "Favourite stations";
+"Help.widgets_favourites_body" = "Small, medium and large Home Screen widgets list your other favourite stations under the main one, without repeating it. Extra large (iPad) shows one station in detail rather than favourites: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and extra large widgets are part of Pro.";
+"Help.widgets_favourites_add" = "To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.";
+"Help.widgets_favourites_offline" = "Without a connection, the widget shows the last readings it saved.";
+"Help.widgets_index_header" = "Which index";
+"Help.widgets_index_body" = "Edit the widget to show AQI, PM2.5, PM10, O3, CO, SO2, or NO2.";
+"Help.widgets_paging_header" = "Page through favourites";
+"Help.widgets_paging_body" = "On a medium or large widget, tap ‹ or › to step through your favourites one station at a time; the number between them, like 2 / 5, shows where you are. Tap anywhere else to open that station in the app. The widget goes back to its own station after 30 minutes without a tap, or when new readings come in. Needs Pro and at least two favourites.";
+"Help.widgets_cycle_body" = "Tap the index name (AQI, PM2.5…) on a Home Screen widget to switch to the next index. It starts from the index chosen in Edit Widget.";
+"Help.widgets_stack_tip" = "Tip: put several Taiwan Air widgets in one widget stack (drag one onto another), set each one differently, for example nearest station and first favourite, or AQI and PM2.5, and swipe between them.";
+"Help.widgets_sizes_header" = "Sizes";
+"Help.widgets_home_sizes" = "Home Screen: small, medium, large, and extra large (iPad).";
+"Help.widgets_lock_sizes" = "Lock Screen: circular, rectangular, and inline.";
+"Help.widgets_standby_header" = "StandBy and stacks";
+"Help.widgets_standby_body" = "StandBy: with iPhone charging on its side, touch and hold StandBy, tap +, and add the small Taiwan Air widget. It comes to the top by itself when the air turns bad.";
+"Help.widgets_smart_rotate_body" = "In a Home Screen stack with Smart Rotate on, the widget moves to the top by itself on a bad-air day.";
+"Help.widgets_add_header" = "How to add";
+"Help.widgets_add_1" = "1. Touch and hold the Home Screen or Lock Screen, then tap Add Widget.";
+"Help.widgets_add_2" = "2. Search for Taiwan Air, TWAQI, or Air quality.";
+"Help.widgets_add_3" = "3. Touch and hold the widget and tap Edit Widget to choose the station and the index.";
+"Help.widgets_footer" = "Open this app once so a station and a reading are ready.";
+
+"Help.watch_title" = "Apple Watch";
+"Help.watch_app_header" = "The watch app";
+"Help.watch_app_body" = "Free. It shows the current reading for the closest station, or one you pick, and the past 12 hours.";
+"Help.watch_complications_header" = "Watch-face complications";
+"Help.watch_complications_body" = "The face style is free: the level's face in its colour, for AQI, PM2.5 or any of 7 indices. Pro adds the number and more styles: a label with the number, number only, and the status in words. The watch app itself is free.";
+"Help.watch_smart_stack_header" = "Smart Stack";
+"Help.watch_smart_stack_body" = "Part of Pro. Turn the Digital Crown on the watch face to open the Smart Stack, touch and hold it, tap +, and add Taiwan Air. It comes up by itself when the air turns bad, and at commute times.";
+"Help.watch_add_header" = "How to add a complication";
+"Help.watch_add_1" = "1. Edit your watch face and add a complication.";
+"Help.watch_add_2" = "2. Choose Taiwan Air, TWAQI, or Air quality.";
+"Help.watch_footer" = "Open this app or the watch app once so a station and a reading are available.";
+
+"AirIndex.meaning_aqi" = "Air quality index";
+"AirIndex.meaning_pm25" = "Particulates (PM2.5)";
+"AirIndex.meaning_pm10" = "Particulates (PM10)";
+"AirIndex.meaning_o3" = "Ozone";
+"AirIndex.meaning_co" = "Carbon monoxide";
+"AirIndex.meaning_so2" = "Sulfur dioxide";
+"AirIndex.meaning_no2" = "Nitrogen dioxide";
+
+
+"AirStatus.good" = "Good";
+"AirStatus.moderate" = "Moderate";
+"AirStatus.unhealthyforsensitivegroup" = "Unhealthy for sensitive groups";
+"AirStatus.unhealthy" = "Unhealthy";
+"AirStatus.veryunhealthy" = "Very unhealthy";
+"AirStatus.hazardous" = "Hazardous";
+"AirStatus.unknown" = "-";
+
+"AirStatus.general_public_guidance_good" = "Enjoy your usual outdoor activities";
+"AirStatus.general_public_guidance_moderate" = "Enjoy your usual outdoor activities";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "Consider reducing outdoor activities";
+"AirStatus.general_public_guidance_unhealthy" = "Should reduce physical exertion, particularly outdoors";
+"AirStatus.general_public_guidance_veryunhealthy" = "Reduce outdoor activities";
+"AirStatus.general_public_guidance_hazardous" = "Avoid outdoor activities and keep doors and windows closed";
+
+"AirStatus.sensitive_group_guidance_good" = "Enjoy your usual outdoor activities";
+"AirStatus.sensitive_group_guidance_moderate" = "Can still be active outside";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "Reduce physical exertion and outdoor activities";
+"AirStatus.sensitive_group_guidance_unhealthy" = "Stay indoors and reduce physical exertion";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "Stay indoors and reduce physical exertion";
+"AirStatus.sensitive_group_guidance_hazardous" = "Stay indoors and avoid physical exertion";
+
+"Details.last_updated" = "Last updated";
+"Details.address" = "Address";
+"Details.coordinates" = "Coordinates";
+"Details.wind" = "Wind";
+"Details.location" = "Location";
+"Details.no_data" = "No data";
+"Details.select_a_station" = "Select a station";
+
+"StationType.general" = "General";
+"StationType.traffic" = "Roadside";
+"StationType.industrial" = "Industrial";
+"StationType.background" = "Background";
+"StationType.national_park" = "National park";
+"StationType.other" = "Other";
+
+"Wind.calm" = "Calm";
+"Wind.light_air" = "Light air";
+"Wind.light_breeze" = "Light breeze";
+"Wind.gentle_breeze" = "Gentle breeze";
+"Wind.moderate_breeze" = "Moderate breeze";
+"Wind.strong_breeze" = "Strong breeze";
+
+/* 24-hour AQI trend */
+"Details.trend_improving" = "Improving";
+"Details.trend_worsening" = "Getting worse";
+"Details.trend_steady" = "Steady";
+"Details.trend_improving_detail" = "AQI down %d over the last few hours";
+"Details.trend_worsening_detail" = "AQI up %d over the last few hours";
+"Details.trend_steady_detail" = "Holding around AQI %d";
+"Details.now" = "Now";
+"Details.low" = "Low";
+"Details.high" = "High";
+"Details.average" = "Average";
+"Details.no_trend_data" = "Not enough readings yet to show a trend";
+"Details.not_reporting" = "No live readings";
+"Details.not_reporting_message" = "This station isn't reporting right now. It may be offline for maintenance, or retired. Stations nearby are on the map.";
+"Details.pollutants" = "Pollutants";
+"Details.health_advice" = "Health advice";
+"Details.alerts_title" = "Air quality alerts";
+"Details.alerts_pitch" = "Get notified when the air here gets worse or clears up.";
+"Details.alerts_on" = "On";
+"Details.alerts_off" = "Off";
+"Details.alerts_unavailable" = "Alerts can't be loaded right now. Check your connection and try again.";
+"Details.alerts_try_again" = "Try Again";
+"Details.live_cam" = "Live camera";
+"Details.cam_captured %@" = "Captured %@";
+"Details.cam_source" = "Image: MOENV";
+"Details.no_cam" = "This station has no camera";
+"Details.cam_unavailable" = "Couldn't load the camera image";
+"Details.cam_showing_saved" = "Couldn't load the latest image — showing the last one saved";
+"Details.cam_live" = "Live";
+"Details.cam_timeline" = "Camera, past 24 hours";
+"Details.cam_hour_missing" = "No image for this hour";
+"Details.send_feedback" = "Send feedback";
+
+/* Share card */
+"Share.share" = "Share";
+"Share.message" = "%1$@: AQI %2$d, %3$@ — via Taiwan Air";
+"Share.preview_title" = "Share Card";
+"Share.shape" = "Shape";
+"Share.shape_feed" = "Post 4:5";
+"Share.shape_story" = "Story 9:16";
+"Share.shape_square" = "Chat 1:1";
+"Share.save_to_photos" = "Save to Photos";
+"Share.saved" = "Saved to Photos";
+"Share.save_denied" = "Taiwan Air isn't allowed to add photos. You can allow it in Settings.";
+"Share.save_failed" = "The card couldn't be saved. Please try again.";
+"Share.open_settings" = "Open Settings";
+"Share.cancel" = "Cancel";
+"Share.download" = "Download Taiwan Air on the App Store";
+
+/* Watch */
+"Watch.stations" = "Stations";
+"Watch.loading_failed" = "Couldn't load readings";
+"Watch.retry" = "Retry";
+"Watch.widget_name" = "Air quality";
+"Watch.widget_description" = "Air quality at the station you chose in the app. The face is free; the number and other styles are Pro.";
+"Watch.widget_short %@" = "%@ (number only)";
+"Watch.widget_face %@" = "%@ (face)";
+"Watch.widget_status %@" = "%@ (status)";
+"Watch.widget_no_station %@" = "%@, no station";
+"Watch.widget_pro %@" = "%@ · Pro";
+
+"Widget.widget_name" = "Air quality";
+"Widget.widget_description" = "Current AQI at your nearest station or first favourite, plus your other favourites.";
+"Widget.favourites" = "Favourites";
+"Widget.no_favourites" = "Save stations in Favourites to list them here.";
+"Widget.station" = "Station";
+"Widget.station_closest" = "Closest station";
+"Widget.station_first_favourite" = "First favourite";
+"Widget.pro_only_title" = "Pro widget";
+"Widget.pro_only_body" = "Medium, large and extra large widgets are for Pro users. Open the app to upgrade.";
+"Widget.pro_unlock" = "Unlock every reading with Pro";
+"Widget.next_station" = "Next station";
+"Widget.previous_station" = "Previous station";
+"Widget.show_index %@" = "Show %@";
+"Widget.page_position %lld %lld" = "Station %1$lld of %2$lld";
+"Widget.intent_page_title" = "Show a station in the widget";
+"Widget.intent_index_title" = "Change the widget's index";
+"Widget.intent_widget" = "Widget";
+"Watch.no_station" = "Open the app to choose a station";
+"Watch.history" = "Past 12 hours";
+"Watch.closest" = "Closest station";
+"Watch.default_station" = "Default · no location";
+"Watch.pro_title" = "Numbers & styles · Pro";
+"Watch.pro_failed" = "Purchase not found. Try again, or restore.";
+"Watch.pro_locked" = "Pro · Open the app to unlock";
+
+/* Pro */
+"Pro.title" = "Taiwan Air Pro";
+"Pro.subtitle" = "Cleaner screens, and air quality on your watch face.";
+"Pro.features" = "What you get";
+"Pro.feature_no_ads" = "No ads";
+"Pro.feature_no_ads_detail" = "Every screen, the map included.";
+"Pro.feature_complications" = "Complication numbers & styles";
+"Pro.feature_complications_detail" = "The number and more styles on your watch face, for AQI, PM2.5 or any of 7 indices. The face style and the watch app are free.";
+"Pro.feature_widgets" = "Medium, large and extra large widgets";
+"Pro.feature_widgets_detail" = "Your station and favourite stations on the Home Screen, or on iPad one station in full detail.";
+"Pro.feature_support" = "Support an independent app";
+"Pro.feature_support_detail" = "Keeps the app maintained and the readings coming.";
+"Pro.choose_plan" = "Choose a plan";
+"Pro.best_value" = "Best value";
+"Pro.per_month %@" = "%@ / month";
+"Pro.billed_monthly" = "Billed monthly";
+"Pro.lifetime_detail" = "Pay once, keep Pro forever";
+"Pro.renewal_terms" = "Subscriptions renew automatically unless cancelled at least 24 hours before the period ends. Manage them in Settings › Apple ID › Subscriptions.";
+"Pro.terms_of_use" = "Terms of Use";
+"Pro.privacy_policy" = "Privacy Policy";
+"Pro.purchase_failed" = "The purchase couldn't be completed. Please try again.";
+"Watch.pro_feature_complications" = "The number on your watch face";
+"Watch.pro_feature_no_ads" = "No ads on iPhone";
+"Watch.pro_feature_indices" = "AQI, PM2.5 and 5 more indices";
+"Watch.pro_complications_cta" = "Numbers on the watch face";
+
+/* Guide */
+"Guide.section_what" = "What it is";
+"Guide.section_sources" = "Where it comes from";
+"Guide.section_health" = "Health effects";
+"Guide.section_measure" = "How it's measured";
+"Guide.section_tips" = "What you can do";
+"Guide.section_bands" = "Colour bands in this app";
+"Guide.bands_footer" = "Every reading on the map, the station pages and the watch is coloured by these bands.";
+"Guide.further_reading" = "Read more on Wikipedia";
+"Guide.sources_footer" = "Sources: Ministry of Environment (Taiwan); World Health Organization, Global Air Quality Guidelines (2021).";
+
+"Guide.aqi.what" = "A single number from 0 to 500 that sums up the air. Each of the six pollutants is converted onto the same 0–500 scale, and the AQI is the highest of the six; that pollutant is reported as the main pollutant. A reading of 160 driven by ozone calls for different precautions from one driven by PM2.5, so it's worth checking which pollutant is behind it.";
+"Guide.aqi.measure" = "Taiwan's Ministry of Environment publishes the AQI every hour. It isn't a snapshot of that hour: particulates use a weighted moving average (half the last 12 hours, half the last 4), ozone and carbon monoxide use 8-hour averages, and sulfur dioxide and nitrogen dioxide use the latest hour. A sudden spike therefore shows in the individual pollutant readings before it moves the AQI.";
+"Guide.aqi.tips" = "Look at the trend as well as the number: a rising AQI in the morning often keeps rising until the weather changes. Above 100, sensitive groups (children, older adults, and people with heart or lung disease) should cut back on long or strenuous time outdoors; above 150, everyone should.";
+
+"Guide.pm25.what" = "Particles 2.5 micrometres across or smaller, about a thirtieth of the width of a human hair. They are small enough to reach deep into the lungs, and the finest can pass into the bloodstream.";
+"Guide.pm25.sources" = "Vehicle exhaust, power stations, factories and burning of all kinds, plus particles that form in the air itself from sulfur dioxide, nitrogen oxides and ammonia. In Taiwan, levels usually climb from autumn to spring, when weaker winds trap local pollution and the northeast monsoon carries in haze from the Asian mainland. The central and southern west coast is often worst.";
+"Guide.pm25.health" = "Long-term exposure is linked to heart disease, stroke, lung cancer and slower lung development in children; short spikes can trigger asthma attacks and heart problems. The WHO guideline is 15 µg/m³ averaged over 24 hours and 5 µg/m³ over a year.";
+"Guide.pm25.measure" = "Micrograms per cubic metre (µg/m³), measured hourly. The AQI uses a moving average, so the hourly reading reacts first.";
+"Guide.pm25.tips" = "On high days, close the windows and run an air purifier with a HEPA filter. Outdoors, a well-fitted N95 or KN95 mask filters fine particles; ordinary surgical masks fit too loosely to do much.";
+
+"Guide.pm10.what" = "Particles up to 10 micrometres across, PM2.5 included. The coarser part is mostly caught in the nose, throat and upper airways rather than the deep lung.";
+"Guide.pm10.sources" = "Road and construction dust, bare ground, sea salt, and in spring, dust storms blown from northern China and Mongolia. On windy days in autumn and winter, the dry bed of the Zhuoshui River raises dust across Yunlin and Changhua.";
+"Guide.pm10.health" = "Irritates the eyes, nose and throat and aggravates asthma and bronchitis. The WHO guideline is 45 µg/m³ averaged over 24 hours.";
+"Guide.pm10.measure" = "Micrograms per cubic metre (µg/m³), measured hourly; the AQI uses the same moving average as PM2.5.";
+"Guide.pm10.tips" = "On dusty days keep the windows shut and wipe surfaces with a damp cloth rather than dry-dusting. Masks work better against coarse dust than against PM2.5.";
+
+"Guide.o3.what" = "Ozone at ground level, not the protective layer high in the atmosphere. Nothing emits it directly: it forms when nitrogen oxides and volatile organic compounds react in sunlight.";
+"Guide.o3.sources" = "The ingredients come mostly from traffic, industry and solvents. Because ozone takes hours to form, it usually peaks in the early-to-mid afternoon on sunny, warm days, and is often higher downwind of cities than in them.";
+"Guide.o3.health" = "Irritates the airways, causing coughing, chest tightness and shortness of breath, and lowers lung function, especially during exercise. People with asthma are affected most.";
+"Guide.o3.measure" = "Parts per billion (ppb), measured hourly. The AQI uses an 8-hour average, so it lags the afternoon peak.";
+"Guide.o3.tips" = "On high-ozone days, exercise in the morning or evening. Ozone breaks down quickly indoors, so staying inside works well; masks don't filter gases.";
+
+"Guide.co.what" = "A colourless, odourless gas produced when fuel burns without enough oxygen.";
+"Guide.co.sources" = "Mainly vehicle exhaust, so levels are highest beside busy roads at rush hour. Outdoors in Taiwan it rarely leaves the good band.";
+"Guide.co.health" = "Carbon monoxide takes the place of oxygen in the blood. At outdoor levels it mainly matters for people with heart disease; at high concentrations it causes headache, dizziness, confusion and death.";
+"Guide.co.measure" = "Parts per million (ppm), measured hourly, with an 8-hour average in the AQI.";
+"Guide.co.tips" = "The real danger is indoors. Gas water heaters in enclosed balconies or bathrooms cause carbon monoxide poisoning in Taiwan every winter: keep them well ventilated and fit a CO alarm.";
+
+"Guide.so2.what" = "A pungent gas released when fuel containing sulfur is burned.";
+"Guide.so2.sources" = "Coal- and oil-fired power stations, refineries, heavy industry and shipping. Volcanic vents emit it too, so stations near the Datun volcanoes around Yangmingshan can read higher.";
+"Guide.so2.health" = "Irritates the airways and can set off asthma within minutes. In the air it turns into sulfate particles, which add to PM2.5, and it contributes to acid rain.";
+"Guide.so2.measure" = "Parts per billion (ppb), as the latest hourly value in the AQI.";
+"Guide.so2.tips" = "If you have asthma, keep your reliever inhaler with you when levels rise, especially near industrial areas or volcanic vents.";
+
+"Guide.no2.what" = "A reddish-brown gas formed during high-temperature combustion.";
+"Guide.no2.sources" = "Mostly road traffic, then power stations and industry. Levels are highest beside busy roads and at rush hour, and drop off within a few hundred metres.";
+"Guide.no2.health" = "Inflames the airways and lowers resistance to respiratory infection; long-term exposure is linked to children developing asthma. It also helps form ozone and PM2.5.";
+"Guide.no2.measure" = "Parts per billion (ppb), as the latest hourly value in the AQI.";
+"Guide.no2.tips" = "Walk, run or cycle a block away from main roads where you can, and avoid rush hours.";
+
+/* visionOS */
+"Vision.map_unavailable" = "Map unavailable";
+"Vision.offline" = "Offline";
+"Vision.refresh" = "Refresh";
+"Vision.index" = "Index";
+"Vision.tabletop" = "Tabletop";
+"Vision.wind" = "Wind";
+"Vision.stations" = "Stations";
+"Vision.nearest" = "Nearest";
+"Vision.nearest_station" = "Nearest station";
+"Vision.find_nearest" = "Find nearest station";
+"Vision.close" = "Close";
+"Vision.details" = "Details";
+"Vision.pin" = "Pin";
+"Vision.unpin" = "Unpin";
+"Vision.show_on_map" = "Show on Map";
+"Vision.open_in_new_window" = "Open in New Window";
+"Vision.drag_to_pin" = "Drag out to pin it in your space";
+"Vision.about" = "About";
+"Vision.version" = "Version";
+"Vision.map_data" = "Coastline: Natural Earth. Elevation: Mapzen Terrain Tiles (SRTM, GMTED, ETOPO1 and others), via AWS Open Data.";
+
+/* Map timeline */
+"Timeline.title" = "Past 24 hours";
+"Timeline.now" = "Now";
+"Timeline.latest" = "Latest";
+"Timeline.hours_ago" = "%d h ago";
+"Timeline.yesterday" = "Yesterday";
+"Timeline.loading" = "Loading %d/%d";
+"Timeline.play" = "Play the past 24 hours";
+"Timeline.pause" = "Pause";
+"Timeline.accessibility_label" = "Timeline";
+
+/* Area forecast (MOENV AQF_P_01) */
+"Forecast.title" = "Regional forecast";
+"Forecast.today" = "Today";
+"Forecast.tomorrow" = "Tomorrow";
+"Forecast.day_after_tomorrow" = "In 2 days";
+"Forecast.major_pollutant %@" = "Main pollutant: %@";
+"Forecast.no_value" = "No forecast value";
+"Forecast.published %@" = "Issued %@";
+"Forecast.source" = "Source: MOENV";
+"Forecast.more" = "Show more";
+"Forecast.less" = "Show less";
+"Forecast.tab_title" = "AQI Forecast";
+"Forecast.your_area" = "Your area";
+"Forecast.favourite_area" = "Favourites";
+"Forecast.none_current" = "No current forecast to show. MOENV's latest one couldn't be loaded; try again later.";
+
+/* Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) */
+"Weather.title" = "Weather";
+"Weather.source" = "Data: Central Weather Administration";
+"Weather.humidity" = "Humidity";
+"Weather.rain_today" = "Rain today";
+"Weather.wind" = "Wind";
+"Weather.temperature %@" = "Temperature %@";
+"Weather.chance_of_rain %@" = "Chance of rain %@";
+"Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
+"Weather.station_nearby %@" = "CWA station %@ away";
+"Weather.observed %@" = "observed %@";
+/* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
+"Weather.wx.1" = "Clear";
+"Weather.wx.2" = "Mostly clear";
+"Weather.wx.3" = "Partly clear";
+"Weather.wx.4" = "Partly cloudy";
+"Weather.wx.5" = "Mostly cloudy";
+"Weather.wx.6" = "Mostly cloudy";
+"Weather.wx.7" = "Cloudy";
+"Weather.wx.8" = "Partly cloudy, occasional showers";
+"Weather.wx.9" = "Mostly cloudy, occasional rain";
+"Weather.wx.10" = "Mostly cloudy, occasional rain";
+"Weather.wx.11" = "Cloudy, occasional rain";
+"Weather.wx.12" = "Mostly cloudy with showers";
+"Weather.wx.13" = "Mostly cloudy with rain";
+"Weather.wx.14" = "Rain";
+"Weather.wx.15" = "Partly cloudy, showers or thunderstorms";
+"Weather.wx.16" = "Mostly cloudy, showers or thunderstorms";
+"Weather.wx.17" = "Mostly cloudy, thundershowers";
+"Weather.wx.18" = "Showers or thunderstorms";
+"Weather.wx.19" = "Clear, local afternoon rain";
+"Weather.wx.20" = "Partly cloudy, afternoon showers";
+"Weather.wx.21" = "Clear, afternoon thundershowers";
+"Weather.wx.22" = "Partly cloudy, afternoon thundershowers";
+"Weather.wx.23" = "Rain or snow";
+"Weather.wx.24" = "Clear with fog";
+"Weather.wx.25" = "Mostly clear with fog";
+"Weather.wx.26" = "Partly clear with fog";
+"Weather.wx.27" = "Partly cloudy with fog";
+"Weather.wx.28" = "Cloudy with fog";
+"Weather.wx.29" = "Partly cloudy, local rain";
+"Weather.wx.30" = "Mostly cloudy, local rain";
+"Weather.wx.31" = "Partly cloudy, fog and local rain";
+"Weather.wx.32" = "Mostly cloudy, fog and local rain";
+"Weather.wx.33" = "Partly cloudy, local thundershowers";
+"Weather.wx.34" = "Mostly cloudy, local thundershowers";
+"Weather.wx.35" = "Partly cloudy, thunderstorms and fog";
+"Weather.wx.36" = "Mostly cloudy, thunderstorms and fog";
+"Weather.wx.37" = "Rain or snow with fog";
+"Weather.wx.38" = "Occasional rain with fog";
+"Weather.wx.39" = "Rain with fog";
+"Weather.wx.41" = "Showers or thunderstorms with fog";
+"Weather.wx.42" = "Snow";
+
+/* Offline: last good readings */
+"Offline.showing_saved_readings" = "Offline — showing the last saved readings";
+"Offline.updated_ago %@" = "Offline · updated %@";
+"Offline.nothing_saved" = "Can't connect, and there's nothing saved to show. Check your connection and try again.";
+"Offline.retry" = "Try Again";
+
+/* Welcome flow (FOX-34) */
+"Help.welcome" = "Getting started";
+"Help.show_welcome_guide" = "Show welcome guide";
+"Onboarding.back" = "Back";
+"Onboarding.skip" = "Skip";
+"Onboarding.step %lld %lld" = "Step %1$lld of %2$lld";
+"Onboarding.continue" = "Continue";
+"Onboarding.not_now" = "Not Now";
+"Onboarding.open_settings" = "Open Settings";
+"Onboarding.get_started" = "Get Started";
+"Onboarding.done" = "Start Using Taiwan Air";
+"Onboarding.welcome_title" = "Air quality across Taiwan";
+"Onboarding.welcome_body" = "See the AQI and pollutant readings from every monitoring station in Taiwan, on a map and in a list, and keep your favourite stations one tap away.";
+"Onboarding.location_title" = "Find your nearest station";
+"Onboarding.location_body" = "Allow location so Taiwan Air can find the monitoring station closest to you and show where you are on the map.";
+"Onboarding.enable_location" = "Allow Location";
+"Onboarding.location_on" = "Location is on.";
+"Onboarding.location_off" = "Location is off. Until you turn it on in Settings, Taiwan Air starts from Zhongzheng District, Taipei.";
+"Onboarding.closest_title" = "Your closest station";
+"Onboarding.closest_body" = "Add it to Favourites and its alerts switch on with it, so you hear when the air there turns unhealthy. Not your area? Choose another station.";
+"Onboarding.closest_fallback" = "Location is off, so this is a stand-in: the station nearest Zhongzheng District, Taipei. Choose your own station below.";
+"Onboarding.closest_failed" = "Stations couldn't be loaded right now. You can add favourites later from the map or Search.";
+"Onboarding.add_to_favourites" = "Add to Favourites & Alerts";
+"Onboarding.in_favourites" = "In your Favourites";
+"Onboarding.alerts_need_notifications" = "Alerts stay off until notifications are allowed for Taiwan Air.";
+"Onboarding.notifications_title" = "Get air quality alerts";
+"Onboarding.notifications_body" = "Allow notifications so Taiwan Air can tell you when the air at your favourite stations changes. Choose the levels on each station page.";
+"Onboarding.allow_notifications" = "Allow Notifications";
+"Onboarding.notifications_on" = "Notifications are on.";
+"Onboarding.notifications_off" = "Notifications are off. You can turn them on in Settings.";
+"Onboarding.dnd_title" = "Quiet hours";
+"Onboarding.dnd_body" = "Taiwan Air's own setting, separate from Focus on your iPhone: between these times it sends no alerts.";
+"Onboarding.dnd_footer" = "You can change this anytime in Help.";
+"Onboarding.premium_body" = "Alerts, favourites, the map and the watch app are free. Pro is optional: it removes ads and adds more.";
+"Onboarding.see_pro_plans" = "See Pro Plans";
+"Onboarding.premium_active" = "You have Pro. Thank you for your support!";
+"Onboarding.welcome_data" = "Readings come every hour from the Ministry of Environment (MOENV). Taiwan Air is an independent app, not run by the government.";
+"Onboarding.choose_station" = "Choose Another Station";
+"Onboarding.choose_station_title" = "Choose a Station";
+"Onboarding.cancel" = "Cancel";
+"Onboarding.close" = "Close";
+"Onboarding.alerts_now_on" = "Its alerts are now on. Change or turn them off on its station page.";
+"Onboarding.dnd_after_notifications" = "Once notifications are on, you can set quiet hours here.";
+"Onboarding.more_title" = "More in Taiwan Air";
+"Onboarding.more_body" = "The air at a glance, without opening the app.";
+"Onboarding.more_widgets_title" = "Widgets";
+"Onboarding.more_widgets_body" = "On the Home Screen and Lock Screen. Page through your favourites with ‹ ›, and on iPad the extra large widget shows one station in detail.";
+"Onboarding.more_siri_title" = "Siri, Shortcuts & Control Center";
+"Onboarding.more_siri_body" = "Ask Siri about the air, or put it on the Action button or in Control Center.";
+"Onboarding.more_forecast_title" = "AQI Forecast";
+"Onboarding.more_forecast_body" = "Tap AQI Forecast at the bottom of the screen for each area's forecast for the coming days.";
+"Onboarding.how_to_add" = "How to add";
+"Onboarding.free_heading" = "Free";
+"Onboarding.free_siri" = "Siri, Shortcuts and the Control Center control";
+"Onboarding.free_complication" = "The watch face complication, with the level's face";
+"Onboarding.free_index_cycling" = "Small widget: tap the index name to cycle AQI, PM2.5 and more";
+"Onboarding.pro_heading" = "With Pro";
+"Onboarding.pro_trial_days %lld" = "%lld-day free trial";
+"Onboarding.pro_trial_weeks %lld" = "%lld-week free trial";
+"Onboarding.pro_trial_months %lld" = "%lld-month free trial";
+"Onboarding.pro_trial_years %lld" = "%lld-year free trial";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "Station";
+"Intent.station_nearest" = "Nearest station";
+"Intent.get_air_quality_title" = "Get Air Quality";
+"Intent.get_air_quality_description" = "Says the current AQI, its level, the main pollutant and what to do, for your nearest station or a favourite.";
+"Intent.get_air_quality_short" = "Air Quality";
+"Intent.open_station_title" = "Open Station";
+"Intent.open_station_description" = "Opens Taiwan Air on a station's page.";
+"Intent.open_station_short" = "Open Station";
+"Get the air at ${station}" = "Get the air at ${station}";
+"Open ${station}" = "Open ${station}";
+"Intent.answer_fallback_favourite" = "Taiwan Air doesn't have your location, so here is your first favourite.";
+"Intent.answer_fallback_default" = "Taiwan Air doesn't have your location and you have no favourites, so here is central Taipei.";
+"Intent.answer_no_reading" = "There's no reading yet. Open Taiwan Air once while online.";
+"Intent.answer_no_aqi" = "%@ has no AQI reading right now.";
+"Intent.answer_reading" = "%1$@: AQI %2$@, %3$@.";
+"Intent.answer_main_pollutant" = "Main pollutant: %@.";
+"Intent.answer_guidance" = "%@.";
+"Intent.answer_cached_age" = "You're offline, so this is the last saved reading, from %@ ago.";
+"Intent.answer_cached" = "You're offline, so this is the last saved reading.";
+"Intent.answer_old_age" = "This reading is from %@ ago.";
+"Control.display_name" = "Air Quality";
+"Control.description" = "The AQI of your nearest station or a favourite. Tap to open it.";
+"Control.configuration_title" = "Station";
+"Help.shortcuts_title" = "Siri, Shortcuts & Control Center";
+"Help.shortcuts_siri_header" = "Ask Siri";
+"Help.shortcuts_siri_body" = "Say “What's the air in Taiwan Air” for your nearest station, or “Taiwan Air air at Songshan” for a favourite. Siri says the AQI, its level, the main pollutant and what to do. Without a connection, it gives the last saved reading and how old it is.";
+"Help.shortcuts_location_body" = "Nearest uses your location only if you have already allowed it for this app. Otherwise you get your first favourite.";
+"Help.shortcuts_app_header" = "Shortcuts, Spotlight & Action button";
+"Help.shortcuts_app_body" = "“Get Air Quality” and “Open Station” are in the Shortcuts app and Spotlight with no setup. On an iPhone with an Action button: Settings → Action Button → Shortcut, then choose one.";
+"Help.shortcuts_control_header" = "Control Center";
+"Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
+"Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";

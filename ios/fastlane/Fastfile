@@ -1,0 +1,942 @@
+require "shellwords"
+
+default_platform(:ios)
+
+APP_VERSION = "3.1.4"
+
+# fastlane runs with the working directory set to fastlane/, not the iOS root,
+# and `sh` inherits that. Anchor every path to an absolute root so nothing
+# depends on which directory a command happens to start in — a relative `rm`
+# against the wrong root fails silently.
+#
+# ROOT is the iOS app's directory (ios/ in the repo since FOX-89), the one that
+# holds TWAQI.xcworkspace and fastlane/. REPO_ROOT is the repository, for the
+# shared tools/.
+ROOT = begin
+  here = File.expand_path(Dir.pwd)
+  File.basename(here) == "fastlane" ? File.expand_path("..", here) : here
+end
+REPO_ROOT = File.expand_path("..", ROOT)
+
+# Raw simulator captures, one directory per App Store locale, kept pristine.
+# Never written to by these lanes.
+#
+#   fastlane/screenshots_raw/en-US/*.png
+#   fastlane/screenshots_raw/zh-Hant/*.png
+#
+# Capture them ad-free and in the right language. No code change is needed —
+# NSUserDefaults' argument domain overrides those keys for one launch only, and
+# AdBannerView renders nothing when isPro is true:
+#
+#   xcrun simctl launch <udid> com.kfpun.twaqi -pro YES
+#   xcrun simctl launch <udid> com.kfpun.twaqi -AppleLanguages "(zh-Hant)" \
+#       -AppleLocale zh_TW -pro YES
+#
+# Apple Watch captures go in the same directories, named "Apple Watch NN.png".
+# Take them on a 46mm Series watch simulator (416x496, the size App Store
+# Connect files under Series 10) with the simulator itself switched to the
+# locale, and with Force Pro on in the watch app's developer section so the
+# complications aren't locked. They are copied through unframed: Apple shows
+# watch screenshots without a bezel.
+RAW_ROOT = File.join(ROOT, "fastlane/screenshots_raw")
+# Scratch area frameit works in. Wiped and rebuilt on every run.
+WORK_ROOT = File.join(ROOT, "fastlane/.frameit_work")
+# Every framed screenshot, per locale.
+SCREENSHOTS_DIR = File.join(ROOT, "fastlane/screenshots")
+# What upload_screenshots hands deliver: SCREENSHOTS_DIR without the iPhone Duo
+# images, which only upload_duo_screenshots sends. Wiped on every run.
+IOS_UPLOAD_DIR = File.join(ROOT, "fastlane/.ios_upload")
+# Just the watch images, staged for upload_watch_screenshots. Wiped on every run.
+WATCH_UPLOAD_DIR = File.join(ROOT, "fastlane/.watch_upload")
+# Just the iPhone Duo images, staged for upload_duo_screenshots. Wiped on every run.
+DUO_UPLOAD_DIR = File.join(ROOT, "fastlane/.duo_upload")
+# Just the Vision Pro images, staged for upload_vision_screenshots. Wiped on every run.
+VISION_UPLOAD_DIR = File.join(ROOT, "fastlane/.vision_upload")
+METADATA_DIR = File.join(ROOT, "fastlane/metadata")
+
+# --- Marketing banner styling -------------------------------------------------
+# The canvas is a vertical gradient in the app's sky blue, so the iPhone
+# captures (which are that same blue edge to edge) bleed into it.
+GRADIENT_TOP    = "#A6E7F6"
+GRADIENT_BOTTOM = "#5CC4E3"
+HEADLINE_COLOR  = "#0B3A49"
+SUBTITLE_COLOR  = "#1A5D71"
+
+# Real font files rather than family names: `magick -list font` is empty on a
+# Homebrew ImageMagick, so -weight/-family do nothing and a family name would
+# silently fall back to the default face.
+#
+# Latin: Arial, whose bold ships as its own .ttf (a .ttc collection resolves to
+# its first face only, which is Regular).
+# CJK:   Arial has no Han glyphs and would render tofu. STHeiti ships Medium and
+# Light as separate .ttc files, and unlike PingFang.ttc — which ImageMagick
+# cannot read at all — FreeType opens them fine.
+FONT_LATIN_BOLD    = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+FONT_LATIN_REGULAR = "/System/Library/Fonts/Supplemental/Arial.ttf"
+FONT_CJK_BOLD      = "/System/Library/Fonts/STHeiti Medium.ttc"
+FONT_CJK_REGULAR   = "/System/Library/Fonts/STHeiti Light.ttc"
+
+# Per-locale banner copy and fonts, keyed by App Store locale code. Add a locale
+# here and drop its captures in fastlane/screenshots_raw/<locale>/ — the lane
+# picks it up automatically and skips locales with no captures yet.
+LOCALES = {
+  "en-US" => {
+    bold: FONT_LATIN_BOLD,
+    regular: FONT_LATIN_REGULAR,
+    titles: {
+      "iPhone_6.9_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPhone_6.9_02" => ["Know before you go out.", "AQI and every pollutant, station by station."],
+      "iPhone_6.9_03" => ["24 hours at a glance.", "Tap a pollutant to chart its trend."],
+      "iPhone_6.9_04" => ["Your stations, saved.", "Favourites feed the widget and AQI alerts."],
+      "iPad_13_01"    => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPad_13_02"    => ["Station beside the map.", "AQI and every pollutant, station by station."],
+      "iPad_13_03"    => ["24 hours at a glance.", "Tap a pollutant to chart its trend."],
+      "iPad_13_04"    => ["Your stations, saved.", "Favourites feed the widget and AQI alerts."],
+      "iPhone_Duo_01" => ["Every station. One map.", "Live AQI from across Taiwan."],
+      "iPhone_Duo_02" => ["Map and station, side by side.", "Unfold to see every reading at a glance."],
+      "iPhone_Duo_03" => ["Find any station.", "Search and read the details in one view."],
+      "iPhone_Duo_04" => ["Share the air you breathe.", "Send any station's reading as a card."],
+      "Vision_Pro_01" => ["All of Taiwan, in 3D.", "Live AQI from every station, on the island's real terrain."],
+      "Vision_Pro_02" => ["Pinch a pin to read it.", "AQI, every pollutant and the wind, right where it's measured."],
+      "Vision_Pro_03" => ["See where the air is going.", "Wind mode turns every station into an arrow."],
+      "Vision_Pro_04" => ["Pin a station anywhere.", "Its 24-hour trend and health advice, in your room."]
+    }
+  },
+  "zh-Hant" => {
+    bold: FONT_CJK_BOLD,
+    regular: FONT_CJK_REGULAR,
+    titles: {
+      "iPhone_6.9_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPhone_6.9_02" => ["出門前，先看空氣", "AQI 與各項污染物，逐站掌握"],
+      "iPhone_6.9_03" => ["過去 24 小時，一目了然", "點選污染物，查看變化趨勢"],
+      "iPhone_6.9_04" => ["常用測站，隨時查看", "加入最愛，搭配小工具與空品通知"],
+      "iPad_13_01"    => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPad_13_02"    => ["地圖與測站並排", "AQI 與各項污染物，逐站掌握"],
+      "iPad_13_03"    => ["過去 24 小時，一目了然", "點選污染物，查看變化趨勢"],
+      "iPad_13_04"    => ["常用測站，隨時查看", "加入最愛，搭配小工具與空品通知"],
+      "iPhone_Duo_01" => ["全台測站，一眼掌握", "即時空氣品質地圖"],
+      "iPhone_Duo_02" => ["展開手機，地圖與測站並排", "一眼看完所有數據"],
+      "iPhone_Duo_03" => ["快速找到任何測站", "搜尋與詳細資料同時呈現"],
+      "iPhone_Duo_04" => ["分享你呼吸的空氣", "一鍵把測站數據做成圖卡"],
+      "Vision_Pro_01" => ["立體台灣，全台測站", "以真實地形呈現即時空氣品質"],
+      "Vision_Pro_02" => ["捏一下，立即讀取", "AQI、各項污染物與風向，就在測站上方"],
+      "Vision_Pro_03" => ["看見空污往哪裡吹", "風向模式把每個測站變成箭頭"],
+      "Vision_Pro_04" => ["把測站釘選在任何地方", "24 小時趨勢與健康建議，就在你身邊"]
+    }
+  }
+}.freeze
+
+# App Store Connect only accepts a fixed set of pixel sizes. frameit does NOT
+# size its output to the Framefile background — Frameit::Editor#generate_background
+# resizes the background down to the *source screenshot's* resolution, so a
+# 1320x2868 background still yields a 1206x2622 file. The framing therefore
+# happens in two steps: frameit draws the real bezel, then ImageMagick fits the
+# framed image onto an exactly-sized, opaque canvas.
+IPHONE_TARGET = [1320, 2868] # 6.9" display
+IPAD_TARGET   = [2048, 2732] # 13" display
+WATCH_TARGET  = [416, 496]   # 46mm, filed by deliver as Series 10
+# iPhone Duo, unfolded, landscape. App Store Connect also takes 2853x2007, the
+# inner display's native size, but fastlane 2.241 only files 2034x1398 and
+# 1398x2034 under APP_IPHONE_DUO and would reject anything else.
+DUO_TARGET    = [2034, 1398]
+# Apple Vision Pro: the simulator's own capture size.
+VISION_TARGET = [3840, 2160]
+
+# Each Vision Pro capture is the whole simulated room; the map takes up only
+# the middle of it. Crop each shot to its subject before framing, as
+# [x, y, width, height] in the 3840x2160 capture. These assume the viewpoint
+# described in tools/capture_vision_screenshots.sh.
+VISION_CROPS = {
+  "Vision_Pro_01" => [1040, 1000, 1800, 822], # the round island diorama
+  "Vision_Pro_02" => [1040, 830, 1884, 860],  # the island with Hualien's card
+  "Vision_Pro_03" => [1040, 1000, 1800, 822], # wind mode
+  "Vision_Pro_04" => [620, 0, 2892, 1320]    # Hualien's window, over the map
+}.freeze
+
+platform :ios do
+  desc "Frame the raw captures in #{RAW_ROOT}/<locale> into App Store sized PNGs"
+  desc "Requires ImageMagick (brew install imagemagick)"
+  lane :frame_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    sh("rm -rf '#{WORK_ROOT}'")
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      raw_dir = File.join(RAW_ROOT, locale)
+      sources = Dir["#{raw_dir}/*.png"].sort
+
+      if sources.empty?
+        UI.important("#{locale}: no captures in #{raw_dir} — skipping")
+        next
+      end
+
+      UI.message("#{locale}: framing #{sources.count} capture(s)")
+      produced += frame_locale(locale, config, sources)
+    end
+
+    UI.user_error!("No captures found under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Frame only the iPhone Duo captures (fastlane/screenshots_raw/<locale>/iPhone Duo NN.png)"
+  desc "Leaves the iPhone, iPad and watch screenshots already framed alone"
+  lane :frame_duo_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      sources = Dir["#{RAW_ROOT}/#{locale}/iPhone Duo *.png"].sort
+      next if sources.empty?
+
+      work_dir = File.join(WORK_ROOT, locale)
+      out_dir = File.join(SCREENSHOTS_DIR, locale)
+      sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+      produced += frame_duo(locale, config, sources, work_dir, out_dir)
+    end
+
+    UI.user_error!("No 'iPhone Duo NN.png' captures under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} iPhone Duo screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Capture the raw App Store screenshots of the four headline features on one simulator"
+  desc "AppStoreScreenshotTests takes map, station, 24-hour chart and Favourites, once per locale, into"
+  desc "fastlane/screenshots_raw/<locale>/<prefix> NN <name>.png. Then run frame_screenshots"
+  desc "Options: device (simulator name, default \"iPhone 18 Pro\"), udid (a simulator's id, used instead"
+  desc "of device, so parallel worktrees can each capture on their own), prefix (\"iPhone\" or \"iPad\","
+  desc "default \"iPhone\"), zoom (map zoom, default 7.2), derived_data (default /tmp/twaqi-screenshots)."
+  desc "The Duo keeps capture_duo_screenshots"
+  lane :capture_screenshots do |options|
+    device = options[:udid] || options[:device] || "iPhone 18 Pro"
+    destination = options[:udid] ? "id=#{options[:udid]}" : "platform=iOS Simulator,name=#{device}"
+    prefix = options[:prefix] || "iPhone"
+    derived = File.expand_path(options[:derived_data] || "/tmp/twaqi-screenshots")
+    xcodebuild = [
+      "xcodebuild",
+      "-workspace", File.join(ROOT, "TWAQI.xcworkspace"),
+      "-scheme", "TWAQI",
+      "-destination", destination,
+      "-derivedDataPath", derived
+    ]
+
+    sh((xcodebuild + ["build-for-testing", "-quiet"]).shelljoin)
+
+    # 9:41, full bars, charged: the status bar Apple's own screenshots use.
+    # simctl takes a simulator's name or its id.
+    sh("xcrun simctl boot #{device.shellescape} || true")
+    sh("xcrun simctl status_bar #{device.shellescape} override --time 9:41 " \
+       "--dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active " \
+       "--cellularBars 4 --batteryState charged --batteryLevel 100")
+
+    { "en-US" => "en", "zh-Hant" => "zh-Hant" }.each do |locale, language|
+      out_dir = File.join(RAW_ROOT, locale)
+      sh("mkdir -p '#{out_dir}'")
+      sh("rm -f '#{out_dir}/#{prefix} '[0-9][0-9]*.png")
+      # xcodebuild hands TEST_RUNNER_-prefixed variables to the test runner
+      # with the prefix stripped.
+      env = {
+        "TEST_RUNNER_SCREENSHOT_DIR" => out_dir,
+        "TEST_RUNNER_SCREENSHOT_PREFIX" => prefix,
+        "TEST_RUNNER_SCREENSHOT_LANGUAGE" => language,
+        "TEST_RUNNER_SCREENSHOT_MAP_ZOOM" => (options[:zoom] || "7.2").to_s
+      }.map { |key, value| "#{key}=#{value.shellescape}" }.join(" ")
+      tests = (xcodebuild + [
+        "test-without-building",
+        # Map loads are slow on a busy Mac; the test waits up to minutes.
+        "-test-timeouts-enabled", "YES",
+        "-default-test-execution-time-allowance", "1200",
+        "-only-testing:TWAQIUITests/AppStoreScreenshotTests"
+      ]).shelljoin
+      sh("#{env} #{tests}")
+      UI.success("#{locale}: #{Dir["#{out_dir}/#{prefix} [0-9][0-9]*.png"].count} #{prefix} capture(s)")
+    end
+  end
+
+  desc "Capture the raw iPhone Duo screenshots on the unfolded iPhone Duo simulator (iOS 27.1+)"
+  desc "DuoScreenshotTests takes 01-03 and ShareScreenshotTests 04, once per locale, into"
+  desc "fastlane/screenshots_raw/<locale>/iPhone Duo NN.png. Then run frame_duo_screenshots"
+  desc "Options: device (simulator name, default \"iPhone Duo\")"
+  lane :capture_duo_screenshots do |options|
+    destination = "platform=iOS Simulator,name=#{options[:device] || 'iPhone Duo'}"
+    derived = "/tmp/twaqi-duo-screenshots"
+    xcodebuild = [
+      "xcodebuild",
+      "-workspace", File.join(ROOT, "TWAQI.xcworkspace"),
+      "-scheme", "TWAQI",
+      "-destination", destination,
+      "-derivedDataPath", derived
+    ]
+
+    sh((xcodebuild + ["build-for-testing", "-quiet"]).shelljoin)
+
+    { "en-US" => "en", "zh-Hant" => "zh-Hant" }.each do |locale, language|
+      out_dir = File.join(RAW_ROOT, locale)
+      sh("mkdir -p '#{out_dir}'")
+      # xcodebuild hands TEST_RUNNER_-prefixed variables to the test runner
+      # with the prefix stripped.
+      env = {
+        "TEST_RUNNER_SCREENSHOT_DIR" => out_dir,
+        "TEST_RUNNER_SCREENSHOT_LANGUAGE" => language,
+        "TEST_RUNNER_SCREENSHOT_FILE" => "iPhone Duo 04.png"
+      }.map { |key, value| "#{key}=#{value.shellescape}" }.join(" ")
+      tests = (xcodebuild + [
+        "test-without-building",
+        "-only-testing:TWAQIUITests/DuoScreenshotTests",
+        "-only-testing:TWAQIUITests/ShareScreenshotTests"
+      ]).shelljoin
+      sh("#{env} #{tests}")
+      UI.success("#{locale}: #{Dir["#{out_dir}/iPhone Duo *.png"].count} iPhone Duo capture(s)")
+    end
+  end
+
+  desc "Upload screenshots only to App Store Connect for #{APP_VERSION}"
+  desc "Does not touch the binary, the metadata, or the review submission"
+  desc "Leaves out the iPhone Duo images: overwrite removes the Duo set already on the version,"
+  desc "and upload_duo_screenshots adds a fresh one"
+  lane :upload_screenshots do
+    ensure_screenshots_editable!("IOS")
+    # The Duo set never rides along (FOX-40): the framed Duo images can be
+    # older than the app's pages, and this lane replaces whatever is on the
+    # version, so stale ones would overwrite App Store Connect.
+    sh("rm -rf '#{IOS_UPLOAD_DIR}'")
+    staged = 0
+    Dir["#{SCREENSHOTS_DIR}/*/"].sort.each do |dir|
+      files = Dir["#{dir}*"].select { |f| File.file?(f) }
+                            .reject { |f| File.basename(f).start_with?("iPhone_Duo_") }
+      next if files.empty?
+
+      dest = File.join(IOS_UPLOAD_DIR, File.basename(dir))
+      FileUtils.mkdir_p(dest)
+      FileUtils.cp(files, dest)
+      staged += files.count
+    end
+    UI.user_error!("Nothing to upload under #{SCREENSHOTS_DIR}: run frame_screenshots first") if staged.zero?
+
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      screenshots_path: IOS_UPLOAD_DIR,
+
+      # Screenshots and nothing else.
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+
+      # Replace whatever is currently attached to this version, so a partial
+      # previous upload can't leave stale images behind.
+      overwrite_screenshots: true,
+
+      # Never submit for review from a lane — that is a separate, deliberate act.
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+
+      # Default false: deliver opens an HTML preview and waits for confirmation.
+      # That prompt can't be answered on a non-TTY, so DELIVER_FORCE=true skips
+      # it for scripted runs.
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Upload the Apple Watch screenshots only to App Store Connect for #{APP_VERSION}"
+  desc "Leaves the iPhone and iPad screenshots already on the version alone"
+  lane :upload_watch_screenshots do
+    ensure_screenshots_editable!("IOS")
+    sh("rm -rf '#{WATCH_UPLOAD_DIR}'")
+    staged = 0
+    LOCALES.each_key do |locale|
+      watch = Dir["#{SCREENSHOTS_DIR}/#{locale}/AppleWatch_*.png"].sort
+      next if watch.empty?
+
+      sh("mkdir -p '#{WATCH_UPLOAD_DIR}/#{locale}'")
+      watch.each { |png| sh("cp '#{png}' '#{WATCH_UPLOAD_DIR}/#{locale}/'") }
+      staged += watch.count
+    end
+    UI.user_error!("No AppleWatch_*.png under #{SCREENSHOTS_DIR}: run frame_screenshots first") if staged.zero?
+
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      screenshots_path: WATCH_UPLOAD_DIR,
+
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+
+      # Off, unlike upload_screenshots: overwrite deletes every display type's
+      # set for each locale it touches, iPhone and iPad included, and this
+      # directory only holds the watch. Images already uploaded are matched by
+      # checksum and skipped, so a rerun doesn't duplicate them.
+      overwrite_screenshots: false,
+
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Upload the iPhone Duo screenshots only to App Store Connect for #{APP_VERSION}"
+  desc "Leaves the iPhone, iPad and watch screenshots already on the version alone"
+  desc "Refuses a framed Duo image whose raw capture isn't in fastlane/screenshots_raw"
+  lane :upload_duo_screenshots do
+    ensure_screenshots_editable!("IOS")
+    sh("rm -rf '#{DUO_UPLOAD_DIR}'")
+    staged = 0
+    LOCALES.each_key do |locale|
+      duo = Dir["#{SCREENSHOTS_DIR}/#{locale}/iPhone_Duo_*.png"].sort
+      next if duo.empty?
+
+      # FOX-40 removed the pre-FOX-25 Duo raws, so a frame left over from them
+      # (in this or any other checkout) has no raw and can't be uploaded.
+      # A hand-captured Duo set brings its raws back.
+      stale = duo.reject do |png|
+        File.exist?(File.join(RAW_ROOT, locale, File.basename(png, ".png").sub("iPhone_Duo_", "iPhone Duo ") + ".png"))
+      end
+      unless stale.empty?
+        UI.user_error!("#{locale}: no raw capture for #{stale.map { |f| File.basename(f) }.join(', ')}. " \
+                       "Hand-capture the Duo into fastlane/screenshots_raw/#{locale}/iPhone Duo NN.png, " \
+                       "run frame_duo_screenshots, then upload")
+      end
+
+      sh("mkdir -p '#{DUO_UPLOAD_DIR}/#{locale}'")
+      duo.each { |png| sh("cp '#{png}' '#{DUO_UPLOAD_DIR}/#{locale}/'") }
+      staged += duo.count
+    end
+    UI.user_error!("No iPhone_Duo_*.png under #{SCREENSHOTS_DIR}: run frame_duo_screenshots first") if staged.zero?
+
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      screenshots_path: DUO_UPLOAD_DIR,
+
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+
+      # Off for the same reason as upload_watch_screenshots: overwrite deletes
+      # every display type's set in each locale it touches, and this directory
+      # only holds the Duo.
+      overwrite_screenshots: false,
+
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Frame only the Vision Pro captures (fastlane/screenshots_raw/<locale>/Vision Pro NN.png)"
+  desc "Capture them first with tools/capture_vision_screenshots.sh"
+  lane :frame_vision_screenshots do
+    UI.user_error!("ImageMagick is required: brew install imagemagick") if `which magick`.strip.empty?
+
+    produced = 0
+    LOCALES.each do |locale, config|
+      sources = Dir["#{RAW_ROOT}/#{locale}/Vision Pro *.png"].sort
+      next if sources.empty?
+
+      work_dir = File.join(WORK_ROOT, locale)
+      out_dir = File.join(SCREENSHOTS_DIR, locale)
+      sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+      produced += frame_vision(locale, config, sources, work_dir, out_dir)
+    end
+
+    UI.user_error!("No 'Vision Pro NN.png' captures under #{RAW_ROOT}/<locale>/") if produced.zero?
+    UI.success("#{produced} Vision Pro screenshot(s) written under #{SCREENSHOTS_DIR}")
+  end
+
+  desc "Upload the Vision Pro screenshots only to the visionOS #{APP_VERSION} version"
+  desc "Replaces the Vision Pro set in each locale; leaves every other platform alone"
+  lane :upload_vision_screenshots do
+    key = asc_api_key
+    UI.user_error!("upload_vision_screenshots needs the App Store Connect API key") unless key
+
+    sh("rm -rf '#{VISION_UPLOAD_DIR}'")
+    staged = {}
+    LOCALES.each_key do |locale|
+      framed = Dir["#{SCREENSHOTS_DIR}/#{locale}/Vision_Pro_*.png"].sort
+      staged[locale] = framed unless framed.empty?
+    end
+    UI.user_error!("No Vision_Pro_*.png under #{SCREENSHOTS_DIR}: run frame_vision_screenshots first") if staged.empty?
+
+    # deliver in fastlane 2.241 has no Vision Pro display type, so this talks
+    # to the App Store Connect API directly.
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: key)
+    app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+    version = Spaceship::ConnectAPI.get_app_store_versions(
+      app_id: app.id, filter: { platform: "VISION_OS", versionString: APP_VERSION }
+    ).to_models.first
+    UI.user_error!("No visionOS #{APP_VERSION} version on App Store Connect") unless version
+    ensure_screenshots_editable!("VISION_OS", version: version)
+
+    Spaceship::ConnectAPI.get_app_store_version_localizations(app_store_version_id: version.id).to_models.each do |loc|
+      images = staged[loc.locale]
+      next unless images
+
+      set = loc.get_app_screenshot_sets.find { |s| s.screenshot_display_type == "APP_APPLE_VISION_PRO" } ||
+            loc.create_app_screenshot_set(attributes: { screenshotDisplayType: "APP_APPLE_VISION_PRO" })
+      (set.app_screenshots || []).each(&:delete!)
+      images.each do |path|
+        Spaceship::ConnectAPI::AppScreenshot.create(app_screenshot_set_id: set.id, path: path, wait_for_processing: false)
+        UI.success("#{loc.locale}: #{File.basename(path)}")
+      end
+    end
+  end
+
+  desc "Upload text metadata only to App Store Connect for #{APP_VERSION}"
+  desc "Does not touch the binary, the screenshots, or the review submission"
+  lane :upload_metadata do
+    deliver(
+      api_key: asc_api_key,
+      app_version: APP_VERSION,
+      metadata_path: METADATA_DIR,
+
+      # Text and nothing else. Screenshots are deliberately excluded rather than
+      # merely absent: the live listing carries 7 images per device and this
+      # repo holds 2, and deliver replaces a device's whole set when it uploads
+      # one — so bundling them here would quietly shrink the product page.
+      skip_binary_upload: true,
+      skip_screenshots: true,
+
+      # Left on (the default) so deliver creates the version if App Store
+      # Connect doesn't have it yet — without that there is nothing to attach
+      # this metadata to.
+      skip_app_version_update: false,
+
+      # Never submit for review from a lane — that is a separate, deliberate act.
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+
+      # Default false: deliver opens an HTML preview and waits for confirmation.
+      # That prompt can't be answered on a non-TTY, so DELIVER_FORCE=true skips
+      # it for scripted runs.
+      force: ENV["DELIVER_FORCE"] == "true"
+    )
+  end
+
+  desc "Archive a Release build of #{APP_VERSION} and upload it to App Store Connect"
+  desc "Bumps every target's build number past the latest one on TestFlight. Never submits for review"
+  lane :release_build do
+    # Version, build numbers and What's New must agree before anything is
+    # archived or uploaded (FOX-38). Same check as CI's PR policy job.
+    sh("python3 '#{File.join(REPO_ROOT, "tools/check_release_consistency.py")}' '#{ROOT}'")
+
+    key = asc_api_key
+    UI.user_error!("release_build needs the App Store Connect API key (ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH)") unless key
+
+    project = File.join(ROOT, "TWAQI.xcodeproj/project.pbxproj")
+    current = File.read(project)[/CURRENT_PROJECT_VERSION = (\d+);/, 1].to_i
+    latest = latest_testflight_build_number(api_key: key, version: APP_VERSION, initial_build_number: 0).to_i
+    build = [current, latest].max + 1
+
+    # The app, watch app and widgets must all carry the
+    # same build number, so every occurrence is rewritten, not just the app's.
+    source = File.read(project)
+    File.write(project, source.gsub(/CURRENT_PROJECT_VERSION = \d+;/, "CURRENT_PROJECT_VERSION = #{build};"))
+    UI.message("Build number #{current} -> #{build} (TestFlight latest for #{APP_VERSION}: #{latest})")
+
+    # No signing certificates need to be installed: Xcode signs with the Apple
+    # ID added under Xcode > Settings > Accounts (cloud-managed distribution).
+    # The App Store Connect API key is not used here; it lacks the cloud
+    # signing permission and export fails with "Cloud signing permission error".
+    auth = "-allowProvisioningUpdates"
+
+    ipa = gym(
+      workspace: File.join(ROOT, "TWAQI.xcworkspace"),
+      scheme: "TWAQI",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: File.join(ROOT, "build"),
+      clean: true,
+      # gym passes xcargs to the export step as well; repeating them in
+      # export_xcargs makes xcodebuild fail with "may only be provided once".
+      xcargs: auth
+    )
+
+    upload_to_testflight(
+      api_key: key,
+      ipa: ipa,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Print the App Store Connect state of the #{APP_VERSION} version on each platform. Read-only"
+  desc "Screenshot upload lanes refuse to run unless the state is one where screenshots can be edited"
+  lane :asc_version_state do
+    %w[IOS VISION_OS].each do |platform|
+      version = asc_app_store_version(platform)
+      state = version ? asc_state(version) : "(no #{APP_VERSION} version)"
+      editable = version && SCREENSHOT_EDITABLE_STATES.include?(state) ? "screenshots editable" : "screenshots locked"
+      UI.message("#{platform} #{APP_VERSION}: #{state} — #{editable}")
+    end
+  end
+
+  desc "Frame, then upload"
+  lane :screenshots do
+    # Fail before framing, not after, when the version is locked.
+    ensure_screenshots_editable!("IOS")
+    frame_screenshots
+    upload_screenshots
+  end
+end
+
+# App Store Connect states in which a version's screenshots can still be
+# changed. Anything else — above all WAITING_FOR_REVIEW and IN_REVIEW — makes
+# ASC answer "Can't Create Screenshot while Waiting For Review", and deliver /
+# Spaceship then retry forever instead of failing (FOX-29, FOX-38).
+SCREENSHOT_EDITABLE_STATES = %w[
+  PREPARE_FOR_SUBMISSION
+  DEVELOPER_REJECTED
+  REJECTED
+  METADATA_REJECTED
+  INVALID_BINARY
+].freeze
+
+# Logs Spaceship in the same way deliver does: API key when configured,
+# otherwise the Apple ID session deliver would open anyway.
+def asc_login!
+  key = asc_api_key
+  if key
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: key)
+  elsif Spaceship::ConnectAPI.token.nil?
+    Spaceship::ConnectAPI.login(ENV["FASTLANE_APPLE_ID"], nil, use_portal: false, use_tunes: true)
+  end
+end
+
+def asc_app_store_version(platform)
+  asc_login!
+  app = Spaceship::ConnectAPI::App.find(CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier))
+  UI.user_error!("App not found on App Store Connect") unless app
+  Spaceship::ConnectAPI.get_app_store_versions(
+    app_id: app.id, filter: { platform: platform, versionString: APP_VERSION }
+  ).to_models.first
+end
+
+def asc_state(version)
+  version.app_version_state || version.app_store_state
+end
+
+# Fails loudly, before anything is staged or uploaded, unless the version's
+# screenshots can be edited. There is no override: pulling a version from
+# review is a deliberate act for the user, not something a lane works around.
+def ensure_screenshots_editable!(platform, version: nil)
+  version ||= asc_app_store_version(platform)
+  unless version
+    UI.user_error!("No #{platform} #{APP_VERSION} version on App Store Connect. Create it first (upload_metadata).")
+  end
+  state = asc_state(version)
+  return if SCREENSHOT_EDITABLE_STATES.include?(state)
+
+  UI.user_error!(
+    "#{platform} #{APP_VERSION} is #{state} on App Store Connect; screenshots can't be changed now. " \
+    "Upload them to the next version once it is PREPARE_FOR_SUBMISSION, or after the user pulls this one from review."
+  )
+end
+
+# Builds the App Store Connect API key from the environment, failing loudly
+# rather than dropping into an interactive Apple ID prompt on a machine that has
+# no credentials. Returns nil when only an Apple ID is configured, which lets
+# deliver fall back to its own username handling.
+def asc_api_key
+  has_api_key = ENV["ASC_KEY_ID"] && ENV["ASC_ISSUER_ID"] && ENV["ASC_KEY_PATH"]
+  unless has_api_key || ENV["FASTLANE_APPLE_ID"]
+    UI.user_error!(
+      "No App Store Connect credentials in the environment. Set either\n" \
+      "  ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH   (API key, no 2FA — preferred)\n" \
+      "or\n" \
+      "  FASTLANE_APPLE_ID / FASTLANE_ITC_TEAM_ID / FASTLANE_TEAM_ID"
+    )
+  end
+  return nil unless has_api_key
+
+  # The path is written with a leading ~ in .env; fastlane opens it verbatim.
+  app_store_connect_api_key(
+    key_id: ENV["ASC_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_filepath: File.expand_path(ENV["ASC_KEY_PATH"])
+  )
+end
+
+# Frames one locale's captures. Returns how many images it wrote.
+def frame_locale(locale, config, sources)
+  work_dir = File.join(WORK_ROOT, locale)
+  out_dir = File.join(SCREENSHOTS_DIR, locale)
+  sh("mkdir -p '#{work_dir}' '#{out_dir}'")
+
+  watch_sources, sources = sources.partition { |src| File.basename(src).start_with?("Apple Watch") }
+  # frameit has no iPhone Duo bezel and no Duo screen size, so those are framed
+  # separately below.
+  duo_sources, sources = sources.partition { |src| File.basename(src).start_with?("iPhone Duo") }
+  # Vision Pro has its own lane, frame_vision_screenshots; frameit would take
+  # its 3840x2160 captures for an unknown device and abort.
+  sources = sources.reject { |src| File.basename(src).start_with?("Vision Pro") }
+
+  # Stage the captures under names frameit can resolve to a device.
+  #
+  # Frameit::Device.detect_device matches on resolution first and then prefers a
+  # device whose name or id appears in the filename.
+  #
+  #   iPhone 17 / 17 Pro  1206x2622  matches as-is.
+  #   iPad Pro 13" M5     2064x2752  is not a size frameit knows, and
+  #                                  detect_device calls UI.user_error! on an
+  #                                  unknown size, aborting the whole run. It is
+  #                                  resampled to 2048x2732 (also a valid App
+  #                                  Store size) and named "ipadPro129" so it
+  #                                  picks up the 4th-gen 12.9" iPad Pro bezel —
+  #                                  the closest frame frameit-frames publishes.
+  counters = Hash.new(0)
+  sources.each do |src|
+    is_ipad = File.basename(src).include?("iPad")
+    counters[is_ipad] += 1
+    idx = format("%02d", counters[is_ipad])
+    if is_ipad
+      sh("magick '#{src}' -resize #{IPAD_TARGET[0]}x#{IPAD_TARGET[1]}! '#{work_dir}/ipadPro129 #{idx}.png'")
+    else
+      sh("cp '#{src}' '#{work_dir}/iPhone 17 Pro #{idx}.png'")
+    end
+  end
+
+  # Easy mode: bezel only. frameit's own complex mode (background + title)
+  # composites at the *source* resolution — Editor#generate_background resizes
+  # the background down to screenshot.size — so its text would be laid out at
+  # 1206px wide and then upscaled, softening every glyph. The gradient and the
+  # marketing copy are drawn below instead, at the final canvas size.
+  frameit(path: work_dir, use_platform: "IOS")
+
+  sh("rm -f '#{out_dir}'/*.png")
+
+  written = 0
+  Dir["#{work_dir}/*_framed.png"].sort.each do |framed|
+    is_ipad = File.basename(framed).include?("ipadPro129")
+    w, h = is_ipad ? IPAD_TARGET : IPHONE_TARGET
+    n = File.basename(framed)[/(\d+)_framed\.png\z/, 1]
+    # Nothing in the output name may say "2nd generation" or "app_ipad_pro_129",
+    # or Deliver::AppScreenshot would file the 2048x2732 images under the old
+    # 12.9" slot instead of the 13" one.
+    name = is_ipad ? "iPad_13_#{n}" : "iPhone_6.9_#{n}"
+    out = File.join(out_dir, "#{name}.png")
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    # Everything scales off the canvas width/height so the iPhone and iPad
+    # banners come out visually identical despite different pixel sizes.
+    side       = (w * 0.083).round # left/right text + device margin
+    top_pad    = (h * 0.052).round # canvas top to headline
+    line_gap   = (w * 0.026).round # headline to subtitle
+    text_gap   = (h * 0.024).round # subtitle to device
+    bottom_pad = (h * 0.021).round # device to canvas bottom
+    text_width = w - side * 2
+
+    tmp = File.join(work_dir, name)
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    # caption: wraps to the given width on its own, so long copy degrades to two
+    # lines instead of overflowing the canvas.
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(w * 0.070).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(w * 0.038).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    device_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_h = h - device_top - bottom_pad
+
+    # Fit the framed device inside what the copy left over, then flatten: App
+    # Store Connect rejects PNGs with an alpha channel and the bezel corners are
+    # transparent.
+    sh("magick '#{framed}' -filter Lanczos -resize #{text_width}x#{box_h} '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{device_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+    written += 1
+  end
+
+  written += frame_duo(locale, config, duo_sources, work_dir, out_dir) unless duo_sources.empty?
+  written + copy_watch(locale, watch_sources, out_dir)
+end
+
+# Frames one locale's iPhone Duo captures onto the same gradient and copy as
+# the other devices. frameit publishes no Duo bezel, so the device is drawn
+# here: the capture with rounded corners inside a dark rounded body, with a
+# soft shadow. Returns how many images it wrote.
+def frame_duo(locale, config, sources, work_dir, out_dir)
+  w, h = DUO_TARGET
+  sh("rm -f '#{out_dir}'/iPhone_Duo_*.png")
+
+  sources.each_with_index do |src, i|
+    name = format("iPhone_Duo_%02d", i + 1)
+    out = File.join(out_dir, "#{name}.png")
+    tmp = File.join(work_dir, name)
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    # Landscape canvas: the copy takes less of the height than on the
+    # portrait devices, so the device stays as large as possible.
+    side       = (w * 0.06).round
+    top_pad    = (h * 0.05).round
+    line_gap   = (h * 0.015).round
+    text_gap   = (h * 0.035).round
+    bottom_pad = (h * 0.05).round
+    text_width = w - side * 2
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(h * 0.062).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(h * 0.034).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    device_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_w = text_width
+    box_h = h - device_top - bottom_pad
+
+    # The body adds a bezel on every side; size the screen so the whole device
+    # fits the box.
+    bezel = (box_h * 0.025).round
+    sh("magick '#{src}' -auto-orient -filter Lanczos " \
+       "-resize #{box_w - bezel * 2}x#{box_h - bezel * 2} '#{tmp}_screen.png'")
+    sw, shh = `magick identify -format '%w %h' '#{tmp}_screen.png'`.strip.split.map(&:to_i)
+    radius = (shh * 0.045).round
+
+    sh("magick -size #{sw}x#{shh} xc:black -fill white " \
+       "-draw 'roundrectangle 0,0,#{sw - 1},#{shh - 1},#{radius},#{radius}' '#{tmp}_mask.png'")
+    sh("magick '#{tmp}_screen.png' '#{tmp}_mask.png' -alpha off -compose CopyOpacity -composite '#{tmp}_rs.png'")
+
+    dw = sw + bezel * 2
+    dh = shh + bezel * 2
+    sh("magick -size #{dw}x#{dh} xc:none -fill '#1C1C1E' " \
+       "-draw 'roundrectangle 0,0,#{dw - 1},#{dh - 1},#{radius + bezel},#{radius + bezel}' " \
+       "'#{tmp}_rs.png' -geometry +#{bezel}+#{bezel} -composite '#{tmp}_body.png'")
+    sh("magick '#{tmp}_body.png' \\( +clone -background black -shadow 35x#{(bezel * 0.8).round}+0+#{(bezel * 0.5).round} \\) " \
+       "+swap -background none -layers merge +repage '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{device_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+  end
+  sources.count
+end
+
+# Vision Pro has no device to draw: the capture already shows the app in a
+# room. Each is cropped to its subject, rounded and shadowed like a window,
+# then set under the copy on the same gradient as the other devices.
+# Returns how many images it wrote.
+def frame_vision(locale, config, sources, work_dir, out_dir)
+  w, h = VISION_TARGET
+  sh("rm -f '#{out_dir}'/Vision_Pro_*.png")
+
+  sources.each_with_index do |src, i|
+    name = format("Vision_Pro_%02d", i + 1)
+    out = File.join(out_dir, "#{name}.png")
+    tmp = File.join(work_dir, name)
+
+    headline, subtitle = config[:titles].fetch(name) do
+      UI.important("#{locale}: no copy for '#{name}' — rendering without it")
+      [nil, nil]
+    end
+
+    side       = (w * 0.06).round
+    top_pad    = (h * 0.055).round
+    line_gap   = (h * 0.018).round
+    text_gap   = (h * 0.04).round
+    bottom_pad = (h * 0.055).round
+    text_width = w - side * 2
+
+    sh("magick -size #{w}x#{h} gradient:'#{GRADIENT_TOP}-#{GRADIENT_BOTTOM}' '#{tmp}_bg.png'")
+
+    text_h = 0
+    if headline
+      sh("magick -background none -fill '#{HEADLINE_COLOR}' -font '#{config[:bold]}' " \
+         "-pointsize #{(h * 0.062).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(headline)} '#{tmp}_h.png'")
+      sh("magick -background none -fill '#{SUBTITLE_COLOR}' -font '#{config[:regular]}' " \
+         "-pointsize #{(h * 0.032).round} -size #{text_width}x -gravity center " \
+         "caption:#{Shellwords.escape(subtitle)} '#{tmp}_s.png'")
+      sh("magick '#{tmp}_h.png' \\( -size 1x#{line_gap} xc:none \\) '#{tmp}_s.png' " \
+         "-background none -gravity center -append '#{tmp}_t.png'")
+      text_h = `magick identify -format '%h' '#{tmp}_t.png'`.strip.to_i
+    end
+
+    panel_top = headline ? top_pad + text_h + text_gap : bottom_pad
+    box_h = h - panel_top - bottom_pad
+
+    cx, cy, cw, ch = VISION_CROPS.fetch(name, [0, 0, w, h])
+    sh("magick '#{src}' -crop #{cw}x#{ch}+#{cx}+#{cy} +repage -filter Lanczos " \
+       "-resize #{text_width}x#{box_h} '#{tmp}_screen.png'")
+    sw, shh = `magick identify -format '%w %h' '#{tmp}_screen.png'`.strip.split.map(&:to_i)
+    radius = (shh * 0.04).round
+
+    sh("magick -size #{sw}x#{shh} xc:black -fill white " \
+       "-draw 'roundrectangle 0,0,#{sw - 1},#{shh - 1},#{radius},#{radius}' '#{tmp}_mask.png'")
+    sh("magick '#{tmp}_screen.png' '#{tmp}_mask.png' -alpha off -compose CopyOpacity -composite '#{tmp}_rs.png'")
+    shadow = (shh * 0.02).round
+    sh("magick '#{tmp}_rs.png' \\( +clone -background black -shadow 40x#{shadow}+0+#{(shadow * 0.6).round} \\) " \
+       "+swap -background none -layers merge +repage '#{tmp}_d.png'")
+
+    compose = ["magick '#{tmp}_bg.png'"]
+    compose << "'#{tmp}_t.png' -gravity north -geometry +0+#{top_pad} -composite" if headline
+    compose << "'#{tmp}_d.png' -gravity north -geometry +0+#{panel_top} -composite"
+    compose << "-alpha remove -alpha off -strip PNG24:'#{out}'"
+    sh(compose.join(" "))
+
+    sh("rm -f '#{tmp}'_*.png")
+
+    size = `magick identify -format '%wx%h' '#{out}'`.strip
+    UI.user_error!("#{out} came out #{size}, expected #{w}x#{h}") unless size == "#{w}x#{h}"
+    UI.success("#{locale}/#{name}.png — #{size}")
+  end
+  sources.count
+end
+
+# Watch captures need no bezel or copy, only the alpha channel dropped: App
+# Store Connect rejects PNGs with one, and simulator captures always have it.
+# Returns how many images it wrote.
+def copy_watch(locale, sources, out_dir)
+  w, h = WATCH_TARGET
+  sources.each_with_index do |src, i|
+    size = `magick identify -format '%wx%h' '#{src}'`.strip
+    UI.user_error!("#{src} is #{size}, expected #{w}x#{h}: capture on a 46mm watch") unless size == "#{w}x#{h}"
+
+    name = format("AppleWatch_%02d", i + 1)
+    sh("magick '#{src}' -background black -alpha remove -alpha off -strip PNG24:'#{out_dir}/#{name}.png'")
+    UI.success("#{locale}/#{name}.png — #{size}")
+  end
+  sources.count
+end

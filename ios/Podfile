@@ -1,0 +1,81 @@
+# Uncomment the next line to define a global platform for your project
+use_frameworks!
+
+target 'TWAQI' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  platform :ios, '15.0'
+
+  # Pods for TWAQI
+  pod 'Alamofire', '~> 5.2.0'
+  pod 'GoogleMaps', '~> 9.4'
+  pod 'SDWebImageSwiftUI', '~> 1.4.0'
+  pod 'SnapKit', '~> 5.0'
+  pod 'SwiftDate', '~> 6.1'
+  pod 'SwiftyJSON', '~> 5.0'
+  # The welcome flow's animations (FOX-84). App target only.
+  pod 'lottie-ios', '~> 4.5'
+
+  # Firebase (Analytics, Crashlytics, Messaging) comes from Swift Package Manager, added
+  # in the Xcode project: Firebase stopped publishing to CocoaPods after
+  # October 2026. Nothing left here shares a dependency with it.
+  pod 'Google-Mobile-Ads-SDK', '~> 12.5'
+
+  # Kept alongside FCM so OneSignal can be switched back on (it gets the
+  # same alert tags); FCM is the live sender. No service extension.
+  pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
+
+  # Host-app tests: they link against the app, so they only need the pods'
+  # header and framework search paths, not another copy of every pod.
+  target 'TWAQITests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings.delete("EXCLUDED_ARCHS[sdk=iphonesimulator*]")
+  end
+
+  # App Store Connect rejects any binary containing bitcode (error 90482).
+  # Older vendored xcframeworks (OneSignal 3.9.1 was the one that hit this)
+  # ship device slices built with it, so an archive is refused at upload even
+  # though nothing here enables bitcode. Kept as a guard for any pod that still
+  # does: strip it after every `pod install`, since a manual strip would be
+  # undone the next time the pods are reinstalled.
+  #
+  # Only iOS *device* slices: those are the ones that end up in an archive, and
+  # `bitcode_strip` fails outright on some simulator/catalyst/tvOS binaries.
+  # Output goes to a temporary file and replaces the original only on success,
+  # so a failure can't leave a truncated framework behind.
+  Dir.glob(File.join(installer.sandbox.root, "**/*.xcframework/ios-arm*/**/*")).each do |path|
+    next if path.include?("simulator") || path.include?("maccatalyst")
+    # Mach-O binaries inside a framework carry no extension.
+    next unless File.file?(path) && File.extname(path).empty?
+    # The `__LLVM` segment alone is not enough: several frameworks carry
+    # `__LLVM` for command-line/coverage metadata with no bitcode in it, and
+    # `bitcode_strip` errors out on those. Embedded bitcode is the `__bundle`
+    # section — that is what Apple's 90482 check looks for.
+    next unless `otool -l "#{path}" 2>/dev/null`.include?("sectname __bundle")
+
+    stripped = "#{path}.nobitcode"
+    if system("xcrun bitcode_strip -r \"#{path}\" -o \"#{stripped}\" > /dev/null 2>&1")
+      FileUtils.mv(stripped, path)
+      Pod::UI.puts "Stripped bitcode: #{path.sub(installer.sandbox.root.to_s + '/', '')}"
+    else
+      FileUtils.rm_f(stripped)
+      Pod::UI.warn "Could not strip bitcode from #{File.basename(path)}"
+    end
+  end
+
+  # Pods targeting an older iOS than the app fail to link against libarclite
+  # (removed in Xcode 14.3) or otherwise mismatch. Raise them to match the
+  # app's deployment target.
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      target_version = config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"]
+      if target_version && target_version.to_f < 15.0
+        config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = "15.0"
+      end
+    end
+  end
+end

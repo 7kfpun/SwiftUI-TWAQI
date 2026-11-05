@@ -1,0 +1,332 @@
+//
+//  AreaForecastView.swift
+//  TWAQI
+//
+//  Created by kf on 31/10/26.
+//  Copyright © 2026 kf. All rights reserved.
+//
+
+import SwiftUI
+
+/// 空品區預報: MOENV's AQI forecast for the station's air-quality region,
+/// today and the next day or two.
+///
+/// It is a regional outlook, not a reading for this station, so it is labelled
+/// with the region and sits below the station's own number. The caller hides
+/// it entirely when there is nothing to show.
+struct AreaForecastView: View {
+    /// What the card's label says.
+    enum Heading {
+        /// On a station: 「空品區預報 · 北部空品區」.
+        case regionalForecast
+        /// On the Forecast tab, where every card is a forecast: the area's
+        /// name, with a tag when it is the reader's area or a favourite's.
+        case area(ForecastTabArea.Pin)
+    }
+
+    let forecast: AreaForecast
+    var heading: Heading = .regionalForecast
+    /// False on the Forecast tab when this area's text is the paragraph
+    /// shown once above every card.
+    var showsContent = true
+    /// False on the Forecast tab, which names the source once for all cards.
+    var showsSource = true
+
+    static let cornerRadius: CGFloat = 12
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            label
+
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(forecast.days.enumerated()), id: \.element.forecastDate) { index, day in
+                    if index > 0 {
+                        Divider().padding(.leading, 12)
+                    }
+                    dayRow(day)
+                }
+
+                if showsContent, let content = forecast.content {
+                    Divider()
+                    ForecastContentText(content: content,
+                                        translated: forecast.translatedContent(OnDeviceTranslation.target))
+                }
+            }
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous))
+
+            caption
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var label: some View {
+        switch heading {
+        case .regionalForecast:
+            HStack(spacing: 4) {
+                SectionLabel(text: "Forecast.title")
+                Text("· \(forecast.areaTitle)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        case .area(let pin):
+            HStack(spacing: 6) {
+                Text(forecast.areaTitle)
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                if let tag = Self.tag(pin) {
+                    Text(tag)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundColor(.accentColor)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.15)))
+                }
+            }
+        }
+    }
+
+    private static func tag(_ pin: ForecastTabArea.Pin) -> LocalizedStringKey? {
+        switch pin {
+        case .reader: return "Forecast.your_area"
+        case .favourite: return "Forecast.favourite_area"
+        case .fallback, .none: return nil
+        }
+    }
+
+    private func dayRow(_ day: AqiForecast) -> some View {
+        let status = day.status
+
+        return HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(Self.dayTitle(day.forecastDate))
+                    .font(.subheadline.weight(.semibold))
+                Text(Self.dateSubtitle(day.forecastDate))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .frame(width: 64, alignment: .leading)
+
+            Text(day.aqi.map(String.init) ?? "—")
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+                .foregroundColor(Color(status.getForegroundColor()))
+                .frame(minWidth: 44, minHeight: 26)
+                .padding(.horizontal, 4)
+                .background(Color(status.getColor()))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(status == .unknown ? "Forecast.no_value" : status.toString())
+                    .font(.subheadline)
+                if let pollutant = day.displayMajorPollutant {
+                    Text("Forecast.major_pollutant \(pollutant)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// 「發布 16:30 · 資料來源：環境部」
+    private var caption: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "clock")
+            if let published = forecast.publishedAt {
+                Text("Forecast.published \(Self.publishedText(published))")
+            }
+            Spacer(minLength: 8)
+            if showsSource {
+                Text("Forecast.source")
+            }
+        }
+        .font(.caption.weight(.light))
+        .foregroundColor(.secondary)
+        .lineLimit(1)
+    }
+
+    // MARK: - Formatting
+
+    /// 今天 / 明天 / 後天, else the weekday.
+    static func dayTitle(_ forecastDate: String, now: Date = Date()) -> String {
+        switch AqiForecastDates.daysFromToday(forecastDate, now: now) {
+        case 0: return "Forecast.today".localized
+        case 1: return "Forecast.tomorrow".localized
+        case 2: return "Forecast.day_after_tomorrow".localized
+        default:
+            return AqiForecastDates.parseDay(forecastDate).map { weekdayFormatter.string(from: $0) } ?? forecastDate
+        }
+    }
+
+    /// 「11/1（日）」
+    static func dateSubtitle(_ forecastDate: String) -> String {
+        AqiForecastDates.parseDay(forecastDate).map { dateFormatter.string(from: $0) } ?? forecastDate
+    }
+
+    /// "16:30" when published today (Taiwan time), else "10/30 22:30".
+    static func publishedText(_ date: Date, now: Date = Date()) -> String {
+        let calendar = AqiForecastDates.calendar
+        return calendar.isDate(date, inSameDayAs: now)
+            ? timeFormatter.string(from: date)
+            : dateTimeFormatter.string(from: date)
+    }
+
+    private static func formatter(_ template: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale.isChinese ? Locale(identifier: "zh_Hant_TW") : Locale.app
+        formatter.timeZone = AqiForecastDates.taipei
+        formatter.setLocalizedDateFormatFromTemplate(template)
+        return formatter
+    }
+
+    // Built per use (a few rows) so they follow a language changed under Help.
+    private static var weekdayFormatter: DateFormatter { formatter("EEEE") }
+    private static var dateFormatter: DateFormatter { formatter("MdEEE") }
+    private static var dateTimeFormatter: DateFormatter { fixedFormatter("M/d HH:mm") }
+    private static var timeFormatter: DateFormatter { fixedFormatter("HH:mm") }
+
+    /// Numeric layouts, but still in the app's locale (digits, calendar).
+    private static func fixedFormatter(_ format: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = .app
+        formatter.timeZone = AqiForecastDates.taipei
+        formatter.dateFormat = format
+        return formatter
+    }
+}
+
+/// MOENV's forecast text, three lines until opened, in the reader's language
+/// outside Chinese. On a station's card, and once above the Forecast tab's
+/// cards when every area carries the same paragraph.
+struct ForecastContentText: View {
+    let content: String
+    /// The Worker's translation of `content` into the reader's language
+    /// (`content_i18n`), when it has one; else it is translated on device.
+    var translated: String? = nil
+
+    @State private var expanded = false
+    /// Whether the forecast text runs past the collapsed three lines; the
+    /// toggle only appears when there is something more to show.
+    @State private var truncated = false
+    /// Bumped when a translation of the forecast text arrives.
+    @State private var translationRevision = 0
+    /// Width the forecast text lays out at, to guess how much of it the
+    /// collapsed lines show. Zero until measured.
+    @State private var textWidth: CGFloat = 0
+
+    /// MOENV's forecast text runs to a paragraph per region; show the start
+    /// and let the reader open the rest. Outside Chinese it is shown in the
+    /// reader's language: the Worker's translation when there is one, else
+    /// on-device translation once it has it (the sentences the collapsed lines
+    /// show first, the rest on expanding), else as written.
+    var body: some View {
+        // Read so a finished translation redraws this text.
+        _ = translationRevision
+        let segments = OnDeviceTranslation.segments(content)
+        let shown = translated ?? OnDeviceTranslation.display(segments: segments, target: OnDeviceTranslation.target)
+
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(shown)
+                .font(.footnote)
+                .foregroundColor(.primary)
+                .lineLimit(expanded ? nil : Self.collapsedLines)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .background(truncationProbe(shown))
+            if truncated {
+                Text(expanded ? "Forecast.less" : "Forecast.more")
+                    .font(.footnote.weight(.medium))
+                    .foregroundColor(.accentColor)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        // A tap target only when there is more to show; a disabled Button
+        // would grey out the text itself.
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard truncated else { return }
+            withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(truncated ? .isButton : [])
+        .translatesOnDevice(translated == nil ? segmentsToTranslate(segments) : [], revision: $translationRevision)
+    }
+
+    private static let collapsedLines = 3
+
+    /// Everything once expanded; before that, about as much of the original
+    /// as the collapsed lines hold, and nothing until the width is known.
+    private func segmentsToTranslate(_ segments: [String]) -> [String] {
+        if expanded { return segments }
+        guard textWidth > 0 else { return [] }
+        let pointSize = UIFont.preferredFont(forTextStyle: .footnote).pointSize
+        // A CJK character is about one point size wide.
+        let perLine = max(Int(textWidth / pointSize), 1)
+        return OnDeviceTranslation.leadingSegments(segments, characters: perLine * Self.collapsedLines)
+    }
+
+    /// Lays the text out at full length and at three lines, invisibly, and
+    /// records whether the two differ.
+    private func truncationProbe(_ content: String) -> some View {
+        GeometryReader { container in
+            ZStack {
+                measured(content, lines: nil)
+                measured(content, lines: Self.collapsedLines)
+            }
+            .frame(width: container.size.width, alignment: .topLeading)
+            .hidden()
+            .onAppear { textWidth = container.size.width }
+            .onChange(of: container.size.width) { textWidth = $0 }
+        }
+        .onPreferenceChange(TextHeightsKey.self) { heights in
+            guard heights.count == 2 else { return }
+            truncated = (heights.max() ?? 0) > (heights.min() ?? 0) + 1
+        }
+    }
+
+    private func measured(_ content: String, lines: Int?) -> some View {
+        Text(content)
+            .font(.footnote)
+            .lineLimit(lines)
+            .fixedSize(horizontal: false, vertical: true)
+            .background(GeometryReader { proxy in
+                Color.clear.preference(key: TextHeightsKey.self, value: [proxy.size.height])
+            })
+    }
+}
+
+private struct TextHeightsKey: PreferenceKey {
+    static var defaultValue: [CGFloat] = []
+    static func reduce(value: inout [CGFloat], nextValue: () -> [CGFloat]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
+struct AreaForecastView_Previews: PreviewProvider {
+    static let sample: [AqiForecast] = [
+        AqiForecast(area: "北部", forecastDate: AqiForecastDates.today(), aqi: 62, majorPollutant: "臭氧8小時",
+                    minorPollutant: "細懸浮微粒", minorPollutantAqi: 55,
+                    content: "1. 今（31）日東北季風影響，北部擴散條件尚可，偶有短暫普通等級。2. 明日風速減弱，午後臭氧易累積。",
+                    publishTime: "2026-10-31 16:30:00"),
+        AqiForecast(area: "北部", forecastDate: AqiForecastDates.today(now: Date().addingTimeInterval(86_400)), aqi: 105,
+                    majorPollutant: "細懸浮微粒", minorPollutant: nil, minorPollutantAqi: nil, content: nil,
+                    publishTime: "2026-10-31 16:30:00"),
+        AqiForecast(area: "北部", forecastDate: AqiForecastDates.today(now: Date().addingTimeInterval(2 * 86_400)), aqi: 45,
+                    majorPollutant: nil, minorPollutant: nil, minorPollutantAqi: nil, content: nil,
+                    publishTime: "2026-10-31 16:30:00"),
+    ]
+
+    static var previews: some View {
+        AreaForecastView(forecast: AreaForecast(areaTitle: "北部空品區", days: sample))
+            .padding(.vertical)
+            .previewLayout(.sizeThatFits)
+    }
+}
