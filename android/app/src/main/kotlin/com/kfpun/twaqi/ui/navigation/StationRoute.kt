@@ -15,6 +15,7 @@ import com.kfpun.twaqi.push.AlertsUnavailableCard
 import com.kfpun.twaqi.push.StationAlertsCard
 import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
+import com.kfpun.twaqi.ui.station.weather.StationWeatherSection
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -26,7 +27,8 @@ data class StationRoute(val stationId: Int)
  * The station page (FOX-55) for [route], with its own view model each time it opens, cleared on
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
  * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60), and
- * its alerts slot holds the station's alert switches (FOX-57).
+ * its alerts slot holds the station's alert switches (FOX-57), and its weather slot the CWA
+ * weather card (FOX-93).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -47,7 +49,9 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             slots = StationPageSlots(
                 alerts = { state, retry ->
                     if (state.stationLoadFailed) AlertsUnavailableCard(retry) else StationAlertsCard(route.stationId)
-                }
+                },
+                // FOX-93: CWA weather near the station, hidden when nothing is in range.
+                weather = { StationWeatherSection(it) }
             )
         )
     }

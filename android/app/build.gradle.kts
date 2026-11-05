@@ -80,6 +80,8 @@ android {
         buildConfigField("String", "DIRECTUS_URL", javaString(secret("DIRECTUS_URL")))
         buildConfigField("String", "DIRECTUS_FEEDBACK_TOKEN", javaString(secret("DIRECTUS_FEEDBACK_TOKEN")))
         buildConfigField("String", "DIRECTUS_COOPERATE_TOKEN", javaString(secret("DIRECTUS_COOPERATE_TOKEN")))
+        // The webcam host (FOX-92): station cams, their hourly history and the manifest.
+        buildConfigField("String", "STATION_CAMS_URL", javaString(secret("STATION_CAMS_URL")))
         manifestPlaceholders["MAPS_API_KEY"] = secret("MAPS_API_KEY")
         // AdMob (FOX-58). The example file holds Google's test ids.
         manifestPlaceholders["ADMOB_APP_ID"] = secret("ADMOB_APP_ID")

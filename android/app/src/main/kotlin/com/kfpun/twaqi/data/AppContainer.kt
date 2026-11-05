@@ -1,6 +1,7 @@
 package com.kfpun.twaqi.data
 
 import android.content.Context
+import com.kfpun.twaqi.BuildConfig
 import com.kfpun.twaqi.data.cache.CacheStore
 import com.kfpun.twaqi.data.cache.OfflineCacheRetention
 import com.kfpun.twaqi.data.cache.PollutantCache
@@ -10,6 +11,7 @@ import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.data.remote.ApiConfig
 import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
+import com.kfpun.twaqi.data.weather.StationWeatherStore
 import com.kfpun.twaqi.push.PushGraph
 import java.io.File
 
@@ -28,6 +30,9 @@ class AppContainer(context: Context, config: ApiConfig = ApiConfig.fromBuildConf
 
     /** FOX-55, with its alerts kept in step (FOX-57): unfavouriting turns a station's alerts off. */
     val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context), PushGraph.favouriteAlerts(context))
+
+    /** FOX-93: the CWA weather file on the webcam host, its last good copy under [cacheRoot]. */
+    val weather = StationWeatherStore(BuildConfig.STATION_CAMS_URL, store)
 
     /** Deletes week-old cache files. Blocking: run it off the main thread. */
     fun purgeExpiredCaches(): List<File> = OfflineCacheRetention.purge(cacheRoot)
