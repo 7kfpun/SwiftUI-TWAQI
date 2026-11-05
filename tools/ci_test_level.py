@@ -4,12 +4,14 @@
 Three levels, decided from the PR's changed files. The highest level wins:
 
   skip   only workers/, services/, web/, fastlane/, assets/, docs (.md), media, or .github/
-         other than the CI workflow changed: nothing runs and the check is green.
+         other than the CI workflow and its build action changed: nothing runs and the
+         check is green.
   build  any other path (Swift, strings, asset catalogs, widget / watch / visionOS,
          project.pbxproj): build-for-testing only, no simulator.
   test   a guarded path changed (the sources and test files behind the CI subset,
-         listed in ci.yml as CI_GUARDED_PATHS), or the CI workflow, this script,
-         the Podfile / Podfile.lock or Package.resolved: build, boot, run the subset.
+         listed in ci.yml as CI_GUARDED_PATHS), or the CI workflow, its build action
+         (.github/actions/unit-tests-build, FOX-65), this script, the Podfile /
+         Podfile.lock or Package.resolved: build, boot, run the subset.
 
 The PR label `ci-full-tests`, an empty file list, or a failed API call give `test`:
 the job never skips on doubt.
@@ -19,7 +21,8 @@ Both lists (CI_TEST_SUITES and CI_GUARDED_PATHS) live in the job's `env` in
 
 Usage:
   ci_test_level.py decide --files FILE [--labels FILE] [--api-error]
-  ci_test_level.py check            # the lists in ci.yml are in step with the repo
+  ci_test_level.py check            # the lists in ci.yml are in step with the repo,
+                                    # and ci-cache.yml's config step matches ci.yml's
 Tests: python3 -m unittest discover -s tools -p 'test_ci_test_level.py'
 """
 
@@ -37,10 +40,17 @@ RANK = {SKIP: 0, BUILD: 1, TEST: 2}
 
 FORCE_LABEL = "ci-full-tests"
 WORKFLOW = ".github/workflows/ci.yml"
+# The job's cache and build steps, shared with ci-cache.yml (FOX-65).
+BUILD_ACTION = ".github/actions/unit-tests-build/**"
+# Fills the caches from master. It carries a copy of ci.yml's config step,
+# which `check` keeps identical.
+CACHE_WORKFLOW = ".github/workflows/ci-cache.yml"
+CONFIG_STEP = "Prepare gitignored config"
 
 # Changing how the job runs, or what it builds against, runs the whole job.
 ALWAYS_TEST = (
     WORKFLOW,
+    BUILD_ACTION,
     "tools/ci_test_level.py",
     "tools/test_ci_test_level.py",
     "Podfile",
@@ -164,6 +174,34 @@ def workflow_block(text: str, key: str) -> str:
     raise ValueError(f"{key}: | not found in the workflow")
 
 
+def step_run(text: str, name: str) -> str:
+    """The `run: |` script of the step called `name`, dedented, without parsing YAML."""
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if not re.match(rf"^\s*-\s+name:\s*{re.escape(name)}\s*$", line):
+            continue
+        step_indent = len(line) - len(line.lstrip())
+        for offset, following in enumerate(lines[index + 1:], start=index + 1):
+            if following.strip() and len(following) - len(following.lstrip()) <= step_indent:
+                break
+            if re.match(r"^\s*run:\s*\|[-+]?\s*$", following):
+                script = workflow_block("\n".join(lines[offset:]), "run").splitlines()
+                cut = min((len(l) - len(l.lstrip()) for l in script if l.strip()), default=0)
+                return "\n".join(l[cut:] for l in script).strip()
+        raise ValueError(f"step {name!r} has no `run: |` script")
+    raise ValueError(f"step {name!r} not found in the workflow")
+
+
+def config_problems(workflow_text: str, cache_text: str) -> list[str]:
+    """ci-cache.yml builds with the same placeholder config as ci.yml (FOX-65)."""
+    try:
+        if step_run(workflow_text, CONFIG_STEP) != step_run(cache_text, CONFIG_STEP):
+            return [f"the {CONFIG_STEP!r} step in {CACHE_WORKFLOW} differs from {WORKFLOW}'s: copy it over"]
+    except ValueError as error:
+        return [str(error)]
+    return []
+
+
 def load_lists(workflow: Path) -> tuple[list[str], list[str]]:
     text = workflow.read_text()
     return (
@@ -225,10 +263,11 @@ def main(argv=None) -> int:
     suites, guarded = load_lists(args.workflow)
     if args.command == "check":
         problems = check(root, suites, guarded)
+        problems += config_problems(args.workflow.read_text(), (root / CACHE_WORKFLOW).read_text())
         for problem in problems:
             print(f"::error::{problem}")
         if not problems:
-            print(f"{len(suites)} suites, {len(guarded)} guarded paths: in step.")
+            print(f"{len(suites)} suites, {len(guarded)} guarded paths: in step. {CACHE_WORKFLOW} config matches.")
         return 1 if problems else 0
 
     files = [] if args.api_error else read_lines(args.files)
