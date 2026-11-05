@@ -16,6 +16,7 @@ import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.data.remote.ApiConfig
 import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
+import com.kfpun.twaqi.data.weather.StationWeatherStore
 import com.kfpun.twaqi.push.PushGraph
 import java.io.File
 
@@ -51,6 +52,9 @@ class AppContainer(
         http,
         BitmapCamImageDecoder
     )
+
+    /** FOX-93: the CWA weather file on the webcam host, its last good copy under [cacheRoot]. */
+    val weather = StationWeatherStore(stationCamsUrl, store)
 
     /** Deletes week-old cache files. Blocking: run it off the main thread. */
     fun purgeExpiredCaches(): List<File> = OfflineCacheRetention.purge(cacheRoot)
