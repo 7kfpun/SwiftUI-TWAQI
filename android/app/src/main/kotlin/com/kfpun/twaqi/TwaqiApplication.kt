@@ -3,6 +3,7 @@ package com.kfpun.twaqi
 import android.app.Application
 import android.util.Log
 import com.kfpun.twaqi.data.AppContainer
+import com.kfpun.twaqi.settings.AppAppearanceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +17,8 @@ class TwaqiApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Help › Appearance (FOX-97), before any activity (the Pro screen can be the first one).
+        AppAppearanceStore.applyStored(this)
         container = AppContainer(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {
