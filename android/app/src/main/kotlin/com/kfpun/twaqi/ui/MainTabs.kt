@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,8 @@ fun MainTabs(
     onOpenDataScreen: (() -> Unit)? = null
 ) {
     var selected by rememberSaveable { mutableStateOf(MainTab.MAIN) }
+    // Each tab keeps its own state (Help's open page) while another tab is shown, as on iOS.
+    val tabStates = rememberSaveableStateHolder()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         // Each tab's own top bar takes the status bar; the navigation bar takes the bottom.
@@ -73,25 +76,27 @@ fun MainTabs(
         // Each tab's banner sits above the tab bar (iOS: the footer banner of each tab).
         Column(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)) {
             val content = Modifier.weight(1f).fillMaxWidth()
-            when (selected) {
-                MainTab.MAIN -> Column(
-                    content,
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    if (onOpenDataScreen != null) {
-                        OutlinedButton(onClick = onOpenDataScreen, modifier = Modifier.padding(top = 24.dp)) {
-                            Text(stringResource(R.string.debug_data_title))
+            tabStates.SaveableStateProvider(selected.name) {
+                when (selected) {
+                    MainTab.MAIN -> Column(
+                        content,
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        if (onOpenDataScreen != null) {
+                            OutlinedButton(onClick = onOpenDataScreen, modifier = Modifier.padding(top = 24.dp)) {
+                                Text(stringResource(R.string.debug_data_title))
+                            }
                         }
                     }
-                }
 
-                MainTab.HELP -> HelpHost(isPro = isPro, onOpenPro = onOpenPro, modifier = content)
+                    MainTab.HELP -> HelpHost(isPro = isPro, onOpenPro = onOpenPro, modifier = content)
+                }
             }
             AdBanner(selected.adPlacement)
         }
