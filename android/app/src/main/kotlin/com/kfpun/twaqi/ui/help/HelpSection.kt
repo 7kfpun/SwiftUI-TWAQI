@@ -3,9 +3,8 @@ package com.kfpun.twaqi.ui.help
 /**
  * The Help tab's sections, top to bottom (iOS `HelpSection`).
  *
- * The iOS sections still to come on Android slot in where iOS has them: the welcome guide after
- * [APPEARANCE] (FOX-96). iOS's developer section has no Android counterpart: tapping the version
- * row 7 times toggles the analytics opt-out directly (FOX-60).
+ * iOS's developer section has no Android counterpart: tapping the version row 7 times toggles the
+ * analytics opt-out directly (FOX-60).
  */
 enum class HelpSection {
     PURCHASE,
@@ -14,6 +13,9 @@ enum class HelpSection {
     DO_NOT_DISTURB,
     LANGUAGE,
     APPEARANCE,
+
+    /** "Show welcome guide": runs the welcome flow again (FOX-96). */
+    WELCOME,
     CONTACT,
     WIDGETS_AND_WATCH,
     DEFINITION,

@@ -34,6 +34,8 @@ work = "2.10.5"
 playReview = "2.0.2"
 # FOX-59: home screen widgets (Glance, compileSdk 35+); their refresh uses FOX-57's WorkManager.
 glance = "1.2.0"
+# FOX-96: the welcome flow's animations (the iOS Lottie files, in assets/onboarding).
+lottie = "6.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -68,6 +70,7 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 play-review = { group = "com.google.android.play", name = "review", version.ref = "playReview" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

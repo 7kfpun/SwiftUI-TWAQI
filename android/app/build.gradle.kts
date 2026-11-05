@@ -212,6 +212,9 @@ dependencies {
     // Home screen widgets (FOX-59): Glance, refreshed by WorkManager (below, with FOX-57).
     implementation(libs.androidx.glance.appwidget)
 
+    // The welcome flow (FOX-96): Lottie, playing the iOS animations from assets/onboarding.
+    implementation(libs.lottie.compose)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)

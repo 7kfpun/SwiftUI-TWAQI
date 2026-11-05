@@ -147,6 +147,32 @@ object Analytics {
      */
     const val APP_INTENT_RUN = "app_intent_run"
 
+    // Welcome flow (FOX-96, iOS FOX-34 / FOX-84).
+
+    /** `label`: launch, when the flow opens by itself. */
+    const val ONBOARDING_SHOWN = "onboarding_shown"
+
+    /** `step` (`OnboardingStep.analyticsName`), `index` (1-based). */
+    const val ONBOARDING_STEP_VIEWED = "onboarding_step_viewed"
+
+    /** `label`: on / off, the answer to the location prompt. */
+    const val ONBOARDING_LOCATION = "onboarding_location"
+
+    /** `label`: on / off, the answer to the notification prompt. */
+    const val ONBOARDING_NOTIFICATIONS = "onboarding_notifications"
+
+    /** `stationId`. */
+    const val ONBOARDING_ADD_FAVOURITE = "onboarding_add_favourite"
+
+    /** `stationId`: another station picked from the list. */
+    const val ONBOARDING_CHOOSE_STATION = "onboarding_choose_station"
+    const val ONBOARDING_OPEN_PRO = "onboarding_open_pro"
+
+    /** `label`: `step_<index>`. */
+    const val ONBOARDING_SKIPPED = "onboarding_skipped"
+    const val ONBOARDING_COMPLETED = "onboarding_completed"
+    const val ONBOARDING_OPEN_FROM_HELP = "onboarding_open_from_help"
+
     /**
      * Logs [name] with [parameters]: text as strings, whole numbers as longs, other numbers as
      * doubles, and booleans as 1 / 0 (how Firebase records the iOS app's booleans). Does nothing

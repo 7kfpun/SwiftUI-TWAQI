@@ -34,10 +34,11 @@ import java.time.format.FormatStyle
 
 /**
  * Help › Do Not Disturb (iOS `HelpView.doNotDisturbSection`): quiet hours for alerts, which the
- * sender honours, and "cancel all" for every station's alerts.
+ * sender honours, and "cancel all" for every station's alerts. The welcome flow's notifications
+ * step (FOX-96) shows the quiet hours only ([showsCancelAll] false).
  */
 @Composable
-fun DoNotDisturbRows() {
+fun DoNotDisturbRows(showsCancelAll: Boolean = true) {
     val context = LocalContext.current
     val graph = remember(context) { PushGraph.get(context) }
     var window by remember { mutableStateOf(graph.sync.dnd) }
@@ -66,6 +67,7 @@ fun DoNotDisturbRows() {
             save(window.copy(end = it), Analytics.SET_DND_NOTIFICATION_END_TIME)
         }
     }
+    if (!showsCancelAll) return
     ListItem(
         headlineContent = {
             Text(stringResource(R.string.help_cancel_site_notification), color = MaterialTheme.colorScheme.error)
