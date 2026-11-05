@@ -7,9 +7,6 @@
       "hosting": {
         "main": [
           "taiwanair-wahthefox"
-        ],
-        "legacy": [
-          "kf-twaqi"
         ]
       }
     }

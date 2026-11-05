@@ -1,0 +1,46 @@
+name: Public text
+
+# The repository is public. This check fails a pull request whose title, description,
+# commit messages or added lines name a non-website host, an IP or network range, a
+# private email, or network-exposure details (tools/public_text_check.py). Hosts are
+# fine in the files that need them to work (config, scripts, app constants, tests).
+# Rules: docs/ci-cd-guardrails.md#public-repo-what-stays-out. Credentials are the
+# job of "Secret files" and "Vulnerability checks".
+#
+# Every non-draft pull request gets the check, and an edit to the description runs it
+# again. No paths filter, so it can be a required check.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-text-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  public-text:
+    name: Public text
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the PR's text and added lines
+        # Title and body come in through env, never into the script text.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: python3 tools/public_text_check.py --base "$BASE" --head "$HEAD"
+
+      - name: Test the checker
+        run: python3 -m unittest discover -s tools -p 'test_public_text_check.py'
