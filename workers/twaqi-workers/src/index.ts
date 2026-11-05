@@ -5,7 +5,7 @@
 // MOENV air-quality forecast sync: aqf_p_01 -> Directus `twaqi_aqi_forecast` (see forecast.ts).
 //
 // CWA weather sync: F-C0032-001 + O-A0003-001 -> R2 `weather/latest.json` (see weather.ts),
-// hourly at :40 in its own invocation, so it never shares the forecast's CPU or subrequest budget.
+// every 15 minutes in its own invocation, so it never shares the forecast's CPU or subrequest budget.
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
 import { errorText, syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
@@ -21,7 +21,7 @@ interface Env extends ForecastEnv, ApiEnv, WeatherEnv {
 /** Must match `triggers.crons` in wrangler.jsonc. */
 const CAMS_CRON = '*/10 * * * *'
 const FORECAST_CRON = '35 * * * *'
-const WEATHER_CRON = '40 * * * *'
+const WEATHER_CRON = '*/15 * * * *'
 const FORECAST_STATUS_KEY = 'forecast/last-sync.json'
 
 interface Station {
