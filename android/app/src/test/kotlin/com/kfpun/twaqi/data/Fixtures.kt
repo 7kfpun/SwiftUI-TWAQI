@@ -10,4 +10,7 @@ object Fixtures {
     val currentPollutants get() = read("current-pollutants.json")
     val historicalPollutants get() = read("historical-pollutants.json")
     val forecast get() = read("aqi-forecast.json")
+
+    /** A slice of the cam manifest (FOX-92): ids and coordinates as MOENV publishes them. */
+    val stationCamsManifest get() = read("station-cams-manifest.json")
 }
