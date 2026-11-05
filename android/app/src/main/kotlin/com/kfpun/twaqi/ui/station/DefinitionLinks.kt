@@ -6,38 +6,16 @@ import android.content.Intent
 import androidx.core.net.toUri
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.AirIndexType
-import java.net.URLEncoder
+import com.kfpun.twaqi.ui.help.DefinitionPage
 
 /**
  * The Wikipedia article for each index, in the reader's language (iOS `DefinitionPages.url`).
- * The station page opens it until the in-app index guide (FOX-97) takes over.
+ * The station page's ⓘ opens it; it can point at the in-app index guide (FOX-97) instead.
  */
 object DefinitionLinks {
-    fun url(type: AirIndexType, chinese: Boolean): String {
-        val article = if (chinese) {
-            when (type) {
-                AirIndexType.AQI -> "空氣品質指標"
-                AirIndexType.PM25 -> "細懸浮微粒"
-                AirIndexType.PM10 -> "懸浮粒子"
-                AirIndexType.O3 -> "臭氧"
-                AirIndexType.CO -> "一氧化碳"
-                AirIndexType.SO2 -> "二氧化硫"
-                AirIndexType.NO2 -> "二氧化氮"
-            }
-        } else {
-            when (type) {
-                AirIndexType.AQI -> "Air_quality_index"
-                AirIndexType.PM25, AirIndexType.PM10 -> "Particulates"
-                AirIndexType.O3 -> "Tropospheric_ozone"
-                AirIndexType.CO -> "Carbon_monoxide"
-                AirIndexType.SO2 -> "Sulfur_dioxide"
-                AirIndexType.NO2 -> "Nitrogen_dioxide"
-            }
-        }
-        val host = if (chinese) "zh.wikipedia.org" else "en.wikipedia.org"
-        val path = URLEncoder.encode(article, "UTF-8").replace("+", "%20")
-        return "https://$host/wiki/$path"
-    }
+    /** The article iOS `DefinitionPages.url` links to; one list, kept by the index guide (FOX-97). */
+    fun url(type: AirIndexType, chinese: Boolean): String =
+        DefinitionPage.entries.first { it.type == type }.url(chinese)
 
     /** Opens the page in the browser and logs `open_definition_page` with the index, as iOS does. */
     fun open(context: Context, type: AirIndexType, chinese: Boolean) {

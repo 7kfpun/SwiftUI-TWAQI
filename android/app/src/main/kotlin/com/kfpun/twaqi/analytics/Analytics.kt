@@ -10,6 +10,25 @@ object Analytics {
     /** `label`: the language id (`system`, `zh-Hant`, `en`). */
     const val SELECT_LANGUAGE = "select_language"
 
+    /** `label`: the appearance id (`system`, `light`, `dark`). */
+    const val SELECT_APPEARANCE = "select_appearance"
+
+    /** `label`: the index page (`aqi`, `pm25`, …). */
+    const val OPEN_DEFINITION_PAGE = "open_definition_page"
+
+    const val OPEN_WIDGET_GUIDE = "open_widget_guide"
+
+    /** The Wear OS guide; same name as the iOS watch guide. */
+    const val OPEN_WATCH_GUIDE = "open_watch_guide"
+
+    const val OPEN_COOPERATE_FORM = "open_cooperate_form"
+
+    /** `cooperation_type`. */
+    const val SUBMIT_COOPERATE = "submit_cooperate"
+
+    /** `reason`: `offline`, `network`, `notConfigured` or `server(statusCode: …)`. */
+    const val SUBMIT_COOPERATE_FAILED = "submit_cooperate_failed"
+
     // Pro upsell funnel (FOX-58): pro_screen_opened → pro_plan_selected →
     // user_premium_buy_product_done, each with `source`.
 
@@ -51,9 +70,6 @@ object Analytics {
     /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
     const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
     const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
-
-    /** `label`: the index (`aqi`, `pm25`, …). */
-    const val OPEN_DEFINITION_PAGE = "open_definition_page"
 
     /** `source`: where the feedback form was opened from (`station_page`). */
     const val OPEN_FEEDBACK_FORM = "open_feedback_form"

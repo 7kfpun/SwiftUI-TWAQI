@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -37,8 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
 import com.kfpun.twaqi.TwaqiApplication
-import com.kfpun.twaqi.ads.AdBanner
-import com.kfpun.twaqi.ads.AdPlacement
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.StationType
@@ -143,8 +140,6 @@ fun StationContent(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        // Below the content, never over it (iOS reserves the space for the same reason).
-        bottomBar = { AdBanner(AdPlacement.DETAILS, Modifier.navigationBarsPadding()) },
         topBar = {
             TopAppBar(
                 title = {},
