@@ -318,7 +318,8 @@ export function parseObservations(body: unknown): Observation[] {
     const element = get(station, 'WeatherElement', 'weatherElement')
     const temp = valid(num(get(element, 'AirTemperature', 'airTemperature')), plausibleTemp)
     let humidity = valid(num(get(element, 'RelativeHumidity', 'relativeHumidity')), (n) => n >= 0 && n <= 100)
-    // Older CWA formats sent humidity as a fraction (0.75).
+    // Older CWA formats sent humidity as a fraction (0.75). A real reading of
+    // 1% or less never happens in Taiwan, so (0, 1] is read as a fraction.
     if (humidity !== null && humidity > 0 && humidity <= 1) humidity = Math.round(humidity * 100)
     const rain = valid(num(get(get(element, 'Now', 'now'), 'Precipitation', 'precipitation')), (n) => n >= 0 && n < 3000)
     const wind = valid(num(get(element, 'WindSpeed', 'windSpeed')), (n) => n >= 0 && n < 100)

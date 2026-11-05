@@ -207,7 +207,13 @@ async function runWeatherSync(env: Env): Promise<WeatherStatus> {
   let status: WeatherStatus
   try {
     const result = await syncWeather(env)
-    console.log('weather sync ok', JSON.stringify(result))
+    // One set failing keeps its last good section and still counts as ok;
+    // a warning makes it visible to the Worker's observability.
+    if (result.forecast !== 'updated' || result.observations !== 'updated') {
+      console.warn('weather sync partial', JSON.stringify(result))
+    } else {
+      console.log('weather sync ok', JSON.stringify(result))
+    }
     status = { ok: true, at: new Date().toISOString(), result }
   } catch (e) {
     // weather/latest.json keeps the last good file; nothing to undo.
