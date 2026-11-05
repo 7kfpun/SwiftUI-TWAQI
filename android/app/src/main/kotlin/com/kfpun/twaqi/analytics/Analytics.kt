@@ -68,6 +68,22 @@ object Analytics {
     /** `placement`: AdMob recorded a click on a banner. */
     const val AD_BANNER_TAPPED = "ad_banner_tapped"
 
+    // Push alerts (FOX-57), as iOS names them.
+
+    /** `stationId`: the "at most three stations" note on a station's alerts, once per page. */
+    const val ALERT_LIMIT_SHOWN = "alert_limit_shown"
+
+    /** `stationId`: a station left Favourites and its alerts went off. */
+    const val STATION_ALERTS_CLEARED_BY_UNFAVOURITE = "station_alerts_cleared_by_unfavourite"
+
+    /** `outcome`, `stationId`: what favouriting a station did to its alerts. */
+    const val STATION_ALERTS_ON_FAVOURITE = "station_alerts_on_favourite"
+
+    /** `label`: on / off, `dndStartTime`, `dndEndTime` (Help › Do Not Disturb). */
+    const val SET_DND_NOTIFICATION = "set_dnd_notification"
+    const val SET_DND_NOTIFICATION_START_TIME = "set_dnd_notification_start_time"
+    const val SET_DND_NOTIFICATION_END_TIME = "set_dnd_notification_end_time"
+
     // Map (FOX-54), as on iOS.
 
     /** `label`: the index (`aqi`, `pm25`, …). */

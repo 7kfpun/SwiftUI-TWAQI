@@ -14,6 +14,7 @@ class HelpTest {
         assertEquals(
             listOf(
                 HelpSection.PURCHASE,
+                HelpSection.DO_NOT_DISTURB,
                 HelpSection.LANGUAGE,
                 HelpSection.APPEARANCE,
                 HelpSection.CONTACT,
@@ -30,7 +31,7 @@ class HelpTest {
         val order = HelpSection.order(isPro = true)
 
         assertFalse(HelpSection.PURCHASE in order)
-        assertEquals(HelpSection.LANGUAGE, order.first())
+        assertEquals(HelpSection.DO_NOT_DISTURB, order.first())
     }
 
     @Test

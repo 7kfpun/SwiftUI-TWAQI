@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.util.Log
 import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.data.AppContainer
+import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.settings.AppAppearanceStore
 import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,8 @@ class TwaqiApplication : Application() {
         // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
         WidgetUpdater.observeFavourites(this, container.favourites.favourites)
         WidgetUpdater.redrawIfLanguageChanged(this)
+        // Push alerts (FOX-57): the channel in the app language, before any alert arrives.
+        AlertNotifications.ensureChannel(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {
             val removed = container.purgeExpiredCaches()

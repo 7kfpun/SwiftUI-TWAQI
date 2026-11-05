@@ -10,6 +10,7 @@ import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.data.remote.ApiConfig
 import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
+import com.kfpun.twaqi.push.PushGraph
 import com.kfpun.twaqi.widget.WidgetHistoryCache
 import java.io.File
 
@@ -29,8 +30,8 @@ class AppContainer(context: Context, config: ApiConfig = ApiConfig.fromBuildConf
     /** FOX-59: the station detail widget's last 24 hours. */
     val widgetHistory = WidgetHistoryCache(store)
 
-    /** FOX-55; FOX-57 passes its alerts gateway here. */
-    val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context))
+    /** FOX-55, with its alerts kept in step (FOX-57): unfavouriting turns a station's alerts off. */
+    val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context), PushGraph.favouriteAlerts(context))
 
     /** Deletes week-old cache files. Blocking: run it off the main thread. */
     fun purgeExpiredCaches(): List<File> = OfflineCacheRetention.purge(cacheRoot)

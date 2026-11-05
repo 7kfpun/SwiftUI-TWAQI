@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsHint
 import com.kfpun.twaqi.data.favourites.FavouritesRepository
 import com.kfpun.twaqi.data.model.HistoricalPollutant
 import com.kfpun.twaqi.data.model.Pollutant
@@ -56,6 +57,7 @@ class RepositoryStationDataSource(private val repository: AirQualityRepository) 
  * @property stationLoadFailed the station record didn't load, so there is no alerts row (FOX-57)
  *   to show; the page says why instead.
  * @property confirmingUnfavourite unfavouriting waits on the reader: it would also turn alerts off.
+ * @property favouriteAlertsHint favourited, but its alerts stayed off: why, for the reader (FOX-57).
  */
 data class StationDetailsUiState(
     val stationId: Int,
@@ -68,7 +70,8 @@ data class StationDetailsUiState(
     val isNotReporting: Boolean = false,
     val stationLoadFailed: Boolean = false,
     val isFavourite: Boolean = false,
-    val confirmingUnfavourite: Boolean = false
+    val confirmingUnfavourite: Boolean = false,
+    val favouriteAlertsHint: FavouriteAlertsHint? = null
 ) {
     /**
      * Whether this id is a station at all: its record or a reading loaded, now or from the cache.
@@ -237,8 +240,11 @@ class StationDetailsViewModel(
         when {
             !current.isFavourite -> {
                 if (!current.canAddFavourite) return
-                if (favourites.add(stationId)) logFavourite(on = true)
-                // FOX-57: a new favourite switches its alerts on (iOS FOX-31) here.
+                if (!favourites.add(stationId)) return
+                logFavourite(on = true)
+                // A new favourite switches its alerts on (iOS FOX-31), unless it can't.
+                val hint = favourites.alerts.enableForNewFavourite(stationId) { favourites.contains(stationId) }
+                if (hint != null) state.update { it.copy(favouriteAlertsHint = hint) }
             }
 
             favourites.needsConfirmation(listOf(stationId)) -> state.update { it.copy(confirmingUnfavourite = true) }
@@ -255,6 +261,10 @@ class StationDetailsViewModel(
 
     fun dismissUnfavourite() {
         state.update { it.copy(confirmingUnfavourite = false) }
+    }
+
+    fun dismissFavouriteAlertsHint() {
+        state.update { it.copy(favouriteAlertsHint = null) }
     }
 
     private fun logFavourite(on: Boolean) {

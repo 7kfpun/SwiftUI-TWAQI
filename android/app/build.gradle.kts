@@ -44,6 +44,9 @@ if (hasReleaseKeystore) {
         )
     }
 }
+// Firebase config (gitignored). Without it the Firebase plugins stay off and FCM is not wired.
+val hasGoogleServices = file("google-services.json").isFile
+
 val uploadTask = Regex("(?i)(^|:)publish(\\w*(bundle|apk))?$")
 val unsignedUploadMessage =
     "Uploading to Play needs a signed release: copy android/keystore.example.properties " +
@@ -87,6 +90,11 @@ android {
             "AD_UNIT_ID_FAVOURITES_FOOTER",
             "AD_UNIT_ID_HELP_FOOTER"
         ).forEach { buildConfigField("String", it, javaString(secret(it))) }
+        // Push alerts (FOX-57): the push Worker's base URL (iOS: PushApiUrl). Empty: alerts are
+        // saved on the phone and not synced. FCM is on only with app/google-services.json.
+        buildConfigField("String", "PUSH_API_URL", javaString(secret("PUSH_API_URL")))
+        buildConfigField("boolean", "FCM_ENABLED", hasGoogleServices.toString())
+        manifestPlaceholders["FCM_ENABLED"] = hasGoogleServices.toString()
     }
 
     signingConfigs {
@@ -147,7 +155,7 @@ android {
 // Firebase (FOX-85: Crashlytics and Analytics, nothing else). The plugins need
 // app/google-services.json, which is gitignored, so they apply only when it is
 // there. Without it the app still builds and Firebase stays uninitialised.
-if (file("google-services.json").isFile) {
+if (hasGoogleServices) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
 }
@@ -199,13 +207,15 @@ dependencies {
     implementation(libs.maps.compose.utils)
     implementation(libs.androidx.window)
 
-    // Home screen widgets (FOX-59): Glance, refreshed by WorkManager.
+    // Home screen widgets (FOX-59): Glance, refreshed by WorkManager (below, with FOX-57).
     implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+    // FOX-57: FCM push alerts; the alert sync runs in WorkManager.
+    implementation(libs.firebase.messaging)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // The review prompt (FOX-60): Play In-App Review.
     implementation(libs.play.review)

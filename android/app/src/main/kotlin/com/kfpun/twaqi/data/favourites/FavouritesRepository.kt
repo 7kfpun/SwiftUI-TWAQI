@@ -51,9 +51,25 @@ interface FavouriteAlertsGateway {
 
     /** Turns both of a station's alerts off as it leaves Favourites; nothing to do when they are off. */
     fun clear(stationId: Int)
+
+    /**
+     * A station just became a favourite: switches its alerts on (iOS FOX-31). Returns why they
+     * stayed off, for the page to tell the reader, or null. [isStillFavourite] is asked just
+     * before writing. The favourite stands either way.
+     */
+    fun enableForNewFavourite(stationId: Int, isStillFavourite: () -> Boolean): FavouriteAlertsHint? = null
 }
 
-/** Until FOX-57: no station has alerts, so nothing needs confirming or clearing. */
+/** Why favouriting just now left a station's alerts off, as told to the reader (iOS `FavouriteAlertsHint`). */
+enum class FavouriteAlertsHint {
+    /** The most stations with alerts already have them. */
+    CAP_REACHED,
+
+    /** Notifications are turned off for the app. */
+    NOTIFICATIONS_DENIED
+}
+
+/** No alerts: nothing needs confirming or clearing (tests, and before push is wired). */
 object NoFavouriteAlerts : FavouriteAlertsGateway {
     override val alertedStationIds: StateFlow<Set<Int>> = MutableStateFlow(emptySet())
 

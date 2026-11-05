@@ -32,6 +32,21 @@ class FavouritesRepositoryTest {
             cleared += stationId
             alertedStationIds.value -= stationId
         }
+
+        /** Why a new favourite's alerts stay off, or null to switch them on. */
+        var hint: com.kfpun.twaqi.data.favourites.FavouriteAlertsHint? = null
+        val enabled = mutableListOf<Int>()
+
+        override fun enableForNewFavourite(
+            stationId: Int,
+            isStillFavourite: () -> Boolean
+        ): com.kfpun.twaqi.data.favourites.FavouriteAlertsHint? {
+            if (hint == null && isStillFavourite()) {
+                enabled += stationId
+                alertedStationIds.value += stationId
+            }
+            return hint
+        }
     }
 
     @Test
