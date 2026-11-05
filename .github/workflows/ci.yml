@@ -140,125 +140,6 @@ jobs:
           # shellcheck disable=SC2086 # api_error is empty or one flag
           python3 tools/ci_test_level.py decide --files "$files" --labels "$labels" $api_error
 
-      - name: Show Xcode
-        id: xcode
-        if: steps.scope.outputs.level != 'skip'
-        run: |
-          set -euo pipefail
-          xcodebuild -version
-          echo "build=$(xcodebuild -version | awk '/Build version/ {print $3}')" >> "$GITHUB_OUTPUT"
-
-      - name: Prepare gitignored config
-        if: steps.scope.outputs.level != 'skip'
-        run: |
-          set -euo pipefail
-          # The project will not build without these, and they are gitignored
-          # because they hold local API keys. Example values are enough to
-          # compile and launch the host app for unit tests.
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
-          # example.xcconfig sets GMSServicesApiKey to an empty value
-          # (`= // Required` is a comment). An empty key skips meaningful
-          # GMSServices.provideAPIKey, and creating GMSMapView then crashes
-          # the test host with GMSServicesException.
-          python3 - <<'PY'
-          from pathlib import Path
-          key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
-          for name in ("debug.xcconfig", "release.xcconfig"):
-              path = Path("TWAQI/Config") / name
-              lines = path.read_text().splitlines()
-              out, replaced = [], False
-              for line in lines:
-                  if line.strip().startswith("GMSServicesApiKey"):
-                      out.append(key_line)
-                      replaced = True
-                  else:
-                      out.append(line)
-              if not replaced:
-                  out.append(key_line)
-              path.write_text("\n".join(out) + "\n")
-          PY
-          cat > TWAQI/GoogleService-Info.plist <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>API_KEY</key>
-            <!-- 39 chars, starts with A, not an AIza key. Firebase Installations
-                 rejects anything else and crashes the test host at launch. -->
-            <string>AciPlaceholderKeyForUnitTests0000000000</string>
-            <key>GCM_SENDER_ID</key>
-            <string>123456789012</string>
-            <key>PLIST_VERSION</key>
-            <string>1</string>
-            <key>BUNDLE_ID</key>
-            <string>com.kfpun.twaqi</string>
-            <key>PROJECT_ID</key>
-            <string>ci-placeholder</string>
-            <key>STORAGE_BUCKET</key>
-            <string>ci-placeholder.appspot.com</string>
-            <key>IS_ADS_ENABLED</key>
-            <false/>
-            <key>IS_ANALYTICS_ENABLED</key>
-            <false/>
-            <key>IS_APPINVITE_ENABLED</key>
-            <true/>
-            <key>IS_GCM_ENABLED</key>
-            <true/>
-            <key>IS_SIGNIN_ENABLED</key>
-            <true/>
-            <key>GOOGLE_APP_ID</key>
-            <string>1:123456789012:ios:abcdefabcdefabcdefabcdef</string>
-          </dict>
-          </plist>
-          EOF
-
-      # Caches are scoped to this PR (and master), so a PR's first run is cold.
-      # A miss only means a full download or build, the same as before caching.
-      - name: Cache Swift packages
-        if: steps.scope.outputs.level != 'skip'
-        uses: actions/cache@v4
-        with:
-          # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
-          # runs DerivedData/SourcePackages/checkouts/firebase-ios-sdk/...
-          path: ${{ runner.temp }}/DerivedData/SourcePackages
-          key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
-          restore-keys: |
-            spm-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Cache Pods
-        if: steps.scope.outputs.level != 'skip'
-        uses: actions/cache@v4
-        with:
-          path: Pods
-          # Podfile too: its post_install hook patches the pods' sources.
-          key: pods-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Podfile.lock', 'Podfile') }}
-          restore-keys: |
-            pods-${{ runner.os }}-${{ runner.arch }}-
-
-      # Build products of the last green run with the same dependencies and
-      # Xcode. Exact key only, no restore-keys: products built against other
-      # pods, packages or Xcode are never restored. Inside a hit, Xcode still
-      # rebuilds whatever changed: checkout gives every app and test source a
-      # new mtime, so only the cached Pods / package products can be reused.
-      - name: Cache DerivedData
-        if: steps.scope.outputs.level != 'skip'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ runner.temp }}/DerivedData/Build
-            ${{ runner.temp }}/DerivedData/ModuleCache.noindex
-          key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('Podfile.lock', 'Podfile', 'TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
-
-      - name: Install CocoaPods dependencies
-        if: steps.scope.outputs.level != 'skip'
-        run: |
-          set -euo pipefail
-          if ! command -v pod >/dev/null 2>&1; then
-            sudo gem install cocoapods -N
-          fi
-          pod install
-
       - name: Pick simulator
         if: steps.scope.outputs.level == 'test'
         run: |
@@ -309,29 +190,12 @@ jobs:
           nohup bash "$state/pick.sh" "$state" > "$state/pick.log" 2>&1 &
           echo "Picking a simulator in the background (log: $state/pick.log)."
 
-      - name: Build for testing
+      # Config, the three caches (restored, saved only on a miss), pod install
+      # and build-for-testing. Shared with ci-cache.yml, which fills the same
+      # keys from master so a PR's first run starts warm (FOX-65).
+      - name: Restore caches and build for testing
         if: steps.scope.outputs.level != 'skip'
-        run: |
-          set -euo pipefail
-          # Generic destination, so the build does not depend on the pick.
-          # ARCHS=arm64 keeps it to the runner's own simulator architecture.
-          # TWAQI-CI is the TWAQI scheme without the TWAQIUITests runner, which
-          # CI never runs. The local full-suite command keeps using TWAQI.
-          # COMPILER_INDEX_STORE_ENABLE=NO: the index is only for Xcode's editor.
-          # A restored cache gives every file a new inode. Let Xcode compare
-          # mtime and size only, so unchanged cached products are reused.
-          defaults write com.apple.dt.XCBuild IgnoreFileSystemDeviceInodeChanges -bool YES
-          xcodebuild build-for-testing \
-            -workspace TWAQI.xcworkspace \
-            -scheme TWAQI-CI \
-            -destination "generic/platform=iOS Simulator" \
-            -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
-            -clonedSourcePackagesDirPath "${RUNNER_TEMP}/DerivedData/SourcePackages" \
-            ARCHS=arm64 \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+        uses: ./.github/actions/unit-tests-build
 
       - name: Boot simulator
         id: boot

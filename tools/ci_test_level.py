@@ -4,12 +4,14 @@
 Three levels, decided from the PR's changed files. The highest level wins:
 
   skip   only workers/, services/, web/, fastlane/, assets/, docs (.md), media, or .github/
-         other than the CI workflow changed: nothing runs and the check is green.
+         other than the CI workflow and its build action changed: nothing runs and the
+         check is green.
   build  any other path (Swift, strings, asset catalogs, widget / watch / visionOS,
          project.pbxproj): build-for-testing only, no simulator.
   test   a guarded path changed (the sources and test files behind the CI subset,
-         listed in ci.yml as CI_GUARDED_PATHS), or the CI workflow, this script,
-         the Podfile / Podfile.lock or Package.resolved: build, boot, run the subset.
+         listed in ci.yml as CI_GUARDED_PATHS), or the CI workflow, its build action
+         (.github/actions/unit-tests-build, FOX-65), this script, the Podfile /
+         Podfile.lock or Package.resolved: build, boot, run the subset.
 
 The PR label `ci-full-tests`, an empty file list, or a failed API call give `test`:
 the job never skips on doubt.
@@ -37,10 +39,13 @@ RANK = {SKIP: 0, BUILD: 1, TEST: 2}
 
 FORCE_LABEL = "ci-full-tests"
 WORKFLOW = ".github/workflows/ci.yml"
+# The job's config, cache and build steps, shared with ci-cache.yml (FOX-65).
+BUILD_ACTION = ".github/actions/unit-tests-build/**"
 
 # Changing how the job runs, or what it builds against, runs the whole job.
 ALWAYS_TEST = (
     WORKFLOW,
+    BUILD_ACTION,
     "tools/ci_test_level.py",
     "tools/test_ci_test_level.py",
     "Podfile",

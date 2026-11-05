@@ -55,6 +55,17 @@ class DecideTests(unittest.TestCase):
         self.assertEqual(result.level, level.TEST)
         self.assertEqual(result.files, [".github/workflows/ci.yml"])
 
+    def test_the_shared_build_action_tests(self):
+        # FOX-65: the job's config, caches and build live in this action.
+        result = decide(".github/actions/unit-tests-build/action.yml", "README.md")
+        self.assertEqual(result.level, level.TEST)
+        self.assertEqual(result.files, [".github/actions/unit-tests-build/action.yml"])
+
+    def test_the_master_cache_workflow_alone_skips(self):
+        # ci-cache.yml runs on master only; the PR job does not use it.
+        self.assertEqual(decide(".github/workflows/ci-cache.yml").level, level.SKIP)
+        self.assertEqual(decide(".github/actions/other/action.yml").level, level.SKIP)
+
     def test_dependency_pins_and_this_script_test(self):
         for path in (
             "Podfile",

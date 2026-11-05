@@ -33,9 +33,9 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
 
 | Level | PR touches only… | Runs |
 |---|---|---|
-| **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing more; the check is green |
+| **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing more; the check is green |
 | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | config, caches, `pod install`, `build-for-testing`; no simulator pick (it starts CoreSimulatorService), boot or test run |
-| **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `tools/ci_test_level.py` or its test, `Podfile`, `Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
+| **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` or its test, `Podfile`, `Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
 
 - `CI_GUARDED_PATHS` (job `env` in `ci.yml`) sits beside `CI_TEST_SUITES`, the subset: the
   suites' test files and the source files they test, read off each suite. `check` fails the
@@ -52,12 +52,32 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
 build and booted after it, in sequence: booting during the build slowed both down on slow
 runners. The build targets a generic simulator (`ARCHS=arm64`) and the tests run with
 `test-without-building` against the booted simulator's udid. Swift packages, `Pods/` and the
-DerivedData build products are cached with `actions/cache`. The DerivedData key is exact
+DerivedData build products are cached. The DerivedData key is exact
 (Xcode build + `Podfile.lock` + `Podfile` + `Package.resolved`, no restore-keys), so
 products built against other dependencies are never restored, and app and test sources
-always rebuild (checkout gives them new mtimes). Caches are scoped to the PR (and
-`master`, which has no CI run to fill one), so each PR's first run is cold; a miss just
-downloads and builds as before.
+always rebuild (checkout gives them new mtimes). A miss just downloads and builds as before.
+
+Shared caches (FOX-65). A PR can read its own caches and `master`'s, never another PR's,
+and CI runs only on `pull_request`, so caches used to be saved per PR: every PR's first run
+was cold, and each PR kept its own ~880 MB copy of the same keys (over the 10 GB repo
+limit with a handful of open PRs, so caches were also evicted). Now:
+
+- The job's config, cache and build steps are one composite action,
+  `.github/actions/unit-tests-build`, used by `ci.yml` and by the **`CI cache`** workflow
+  (`ci-cache.yml`). Keys and build flags live only there, so the two can't drift apart.
+- `CI cache` runs on `master` only: on a push that changes `Podfile`, `Podfile.lock`,
+  `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action; weekly
+  (Monday 03:17 UTC: caches unused for 7 days are evicted, and a runner image with a new
+  Xcode build changes the DerivedData key); and by `workflow_dispatch`. It builds with
+  `build-for-testing` exactly as the PR job does, with no simulator or tests, and saves the
+  three caches. When all three keys already exist it only restores them (a restore counts
+  as a use) and stops. `contents: read`, no secrets; the config placeholders are the same.
+- Caches are restored with `actions/cache/restore` and saved with `actions/cache/save` right
+  after a successful build, each only when its exact key missed. A PR whose dependencies
+  match `master` restores `master`'s caches and saves nothing. A PR that changes them saves
+  its new keys in its own scope, so its later runs are warm.
+- The build prints `-showBuildTimingSummary`, so a cold build's log shows where the time
+  went.
 
 "CI green" for undrafting means everything except `LGTM`, which stays pending until
 a reviewer's LGTM covers the head.

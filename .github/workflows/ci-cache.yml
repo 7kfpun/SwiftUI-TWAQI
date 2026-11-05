@@ -1,0 +1,59 @@
+name: CI cache
+
+# Fills the Unit tests job's three caches (Swift packages, Pods, DerivedData)
+# from master (FOX-65). CI itself runs only on pull_request, and a PR's caches
+# are saved under refs/pull/<n>/merge, which no other PR can read, so every
+# PR's first run used to be cold and each PR stored its own ~880 MB copy of the
+# same keys. Caches saved here, on master, can be read by every PR to master.
+#
+# The build is the Unit tests job's own (.github/actions/unit-tests-build), so
+# the keys and flags cannot drift apart. No simulator, no tests.
+
+on:
+  push:
+    branches: [master]
+    # What the cache keys or the build depend on.
+    paths:
+      - Podfile
+      - Podfile.lock
+      - TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
+      - TWAQI.xcodeproj/xcshareddata/xcschemes/TWAQI-CI.xcscheme
+      - .github/workflows/ci.yml
+      - .github/workflows/ci-cache.yml
+      - .github/actions/unit-tests-build/**
+  # Caches unused for 7 days are evicted, and a runner image with a new Xcode
+  # build changes the DerivedData key. Restoring also counts as a use, so a
+  # weekly run keeps current caches alive and refills missing ones.
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+# A newer master commit supersedes an older fill.
+concurrency:
+  group: ci-cache
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fill:
+    name: Fill Unit tests caches
+    # Only master's caches are readable by every PR. A dispatch from another
+    # branch would fill caches that only that branch can read.
+    if: github.ref == 'refs/heads/master'
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      COCOAPODS_DISABLE_STATS: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore caches and build for testing
+        uses: ./.github/actions/unit-tests-build
+        with:
+          skip-build-if-cached: "true"
