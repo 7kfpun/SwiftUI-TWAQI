@@ -21,11 +21,13 @@ on:
       - .github/workflows/ci.yml
       - .github/workflows/ci-cache.yml
       - .github/actions/unit-tests-build/**
-  # Caches unused for 7 days are evicted, and a runner image with a new Xcode
-  # build changes the DerivedData key. Restoring also counts as a use, so a
-  # weekly run keeps current caches alive and refills missing ones.
+  # A runner image with a new Xcode build changes the DerivedData key, and
+  # caches unused for 7 days are evicted. Daily, so PRs fall back to saving
+  # their own copy for a day at most after an image update. When all three
+  # keys exist the run only restores them (a restore counts as a use), about a
+  # minute.
   schedule:
-    - cron: "17 3 * * 1"
+    - cron: "17 3 * * *"
   workflow_dispatch:
 
 # A newer master commit supersedes an older fill.

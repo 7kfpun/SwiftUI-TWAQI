@@ -15,11 +15,6 @@ inputs:
     required: false
     default: "false"
 
-outputs:
-  all-cached:
-    description: "'true' when all three caches were restored from their exact keys."
-    value: ${{ steps.cached.outputs.all }}
-
 runs:
   using: composite
   steps:
@@ -92,7 +87,6 @@ runs:
           skip=true
           echo "All three caches are current. Nothing to build or save."
         fi
-        echo "all=${all}" >> "$GITHUB_OUTPUT"
         echo "skip=${skip}" >> "$GITHUB_OUTPUT"
 
     - name: Install CocoaPods dependencies

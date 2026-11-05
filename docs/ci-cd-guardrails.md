@@ -69,9 +69,10 @@ limit with a handful of open PRs, so caches were also evicted). Now:
   host is allowed by `Public text` only in `.github/workflows/*.yml`); `ci_test_level.py
   check` fails the `Unit tests` job when `ci-cache.yml`'s copy differs from `ci.yml`'s.
 - `CI cache` runs on `master` only: on a push that changes `Podfile`, `Podfile.lock`,
-  `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action; weekly
-  (Monday 03:17 UTC: caches unused for 7 days are evicted, and a runner image with a new
-  Xcode build changes the DerivedData key); and by `workflow_dispatch`. It builds with
+  `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action; daily
+  (03:17 UTC: a runner image with a new Xcode build changes the DerivedData key, so PRs
+  save their own copy for a day at most after an image update; caches unused for 7 days are
+  evicted); and by `workflow_dispatch`. It builds with
   `build-for-testing` exactly as the PR job does, with no simulator or tests, and saves the
   three caches. When all three keys already exist it only restores them (a restore counts
   as a use) and stops. `contents: read`, no secrets; the config placeholders are the same.
