@@ -48,24 +48,24 @@ $ open TWAQI.xcworkspace
 
 `debug.xcconfig`, `release.xcconfig` and `GoogleService-Info.plist` are gitignored; they hold real keys.
 
-Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS). Cloudflare Workers live under `workers/<name>/`.
+Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS). Cloudflare Workers live under `workers/<name>/`, the Cloud Run read API under `services/twaqi-api/`.
 
 ## Services
 
 | What | Where |
 | --- | --- |
-| Air-quality readings | MOENV open data, served to the app from the `API_DOMAIN` endpoints in the xcconfig |
-| In-app feedback (Help → Feedback / Contact us) | Directus on `https://cms.wahthefox.com`, collection `twaqi_feedback`, with the app's static token (`DirectusFeedbackToken`) |
+| Air-quality readings | MOENV open data, pulled into MySQL (Cloud SQL) every 20 min by the AWS Lambda (`7kfpun/lambda-serverless`). The app reads it from the `API_DOMAIN` endpoints in the xcconfig: the Lambda's API, or the same `/v1` API on the webcam host (a route on [`workers/twaqi-workers`](workers/twaqi-workers/README.md#read-api-v1) → Cloud Run [`services/twaqi-api`](services/twaqi-api/README.md), FOX-82), byte-for-byte the same responses |
+| In-app feedback (Help → Feedback / Contact us) | Directus (`DirectusUrl`), collection `twaqi_feedback`, with the app's static token (`DirectusFeedbackToken`) |
 | 空品區 AQI forecast | Directus `twaqi_aqi_forecast`, filled hourly from MOENV `AQF_P_01` by [`workers/twaqi-workers`](workers/twaqi-workers/README.md); the app only reads it |
 | Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
-| Station webcams | R2 bucket `twaqi-station-cams` behind `https://twaqi.app.wahthefox.com`, synced every 10 min by `workers/twaqi-workers` |
+| Station webcams | R2 bucket `twaqi-station-cams` behind the webcam host (its custom domain), synced every 10 min by `workers/twaqi-workers` |
 | Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
 | Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
 ### Station webcams
 
-- Latest frame: `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg` (plus `manifest.json`, which maps each `siteId` to its name, location and latest `hourKey`).
+- Latest frame: `<webcam host>/stations/{siteId}.jpg` (plus `manifest.json`, which maps each `siteId` to its name, location and latest `hourKey`).
 - Hourly history: `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` — one frame per site per clock hour, `yyyy-MM-dd` and `HH` in **Taiwan time (Asia/Taipei, UTC+8)**. The station screen's scrubber reads the last 24 of these.
 - R2 keeps a **rolling 24 h** of hourly frames. A missing hour is a plain 404; the app treats it as missing, not as a failure.
 - `siteId` is the MOENV image site id (`001`), not a TWAQI station id; the app matches cams to stations by name, then by distance.
@@ -93,13 +93,13 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
   | Level | When the PR touches only… | Runs |
   |---|---|---|
-  | **skip** | `workers/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing; the check is green in seconds |
+  | **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing; the check is green in seconds |
   | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | `build-for-testing` only; no simulator pick, boot or test run |
   | **test** | a `CI_GUARDED_PATHS` entry (the subset suites' test files and the sources they test), `.github/workflows/ci.yml`, `tools/ci_test_level.py` (and its test), `Podfile`, `Podfile.lock`, `Package.resolved` | build + boot + the subset |
 
   The PR label **`ci-full-tests`** forces **test** (labels are read when the job runs: add the label, then re-run the job or push). An empty file list or an API error also gives **test**. The script's tests: `python3 -m unittest discover -s tools -p 'test_ci_test_level.py'`; `python3 tools/ci_test_level.py decide --files <list>` shows the level for a file list.
 - CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild). Caches are per PR, so a PR's first run is cold.
-- Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
+- Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`). So does the Cloud Run API, in Rust: `cd services/twaqi-api && make check`, which the `Services` check (`services.yml`) also runs on PRs that change it; it is deployed by hand.
 
 ## Branches, CI and review
 

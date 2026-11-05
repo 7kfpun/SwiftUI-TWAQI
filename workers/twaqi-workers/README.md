@@ -2,8 +2,9 @@
 
 Cloudflare Worker that:
 
-- mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the R2 custom domain `twaqi.app.wahthefox.com`;
-- mirrors the MOENV 空品區 AQI forecast (`aqf_p_01`) into the Directus collection `twaqi_aqi_forecast` on `cms.wahthefox.com`, which the app reads directly.
+- mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the bucket's R2 custom domain (the webcam host);
+- mirrors the MOENV 空品區 AQI forecast (`aqf_p_01`) into the Directus collection `twaqi_aqi_forecast`, which the app reads directly.
+- fronts the TWAQI read API (FOX-82) at `/v1/...` on the webcam host, the same host as the webcam images (see [Read API](#read-api-v1)).
 
 ## Station webcams
 
@@ -16,17 +17,17 @@ Cloudflare Worker that:
 
 Public images are served straight from R2 via the bucket's custom domain — no Worker in the path:
 
-- `https://twaqi.app.wahthefox.com/stations/{siteId}.jpg`
-- `https://twaqi.app.wahthefox.com/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (hourly history)
-- `https://twaqi.app.wahthefox.com/manifest.json`
+- `<webcam host>/stations/{siteId}.jpg`
+- `<webcam host>/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` (hourly history)
+- `<webcam host>/manifest.json`
 
-The Worker has no custom-domain route; it runs on `https://twaqi-workers.710kfpun.workers.dev`. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
+The Worker's own routes run on its `workers.dev` URL; on the webcam host it takes only `/v1/*` (the read API below), everything else there is R2. Each feature has its own path prefix; the webcam routes are under `/station-cams`.
 
 | Route | |
 | --- | --- |
 | `GET /` | Worker health |
 | `GET /station-cams` | Webcam sync status: last sync time, source zip, station count |
-| `GET /station-cams/manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key, hourKey } } }` — `max-age=60` |
+| `GET /station-cams/manifest.json` | `{ updatedAt, source, stations: { [siteId]: { name, lat, lon, time, key, hourKey } }, sweptHour }` — `max-age=60` |
 | `GET /station-cams/stations/{siteId}.jpg` | Latest JPEG — `max-age=300`, ETag / 304 |
 | `GET /station-cams/stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg` | That hour's JPEG — `max-age=86400`, ETag / 304; 404 if none was filed |
 | `POST /station-cams/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN`; `?force` re-uploads every latest frame (hourly frames already filed are left alone) |
@@ -43,7 +44,7 @@ stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg      e.g. stations/001/2026-10-30/22.jpg
 - The first frame a sync sees in each hour is filed: the `:00` frame whenever a sync catches it, otherwise the earliest after it (a missed sync, or a site that skipped `:00`). Later frames in that hour are not. The manifest's per-site `hourKey` records the hour last filed, so nothing has to `HEAD` or list R2.
 - An hour's object never changes once written (`Cache-Control: public, max-age=86400`); its `customMetadata.time` is the actual capture time.
 - The app builds the URL from the site id and the hour. An hour with no frame (cam down, or not filed yet) is a plain 404.
-- **Retention: rolling 24 hours** (`HISTORY_DAYS = 1` in `src/history.ts`). As each hour is filed, the same site's object for that hour the day before is deleted, so R2 holds the last 24 hourly slots per site without listing the bucket. (The app keeps its own offline copies for up to a week.) Frames left behind by a site that stopped reporting, or by a failed delete, are not swept; an R2 lifecycle rule on the bucket would catch those (follow-up).
+- **Retention: only the 24 hours the app shows** (`HISTORY_DAYS = 1` in `src/history.ts`). Once per newly filed hour (the manifest's `sweptHour` records the last one) the sync lists `stations/` and deletes every hourly object more than 24 clock hours before its site's last filed hour (`staleHourKeys`). That covers hours a site skipped, frames from the old 7-day retention, and a sweep that failed (it is retried on the next sync). A site that stopped reporting keeps the 24 hours before it stopped, which the app still shows; a site that files its new hour after the sweep keeps one extra hour until the next sweep. The latest `stations/{siteId}.jpg`, `manifest.json` and anything else that isn't an hourly key are never touched. (The app keeps its own offline copies for up to a week.)
 
 Logic tests (`node --test`, no extra dependencies, Node 23.6+):
 
@@ -54,10 +55,11 @@ npm test
 Checking a deploy by hand:
 
 ```sh
-curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" https://twaqi-workers.710kfpun.workers.dev/station-cams/sync
-# → { …, "hours": 81, "expired": 81, … } on the first sync of an hour, then "hours": 0 until the next hour
-curl -s https://twaqi.app.wahthefox.com/manifest.json | jq '.stations["001"].hourKey'
-curl -sI "https://twaqi.app.wahthefox.com/$(curl -s https://twaqi.app.wahthefox.com/manifest.json | jq -r '.stations["001"].hourKey')"
+# WORKER = the Worker's workers.dev URL, HOST = the webcam host (wrangler.jsonc)
+curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" "$WORKER/station-cams/sync"
+# → { …, "hours": 81, "expired": 81, … } on the first sync of an hour (the first sweep also clears older leftovers), then "hours": 0, "expired": 0 until the next hour
+curl -s "https://$HOST/manifest.json" | jq '.stations["001"].hourKey'
+curl -sI "https://$HOST/$(curl -s "https://$HOST/manifest.json" | jq -r '.stations["001"].hourKey')"
 ```
 
 ## AQI forecast (`aqf_p_01`)
@@ -82,7 +84,8 @@ curl -sI "https://twaqi.app.wahthefox.com/$(curl -s https://twaqi.app.wahthefox.
 - **Model:** pinned in `TRANSLATION_MODEL` (`deepseek/deepseek-v4.1-flash`), `temperature: 0`, a short system prompt plus the glossary terms found in the text (the 10 forecast areas, pollutants, AQI levels, MOENV alerts). Output must be plain English with no Chinese left, or it is rejected.
 - **Limits:** 30 s per call, at most 40 distinct texts and 120 s of translating per run; the rest waits for the next hour.
 - **Never blocks the forecast.** Translation runs after the rows are stored. A failed call, a missing `OPENROUTER_FORECAST_API_KEY`, a missing `content_i18n` field or a refused write leaves `content_i18n` as it was and is retried next run.
-- `GET /forecast` reports `translated` (texts translated), `translatedRows`, `translationFailed`, `translationDeferred`, and `translationSkipped` with the reason when translation did not run or could not save.
+- **Saves in batches.** Rows that only copy an existing translation are saved first (no model call), then the translations after every 5 model calls (`TRANSLATION_SAVE_BATCH`). Once Directus refuses a save (e.g. 403: the Worker role lacks update on `content_i18n`), the run makes no more model calls, so a refused save costs at most one batch per run instead of up to 40 calls; the unsent texts count as `translationDeferred`.
+- `GET /forecast` reports `translated` (texts translated and saved), `translatedRows`, `translationFailed` (including texts translated but not saved), `translationDeferred`, and `translationSkipped` with the reason when translation did not run or could not save; after a refused save it ends with `model calls stopped after N, M left for next run`.
 - Directus: `content_i18n` is a JSON field on `twaqi_aqi_forecast`; the **TWAQI Forecast Worker** role needs read and update on it, and the app's role read.
 
 | Route | |
@@ -118,3 +121,33 @@ Local development:
 npm install
 npx wrangler dev
 ```
+
+## Read API (`/v1`)
+
+FOX-82. A route for `/v1/*` on the webcam host (`routes` in `wrangler.jsonc`): the Lambda's four reads,
+answered by the Cloud Run service [`services/twaqi-api`](../../services/twaqi-api/README.md)
+with the Lambda's exact bytes. The webcam paths on the same host (`/stations/…`,
+`/manifest.json`) never reach the Worker. Code: `src/api.ts`.
+
+| Route | |
+| --- | --- |
+| `GET /v1/countries` | Countries |
+| `GET /v1/stations?country=…` / `country_id=…` | A country's stations |
+| `GET /v1/current-pollutants?country=…` / `station_id=1,2,3` | Latest readings |
+| `GET /v1/historical-pollutants?station_id=…&limit=…` | A station's history (max 100) |
+
+- Forwards to `TWAQI_API_ORIGIN_URL` with the header `x-twaqi-origin-token: TWAQI_API_ORIGIN_TOKEN`
+  (secret; same value as Secret Manager `twaqi-api-origin-token` and the `workers-production`
+  environment secret). Cloud Run answers 403 without it.
+- Successful answers are cached at the edge for `TWAQI_API_CACHE_SECONDS` (600, 10 minutes)
+  and carry `x-twaqi-cache: HIT|MISS`. The data changes every 20 minutes. The cache key and
+  the origin query keep only the route's own params (first value each, fixed order), so an
+  extra `?_=N` or a reordered query can't bypass the cache.
+- The Worker sets `cache-control` itself on every 200: `public, max-age=600` on a MISS, and on
+  a HIT `max-age` = 600 minus the cached copy's `age`, at least 0, so a reading is at most
+  10 minutes old in total. What `caches.default.match` returns would otherwise carry the
+  zone's 4-hour Browser Cache TTL (`max-age=14400`).
+- Cloud Run errors never reach the apps as HTML: an origin 4xx becomes 502
+  `{"success":false,"error":"Upstream error"}`, a 5xx keeps its status, an unreachable origin is
+  502. None are cached. Other `/v1/` paths are 404; writes are 405.
+- Check a deploy against the Lambda: `cd services/twaqi-api && make compare BASE=https://<webcam host>`.

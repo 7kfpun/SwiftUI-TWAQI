@@ -9,7 +9,7 @@ The product site, privacy policy and terms (`web/`) move from `kf-twaqi.web.app`
 | Firebase Hosting site (project `kf-twaqi`) | Target | Config | Serves |
 |---|---|---|---|
 | `taiwanair-wahthefox` (new) | `main` | `firebase.json` | `web/`, with custom domain `taiwanair.wahthefox.com` |
-| `kf-twaqi` (existing) | `legacy` | `firebase.legacy-redirect.json` | 301 every path to the same path on `taiwanair.wahthefox.com` |
+| `kf-twaqi` (existing) | — | none in the repo any more | 301 every path to the same path on `taiwanair.wahthefox.com` (deployed in step 6; Firebase keeps serving it) |
 
 Firebase redirects can't depend on the hostname, so `kf-twaqi.web.app` can't 301 to the custom
 domain while serving the same content. The content therefore moves to a new site, and the old
@@ -18,9 +18,10 @@ URL `https://kf-twaqi.web.app/privacy.html` lands on
 `https://taiwanair.wahthefox.com/privacy.html`, and `/zh-Hant/privacy.html` and both terms
 pages work the same way.
 
-The legacy site has its own config file on purpose. A plain `firebase deploy --only hosting`
-deploys only `main`, so nobody can turn `kf-twaqi` into redirects before the new domain
-resolves.
+The redirects on `kf-twaqi` were deployed once (step 6) and are live. Their config
+(`firebase.legacy-redirect.json`) and placeholder page (`web-legacy/`) were removed from the
+repo in FOX-82; to change them again, recreate a config with the `redirects` block below
+and deploy it to site `kf-twaqi`.
 
 ## Cutover runbook
 
@@ -56,7 +57,9 @@ Run this only after the PR is approved and merged. Each step depends on the one 
    curl -sI https://taiwanair.wahthefox.com/privacy.html | head -1          # HTTP/2 200
    curl -sI https://taiwanair.wahthefox.com/zh-Hant/privacy.html | head -1  # HTTP/2 200
    ```
-6. **Only now, switch the old host to redirects:**
+6. **Only now, switch the old host to redirects** (done; the config this step used, a
+   `legacy` target serving a placeholder page with a 301 from `/` and from `^/(?P<path>.*)$`
+   to `https://taiwanair.wahthefox.com/:path`, is no longer in the repo):
    ```sh
    firebase deploy --config firebase.legacy-redirect.json --only hosting:legacy
    curl -sI https://kf-twaqi.web.app/zh-Hant/privacy.html   # 301, location: https://taiwanair.wahthefox.com/zh-Hant/privacy.html

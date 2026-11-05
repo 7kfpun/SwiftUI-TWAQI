@@ -4,6 +4,7 @@ import { test } from 'node:test'
 import {
   GLOSSARY,
   TRANSLATION_MODEL,
+  TRANSLATION_SAVE_BATCH,
   buildI18n,
   buildMessages,
   buildRequestBody,
@@ -146,16 +147,21 @@ test('missing field: Directus 403 naming content_i18n', () => {
 })
 
 /** In-memory stand-in for the Directus client. */
-function fakeDirectus(rows: Array<{ id: number; content: string | null; content_i18n?: unknown }>, opts: { listError?: Error; updateError?: Error } = {}) {
+function fakeDirectus(rows: Array<{ id: number; content: string | null; content_i18n?: unknown }>, opts: { listError?: Error; updateError?: Error; savesBeforeError?: number } = {}) {
   const updates: Array<Array<{ id: number }>> = []
+  let saves = 0
   return {
     updates,
+    get saves() {
+      return saves
+    },
     async list<T>(): Promise<T[]> {
       if (opts.listError) throw opts.listError
       return rows as T[]
     },
     async updateBatch(items: Array<{ id: number }>) {
-      if (opts.updateError) throw opts.updateError
+      saves++
+      if (opts.updateError && saves > (opts.savesBeforeError ?? 0)) throw opts.updateError
       updates.push(items)
       return {}
     },
@@ -207,6 +213,51 @@ test('translateForecast: skips without a key, without the field, and when saving
   assert.equal(noSave.translated, 0)
   assert.equal(noSave.translationFailed, 1)
   assert.match(noSave.translationSkipped ?? '', /could not save/)
+})
+
+const REFUSED = new Error('Directus PATCH /items/twaqi_aqi_forecast 403: You don\'t have permission to access field "content_i18n"')
+/** `n` rows with distinct Chinese texts, none translated yet. */
+const distinctRows = (n: number, from = 1) => Array.from({ length: n }, (_, k) => ({ id: from + k, content: `第${from + k}則預報。`, content_i18n: null }))
+
+test('translateForecast: a refused save stops model calls after one batch', async () => {
+  const d = fakeDirectus(distinctRows(12), { updateError: REFUSED })
+  let calls = 0
+  const r = await translateForecast(KEY, d, ['2026-11-03'], { translate: async () => (calls++, { text: EN }) })
+  assert.equal(calls, TRANSLATION_SAVE_BATCH)
+  assert.equal(d.saves, 1)
+  assert.deepEqual([r.translated, r.translatedRows, r.translationFailed, r.translationDeferred], [0, 0, TRANSLATION_SAVE_BATCH, 12 - TRANSLATION_SAVE_BATCH])
+  assert.match(r.translationSkipped ?? '', /could not save translations: .*403/)
+  assert.match(r.translationSkipped ?? '', new RegExp(`model calls stopped after ${TRANSLATION_SAVE_BATCH}, ${12 - TRANSLATION_SAVE_BATCH} left for next run`))
+})
+
+test('translateForecast: a refused save of copied translations makes no model calls', async () => {
+  const done = buildI18n(ZH, { en: EN })
+  const d = fakeDirectus([{ id: 1, content: ZH, content_i18n: done }, { id: 2, content: ZH, content_i18n: null }, ...distinctRows(3, 10)], { updateError: REFUSED })
+  const r = await translateForecast(KEY, d, ['2026-11-03'], {
+    translate: async () => {
+      throw new Error('should not be called')
+    },
+  })
+  assert.deepEqual([r.translated, r.translatedRows, r.translationFailed, r.translationDeferred], [0, 0, 0, 3])
+  assert.match(r.translationSkipped ?? '', /model calls stopped after 0, 3 left for next run/)
+})
+
+test('translateForecast: saves each batch; a later refusal keeps what was saved', async () => {
+  const d = fakeDirectus(distinctRows(7), { updateError: REFUSED, savesBeforeError: 1 })
+  let calls = 0
+  const r = await translateForecast(KEY, d, ['2026-11-03'], { saveBatch: 2, translate: async () => (calls++, { text: EN }) })
+  // Batch 1 saved, batch 2 refused, the other 3 never sent.
+  assert.equal(calls, 4)
+  assert.deepEqual(d.updates.map((u) => u.map((w) => w.id)), [[1, 2]])
+  assert.deepEqual([r.translated, r.translatedRows, r.translationFailed, r.translationDeferred], [2, 2, 2, 3])
+  assert.match(r.translationSkipped ?? '', /model calls stopped after 4, 3 left for next run/)
+})
+
+test('translateForecast: without a refusal every batch is saved and nothing is skipped', async () => {
+  const d = fakeDirectus(distinctRows(5))
+  const r = await translateForecast(KEY, d, ['2026-11-03'], { saveBatch: 2, translate: async () => ({ text: EN }) })
+  assert.deepEqual(d.updates.map((u) => u.map((w) => w.id)), [[1, 2], [3, 4], [5]])
+  assert.deepEqual(r, { translated: 5, translatedRows: 5, translationFailed: 0, translationDeferred: 0 })
 })
 
 test('translateForecast: the time budget defers what is left', async () => {

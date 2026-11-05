@@ -1,0 +1,7 @@
+target
+test
+tests
+scripts
+README.md
+Makefile
+.env*
