@@ -41,8 +41,8 @@ import com.kfpun.twaqi.ui.common.secondaryText
  * The map is Google Maps in lite mode (a still image, no gestures, cheap inside a scrolling page),
  * keyed by `MAPS_API_KEY`; with the example key it renders blank, the rest still shows.
  *
- * @param address the street address in Chinese, as the API sends it. In English it shows as is
- *   until on-device translation (FOX-98) lands.
+ * @param address the street address, as the API sends it (Chinese) or translated on the device in
+ *   English (FOX-98).
  */
 @Composable
 fun StationLocation(lat: Double, lon: Double, address: String?, coordinateText: String, modifier: Modifier = Modifier) {

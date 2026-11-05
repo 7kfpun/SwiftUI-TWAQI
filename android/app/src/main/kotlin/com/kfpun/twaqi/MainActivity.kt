@@ -32,10 +32,14 @@ import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.push.PushGraph
 import com.kfpun.twaqi.push.PushMessaging
 import com.kfpun.twaqi.review.ReviewPrompt
+import com.kfpun.twaqi.shortcuts.AirQualityAnswerActivity
+import com.kfpun.twaqi.shortcuts.StationShortcuts
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.navigation.DeepLink
+import com.kfpun.twaqi.ui.navigation.KnownStations
 import com.kfpun.twaqi.ui.navigation.StationDestination
+import com.kfpun.twaqi.ui.navigation.StationLinkSource
 import com.kfpun.twaqi.ui.navigation.StationRoute
 import com.kfpun.twaqi.ui.theme.TWAQITheme
 import com.kfpun.twaqi.widget.WidgetLocation
@@ -113,12 +117,22 @@ class MainActivity : AppCompatActivity() {
         WidgetLocation.remember(this)
     }
 
-    /** `twaqi://station` and `twaqi://pro` links, through the one router ([DeepLink]). */
+    /**
+     * FOX-95: names of stations first loaded this visit reach the launcher's shortcuts. Nothing is
+     * written when they are unchanged, so this stays clear of the launcher's rate limit.
+     */
+    override fun onStop() {
+        super.onStop()
+        StationShortcuts.requestRefresh(this)
+    }
+
+    /** `twaqi://station`, `twaqi://pro` and `twaqi://air-quality` links, through the one router ([DeepLink]). */
     private fun handleLink(intent: Intent?) {
         val link = DeepLink.parse(intent?.data) ?: return
         lifecycleScope.launch {
             val isPro = ProGraph.repository(this@MainActivity).entitlement.filterNotNull().first() == Entitlement.PRO
-            val known = (link as? DeepLink.Station)?.let { isKnownStation(it.stationId) } ?: true
+            val known =
+                (link as? DeepLink.Station)?.let { KnownStations.contains(this@MainActivity, it.stationId) } ?: true
             when (val routed = DeepLink.route(link, isPro) { known }) {
                 is DeepLink.Station -> {
                     openStation.value = routed.stationId
@@ -127,20 +141,25 @@ class MainActivity : AppCompatActivity() {
                         Analytics.STATION_LINK_OPENED,
                         mapOf("source" to routed.source.analyticsName, "stationId" to routed.stationId.toString())
                     )
+                    // FOX-95: a station's launcher shortcut or Assistant ran "Open station" (iOS `OpenStationIntent`).
+                    if (routed.source == StationLinkSource.SHORTCUT) {
+                        Analytics.logEvent(
+                            this@MainActivity,
+                            Analytics.APP_INTENT_RUN,
+                            mapOf("intent" to "open_station", "station" to "station", "result" to "opened")
+                        )
+                    }
                 }
 
                 is DeepLink.Pro -> ProNavigation.open(this@MainActivity, routed.source)
 
+                // FOX-95: the "What's the air?" card has its own activity.
+                is DeepLink.AirQuality ->
+                    startActivity(AirQualityAnswerActivity.intent(this@MainActivity, routed.stationId))
+
                 null -> Unit
             }
         }
-    }
-
-    /** A station the app has seen: in the saved readings or the saved station list. */
-    private suspend fun isKnownStation(stationId: Int): Boolean {
-        val airQuality = (application as TwaqiApplication).container.airQuality
-        return airQuality.savedPollutants(listOf(stationId)).isNotEmpty() ||
-            airQuality.savedStations()?.value?.any { it.id == stationId } == true
     }
 
     /**
@@ -213,6 +232,8 @@ fun HomeScreen(
     // the search text, the map's camera) so back returns to the tab the station was opened from.
     val tabsState = rememberSaveableStateHolder()
     val station = stationId
+    // FOX-95: an opened station becomes a recent one, for the launcher's shortcuts.
+    LaunchedEffect(station) { station?.let { StationShortcuts.stationOpened(context, it) } }
     if (station != null) {
         BackHandler { stationId = null }
         StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)

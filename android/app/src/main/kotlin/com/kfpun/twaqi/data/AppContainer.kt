@@ -18,6 +18,9 @@ import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
 import com.kfpun.twaqi.data.weather.StationWeatherStore
 import com.kfpun.twaqi.push.PushGraph
+import com.kfpun.twaqi.translation.MlKitTranslator
+import com.kfpun.twaqi.translation.OnDeviceTranslation
+import com.kfpun.twaqi.translation.TranslationDiskCache
 import com.kfpun.twaqi.widget.WidgetHistoryCache
 import java.io.File
 
@@ -59,6 +62,15 @@ class AppContainer(
 
     /** FOX-93: the CWA weather file on the webcam host, its last good copy under [cacheRoot]. */
     val weather = StationWeatherStore(stationCamsUrl, store)
+
+    /**
+     * FOX-98: Chinese-only API text (forecast text, township, address) in English on the device,
+     * with ML Kit; its translations kept under [cacheRoot] for a week.
+     */
+    val translation = OnDeviceTranslation(
+        MlKitTranslator(MlKitTranslator.unmeteredNetwork(context)),
+        TranslationDiskCache(store)
+    )
 
     /** Deletes week-old cache files. Blocking: run it off the main thread. */
     fun purgeExpiredCaches(): List<File> = OfflineCacheRetention.purge(cacheRoot)

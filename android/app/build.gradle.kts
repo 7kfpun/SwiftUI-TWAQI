@@ -222,6 +222,9 @@ dependencies {
     // The review prompt (FOX-60): Play In-App Review.
     implementation(libs.play.review)
 
+    // On-device translation of Chinese-only API text (FOX-98): ML Kit, the model downloaded on Wi-Fi.
+    implementation(libs.mlkit.translate)
+
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)

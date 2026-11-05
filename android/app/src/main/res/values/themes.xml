@@ -2,4 +2,12 @@
 <resources>
     <!-- Window theme only; the UI theme is TWAQITheme in Compose. -->
     <style name="Theme.TWAQI" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <!-- The "What's the air?" card (FOX-95): drawn over whatever was on screen. Its scrim and
+         card are Compose; DayNight follows Help › Appearance. -->
+    <style name="Theme.TWAQI.Answer" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
 </resources>

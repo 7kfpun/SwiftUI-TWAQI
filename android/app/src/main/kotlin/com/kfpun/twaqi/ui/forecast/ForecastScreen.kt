@@ -102,7 +102,7 @@ fun ForecastContent(
 @Composable
 private fun ForecastList(state: ForecastUiState.Loaded, now: Instant) {
     val context = LocalContext.current
-    val language = translationLanguage(AppLocale.isChinese(context), AppLocale.locale(context))
+    val language = translationLanguage(AppLocale.isChinese(context))
     val shared = state.sharedContent
     LazyColumn(
         // A readable measure on tablets, as the station page.

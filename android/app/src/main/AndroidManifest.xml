@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- On-device translation (FOX-98): its model downloads only on an unmetered network. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Air quality alerts (FOX-57): asked for on Android 13+ when an alert is switched on. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- The map's blue dot, "my location" and the nearest-first station list (FOX-54). -->
@@ -77,7 +79,11 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- twaqi://station?id=…&source=… (FOX-59 widget taps; DeepLink). -->
+            <!-- Launcher shortcuts and Google Assistant App Actions (FOX-95). -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <!-- twaqi://station?id=…&source=… (FOX-59 widget taps, FOX-95 shortcuts and tile; DeepLink). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -119,6 +125,36 @@
                     android:scheme="twaqi" />
             </intent-filter>
         </activity>
+
+        <!-- "What's the air?" (FOX-95): the answer card, over whatever was on screen, opened by the
+             "Air quality" shortcut and Google Assistant through twaqi://air-quality (DeepLink). -->
+        <activity
+            android:name=".shortcuts.AirQualityAnswerActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.TWAQI.Answer">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="air-quality"
+                    android:scheme="twaqi" />
+            </intent-filter>
+        </activity>
+
+        <!-- Quick Settings tile (FOX-95), Android's Control Center control. -->
+        <service
+            android:name=".shortcuts.AirQualityTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_aqi_low"
+            android:label="@string/control_display_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <!-- Home screen widgets (FOX-59): the air-quality widget (small free; medium and large Pro)
              and the station detail widget (Pro). Both are set up in WidgetConfigureActivity. -->
