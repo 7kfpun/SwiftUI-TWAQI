@@ -1,24 +1,20 @@
 package com.kfpun.twaqi.ui.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.kfpun.twaqi.R
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.kfpun.twaqi.feedback.FeedbackNavigation
+import com.kfpun.twaqi.feedback.FeedbackSource
+import com.kfpun.twaqi.push.AlertsUnavailableCard
 import com.kfpun.twaqi.push.StationAlertsCard
+import com.kfpun.twaqi.ui.station.StationPageSlots
+import com.kfpun.twaqi.ui.station.StationScreen
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -27,36 +23,32 @@ import com.kfpun.twaqi.push.StationAlertsCard
 data class StationRoute(val stationId: Int)
 
 /**
- * Stub until FOX-55's station screen: FOX-55 replaces the body with
- * `StationScreen(route.stationId, onBack)`, and moves the alert card (FOX-57) into its
- * `StationPageSlots.alerts`.
+ * The station page (FOX-55) for [route], with its own view model each time it opens, cleared on
+ * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
+ * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60), and
+ * its alerts slot holds the station's alert switches (FOX-57).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.detailslist_details)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.map_back)
-                        )
-                    }
+    val owner = remember(route.stationId) {
+        object : ViewModelStoreOwner {
+            override val viewModelStore = ViewModelStore()
+        }
+    }
+    DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
+    val context = LocalContext.current
+    CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
+        StationScreen(
+            stationId = route.stationId,
+            onBack = onBack,
+            modifier = modifier,
+            onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) },
+            // FOX-57: the alert switches, or why they can't be shown yet.
+            slots = StationPageSlots(
+                alerts = { state, retry ->
+                    if (state.stationLoadFailed) AlertsUnavailableCard(retry) else StationAlertsCard(route.stationId)
                 }
             )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text("#${route.stationId}", style = MaterialTheme.typography.titleMedium)
-            StationAlertsCard(route.stationId, Modifier.padding(top = 24.dp))
-        }
+        )
     }
 }

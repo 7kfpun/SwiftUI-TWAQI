@@ -3,9 +3,9 @@ package com.kfpun.twaqi.ui.help
 /**
  * The Help tab's sections, top to bottom (iOS `HelpSection`).
  *
- * The iOS sections still to come on Android slot in where iOS has them: the welcome guide
- * after [APPEARANCE] (FOX-96), and the developer
- * section last (FOX-60). The feedback row joins [CONTACT] with FOX-60.
+ * The iOS sections still to come on Android slot in where iOS has them: the welcome guide after
+ * [APPEARANCE] (FOX-96). iOS's developer section has no Android counterpart: tapping the version
+ * row 7 times toggles the analytics opt-out directly (FOX-60).
  */
 enum class HelpSection {
     PURCHASE,
@@ -46,12 +46,17 @@ sealed interface HelpDestination {
         override val route = "cooperate"
     }
 
+    data object Feedback : HelpDestination {
+        override val route = "feedback"
+    }
+
     companion object {
         fun fromRoute(route: String): HelpDestination? = when {
             route.startsWith("guide/") -> DefinitionPage.fromKey(route.removePrefix("guide/"))?.let(::IndexGuide)
             route == WidgetGuide.route -> WidgetGuide
             route == WearOsGuide.route -> WearOsGuide
             route == Cooperate.route -> Cooperate
+            route == Feedback.route -> Feedback
             else -> null
         }
     }

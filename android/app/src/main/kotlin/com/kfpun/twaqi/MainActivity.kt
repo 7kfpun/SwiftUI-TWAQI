@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +21,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.kfpun.twaqi.ads.AdConsent
+import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.ProActivity
 import com.kfpun.twaqi.pro.ProGraph
@@ -28,6 +31,7 @@ import com.kfpun.twaqi.pro.ProScreenSource
 import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.push.PushGraph
 import com.kfpun.twaqi.push.PushMessaging
+import com.kfpun.twaqi.review.ReviewPrompt
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.navigation.StationDestination
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         startPro()
         startPush(savedInstanceState == null)
+        startTracking(savedInstanceState)
         setContent {
             TWAQITheme {
                 // Debug builds can open the data-layer check screen (FOX-53) until the real
@@ -97,6 +102,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * FOX-60: count the app open for the review prompt, once per process start (not when a
+     * language or appearance change recreates the activity). Debug builds started with
+     * `--ez analytics_debug true` send events to Firebase DebugView.
+     */
+    private fun startTracking(savedInstanceState: Bundle?) {
+        if (BuildConfig.DEBUG &&
+            intent.getBooleanExtra(TrackingManager.EXTRA_ANALYTICS_DEBUG, false)
+        ) {
+            TrackingManager.get(this).enableDebugView()
+        }
+        if (savedInstanceState != null || appOpenCounted) return
+        appOpenCounted = true
+        val appContext = applicationContext
+        ReviewPrompt.onAppOpen(this) { name, parameters -> Analytics.logEvent(appContext, name, parameters) }
+    }
+
     /** FOX-58: re-check Pro with Play whenever the app comes to the front; ask for ad consent if free. */
     private fun startPro() {
         if (BuildConfig.DEBUG &&
@@ -118,6 +140,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         /** Debug builds: post a sample alert notification at launch (FOX-57 screenshots). */
         const val EXTRA_DEMO_ALERT = "demo_alert"
+
+        /** This process has counted its app open. */
+        private var appOpenCounted = false
     }
 }
 
@@ -143,17 +168,22 @@ fun HomeScreen(
             openStation.value = null
         }
     }
+    // The tabs leave composition while a station is open; this keeps their state (the selected tab,
+    // the search text, the map's camera) so back returns to the tab the station was opened from.
+    val tabsState = rememberSaveableStateHolder()
     val station = stationId
     if (station != null) {
         BackHandler { stationId = null }
         StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)
     } else {
-        MainTabs(
-            isPro = entitlement == Entitlement.PRO,
-            onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
-            onOpenStation = { stationId = it.stationId },
-            onOpenDataScreen = onOpenDataScreen,
-            modifier = modifier
-        )
+        tabsState.SaveableStateProvider("tabs") {
+            MainTabs(
+                isPro = entitlement == Entitlement.PRO,
+                onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
+                onOpenStation = { stationId = it.stationId },
+                onOpenDataScreen = onOpenDataScreen,
+                modifier = modifier
+            )
+        }
     }
 }

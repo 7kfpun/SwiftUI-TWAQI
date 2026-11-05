@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -16,7 +15,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.kfpun.twaqi.BuildConfig
+import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.data.favourites.FavouritesRepository
 import com.kfpun.twaqi.locale.AppLanguage
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.pro.Entitlement
@@ -28,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -41,14 +43,6 @@ object PushGraph {
     @Volatile
     private var instances: Instances? = null
 
-    /**
-     * The favourites list alerts keep in step. Until FOX-55's `FavouritesRepository` lands it is
-     * read and written in the same shared preferences that repository uses; FOX-55's wiring then
-     * replaces this with the repository itself (see [PreferencesFavouriteStations]).
-     */
-    @Volatile
-    var favourites: ((Context) -> FavouriteStations)? = null
-
     fun get(context: Context): Instances = instances ?: synchronized(this) {
         instances ?: build(context.applicationContext).also { instances = it }
     }
@@ -60,22 +54,27 @@ object PushGraph {
     private fun build(context: Context): Instances {
         val logger = EventLogger { name, parameters -> Analytics.logEvent(context, name, parameters) }
         val store = SharedPreferencesPushStore(context)
+        val profile = AppDeviceProfile(context, store)
         val sync = PushSync(
             store = store,
             identity = KeystorePushIdentity(context),
             baseUrl = BuildConfig.PUSH_API_URL,
             apiFactory = { OkHttpPushApi(it) },
-            profile = AppDeviceProfile(context, store),
+            profile = profile,
             scheduler = WorkManagerSyncScheduler(context)
         )
+        val main = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         val alerts = FavouriteAlerts(
             store = sync,
-            favourites = { (favourites ?: ::PreferencesFavouriteStations)(context) },
-            notificationsDenied = { !NotificationManagerCompat.from(context).areNotificationsEnabled() },
+            // Read when first needed, not here: AppContainer builds this graph for its repository.
+            favourites = { RepositoryFavouriteStations((context as TwaqiApplication).container.favourites) },
+            // Denied, as iOS's `.denied`: a permission not asked for yet (Android 13+) is not "off".
+            notificationsDenied = { profile.notificationsAllowed() == false },
             logger = logger,
-            scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+            scope = main
         )
-        sync.onRestored = alerts::restored
+        // The sync runs in a worker; the favourites list is kept on the main thread.
+        sync.onRestored = { stations -> main.launch { alerts.restored(stations) } }
         return Instances(sync, alerts, logger)
     }
 }
@@ -138,32 +137,11 @@ class AppDeviceProfile(private val context: Context, private val store: PushStor
     }
 }
 
-/**
- * The favourites list in FOX-55's shared preferences (`favourites` / `savedFavouriteStations`,
- * `"126,85"`), until its repository is wired in through [PushGraph.favourites].
- */
-class PreferencesFavouriteStations(context: Context) : FavouriteStations {
-    private val prefs = context.getSharedPreferences("favourites", Context.MODE_PRIVATE)
+/** FOX-55's favourites list, as alerts use it. */
+class RepositoryFavouriteStations(private val repository: FavouritesRepository) : FavouriteStations {
+    override fun contains(stationId: Int): Boolean = repository.contains(stationId)
 
-    private fun read(): List<Int> = prefs.getString(KEY, null)
-        ?.split(',')?.mapNotNull { it.trim().toIntOrNull() }?.distinct()
-        ?: listOf(DEFAULT_FAVOURITE)
-
-    override fun contains(stationId: Int): Boolean = stationId in read()
-
-    override fun add(stationId: Int): Boolean {
-        val list = read()
-        if (stationId in list) return false
-        prefs.edit { putString(KEY, (list + stationId).joinToString(",")) }
-        return true
-    }
-
-    private companion object {
-        const val KEY = "savedFavouriteStations"
-
-        /** A new install starts with one favourite, as on iOS and in FOX-55. */
-        const val DEFAULT_FAVOURITE = 126
-    }
+    override fun add(stationId: Int): Boolean = repository.add(stationId)
 }
 
 /** Runs [PushSync.sync] in WorkManager: once online, after the debounce, retried with backoff until it lands. */

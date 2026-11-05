@@ -1,6 +1,8 @@
 package com.kfpun.twaqi.push
 
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsGateway
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsHint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -10,7 +12,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** The favourites list as alerts need it: FOX-55's `FavouritesRepository` has the same two calls. */
+/** The favourites list as alerts need it: FOX-55's `FavouritesRepository` in the app. */
 interface FavouriteStations {
     fun contains(stationId: Int): Boolean
 
@@ -54,14 +56,14 @@ class FavouriteAlerts(
     private val notificationsDenied: () -> Boolean,
     private val logger: EventLogger,
     scope: CoroutineScope
-) {
+) : FavouriteAlertsGateway {
     private val changeEvents = MutableSharedFlow<AlertChange>(extraBufferCapacity = 64)
 
     /** Every [AlertChange], for station pages that are open. */
     val changes: SharedFlow<AlertChange> = changeEvents.asSharedFlow()
 
-    /** Stations with an alert on (FOX-55's `FavouriteAlertsGateway.alertedStationIds`). */
-    val alertedStationIds: StateFlow<Set<Int>> = store.alertedStations
+    /** Stations with an alert on. */
+    override val alertedStationIds: StateFlow<Set<Int>> = store.alertedStations
         .map { it.keys }
         .stateIn(scope, SharingStarted.Eagerly, store.alertedStations.value.keys)
 
@@ -106,7 +108,7 @@ class FavouriteAlerts(
     // MARK: - Leaving Favourites turns alerts off
 
     /** Turns both of a station's alerts off as it leaves Favourites; nothing to do when they're off. */
-    fun clear(stationId: Int) {
+    override fun clear(stationId: Int) {
         if (!isOn(stationId)) return
         store.stationChanged(stationId, null, StationAlerts.OFF, settled = true)
         logger.log(Analytics.STATION_ALERTS_CLEARED_BY_UNFAVOURITE, mapOf("stationId" to stationId.toString()))
@@ -181,6 +183,14 @@ class FavouriteAlerts(
         logger.log(Analytics.STATION_ALERTS_ON_FAVOURITE, mapOf("outcome" to name, "stationId" to stationId.toString()))
         return outcome
     }
+
+    /** The station page's heart (FOX-55): [enableForNewFavourite], told as the page's hint. */
+    override fun enableForNewFavourite(stationId: Int, isStillFavourite: () -> Boolean): FavouriteAlertsHint? =
+        when (enableForNewFavourite(stationId, siteId = null, isStillFavourite = isStillFavourite)) {
+            NewFavouriteOutcome.CapReached -> FavouriteAlertsHint.CAP_REACHED
+            NewFavouriteOutcome.NotificationsDenied -> FavouriteAlertsHint.NOTIFICATIONS_DENIED
+            else -> null
+        }
 
     // MARK: - Restored after a reinstall
 

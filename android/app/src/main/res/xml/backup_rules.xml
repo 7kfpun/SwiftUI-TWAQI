@@ -11,4 +11,6 @@
          new install's own row. -->
     <exclude domain="sharedpref" path="push_identity.xml" />
     <exclude domain="sharedpref" path="push_sync.xml" />
+    <!-- Per-install: the analytics opt-out and the feedback's anonymous id (FOX-60). -->
+    <exclude domain="sharedpref" path="install.xml" />
 </full-backup-content>

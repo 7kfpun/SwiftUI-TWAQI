@@ -1,6 +1,9 @@
 package com.kfpun.twaqi.push
 
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.data.FavouritesRepositoryTest.MemoryStore
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsHint
+import com.kfpun.twaqi.data.favourites.FavouritesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -268,5 +271,79 @@ class FavouriteAlertsTest {
         assertEquals(scheduled, h.scheduler.delays.size)
         testScheduler.runCurrent()
         assertEquals(setOf(126, 7), alerts.alertedStationIds.value)
+    }
+
+    // MARK: - With FOX-55's FavouritesRepository, as the app wires them
+
+    private class Wired(scope: CoroutineScope, favourites: List<Int>, denied: Boolean = false) {
+        val h = SyncHarness()
+        val repository: FavouritesRepository
+        val alerts =
+            FavouriteAlerts(h.sync, { RepositoryFavouriteStations(repository) }, { denied }, RecordingLogger(), scope)
+
+        init {
+            repository = FavouritesRepository(MemoryStore(favourites), alerts)
+        }
+    }
+
+    @Test
+    fun withTheRepositoryRemovingAFavouriteTurnsItsAlertsOff() = runTest {
+        val w = Wired(backgroundScope, listOf(126, 7))
+        w.h.sync.stationChanged(126, null, above120, settled = true)
+        w.h.sync.stationChanged(7, null, above120, settled = true)
+        testScheduler.runCurrent()
+        assertTrue(w.repository.needsConfirmation(listOf(126)))
+
+        w.repository.remove(126)
+
+        assertEquals(listOf(7), w.repository.favourites.value)
+        assertEquals(StationAlerts.OFF, w.h.store.wanted["126"])
+        testScheduler.runCurrent()
+        assertEquals(setOf(7), w.alerts.alertedStationIds.value)
+    }
+
+    @Test
+    fun withTheRepositoryReorderingLeavesAlertsAlone() = runTest {
+        val w = Wired(backgroundScope, listOf(126, 7, 5))
+        w.h.sync.stationChanged(126, null, above120, settled = true)
+        val before = w.h.store.wanted
+        val scheduled = w.h.scheduler.delays.size
+
+        w.repository.reorder(listOf(5, 7, 126))
+        w.repository.move(0, 2)
+
+        assertEquals(before, w.h.store.wanted)
+        assertEquals(scheduled, w.h.scheduler.delays.size)
+    }
+
+    @Test
+    fun withTheRepositoryAnAlertSwitchedOnMakesAFavourite() = runTest {
+        val w = Wired(backgroundScope, emptyList())
+        assertTrue(w.alerts.write(StationAlertSetting.from(above120), 91, siteId = null))
+        w.alerts.addToFavourites(91)
+        assertEquals(listOf(91), w.repository.favourites.value)
+    }
+
+    @Test
+    fun withTheRepositoryANewFavouriteSwitchesOnOrSaysWhyNot() = runTest {
+        val w = Wired(backgroundScope, listOf(1, 2, 3))
+        w.repository.add(91)
+        assertNull(w.alerts.enableForNewFavourite(91) { w.repository.contains(91) })
+        assertEquals(above120, w.h.store.wanted["91"])
+
+        val full = Wired(backgroundScope, listOf(1, 2, 3, 4))
+        listOf(1, 2, 3).forEach { full.h.sync.stationChanged(it, null, above120, settled = true) }
+        full.repository.add(4)
+        assertEquals(FavouriteAlertsHint.CAP_REACHED, full.alerts.enableForNewFavourite(4) { true })
+
+        val denied = Wired(backgroundScope, emptyList(), denied = true)
+        assertEquals(FavouriteAlertsHint.NOTIFICATIONS_DENIED, denied.alerts.enableForNewFavourite(9) { true })
+    }
+
+    @Test
+    fun restoredAlertsAreFavouritesInTheRepository() = runTest {
+        val w = Wired(backgroundScope, listOf(126))
+        w.alerts.restored(mapOf(7 to above120))
+        assertEquals(listOf(126, 7), w.repository.favourites.value)
     }
 }

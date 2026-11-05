@@ -23,6 +23,24 @@ contents are not.
 2. Run on a simulator or device. Firebase console → Analytics → DebugView shows
    the events within seconds. Xcode's console prints a `LogEvent` line for each one.
 
+### Android
+
+The Android app (`android/`) logs the same event names through `Analytics.logEvent`
+(`analytics/Analytics.kt`), only for the features it has so far. Numbers go to Firebase as
+numbers and booleans as 1 / 0, as the iPhone app's do. `TrackingManager` decides whether
+anything is sent:
+
+- Release builds report unless the install opted out: tap the version row in Help 7 times
+  (a toast confirms; tap 7 more to opt back in). The opt-out is per install and left out of
+  backups.
+- Debug builds report nothing (collection is off in the manifest from the first event on),
+  except to DebugView when started with
+  `adb shell am start -n com.kfpun.twaqi/.MainActivity --ez analytics_debug true` after
+  `adb shell setprop debug.firebase.analytics.app com.kfpun.twaqi`. An opted-out install stays
+  off.
+- Without `app/google-services.json` nothing is sent; debug builds still print a `LogEvent`
+  line to Logcat for each event.
+
 ## Pro funnel
 
 `source` is a `ProScreenSource`: `help_row`, `onboarding`, `widget_locked` or
@@ -50,9 +68,13 @@ station's alerts) and `ad_banner_tapped` (`placement`: `main`, `details`,
 
 - `open_feedback_form` (`source`), then `submit_feedback` (`rating`,
   `platform`, `interview_interest`) or `submit_feedback_failed` (`reason`).
-- `review_requested` (`app_open_count`): the app asked StoreKit for the
-  review prompt. iOS decides whether it actually shows and throttles it, so
+- `review_requested` (`source`: `app_opens` with `app_open_count`, or
+  `feedback` with `rating`): the app asked StoreKit (Android: Play In-App
+  Review) for the review prompt, every 20 app opens and after a 4- or 5-star
+  feedback. The OS decides whether it actually shows and throttles it, so
   this count is higher than the number of prompts users saw.
+- `write_review_tapped` (`source`: feedback): "Rate on the App Store" /
+  "Rate on Google Play" in the thank-you after a 4- or 5-star feedback.
 
 ## Onboarding
 

@@ -1,5 +1,7 @@
 package com.kfpun.twaqi.forms
 
+import android.util.Log
+import com.kfpun.twaqi.BuildConfig
 import java.io.IOException
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
@@ -102,6 +104,8 @@ object DirectusForms {
             } catch (e: NoRouteToHostException) {
                 SubmitResult.Failed(FormError.Offline)
             } catch (e: IOException) {
+                // iOS prints the error in debug builds too.
+                if (BuildConfig.DEBUG) Log.w("DirectusForms", "send failed", e)
                 SubmitResult.Failed(FormError.Network)
             }
         }

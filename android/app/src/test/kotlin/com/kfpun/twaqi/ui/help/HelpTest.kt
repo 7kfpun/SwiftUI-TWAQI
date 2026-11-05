@@ -37,7 +37,12 @@ class HelpTest {
     @Test
     fun routesRoundTrip() {
         val destinations = DefinitionPage.entries.map { HelpDestination.IndexGuide(it) } +
-            listOf(HelpDestination.WidgetGuide, HelpDestination.WearOsGuide, HelpDestination.Cooperate)
+            listOf(
+                HelpDestination.WidgetGuide,
+                HelpDestination.WearOsGuide,
+                HelpDestination.Cooperate,
+                HelpDestination.Feedback
+            )
         destinations.forEach { assertEquals(it, HelpDestination.fromRoute(it.route)) }
         assertNull(HelpDestination.fromRoute("guide/pm1"))
         assertNull(HelpDestination.fromRoute("nowhere"))

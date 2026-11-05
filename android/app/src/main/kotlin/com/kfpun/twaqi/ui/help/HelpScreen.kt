@@ -1,6 +1,9 @@
 package com.kfpun.twaqi.ui.help
 
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,16 +17,22 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kfpun.twaqi.BuildConfig
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.analytics.TrackingManager
+import com.kfpun.twaqi.analytics.VersionTapCounter
+import com.kfpun.twaqi.feedback.FeedbackSource
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.ui.settings.AppearanceRow
 import com.kfpun.twaqi.ui.settings.DoNotDisturbRows
@@ -51,6 +60,7 @@ fun HelpHost(isPro: Boolean, onOpenPro: () -> Unit, modifier: Modifier = Modifie
             HelpDestination.WidgetGuide -> WidgetGuideScreen(onBack = back)
             HelpDestination.WearOsGuide -> WearOsGuideScreen(onBack = back)
             HelpDestination.Cooperate -> CooperateScreen(onBack = back)
+            HelpDestination.Feedback -> FeedbackScreen(source = FeedbackSource.HELP, onBack = back)
         }
     }
 }
@@ -98,6 +108,9 @@ private fun LazyListScope.section(section: HelpSection, onOpenPro: () -> Unit, o
 
         HelpSection.CONTACT -> item(key = "contact") {
             SectionHeader(stringResource(R.string.help_contact_us))
+            LinkRow(stringResource(R.string.help_feedback_or_contact_us), onClick = {
+                onOpen(HelpDestination.Feedback)
+            })
             LinkRow(stringResource(R.string.help_interested_to_be_our_business_partner), onClick = {
                 onOpen(HelpDestination.Cooperate)
             })
@@ -128,9 +141,25 @@ private fun AboutSection() {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val chinese = AppLocale.isChinese(context)
+    val haptics = LocalHapticFeedback.current
+    val versionTaps = remember { VersionTapCounter() }
     // No header, as on iOS; the version label is unlocalised there too.
     Spacer(Modifier.height(16.dp))
-    ValueRow("Version", "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+    // Tap 7 times to opt this install out of analytics and crash reports, or back in (FOX-60).
+    ValueRow(
+        "Version",
+        "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+        modifier = Modifier.clickable(
+            interactionSource = null,
+            indication = null,
+            onClickLabel = null
+        ) {
+            if (!versionTaps.tap()) return@clickable
+            val excluded = TrackingManager.get(context).toggleExcluded()
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            Toast.makeText(context, analyticsToastText(context, excluded), Toast.LENGTH_SHORT).show()
+        }
+    )
     LinkRow(stringResource(R.string.pro_privacy_policy), onClick = {
         uriHandler.openSafely(LegalPage.PRIVACY.url(chinese))
     }, external = true)
@@ -139,6 +168,10 @@ private fun AboutSection() {
     }, external = true)
     SectionFooter(stringResource(R.string.help_data_provided_by_government))
 }
+
+/** The toast after the 7th tap on the version row. */
+private fun analyticsToastText(context: Context, excluded: Boolean): String =
+    context.getString(if (excluded) R.string.help_analytics_excluded else R.string.help_analytics_included)
 
 /** The legal pages on the public website, in the app's language (iOS `ProView.legalURL`). */
 enum class LegalPage(private val page: String) {
