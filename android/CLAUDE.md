@@ -49,6 +49,10 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
   (with a `ProScreenSource`); `twaqi://pro?source=…` opens it too. Banners are `AdBanner`, shown
   only by `AdsPolicy` (free user, UMP consent given). Debug builds launched with
   `--ez demo_billing true` sell demo plans without Play (`DemoBillingGateway`).
+- **Appearance** (FOX-97): Help › Appearance (System / Light / Dark) is AppCompat's night mode,
+  applied at process start (`AppAppearanceStore`, `TwaqiApplication`). Activities must be
+  `AppCompatActivity`, and anything dark-aware (the map style, FOX-54) follows
+  `isSystemInDarkTheme()`; never read the phone's setting directly.
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)

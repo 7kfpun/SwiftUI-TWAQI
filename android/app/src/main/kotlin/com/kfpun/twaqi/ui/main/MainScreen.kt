@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,23 +19,24 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
-import com.kfpun.twaqi.ads.AdBanner
-import com.kfpun.twaqi.ads.AdPlacement
+import com.kfpun.twaqi.R
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.Pollutant
 
 /**
  * The home tab: the map, and in a wide window (a tablet, an unfolded foldable) the station list
- * beside it, its divider on the fold when there is one. The main banner sits under both.
+ * beside it, its divider on the fold when there is one. The tab host puts the main banner under both.
  */
 @Composable
 fun MainScreen(
@@ -74,11 +77,13 @@ fun MainScreen(
                 MapScreen(viewModel, state, onOpenStation)
             }
         }
-        AdBanner(AdPlacement.MAIN)
     }
 }
 
-/** The Search tab: the station list on its own, with its own index selector (iOS `DetailsListView`). */
+/**
+ * The Search tab: the station list on its own, with its own index selector (iOS `DetailsListView`).
+ * [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen (FOX-53).
+ */
 @Composable
 fun StationListScreen(
     viewModel: MainViewModel,
@@ -86,7 +91,8 @@ fun StationListScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     onOpenStation: (Pollutant) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenDataScreen: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     Column(modifier.fillMaxSize()) {
@@ -100,7 +106,11 @@ fun StationListScreen(
             showIndexSelector = true,
             modifier = Modifier.weight(1f).statusBarsPadding()
         )
-        AdBanner(AdPlacement.DETAILS_LIST)
+        if (onOpenDataScreen != null) {
+            TextButton(onClick = onOpenDataScreen, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text(stringResource(R.string.debug_data_title))
+            }
+        }
     }
 }
 

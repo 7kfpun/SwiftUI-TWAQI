@@ -6,11 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,6 +21,8 @@ import com.kfpun.twaqi.ads.AdConsent
 import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.ProActivity
 import com.kfpun.twaqi.pro.ProGraph
+import com.kfpun.twaqi.pro.ProNavigation
+import com.kfpun.twaqi.pro.ProScreenSource
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.navigation.StationDestination
@@ -69,18 +74,26 @@ class MainActivity : AppCompatActivity() {
 }
 
 /**
- * The tabs, with the map as home (FOX-54), and the station screen over them. The language picker
- * and the Pro row sit under the Help tab until FOX-97's Help screen; the main banner is under
- * the map. [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen.
+ * The tabs, with the map as home (FOX-54) and Help (FOX-97), and the station screen over them.
+ * [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen.
  */
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = null) {
+    val context = LocalContext.current
+    val pro = remember(context) { ProGraph.repository(context) }
+    val entitlement by pro.entitlement.collectAsState()
     var stationId by rememberSaveable { mutableStateOf<Int?>(null) }
     val station = stationId
     if (station != null) {
         BackHandler { stationId = null }
         StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)
     } else {
-        MainTabs(onOpenStation = { stationId = it.stationId }, onOpenDataScreen = onOpenDataScreen, modifier = modifier)
+        MainTabs(
+            isPro = entitlement == Entitlement.PRO,
+            onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
+            onOpenStation = { stationId = it.stationId },
+            onOpenDataScreen = onOpenDataScreen,
+            modifier = modifier
+        )
     }
 }
