@@ -268,6 +268,17 @@
     <string name="widget_page_position">Station %1$d of %2$d</string>
     <string name="widget_intent_page_title">Show a station in the widget</string>
     <string name="widget_intent_index_title">Change the widget\'s index</string>
+    <!-- FOX-59: Android widgets. -->
+    <string name="widget_index">Index</string>
+    <string name="widget_configure_title">Set up the widget</string>
+    <string name="widget_configure_save">Save</string>
+    <string name="widget_all_stations">All stations</string>
+    <string name="widget_detail_name">Station detail</string>
+    <string name="widget_detail_description">One station in detail: every index, wind, the last 24 hours and the regional forecast.</string>
+    <string name="widget_pro_only_body_android">Medium, large and station detail widgets are part of Pro. Tap to upgrade.</string>
+    <string name="widget_updated_at">Updated %s</string>
+    <string name="widget_wind_speed">Wind</string>
+    <string name="widget_offline_saved_at">Offline · saved %s</string>
     <string name="widget_intent_widget">Widget</string>
     <string name="watch_no_station">Open the app to choose a station</string>
 

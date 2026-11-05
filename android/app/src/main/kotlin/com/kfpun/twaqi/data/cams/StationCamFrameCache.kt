@@ -51,7 +51,14 @@ class StationCamFrameCache<T>(
     private val io: CoroutineDispatcher = Dispatchers.IO
 ) : CamFrameSource<T> {
 
-    override suspend fun savedFrame(siteId: String): CamFrame<T>? = withContext(io) { readFrame(siteId) }
+    override suspend fun savedFrame(siteId: String): CamFrame<T>? = withContext(io) { readFrame(siteId, decoder::full) }
+
+    /**
+     * The saved frame decoded by [decode] instead of the screen's decoder: the station detail
+     * widget (FOX-59) draws a small `Bitmap` from the frame the page or the widget refresh saved.
+     */
+    suspend fun <R> savedFrame(siteId: String, decode: (ByteArray) -> R?): CamFrame<R>? =
+        withContext(io) { readFrame(siteId, decode) }
 
     override suspend fun fetch(cam: StationCam): CamFrame<T>? {
         val url = endpoints.latest(cam) ?: return null
@@ -67,7 +74,7 @@ class StationCamFrameCache<T>(
 
     fun metaFile(siteId: String): File = File(directory, "$siteId.json")
 
-    private fun readFrame(siteId: String): CamFrame<T>? {
+    private fun <R> readFrame(siteId: String, decode: (ByteArray) -> R?): CamFrame<R>? {
         val file = imageFile(siteId)
         if (OfflineCacheRetention.isExpired(OfflineCacheRetention.modificationDate(file), now())) return null
         val bytes = try {
@@ -75,7 +82,7 @@ class StationCamFrameCache<T>(
         } catch (e: IOException) {
             return null
         }
-        val image = decoder.full(bytes) ?: return null
+        val image = decode(bytes) ?: return null
         val time = runCatching {
             (Json.parseToJsonElement(metaFile(siteId).readText()).jsonObject["time"] as? JsonPrimitive)
                 ?.takeIf { it.isString }?.content
