@@ -1,7 +1,7 @@
 # Analytics
 
 The iPhone app logs Firebase Analytics events through `TrackingManager.logEvent`.
-Every event name is a case of `AnalyticsEvent` (`TWAQI/Utils/AnalyticsEvent.swift`),
+Every event name is a case of `AnalyticsEvent` (`ios/TWAQI/Utils/AnalyticsEvent.swift`),
 with its parameters noted beside it. Add a case for a new event. Never rename an
 existing one: Firebase would record the new name as a separate event.
 

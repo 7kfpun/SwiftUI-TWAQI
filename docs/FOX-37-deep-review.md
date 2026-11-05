@@ -8,7 +8,7 @@
 - **Method:** read the diffs of #28–#33. Read in full: `FavouriteAlerts`, `PushService`,
   `DirectusPushMirror`, `OneSignalManager`, `SettingsStore`, the Details, Favourites and Help
   view models and views, `ProView`/`IAPManager`, `AppDelegate`, `web/` (en + zh-Hant),
-  `TWAQITests/PushServiceTests.swift`, `TWAQIUITests/*`, `.github/workflows/ci.yml` and the
+  `ios/TWAQITests/PushServiceTests.swift`, `ios/TWAQIUITests/*`, `.github/workflows/ci.yml` and the
   fastlane `capture_screenshots` lane. Opened the committed raw screenshots.
 - **Tests were not run.** This worktree has no `Pods/`, and `pod install` rewrites
   `project.pbxproj`. Every finding comes from reading code or files.
@@ -42,9 +42,9 @@
 - **Area:** privacy/landing vs FOX-31.
 - **What changed:** FOX-31 (#32, merged 09:01 on 1 Nov) makes the heart switch on the "AQI above
   120" alert. That sends the station tag and threshold to OneSignal and copies them to Directus:
-  - `TWAQI/Views/Details/DetailsViewModel.swift:165-169`
-  - `TWAQI/Views/Details/DetailsViewModel.swift:192-225`
-  - `TWAQI/Utils/FavouriteAlerts.swift:209-249`
+  - `ios/TWAQI/Views/Details/DetailsViewModel.swift:165-169`
+  - `ios/TWAQI/Views/Details/DetailsViewModel.swift:192-225`
+  - `ios/TWAQI/Utils/FavouriteAlerts.swift:209-249`
 - **Copy still saying favourites stay on the device.** The privacy copy (#28/#29, merged 00:54)
   predates FOX-31:
   - `web/privacy.html:21`: "Favourites and settings stay on your device."
@@ -64,8 +64,8 @@
 
 - **Area:** Pro paywall vs legal pages.
 - **What the app sells:** 1-, 6- and 12-month auto-renewing subscriptions plus lifetime:
-  - `TWAQI/Utils/IAPManager.swift:25-33`
-  - `TWAQI/Views/Help/ProView.swift:84-108`
+  - `ios/TWAQI/Utils/IAPManager.swift:25-33`
+  - `ios/TWAQI/Views/Help/ProView.swift:84-108`
 - **What the legal pages say:**
   - The paywall's footer shows "Terms of Use" and "Privacy Policy", which Apple requires beside a
     subscription offer (`ProView.swift:110-126`).
@@ -87,10 +87,10 @@
 
 - **Area:** screenshot harness consistency.
 - **Evidence:**
-  - `fastlane/screenshots_raw/en-US/iPhone 02 station.png` goes header → AQI scale → **Live
+  - `ios/fastlane/screenshots_raw/en-US/iPhone 02 station.png` goes header → AQI scale → **Live
     camera** → Pollutants. It has no alerts card and no health advice.
-  - `fastlane/screenshots_raw/zh-Hant/iPad 02 station.png` has 健康建議 at the very bottom, under wind.
-  - The order on master (`TWAQI/Views/Details/DetailsView.swift:124-195`) is: scale → **alerts
+  - `ios/fastlane/screenshots_raw/zh-Hant/iPad 02 station.png` has 健康建議 at the very bottom, under wind.
+  - The order on master (`ios/TWAQI/Views/Details/DetailsView.swift:124-195`) is: scale → **alerts
     card** (`:132-135`) → health guidance (`:139-142`) → forecast/cam → pollutants.
 - **When they were taken:** the frames read "Last updated … 1:00 AM · 1 hr. ago" and the cam says
   "Captured 23:40 · 2 hr. ago", so roughly 02:00 +0800 on 1 Nov. FOX-25 merged at 09:13 that day.
@@ -136,7 +136,7 @@
 ### M2 — `getOneSignalSettings` can leave callers waiting forever and can crash on a bad tag
 
 - **Area:** concurrency / error handling.
-- **Where:** `TWAQI/Utils/OneSignalManager.swift`.
+- **Where:** `ios/TWAQI/Utils/OneSignalManager.swift`.
 - **The problems:**
   - `:67-69`: when `tags == nil` the closure returns without calling `completionHandler`.
   - `:73-75`: a tag whose key or value isn't a `String` hits `return`, which leaves the whole
@@ -199,7 +199,7 @@
     `DirectusFeedbackToken`.
   - Both come from Info.plist via `getEnv`, so they are plain text in the shipped app.
   - The example config says the feedback role "already has that access": create, read and update
-    on `twaqi_push_devices` / `twaqi_push_subscriptions` (`TWAQI/Config/example.xcconfig`, push section).
+    on `twaqi_push_devices` / `twaqi_push_subscriptions` (`ios/TWAQI/Config/example.xcconfig`, push section).
 - **What the code needs from it:**
   - **Read:** `GET` filtered by any `device_id` or `device_token` (`PushService.swift:325-334`)
     and by any `device` (`:339-352`).
@@ -270,7 +270,7 @@
   - The lists in `README.md` (Tests) and `CLAUDE.md` don't mention them.
 - **L7 — The screenshot lane collides with parallel worktrees.**
   - `capture_screenshots` defaults to `iPhone 18 Pro` and a shared `-derivedDataPath
-    /tmp/twaqi-screenshots` (`fastlane/Fastfile:200-202`).
+    /tmp/twaqi-screenshots` (`ios/fastlane/Fastfile:200-202`).
   - That clashes with other worktrees using the same simulator; the team note is to avoid iPhone
     18 Pro for parallel runs.
   - Pass a dedicated simulator and a per-worktree DerivedData path.
@@ -370,7 +370,7 @@ CI notes:
 
 ## Self-review (executor pass, same tip)
 
-Independent read of the same `master` tip (`2f07bf3` / `cb7d78c`) against Claude’s draft. **H3 confirmed visually** on `fastlane/screenshots_raw/en-US/iPhone 02 station.png`: header → AQI scale → Live camera → Pollutants — **no alerts card** (pre–FOX-25 IA). H1/H2 privacy/terms strings verified with `rg` on `web/`.
+Independent read of the same `master` tip (`2f07bf3` / `cb7d78c`) against Claude’s draft. **H3 confirmed visually** on `ios/fastlane/screenshots_raw/en-US/iPhone 02 station.png`: header → AQI scale → Live camera → Pollutants — **no alerts card** (pre–FOX-25 IA). H1/H2 privacy/terms strings verified with `rg` on `web/`.
 
 **Severity adjust (for Mini):** keep H1–H3 as High (copy/assets / App Review). **Also treat M2 as High for code** (H4 / elevated): `OneSignalManager.getOneSignalSettings` nil-tags / bad-cast `return` never calls `completionHandler`, and `Double(value)!` can crash — now on every FOX-31 favourite path and on every station page open. Prefer fixing under FOX-36 before more IA work.
 

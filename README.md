@@ -22,14 +22,24 @@
 
 <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-vision-pro2.png" width="420"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-vision-pro3.png" width="420">
 
-## Development
+## Repository layout
+
+Two platforms in one repository (FOX-89):
+
+| Folder | What |
+| --- | --- |
+| `ios/` | The Apple app: `TWAQI.xcworkspace` / `TWAQI.xcodeproj`, the targets (`TWAQI`, `TWAQIWidget`, `TWAQIWatch`, `TWAQIWatchWidget`, `TWAQIVision`, `TWAQITests`, `TWAQIUITests`), `Podfile`, `fastlane/` and `.swiftlint.yml` |
+| `android/` | The Android app (Kotlin + Jetpack Compose); the project comes with FOX-52 |
+| root | Shared: `.github/`, `.githooks/`, `docs/`, `tools/`, `assets/`, `services/`, `web/`, `workers/`, Firebase Hosting (`firebase.json`, `.firebaserc`) |
+
+## Development (iOS)
 
 ```bash
 # Clone this repo
 $ git clone git@github.com:7kfpun/SwiftUI-TWAQI.git
 
-# Go inside the project and install pod dependencies
-$ cd SwiftUI-TWAQI && pod install
+# Go inside the iOS project and install pod dependencies
+$ cd SwiftUI-TWAQI/ios && pod install
 
 # Copy example config
 $ cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
@@ -46,9 +56,9 @@ $ cp ~/GoogleService-Info.plist TWAQI/GoogleService-Info.plist
 $ open TWAQI.xcworkspace
 ```
 
-`debug.xcconfig`, `release.xcconfig` and `GoogleService-Info.plist` are gitignored; they hold real keys.
+The commands above run in `ios/`. `ios/TWAQI/Config/debug.xcconfig`, `release.xcconfig` and `ios/TWAQI/GoogleService-Info.plist` are gitignored; they hold real keys. So is `ios/fastlane/.env`.
 
-Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS). Cloudflare Workers live under `workers/<name>/`, the Cloud Run read API under `services/twaqi-api/`.
+Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS), all under `ios/`. Cloudflare Workers live under `workers/<name>/`, the Cloud Run read API under `services/twaqi-api/`.
 
 ## Services
 
@@ -88,9 +98,10 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
 ## Tests
 
-- **Before merge, run the full suite locally** (Mac mini / Orca):
+- **Before merge, run the full suite locally** (Mac mini / Orca), from `ios/`:
 
   ```bash
+  cd ios
   xcodebuild test -workspace TWAQI.xcworkspace -scheme TWAQI \
     -destination 'platform=iOS Simulator,name=<an installed iPhone>,OS=latest' \
     -only-testing:TWAQITests
@@ -101,13 +112,13 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
   | Level | When the PR touches only… | Runs |
   |---|---|---|
-  | **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing; the check is green in seconds |
+  | **skip** | `android/`, `workers/`, `services/`, `web/`, `ios/fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing; the check is green in seconds |
   | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | `build-for-testing` only; no simulator pick, boot or test run |
-  | **test** | a `CI_GUARDED_PATHS` entry (the subset suites' test files and the sources they test), `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` (and its test), `Podfile`, `Podfile.lock`, `Package.resolved` | build + boot + the subset |
+  | **test** | a `CI_GUARDED_PATHS` entry (the subset suites' test files and the sources they test), `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` (and its test), `ios/Podfile`, `ios/Podfile.lock`, `Package.resolved` | build + boot + the subset |
 
   The PR label **`ci-full-tests`** forces **test** (labels are read when the job runs: add the label, then re-run the job or push). An empty file list or an API error also gives **test**. The script's tests: `python3 -m unittest discover -s tools -p 'test_ci_test_level.py'`; `python3 tools/ci_test_level.py decide --files <list>` shows the level for a file list.
-- CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild).
-- **Caches come from `master`** (FOX-65). The cache and build steps live in [`.github/actions/unit-tests-build`](.github/actions/unit-tests-build/action.yml), shared by `ci.yml` and the **`CI cache`** workflow ([`ci-cache.yml`](.github/workflows/ci-cache.yml)); `ci-cache.yml` carries a copy of `ci.yml`'s config step, and `tools/ci_test_level.py check` fails when the two differ. `CI cache` runs on `master` when `Podfile`, `Podfile.lock`, `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action change, daily (03:17 UTC: a new Xcode on the runner changes the DerivedData key, and caches unused for 7 days are evicted; when all three keys exist the run only restores them) and by hand (Actions → CI cache → Run workflow, on `master`). It builds exactly like the `Unit tests` job, without a simulator or tests, and saves the three caches under the same keys; when all three are already there it restores them (which keeps them alive) and stops. Every PR to `master` can read those caches, so a PR's first run starts warm. A PR saves a cache only when its exact key missed (say the PR changes `Podfile.lock`), into its own scope; it never stores a second copy of what `master` has.
+- CI builds the **`TWAQI-CI`** scheme: `TWAQI` without the `TWAQIUITests` runner, which CI never runs. Locally, keep using `-scheme TWAQI` as above. The job picks its simulator in the background during the build, runs `build-for-testing`, then boots the simulator (booting it during the build slowed both down on slow runners) and runs `test-without-building` against it, and caches Swift packages (`Package.resolved`), `ios/Pods/` (`Podfile.lock`, `Podfile`) and the DerivedData build products (exact key: Xcode build + those three files; app and test sources always rebuild).
+- **Caches come from `master`** (FOX-65). The cache and build steps live in [`.github/actions/unit-tests-build`](.github/actions/unit-tests-build/action.yml), shared by `ci.yml` and the **`CI cache`** workflow ([`ci-cache.yml`](.github/workflows/ci-cache.yml)); `ci-cache.yml` carries a copy of `ci.yml`'s config step, and `tools/ci_test_level.py check` fails when the two differ. `CI cache` runs on `master` when `ios/Podfile`, `ios/Podfile.lock`, `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action change, daily (03:17 UTC: a new Xcode on the runner changes the DerivedData key, and caches unused for 7 days are evicted; when all three keys exist the run only restores them) and by hand (Actions → CI cache → Run workflow, on `master`). It builds exactly like the `Unit tests` job, without a simulator or tests, and saves the three caches under the same keys; when all three are already there it restores them (which keeps them alive) and stops. Every PR to `master` can read those caches, so a PR's first run starts warm. A PR saves a cache only when its exact key missed (say the PR changes `Podfile.lock`), into its own scope; it never stores a second copy of what `master` has.
 - Workers have their own tests: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`). So does the Cloud Run API, in Rust: `cd services/twaqi-api && make check`, which the `Services` check (`services.yml`) also runs on PRs that change it; it is deployed by hand.
 
 ## Branches, CI and review
@@ -118,13 +129,13 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
   - **Secret files** — fails on `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env`, `.dev.vars`, signing keys, force-added gitignored files or real-looking secret values in the diff.
   - **LGTM** (status) — pending until a reviewer's LGTM covers the head commit: a pull request review or comment whose first line is `**<Name> LGTM**`, with any reviewer name (or none). A later `**<Name> — changes needed**` sets it back to pending. The advisory Claude Code Review bot doesn't count.
 - On a **non-draft** PR from `feature/*` to `master`, GitHub also runs:
-  - **CI / Unit tests** — the subset above, at the skip / build / test level from [Tests](#tests). Green in seconds when the PR only touches docs, media, `assets/`, `fastlane/`, `web/`, `workers/` or `.github/` (other than `ci.yml` and the `unit-tests-build` action).
+  - **CI / Unit tests** — the subset above, at the skip / build / test level from [Tests](#tests). Green in seconds when the PR only touches docs, media, `android/`, `assets/`, `ios/fastlane/`, `web/`, `workers/` or `.github/` (other than `ci.yml` and the `unit-tests-build` action).
   - **CI / Vulnerability checks** — TruffleHog and osv-scanner, posted as a PR comment. Fails only on secrets TruffleHog **verified** as live; everything else is a warning.
   - **Claude Code Review** — reviews the diff against the ticket scope and the PR body's claims, and marks push / favourites ↔ alerts / dual-write breaks as blocking. A failed review fails the check.
   - **Workers** — typechecks and dry-runs any Worker the PR changes (green when none changed). Merging to `master` deploys only the changed Workers.
 - Put the Linear ticket (`FOX-nn`) and its scope in the PR body, and only claim behavior the diff shows — the reviewer checks both. The PR template carries the merge gates.
 - `master` protection (required checks, no direct pushes, up-to-date branches) is proposed in [`docs/master-protection.md`](docs/master-protection.md).
-- Releases (version bump, TestFlight, App Store) use the fastlane lanes in [`fastlane/README.md`](fastlane/README.md) and are run by hand, never from a feature PR. Screenshot uploads refuse to run while the version is `WAITING_FOR_REVIEW` (`fastlane asc_version_state` shows the state). The website deploys through the manual `Firebase Hosting` workflow.
+- Releases (version bump, TestFlight, App Store) use the fastlane lanes in [`ios/fastlane/README.md`](ios/fastlane/README.md) (run from `ios/`) and are run by hand, never from a feature PR. Screenshot uploads refuse to run while the version is `WAITING_FOR_REVIEW` (`fastlane asc_version_state` shows the state). The website deploys through the manual `Firebase Hosting` workflow.
 
 ## License
 
