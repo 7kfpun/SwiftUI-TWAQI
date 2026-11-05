@@ -55,6 +55,17 @@ class DecideTests(unittest.TestCase):
         self.assertEqual(result.level, level.TEST)
         self.assertEqual(result.files, [".github/workflows/ci.yml"])
 
+    def test_the_shared_build_action_tests(self):
+        # FOX-65: the job's config, caches and build live in this action.
+        result = decide(".github/actions/unit-tests-build/action.yml", "README.md")
+        self.assertEqual(result.level, level.TEST)
+        self.assertEqual(result.files, [".github/actions/unit-tests-build/action.yml"])
+
+    def test_the_master_cache_workflow_alone_skips(self):
+        # ci-cache.yml runs on master only; the PR job does not use it.
+        self.assertEqual(decide(".github/workflows/ci-cache.yml").level, level.SKIP)
+        self.assertEqual(decide(".github/actions/other/action.yml").level, level.SKIP)
+
     def test_dependency_pins_and_this_script_test(self):
         for path in (
             "Podfile",
@@ -167,6 +178,66 @@ class WorkflowListTests(unittest.TestCase):
             self.assertTrue(any("TWAQI/Gone.swift" in problem for problem in problems))
             self.assertTrue(any("BTests lives in TWAQITests/BTests.swift" in problem for problem in problems))
             self.assertTrue(any("CTests" in problem for problem in problems))
+
+
+class ConfigStepTests(unittest.TestCase):
+    """FOX-65: ci-cache.yml carries a copy of ci.yml's config step."""
+
+    PR = (
+        "jobs:\n"
+        "  tests:\n"
+        "    steps:\n"
+        "      - name: Other\n"
+        "        run: |\n"
+        "          echo other\n"
+        "      - name: Prepare gitignored config\n"
+        "        if: steps.scope.outputs.level != 'skip'\n"
+        "        run: |\n"
+        "          set -euo pipefail\n"
+        "          cat > a <<'EOF'\n"
+        "            <key>X</key>\n"
+        "          EOF\n"
+        "\n"
+        "      - name: Next\n"
+        "        run: echo next\n"
+    )
+
+    def cache(self, body):
+        return (
+            "jobs:\n"
+            "  fill:\n"
+            "    steps:\n"
+            "      - name: Checkout repository\n"
+            "        uses: actions/checkout@v4\n"
+            "      - name: Prepare gitignored config\n"
+            "        run: |\n"
+            f"{body}"
+            "      - name: Build\n"
+            "        uses: ./x\n"
+        )
+
+    def test_same_script_at_another_indent_matches(self):
+        body = "          set -euo pipefail\n          cat > a <<'EOF'\n            <key>X</key>\n          EOF\n"
+        self.assertEqual(level.step_run(self.PR, level.CONFIG_STEP), "set -euo pipefail\ncat > a <<'EOF'\n  <key>X</key>\nEOF")
+        self.assertEqual(level.config_problems(self.PR, self.cache(body)), [])
+        self.assertEqual(level.config_problems(self.PR, self.cache(body.replace("          ", "            "))), [])
+
+    def test_a_changed_placeholder_is_drift(self):
+        body = "          set -euo pipefail\n          cat > a <<'EOF'\n            <key>Y</key>\n          EOF\n"
+        problems = level.config_problems(self.PR, self.cache(body))
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("differs", problems[0])
+
+    def test_a_missing_step_is_a_problem(self):
+        problems = level.config_problems(self.PR, "jobs:\n  fill:\n    steps:\n      - name: Build\n        uses: ./x\n")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("not found", problems[0])
+
+    def test_the_real_workflows_match(self):
+        self.assertEqual(
+            level.config_problems((ROOT / level.WORKFLOW).read_text(), (ROOT / level.CACHE_WORKFLOW).read_text()),
+            [],
+        )
 
 
 class RepositoryTests(unittest.TestCase):
