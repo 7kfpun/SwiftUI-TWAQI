@@ -2,31 +2,14 @@
 <!-- Launcher shortcuts and Google Assistant App Actions (FOX-95, the Android side of iOS
      TWAQIShortcuts). Every intent here is a twaqi:// link the one router (DeepLink) parses.
 
-     Static: "Air quality", the answer card for the nearest station (twaqi://air-quality).
-     Dynamic (StationShortcuts): one per favourite and recent station (twaqi://station?id=…).
+     The shortcuts themselves are all dynamic (StationShortcuts), so they are named in the app's
+     language: "Air quality", the answer card for the nearest station (twaqi://air-quality), then
+     one per favourite and recent station (twaqi://station?id=…).
 
-     Assistant: actions.intent.OPEN_APP_FEATURE. "Open air quality in Taiwan Air" matches the
-     static shortcut's binding; "Open Songshan in Taiwan Air" matches a station shortcut's, which
-     carries the station's name in both languages. Any other feature opens the app. -->
+     Assistant: actions.intent.OPEN_APP_FEATURE, with those shortcuts as its inventory. "Open air
+     quality in Taiwan Air" matches the "Air quality" shortcut; "Open Songshan in Taiwan Air" a
+     station's. Each carries its name in both languages. Any other feature opens the app. -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <shortcut
-        android:enabled="true"
-        android:icon="@drawable/ic_shortcut_air_quality"
-        android:shortcutId="air_quality"
-        android:shortcutLongLabel="@string/intent_get_air_quality_title"
-        android:shortcutShortLabel="@string/intent_get_air_quality_short">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="twaqi://air-quality"
-            android:targetClass="com.kfpun.twaqi.shortcuts.AirQualityAnswerActivity"
-            android:targetPackage="com.kfpun.twaqi" />
-        <capability-binding android:key="actions.intent.OPEN_APP_FEATURE">
-            <parameter-binding
-                android:key="feature"
-                android:value="@string/intent_assistant_feature_air_quality" />
-        </capability-binding>
-    </shortcut>
 
     <capability android:name="actions.intent.OPEN_APP_FEATURE">
         <!-- No shortcut matched the feature: open the app. -->

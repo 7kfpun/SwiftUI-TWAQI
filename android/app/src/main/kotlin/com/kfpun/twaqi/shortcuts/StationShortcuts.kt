@@ -1,7 +1,10 @@
 package com.kfpun.twaqi.shortcuts
 
 import android.content.Context
+import android.content.res.Configuration
+import android.os.LocaleList
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.core.content.edit
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -28,16 +31,16 @@ import kotlinx.coroutines.sync.withLock
 object StationShortcutPlan {
     /**
      * At most this many station shortcuts, whatever the launcher allows: a long-press menu shows
-     * about five entries, and the static "Air quality" shortcut is one of them.
+     * about five entries, and the "Air quality" shortcut is one of them.
      */
     const val MAX_STATIONS = 4
 
-    /** The static shortcuts in `res/xml/shortcuts.xml`, which count against the launcher's limit. */
-    const val STATIC_SHORTCUTS = 1
+    /** Shortcuts other than stations ("Air quality"), which count against the launcher's limit. */
+    const val OTHER_SHORTCUTS = 1
 
-    /** How many station shortcuts fit: the launcher's per-activity limit less the static ones, capped. */
-    fun limit(launcherMax: Int, staticCount: Int = STATIC_SHORTCUTS): Int =
-        minOf(MAX_STATIONS, launcherMax - staticCount).coerceAtLeast(0)
+    /** How many station shortcuts fit: the launcher's per-activity limit less the other ones, capped. */
+    fun limit(launcherMax: Int, otherCount: Int = OTHER_SHORTCUTS): Int =
+        minOf(MAX_STATIONS, launcherMax - otherCount).coerceAtLeast(0)
 
     /**
      * Favourites in the reader's order, then recently opened stations, newest first, without
@@ -56,6 +59,9 @@ object StationShortcutPlan {
 
     /** The shortcut id of a station's shortcut; launchers keep pinned copies by it. */
     fun shortcutId(stationId: Int): String = "$SHORTCUT_PREFIX$stationId"
+
+    /** The "Air quality" shortcut's id. */
+    const val AIR_QUALITY_ID = "air_quality"
 
     private const val SHORTCUT_PREFIX = "station_"
 }
@@ -84,13 +90,16 @@ object RecentStations {
 }
 
 /**
- * The launcher's dynamic shortcuts (FOX-95, the Android side of iOS `TWAQIShortcuts`): one per
- * favourite and recent station ([StationShortcutPlan]), named in the app's language, each opening
- * its station through [DeepLink]. Each is also Google Assistant's inventory for "open <station>"
- * (`actions.intent.OPEN_APP_FEATURE` in `res/xml/shortcuts.xml`), in both languages' names.
+ * The launcher's shortcuts (FOX-95, the Android side of iOS `TWAQIShortcuts`): "Air quality" first,
+ * opening the answer card ([AirQualityAnswerActivity]), then one per favourite and recent station
+ * ([StationShortcutPlan]), each opening its station. All go through [DeepLink] and are named in the
+ * app's language, so all are dynamic: a launcher names a static (`shortcuts.xml`) shortcut in the
+ * phone's language, not the one chosen in Help › Language. Each is also Google Assistant's
+ * inventory for `actions.intent.OPEN_APP_FEATURE` (`res/xml/shortcuts.xml`), with its name in
+ * both languages.
  *
- * Refreshed at start, when favourites change, when a station is opened and when the language
- * changes. Nothing is written when the list is unchanged, which keeps clear of the launcher's
+ * Refreshed at start, when favourites change, when a station is opened, when the app goes to the
+ * background (names loaded meanwhile) and when the language changes. Nothing is written when the list is unchanged, which keeps clear of the launcher's
  * rate limit.
  */
 object StationShortcuts {
@@ -141,8 +150,21 @@ object StationShortcuts {
             container.airQuality.savedStations()?.value.orEmpty().associateBy { it.id }
         }
         val chinese = AppLocale.isChinese(context)
+        val localized = AppLocale.localizedContext(context)
         val icon = IconCompat.createWithResource(context, R.drawable.ic_shortcut_station)
-        val shortcuts = ids.mapIndexed { rank, id ->
+        val airQuality = ShortcutInfoCompat.Builder(context, StationShortcutPlan.AIR_QUALITY_ID)
+            .setShortLabel(localized.getString(R.string.intent_get_air_quality_short))
+            .setLongLabel(localized.getString(R.string.intent_get_air_quality_title))
+            .setIcon(IconCompat.createWithResource(context, R.drawable.ic_shortcut_air_quality))
+            .setRank(0)
+            .setIntent(AirQualityAnswerActivity.intent(context))
+            .addCapabilityBinding(
+                OPEN_APP_FEATURE,
+                FEATURE_PARAMETER,
+                bothLanguages(context, R.string.intent_assistant_feature_air_quality)
+            )
+            .build()
+        val stationShortcuts = ids.mapIndexed { index, id ->
             val (local, english) = readings[id]?.let { it.displayName(true) to it.displayName(false) }
                 ?: stations[id]?.let { it.displayName(true) to it.displayName(false) }
                 ?: (StationText.displayName("", "", id) to StationText.displayName("", "", id))
@@ -151,15 +173,23 @@ object StationShortcuts {
                 .setShortLabel(name)
                 .setLongLabel(name)
                 .setIcon(icon)
-                .setRank(rank)
+                .setRank(index + 1)
                 .setIntent(DeepLink.stationIntent(context, id, StationLinkSource.SHORTCUT))
                 .addCapabilityBinding(OPEN_APP_FEATURE, FEATURE_PARAMETER, listOf(local, english).distinct())
                 .build()
         }
+        val shortcuts = listOf(airQuality) + stationShortcuts
         val current = ShortcutManagerCompat.getDynamicShortcuts(context)
             .sortedBy { it.rank }
             .map { it.id to it.shortLabel.toString() }
         if (current == shortcuts.map { it.id to it.shortLabel.toString() }) return
         if (!ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)) Log.i(TAG, "Shortcut update rate-limited")
     }
+
+    /** [id] in English and Traditional Chinese, for Assistant to match either. */
+    private fun bothLanguages(context: Context, @StringRes id: Int): List<String> = listOf("en", "zh-TW").map { tag ->
+        val configuration = Configuration(context.resources.configuration)
+        configuration.setLocales(LocaleList.forLanguageTags(tag))
+        context.createConfigurationContext(configuration).getString(id)
+    }.distinct()
 }

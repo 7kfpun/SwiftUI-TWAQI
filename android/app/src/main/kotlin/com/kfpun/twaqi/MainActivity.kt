@@ -117,6 +117,15 @@ class MainActivity : AppCompatActivity() {
         WidgetLocation.remember(this)
     }
 
+    /**
+     * FOX-95: names of stations first loaded this visit reach the launcher's shortcuts. Nothing is
+     * written when they are unchanged, so this stays clear of the launcher's rate limit.
+     */
+    override fun onStop() {
+        super.onStop()
+        StationShortcuts.requestRefresh(this)
+    }
+
     /** `twaqi://station`, `twaqi://pro` and `twaqi://air-quality` links, through the one router ([DeepLink]). */
     private fun handleLink(intent: Intent?) {
         val link = DeepLink.parse(intent?.data) ?: return

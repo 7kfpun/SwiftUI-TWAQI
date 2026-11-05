@@ -40,7 +40,7 @@ class StationShortcutPlanTest {
     }
 
     @Test
-    fun theLimitLeavesRoomForTheStaticShortcutAndNeverPassesFour() {
+    fun theLimitLeavesRoomForTheAirQualityShortcutAndNeverPassesFour() {
         assertEquals(4, StationShortcutPlan.limit(launcherMax = 15))
         assertEquals(4, StationShortcutPlan.limit(launcherMax = 5))
         assertEquals(3, StationShortcutPlan.limit(launcherMax = 4))
