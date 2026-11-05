@@ -279,6 +279,16 @@
     <string name="pro_privacy_policy">隱私權政策</string>
     <string name="pro_purchase_failed">無法完成購買，請再試一次。</string>
 
+    <string name="pro_feature_widgets_android">中、大尺寸小工具</string>
+    <string name="pro_feature_widgets_android_detail">在主畫面查看目前測站與最愛測站。</string>
+    <string name="pro_plan_1m">1 個月</string>
+    <string name="pro_plan_6m">6 個月</string>
+    <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_retry">重試</string>
+    <string name="pro_close">關閉</string>
+    <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>
+    <string name="ads_remove">移除廣告</string>
+
     <!-- Guide -->
     <string name="guide_section_what">這是什麼</string>
     <string name="guide_section_sources">從哪裡來</string>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -24,9 +25,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.kfpun.twaqi.ads.AdBanner
+import com.kfpun.twaqi.ads.AdConsent
+import com.kfpun.twaqi.ads.AdPlacement
+import com.kfpun.twaqi.pro.Entitlement
+import com.kfpun.twaqi.pro.ProActivity
+import com.kfpun.twaqi.pro.ProGraph
+import com.kfpun.twaqi.pro.ProSettingsRow
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.settings.LanguageSection
 import com.kfpun.twaqi.ui.theme.TWAQITheme
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 // AppCompatActivity, so AppCompatDelegate.setApplicationLocales applies the app language
 // below Android 13 (FOX-56).
@@ -34,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        startPro()
         setContent {
             TWAQITheme {
                 // Debug builds can open the data-layer check screen (FOX-53) until the real
@@ -48,16 +63,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    /** FOX-58: re-check Pro with Play whenever the app comes to the front; ask for ad consent if free. */
+    private fun startPro() {
+        if (BuildConfig.DEBUG &&
+            intent.getBooleanExtra(ProActivity.EXTRA_DEMO_BILLING, false)
+        ) {
+            ProGraph.useDemoBilling()
+        }
+        val pro = ProGraph.repository(this)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) { pro.refresh() }
+        }
+        lifecycleScope.launch {
+            // Pro users see no ads, so no consent form; one who lapses gets it then.
+            pro.entitlement.filterNotNull().first { it != Entitlement.PRO }
+            AdConsent.gather(this@MainActivity)
+        }
+    }
 }
 
 /**
  * Placeholder home screen; the map, list and details come with the later Android tickets. The
- * language picker sits here until the Help screen exists. [onOpenDataScreen] (debug builds only)
- * adds a button to the data-layer check screen.
+ * language picker and the Pro row sit here until the Help screen exists, and the banner until
+ * the real screens do. [onOpenDataScreen] (debug builds only) adds a button to the data-layer
+ * check screen.
  */
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = null) {
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        bottomBar = { AdBanner(AdPlacement.MAIN, modifier = Modifier.navigationBarsPadding()) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             verticalArrangement = Arrangement.Center,
@@ -69,6 +106,7 @@ fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = 
                 color = MaterialTheme.colorScheme.primary
             )
             LanguageSection(Modifier.fillMaxWidth().padding(top = 24.dp))
+            ProSettingsRow(Modifier.padding(top = 8.dp))
             if (onOpenDataScreen != null) {
                 OutlinedButton(onClick = onOpenDataScreen, modifier = Modifier.padding(top = 24.dp)) {
                     Text(stringResource(R.string.debug_data_title))
