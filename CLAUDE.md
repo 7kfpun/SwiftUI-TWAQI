@@ -70,11 +70,12 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 - CI builds the CI-only `TWAQI-CI` scheme (`TWAQI` minus the `TWAQIUITests` runner) with
   `build-for-testing` + `test-without-building`. Use `-scheme TWAQI` locally; if you change
   the `TWAQI` scheme's build or test targets, mirror it in `TWAQI-CI`.
-- The job's config, cache and build steps live in `.github/actions/unit-tests-build`, shared
-  with `ci-cache.yml`, which fills the same three caches (Swift packages, Pods, DerivedData)
-  from `master` on dependency changes, weekly and by hand (FOX-65). PRs restore `master`'s
-  caches and save only on a miss. Change cache keys or build flags in the action, never in
-  one workflow alone.
+- The job's cache and build steps live in `.github/actions/unit-tests-build`, shared with
+  `ci-cache.yml`, which fills the same three caches (Swift packages, Pods, DerivedData) from
+  `master` on dependency changes, weekly and by hand (FOX-65). PRs restore `master`'s caches
+  and save only on a miss. Change cache keys or build flags in the action, never in one
+  workflow alone. The `Prepare gitignored config` step is copied in both workflows; change
+  both (`tools/ci_test_level.py check` fails when they differ).
 - Workers: `cd workers/<name> && npm test` (`twaqi-workers`, `twaqi-push-sender`).
 
 ## Self-review before opening a PR

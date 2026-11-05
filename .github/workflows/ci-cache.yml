@@ -53,6 +53,72 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # A copy of ci.yml's step (the placeholders the PR job builds with).
+      # tools/ci_test_level.py check fails when the two differ.
+      - name: Prepare gitignored config
+        run: |
+          set -euo pipefail
+          # The project will not build without these, and they are gitignored
+          # because they hold local API keys. Example values are enough to
+          # compile and launch the host app for unit tests.
+          cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
+          cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
+          # example.xcconfig sets GMSServicesApiKey to an empty value
+          # (`= // Required` is a comment). An empty key skips meaningful
+          # GMSServices.provideAPIKey, and creating GMSMapView then crashes
+          # the test host with GMSServicesException.
+          python3 - <<'PY'
+          from pathlib import Path
+          key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
+          for name in ("debug.xcconfig", "release.xcconfig"):
+              path = Path("TWAQI/Config") / name
+              lines = path.read_text().splitlines()
+              out, replaced = [], False
+              for line in lines:
+                  if line.strip().startswith("GMSServicesApiKey"):
+                      out.append(key_line)
+                      replaced = True
+                  else:
+                      out.append(line)
+              if not replaced:
+                  out.append(key_line)
+              path.write_text("\n".join(out) + "\n")
+          PY
+          cat > TWAQI/GoogleService-Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>API_KEY</key>
+            <!-- 39 chars, starts with A, not an AIza key. Firebase Installations
+                 rejects anything else and crashes the test host at launch. -->
+            <string>AciPlaceholderKeyForUnitTests0000000000</string>
+            <key>GCM_SENDER_ID</key>
+            <string>123456789012</string>
+            <key>PLIST_VERSION</key>
+            <string>1</string>
+            <key>BUNDLE_ID</key>
+            <string>com.kfpun.twaqi</string>
+            <key>PROJECT_ID</key>
+            <string>ci-placeholder</string>
+            <key>STORAGE_BUCKET</key>
+            <string>ci-placeholder.appspot.com</string>
+            <key>IS_ADS_ENABLED</key>
+            <false/>
+            <key>IS_ANALYTICS_ENABLED</key>
+            <false/>
+            <key>IS_APPINVITE_ENABLED</key>
+            <true/>
+            <key>IS_GCM_ENABLED</key>
+            <true/>
+            <key>IS_SIGNIN_ENABLED</key>
+            <true/>
+            <key>GOOGLE_APP_ID</key>
+            <string>1:123456789012:ios:abcdefabcdefabcdefabcdef</string>
+          </dict>
+          </plist>
+          EOF
+
       - name: Restore caches and build for testing
         uses: ./.github/actions/unit-tests-build
         with:

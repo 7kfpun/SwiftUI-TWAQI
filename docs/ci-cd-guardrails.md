@@ -62,9 +62,12 @@ and CI runs only on `pull_request`, so caches used to be saved per PR: every PR'
 was cold, and each PR kept its own ~880 MB copy of the same keys (over the 10 GB repo
 limit with a handful of open PRs, so caches were also evicted). Now:
 
-- The job's config, cache and build steps are one composite action,
+- The job's cache and build steps are one composite action,
   `.github/actions/unit-tests-build`, used by `ci.yml` and by the **`CI cache`** workflow
   (`ci-cache.yml`). Keys and build flags live only there, so the two can't drift apart.
+  The `Prepare gitignored config` step stays in each workflow file (its placeholder Firebase
+  host is allowed by `Public text` only in `.github/workflows/*.yml`); `ci_test_level.py
+  check` fails the `Unit tests` job when `ci-cache.yml`'s copy differs from `ci.yml`'s.
 - `CI cache` runs on `master` only: on a push that changes `Podfile`, `Podfile.lock`,
   `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action; weekly
   (Monday 03:17 UTC: caches unused for 7 days are evicted, and a runner image with a new
