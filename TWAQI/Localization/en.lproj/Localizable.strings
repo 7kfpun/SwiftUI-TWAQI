@@ -413,6 +413,60 @@
 "Forecast.favourite_area" = "Favourites";
 "Forecast.none_current" = "No current forecast to show. MOENV's latest one couldn't be loaded; try again later.";
 
+/* Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) */
+"Weather.title" = "Weather";
+"Weather.source" = "Data: Central Weather Administration";
+"Weather.humidity" = "Humidity";
+"Weather.rain_today" = "Rain today";
+"Weather.wind" = "Wind";
+"Weather.temperature %@" = "Temperature %@";
+"Weather.chance_of_rain %@" = "Chance of rain %@";
+"Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
+"Weather.station_nearby %@" = "CWA station %@ away";
+"Weather.observed %@" = "observed %@";
+/* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
+"Weather.wx.1" = "Clear";
+"Weather.wx.2" = "Mostly clear";
+"Weather.wx.3" = "Partly clear";
+"Weather.wx.4" = "Partly cloudy";
+"Weather.wx.5" = "Mostly cloudy";
+"Weather.wx.6" = "Mostly cloudy";
+"Weather.wx.7" = "Cloudy";
+"Weather.wx.8" = "Partly cloudy, occasional showers";
+"Weather.wx.9" = "Mostly cloudy, occasional rain";
+"Weather.wx.10" = "Mostly cloudy, occasional rain";
+"Weather.wx.11" = "Cloudy, occasional rain";
+"Weather.wx.12" = "Mostly cloudy with showers";
+"Weather.wx.13" = "Mostly cloudy with rain";
+"Weather.wx.14" = "Rain";
+"Weather.wx.15" = "Partly cloudy, showers or thunderstorms";
+"Weather.wx.16" = "Mostly cloudy, showers or thunderstorms";
+"Weather.wx.17" = "Mostly cloudy, thundershowers";
+"Weather.wx.18" = "Showers or thunderstorms";
+"Weather.wx.19" = "Clear, local afternoon rain";
+"Weather.wx.20" = "Partly cloudy, afternoon showers";
+"Weather.wx.21" = "Clear, afternoon thundershowers";
+"Weather.wx.22" = "Partly cloudy, afternoon thundershowers";
+"Weather.wx.23" = "Rain or snow";
+"Weather.wx.24" = "Clear with fog";
+"Weather.wx.25" = "Mostly clear with fog";
+"Weather.wx.26" = "Partly clear with fog";
+"Weather.wx.27" = "Partly cloudy with fog";
+"Weather.wx.28" = "Cloudy with fog";
+"Weather.wx.29" = "Partly cloudy, local rain";
+"Weather.wx.30" = "Mostly cloudy, local rain";
+"Weather.wx.31" = "Partly cloudy, fog and local rain";
+"Weather.wx.32" = "Mostly cloudy, fog and local rain";
+"Weather.wx.33" = "Partly cloudy, local thundershowers";
+"Weather.wx.34" = "Mostly cloudy, local thundershowers";
+"Weather.wx.35" = "Partly cloudy, thunderstorms and fog";
+"Weather.wx.36" = "Mostly cloudy, thunderstorms and fog";
+"Weather.wx.37" = "Rain or snow with fog";
+"Weather.wx.38" = "Occasional rain with fog";
+"Weather.wx.39" = "Rain with fog";
+"Weather.wx.41" = "Showers or thunderstorms with fog";
+"Weather.wx.42" = "Snow";
+
 /* Offline: last good readings */
 "Offline.showing_saved_readings" = "Offline — showing the last saved readings";
 "Offline.updated_ago %@" = "Offline · updated %@";

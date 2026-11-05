@@ -5,6 +5,7 @@ Cloudflare Worker that:
 - mirrors MOENV air-quality station webcam JPEGs (`aqx_p_01`) into R2 bucket `twaqi-station-cams` and serves them publicly via the bucket's R2 custom domain (the webcam host);
 - mirrors the MOENV 空品區 AQI forecast (`aqf_p_01`) into the Directus collection `twaqi_aqi_forecast`, which the app reads directly.
 - fronts the TWAQI read API (FOX-82) at `/v1/...` on the webcam host, the same host as the webcam images (see [Read API](#read-api-v1)).
+- writes Central Weather Administration (CWA) weather for the station page to `weather/latest.json` in the same bucket, served from the webcam host (see [CWA weather](#cwa-weather-fox-11)).
 
 ## Station webcams
 
@@ -100,6 +101,31 @@ npx wrangler dev --var MOENV_FORECAST_URL:http://127.0.0.1:8799/feed.json
 curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 ```
 
+## CWA weather (FOX-11)
+
+- **Cron** `40 * * * *` (hourly, its own invocation so it never shares the forecast's CPU or subrequest budget): fetch two CWA open-data sets with `CWA_API_KEY` → one compact JSON → R2 `weather/latest.json`, `Cache-Control: public, max-age=300`, served straight from the webcam host like `manifest.json` (no Worker in the path). Code: `src/weather.ts`.
+  - `F-C0032-001`: the 36-hour county (縣市) forecast. Kept per county and period: start/end (Taiwan time, ISO 8601 with `+08:00`), Wx code and CWA's text, PoP, MinT, MaxT. CI (comfort) is dropped: the app doesn't show it.
+  - `O-A0003-001`: CWA's staffed stations. Kept per station: id, name, county, WGS84 lat/lon, observation time, temperature, humidity, rain since midnight (`Now.Precipitation`), wind speed. CWA's missing-value markers (`-99`, `-990`, …) become `null`; a station with no reading left is dropped.
+- **Shape:** `{ version: 1, updatedAt, forecast: { fetchedAt, counties: { "臺北市": [period…] } } | null, observations: { fetchedAt, stations: [station…] } | null }`. County names use 臺 as CWA writes them. Free text (Wx descriptions, station names) stays zh-Hant; the app maps Wx codes to its own strings.
+- **Last good wins.** Each set is fetched and parsed on its own. One that fails (HTTP error, non-JSON body, `success` not true, nothing usable) keeps its section from the previous file; the file is rewritten only when at least one set is new, and left untouched when both fail. Nothing is deleted.
+- **Wx codes:** CWA's table (預報產品天氣描述代碼表) is 1–42 without 40 (`WX_CODES`). A code outside it is still stored and listed in the sync status as `unknownWx`, so a new code is noticed before the app learns it.
+- **Free plan:** two fetches, one R2 read and two writes per run. Parsing both sets at full size (22 counties; 80 stations, more than CWA's staffed network) took 6.2 ms on a cold first run and ~0.5 ms after, in Node 25's V8 (the same engine), against the Free plan's 10 ms CPU per invocation; time spent waiting on CWA or R2 isn't CPU. The Worker's observability logs show each run's real CPU time.
+
+| Route | |
+| --- | --- |
+| `GET /weather` | Outcome of the last sync (`{ ok, at, result \| error }`; `result` has `forecast` / `observations` = `updated` \| `kept` \| `missing`, counts, `unknownWx`, and the error of a set that wasn't updated), kept in R2 at `weather/last-sync.json` |
+| `POST /weather/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN` |
+
+Checking a deploy by hand:
+
+```sh
+# WORKER = the Worker's workers.dev URL, HOST = the webcam host (wrangler.jsonc)
+curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" "$WORKER/weather/sync"
+curl -s "https://$HOST/weather/latest.json" | jq '{updatedAt, counties: (.forecast.counties | keys | length), stations: (.observations.stations | length)}'
+```
+
+Local testing against a mock CWA (no key needed): `npx wrangler dev --var CWA_API_BASE:http://127.0.0.1:8799` with `CWA_API_KEY` in `.dev.vars`, serving `/F-C0032-001` and `/O-A0003-001` (the fixtures in `test/fixtures/` work).
+
 ## Deploy
 
 GitHub Actions deploys this Worker when a merge to master changes `workers/twaqi-workers/` (see `.github/workflows/workers.yml`). Run the **Workers** workflow by hand to redeploy.
@@ -113,6 +139,8 @@ gh secret set SYNC_TOKEN -R 7kfpun/SwiftUI-TWAQI --env workers-production
 gh secret set DIRECTUS_FORECAST_TOKEN -R 7kfpun/SwiftUI-TWAQI --env workers-production
 # OpenRouter key for pre-translating the forecast text
 gh secret set OPENROUTER_FORECAST_API_KEY -R 7kfpun/SwiftUI-TWAQI --env workers-production
+# CWA open-data key (授權碼) for the weather sync; it never goes to the app
+gh secret set CWA_API_KEY -R 7kfpun/SwiftUI-TWAQI --env workers-production
 ```
 
 Local development:

@@ -1,0 +1,466 @@
+{
+ "success": "true",
+ "result": {
+  "resource_id": "F-C0032-001",
+  "fields": [
+   {
+    "id": "datasetDescription",
+    "type": "String"
+   },
+   {
+    "id": "locationName",
+    "type": "String"
+   }
+  ]
+ },
+ "records": {
+  "datasetDescription": "三十六小時天氣預報",
+  "location": [
+   {
+    "locationName": "臺北市",
+    "weatherElement": [
+     {
+      "elementName": "Wx",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "多雲",
+         "parameterValue": "4"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "多雲短暫雨",
+         "parameterValue": "8"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "陰短暫雨",
+         "parameterValue": "11"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "PoP",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "10",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "30",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "60",
+         "parameterUnit": "百分比"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MinT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "23",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "21",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "20",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "CI",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "稍有寒意至舒適"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MaxT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "27",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "24",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "23",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "locationName": "花蓮縣",
+    "weatherElement": [
+     {
+      "elementName": "Wx",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "晴時多雲",
+         "parameterValue": "2"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "多雲",
+         "parameterValue": "4"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "多雲時晴",
+         "parameterValue": "3"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "PoP",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "0",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "10",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "10",
+         "parameterUnit": "百分比"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MinT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "22",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "20",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "21",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "CI",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MaxT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "28",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "24",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "27",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "locationName": "嘉義縣",
+    "weatherElement": [
+     {
+      "elementName": "Wx",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "陰時多雲有雷陣雨",
+         "parameterValue": "17"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "陣雨或雷雨有霧",
+         "parameterValue": "41"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "下雪",
+         "parameterValue": "42"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "PoP",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "80",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "70",
+         "parameterUnit": "百分比"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "20",
+         "parameterUnit": "百分比"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MinT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "18",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "-99",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "15",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "CI",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "舒適"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "寒冷"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "寒冷"
+        }
+       }
+      ]
+     },
+     {
+      "elementName": "MaxT",
+      "time": [
+       {
+        "startTime": "2026-11-05 12:00:00",
+        "endTime": "2026-11-05 18:00:00",
+        "parameter": {
+         "parameterName": "22",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-05 18:00:00",
+        "endTime": "2026-11-06 06:00:00",
+        "parameter": {
+         "parameterName": "20",
+         "parameterUnit": "C"
+        }
+       },
+       {
+        "startTime": "2026-11-06 06:00:00",
+        "endTime": "2026-11-06 18:00:00",
+        "parameter": {
+         "parameterName": "-",
+         "parameterUnit": "C"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "locationName": "無資料縣",
+    "weatherElement": []
+   }
+  ]
+ }
+}

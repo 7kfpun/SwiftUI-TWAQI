@@ -67,6 +67,15 @@ class DetailsViewModel: ObservableObject {
     /// screen then shows no forecast section at all.
     @Published var forecast: AreaForecast?
 
+    /// CWA weather near this station (FOX-11): the nearest CWA station's
+    /// reading and the county forecast. Nil until loaded, and stays nil when
+    /// there is nothing in range — the screen then shows no weather card.
+    @Published var weather: StationWeather?
+
+    /// The station's county in the app's language, for the weather card's
+    /// heading.
+    @Published var weatherCountyTitle: String?
+
     /// `pollutant` seeds a reading the caller already holds, so the heart
     /// works before the first load answers.
     init(stationId: Int, historicalPollutants: HistoricalPollutants = [], pollutant: Pollutant? = nil) {
@@ -97,6 +106,7 @@ class DetailsViewModel: ObservableObject {
             self.pollutant = saved
             self.findCam(name: saved.nameLocal, lat: saved.lat, lon: saved.lon)
             self.findForecast(areaLocal: saved.areaLocal, countyLocal: saved.countyLocal, title: saved.displayArea)
+            self.findWeather(lat: saved.lat, lon: saved.lon, county: saved.county, countyLocal: saved.countyLocal)
         }
         self.generation += 1
         let generation = self.generation
@@ -122,6 +132,7 @@ class DetailsViewModel: ObservableObject {
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
+                    self.findWeather(lat: station.lat, lon: station.lon, county: station.county, countyLocal: station.countyLocal)
                 }
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
@@ -145,6 +156,7 @@ class DetailsViewModel: ObservableObject {
                     self.isNotReporting = false
                     self.findCam(name: pollutant.nameLocal, lat: pollutant.lat, lon: pollutant.lon)
                     self.findForecast(areaLocal: pollutant.areaLocal, countyLocal: pollutant.countyLocal, title: pollutant.displayArea)
+                    self.findWeather(lat: pollutant.lat, lon: pollutant.lon, county: pollutant.county, countyLocal: pollutant.countyLocal)
                 } else {
                     self.isNotReporting = true
                     // Online, so whatever is on screen is not an offline fallback.
@@ -270,6 +282,20 @@ class DetailsViewModel: ObservableObject {
                 in: forecasts,
                 title: title
             )
+        }
+    }
+
+    /// Called by both station requests, like `findCam`; the first match wins.
+    /// The join is by position and county name: CWA station ids are a
+    /// numbering of their own.
+    private func findWeather(lat: Double, lon: Double, county: String?, countyLocal: String?) {
+        guard weather == nil else { return }
+
+        StationWeatherStore.shared.weather { file in
+            guard self.weather == nil, let file = file else { return }
+            guard let weather = StationWeatherMatcher.weather(lat: lat, lon: lon, countyLocal: countyLocal, in: file) else { return }
+            self.weatherCountyTitle = Locale.isChinese ? countyLocal : county
+            self.weather = weather
         }
     }
 

@@ -147,12 +147,16 @@ struct DetailsView: View {
 
                 Separator().frame(height: 8)
 
-                // Where that number is heading, and what it looks like
-                // outside. The forecast is absent, not empty, when there is
-                // none to show.
+                // Where that number is heading, the weather behind it, and
+                // what it looks like outside. The forecast and the weather
+                // are absent, not empty, when there is none to show.
                 VStack(alignment: .leading, spacing: 16) {
                     if let forecast = viewModel.forecast {
                         AreaForecastView(forecast: forecast)
+                    }
+
+                    if let weather = viewModel.weather {
+                        StationWeatherView(weather: weather, countyTitle: viewModel.weatherCountyTitle)
                     }
 
                     StationCamView(state: viewModel.cam)
