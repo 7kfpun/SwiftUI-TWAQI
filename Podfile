@@ -20,11 +20,9 @@ target 'TWAQI' do
   # October 2026. Nothing left here shares a dependency with it.
   pod 'Google-Mobile-Ads-SDK', '~> 12.5'
 
-  pod 'Bugsnag', '~> 5.23'
   # Kept alongside FCM so OneSignal can be switched back on (it gets the
   # same alert tags); FCM is the live sender. No service extension.
   pod 'OneSignalXCFramework', '>= 3.0.0', '< 4.0'
-  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '5.0.4'
 
   # Host-app tests: they link against the app, so they only need the pods'
   # header and framework search paths, not another copy of every pod.
@@ -36,33 +34,6 @@ end
 post_install do |installer|
   installer.pods_project.build_configurations.each do |config|
     config.build_settings.delete("EXCLUDED_ARCHS[sdk=iphonesimulator*]")
-  end
-
-  # Sentry is pinned to the 5.0.4 tag from 2020 and does not compile against a
-  # current SDK: these files reached system types through headers that no longer
-  # include them transitively. Patching here rather than by hand because Pods/
-  # is gitignored, so a manual edit is lost on the next reinstall.
-  #
-  # This is a stopgap. The app already ships Firebase Crashlytics *and* Bugsnag,
-  # so Sentry is a third crash reporter — the durable fix is to drop it or move
-  # to a supported release, not to keep chasing missing includes.
-  {
-    "Sentry/Sources/SentryCrash/Recording/Monitors/SentryCrashMonitor_CPPException.cpp" =>
-      ["#include <typeinfo>", "#include <exception>"],
-    "Sentry/Sources/SentryCrash/Recording/Tools/SentryCrashMachineContext.c" =>
-      ["#include \"SentryCrashMachineContext.h\"", "#include <sys/_types/_ucontext64.h>"],
-  }.each do |relative, (anchor, include_line)|
-    file = File.join(installer.sandbox.root, relative)
-    next unless File.exist?(file)
-
-    source = File.read(file)
-    next if source.include?(include_line)
-    next unless source.include?(anchor)
-
-    # Pods fetched from git are checked out read-only.
-    File.chmod(0o644, file)
-    File.write(file, source.sub(anchor, "#{include_line}\n#{anchor}"))
-    Pod::UI.puts "Patched #{File.basename(file)}: added #{include_line}"
   end
 
   # App Store Connect rejects any binary containing bitcode (error 90482).

@@ -8,13 +8,11 @@
 
 import UIKit
 
-import Bugsnag
 import FirebaseCore
 import FirebaseMessaging
 import GoogleMaps
 import GoogleMobileAds
 import OneSignal
-import Sentry
 import UserNotifications
 
 @UIApplicationMain
@@ -52,17 +50,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Offline data saved more than a week ago is never shown; delete it.
         OfflineCacheRetention.purgeInBackground()
 
-        // A device excluded from reporting (Help's hidden version toggle, or any
-        // DEBUG run) starts none of the crash reporters.
-        let reportsThisLaunch = !TrackingManager.isExcludedThisLaunch
-
-        // Initialize the Bugsnag SDK.
-        if reportsThisLaunch, let bugsnagApiKey = getEnv("BugsnagApiKey") {
-            Bugsnag.start(withApiKey: bugsnagApiKey)
-        }
-
         // Use Firebase library to configure APIs (Analytics, Crashlytics and
-        // Messaging).
+        // Messaging). Crashlytics is the only crash reporter. A device excluded
+        // from reporting (Help's hidden version toggle, or any DEBUG run) has
+        // its collection switched off right after.
         FirebaseApp.configure()
         TrackingManager.applyExclusionAtLaunch()
         // The watch has no Firebase; its events come over WatchConnectivity.
@@ -80,16 +71,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Google Map Service
         if let gmsServicesApiKey = getEnv("GMSServicesApiKey") {
             GMSServices.provideAPIKey(gmsServicesApiKey)
-        }
-
-        // Initialize Sentry service.
-        if reportsThisLaunch, let sentryDSN = getEnv("SentryDSN") {
-            var sentryOptions: [String: Any] = ["dsn": sentryDSN]
-            #if DEBUG
-            // Verbose SDK logging is for development only.
-            sentryOptions["debug"] = true
-            #endif
-            SentrySDK.start(options: sentryOptions)
         }
 
         StoreReviewHelper.incrementAppOpenedCount()

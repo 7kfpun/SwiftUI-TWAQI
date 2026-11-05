@@ -258,6 +258,8 @@
 - **L4 — Sentry debug logging in release builds.**
   - `AppDelegate.swift:61-66` starts Sentry with `"debug": true` unconditionally, so release builds
     log verbosely.
+  - Resolved by FOX-85: Sentry (and Bugsnag) are removed; Firebase Crashlytics is the only
+    crash reporter.
 - **L5 — Some favourites can't be seen or removed.**
   - A favourite with no current or saved reading (retired, or not reporting) is dropped from the
     list (`FavouriteListViewModel.swift:146-156`). It can't be removed, or have its alerts cleared,
