@@ -37,10 +37,11 @@ plus these:
 | required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
 | required: `Workers` | Workers | One summary check on every PR, green when no Worker changed. |
+| required: `Android` | Android | One check on every PR to `master` (FOX-52): ktlint, Android lint, JVM unit tests and a debug build. Green at once on drafts and when nothing under `android/` or `.github/workflows/android.yml` changed. Added after the FOX-52 merge, see [below](#android-check-fox-52). |
 | required: `LGTM` | LGTM | Commit status set from another agent's review (see below). |
 | `bypass_actors` | none | Every actor here, Orca and Mini included, uses the owner's admin account. An admin bypass would exempt the agents too, so there is none. |
 
-`integration_id: 15368` is GitHub Actions: those five checks can only be satisfied by a
+`integration_id: 15368` is GitHub Actions: those checks can only be satisfied by a
 workflow. `LGTM` is a commit *status*, not a check run, and it is left without an
 `integration_id` on purpose. It isn't confirmed that a ruleset matches a status posted with
 `GITHUB_TOKEN` to the Actions app, and if it doesn't, every PR would be blocked. The
@@ -126,6 +127,31 @@ Then, on the next PR:
   status should turn green and the merge box should stop listing `LGTM` as expected.
 - Any PR opened before this change has to be updated from `master` once so that it picks
   up the new checks.
+
+## Android check (FOX-52)
+
+`Android` ([`android.yml`](../.github/workflows/android.yml)) reports on every PR to
+`master`, so it can be required. Make it required **after** the FOX-52 PR is merged: a
+pull request runs the workflows of its merge with `master`, so before that merge no
+other PR would ever report `Android` and every one of them would be blocked.
+
+Add it to the live ruleset without touching its other rules (the live required checks
+may differ from `master-ruleset.json`, so don't PUT that file just for this):
+
+```sh
+gh api repos/7kfpun/SwiftUI-TWAQI/rulesets/25890340 > /tmp/master-ruleset.before.json
+jq '{name, target, enforcement, conditions, bypass_actors, rules: [.rules[]
+      | if .type == "required_status_checks"
+        then .parameters.required_status_checks |=
+          (map(select(.context != "Android")) + [{"context": "Android", "integration_id": 15368}])
+        else . end]}' /tmp/master-ruleset.before.json \
+  | gh api --method PUT repos/7kfpun/SwiftUI-TWAQI/rulesets/25890340 --input -
+gh api repos/7kfpun/SwiftUI-TWAQI/rulesets/25890340 \
+  --jq '.rules[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context'
+```
+
+Undo: PUT `/tmp/master-ruleset.before.json` back the same way. Until this is applied,
+`Android` is visible on every PR but advisory.
 
 ## Rollback
 

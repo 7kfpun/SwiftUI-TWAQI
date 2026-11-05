@@ -35,6 +35,7 @@
           { "context": "PR policy", "integration_id": 15368 },
           { "context": "Secret files", "integration_id": 15368 },
           { "context": "Workers", "integration_id": 15368 },
+          { "context": "Android", "integration_id": 15368 },
           { "context": "LGTM" }
         ]
       }
