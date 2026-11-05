@@ -35,6 +35,7 @@ import com.kfpun.twaqi.analytics.VersionTapCounter
 import com.kfpun.twaqi.feedback.FeedbackSource
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.ui.settings.AppearanceRow
+import com.kfpun.twaqi.ui.settings.DoNotDisturbRows
 import com.kfpun.twaqi.ui.settings.LanguageRow
 
 /**
@@ -87,6 +88,11 @@ private fun LazyListScope.section(section: HelpSection, onOpenPro: () -> Unit, o
         HelpSection.PURCHASE -> item(key = "purchase") {
             SectionHeader(stringResource(R.string.help_in_app_purchase))
             LinkRow(stringResource(R.string.help_ad_free), onClick = onOpenPro, emphasized = true)
+        }
+
+        HelpSection.DO_NOT_DISTURB -> item(key = "dnd") {
+            SectionHeader(stringResource(R.string.help_do_not_disturb))
+            DoNotDisturbRows()
         }
 
         HelpSection.LANGUAGE -> item(key = "language") {

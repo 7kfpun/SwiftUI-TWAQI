@@ -6,6 +6,11 @@
     <!-- Pro is re-read from Google Play on every start; a copy restored on
          another phone or account must not unlock it there (FOX-58). -->
     <exclude domain="file" path="datastore/pro.preferences_pb" />
+    <!-- Push (FOX-57): the device id and secret, and this install's sync state, stay on this
+         install. The alerts and quiet hours (push_settings) are backed up and written to the
+         new install's own row. -->
+    <exclude domain="sharedpref" path="push_identity.xml" />
+    <exclude domain="sharedpref" path="push_sync.xml" />
     <!-- Per-install: the analytics opt-out and the feedback's anonymous id (FOX-60). -->
     <exclude domain="sharedpref" path="install.xml" />
 </full-backup-content>

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.kfpun.twaqi.feedback.FeedbackNavigation
 import com.kfpun.twaqi.feedback.FeedbackSource
+import com.kfpun.twaqi.push.AlertsUnavailableCard
+import com.kfpun.twaqi.push.StationAlertsCard
 import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
 import com.kfpun.twaqi.ui.station.cam.StationCamSection
@@ -24,7 +26,8 @@ data class StationRoute(val stationId: Int)
 /**
  * The station page (FOX-55) for [route], with its own view model each time it opens, cleared on
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
- * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60).
+ * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60), and
+ * its alerts slot holds the station's alert switches (FOX-57).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -40,9 +43,15 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             stationId = route.stationId,
             onBack = onBack,
             modifier = modifier,
-            // FOX-92: the station cam with its 24-hour history.
-            slots = StationPageSlots(cam = { StationCamSection(it) }),
-            onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) }
+            onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) },
+            slots = StationPageSlots(
+                // FOX-57: the alert switches, or why they can't be shown yet.
+                alerts = { state, retry ->
+                    if (state.stationLoadFailed) AlertsUnavailableCard(retry) else StationAlertsCard(route.stationId)
+                },
+                // FOX-92: the station cam with its 24-hour history.
+                cam = { StationCamSection(it) }
+            )
         )
     }
 }

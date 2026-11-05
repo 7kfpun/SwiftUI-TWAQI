@@ -1,5 +1,7 @@
 package com.kfpun.twaqi.ui.station
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +41,11 @@ import com.kfpun.twaqi.R
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.ads.AdBanner
 import com.kfpun.twaqi.ads.AdPlacement
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsHint
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.StationType
 import com.kfpun.twaqi.locale.AppLocale
+import com.kfpun.twaqi.push.FavouriteAlerts
 import com.kfpun.twaqi.ui.common.OfflineEmptyState
 import com.kfpun.twaqi.ui.common.OfflineNotice
 import java.time.Instant
@@ -106,6 +110,7 @@ fun StationScreen(
         onToggleFavourite = viewModel::toggleFavourite,
         onConfirmUnfavourite = viewModel::removeFromFavourites,
         onDismissUnfavourite = viewModel::dismissUnfavourite,
+        onDismissFavouriteAlertsHint = viewModel::dismissFavouriteAlertsHint,
         onOpenDefinition = onOpenDefinition ?: { DefinitionLinks.open(context, it, chinese) },
         // The form logs `open_feedback_form` (source station_page) itself when it opens (FOX-60).
         onSendFeedback = onSendFeedback,
@@ -124,6 +129,7 @@ fun StationContent(
     onToggleFavourite: () -> Unit,
     onConfirmUnfavourite: () -> Unit,
     onDismissUnfavourite: () -> Unit,
+    onDismissFavouriteAlertsHint: () -> Unit = {},
     onOpenDefinition: (AirIndexType) -> Unit,
     onSendFeedback: (() -> Unit)?,
     slots: StationPageSlots,
@@ -263,6 +269,51 @@ fun StationContent(
             }
         )
     }
+
+    // Favourited, but its alerts couldn't be switched on: one line on why, and the way to fix it
+    // when it's a setting (iOS `favouriteAlertsHint`, FOX-57).
+    state.favouriteAlertsHint?.let { hint ->
+        FavouriteAlertsHintDialog(hint, onDismissFavouriteAlertsHint)
+    }
+}
+
+@Composable
+private fun FavouriteAlertsHintDialog(hint: FavouriteAlertsHint, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.favourites_added_to_favourites)) },
+        text = {
+            Text(
+                when (hint) {
+                    FavouriteAlertsHint.CAP_REACHED -> stringResource(
+                        R.string.favourites_alerts_cap_reached_message,
+                        FavouriteAlerts.MAX_ALERTED_STATIONS
+                    )
+
+                    FavouriteAlertsHint.NOTIFICATIONS_DENIED -> stringResource(
+                        R.string.favourites_notifications_off_message
+                    )
+                }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.favourites_ok)) }
+        },
+        dismissButton = if (hint == FavouriteAlertsHint.NOTIFICATIONS_DENIED) {
+            {
+                TextButton(onClick = {
+                    onDismiss()
+                    context.startActivity(
+                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    )
+                }) { Text(stringResource(R.string.favourites_open_settings)) }
+            }
+        } else {
+            null
+        }
+    )
 }
 
 /** Disabled until the station is known to exist, unless it is already a favourite (iOS FOX-74). */

@@ -16,6 +16,7 @@ import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.data.remote.ApiConfig
 import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
+import com.kfpun.twaqi.push.PushGraph
 import java.io.File
 
 /**
@@ -36,8 +37,8 @@ class AppContainer(
     val airQuality = AirQualityRepository(api, store, PollutantCache(store))
     val forecasts = ForecastRepository(api, store)
 
-    /** FOX-55; FOX-57 passes its alerts gateway here. */
-    val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context))
+    /** FOX-55, with its alerts kept in step (FOX-57): unfavouriting turns a station's alerts off. */
+    val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context), PushGraph.favouriteAlerts(context))
 
     /** FOX-92: the station cams on the webcam host, their frames and hourly history under [cacheRoot]. */
     private val camEndpoints = StationCamEndpoints(stationCamsUrl)
