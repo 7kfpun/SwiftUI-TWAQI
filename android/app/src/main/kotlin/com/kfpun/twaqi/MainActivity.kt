@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.theme.TWAQITheme
 
 class MainActivity : ComponentActivity() {
@@ -23,13 +24,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TWAQITheme {
-                HomeScreen()
+                // Debug builds open the data-layer check screen until the real screens land.
+                if (BuildConfig.DEBUG) DataDebugScreen() else HomeScreen()
             }
         }
     }
 }
 
-/** Placeholder home screen; the map, list and details come with FOX-53 and later. */
+/** Placeholder home screen; the map, list and details come with the later Android tickets. */
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
     Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->

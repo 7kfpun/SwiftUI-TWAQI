@@ -1,4 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Taiwan Air</string>
+    <!-- The same name in every language, as on iOS. -->
+    <string name="app_name" translatable="false">Taiwan Air</string>
+
+    <!-- From ios/TWAQI/Localization Localizable.strings (FOX-53). -->
+    <string name="air_status_good">Good</string>
+    <string name="air_status_moderate">Moderate</string>
+    <string name="air_status_unhealthyforsensitivegroup">Unhealthy for sensitive groups</string>
+    <string name="air_status_unhealthy">Unhealthy</string>
+    <string name="air_status_veryunhealthy">Very unhealthy</string>
+    <string name="air_status_hazardous">Hazardous</string>
+    <string name="air_status_unknown">\-</string>
+    <string name="air_status_general_public_guidance_good">Enjoy your usual outdoor activities</string>
+    <string name="air_status_general_public_guidance_moderate">Enjoy your usual outdoor activities</string>
+    <string name="air_status_general_public_guidance_unhealthyforsensitivegroup">Consider reducing outdoor activities</string>
+    <string name="air_status_general_public_guidance_unhealthy">Should reduce physical exertion, particularly outdoors</string>
+    <string name="air_status_general_public_guidance_veryunhealthy">Reduce outdoor activities</string>
+    <string name="air_status_general_public_guidance_hazardous">Avoid outdoor activities and keep doors and windows closed</string>
+    <string name="air_status_sensitive_group_guidance_good">Enjoy your usual outdoor activities</string>
+    <string name="air_status_sensitive_group_guidance_moderate">Can still be active outside</string>
+    <string name="air_status_sensitive_group_guidance_unhealthyforsensitivegroup">Reduce physical exertion and outdoor activities</string>
+    <string name="air_status_sensitive_group_guidance_unhealthy">Stay indoors and reduce physical exertion</string>
+    <string name="air_status_sensitive_group_guidance_veryunhealthy">Stay indoors and reduce physical exertion</string>
+    <string name="air_status_sensitive_group_guidance_hazardous">Stay indoors and avoid physical exertion</string>
+    <string name="station_type_general">General</string>
+    <string name="station_type_traffic">Roadside</string>
+    <string name="station_type_industrial">Industrial</string>
+    <string name="station_type_background">Background</string>
+    <string name="station_type_national_park">National park</string>
+    <string name="station_type_other">Other</string>
+    <string name="offline_showing_saved_readings">Offline — showing the last saved readings</string>
+    <string name="offline_updated_ago">Offline · updated %1$s</string>
+    <string name="offline_nothing_saved">Can\'t connect, and there\'s nothing saved to show. Check your connection and try again.</string>
+    <string name="offline_retry">Try Again</string>
+    <string name="details_last_updated">Last updated</string>
+
+    <!-- Debug-only data-layer check screen; never shown in a release build. -->
+    <string name="debug_data_title" translatable="false">Data layer</string>
+    <string name="debug_data_counts" translatable="false">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>
 </resources>

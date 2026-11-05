@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From ios/TWAQI/Localization Localizable.strings (FOX-53). -->
+    <string name="air_status_good">良好</string>
+    <string name="air_status_moderate">普通</string>
+    <string name="air_status_unhealthyforsensitivegroup">對敏感族群不健康</string>
+    <string name="air_status_unhealthy">對所有族群不健康</string>
+    <string name="air_status_veryunhealthy">非常不健康</string>
+    <string name="air_status_hazardous">危害</string>
+    <string name="air_status_unknown">－</string>
+    <string name="air_status_general_public_guidance_good">可正常從事戶外活動</string>
+    <string name="air_status_general_public_guidance_moderate">可正常從事戶外活動</string>
+    <string name="air_status_general_public_guidance_unhealthyforsensitivegroup">建議減少戶外活動</string>
+    <string name="air_status_general_public_guidance_unhealthy">建議減少體力消耗活動，尤其是戶外活動</string>
+    <string name="air_status_general_public_guidance_veryunhealthy">建議減少戶外活動</string>
+    <string name="air_status_general_public_guidance_hazardous">避免戶外活動，並緊閉門窗</string>
+    <string name="air_status_sensitive_group_guidance_good">可正常從事戶外活動</string>
+    <string name="air_status_sensitive_group_guidance_moderate">仍可從事戶外活動</string>
+    <string name="air_status_sensitive_group_guidance_unhealthyforsensitivegroup">建議減少體力消耗及戶外活動</string>
+    <string name="air_status_sensitive_group_guidance_unhealthy">建議留在室內並減少體力消耗活動</string>
+    <string name="air_status_sensitive_group_guidance_veryunhealthy">建議留在室內並減少體力消耗活動</string>
+    <string name="air_status_sensitive_group_guidance_hazardous">應留在室內並避免體力消耗活動</string>
+    <string name="station_type_general">一般測站</string>
+    <string name="station_type_traffic">交通測站</string>
+    <string name="station_type_industrial">工業測站</string>
+    <string name="station_type_background">背景測站</string>
+    <string name="station_type_national_park">國家公園測站</string>
+    <string name="station_type_other">其他測站</string>
+    <string name="offline_showing_saved_readings">目前離線，顯示最後儲存的資料</string>
+    <string name="offline_updated_ago">離線・%1$s更新</string>
+    <string name="offline_nothing_saved">目前無法連線，也沒有已儲存的資料。請檢查網路連線後再試一次。</string>
+    <string name="offline_retry">重試</string>
+    <string name="details_last_updated">最後更新</string>
+</resources>

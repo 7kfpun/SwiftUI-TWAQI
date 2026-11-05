@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="root" path="cache" />
+    <!-- Offline caches (FOX-53): refetched, and purged after a week. -->
+    <exclude domain="file" path="offline-cache" />
 </full-backup-content>
