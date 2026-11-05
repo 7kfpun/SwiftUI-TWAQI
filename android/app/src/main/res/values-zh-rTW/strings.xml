@@ -540,4 +540,34 @@
     <string name="details_back">返回</string>
     <string name="details_about_index">關於 %s</string>
     <string name="details_map">測站位置地圖</string>
+    <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's
+         Siri, Shortcuts and Control Center strings (Intent.*, Control.*). -->
+    <string name="intent_get_air_quality_title">查詢空氣品質</string>
+    <string name="intent_get_air_quality_short">空氣品質</string>
+    <string name="intent_open_station_title">開啟測站</string>
+    <string name="intent_answer_fallback_favourite">Taiwan Air 無法取得你的位置，以下是你的第一個最愛測站。</string>
+    <string name="intent_answer_fallback_default">Taiwan Air 無法取得你的位置，你也還沒有最愛測站，以下是臺北市中正區附近的測站。</string>
+    <string name="intent_answer_no_reading">目前還沒有數值。請在有網路時開啟 Taiwan Air 一次。</string>
+    <string name="intent_answer_no_aqi">%s目前沒有 AQI 數值。</string>
+    <string name="intent_answer_reading">%1$s：AQI %2$s，%3$s。</string>
+    <string name="intent_answer_main_pollutant">主要污染物：%s。</string>
+    <string name="intent_answer_guidance">%s。</string>
+    <string name="intent_answer_cached_age">目前沒有網路，這是最後儲存的數值，為 %s前的資料。</string>
+    <string name="intent_answer_cached">目前沒有網路，這是最後儲存的數值。</string>
+    <string name="intent_answer_old_age">這筆數值是 %s前發布的。</string>
+    <string name="control_display_name">空氣品質</string>
+    <!-- Android only (FOX-95): the answer card's close button, and what Assistant hears for the
+         "Air quality" shortcut (actions.intent.OPEN_APP_FEATURE). -->
+    <string name="intent_answer_close">關閉</string>
+    <string name="intent_assistant_feature_air_quality">空氣品質</string>
+    <!-- How old a reading is, as iOS DateComponentsFormatter (.full, one unit) says it. -->
+    <plurals name="intent_age_minutes">
+        <item quantity="other">%d分鐘</item>
+    </plurals>
+    <plurals name="intent_age_hours">
+        <item quantity="other">%d小時</item>
+    </plurals>
+    <plurals name="intent_age_days">
+        <item quantity="other">%d天</item>
+    </plurals>
 </resources>
