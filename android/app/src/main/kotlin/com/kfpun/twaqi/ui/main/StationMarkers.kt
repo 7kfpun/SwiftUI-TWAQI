@@ -4,10 +4,32 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.AirStatus
+import com.kfpun.twaqi.data.model.HistoricalPollutant
 import com.kfpun.twaqi.data.model.Pollutant
+import com.kfpun.twaqi.data.model.wind
 
 /**
- * Everything that decides how a station's marker is drawn (iOS `MarkerAppearance`).
+ * What a marker draws (iOS `MarkerAppearance.Shape`).
+ *
+ * - [Pill]: the selected index's reading on its band colour.
+ * - [Arrow]: wind mode, an arrow whose length carries the speed ([Wind.strengthLevel]), rotated by
+ *   [bearing] (where the wind comes *from*) to point downwind. Deliberately arrow-only: the mode
+ *   exists to read pollution *movement* across the island at a glance, and the colour still carries
+ *   the selected index's band.
+ * - [Calm]: wind mode, no wind: a ring, so still air doesn't read as a gap.
+ */
+sealed interface MarkerShape {
+    data object Pill : MarkerShape
+
+    data class Arrow(val strengthLevel: Int, val bearing: Float) : MarkerShape
+
+    data object Calm : MarkerShape
+}
+
+/**
+ * Everything that decides how a station's marker is drawn (iOS `MarkerAppearance`). The renderer
+ * only touches a marker whose appearance changed, so stepping through the timeline costs a handful
+ * of icon swaps rather than restyling every station (iOS FOX-69).
  *
  * @property text the reading in the selected index's decimals, or "-" when the station reports 0
  *   (many don't measure every pollutant).
@@ -20,7 +42,8 @@ data class MarkerAppearance(
     val status: AirStatus,
     val color: Int,
     val foregroundColor: Int,
-    val alpha: Float
+    val alpha: Float,
+    val shape: MarkerShape = MarkerShape.Pill
 ) {
     companion object {
         /** Markers outside the supported country read as "context, not tappable" rather than "broken". */
@@ -29,27 +52,36 @@ data class MarkerAppearance(
         /** Ceiling for a station with no reading at the timeline's hour: faded, so it reads as missing. */
         const val MISSING_DATA_ALPHA = 0.55f
 
-        /**
-         * @param hasData false when the station has no reading at the timeline's hour (FOX-91).
-         * @param mode [MapMode.WIND] is drawn by FOX-91; until then it draws as [MapMode.POLLUTANT].
-         */
+        /** @param hasData false when the station has no reading at the timeline's hour. */
         fun of(
             pollutant: Pollutant,
             type: AirIndexType,
             isInteractive: Boolean,
             hasData: Boolean = true,
-            @Suppress("UNUSED_PARAMETER") mode: MapMode = MapMode.POLLUTANT
+            mode: MapMode = MapMode.POLLUTANT
         ): MarkerAppearance {
             val value = pollutant.value(type)
             val status = AirStatus.of(type, value)
             var alpha = if (isInteractive) 1f else MUTED_ALPHA
             if (!hasData) alpha = minOf(alpha, MISSING_DATA_ALPHA)
+            val shape = when (mode) {
+                MapMode.POLLUTANT -> MarkerShape.Pill
+
+                MapMode.WIND -> pollutant.wind.let { wind ->
+                    if (wind.isCalm) {
+                        MarkerShape.Calm
+                    } else {
+                        MarkerShape.Arrow(wind.strengthLevel, wind.arrowRotation.toFloat())
+                    }
+                }
+            }
             return MarkerAppearance(
                 text = if (value != 0.0) type.format(value) else "-",
                 status = status,
                 color = status.color,
                 foregroundColor = status.foregroundColor,
-                alpha = alpha
+                alpha = alpha,
+                shape = shape
             )
         }
     }
@@ -88,9 +120,9 @@ class MapStation(
 /**
  * Builds the map's stations from the loaded readings.
  *
- * The timeline (FOX-91) plugs in through [hour] and [readingAt]: with an [hour] (a publish time,
- * `"2026-11-06 14:00:00"`), each station shows [readingAt]'s reading for it, or its live reading
- * faded when there is none. A null [hour] is live, and is all this ticket draws.
+ * At [hoursAgo] 0 every station shows its live reading. Further back, each country's hour is
+ * [hoursAgo] before its own latest publish time, and each station shows [readingAt]'s reading for
+ * that hour, or a faded grey "-" when there is none (iOS `displayedPollutant`).
  */
 object MarkerSource {
     fun stations(
@@ -99,14 +131,14 @@ object MarkerSource {
         type: AirIndexType,
         chinese: Boolean,
         mode: MapMode = MapMode.POLLUTANT,
-        hour: String? = null,
-        readingAt: (Pollutant, String) -> Pollutant? = { _, _ -> null }
+        hoursAgo: Int = 0,
+        readingAt: (stationId: Int, hour: String) -> HistoricalPollutant? = { _, _ -> null }
     ): List<MapStation> = countryPollutants.flatMap { (countryCode, pollutants) ->
         val isInteractive = countryCode == supportedCountryCode
+        // Worked out once per country rather than per station.
+        val hour = timelineHour(pollutants, hoursAgo)
         pollutants.map { live ->
-            val reading = hour?.let { readingAt(live, it) }
-            val shown = reading ?: live
-            val hasData = hour == null || reading != null
+            val (shown, hasData) = displayed(live, hour, readingAt)
             MapStation(
                 countryCode = countryCode,
                 pollutant = shown,
@@ -115,5 +147,22 @@ object MarkerSource {
                 label = shown.displayName(chinese)
             )
         }
+    }
+
+    /** The publish hour the timeline is on for these stations' country, or null at "now". */
+    fun timelineHour(pollutants: Collection<Pollutant>, hoursAgo: Int): String? {
+        if (hoursAgo <= 0) return null
+        return MapTimeline.anchor(pollutants)?.let { MapTimeline.publishTime(it, hoursAgo) }
+    }
+
+    /** What a station shows at [hour] and whether there is a reading behind it; live when [hour] is null. */
+    fun displayed(
+        live: Pollutant,
+        hour: String?,
+        readingAt: (stationId: Int, hour: String) -> HistoricalPollutant?
+    ): Pair<Pollutant, Boolean> {
+        if (hour == null) return live to true
+        val reading = readingAt(live.stationId, hour)
+        return live.at(hour, reading) to (reading != null)
     }
 }
