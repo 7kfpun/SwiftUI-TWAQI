@@ -202,6 +202,7 @@ jobs:
           DIRECTUS_PUSH_TOKEN: ${{ secrets.DIRECTUS_PUSH_TOKEN }}
           AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
           OPENROUTER_FORECAST_API_KEY: ${{ secrets.OPENROUTER_FORECAST_API_KEY }}
+          TWAQI_API_ORIGIN_TOKEN: ${{ secrets.TWAQI_API_ORIGIN_TOKEN }}
         run: |
           set -euo pipefail
           # Copy only the names this Worker lists under secrets.required, and

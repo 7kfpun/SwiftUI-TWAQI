@@ -45,6 +45,11 @@ class DecideTests(unittest.TestCase):
         self.assertEqual(decide(".github/workflows/push-sender.yml").level, level.SKIP)
         self.assertEqual(decide(".github/workflows/workers.yml", "workers/x/a.ts").level, level.SKIP)
 
+    def test_cloud_run_services_skip(self):
+        # FOX-82: services/twaqi-api (Cloud Run) never feeds the app build.
+        result = decide("services/twaqi-api/src/api.ts", "services/twaqi-api/Dockerfile")
+        self.assertEqual(result.level, level.SKIP)
+
     def test_ci_yml_itself_tests(self):
         result = decide(".github/workflows/ci.yml", "docs/ci-cd-guardrails.md")
         self.assertEqual(result.level, level.TEST)

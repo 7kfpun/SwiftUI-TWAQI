@@ -1,0 +1,79 @@
+name: Services
+
+# The Cloud Run read API under services/twaqi-api (FOX-82), in Rust. Pull requests
+# that change it (or this file) run `cargo fmt --check`, clippy and the tests,
+# golden fixtures included. Nothing deploys from here: Cloud Run is deployed by
+# hand (services/twaqi-api/README.md).
+#
+# Every non-draft pull request gets a single "Services" check, green when
+# services/ didn't change, so branch protection can require it. That is why
+# pull_request has no paths filter: a filtered-out workflow never reports.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: services-${{ github.event.pull_request.number }}-${{ github.event.pull_request.draft }}
+  cancel-in-progress: true
+
+jobs:
+  services:
+    name: Services
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/twaqi-api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did services/ change?
+        id: changed
+        working-directory: .
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git diff --quiet "$PR_BASE...$PR_HEAD" -- services/ .github/workflows/services.yml; then
+            echo "No change under services/; nothing to check."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Rust
+        if: steps.changed.outputs.run == 'true'
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+
+      - name: Cache cargo
+        if: steps.changed.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            services/twaqi-api/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('services/twaqi-api/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Format
+        if: steps.changed.outputs.run == 'true'
+        run: cargo fmt --check
+
+      - name: Clippy
+        if: steps.changed.outputs.run == 'true'
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Test
+        if: steps.changed.outputs.run == 'true'
+        run: cargo test --locked

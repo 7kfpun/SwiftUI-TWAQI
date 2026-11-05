@@ -3,7 +3,7 @@
 
 Three levels, decided from the PR's changed files. The highest level wins:
 
-  skip   only workers/, web/, fastlane/, assets/, docs (.md), media, or .github/
+  skip   only workers/, services/, web/, fastlane/, assets/, docs (.md), media, or .github/
          other than the CI workflow changed: nothing runs and the check is green.
   build  any other path (Swift, strings, asset catalogs, widget / watch / visionOS,
          project.pbxproj): build-for-testing only, no simulator.
@@ -48,8 +48,9 @@ ALWAYS_TEST = (
     "**/Package.resolved",
 )
 
-# These do not feed the app build. workers/ is checked by the Workers workflow.
-SKIP_PREFIXES = ("assets/", "fastlane/", "web/", "workers/", ".github/")
+# These do not feed the app build. workers/ is checked by the Workers workflow,
+# services/ is Cloud Run, deployed by hand (services/twaqi-api/README.md).
+SKIP_PREFIXES = ("assets/", "fastlane/", "services/", "web/", "workers/", ".github/")
 DOC_SUFFIXES = {".md", ".markdown"}
 MEDIA_SUFFIXES = {
     ".m4a", ".mp3", ".wav", ".aac", ".caf", ".aiff", ".aif", ".m4b", ".flac", ".ogg",
