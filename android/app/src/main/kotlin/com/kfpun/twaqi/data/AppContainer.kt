@@ -18,6 +18,7 @@ import com.kfpun.twaqi.data.repository.AirQualityRepository
 import com.kfpun.twaqi.data.repository.ForecastRepository
 import com.kfpun.twaqi.data.weather.StationWeatherStore
 import com.kfpun.twaqi.push.PushGraph
+import com.kfpun.twaqi.widget.WidgetHistoryCache
 import java.io.File
 
 /**
@@ -37,6 +38,9 @@ class AppContainer(
 
     val airQuality = AirQualityRepository(api, store, PollutantCache(store))
     val forecasts = ForecastRepository(api, store)
+
+    /** FOX-59: the station detail widget's last 24 hours. */
+    val widgetHistory = WidgetHistoryCache(store)
 
     /** FOX-55, with its alerts kept in step (FOX-57): unfavouriting turns a station's alerts off. */
     val favourites = FavouritesRepository(SharedPreferencesFavouritesStore(context), PushGraph.favouriteAlerts(context))

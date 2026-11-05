@@ -209,6 +209,9 @@ dependencies {
     implementation(libs.maps.compose.utils)
     implementation(libs.androidx.window)
 
+    // Home screen widgets (FOX-59): Glance, refreshed by WorkManager (below, with FOX-57).
+    implementation(libs.androidx.glance.appwidget)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)

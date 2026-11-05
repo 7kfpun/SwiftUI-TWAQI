@@ -1,11 +1,13 @@
 package com.kfpun.twaqi
 
 import android.app.Application
+import android.content.res.Configuration
 import android.util.Log
 import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.data.AppContainer
 import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.settings.AppAppearanceStore
+import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,6 +26,9 @@ class TwaqiApplication : Application() {
         // Before anything is logged: debug builds and opted-out installs don't report (FOX-60).
         TrackingManager.get(this).applyAtLaunch()
         container = AppContainer(this)
+        // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
+        WidgetUpdater.observeFavourites(this, container.favourites.favourites)
+        WidgetUpdater.redrawIfLanguageChanged(this)
         // Push alerts (FOX-57): the channel in the app language, before any alert arrives.
         AlertNotifications.ensureChannel(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
@@ -31,5 +36,11 @@ class TwaqiApplication : Application() {
             val removed = container.purgeExpiredCaches()
             if (removed.isNotEmpty()) Log.i("OfflineCacheRetention", "purged ${removed.map { it.name }}")
         }
+    }
+
+    /** Android 13+: the app language changed in the phone's settings; widgets follow it (FOX-56). */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        WidgetUpdater.requestRedrawAll(this)
     }
 }
