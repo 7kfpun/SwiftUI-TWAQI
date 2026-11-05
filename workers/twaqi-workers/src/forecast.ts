@@ -49,7 +49,7 @@ export interface ForecastSyncResult {
   translatedRows: number
   /** Distinct texts whose translation failed; retried next run. */
   translationFailed: number
-  /** Distinct texts left for the next run by the per-run cap or time budget. */
+  /** Distinct texts left for the next run by the per-run cap, the time budget or a refused save. */
   translationDeferred: number
   /** Why translation did not run, or failed to save, if it didn't. */
   translationSkipped?: string
