@@ -84,7 +84,8 @@ class ForecastFormatTest {
 
     @Test
     fun translationLanguageIsNoneInChinese() {
-        assertNull(translationLanguage(chinese = true, locale = Locale.TRADITIONAL_CHINESE))
-        assertEquals("en", translationLanguage(chinese = false, locale = Locale.US))
+        assertNull(translationLanguage(chinese = true))
+        // English for every other locale: the app's English strings show there too (FOX-98).
+        assertEquals("en", translationLanguage(chinese = false))
     }
 }

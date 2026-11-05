@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- On-device translation (FOX-98): its model downloads only on an unmetered network. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Air quality alerts (FOX-57): asked for on Android 13+ when an alert is switched on. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- The map's blue dot, "my location" and the nearest-first station list (FOX-54). -->

@@ -9,6 +9,7 @@ import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
+import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.widget.WidgetUpdater
 import java.util.Locale
@@ -57,6 +58,8 @@ object AppLocale {
             if (language.localeTag == null) remove(KEY) else putString(KEY, language.id)
         }
         AppCompatDelegate.setApplicationLocales(localeList(language))
+        // Nothing translated on device for the old language should show under the new one (FOX-98).
+        (context.applicationContext as? TwaqiApplication)?.container?.translation?.clearCache()
         // Widgets have no activity to recreate; they redraw in the new language (FOX-59).
         WidgetUpdater.requestRedrawAll(context)
         Analytics.logEvent(context, Analytics.SELECT_LANGUAGE, mapOf("label" to language.id))

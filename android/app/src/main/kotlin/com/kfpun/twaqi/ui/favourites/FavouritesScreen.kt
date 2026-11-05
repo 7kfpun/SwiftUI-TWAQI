@@ -195,7 +195,7 @@ private fun FavouriteList(
 private fun FavouriteRow(pollutant: Pollutant, chinese: Boolean, alerted: Set<Int>, modifier: Modifier) {
     StationRow(
         title = pollutant.displayName(chinese),
-        // FOX-98 translates the Chinese-only township in English.
+        // As written, as iOS lists show it: only the station page translates the township (FOX-98).
         subtitle = pollutant.displayLocality(chinese),
         reading = StationRowReading(
             aqi = pollutant.aqi,
