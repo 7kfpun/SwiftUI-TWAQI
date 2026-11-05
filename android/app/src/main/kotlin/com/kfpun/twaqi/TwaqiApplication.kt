@@ -2,6 +2,7 @@ package com.kfpun.twaqi
 
 import android.app.Application
 import android.util.Log
+import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.data.AppContainer
 import com.kfpun.twaqi.settings.AppAppearanceStore
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +20,8 @@ class TwaqiApplication : Application() {
         super.onCreate()
         // Help › Appearance (FOX-97), before any activity (the Pro screen can be the first one).
         AppAppearanceStore.applyStored(this)
+        // Before anything is logged: debug builds and opted-out installs don't report (FOX-60).
+        TrackingManager.get(this).applyAtLaunch()
         container = AppContainer(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {

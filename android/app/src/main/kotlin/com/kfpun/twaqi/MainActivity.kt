@@ -18,11 +18,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.kfpun.twaqi.ads.AdConsent
+import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.ProActivity
 import com.kfpun.twaqi.pro.ProGraph
 import com.kfpun.twaqi.pro.ProNavigation
 import com.kfpun.twaqi.pro.ProScreenSource
+import com.kfpun.twaqi.review.ReviewPrompt
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
 import com.kfpun.twaqi.ui.navigation.StationDestination
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startPro()
+        startTracking(savedInstanceState)
         setContent {
             TWAQITheme {
                 // Debug builds can open the data-layer check screen (FOX-53) until the real
@@ -52,6 +56,28 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * FOX-60: count the app open for the review prompt, once per process start (not when a
+     * language or appearance change recreates the activity). Debug builds started with
+     * `--ez analytics_debug true` send events to Firebase DebugView.
+     */
+    private fun startTracking(savedInstanceState: Bundle?) {
+        if (BuildConfig.DEBUG &&
+            intent.getBooleanExtra(TrackingManager.EXTRA_ANALYTICS_DEBUG, false)
+        ) {
+            TrackingManager.get(this).enableDebugView()
+        }
+        if (savedInstanceState != null || appOpenCounted) return
+        appOpenCounted = true
+        val appContext = applicationContext
+        ReviewPrompt.onAppOpen(this) { name, parameters -> Analytics.logEvent(appContext, name, parameters) }
+    }
+
+    private companion object {
+        /** This process has counted its app open. */
+        var appOpenCounted = false
     }
 
     /** FOX-58: re-check Pro with Play whenever the app comes to the front; ask for ad consent if free. */
