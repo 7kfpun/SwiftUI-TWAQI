@@ -19,13 +19,11 @@ ApiEnpointCurrentPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fcu
 ApiEnpointHistoricalPollutants = /v0/b/kf-twaqi.appspot.com/o/example-payloads%2Fhistorical-pollutants.json?alt=media&token=63729049-76eb-4836-ab28-c5dd371769ed
 
 // Services
-BugsnagApiKey =
 GADApplicationIdentifier = ca-app-pub-3940256099942544~1458002511
 GMSServicesApiKey = // Required
 // OneSignal stays registered alongside FCM (same alert tags), so it can be
 // switched back on as a sender. Optional: empty leaves OneSignal off.
 OneSignalAppId =
-SentryDSN =
 
 // AdMob AdUnitId
 AdUnitIdMainFooter = ca-app-pub-3940256099942544/2934735716
