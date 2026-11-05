@@ -75,6 +75,15 @@ object Analytics {
     /** A map marker opened its station: `name`, `nameLocal`, `stationId`. */
     const val CHECK_MAIN_DETAILS = "check_main_details"
 
+    // Station page and Favourites (FOX-55).
+
+    /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
+    const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
+    const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
+
+    /** `source`: where the feedback form was opened from (`station_page`). */
+    const val OPEN_FEEDBACK_FORM = "open_feedback_form"
+
     /** Does nothing when Firebase is not set up (no `google-services.json`). */
     fun logEvent(context: Context, name: String, parameters: Map<String, String> = emptyMap()) {
         if (FirebaseApp.getApps(context).isEmpty()) return

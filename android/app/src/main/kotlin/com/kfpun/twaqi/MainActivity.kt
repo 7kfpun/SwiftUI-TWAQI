@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -83,17 +84,22 @@ fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = 
     val pro = remember(context) { ProGraph.repository(context) }
     val entitlement by pro.entitlement.collectAsState()
     var stationId by rememberSaveable { mutableStateOf<Int?>(null) }
+    // The tabs leave composition while a station is open; this keeps their state (the selected tab,
+    // the search text, the map's camera) so back returns to the tab the station was opened from.
+    val tabsState = rememberSaveableStateHolder()
     val station = stationId
     if (station != null) {
         BackHandler { stationId = null }
         StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)
     } else {
-        MainTabs(
-            isPro = entitlement == Entitlement.PRO,
-            onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
-            onOpenStation = { stationId = it.stationId },
-            onOpenDataScreen = onOpenDataScreen,
-            modifier = modifier
-        )
+        tabsState.SaveableStateProvider("tabs") {
+            MainTabs(
+                isPro = entitlement == Entitlement.PRO,
+                onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
+                onOpenStation = { stationId = it.stationId },
+                onOpenDataScreen = onOpenDataScreen,
+                modifier = modifier
+            )
+        }
     }
 }
