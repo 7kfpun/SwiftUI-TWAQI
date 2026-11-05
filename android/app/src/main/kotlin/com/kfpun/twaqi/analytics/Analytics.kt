@@ -125,8 +125,16 @@ object Analytics {
 
     // Widgets (FOX-59), as on iOS.
 
-    /** `source` (widget, tile, deep_link), `stationId`: a `twaqi://station` link opened its station. */
+    /** `source` (widget, tile, shortcut, deep_link), `stationId`: a `twaqi://station` link opened its station. */
     const val STATION_LINK_OPENED = "station_link_opened"
+
+    // Launcher shortcuts, Assistant and the Quick Settings tile (FOX-95), as iOS names its Siri events.
+
+    /**
+     * `intent` (get_air_quality / open_station), `station` (nearest, favourite, station, default:
+     * which station answered), `result` (live / cached / none, or opened).
+     */
+    const val APP_INTENT_RUN = "app_intent_run"
 
     /**
      * Logs [name] with [parameters]: text as strings, whole numbers as longs, other numbers as

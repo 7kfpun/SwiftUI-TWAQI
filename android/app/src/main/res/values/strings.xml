@@ -541,4 +541,37 @@
     <string name="details_back">Back</string>
     <string name="details_about_index">About %s</string>
     <string name="details_map">Map of the station\'s location</string>
+    <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's
+         Siri, Shortcuts and Control Center strings (Intent.*, Control.*). -->
+    <string name="intent_get_air_quality_title">Get Air Quality</string>
+    <string name="intent_get_air_quality_short">Air Quality</string>
+    <string name="intent_open_station_title">Open Station</string>
+    <string name="intent_answer_fallback_favourite">Taiwan Air doesn\'t have your location, so here is your first favourite.</string>
+    <string name="intent_answer_fallback_default">Taiwan Air doesn\'t have your location and you have no favourites, so here is central Taipei.</string>
+    <string name="intent_answer_no_reading">There\'s no reading yet. Open Taiwan Air once while online.</string>
+    <string name="intent_answer_no_aqi">%s has no AQI reading right now.</string>
+    <string name="intent_answer_reading">%1$s: AQI %2$s, %3$s.</string>
+    <string name="intent_answer_main_pollutant">Main pollutant: %s.</string>
+    <string name="intent_answer_guidance">%s.</string>
+    <string name="intent_answer_cached_age">You\'re offline, so this is the last saved reading, from %s ago.</string>
+    <string name="intent_answer_cached">You\'re offline, so this is the last saved reading.</string>
+    <string name="intent_answer_old_age">This reading is from %s ago.</string>
+    <string name="control_display_name">Air Quality</string>
+    <!-- Android only (FOX-95): the answer card's close button, and what Assistant hears for the
+         "Air quality" shortcut (actions.intent.OPEN_APP_FEATURE). -->
+    <string name="intent_answer_close">Close</string>
+    <string name="intent_assistant_feature_air_quality">air quality</string>
+    <!-- How old a reading is, as iOS DateComponentsFormatter (.full, one unit) says it. -->
+    <plurals name="intent_age_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="intent_age_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="intent_age_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
 </resources>
