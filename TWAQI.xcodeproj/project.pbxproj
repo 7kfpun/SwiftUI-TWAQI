@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		95E3353483BA62DF5D8CF59A /* StationWeatherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1AFD81FB955076250384E18 /* StationWeatherTests.swift */; };
+		39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC438F9A61389C50464FC038 /* StationWeatherView.swift */; };
+		DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AF890677A74B0C87F84851 /* StationWeatherStore.swift */; };
+		7DB134A990DD8C29D6F7010C /* StationWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */; };
 		F084A11E0000000000000002 /* OnboardingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000001 /* OnboardingAnimation.swift */; };
 		F084A11E0000000000000004 /* OnboardingAnimations in Resources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000003 /* OnboardingAnimations */; };
 		97DD8D3099A1D036F4AA8A65 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
@@ -391,6 +395,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F1AFD81FB955076250384E18 /* StationWeatherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherTests.swift; sourceTree = "<group>"; };
+		AC438F9A61389C50464FC038 /* StationWeatherView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherView.swift; sourceTree = "<group>"; };
+		77AF890677A74B0C87F84851 /* StationWeatherStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherStore.swift; sourceTree = "<group>"; };
+		E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeather.swift; sourceTree = "<group>"; };
 		F084A11E0000000000000001 /* OnboardingAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimation.swift; sourceTree = "<group>"; };
 		F084A11E0000000000000003 /* OnboardingAnimations */ = {isa = PBXFileReference; lastKnownFileType = folder; path = OnboardingAnimations; sourceTree = "<group>"; };
 		41069023CE2A01483825C22B /* WidgetFamilyRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetFamilyRules.swift; sourceTree = "<group>"; };
@@ -768,6 +776,7 @@
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
 				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
+				F1AFD81FB955076250384E18 /* StationWeatherTests.swift */,
 				F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */,
 				F0A43A0E0000000000000001 /* AppAppearanceTests.swift */,
 				F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */,
@@ -981,6 +990,7 @@
 				9BE775C56385FDE2BC07B4BB /* WindView.swift */,
 				EF2D9DEA8C6744210C4D3F8C /* StationLocationView.swift */,
 				37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */,
+				AC438F9A61389C50464FC038 /* StationWeatherView.swift */,
 				02741CF262046B02509EB59F /* AreaForecastView.swift */,
 			);
 			path = Details;
@@ -995,6 +1005,7 @@
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
 				9EDBA6ED23649079009B4CC4 /* APIManager.swift */,
 				2F15F0DF067304D6744238CD /* StationCamStore.swift */,
+				77AF890677A74B0C87F84851 /* StationWeatherStore.swift */,
 				DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */,
 				28105738488F92DC053659E1 /* StationCamHistoryCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
@@ -1056,6 +1067,7 @@
 				9E01F534235C3E1900BC3486 /* StationAlertSetting.swift */,
 				9EF3D34523939798009CED32 /* Stations.swift */,
 				51BAAB62CFA3EB870547CDDC /* StationCams.swift */,
+				E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */,
 				7B92A7319F203C7207887169 /* AqiForecast.swift */,
 				39D50685ABB6D7832C10DAFD /* AqiTrend.swift */,
 			);
@@ -1605,6 +1617,7 @@
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
 				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
 				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
+				95E3353483BA62DF5D8CF59A /* StationWeatherTests.swift in Sources */,
 				F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */,
 				F0A43A0E0000000000000002 /* AppAppearanceTests.swift in Sources */,
 				F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */,
@@ -1717,6 +1730,9 @@
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
 				01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
+				39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */,
+				DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */,
+				7DB134A990DD8C29D6F7010C /* StationWeather.swift in Sources */,
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
