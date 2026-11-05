@@ -27,7 +27,9 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -254,25 +256,14 @@ private fun WindCell(reading: Pollutant, text: WidgetText) {
             6.dp
         ).background(rgb(0x808080, 0.12f)).padding(horizontal = 5.dp, vertical = 3.dp)
     ) {
-        val label = if (calm) {
-            text.string(
-                R.string.details_wind
-            )
+        // The cell is a quarter of half the widget: room for "Wind" and the speed in m/s only.
+        WidgetLabel(text.string(R.string.details_wind), size = 10.sp, weight = FontWeight.Bold)
+        val speed = if (calm) {
+            text.string(R.string.wind_calm)
         } else {
-            "${text.string(R.string.details_wind)} ${WidgetFormat.compass(reading.windDirection)}"
+            String.format(java.util.Locale.US, "%.1f", reading.windSpeed)
         }
-        WidgetLabel(label, size = 10.sp, weight = FontWeight.Bold)
-        WidgetLabel(
-            if (calm) {
-                text.string(
-                    R.string.wind_calm
-                )
-            } else {
-                String.format(java.util.Locale.US, "%.1f m/s", reading.windSpeed)
-            },
-            size = 12.sp,
-            weight = FontWeight.Bold
-        )
+        WidgetLabel(speed, size = 12.sp, weight = FontWeight.Bold)
     }
 }
 
@@ -310,21 +301,40 @@ private fun Trend(snapshot: WidgetSnapshot, type: AirIndexType, text: WidgetText
     }
 }
 
-/** Bars in each hour's band colour, scaled to the day's own range as on the station page. */
+/**
+ * Bars in each hour's band colour, scaled to the day's own range as on the station page. Glance
+ * allows ten children in a Row, so the bars sit in groups of [BARS_PER_GROUP], with each bar's
+ * padding as the gap.
+ */
 @Composable
 private fun Bars(chart: HistoryChart, type: AirIndexType) {
     Row(modifier = GlanceModifier.fillMaxWidth().height(BARS_HEIGHT.dp), verticalAlignment = Alignment.Bottom) {
-        chart.values.forEachIndexed { position, value ->
-            if (position > 0) Spacer(GlanceModifier.width(2.dp))
-            val height = (BARS_HEIGHT * chart.barFraction(value)).toFloat().coerceAtLeast(3f)
-            Box(
-                modifier = GlanceModifier
-                    .defaultWeight()
-                    .height(height.dp)
-                    .cornerRadius(2.dp)
-                    .background(rgb(AirStatus.of(type, value).color))
-            ) {}
+        chart.values.chunked(BARS_PER_GROUP).forEach { group ->
+            Row(
+                modifier = GlanceModifier.defaultWeight().fillMaxHeight(),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                group.forEach { value -> Bar(value, chart, type) }
+            }
         }
+        // A short history keeps its bars as wide as a full day's.
+        repeat(MAX_GROUPS - (chart.values.size + BARS_PER_GROUP - 1) / BARS_PER_GROUP) {
+            Spacer(GlanceModifier.defaultWeight())
+        }
+    }
+}
+
+@Composable
+private fun RowScope.Bar(value: Double, chart: HistoryChart, type: AirIndexType) {
+    val height = (BARS_HEIGHT * chart.barFraction(value)).toFloat().coerceAtLeast(3f)
+    Box(modifier = GlanceModifier.defaultWeight().padding(horizontal = 1.dp)) {
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .height(height.dp)
+                .cornerRadius(2.dp)
+                .background(rgb(AirStatus.of(type, value).color))
+        ) {}
     }
 }
 
@@ -344,6 +354,8 @@ private fun Advice(reading: Pollutant, text: WidgetText) {
 
 private const val WIDE_DP = 300f
 private const val BARS_HEIGHT = 30
+private const val BARS_PER_GROUP = 3
+private val MAX_GROUPS = (HistoryChart.MAX_POINTS + BARS_PER_GROUP - 1) / BARS_PER_GROUP
 
 /** Draws [StationDetailWidget], and starts or stops the refresh as widgets are added and removed. */
 class StationDetailWidgetReceiver : GlanceAppWidgetReceiver() {

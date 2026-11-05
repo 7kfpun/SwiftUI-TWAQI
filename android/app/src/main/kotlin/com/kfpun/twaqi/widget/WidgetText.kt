@@ -62,13 +62,6 @@ object WidgetFormat {
         return if (value > 0) type.format(value) else "—"
     }
 
-    /** "N", "NE" … for the direction the wind comes from, in degrees. */
-    fun compass(degrees: Double): String {
-        val points = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
-        val normalized = ((degrees % 360) + 360) % 360
-        return points[((normalized + 22.5) / 45).toInt() % points.size]
-    }
-
     /** Below this, in m/s, the wind is calm (Beaufort 0). */
     const val CALM_WIND = 0.5
 }

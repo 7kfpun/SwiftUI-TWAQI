@@ -62,4 +62,31 @@ object WidgetFamilyRules {
         WidgetFamily.LARGE -> 4
         WidgetFamily.STATION_DETAIL -> 0
     }
+
+    /**
+     * What a large widget [heightDp] tall has room for under its header: the favourite rows, and
+     * the row of other indices only when every listed favourite still fits beside it. The
+     * forecast ([hasForecast]) always keeps its place, so it is never clipped off the bottom.
+     */
+    fun largeFit(heightDp: Float, hasForecast: Boolean, favourites: Int): LargeFit {
+        val base = LargeFit.PADDING_DP + LargeFit.HEADER_DP + LargeFit.FAVOURITES_TITLE_DP +
+            (if (hasForecast) LargeFit.FORECAST_DP else 0f)
+        fun rows(space: Float) = (space / LargeFit.ROW_DP).toInt().coerceAtLeast(0)
+        val rowsWithIndices = rows(heightDp - base - LargeFit.INDICES_DP)
+        val showsIndices = rowsWithIndices >= favourites
+        val rows = if (showsIndices) favourites else minOf(favourites, rows(heightDp - base))
+        return LargeFit(showsOtherIndices = showsIndices, favouriteRows = rows.coerceAtLeast(minOf(favourites, 1)))
+    }
+}
+
+/** [WidgetFamilyRules.largeFit]: the space each part of a large widget takes, in dp. */
+data class LargeFit(val showsOtherIndices: Boolean, val favouriteRows: Int) {
+    companion object {
+        const val PADDING_DP = 24f
+        const val HEADER_DP = 100f
+        const val FAVOURITES_TITLE_DP = 32f
+        const val FORECAST_DP = 68f
+        const val INDICES_DP = 40f
+        const val ROW_DP = 36f
+    }
 }

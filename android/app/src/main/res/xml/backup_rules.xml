@@ -8,4 +8,6 @@
     <exclude domain="file" path="datastore/pro.preferences_pb" />
     <!-- Per-install: the analytics opt-out and the feedback's anonymous id (FOX-60). -->
     <exclude domain="sharedpref" path="install.xml" />
+    <!-- The last location the app saw, for the widgets' nearest station (FOX-59). -->
+    <exclude domain="sharedpref" path="widget_location.xml" />
 </full-backup-content>

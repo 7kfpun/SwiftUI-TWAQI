@@ -91,8 +91,11 @@ class WidgetConfigTest {
 
     @Test
     fun nearestIsMeasuredFromTheFixThenTheMapThenTaipei() {
-        assertEquals(GeoPoint(24.1, 120.6), WidgetLocation.choose(GeoPoint(24.1, 120.6), 22.6, 120.3))
-        assertEquals(GeoPoint(22.6, 120.3), WidgetLocation.choose(null, 22.6, 120.3))
-        assertEquals(WidgetLocation.DEFAULT, WidgetLocation.choose(null, 0.0, 0.0))
+        val saved = GeoPoint(25.02, 121.53)
+        assertEquals(GeoPoint(24.1, 120.6), WidgetLocation.choose(GeoPoint(24.1, 120.6), saved, 22.6, 120.3))
+        // In the background there's no last fix: the one the app saw in the foreground wins over the map.
+        assertEquals(saved, WidgetLocation.choose(null, saved, 22.6, 120.3))
+        assertEquals(GeoPoint(22.6, 120.3), WidgetLocation.choose(null, null, 22.6, 120.3))
+        assertEquals(WidgetLocation.DEFAULT, WidgetLocation.choose(null, null, 0.0, 0.0))
     }
 }

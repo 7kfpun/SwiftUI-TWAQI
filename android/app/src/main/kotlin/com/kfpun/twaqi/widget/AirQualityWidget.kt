@@ -185,7 +185,8 @@ private fun Medium(context: Context, entry: WidgetEntry, reading: Pollutant, upd
         Row(modifier = GlanceModifier.fillMaxSize()) {
             Column(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
                 WidgetLabel(text.name(reading), size = 15.sp, weight = FontWeight.Bold)
-                WidgetLabel(text.status(status), size = 12.sp, weight = FontWeight.Medium, color = rgb(status.color))
+                Spacer(GlanceModifier.height(2.dp))
+                StatusPill(status, text, size = 11.sp)
                 updated?.let { SecondaryLabel(it, size = 10.sp) }
                 Spacer(GlanceModifier.defaultWeight())
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth()) {
@@ -232,44 +233,46 @@ private fun Large(
     val status = reading.status(type)
     val value = WidgetFormat.value(reading, type)
     val forecast = snapshot.forecast(reading, text.chinese)
-    // The other indices only where they fit with the favourites and the forecast.
-    val showsOtherIndices = heightDp >= LARGE_WITH_INDICES_DP || forecast == null
+    // The other indices and favourites only as far as they fit above the forecast.
+    val fit = WidgetFamilyRules.largeFit(heightDp, forecast != null, entry.listedFavourites.size)
     WidgetContainer(onClick = WidgetTaps.station(context, reading.stationId)) {
+        // Glance allows ten children in a Column, so the parts are grouped.
         Column(modifier = GlanceModifier.fillMaxSize()) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = GlanceModifier.defaultWeight()) {
-                    WidgetLabel(text.name(reading), size = 16.sp, weight = FontWeight.Bold)
-                    WidgetLabel(
-                        text.status(status),
-                        size = 13.sp,
-                        weight = FontWeight.Medium,
-                        color = rgb(status.color),
-                        maxLines = 2
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IndexLabel(type, entry.cyclesIndex)
-                        Spacer(GlanceModifier.width(4.dp))
-                        WidgetLabel("$value ${type.unit}".trim(), size = 20.sp, weight = FontWeight.Bold)
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = GlanceModifier.defaultWeight()) {
+                        WidgetLabel(text.name(reading), size = 16.sp, weight = FontWeight.Bold)
+                        Spacer(GlanceModifier.height(2.dp))
+                        StatusPill(status, text, size = 12.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IndexLabel(type, entry.cyclesIndex)
+                            Spacer(GlanceModifier.width(4.dp))
+                            WidgetLabel("$value ${type.unit}".trim(), size = 20.sp, weight = FontWeight.Bold)
+                        }
                     }
+                    Face(status, value, 56.dp)
                 }
-                Face(status, value, 56.dp)
-            }
-            updated?.let { SecondaryLabel(it, size = 10.sp) }
-            if (showsOtherIndices) {
-                Spacer(GlanceModifier.height(4.dp))
-                OtherIndices(reading, type)
+                updated?.let { SecondaryLabel(it, size = 10.sp) }
+                if (fit.showsOtherIndices) {
+                    Spacer(GlanceModifier.height(4.dp))
+                    OtherIndices(reading, type)
+                }
             }
             Spacer(GlanceModifier.height(6.dp))
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = GlanceModifier.defaultWeight()) {
-                    SecondaryLabel(text.string(R.string.widget_favourites))
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = GlanceModifier.defaultWeight()) {
+                        SecondaryLabel(text.string(R.string.widget_favourites))
+                    }
+                    if (entry.showsPager) Pager(entry, text)
                 }
-                if (entry.showsPager) Pager(entry, text)
-            }
-            if (entry.listedFavourites.isEmpty()) {
-                SecondaryLabel(text.string(R.string.widget_no_favourites), maxLines = 2)
-            } else {
-                entry.listedFavourites.forEach { FavouriteRow(it, type, text, showsStatus = true) }
+                if (entry.listedFavourites.isEmpty()) {
+                    SecondaryLabel(text.string(R.string.widget_no_favourites), maxLines = 2)
+                } else {
+                    entry.listedFavourites.take(fit.favouriteRows).forEach {
+                        FavouriteRow(it, type, text, showsStatus = true)
+                    }
+                }
             }
             Spacer(GlanceModifier.defaultWeight())
             forecast?.let { ForecastSection(it, text, compact = false) }
@@ -280,24 +283,26 @@ private fun Large(
 /** The indices other than the one shown, each on its level's tint. */
 @Composable
 private fun OtherIndices(reading: Pollutant, type: AirIndexType) {
+    // Glance allows ten children in a Row: the gaps are each cell's padding, not spacers.
     Row(modifier = GlanceModifier.fillMaxWidth()) {
-        WidgetPaging.indexCycle.filter { it != type }.forEachIndexed { position, other ->
-            if (position > 0) Spacer(GlanceModifier.width(3.dp))
+        WidgetPaging.indexCycle.filter { it != type }.forEach { other ->
             val status = reading.status(other)
-            Column(
-                modifier = GlanceModifier.defaultWeight().cornerRadius(
-                    6.dp
-                ).background(rgb(status.color, 0.18f)).padding(vertical = 2.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryLabel(other.label, size = 9.sp)
-                WidgetLabel(WidgetFormat.value(reading, other), size = 11.sp, weight = FontWeight.Bold)
+            Box(modifier = GlanceModifier.defaultWeight().padding(horizontal = 1.5.dp)) {
+                Column(
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .cornerRadius(6.dp)
+                        .background(rgb(status.color, 0.18f))
+                        .padding(vertical = 2.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SecondaryLabel(other.label, size = 9.sp)
+                    WidgetLabel(WidgetFormat.value(reading, other), size = 11.sp, weight = FontWeight.Bold)
+                }
             }
         }
     }
 }
-
-private const val LARGE_WITH_INDICES_DP = 330f
 
 /** Draws [AirQualityWidget], and starts or stops the refresh as widgets are added and removed. */
 class AirQualityWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -317,9 +322,14 @@ class AirQualityWidgetReceiver : GlanceAppWidgetReceiver() {
 internal object WidgetReceivers {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /**
+     * A widget was placed (or the phone restarted, or the app updated): fetch once now, so a new
+     * large or station detail widget gets its forecast and history without waiting a period, and
+     * keep the schedule. Repeated calls replace one another.
+     */
     fun sync(context: Context) {
         val app = context.applicationContext
-        scope.launch { WidgetUpdater.syncSchedule(app) }
+        scope.launch { WidgetUpdater.refreshNow(app) }
     }
 
     fun deleted(context: Context, appWidgetIds: IntArray) {

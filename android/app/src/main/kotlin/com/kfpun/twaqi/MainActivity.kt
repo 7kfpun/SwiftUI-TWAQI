@@ -35,6 +35,7 @@ import com.kfpun.twaqi.ui.navigation.DeepLink
 import com.kfpun.twaqi.ui.navigation.StationDestination
 import com.kfpun.twaqi.ui.navigation.StationRoute
 import com.kfpun.twaqi.ui.theme.TWAQITheme
+import com.kfpun.twaqi.widget.WidgetLocation
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -68,6 +69,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // FOX-59: a widget's background refresh can't read the last fix; keep it while the app is open.
+        WidgetLocation.remember(this)
     }
 
     override fun onNewIntent(intent: Intent) {

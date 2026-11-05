@@ -144,4 +144,25 @@ class WidgetFamilyRulesTest {
         assertNull(empty.reading)
         assertFalse(empty.showsPager)
     }
+
+    @Test
+    fun largeKeepsRoomForTheForecast() {
+        // A 4×3 phone large widget: the forecast stays, a favourite and the indices give way.
+        val withForecast = WidgetFamilyRules.largeFit(340f, hasForecast = true, favourites = 4)
+        assertFalse(withForecast.showsOtherIndices)
+        assertEquals(3, withForecast.favouriteRows)
+        // Without a forecast the same size shows the indices and all four favourites.
+        val noForecast = WidgetFamilyRules.largeFit(340f, hasForecast = false, favourites = 4)
+        assertTrue(noForecast.showsOtherIndices)
+        assertEquals(4, noForecast.favouriteRows)
+        // Tall enough, everything fits.
+        assertEquals(LargeFit(true, 4), WidgetFamilyRules.largeFit(460f, hasForecast = true, favourites = 4))
+    }
+
+    @Test
+    fun largeAlwaysListsAFavouriteItHasAndNeverMoreThanItHas() {
+        assertEquals(1, WidgetFamilyRules.largeFit(250f, hasForecast = true, favourites = 4).favouriteRows)
+        assertEquals(0, WidgetFamilyRules.largeFit(250f, hasForecast = true, favourites = 0).favouriteRows)
+        assertEquals(2, WidgetFamilyRules.largeFit(600f, hasForecast = true, favourites = 2).favouriteRows)
+    }
 }

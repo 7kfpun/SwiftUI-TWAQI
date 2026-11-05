@@ -153,6 +153,19 @@ internal fun Face(status: AirStatus, value: String, size: Dp) {
     }
 }
 
+/** The level in words on its band colour, readable for every band (yellow included). */
+@Composable
+internal fun StatusPill(status: AirStatus, text: WidgetText, size: TextUnit) {
+    Box(
+        modifier = GlanceModifier
+            .cornerRadius(10.dp)
+            .background(rgb(status.color))
+            .padding(horizontal = 8.dp, vertical = 1.dp)
+    ) {
+        WidgetLabel(text.status(status), size = size, weight = FontWeight.Bold, color = rgb(status.foregroundColor))
+    }
+}
+
 /** A favourite: its name, its level in words on large, and its value on its band colour. */
 @Composable
 internal fun FavouriteRow(reading: Pollutant, type: AirIndexType, text: WidgetText, showsStatus: Boolean) {
@@ -163,7 +176,8 @@ internal fun FavouriteRow(reading: Pollutant, type: AirIndexType, text: WidgetTe
     ) {
         Column(modifier = GlanceModifier.defaultWeight()) {
             WidgetLabel(text.name(reading), size = 12.sp, weight = FontWeight.Medium)
-            if (showsStatus) WidgetLabel(text.status(status), size = 10.sp, color = rgb(status.color))
+            // The band colour is on the value beside it; yellow words would be unreadable on the background.
+            if (showsStatus) SecondaryLabel(text.status(status), size = 10.sp)
         }
         Box(
             modifier = GlanceModifier
