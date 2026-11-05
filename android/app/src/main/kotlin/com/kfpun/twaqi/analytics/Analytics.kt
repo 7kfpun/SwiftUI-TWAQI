@@ -103,6 +103,17 @@ object Analytics {
     const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
     const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
 
+    // Share card (FOX-94), as on iOS (FOX-73).
+
+    /** The share preview opened: `stationId`, `aqi`, `shape` (`4x5`, `9x16`, `1x1`). */
+    const val SHARE_CARD_PREVIEW_OPENED = "share_card_preview_opened"
+
+    /**
+     * `stationId`, `aqi`, `shape`, `action`: `share` (the share sheet opened), `save` (saved to
+     * Photos) or `cancel` (closed the preview without either).
+     */
+    const val SHARE_CARD = "share_card"
+
     // Feedback and review (FOX-60), as on iOS.
 
     /** `source` ([com.kfpun.twaqi.feedback.FeedbackSource]): where the form was opened from. */
