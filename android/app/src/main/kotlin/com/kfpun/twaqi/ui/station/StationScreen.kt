@@ -39,7 +39,6 @@ import com.kfpun.twaqi.R
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.ads.AdBanner
 import com.kfpun.twaqi.ads.AdPlacement
-import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.StationType
 import com.kfpun.twaqi.locale.AppLocale
@@ -75,8 +74,8 @@ data class StationPageSlots(
  *
  * @param onOpenDefinition opens an index's definition; defaults to its Wikipedia article (iOS
  *   `DefinitionPages.url`) until the index guide (FOX-97) takes over.
- * @param onSendFeedback opens the feedback form (FOX-60). The "Send feedback" link is hidden while
- *   it is null.
+ * @param onSendFeedback opens the feedback form (FOX-60, `FeedbackNavigation` with
+ *   `FeedbackSource.STATION_PAGE`). The "Send feedback" link is hidden while it is null.
  */
 @Composable
 fun StationScreen(
@@ -108,12 +107,8 @@ fun StationScreen(
         onConfirmUnfavourite = viewModel::removeFromFavourites,
         onDismissUnfavourite = viewModel::dismissUnfavourite,
         onOpenDefinition = onOpenDefinition ?: { DefinitionLinks.open(context, it, chinese) },
-        onSendFeedback = onSendFeedback?.let { open ->
-            {
-                Analytics.logEvent(context, Analytics.OPEN_FEEDBACK_FORM, mapOf("source" to "station_page"))
-                open()
-            }
-        },
+        // The form logs `open_feedback_form` (source station_page) itself when it opens (FOX-60).
+        onSendFeedback = onSendFeedback,
         slots = slots,
         modifier = modifier
     )
