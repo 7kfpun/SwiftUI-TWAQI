@@ -51,14 +51,14 @@ All of these are gitignored. A clean checkout builds without any of them.
 
 | File | What | Template |
 | --- | --- | --- |
-| `secrets.properties` | `API_DOMAIN`, `MAPS_API_KEY`, Directus URL and tokens, AdMob app and ad unit ids, Play service-account path | `secrets.example.properties` |
+| `secrets.properties` | `API_DOMAIN`, `MAPS_API_KEY`, Directus URL and tokens, `STATION_CAMS_URL` (the webcam host), AdMob app and ad unit ids, Play service-account path | `secrets.example.properties` |
 | `app/google-services.json` | Firebase (Crashlytics, Analytics) | Firebase console |
 | `keystore.properties` | release signing | `keystore.example.properties` |
 | `play-service-account.json` | Play upload (or the path in `PLAY_SERVICE_ACCOUNT_JSON`) | Google Cloud / Play Console |
 
 - `secrets.properties` overrides `secrets.example.properties` key by key. Values reach the app
   as `BuildConfig.API_DOMAIN`, `BuildConfig.DIRECTUS_URL`, `BuildConfig.DIRECTUS_FEEDBACK_TOKEN`,
-  `BuildConfig.DIRECTUS_COOPERATE_TOKEN`, and the Maps key as the manifest's
+  `BuildConfig.DIRECTUS_COOPERATE_TOKEN`, `BuildConfig.STATION_CAMS_URL`, and the Maps key as the manifest's
   `com.google.android.geo.API_KEY`. The names match `ios/TWAQI/Config/example.xcconfig` on iOS.
 - Anything in `BuildConfig` or the manifest ships inside the APK and can be read out of it,
   as on iOS. The Directus tokens must stay create-only on their collections
