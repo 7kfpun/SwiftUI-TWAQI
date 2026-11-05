@@ -256,8 +256,8 @@ private fun WindCell(reading: Pollutant, text: WidgetText) {
             6.dp
         ).background(rgb(0x808080, 0.12f)).padding(horizontal = 5.dp, vertical = 3.dp)
     ) {
-        // The cell is a quarter of half the widget: room for "Wind" and the speed in m/s only.
-        WidgetLabel(text.string(R.string.details_wind), size = 10.sp, weight = FontWeight.Bold)
+        // The cell is a quarter of half the widget: room for the speed in m/s only ("風速", not "風向風速").
+        WidgetLabel(text.string(R.string.widget_wind_speed), size = 10.sp, weight = FontWeight.Bold)
         val speed = if (calm) {
             text.string(R.string.wind_calm)
         } else {

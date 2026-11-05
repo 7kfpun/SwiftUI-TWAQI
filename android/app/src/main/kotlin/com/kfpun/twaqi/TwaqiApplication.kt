@@ -27,6 +27,7 @@ class TwaqiApplication : Application() {
         container = AppContainer(this)
         // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
         WidgetUpdater.observeFavourites(this, container.favourites.favourites)
+        WidgetUpdater.redrawIfLanguageChanged(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {
             val removed = container.purgeExpiredCaches()

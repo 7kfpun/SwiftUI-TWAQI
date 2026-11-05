@@ -2,6 +2,7 @@ package com.kfpun.twaqi.widget
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -9,6 +10,7 @@ import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.work.WorkManager
+import com.kfpun.twaqi.locale.AppLocale
 import java.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,11 +58,28 @@ object WidgetUpdater {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    /** [redrawAll] from code that isn't suspending (the language picker). */
+    /** [redrawAll] from code that isn't suspending (the language picker), noting the language drawn in. */
     fun requestRedrawAll(context: Context) {
         val app = context.applicationContext
+        languagePrefs(app).edit { putString(KEY_DRAWN_LANGUAGE, AppLocale.locale(app).toLanguageTag()) }
         scope.launch { redrawAll(app) }
     }
+
+    /**
+     * At app start: Android 13+ lets Settings change the app's language while the app isn't
+     * running, so nothing told the widgets. Redraws them when the language differs from the one
+     * they were last drawn in.
+     */
+    fun redrawIfLanguageChanged(context: Context) {
+        val app = context.applicationContext
+        val drawn = languagePrefs(app).getString(KEY_DRAWN_LANGUAGE, null)
+        if (drawn != AppLocale.locale(app).toLanguageTag()) requestRedrawAll(app)
+    }
+
+    private const val LANGUAGE_PREFS = "widget_language"
+    private const val KEY_DRAWN_LANGUAGE = "drawn"
+
+    private fun languagePrefs(context: Context) = context.getSharedPreferences(LANGUAGE_PREFS, Context.MODE_PRIVATE)
 
     /**
      * Keeps the widgets in step with the favourites while the app's process runs (iOS
