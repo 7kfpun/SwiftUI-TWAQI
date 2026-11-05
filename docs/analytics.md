@@ -61,4 +61,13 @@ station's alerts) and `ad_banner_tapped` (`placement`: `main`, `details`,
 `onboarding_notifications` (`label`: on / off, the answer to each permission
 prompt; `onboarding_location` is logged only when the system prompt was
 shown), then `onboarding_completed`, or `onboarding_skipped` (`label`:
-`step_<index>`).
+`step_<index>`). On the closest station step, `onboarding_add_favourite`
+(`stationId`) and `onboarding_choose_station` (`stationId`, another station
+picked from the list).
+
+Steps since FOX-84 (five): `welcome` (1), `location` (2), `closest_station`
+(3), `notifications` (4, quiet hours included), `more` (5: widgets, Siri, the
+Forecast tab and Pro). Builds before it had seven: `do_not_disturb` (5),
+`data_source` (6) and `premium` (7). Read a funnel across both by step name,
+not index: index 5 and `step_5` mean `do_not_disturb` before FOX-84 and `more`
+after it.

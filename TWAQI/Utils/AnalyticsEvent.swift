@@ -82,6 +82,8 @@ enum AnalyticsEvent: String, CaseIterable {
     case onboardingNotifications = "onboarding_notifications"
     /// `stationId`.
     case onboardingAddFavourite = "onboarding_add_favourite"
+    /// `stationId`: another station picked on the closest station step (FOX-84).
+    case onboardingChooseStation = "onboarding_choose_station"
     case onboardingOpenPro = "onboarding_open_pro"
     /// `label`: step_<index>, the step "Skip" was tapped on.
     case onboardingSkipped = "onboarding_skipped"
