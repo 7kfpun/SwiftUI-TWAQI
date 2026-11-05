@@ -421,6 +421,60 @@
 "Forecast.favourite_area" = "最愛測站";
 "Forecast.none_current" = "目前沒有可顯示的最新預報，環境部的最新預報暫時無法載入，請稍後再試。";
 
+/* 測站頁的天氣（FOX-11，中央氣象署 F-C0032-001、O-A0003-001） */
+"Weather.title" = "天氣";
+"Weather.source" = "資料來源：中央氣象署";
+"Weather.humidity" = "濕度";
+"Weather.rain_today" = "今日雨量";
+"Weather.wind" = "風速";
+"Weather.temperature %@" = "氣溫 %@";
+"Weather.chance_of_rain %@" = "降雨機率 %@";
+"Weather.station_named %@ %@" = "%1$@測站，距離 %2$@";
+"Weather.station_nearby %@" = "中央氣象署測站，距離 %@";
+"Weather.observed %@" = "觀測於%@";
+/* 中央氣象署預報天氣描述代碼，每個代碼一則代表描述 */
+"Weather.wx.1" = "晴天";
+"Weather.wx.2" = "晴時多雲";
+"Weather.wx.3" = "多雲時晴";
+"Weather.wx.4" = "多雲";
+"Weather.wx.5" = "多雲時陰";
+"Weather.wx.6" = "陰時多雲";
+"Weather.wx.7" = "陰天";
+"Weather.wx.8" = "多雲短暫陣雨";
+"Weather.wx.9" = "多雲時陰短暫雨";
+"Weather.wx.10" = "陰時多雲短暫雨";
+"Weather.wx.11" = "陰短暫雨";
+"Weather.wx.12" = "多雲時陰陣雨";
+"Weather.wx.13" = "陰時多雲有雨";
+"Weather.wx.14" = "陰有雨";
+"Weather.wx.15" = "多雲短暫陣雨或雷雨";
+"Weather.wx.16" = "多雲時陰陣雨或雷雨";
+"Weather.wx.17" = "陰時多雲陣雨或雷雨";
+"Weather.wx.18" = "陰陣雨或雷雨";
+"Weather.wx.19" = "晴午後多雲局部雨";
+"Weather.wx.20" = "多雲午後局部陣雨";
+"Weather.wx.21" = "晴午後多雲雷陣雨";
+"Weather.wx.22" = "多雲午後雷陣雨";
+"Weather.wx.23" = "有雨或雪";
+"Weather.wx.24" = "晴有霧";
+"Weather.wx.25" = "晴時多雲有霧";
+"Weather.wx.26" = "多雲時晴有霧";
+"Weather.wx.27" = "多雲有霧";
+"Weather.wx.28" = "陰有霧";
+"Weather.wx.29" = "多雲局部雨";
+"Weather.wx.30" = "多雲時陰局部雨";
+"Weather.wx.31" = "多雲有霧有局部雨";
+"Weather.wx.32" = "多雲時陰有霧有局部雨";
+"Weather.wx.33" = "多雲局部雷陣雨";
+"Weather.wx.34" = "多雲時陰局部雷陣雨";
+"Weather.wx.35" = "多雲局部雷陣雨有霧";
+"Weather.wx.36" = "多雲時陰局部雷陣雨有霧";
+"Weather.wx.37" = "有雨或雪有霧";
+"Weather.wx.38" = "短暫雨有霧";
+"Weather.wx.39" = "有雨有霧";
+"Weather.wx.41" = "陣雨或雷雨有霧";
+"Weather.wx.42" = "下雪";
+
 /* 離線：最後一次成功的資料 */
 "Offline.showing_saved_readings" = "目前離線，顯示最後儲存的資料";
 "Offline.updated_ago %@" = "離線・%@更新";
