@@ -8,6 +8,7 @@
 
 import CoreLocation
 import Foundation
+import StoreKit
 
 /// The welcome flow (FOX-34): opens by itself once for every user, fresh
 /// installs and updates alike (FOX-49), and again whenever it is opened from
@@ -57,16 +58,16 @@ enum Onboarding {
         releaseLaunchHold(notificationCenter: notificationCenter)
     }
 
-    /// The steps, in order. Location is asked for on `.location` only, and
-    /// notifications on `.notifications` only.
+    /// The steps, in order, five at most (FOX-84). Location is asked for on
+    /// `.location` only, and notifications on `.notifications` only. The data
+    /// source is a line on `.welcome`, quiet hours sit on `.notifications`, and
+    /// `.more` shows the widgets, Siri and the Forecast tab above Pro.
     enum Step: Int, CaseIterable, Identifiable {
         case welcome
         case location
         case closestStation
         case notifications
-        case doNotDisturb
-        case dataSource
-        case premium
+        case more
 
         var id: Int { rawValue }
 
@@ -74,21 +75,33 @@ enum Onboarding {
         var previous: Step? { Step(rawValue: rawValue - 1) }
         var isLast: Bool { next == nil }
 
-        /// The step as `onboarding_step_viewed` names it.
+        /// The step as `onboarding_step_viewed` names it. Until FOX-84 the
+        /// flow had 7 steps: `do_not_disturb` (5), `data_source` (6) and
+        /// `premium` (7) are gone, and index 5 is now `more`.
         var analyticsName: String {
             switch self {
             case .welcome: return "welcome"
             case .location: return "location"
             case .closestStation: return "closest_station"
             case .notifications: return "notifications"
-            case .doNotDisturb: return "do_not_disturb"
-            case .dataSource: return "data_source"
-            case .premium: return "premium"
+            case .more: return "more"
             }
         }
 
         /// 1-based, as the dots and `onboarding_skipped`'s step_<n> count.
         var analyticsIndex: Int { rawValue + 1 }
+    }
+
+    /// Quiet hours show on the notifications step once notifications are on:
+    /// before that they would silence nothing.
+    static func showsQuietHours(notificationsOn: Bool) -> Bool {
+        notificationsOn
+    }
+
+    /// After the notification prompt is answered: a yes stays on the step so
+    /// quiet hours can be set there, a no moves on.
+    static func advancesAfterNotificationAnswer(accepted: Bool) -> Bool {
+        !accepted
     }
 }
 
@@ -177,9 +190,20 @@ struct OnboardingStore {
 
 /// The station the flow suggests as a first favourite.
 struct OnboardingClosestStation: Equatable {
+    enum Origin: Equatable {
+        /// Nearest the reader's location.
+        case nearest
+        /// No location: the station nearest 中正, the Watch app's default,
+        /// standing in until the reader picks their own.
+        case fallback
+        /// Picked from the list (FOX-84).
+        case chosen
+    }
+
     let pollutant: Pollutant
-    /// No location: the station nearest 中正, the Watch app's default.
-    let isFallback: Bool
+    let origin: Origin
+
+    var isFallback: Bool { origin == .fallback }
 
     /// The station nearest `location`, or, without one, nearest the same
     /// 中正 point the Watch app falls back to (`WatchAPI.defaultLocation`).
@@ -187,6 +211,78 @@ struct OnboardingClosestStation: Equatable {
         guard let pollutant = WatchAPI.closest(to: location ?? WatchAPI.defaultLocation, in: stations) else {
             return nil
         }
-        return OnboardingClosestStation(pollutant: pollutant, isFallback: location == nil)
+        return OnboardingClosestStation(pollutant: pollutant, origin: location == nil ? .fallback : .nearest)
+    }
+}
+
+/// The closest station step's list for choosing another station: search, or
+/// browse by 空品區, as the station list does.
+enum OnboardingStationList {
+    struct Section: Equatable {
+        let title: String
+        let stations: Pollutants
+    }
+
+    /// Stations whose name (either language) or locality contains `query`,
+    /// grouped by air-quality area in first-seen (roughly north-to-south)
+    /// order. An empty query keeps every station.
+    static func sections(_ stations: Pollutants, matching query: String) -> [Section] {
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let matches = query.isEmpty
+            ? stations
+            : stations.filter {
+                $0.name.localizedCaseInsensitiveContains(query)
+                    || $0.nameLocal.localizedCaseInsensitiveContains(query)
+                    || ($0.displayLocality?.localizedCaseInsensitiveContains(query) ?? false)
+            }
+
+        var order: [String] = []
+        var buckets: [String: Pollutants] = [:]
+        for station in matches {
+            let key = station.displayArea ?? ""
+            if buckets[key] == nil {
+                buckets[key] = []
+                order.append(key)
+            }
+            buckets[key]?.append(station)
+        }
+        return order.map { Section(title: $0, stations: buckets[$0] ?? []) }
+    }
+}
+
+/// A subscription's free trial, as the last step words it.
+struct OnboardingProTrial: Equatable {
+    enum Unit: Equatable {
+        case days
+        case weeks
+        case months
+        case years
+    }
+
+    let unit: Unit
+    let count: Int
+
+    /// From an introductory offer's period. 7, 14… days read as weeks.
+    init?(unit: Product.SubscriptionPeriod.Unit, value: Int) {
+        guard value > 0 else { return nil }
+        switch unit {
+        case .day where value % 7 == 0:
+            self.init(unit: .weeks, count: value / 7)
+        case .day:
+            self.init(unit: .days, count: value)
+        case .week:
+            self.init(unit: .weeks, count: value)
+        case .month:
+            self.init(unit: .months, count: value)
+        case .year:
+            self.init(unit: .years, count: value)
+        @unknown default:
+            return nil
+        }
+    }
+
+    init(unit: Unit, count: Int) {
+        self.unit = unit
+        self.count = count
     }
 }

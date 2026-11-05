@@ -49,6 +49,9 @@ final class OnboardingViewModel: ObservableObject {
     /// its alerts switched on with it (FOX-31).
     @Published private(set) var stationModel: DetailsViewModel?
 
+    /// Every station with its current reading, for choosing another one.
+    @Published private(set) var stations: Pollutants = []
+
     /// The Watch app's one-shot locator, shared with the phone.
     private let locator = Locator()
     /// Only read for its status: reading never prompts.
@@ -81,6 +84,10 @@ final class OnboardingViewModel: ObservableObject {
             step = previous
         }
     }
+
+    /// How long a granted permission's success shows before the flow moves
+    /// on by itself.
+    private static let successPause: UInt64 = 1_200_000_000
 
     // MARK: - Location (step 2 only)
 
@@ -115,7 +122,13 @@ final class OnboardingViewModel: ObservableObject {
                 closest = .loading
                 stationModel = nil
             }
-            if locationState == .on || locationState == .off {
+            if locationState == .on, prompts {
+                // Let the step's success show, unless the reader moved on already.
+                try? await Task.sleep(nanoseconds: Self.successPause)
+                if step == .location {
+                    goForward()
+                }
+            } else if locationState == .on || locationState == .off {
                 goForward()
             }
         }
@@ -136,17 +149,32 @@ final class OnboardingViewModel: ObservableObject {
             }
 
             let stations = await Self.currentStations()
+            self.stations = stations
             guard let resolved = OnboardingClosestStation.resolve(location: location, in: stations) else {
                 closest = .failed
                 return
             }
-            closest = .loaded(resolved)
-
-            let model = DetailsViewModel(stationId: resolved.pollutant.stationId, pollutant: resolved.pollutant)
-            // Loads the station's cam, whose SiteId its alerts are stored with.
-            model.getData()
-            stationModel = model
+            show(resolved)
         }
+    }
+
+    /// The reader picked another station from the list. Kept when they go
+    /// back and forth, and over the 中正 stand-in.
+    func chooseStation(_ pollutant: Pollutant) {
+        if case .loaded(let shown) = closest, shown.pollutant.stationId == pollutant.stationId { return }
+        show(OnboardingClosestStation(pollutant: pollutant, origin: .chosen))
+        TrackingManager.logEvent(.onboardingChooseStation, parameters: [
+            "stationId": pollutant.stationId,
+        ])
+    }
+
+    private func show(_ station: OnboardingClosestStation) {
+        closest = .loaded(station)
+
+        let model = DetailsViewModel(stationId: station.pollutant.stationId, pollutant: station.pollutant)
+        // Loads the station's cam, whose SiteId its alerts are stored with.
+        model.getData()
+        stationModel = model
     }
 
     func addClosestStationToFavourites() {
@@ -174,6 +202,11 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     // MARK: - Notifications (step 4 only)
+
+    /// Quiet hours show on this step once notifications are on.
+    var showsQuietHours: Bool {
+        Onboarding.showsQuietHours(notificationsOn: notificationState == .on)
+    }
 
     func refreshNotificationState() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
@@ -209,7 +242,10 @@ final class OnboardingViewModel: ObservableObject {
                 TrackingManager.logEvent(.onboardingNotifications, parameters: [
                     "label": accepted ? "on" : "off",
                 ])
-                self.goForward()
+                // A yes stays here for quiet hours; a no moves on.
+                if Onboarding.advancesAfterNotificationAnswer(accepted: accepted), self.step == .notifications {
+                    self.goForward()
+                }
             }
         }
 

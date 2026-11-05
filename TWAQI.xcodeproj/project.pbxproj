@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F084A11E0000000000000002 /* OnboardingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000001 /* OnboardingAnimation.swift */; };
+		F084A11E0000000000000004 /* OnboardingAnimations in Resources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000003 /* OnboardingAnimations */; };
 		97DD8D3099A1D036F4AA8A65 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
 		88B20C7BB8243B3114D5DB73 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
 		54208C6AB262712EACEB6141 /* WidgetStationDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */; };
@@ -388,6 +390,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F084A11E0000000000000001 /* OnboardingAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimation.swift; sourceTree = "<group>"; };
+		F084A11E0000000000000003 /* OnboardingAnimations */ = {isa = PBXFileReference; lastKnownFileType = folder; path = OnboardingAnimations; sourceTree = "<group>"; };
 		41069023CE2A01483825C22B /* WidgetFamilyRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetFamilyRules.swift; sourceTree = "<group>"; };
 		C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetStationDetail.swift; sourceTree = "<group>"; };
 		3670A7238663AB08BCE2EFBE /* StationDetailLoader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationDetailLoader.swift; sourceTree = "<group>"; };
@@ -875,6 +879,7 @@
 				9E1AC54F233F998E00AC862D /* Views */,
 				9EC6BB29235B5AEE00213041 /* TWAQI.entitlements */,
 				9E978F152357808100C66A03 /* GoogleService-Info.plist */,
+				F084A11E0000000000000003 /* OnboardingAnimations */,
 				9E1AC549233F981900AC862D /* Info.plist */,
 				9E1AC53B233F981700AC862D /* AppDelegate.swift */,
 				9E1AC53F233F981700AC862D /* ContentView.swift */,
@@ -944,6 +949,7 @@
 			children = (
 				55099A312B9E5B7CBDAD497C /* OnboardingViewModel.swift */,
 				8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */,
+				F084A11E0000000000000001 /* OnboardingAnimation.swift */,
 				9E1AC55D233F9A5000AC862D /* HelpView.swift */,
 				9EF7A3292386FC8700FF410C /* HelpViewModel.swift */,
 				9BBB3B8DA8D6029AE4AFADA9 /* ProView.swift */,
@@ -1378,6 +1384,7 @@
 				9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */,
 				7F3A73C10B2E4D5F8A9B0C25 /* InfoPlist.strings in Resources */,
 				9E978F162357808100C66A03 /* GoogleService-Info.plist in Resources */,
+				F084A11E0000000000000004 /* OnboardingAnimations in Resources */,
 				9E1AC545233F981900AC862D /* Preview Assets.xcassets in Resources */,
 				9E1AC542233F981900AC862D /* Assets.xcassets in Resources */,
 			);
@@ -1694,6 +1701,7 @@
 				2FD81BE457A4FB709E291D6D /* Locator.swift in Sources */,
 				55E1C42FC16E2766D66B3A88 /* OnboardingViewModel.swift in Sources */,
 				39F6C4C701FB5EC1988473B6 /* OnboardingView.swift in Sources */,
+				F084A11E0000000000000002 /* OnboardingAnimation.swift in Sources */,
 				B3B4EC36CE2E6B47C7044C4E /* Onboarding.swift in Sources */,
 				F0A47D1E0000000000000011 /* DeepLink.swift in Sources */,
 				F0A76D1E0000000000000002 /* WidgetPaging.swift in Sources */,

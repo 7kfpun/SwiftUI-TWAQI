@@ -12,6 +12,8 @@ target 'TWAQI' do
   pod 'SnapKit', '~> 5.0'
   pod 'SwiftDate', '~> 6.1'
   pod 'SwiftyJSON', '~> 5.0'
+  # The welcome flow's animations (FOX-84). App target only.
+  pod 'lottie-ios', '~> 4.5'
 
   # Firebase (Analytics, Crashlytics, Messaging) comes from Swift Package Manager, added
   # in the Xcode project: Firebase stopped publishing to CocoaPods after
