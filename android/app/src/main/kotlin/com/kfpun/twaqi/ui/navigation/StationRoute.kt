@@ -11,7 +11,9 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.kfpun.twaqi.feedback.FeedbackNavigation
 import com.kfpun.twaqi.feedback.FeedbackSource
+import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
+import com.kfpun.twaqi.ui.station.cam.StationCamSection
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -38,6 +40,8 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             stationId = route.stationId,
             onBack = onBack,
             modifier = modifier,
+            // FOX-92: the station cam with its 24-hour history.
+            slots = StationPageSlots(cam = { StationCamSection(it) }),
             onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) }
         )
     }
