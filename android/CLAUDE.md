@@ -19,6 +19,9 @@ only on the user's greenlight). Read `README.md` here for setup.
   Firebase is initialised.
 - **Signing** comes from `keystore.properties` (gitignored). Without it a release is unsigned
   and `publish*Bundle` stops. Never create, commit or print a keystore or service account.
+- **Backup:** `allowBackup` is on so favourites and settings follow the user to a new phone.
+  Exclude device secrets (e.g. the push device secret) and caches in
+  `res/xml/backup_rules.xml` and `data_extraction_rules.xml` when they are added.
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)

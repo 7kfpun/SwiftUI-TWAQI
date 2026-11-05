@@ -46,6 +46,10 @@ All of these are gitignored. A clean checkout builds without any of them.
   as `BuildConfig.API_DOMAIN`, `BuildConfig.DIRECTUS_URL`, `BuildConfig.DIRECTUS_FEEDBACK_TOKEN`,
   `BuildConfig.DIRECTUS_COOPERATE_TOKEN`, and the Maps key as the manifest's
   `com.google.android.geo.API_KEY`. The names match `TWAQI/Config/example.xcconfig` on iOS.
+- Anything in `BuildConfig` or the manifest ships inside the APK and can be read out of it,
+  as on iOS. The Directus tokens must stay create-only on their collections
+  (`twaqi_feedback`, `twaqi_cooperate`) and read-only on `twaqi_aqi_forecast`; push goes
+  through the Worker's signed API and needs no Directus token.
 - **Firebase:** register the Android app `com.kfpun.twaqi` in the TWAQI Firebase project and
   save its `google-services.json` to `android/app/`. The google-services and Crashlytics Gradle
   plugins apply only when that file exists.

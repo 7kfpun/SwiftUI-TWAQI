@@ -45,11 +45,19 @@ if (hasReleaseKeystore) {
     }
 }
 val uploadTask = Regex("(?i)(^|:)publish(\\w*(bundle|apk))?$")
+val unsignedUploadMessage =
+    "Uploading to Play needs a signed release: copy android/keystore.example.properties " +
+        "to android/keystore.properties and fill it in (android/README.md, Release)."
+// From the command line: stop before anything builds.
 if (!hasReleaseKeystore && gradle.startParameter.taskNames.any { uploadTask.containsMatchIn(it) }) {
-    throw GradleException(
-        "Uploading to Play needs a signed release: copy android/keystore.example.properties " +
-            "to android/keystore.properties and fill it in (android/README.md, Release)."
-    )
+    throw GradleException(unsignedUploadMessage)
+}
+// Any other way in (an IDE run configuration, a dependent task): stop before
+// the upload task's own action runs.
+tasks.matching { uploadTask.containsMatchIn(it.name) }.configureEach {
+    val signed = hasReleaseKeystore
+    val message = unsignedUploadMessage
+    doFirst { if (!signed) throw GradleException(message) }
 }
 
 android {
