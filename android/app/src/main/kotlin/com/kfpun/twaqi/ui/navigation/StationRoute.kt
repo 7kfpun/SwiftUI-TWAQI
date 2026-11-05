@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.push.StationAlertsCard
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -27,7 +28,8 @@ data class StationRoute(val stationId: Int)
 
 /**
  * Stub until FOX-55's station screen: FOX-55 replaces the body with
- * `StationScreen(route.stationId, onBack)`.
+ * `StationScreen(route.stationId, onBack)`, and moves the alert card (FOX-57) into its
+ * `StationPageSlots.alerts`.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +56,7 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             verticalArrangement = Arrangement.Center
         ) {
             Text("#${route.stationId}", style = MaterialTheme.typography.titleMedium)
+            StationAlertsCard(route.stationId, Modifier.padding(top = 24.dp))
         }
     }
 }

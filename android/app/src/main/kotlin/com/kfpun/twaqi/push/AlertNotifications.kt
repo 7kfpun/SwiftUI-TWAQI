@@ -55,7 +55,6 @@ object AlertNotifications {
 
     /** Creates or renames the channel in the app language. Call at start and after a language change. */
     fun ensureChannel(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val localized = AppLocale.localizedContext(context)
         val channel = NotificationChannel(
             CHANNEL_ID,
