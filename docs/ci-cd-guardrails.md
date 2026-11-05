@@ -22,6 +22,8 @@ deliberate action, taken only when the ticket or PR names it.
 | `PR policy` | `pr-policy.yml` | every PR, drafts too | the branch isn't `feature/…`; no `FOX-nn` in the branch or title; a `Depends on #N` PR isn't merged; Fastfile `APP_VERSION`, `MARKETING_VERSION`, build numbers or What's New disagree (`tools/check_release_consistency.py`). |
 | `Secret files` | `pr-policy.yml` | every PR, drafts too | the net diff adds or changes `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env*`, `.dev.vars*`, signing keys or profiles; force-adds a gitignored file; or adds a real-looking secret value (`tools/check_secret_files.py`). Example and placeholder files pass. |
 | `Workers` | `workers.yml` | non-draft PRs | a changed Worker fails its typecheck or `wrangler deploy --dry-run`. Green when no Worker changed. |
+| `Services` | `services.yml` | non-draft PRs | `services/twaqi-api` fails `cargo fmt --check`, clippy (`-D warnings`) or `cargo test --locked` (golden fixtures included). Green when `services/` didn't change. Deploys nothing. |
+| `Public text` | `public-text.yml` | non-draft PRs, again on each description edit | the title, description, a commit message or an added line names a non-website host, an IP or network range, a private email, or network-exposure details (`tools/public_text_check.py`). Hosts are fine in files that need them to work (config, scripts, app constants, tests). See [Public repo](#public-repo-what-stays-out). |
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
@@ -31,7 +33,7 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
 
 | Level | PR touches only… | Runs |
 |---|---|---|
-| **skip** | `workers/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing more; the check is green |
+| **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` | nothing more; the check is green |
 | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | config, caches, `pod install`, `build-for-testing`; no simulator pick (it starts CoreSimulatorService), boot or test run |
 | **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `tools/ci_test_level.py` or its test, `Podfile`, `Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
 
@@ -78,14 +80,82 @@ or not the key works. `Vulnerability checks` fails on credentials TruffleHog pro
 anywhere in the PR's commits. The repository is public, so anything pushed is already
 exposed: rotate the key, then rewrite the branch.
 
+## Public repo: what stays out
+
+`Secret files` and `Vulnerability checks` catch keys and secret files. `Public text`
+catches the patterns below in a PR's title, description, commit messages and added lines,
+but not in comments, reviews, or a description edited back later, and wording slips past
+patterns. Commit messages, PR titles and descriptions, review and issue comments, and docs
+are all public, and so is a description's **edit history** (the "edited" menu shows every
+earlier version).
+
+Keep out of all of them:
+
+- IP addresses, network ranges, allow-lists, and changes to network access rules.
+- Security posture: which services are or were reachable from anywhere, what was locked
+  down and when, how a service is reached past its access controls.
+- Incident details: attacker or scanner IPs, outage causes, what was hit or exposed.
+- Secret values or any part of them (tokens, passwords, keys, DSNs), database hosts, and
+  account emails.
+- **Hostnames, except the public websites.** `taiwanair.wahthefox.com`, `kf-twaqi.web.app`
+  and `kf-nihongo.web.app` are fine. Every other host (the API and webcam host, Directus,
+  `workers.dev` URLs, Cloud Run URLs, the Lambda's API Gateway) is named by its role: "the
+  webcam host", "Directus", "the Worker's workers.dev URL", "Cloud Run". The real value
+  stays in the code or config that needs it to work (`wrangler.jsonc`, xcconfig, a
+  script's request URL), and in docs as a placeholder (`<webcam host>`) or a command that
+  looks it up (`gcloud run services describe … --format 'value(status.url)'`).
+
+Fine to write: resource **names** a runbook or the code needs (a Secret Manager secret's
+name, a Cloud Run service, a Worker route), commands with placeholders, and test or
+benchmark results.
+
+Where the rest goes: the Linear ticket. Linear is internal, so hosts, infra state and
+incident notes are fine there. The PR body says "infra changes: see FOX-nn" and links it.
+
+If something slipped into a PR description: edit it out, then delete the older versions
+from the description's edit history ("edited" menu → the revision → **Delete revision
+from history**; needs write access and a logged-in browser, not possible through the
+API). The same works for comments. In a commit message or a file: rewrite the branch
+before merge; after merge, treat it as public.
+
+## Security
+
+**Scan before a PR goes ready, and after any secret scare**, over all history and every
+branch (both tools: `brew install gitleaks trufflehog`):
+
+```sh
+gitleaks git --log-opts="--all" --redact .
+trufflehog git file://. --results=verified,unknown,unverified
+```
+
+CI runs TruffleHog on each PR's commits (`Vulnerability checks`); the full-history scan is
+by hand. Report findings in Linear, not on the PR.
+
+**Rotate first.** A credential that reached GitHub, a shipped app binary or a log is
+exposed for good: revoke or rotate it at its source (Directus, OneSignal, Google Cloud,
+Cloudflare, Firebase, OpenRouter), then remove it from the code. Rewriting history is only
+worth it when a real secret got in, and even then GitHub keeps old PR commits until
+GitHub Support purges them; it never replaces rotation.
+
+**Anything in the app is public.** Values in `xcconfig` end up in the shipped binary, and
+old builds stay installed for years. So a token the app carries must be read-only or
+create-only, limited to the collections it needs, and revocable without breaking current
+builds. Writes go through a Worker that checks the caller (as the push API does), not
+through a shared token.
+
+**Servers and databases** reach each other through their platform's private connections
+(Cloud Run's Cloud SQL connection, Worker secrets), not through open network rules.
+Changes to who can reach what are recorded in Linear, never in the repo.
+
 ## Deploy paths, each separate from merging
 
 | What | How | Gate |
 |---|---|---|
 | **Squash-merge** | GitHub merge button / `gh pr merge --squash`, after the user's greenlight | ruleset: required checks + `LGTM` (another agent's review); PR template checkboxes |
 | **Cloudflare Workers** | `workers.yml` on push to `master` (changed Workers only); `workflow_dispatch` to redeploy | the PR's `Workers` check; deploy runs from `master` only |
+| **Cloud Run `twaqi-api`** (read API origin, FOX-82) | by hand, `gcloud run deploy` from `services/twaqi-api` ([runbook](../services/twaqi-api/README.md#deploy-by-hand)) | the owner, from master; merging never deploys it |
 | **Push sends** (scheduled AQI alerts) | `push-sender.yml`: `schedule` `20 */2 * * *` and `workflow_dispatch` (dry run on by default), running `workers/twaqi-push-sender`'s `run()` under Node | `push-sender` environment (master only, **no reviewers**, so the schedule can run); the workflow also refuses other branches before the environment is used. See below. |
-| **Firebase Hosting** | `firebase-hosting.yml`, `workflow_dispatch` only, from `master`: `check-domain` · `deploy-main` · `deploy-legacy` | `firebase-hosting` environment (owner approval); `deploy-legacy` refuses until `check-domain` passes |
+| **Firebase Hosting** | `firebase-hosting.yml`, `workflow_dispatch` only, from `master`: `check-domain` · `deploy-main` | `firebase-hosting` environment (owner approval) |
 | **DNS cutover** | by hand, Cloudflare zone `wahthefox.com` + Firebase console custom domain | [web-hosting.md](web-hosting.md) steps 3-5; verify with the `check-domain` action |
 | **TestFlight** | `fastlane release_build` on the Mac mini (cloud-managed signing needs the Xcode Apple ID, so it can't run on GitHub's runners) | named in the ticket/PR; the lane runs `check_release_consistency.py` first |
 | **App Store Connect** metadata / screenshots / review | `fastlane upload_metadata`, `upload_*screenshots`; submission by hand | named in the ticket/PR; screenshot lanes refuse to run unless the version is editable |

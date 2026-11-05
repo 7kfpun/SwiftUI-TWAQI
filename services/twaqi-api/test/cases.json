@@ -1,0 +1,18 @@
+[
+  { "name": "countries", "path": "/v1/countries" },
+  { "name": "stations-twn", "path": "/v1/stations?country=twn" },
+  { "name": "stations-country-id", "path": "/v1/stations?country_id=3" },
+  { "name": "current-twn", "path": "/v1/current-pollutants?country=twn" },
+  { "name": "current-station-ids", "path": "/v1/current-pollutants?station_id=91,abc,%202%20,99999" },
+  { "name": "current-station-ids-unsorted", "path": "/v1/current-pollutants?station_id=92,898,137,83,76,89,91,132,859,860,108,135,84,115,131,585,126,129,105,75,80,64,121,118,106,856,888,897,94,133" },
+  { "name": "history-station-id", "path": "/v1/historical-pollutants?station_id=91&limit=5" },
+  { "name": "history-station-code", "path": "/v1/historical-pollutants?station=%E5%9F%BA%E9%9A%86&limit=3" },
+  { "name": "history-default-limit", "path": "/v1/historical-pollutants?station_id=91&limit=abc" },
+  { "name": "error-stations-no-param", "path": "/v1/stations" },
+  { "name": "error-current-no-param", "path": "/v1/current-pollutants?foo=1" },
+  { "name": "error-current-bad-ids", "path": "/v1/current-pollutants?station_id=abc" },
+  { "name": "error-current-unknown-id", "path": "/v1/current-pollutants?station_id=999999" },
+  { "name": "error-history-no-station", "path": "/v1/historical-pollutants?limit=3" },
+  { "name": "error-history-unknown-station", "path": "/v1/historical-pollutants?station_id=999999" },
+  { "name": "error-history-negative-limit", "path": "/v1/historical-pollutants?station_id=91&limit=-1" }
+]

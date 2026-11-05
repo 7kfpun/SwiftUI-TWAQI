@@ -1,0 +1,19 @@
+[package]
+name = "twaqi-api"
+version = "1.0.0"
+edition = "2024"
+publish = false
+description = "TWAQI read API (FOX-82): the Lambda's /v1 reads on Cloud Run, byte-identical responses"
+
+[dependencies]
+axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio"] }
+form_urlencoded = "1.2.2"
+mysql_async = { version = "0.37.1", default-features = false, features = ["minimal-rust"] }
+serde_json = "1.0.154"
+subtle = "2.6.1"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "net", "signal", "time"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
