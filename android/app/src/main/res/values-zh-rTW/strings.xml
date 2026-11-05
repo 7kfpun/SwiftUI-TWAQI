@@ -490,6 +490,12 @@
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
 
+    <!-- Map (FOX-54): Android-only labels for TalkBack and the station screen stub. -->
+    <string name="map_my_location">移到我的位置</string>
+    <string name="map_default_location">移到預設位置</string>
+    <string name="map_clear_search">清除搜尋</string>
+    <string name="map_back">返回</string>
+
     <!-- Debug builds only: the data-layer check screen (FOX-53). -->
     <string name="debug_data_title">資料層</string>
     <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>

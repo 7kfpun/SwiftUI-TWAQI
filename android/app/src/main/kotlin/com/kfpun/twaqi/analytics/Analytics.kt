@@ -43,6 +43,19 @@ object Analytics {
     /** `placement`: AdMob recorded a click on a banner. */
     const val AD_BANNER_TAPPED = "ad_banner_tapped"
 
+    // Map (FOX-54), as on iOS.
+
+    /** `label`: the index (`aqi`, `pm25`, …). */
+    const val SELECT_INDEX = "select_index"
+    const val MOVE_TO_CURRENT_LOCATION = "move_to_current_location"
+    const val MOVE_TO_DEFAULT_LOCATION = "move_to_default_location"
+
+    /** `label`: landscape / portrait. */
+    const val CHANGE_DEVICE_ORIENTATION = "change_device_orientation"
+
+    /** A map marker opened its station: `name`, `nameLocal`, `stationId`. */
+    const val CHECK_MAIN_DETAILS = "check_main_details"
+
     /** Does nothing when Firebase is not set up (no `google-services.json`). */
     fun logEvent(context: Context, name: String, parameters: Map<String, String> = emptyMap()) {
         if (FirebaseApp.getApps(context).isEmpty()) return
