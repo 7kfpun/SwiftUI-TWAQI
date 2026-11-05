@@ -21,6 +21,12 @@ export const MAX_TRANSLATIONS_PER_RUN = 40
 export const TRANSLATION_TIMEOUT_MS = 30_000
 /** Total time a sync spends translating before leaving the rest for the next run. */
 export const TRANSLATION_BUDGET_MS = 120_000
+/**
+ * Translations are saved after every this many model calls. A refused save
+ * (e.g. the Worker role lacks update on `content_i18n`) stops the run's model
+ * calls, so it costs at most one batch, not the whole cap, every hour.
+ */
+export const TRANSLATION_SAVE_BATCH = 5
 
 export type ContentI18n = Partial<Record<string, string>>
 
@@ -283,12 +289,17 @@ export interface TranslationStore {
  * rows a previous run failed on. Rows already current are left alone, so a
  * run with nothing new makes no model calls. Runs after the upsert and never
  * throws; anything not done here is retried next hour.
+ *
+ * Saves as it goes: first the rows that only copy an existing translation
+ * (no model call, so a refusal there costs nothing), then after every
+ * `saveBatch` model calls. Once a save is refused it makes no more calls this
+ * run; the texts it didn't send count as deferred.
  */
 export async function translateForecast(
   apiKey: string | undefined,
   directus: TranslationStore,
   dates: string[],
-  options: { cap?: number; budgetMs?: number; translate?: typeof translateText; now?: () => number } = {},
+  options: { cap?: number; budgetMs?: number; saveBatch?: number; translate?: typeof translateText; now?: () => number } = {},
 ): Promise<TranslationResult> {
   const result: TranslationResult = { translated: 0, translatedRows: 0, translationFailed: 0, translationDeferred: 0 }
   if (!apiKey) return { ...result, translationSkipped: 'OPENROUTER_FORECAST_API_KEY not set' }
@@ -311,7 +322,41 @@ export async function translateForecast(
 
   const plan = planTranslations(rows, options.cap ?? MAX_TRANSLATIONS_PER_RUN)
   result.translationDeferred = plan.deferred
-  const writes: Array<{ id: number; content_i18n: ContentI18n }> = plan.reuse.map((r) => ({ id: r.id, content_i18n: r.i18n }))
+  const saveBatch = Math.max(1, Math.floor(options.saveBatch ?? TRANSLATION_SAVE_BATCH))
+
+  // Writes not yet saved, and how many model-translated texts they carry.
+  let pending: Array<{ id: number; content_i18n: ContentI18n }> = plan.reuse.map((r) => ({ id: r.id, content_i18n: r.i18n }))
+  let pendingTexts = 0
+  /** Saves `pending`; false when Directus refused it. `translated` counts only saved texts. */
+  const save = async (): Promise<boolean> => {
+    if (pending.length === 0) return true
+    const items = pending
+    const texts = pendingTexts
+    pending = []
+    pendingTexts = 0
+    try {
+      await directus.updateBatch(items)
+      result.translatedRows += items.length
+      result.translated += texts
+      return true
+    } catch (e) {
+      // The rows are stored; count these texts as failed so the status shows
+      // it, and retry next run.
+      result.translationFailed += texts
+      result.translationSkipped = `could not save translations: ${String(e).slice(0, 200)}`
+      console.error('forecast translation save failed', e)
+      return false
+    }
+  }
+  /** After a refused save: leave the unsent texts for the next run and say so. */
+  const stop = (calls: number) => {
+    const left = plan.texts.length - calls
+    result.translationDeferred += left
+    if (left > 0) result.translationSkipped += `; model calls stopped after ${calls}, ${left} left for next run`
+    return result
+  }
+
+  if (!(await save())) return stop(0)
 
   const now = options.now ?? Date.now
   const deadline = now() + (options.budgetMs ?? TRANSLATION_BUDGET_MS)
@@ -323,26 +368,17 @@ export async function translateForecast(
     }
     try {
       const { text: en } = await translate(text, { apiKey })
-      result.translated++
       const i18n = buildI18n(text, { en })
-      for (const id of plan.rowsByText.get(text) ?? []) writes.push({ id, content_i18n: i18n })
+      for (const id of plan.rowsByText.get(text) ?? []) pending.push({ id, content_i18n: i18n })
+      pendingTexts++
     } catch (e) {
       result.translationFailed++
       console.error('forecast translation failed', String(e).slice(0, 300))
     }
+    const calls = i + 1
+    if (calls % saveBatch === 0 && calls < plan.texts.length && !(await save())) return stop(calls)
   }
 
-  if (writes.length === 0) return result
-  try {
-    await directus.updateBatch(writes)
-    result.translatedRows = writes.length
-  } catch (e) {
-    // e.g. the Worker role lacks update on content_i18n. The rows are stored;
-    // count these texts as failed so the status shows it, and retry next run.
-    result.translationFailed += result.translated
-    result.translated = 0
-    result.translationSkipped = `could not save translations: ${String(e).slice(0, 200)}`
-    console.error('forecast translation save failed', e)
-  }
+  await save()
   return result
 }
