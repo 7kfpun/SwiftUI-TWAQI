@@ -1,8 +1,13 @@
 package com.kfpun.twaqi.widget
 
 import android.content.Context
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.data.AppContainer
+import com.kfpun.twaqi.data.cams.BitmapCamImageDecoder
+import com.kfpun.twaqi.data.cams.CamFrame
+import com.kfpun.twaqi.data.cams.StationCamMatcher
 import com.kfpun.twaqi.data.model.AqiForecast
 import com.kfpun.twaqi.data.model.AqiForecastMatcher
 import com.kfpun.twaqi.data.model.AreaForecast
@@ -27,6 +32,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * @property savedAt when each of [readings] was saved, for the offline line.
  * @property forecasts every area's forecast rows (large and station detail pick the station's area).
  * @property history the leading station's last 24 hours (station detail only), oldest first.
+ * @property cam the leading station's last saved cam frame, small (station detail only, FOX-92).
  */
 data class WidgetSnapshot(
     val config: WidgetConfig,
@@ -36,7 +42,8 @@ data class WidgetSnapshot(
     val savedAt: Map<Int, Instant>,
     val isPro: Boolean,
     val forecasts: List<AqiForecast> = emptyList(),
-    val history: List<HistoricalPollutant> = emptyList()
+    val history: List<HistoricalPollutant> = emptyList(),
+    val cam: CamFrame<Bitmap>? = null
 ) {
     val leading: Pollutant? get() = leadingId?.let(readings::get)
 
@@ -76,8 +83,17 @@ class WidgetDataSource(private val context: Context, private val container: AppC
                 container.widgetHistory.read(leadingId).orEmpty()
             } else {
                 emptyList()
-            }
+            },
+            cam = if (includeHistory && leadingId != null) savedCam(leadingId) else null
         )
+    }
+
+    /** The frame the station page or a refresh saved for [stationId]'s cam, decoded small for a widget. */
+    private suspend fun savedCam(stationId: Int): CamFrame<Bitmap>? {
+        val siteId = container.widgetHistory.readCam(stationId) ?: return null
+        return container.camFrames.savedFrame(siteId) { bytes ->
+            BitmapCamImageDecoder.thumbnail(bytes, CAM_PIXELS)?.asAndroidBitmap()
+        }
     }
 
     /**
@@ -106,12 +122,29 @@ class WidgetDataSource(private val context: Context, private val container: AppC
         val details = configs.filter { it.second }.map { it.first }
         if (details.isNotEmpty()) {
             val nearestId = if (details.any { it.needsNearest(favouriteIds) }) nearestStationId() else null
-            details.mapNotNull { it.leadingStationId(favouriteIds, nearestId) }.distinct().forEach { stationId ->
+            val stationIds = details.mapNotNull { it.leadingStationId(favouriteIds, nearestId) }.distinct()
+            stationIds.forEach { stationId ->
                 val history = container.airQuality.history(stationId)
                 if (history is DataResult.Fresh) container.widgetHistory.save(stationId, history.value.readings)
             }
+            refreshCams(stationIds)
         }
         return hasNewData
+    }
+
+    /**
+     * Station detail's cam (FOX-92): the manifest (kept an hour) names each station's cam, and its
+     * latest frame is saved over the last one, where the station page finds it too. A manifest that
+     * didn't load changes nothing; a failed frame keeps the saved one (iOS `StationDetailLoader`).
+     */
+    private suspend fun refreshCams(stationIds: List<Int>) {
+        val cams = runCatching { container.camManifest.cams() }.getOrDefault(emptyList())
+        if (cams.isEmpty()) return
+        container.airQuality.savedPollutants(stationIds).map { it.value }.forEach { reading ->
+            val cam = StationCamMatcher.match(reading.nameLocal, reading.lat, reading.lon, cams)
+            container.widgetHistory.saveCam(reading.stationId, cam?.siteId)
+            if (cam != null) container.camFrames.fetch(cam)
+        }
     }
 
     private suspend fun nearestStationId(): Int? {
@@ -128,6 +161,9 @@ class WidgetDataSource(private val context: Context, private val container: AppC
 
     companion object {
         private const val PRO_READ_TIMEOUT_MS = 2_000L
+
+        /** Longest side of the cam frame a widget draws, in pixels: a 160dp-wide thumbnail. */
+        private const val CAM_PIXELS = 480
 
         fun containerOf(context: Context): AppContainer = (context.applicationContext as TwaqiApplication).container
     }

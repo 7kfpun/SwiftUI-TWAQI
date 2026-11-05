@@ -2,6 +2,7 @@ package com.kfpun.twaqi.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +15,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -26,6 +29,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Row
 import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
@@ -39,19 +43,22 @@ import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.data.cams.CamFrame
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.AirStatus
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.ui.station.HistoryChart
 import com.kfpun.twaqi.ui.station.TrendDisplay
+import com.kfpun.twaqi.ui.station.cam.CamTime
 import java.time.Instant
+import java.time.OffsetDateTime
 
 /**
  * The station detail widget (iOS extra large, `StationDetailWidgetView`, FOX-72): one station in
  * detail, as much of the station page as fits. Header and every index with wind; the 24-hour trend
- * and the 空品區 forecast; one line of health advice. Where the widget is too short, the advice
- * goes first, then the forecast. Pro; locked without it. Nothing here is interactive but the tap,
- * which opens the station. (The station cam joins when the Android cam lands, FOX-92.)
+ * and the 空品區 forecast; the station cam's last frame (FOX-92); one line of health advice. Where
+ * the widget is too short, the advice goes first, then the cam, then the forecast. Pro; locked
+ * without it. Nothing here is interactive but the tap, which opens the station.
  */
 class StationDetailWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
@@ -126,8 +133,17 @@ private fun DetailContent(
     val forecast = snapshot.forecast(reading, text.chinese)
     val wide = widthDp >= WIDE_DP
     // The first layout that fits the height, as iOS's ViewThatFits: each drops one more section.
-    val showsAdvice = heightDp >= (if (wide) 300f else 420f)
     val shownForecast = forecast?.takeIf { heightDp >= (if (wide) 250f else 360f) }
+    // Wide, the cam sits above the forecast beside the trend, so together they need more height.
+    val camHeight = if (wide) (if (shownForecast != null) 360f else 330f) else 480f
+    val shownCam = snapshot.cam?.takeIf { heightDp >= camHeight }
+    val showsAdvice = if (shownCam !=
+        null
+    ) {
+        heightDp >= camHeight + ADVICE_DP
+    } else {
+        heightDp >= (if (wide) 300f else 420f)
+    }
     WidgetContainer(onClick = WidgetTaps.station(context, reading.stationId)) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
             if (wide) {
@@ -142,16 +158,22 @@ private fun DetailContent(
                 Indices(reading, type, text)
             }
             Spacer(GlanceModifier.height(8.dp))
-            if (wide && shownForecast != null) {
+            if (wide && (shownForecast != null || shownCam != null)) {
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     Box(modifier = GlanceModifier.defaultWeight()) { Trend(snapshot, type, text) }
                     Spacer(GlanceModifier.width(12.dp))
-                    Box(modifier = GlanceModifier.defaultWeight()) {
-                        ForecastSection(shownForecast, text, compact = true)
+                    Column(modifier = GlanceModifier.defaultWeight()) {
+                        shownCam?.let { Cam(it, text) }
+                        if (shownCam != null && shownForecast != null) Spacer(GlanceModifier.height(6.dp))
+                        shownForecast?.let { ForecastSection(it, text, compact = true) }
                     }
                 }
             } else {
                 Trend(snapshot, type, text)
+                shownCam?.let {
+                    Spacer(GlanceModifier.height(6.dp))
+                    Cam(it, text)
+                }
                 if (shownForecast != null) {
                     Spacer(GlanceModifier.height(6.dp))
                     ForecastSection(shownForecast, text, compact = false)
@@ -338,6 +360,44 @@ private fun RowScope.Bar(value: Double, chart: HistoryChart, type: AirIndexType)
     }
 }
 
+/** The cam's last frame, 16:9, with when it was captured on it (iOS `camSection`). */
+@Composable
+private fun Cam(frame: CamFrame<Bitmap>, text: WidgetText) {
+    val captured = frame.time?.let { runCatching { OffsetDateTime.parse(it).toInstant() }.getOrNull() }
+    Column(modifier = GlanceModifier.fillMaxWidth()) {
+        SecondaryLabel(text.string(R.string.details_live_cam), size = 10.sp)
+        Spacer(GlanceModifier.height(2.dp))
+        Box(
+            modifier = GlanceModifier.fillMaxWidth().height(CAM_HEIGHT_DP.dp).cornerRadius(8.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Image(
+                provider = ImageProvider(frame.image),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = GlanceModifier.fillMaxSize().cornerRadius(8.dp)
+            )
+            if (captured != null) {
+                Box(modifier = GlanceModifier.padding(5.dp)) {
+                    Box(
+                        modifier = GlanceModifier
+                            .cornerRadius(8.dp)
+                            .background(rgb(0x000000, 0.45f))
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    ) {
+                        WidgetLabel(
+                            text.string(R.string.details_cam_captured, CamTime.clock(captured)),
+                            size = 9.sp,
+                            weight = FontWeight.Medium,
+                            color = rgb(0xFFFFFF)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 /** The general-public line of the station page's health advice, for AQI. */
 @Composable
 private fun Advice(reading: Pollutant, text: WidgetText) {
@@ -354,6 +414,13 @@ private fun Advice(reading: Pollutant, text: WidgetText) {
 
 private const val WIDE_DP = 300f
 private const val BARS_HEIGHT = 30
+
+/** The cam frame's height, 16:9 at about the half-width it gets on a 4-column widget. */
+private const val CAM_HEIGHT_DP = 90
+
+/** The advice line and the gap above it, for the height check. */
+private const val ADVICE_DP = 22f
+
 private const val BARS_PER_GROUP = 3
 private val MAX_GROUPS = (HistoryChart.MAX_POINTS + BARS_PER_GROUP - 1) / BARS_PER_GROUP
 

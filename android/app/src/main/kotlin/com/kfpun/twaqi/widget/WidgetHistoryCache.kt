@@ -13,7 +13,8 @@ import kotlinx.serialization.json.put
 
 /**
  * The station detail widget's last good 24 hours per station (iOS `WidgetStationDetailCache`),
- * so it still draws its trend offline. A failed or empty fetch keeps the saved copy; a week-old
+ * so it still draws its trend offline, and the cam matched to it (the frame itself is FOX-92's
+ * `StationCamFrameCache`, shared with the station page). A failed or empty fetch keeps the saved copy; a week-old
  * copy is ignored and purged like every offline cache, since it lives under the cache root
  * ([CacheStore], `OfflineCacheRetention`).
  */
@@ -29,6 +30,22 @@ class WidgetHistoryCache(private val store: CacheStore) {
     fun save(stationId: Int, readings: List<HistoricalPollutant>) {
         if (readings.isEmpty()) return
         store.write(fileName(stationId), buildJsonArray { readings.forEach { add(encode(it)) } }.toString())
+    }
+
+    /**
+     * The MOENV image site id of [stationId]'s cam, as the last manifest that loaded matched it;
+     * null when it has none or no manifest has loaded yet (iOS `WidgetStationDetail.cam`).
+     */
+    fun readCam(stationId: Int): String? {
+        val text = store.read(camFileName(stationId))?.value ?: return null
+        val json = runCatching { kotlinx.serialization.json.Json.parseToJsonElement(text) as? JsonObject }
+            .getOrNull() ?: return null
+        return (json["siteId"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotEmpty() }
+    }
+
+    /** Saves the cam a loaded manifest matched to [stationId]; null saves that it has none. */
+    fun saveCam(stationId: Int, siteId: String?) {
+        store.write(camFileName(stationId), buildJsonObject { siteId?.let { put("siteId", it) } }.toString())
     }
 
     private fun encode(reading: HistoricalPollutant): JsonObject = buildJsonObject {
@@ -63,5 +80,7 @@ class WidgetHistoryCache(private val store: CacheStore) {
 
     companion object {
         fun fileName(stationId: Int) = "widget-history-$stationId.json"
+
+        fun camFileName(stationId: Int) = "widget-cam-$stationId.json"
     }
 }

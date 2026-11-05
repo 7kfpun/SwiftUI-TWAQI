@@ -38,4 +38,23 @@ class WidgetHistoryCacheTest {
         now = now.plus(Duration.ofDays(8))
         assertNull(cache.read(12))
     }
+
+    @Test
+    fun theMatchedCamIsKeptAndANoMatchClearsIt() {
+        assertNull(cache.readCam(12))
+        cache.saveCam(12, "001")
+        assertEquals("001", cache.readCam(12))
+        assertNull(cache.readCam(13))
+        // A loaded manifest without this station's cam drops it (iOS `merged`).
+        cache.saveCam(12, null)
+        assertNull(cache.readCam(12))
+    }
+
+    @Test
+    fun aWeekOldCamMatchIsIgnoredAndLivesUnderTheCacheRoot() {
+        cache.saveCam(12, "001")
+        assertEquals(root, CacheStore(root).file(WidgetHistoryCache.camFileName(12)).parentFile)
+        now = now.plus(Duration.ofDays(8))
+        assertNull(cache.readCam(12))
+    }
 }
