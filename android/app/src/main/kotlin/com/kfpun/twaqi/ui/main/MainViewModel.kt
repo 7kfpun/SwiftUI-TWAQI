@@ -185,8 +185,12 @@ class MainViewModel(
         return MarkerSource.displayed(live, hour, history::reading)
     }
 
-    /** A finger came down on the track, before any change: playback stops and history starts loading. */
-    fun onTimelineInteraction() {
+    /**
+     * A finger came down on the track, before any change: playback stops and history starts loading
+     * for [area], the map's view right now (the first camera idle can come before the map has one).
+     */
+    fun onTimelineInteraction(area: MapArea?) {
+        if (area != null) visibleArea = area
         stopPlaying()
         requestVisibleHistory()
     }
@@ -201,11 +205,12 @@ class MainViewModel(
      * Play steps forward an hour at a time to "now"; from "now" it starts 24 hours back. Returns
      * true when playback started (for the `map_timeline_play` event).
      */
-    fun togglePlay(): Boolean {
+    fun togglePlay(area: MapArea?): Boolean {
         if (playJob != null) {
             stopPlaying()
             return false
         }
+        if (area != null) visibleArea = area
         requestVisibleHistory()
         state.update {
             it.copy(

@@ -245,10 +245,12 @@ fun MapScreen(
                     hoursAgo = state.timelineHoursAgo,
                     playing = state.timelinePlaying,
                     progress = state.historyProgress,
-                    onInteractionBegan = viewModel::onTimelineInteraction,
+                    // The view right now: the first camera idle can come before the map has one.
+                    onInteractionBegan = { viewModel.onTimelineInteraction(cameraPositionState.visibleArea()) },
                     onChange = viewModel::setTimelineHoursAgo,
                     onPlay = {
-                        if (viewModel.togglePlay()) Analytics.logEvent(context, Analytics.MAP_TIMELINE_PLAY)
+                        val started = viewModel.togglePlay(cameraPositionState.visibleArea())
+                        if (started) Analytics.logEvent(context, Analytics.MAP_TIMELINE_PLAY)
                     },
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 15.dp)
                 )

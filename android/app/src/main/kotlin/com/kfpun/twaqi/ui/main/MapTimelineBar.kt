@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,12 +61,16 @@ import kotlin.math.roundToInt
 /** One row tall, so the map keeps the room (iOS `MapTimelineView.preferredHeight`). */
 private val BarHeight = 38.dp
 
-/** Wide enough for 「昨天 22:00」, so the track doesn't shift as the hour changes. */
+/**
+ * iOS's time column, wide enough for 「昨天 22:00」. The bar widens it to the app language's widest
+ * clock ("Yesterday 22:00" in English), so the track still doesn't shift as the hour changes.
+ */
 private val TimeColumnWidth = 70.dp
 
 private val TrackY = 14.dp
 private val ThumbSize = 14.dp
 private const val TABULAR = "tnum"
+private val ClockStyle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = TABULAR)
 
 /**
  * The map's bottom bar for scrubbing back through the past 24 hours (iOS `MapTimelineView`): play,
@@ -99,6 +104,14 @@ fun MapTimelineBar(
         relative.orEmpty()
     }
 
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val widestClock = "${stringResource(R.string.timeline_yesterday)} 22:00"
+    val timeColumnWidth = remember(widestClock, density) {
+        val measured = measurer.measure(widestClock, ClockStyle).size.width
+        maxOf(TimeColumnWidth, with(density) { measured.toDp() } + 2.dp)
+    }
+
     Surface(
         modifier = modifier.widthIn(max = 560.dp).fillMaxWidth().height(BarHeight),
         shape = RoundedCornerShape(BarHeight / 2),
@@ -109,14 +122,8 @@ fun MapTimelineBar(
             Spacer(Modifier.width(6.dp))
             PlayButton(playing = playing, enabled = anchor != null, onClick = onPlay)
             Spacer(Modifier.width(8.dp))
-            Column(Modifier.width(TimeColumnWidth).semantics(mergeDescendants = true) {}) {
-                Text(
-                    text = clock,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    style = TextStyle(fontFeatureSettings = TABULAR),
-                    maxLines = 1
-                )
+            Column(Modifier.width(timeColumnWidth).semantics(mergeDescendants = true) {}) {
+                Text(text = clock, style = ClockStyle, maxLines = 1)
                 Text(
                     text = detail,
                     fontSize = 10.sp,
