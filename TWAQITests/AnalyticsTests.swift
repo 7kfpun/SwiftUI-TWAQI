@@ -41,6 +41,7 @@ final class AnalyticsTests: XCTestCase {
         XCTAssertEqual(AnalyticsEvent.submitFeedback.rawValue, "submit_feedback")
         XCTAssertEqual(AnalyticsEvent.onboardingSkipped.rawValue, "onboarding_skipped")
         XCTAssertEqual(AnalyticsEvent.onboardingCompleted.rawValue, "onboarding_completed")
+        XCTAssertEqual(AnalyticsEvent.onboardingChooseStation.rawValue, "onboarding_choose_station")
         XCTAssertEqual(AnalyticsEvent.reviewRequested.rawValue, "review_requested")
         XCTAssertEqual(AnalyticsEvent.favouriteStationSaved.rawValue, "favourite_station_saved")
     }
