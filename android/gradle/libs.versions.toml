@@ -23,6 +23,8 @@ billing = "9.1.0"
 datastore = "1.3.0"
 playServicesAds = "25.5.0"
 ump = "4.0.0"
+# FOX-57: push alerts (alert sync in the background, FCM).
+work = "2.10.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +52,8 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "billing" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
 google-ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
