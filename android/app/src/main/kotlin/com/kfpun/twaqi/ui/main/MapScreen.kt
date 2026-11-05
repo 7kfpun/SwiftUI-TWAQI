@@ -7,11 +7,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -28,6 +31,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -115,7 +121,10 @@ fun MapScreen(
             .filter { !it }
             .collect {
                 val position = cameraPositionState.position
-                viewModel.onCameraIdle(MapTarget(position.target.latitude, position.target.longitude, position.zoom))
+                viewModel.onCameraIdle(
+                    MapTarget(position.target.latitude, position.target.longitude, position.zoom),
+                    cameraPositionState.visibleArea()
+                )
             }
     }
 
@@ -130,8 +139,22 @@ fun MapScreen(
         }
     }
 
+    // Playback stops when the map goes away (another tab, the app in the background).
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) viewModel.stopPlaying()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            viewModel.stopPlaying()
+        }
+    }
+
     Box(modifier.fillMaxSize()) {
         StationMap(
+            viewModel = viewModel,
             state = state,
             cameraPositionState = cameraPositionState,
             locationGranted = locationGranted,
@@ -145,11 +168,24 @@ fun MapScreen(
         ) {
             state.closest?.let { closest ->
                 val interactive = state.isInteractive(closest)
+                // At an earlier hour the card shows that hour's reading, and says which hour it is.
+                val shown = remember(closest, state.timelineHoursAgo, state.historyVersion) {
+                    viewModel.displayed(closest).first
+                }
+                val timelineContext = if (state.timelineHoursAgo > 0) {
+                    state.countryOf(closest)?.let { state.countryPollutants[it] }
+                        ?.let(MapTimeline::anchor)
+                        ?.let { MapTimeline.describe(it, state.timelineHoursAgo) }
+                        ?.let { "${timelineClock(it)}・${timelineRelative(it)}" }
+                } else {
+                    null
+                }
                 ClosestStationCard(
-                    pollutant = closest,
+                    pollutant = shown,
                     type = state.indexType,
                     lastGood = state.isLastGood(closest),
-                    onClick = if (interactive) ({ onOpenStation(closest) }) else null
+                    onClick = if (interactive) ({ onOpenStation(closest) }) else null,
+                    timelineContext = timelineContext
                 )
             }
             AirStatusBar()
@@ -159,43 +195,85 @@ fun MapScreen(
             modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier.align(Alignment.End).padding(end = 15.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+                verticalAlignment = Alignment.Bottom
             ) {
-                MapRoundButton(
-                    icon = R.drawable.ic_map_default_location,
-                    contentDescription = stringResource(R.string.map_default_location),
-                    onClick = {
-                        animateTo(MapHome.defaultLocation(state.countries))
-                        Analytics.logEvent(context, Analytics.MOVE_TO_DEFAULT_LOCATION)
+                WindModeButton(
+                    isWindMode = state.mapMode == MapMode.WIND,
+                    onToggle = {
+                        val mode = viewModel.toggleWindMode()
+                        Analytics.logEvent(
+                            context,
+                            Analytics.SET_WIND_MODE,
+                            mapOf("label" to if (mode == MapMode.WIND) "on" else "off")
+                        )
                     }
                 )
-                MapRoundButton(
-                    icon = R.drawable.ic_map_my_location,
-                    contentDescription = stringResource(R.string.map_my_location),
-                    onClick = {
-                        if (LocationAccess.isGranted(context)) {
-                            goToMyLocation()
-                        } else {
-                            askedFromButton = true
-                            permissionLauncher.launch(LocationAccess.permissions)
+                Spacer(Modifier.weight(1f))
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    MapRoundButton(
+                        icon = R.drawable.ic_map_default_location,
+                        contentDescription = stringResource(R.string.map_default_location),
+                        onClick = {
+                            animateTo(MapHome.defaultLocation(state.countries))
+                            Analytics.logEvent(context, Analytics.MOVE_TO_DEFAULT_LOCATION)
                         }
-                    }
+                    )
+                    MapRoundButton(
+                        icon = R.drawable.ic_map_my_location,
+                        contentDescription = stringResource(R.string.map_my_location),
+                        onClick = {
+                            if (LocationAccess.isGranted(context)) {
+                                goToMyLocation()
+                            } else {
+                                askedFromButton = true
+                                permissionLauncher.launch(LocationAccess.permissions)
+                            }
+                        }
+                    )
+                }
+            }
+            // The index bar sits right on the timeline, as on iOS.
+            Column {
+                IndexSelector(
+                    selected = state.indexType,
+                    onSelect = { selectIndex(context, viewModel, it) }
+                )
+                MapTimelineBar(
+                    anchor = state.timelineAnchor,
+                    hoursAgo = state.timelineHoursAgo,
+                    playing = state.timelinePlaying,
+                    progress = state.historyProgress,
+                    onInteractionBegan = viewModel::onTimelineInteraction,
+                    onChange = viewModel::setTimelineHoursAgo,
+                    onPlay = {
+                        if (viewModel.togglePlay()) Analytics.logEvent(context, Analytics.MAP_TIMELINE_PLAY)
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 15.dp)
                 )
             }
-            IndexSelector(
-                selected = state.indexType,
-                onSelect = { selectIndex(context, viewModel, it) }
-            )
         }
     }
+}
+
+/** The camera's visible area and centre, once the map has laid out. */
+private fun CameraPositionState.visibleArea(): MapArea? {
+    val bounds = projection?.visibleRegion?.latLngBounds ?: return null
+    return MapArea(
+        south = bounds.southwest.latitude,
+        west = bounds.southwest.longitude,
+        north = bounds.northeast.latitude,
+        east = bounds.northeast.longitude,
+        center = GeoPoint(position.target.latitude, position.target.longitude)
+    )
 }
 
 /** Google Map with the stations as clustered markers; the dark style follows the app's appearance. */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun StationMap(
+    viewModel: MainViewModel,
     state: MainUiState,
     cameraPositionState: CameraPositionState,
     locationGranted: Boolean,
@@ -207,16 +285,25 @@ private fun StationMap(
     val chinese = AppLocale.isChinese(context)
     val dark = isSystemInDarkTheme()
     val darkStyle = remember(context) { MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark) }
-    val stations =
-        remember(state.countryPollutants, state.supportedCountryCode, state.indexType, state.mapMode, chinese) {
-            MarkerSource.stations(
-                countryPollutants = state.countryPollutants,
-                supportedCountryCode = state.supportedCountryCode,
-                type = state.indexType,
-                chinese = chinese,
-                mode = state.mapMode
-            )
-        }
+    val stations = remember(
+        state.countryPollutants,
+        state.supportedCountryCode,
+        state.indexType,
+        state.mapMode,
+        state.timelineHoursAgo,
+        state.historyVersion,
+        chinese
+    ) {
+        MarkerSource.stations(
+            countryPollutants = state.countryPollutants,
+            supportedCountryCode = state.supportedCountryCode,
+            type = state.indexType,
+            chinese = chinese,
+            mode = state.mapMode,
+            hoursAgo = state.timelineHoursAgo,
+            readingAt = viewModel::historyReading
+        )
+    }
     val latestStations by rememberUpdatedState(stations)
     val openStation by rememberUpdatedState(onOpenStation)
 

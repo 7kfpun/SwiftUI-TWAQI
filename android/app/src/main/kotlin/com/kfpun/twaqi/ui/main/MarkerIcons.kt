@@ -3,12 +3,16 @@ package com.kfpun.twaqi.ui.main
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.LruCache
 import androidx.core.graphics.createBitmap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.kfpun.twaqi.data.model.Wind
+import kotlin.math.ceil
+import kotlin.math.sqrt
 
 /**
  * Marker images, drawn once per look and reused (iOS `MarkerIcons`). The map uploads each distinct
@@ -63,6 +67,52 @@ class MarkerIcons(context: Context) {
             BitmapDescriptorFactory.fromBitmap(bitmap)
         }
 
+    /**
+     * Wind mode's arrow (iOS `MarkerIcons.arrow`): shaft and chevron, cased in white so it stays
+     * legible over green terrain, drawn pointing south. The marker rotates it by the bearing, so one
+     * bitmap per strength level and colour serves every direction: at most
+     * ([Wind.STRENGTH_STEPS] + 1) × 7 arrows, all reused while scrubbing.
+     *
+     * Square-rooted, not linear: Taiwan's stations mostly report 1–4 m/s, which a linear scale
+     * squeezes into the bottom third. Head and stroke grow with the length, so a long arrow reads as
+     * strong rather than thin.
+     */
+    fun arrow(strengthLevel: Int, color: Int): BitmapDescriptor = cached("arrow|$strengthLevel|$color") {
+        val strength = sqrt(strengthLevel.coerceIn(0, Wind.STRENGTH_STEPS).toFloat() / Wind.STRENGTH_STEPS)
+        val length = (12 + 58 * strength) * density
+        val head = (5 + 5 * strength) * density
+        val stroke = (1.8f + 1.8f * strength) * density
+        val inset = stroke + 1.5f * density
+        val width = head * 2 + inset * 2
+        val height = length + inset * 2
+        val bitmap = createBitmap(ceil(width).toInt(), ceil(height).toInt())
+        val canvas = Canvas(bitmap)
+        val midX = width / 2
+        val tip = height - inset
+        val path = Path().apply {
+            moveTo(midX, inset)
+            lineTo(midX, tip)
+            moveTo(midX - head, tip - head)
+            lineTo(midX, tip)
+            lineTo(midX + head, tip - head)
+        }
+        canvas.drawPath(path, line(CASING, stroke + 2 * density))
+        canvas.drawPath(path, line(opaque(color), stroke))
+        BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    /** Wind mode, no wind (iOS `MarkerIcons.calm`): a ring, so still air doesn't read as missing data. */
+    fun calm(color: Int): BitmapDescriptor = cached("calm|$color") {
+        val diameter = 9 * density
+        val inset = 2.5f * density
+        val size = diameter + inset * 2
+        val bitmap = createBitmap(ceil(size).toInt(), ceil(size).toInt())
+        val canvas = Canvas(bitmap)
+        canvas.drawCircle(size / 2, size / 2, diameter / 2, line(CASING, 3.5f * density))
+        canvas.drawCircle(size / 2, size / 2, diameter / 2, line(opaque(color), 2 * density))
+        BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
     private fun cached(key: String, draw: () -> BitmapDescriptor): BitmapDescriptor =
         cache.get(key) ?: draw().also { cache.put(key, it) }
 
@@ -77,10 +127,21 @@ class MarkerIcons(context: Context) {
         strokeWidth = width
     }
 
+    private fun line(argb: Int, width: Float) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = argb
+        style = Paint.Style.STROKE
+        strokeWidth = width
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+    }
+
     private fun opaque(rgb: Int): Int = rgb or OPAQUE
 
     private companion object {
         const val WHITE = 0xFFFFFF
         const val OPAQUE = 0xFF000000.toInt()
+
+        /** White at 85 %, under the coloured stroke. */
+        const val CASING = 0xD9FFFFFF.toInt()
     }
 }
