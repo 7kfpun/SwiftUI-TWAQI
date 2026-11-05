@@ -1,6 +1,7 @@
 package com.kfpun.twaqi.data.repository
 
 import com.kfpun.twaqi.data.cache.CacheStore
+import com.kfpun.twaqi.data.cache.OfflineCacheRetention
 import com.kfpun.twaqi.data.cache.Saved
 import com.kfpun.twaqi.data.model.AqiForecast
 import com.kfpun.twaqi.data.model.TaiwanTime
@@ -57,6 +58,20 @@ class ForecastRepository(
             } catch (e: ApiFormatException) {
                 fallback(e, current)
             }
+        }
+    }
+
+    /**
+     * The last good rows without a request, for the widgets (FOX-59), which draw from saved data
+     * only; empty when there are none younger than a week.
+     */
+    suspend fun savedForecasts(): List<AqiForecast> = mutex.withLock {
+        withContext(io) {
+            if (!loadedFromDisk) {
+                loadedFromDisk = true
+                forecasts = forecasts ?: readSaved()
+            }
+            forecasts?.takeUnless { OfflineCacheRetention.isExpired(it.savedAt, now()) }?.value.orEmpty()
         }
     }
 

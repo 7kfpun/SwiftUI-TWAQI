@@ -123,6 +123,11 @@ object Analytics {
     /** `source`: feedback. "Rate on Google Play" tapped in the thank-you after a 4- or 5-star feedback. */
     const val WRITE_REVIEW_TAPPED = "write_review_tapped"
 
+    // Widgets (FOX-59), as on iOS.
+
+    /** `source` (widget, tile, deep_link), `stationId`: a `twaqi://station` link opened its station. */
+    const val STATION_LINK_OPENED = "station_link_opened"
+
     /**
      * Logs [name] with [parameters]: text as strings, whole numbers as longs, other numbers as
      * doubles, and booleans as 1 / 0 (how Firebase records the iOS app's booleans). Does nothing

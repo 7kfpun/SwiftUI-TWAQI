@@ -2,6 +2,7 @@ package com.kfpun.twaqi.pro
 
 import android.content.Context
 import com.kfpun.twaqi.BuildConfig
+import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +23,11 @@ object ProGraph {
             gateway = gateway(context),
             store = DataStoreEntitlementStore(context),
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-        ).also { repository = it }
+        ).also {
+            repository = it
+            // FOX-59: widgets redraw when Pro changes.
+            WidgetUpdater.observePro(context, it.isPro)
+        }
     }
 
     fun gateway(context: Context): BillingGateway = gateway ?: synchronized(this) {

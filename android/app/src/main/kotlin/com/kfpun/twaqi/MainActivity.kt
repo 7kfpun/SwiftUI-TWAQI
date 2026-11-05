@@ -34,9 +34,11 @@ import com.kfpun.twaqi.push.PushMessaging
 import com.kfpun.twaqi.review.ReviewPrompt
 import com.kfpun.twaqi.ui.MainTabs
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
+import com.kfpun.twaqi.ui.navigation.DeepLink
 import com.kfpun.twaqi.ui.navigation.StationDestination
 import com.kfpun.twaqi.ui.navigation.StationRoute
 import com.kfpun.twaqi.ui.theme.TWAQITheme
+import com.kfpun.twaqi.widget.WidgetLocation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         startPro()
         startPush(savedInstanceState == null)
+        if (savedInstanceState == null) handleLink(intent)
         startTracking(savedInstanceState)
         setContent {
             TWAQITheme {
@@ -70,12 +73,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** FOX-57: a tapped alert's station, for [HomeScreen] to open. */
+    /** A tapped alert's station (FOX-57) or a widget's `twaqi://station` link (FOX-59), for [HomeScreen] to open. */
     private val openStation = MutableStateFlow<Int?>(null)
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         AlertNotifications.stationId(intent)?.let { openStation.value = it }
+        handleLink(intent)
     }
 
     /**
@@ -100,6 +105,42 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG && firstCreate && intent.getBooleanExtra(EXTRA_DEMO_ALERT, false)) {
             AlertNotifications.show(this, AlertNotifications.demo(this))
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // FOX-59: a widget's background refresh can't read the last fix; keep it while the app is open.
+        WidgetLocation.remember(this)
+    }
+
+    /** `twaqi://station` and `twaqi://pro` links, through the one router ([DeepLink]). */
+    private fun handleLink(intent: Intent?) {
+        val link = DeepLink.parse(intent?.data) ?: return
+        lifecycleScope.launch {
+            val isPro = ProGraph.repository(this@MainActivity).entitlement.filterNotNull().first() == Entitlement.PRO
+            val known = (link as? DeepLink.Station)?.let { isKnownStation(it.stationId) } ?: true
+            when (val routed = DeepLink.route(link, isPro) { known }) {
+                is DeepLink.Station -> {
+                    openStation.value = routed.stationId
+                    Analytics.logEvent(
+                        this@MainActivity,
+                        Analytics.STATION_LINK_OPENED,
+                        mapOf("source" to routed.source.analyticsName, "stationId" to routed.stationId.toString())
+                    )
+                }
+
+                is DeepLink.Pro -> ProNavigation.open(this@MainActivity, routed.source)
+
+                null -> Unit
+            }
+        }
+    }
+
+    /** A station the app has seen: in the saved readings or the saved station list. */
+    private suspend fun isKnownStation(stationId: Int): Boolean {
+        val airQuality = (application as TwaqiApplication).container.airQuality
+        return airQuality.savedPollutants(listOf(stationId)).isNotEmpty() ||
+            airQuality.savedStations()?.value?.any { it.id == stationId } == true
     }
 
     /**
@@ -149,7 +190,7 @@ class MainActivity : AppCompatActivity() {
 /**
  * The tabs, with the map as home (FOX-54) and Help (FOX-97), and the station screen over them.
  * [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen.
- * [openStation] carries a tapped alert's station (FOX-57).
+ * [openStation] carries a tapped alert's station (FOX-57) or a widget's station link (FOX-59).
  */
 @Composable
 fun HomeScreen(
@@ -161,7 +202,7 @@ fun HomeScreen(
     val pro = remember(context) { ProGraph.repository(context) }
     val entitlement by pro.entitlement.collectAsState()
     var stationId by rememberSaveable { mutableStateOf<Int?>(null) }
-    // FOX-57: a tapped alert opens its station.
+    // A tapped alert (FOX-57) or a widget's station link (FOX-59) opens its station.
     LaunchedEffect(openStation) {
         openStation?.filterNotNull()?.collect {
             stationId = it
