@@ -39,6 +39,13 @@ class DeepLinkTest {
     }
 
     @Test
+    fun theLockedWidgetsProLinkRoundTrips() {
+        val uri = DeepLink.proUri(ProScreenSource.WIDGET_LOCKED)
+        assertEquals("twaqi://pro?source=widget_locked", uri)
+        assertEquals(DeepLink.Pro(ProScreenSource.WIDGET_LOCKED), parse(uri))
+    }
+
+    @Test
     fun anythingElseIsIgnored() {
         listOf(
             "https://station?id=5",

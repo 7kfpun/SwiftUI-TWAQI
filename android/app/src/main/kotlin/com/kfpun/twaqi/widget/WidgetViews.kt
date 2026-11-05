@@ -44,7 +44,6 @@ import com.kfpun.twaqi.data.model.AqiForecast
 import com.kfpun.twaqi.data.model.AreaForecast
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.data.model.TaiwanTime
-import com.kfpun.twaqi.pro.ProNavigation
 import com.kfpun.twaqi.pro.ProScreenSource
 import com.kfpun.twaqi.ui.navigation.DeepLink
 import com.kfpun.twaqi.ui.navigation.StationLinkSource
@@ -58,9 +57,7 @@ internal fun rgb(color: Int, alpha: Float): ColorProvider =
 
 internal object WidgetTaps {
     /** Locked widgets open the Pro screen, through the one way in (FOX-58, iOS FOX-47). */
-    fun pro(context: Context): Action = actionStartActivity(
-        ProNavigation.intent(context, ProScreenSource.WIDGET_LOCKED).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
+    fun pro(context: Context): Action = actionStartActivity(DeepLink.proIntent(context, ProScreenSource.WIDGET_LOCKED))
 
     /** Medium, large and station detail open the station shown, the page paged to included. */
     fun station(context: Context, stationId: Int): Action =

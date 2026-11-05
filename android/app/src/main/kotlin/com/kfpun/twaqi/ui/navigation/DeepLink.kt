@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.kfpun.twaqi.MainActivity
 import com.kfpun.twaqi.pro.ProDeepLink
+import com.kfpun.twaqi.pro.ProNavigation
 import com.kfpun.twaqi.pro.ProScreenSource
 
 /** Where a station link came from (iOS `StationLinkSource`). */
@@ -69,6 +70,20 @@ sealed interface DeepLink {
         /** `twaqi://station?id=…&source=…` */
         fun stationUri(stationId: Int, source: StationLinkSource): String =
             "$SCHEME://$STATION_HOST?$ID_PARAMETER=$stationId&$SOURCE_PARAMETER=${source.analyticsName}"
+
+        /** `twaqi://pro?source=…` */
+        fun proUri(source: ProScreenSource): String =
+            "$SCHEME://${ProDeepLink.HOST}?${ProDeepLink.SOURCE_PARAMETER}=${source.analyticsName}"
+
+        /**
+         * Opens the Pro screen, for a locked widget's tap. It carries its own [proUri], because
+         * Glance gives an activity intent without data a `glance-action:` one, which the Pro screen
+         * would read as a link it doesn't know and close.
+         */
+        fun proIntent(context: Context, source: ProScreenSource): Intent = ProNavigation.intent(context, source)
+            .setAction(Intent.ACTION_VIEW)
+            .setData(proUri(source).toUri())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         /** Opens [stationId] in the app, for a widget's tap. */
         fun stationIntent(context: Context, stationId: Int, source: StationLinkSource): Intent =
