@@ -105,7 +105,7 @@ curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 
 - **Cron** `40 * * * *` (hourly, its own invocation so it never shares the forecast's CPU or subrequest budget): fetch two CWA open-data sets with `CWA_API_KEY` → one compact JSON → R2 `weather/latest.json`, `Cache-Control: public, max-age=300`, served straight from the webcam host like `manifest.json` (no Worker in the path). Code: `src/weather.ts`.
   - `F-C0032-001`: the 36-hour county (縣市) forecast. Kept per county and period: start/end (Taiwan time, ISO 8601 with `+08:00`), Wx code and CWA's text, PoP, MinT, MaxT. CI (comfort) is dropped: the app doesn't show it.
-  - `O-A0003-001`: CWA's staffed stations. Kept per station: id, name, county, WGS84 lat/lon, observation time, temperature, humidity, rain since midnight (`Now.Precipitation`), wind speed. CWA's missing-value markers (`-99`, `-990`, …) become `null`; a station with no reading left is dropped.
+  - `O-A0003-001`: CWA's staffed stations. Kept per station: id, name, county, WGS84 lat/lon, observation time, temperature, humidity, rain since midnight (`Now.Precipitation`), wind speed. CWA's missing-value markers (`-99`, `-990`, `X`, …) become `null`; for rain, `T` (trace) and `-98` (no rain in 6 h) are `0`. A station with no reading left is dropped.
 - **Shape:** `{ version: 1, updatedAt, forecast: { fetchedAt, counties: { "臺北市": [period…] } } | null, observations: { fetchedAt, stations: [station…] } | null }`. County names use 臺 as CWA writes them. Free text (Wx descriptions, station names) stays zh-Hant; the app maps Wx codes to its own strings.
 - **Last good wins.** Each set is fetched and parsed on its own. One that fails (HTTP error, non-JSON body, `success` not true, nothing usable) keeps its section from the previous file; the file is rewritten only when at least one set is new, and left untouched when both fail. Nothing is deleted.
 - **Wx codes:** CWA's table (預報產品天氣描述代碼表) is 1–42 without 40 (`WX_CODES`). A code outside it is still stored and listed in the sync status as `unknownWx`, so a new code is noticed before the app learns it.
@@ -113,7 +113,7 @@ curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 
 | Route | |
 | --- | --- |
-| `GET /weather` | Outcome of the last sync (`{ ok, at, result \| error }`; `result` has `forecast` / `observations` = `updated` \| `kept` \| `missing`, counts, `unknownWx`, and the error of a set that wasn't updated), kept in R2 at `weather/last-sync.json` |
+| `GET /weather` | Outcome of the last sync (`{ ok, at, result \| error }`; `result` has `forecast` / `observations` = `updated` \| `kept` \| `missing`, counts, `unknownWx`, and the error of a set that wasn't updated, with any URL query string and `Authorization` value stripped), kept in R2 at `weather/last-sync.json` |
 | `POST /weather/sync` | Manual sync, `Authorization: Bearer $SYNC_TOKEN` |
 
 Checking a deploy by hand:

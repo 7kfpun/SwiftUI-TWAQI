@@ -12,6 +12,8 @@ import {
   mergeWeather,
   parseForecast,
   parseObservations,
+  rainfall,
+  redactSecrets,
   syncWeather,
   taiwanIso,
   unknownWxCodes,
@@ -107,10 +109,28 @@ test('observations: WGS84 position, county, readings and time per station', () =
 
 test('observations: -99 style markers are null, a station with no reading left is dropped, a bad time is dropped', () => {
   const stations = parseObservations(OBSERVATIONS)
-  assert.deepEqual(stations.map((s) => s.id), ['466920', '466990', '467480'])
+  assert.deepEqual(stations.map((s) => s.id), ['466920', '466990', '467410', '467440', '467480', '467490'])
   const chiayi = stations.find((s) => s.id === '467480')!
   assert.equal(chiayi.rain, null) // -99
   assert.equal(chiayi.humidity, 81) // 0.81 in the old fractional form
+})
+
+test('observations: rain T (trace) and -98 (no rain for 6 h) are 0; X and other negatives stay null', () => {
+  const stations = parseObservations(OBSERVATIONS)
+  const rain = (id: string) => stations.find((s) => s.id === id)!.rain
+  assert.equal(rain('467490'), 0) // "T"
+  assert.equal(rain('467410'), 0) // -98
+  assert.equal(rain('467440'), null) // "X"
+  assert.equal(rain('467480'), null) // -99
+  assert.equal(rainfall('t'), 0)
+  assert.equal(rainfall(' T '), 0)
+  assert.equal(rainfall('-98'), 0)
+  assert.equal(rainfall(-99), null)
+  assert.equal(rainfall(-998), null)
+  assert.equal(rainfall(-1), null)
+  assert.equal(rainfall('X'), null)
+  assert.equal(rainfall(null), null)
+  assert.equal(rainfall('12.5'), 12.5)
 })
 
 test('observations: nothing usable throws', () => {
@@ -159,7 +179,7 @@ test('merge: a set that never loaded is null, not empty', () => {
   const { file, result } = mergeWeather(null, { error: 'x' }, { value: parseObservations(OBSERVATIONS) }, NOW)
   assert.equal(file.forecast, null)
   assert.equal(result.forecast, 'missing')
-  assert.equal(result.stations, 3)
+  assert.equal(result.stations, 6)
 })
 
 /** In-memory stand-in for the R2 bucket. */
@@ -205,7 +225,7 @@ test('sync: writes weather/latest.json with both sets and the cam cache rule', a
   assert.equal(result.forecast, 'updated')
   assert.equal(result.observations, 'updated')
   assert.equal(result.counties, 3)
-  assert.equal(result.stations, 3)
+  assert.equal(result.stations, 6)
 
   const file = JSON.parse(r2.store.get(WEATHER_KEY)!) as WeatherFile
   assert.equal(file.version, 1)
@@ -228,7 +248,7 @@ test('sync: one set down keeps its last good section', async () => {
   assert.match(result.forecastError!, /non-JSON/)
   const file = JSON.parse(r2.store.get(WEATHER_KEY)!) as WeatherFile
   assert.deepEqual(file.forecast, PREV.forecast)
-  assert.equal(file.observations?.stations.length, 3)
+  assert.equal(file.observations?.stations.length, 6)
 })
 
 test('sync: both sets down leaves the last good file untouched and throws', async () => {
@@ -242,6 +262,26 @@ test('sync: both sets down leaves the last good file untouched and throws', asyn
   await assert.rejects(syncWeather({ CAMS: r2.binding, CWA_API_KEY: 'k' }, NOW, api.fetch), /nothing usable/)
   assert.equal(r2.store.get(WEATHER_KEY), before)
   assert.equal(r2.puts.length, 0)
+})
+
+test('sync: a fetch error that names the request URL keeps the key out of the result', async () => {
+  const r2 = bucket({ [WEATHER_KEY]: JSON.stringify(PREV) })
+  const failing = (async (input: string) => {
+    if (input.includes(`/${FORECAST_DATASET}?`)) throw new TypeError(`fetch failed: ${input}`)
+    return new Response(JSON.stringify(OBSERVATIONS), { status: 200 })
+  }) as unknown as typeof fetch
+
+  const result = await syncWeather({ CAMS: r2.binding, CWA_API_KEY: 'secret-key' }, NOW, failing)
+  assert.equal(result.forecast, 'kept')
+  assert.match(result.forecastError!, /fetch failed: https:\/\/opendata\.cwa\.gov\.tw\/.+F-C0032-001$/)
+  assert.equal(JSON.stringify(result).includes('secret-key'), false)
+})
+
+test('errors: Authorization values and URL query strings are redacted', () => {
+  assert.equal(redactSecrets('GET https://host.example/api/X?format=JSON&Authorization=abc-123 failed'), 'GET https://host.example/api/X failed')
+  assert.equal(redactSecrets('bad Authorization=abc-123&format=JSON'), 'bad Authorization=[redacted]&format=JSON')
+  assert.equal(redactSecrets('header Authorization: Bearer abc.def'), 'header Authorization: [redacted]')
+  assert.equal(redactSecrets('F-C0032-001 HTTP 503'), 'F-C0032-001 HTTP 503')
 })
 
 test('sync: a missing key fails before calling CWA', async () => {

@@ -8,7 +8,7 @@
 // hourly at :40 in its own invocation, so it never shares the forecast's CPU or subrequest budget.
 import { unzipSync } from 'fflate'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
-import { syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
+import { errorText, syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
 import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepDue } from './history'
 import { handleApi, isApiPath, type ApiEnv } from './api'
 
@@ -217,8 +217,9 @@ async function runWeatherSync(env: Env): Promise<WeatherStatus> {
     status = { ok: true, at: new Date().toISOString(), result }
   } catch (e) {
     // weather/latest.json keeps the last good file; nothing to undo.
-    console.error('weather sync failed', e)
-    status = { ok: false, at: new Date().toISOString(), error: String(e) }
+    const error = errorText(e)
+    console.error('weather sync failed', error)
+    status = { ok: false, at: new Date().toISOString(), error }
   }
   try {
     await env.CAMS.put(WEATHER_STATUS_KEY, JSON.stringify(status), {

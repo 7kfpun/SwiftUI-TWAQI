@@ -256,6 +256,34 @@ final class StationWeatherTests: XCTestCase {
         XCTAssertEqual(StationWeatherView.millimetres(0.5), "0.5 mm")
         XCTAssertEqual(StationWeatherView.windSpeed(nil), "—")
     }
+
+    /// 02:00 Thursday (Taiwan): the 18:00–06:00 period that started Wednesday is
+    /// running, so it is 今天, not Wednesday; the next one starts today too.
+    func testPeriodRunningPastMidnightIsToday() throws {
+        let night = WeatherPeriod(start: "2026-11-04T18:00:00+08:00", end: "2026-11-05T06:00:00+08:00",
+                                  wx: 1, text: nil, pop: 0, minT: 20, maxT: 24)
+        let day = WeatherPeriod(start: "2026-11-05T06:00:00+08:00", end: "2026-11-05T18:00:00+08:00",
+                                wx: 1, text: nil, pop: 0, minT: 22, maxT: 27)
+        let tonight = WeatherPeriod(start: "2026-11-05T18:00:00+08:00", end: "2026-11-06T06:00:00+08:00",
+                                    wx: 1, text: nil, pop: 0, minT: 20, maxT: 24)
+        let today = "Forecast.today".localized
+        let tomorrow = "Forecast.tomorrow".localized
+
+        let twoAM = try XCTUnwrap(WeatherDates.parse("2026-11-05T02:00:00+08:00"))
+        XCTAssertEqual(StationWeatherView.dayTitle(night, now: twoAM), today)
+        XCTAssertEqual(StationWeatherView.dayTitle(day, now: twoAM), today)
+
+        // At 20:00 the period that starts tonight is today; at 06:00 the night one has ended.
+        let eightPM = try XCTUnwrap(WeatherDates.parse("2026-11-05T20:00:00+08:00"))
+        XCTAssertEqual(StationWeatherView.dayTitle(tonight, now: eightPM), today)
+        let sixAM = try XCTUnwrap(WeatherDates.parse("2026-11-05T06:00:00+08:00"))
+        XCTAssertNotEqual(StationWeatherView.dayTitle(night, now: sixAM), today)
+
+        // A later period keeps its own day.
+        let next = WeatherPeriod(start: "2026-11-06T06:00:00+08:00", end: "2026-11-06T18:00:00+08:00",
+                                 wx: 1, text: nil, pop: 0, minT: 22, maxT: 27)
+        XCTAssertEqual(StationWeatherView.dayTitle(next, now: twoAM), tomorrow)
+    }
 }
 
 // MARK: - Store

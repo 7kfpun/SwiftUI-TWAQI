@@ -151,9 +151,13 @@ struct StationWeatherView: View {
     // MARK: - Formatting
 
     /// 今天 / 明天 / 後天, else the weekday, for the Taiwan day the period
-    /// starts on.
+    /// starts on. The period running now is 今天, even between 00:00 and
+    /// 06:00 when the 18:00–06:00 period started the day before.
     static func dayTitle(_ period: WeatherPeriod, now: Date = Date()) -> String {
         guard let start = period.startDate else { return "" }
+        if start <= now, let end = period.endDate, now < end {
+            return "Forecast.today".localized
+        }
         return AreaForecastView.dayTitle(WeatherDates.day(start), now: now)
     }
 

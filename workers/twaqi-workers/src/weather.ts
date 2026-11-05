@@ -145,8 +145,20 @@ function safely<T>(run: () => T): Parsed<T> {
   }
 }
 
-function errorText(e: unknown): string {
-  return e instanceof Error ? e.message : String(e)
+/** An error's text with any request URL's query string and `Authorization` value removed. */
+export function errorText(e: unknown): string {
+  return redactSecrets(e instanceof Error ? e.message : String(e))
+}
+
+/**
+ * Strips what could carry the CWA key before an error is logged or written to
+ * weather/last-sync.json (which GET /weather returns): an `Authorization` value
+ * and the query string of any URL.
+ */
+export function redactSecrets(text: string): string {
+  return text
+    .replace(/(Authorization\s*[=:]\s*)(Bearer\s+)?[^\s&"',;)]+/gi, '$1[redacted]')
+    .replace(/(https?:\/\/[^\s?#"']+)\?[^\s#"']*/gi, '$1')
 }
 
 /**
@@ -321,7 +333,7 @@ export function parseObservations(body: unknown): Observation[] {
     // Older CWA formats sent humidity as a fraction (0.75). A real reading of
     // 1% or less never happens in Taiwan, so (0, 1] is read as a fraction.
     if (humidity !== null && humidity > 0 && humidity <= 1) humidity = Math.round(humidity * 100)
-    const rain = valid(num(get(get(element, 'Now', 'now'), 'Precipitation', 'precipitation')), (n) => n >= 0 && n < 3000)
+    const rain = rainfall(get(get(element, 'Now', 'now'), 'Precipitation', 'precipitation'))
     const wind = valid(num(get(element, 'WindSpeed', 'windSpeed')), (n) => n >= 0 && n < 100)
     if (temp === null && humidity === null && rain === null && wind === null) continue
 
@@ -364,6 +376,18 @@ export function taiwanIso(value: string | null): string | null {
 function plausibleTemp(n: number): boolean {
   // Taiwan's record low is around -18 °C on Yushan; CWA's missing markers are -99 and below.
   return n > -50 && n < 60
+}
+
+/**
+ * Today's rain in mm. CWA writes `T` for a trace (雨跡, under 0.5 mm) and `-98`
+ * for no rain in the last 6 hours; both are a real 0. `X`, `-99` and any other
+ * negative mean no reading and stay null, so the app shows "—".
+ */
+export function rainfall(value: unknown): number | null {
+  if (typeof value === 'string' && value.trim().toUpperCase() === 'T') return 0
+  const n = num(value)
+  if (n === -98) return 0
+  return valid(n, (n) => n >= 0 && n < 3000)
 }
 
 function valid(n: number | null, ok: (n: number) => boolean): number | null {
