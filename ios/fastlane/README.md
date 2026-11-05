@@ -21,7 +21,7 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane ios frame_screenshots
 ```
 
-Frame the raw captures in /Users/kf/Documents/Workspace/SwiftUI-TWAQI/fastlane/screenshots_raw/<locale> into App Store sized PNGs
+Frame the raw captures in /Users/kf/Documents/Workspace/SwiftUI-TWAQI/ios/fastlane/screenshots_raw/<locale> into App Store sized PNGs
 
 Requires ImageMagick (brew install imagemagick)
 

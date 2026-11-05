@@ -12,7 +12,7 @@
 //
 //  Usage:
 //    swiftc -O tools/DrawVisionAppIcon.swift -o /tmp/draw-icon
-//    /tmp/draw-icon TWAQIVision/Assets.xcassets/AppIcon.solidimagestack
+//    /tmp/draw-icon ios/TWAQIVision/Assets.xcassets/AppIcon.solidimagestack
 //
 
 import CoreGraphics

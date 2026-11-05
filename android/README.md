@@ -4,6 +4,9 @@ Native Kotlin + Jetpack Compose + Material 3. One `app` module, package `com.kfp
 (it updates the existing Play listing), minSdk 26, compileSdk / targetSdk 36.
 Decisions: FOX-51. Setup: FOX-52. Features follow from FOX-53.
 
+The iOS app is in [`../ios`](../ios). Shared parts stay at the repository root:
+`workers/`, `services/`, `web/`, `docs/`, `tools/`, `assets/` and `.github/` (FOX-89).
+
 ## Toolchain
 
 JDK 17 and the Android command-line tools (Homebrew), with platform 36 and build-tools:
@@ -45,7 +48,7 @@ All of these are gitignored. A clean checkout builds without any of them.
 - `secrets.properties` overrides `secrets.example.properties` key by key. Values reach the app
   as `BuildConfig.API_DOMAIN`, `BuildConfig.DIRECTUS_URL`, `BuildConfig.DIRECTUS_FEEDBACK_TOKEN`,
   `BuildConfig.DIRECTUS_COOPERATE_TOKEN`, and the Maps key as the manifest's
-  `com.google.android.geo.API_KEY`. The names match `TWAQI/Config/example.xcconfig` on iOS.
+  `com.google.android.geo.API_KEY`. The names match `ios/TWAQI/Config/example.xcconfig` on iOS.
 - Anything in `BuildConfig` or the manifest ships inside the APK and can be read out of it,
   as on iOS. The Directus tokens must stay create-only on their collections
   (`twaqi_feedback`, `twaqi_cooperate`) and read-only on `twaqi_aqi_forecast`; push goes

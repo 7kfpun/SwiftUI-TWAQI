@@ -14,10 +14,10 @@ on:
     branches: [master]
     # What the cache keys or the build depend on.
     paths:
-      - Podfile
-      - Podfile.lock
-      - TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
-      - TWAQI.xcodeproj/xcshareddata/xcschemes/TWAQI-CI.xcscheme
+      - ios/Podfile
+      - ios/Podfile.lock
+      - ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved
+      - ios/TWAQI.xcodeproj/xcshareddata/xcschemes/TWAQI-CI.xcscheme
       - .github/workflows/ci.yml
       - .github/workflows/ci-cache.yml
       - .github/actions/unit-tests-build/**
@@ -63,8 +63,8 @@ jobs:
           # The project will not build without these, and they are gitignored
           # because they hold local API keys. Example values are enough to
           # compile and launch the host app for unit tests.
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/debug.xcconfig
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/release.xcconfig
           # example.xcconfig sets GMSServicesApiKey to an empty value
           # (`= // Required` is a comment). An empty key skips meaningful
           # GMSServices.provideAPIKey, and creating GMSMapView then crashes
@@ -73,7 +73,7 @@ jobs:
           from pathlib import Path
           key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
           for name in ("debug.xcconfig", "release.xcconfig"):
-              path = Path("TWAQI/Config") / name
+              path = Path("ios/TWAQI/Config") / name
               lines = path.read_text().splitlines()
               out, replaced = [], False
               for line in lines:
@@ -86,7 +86,7 @@ jobs:
                   out.append(key_line)
               path.write_text("\n".join(out) + "\n")
           PY
-          cat > TWAQI/GoogleService-Info.plist <<'EOF'
+          cat > ios/TWAQI/GoogleService-Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">

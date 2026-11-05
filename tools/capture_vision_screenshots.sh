@@ -2,7 +2,7 @@
 #
 # Captures the raw Vision Pro App Store screenshots on the visionOS simulator,
 # through devicectl (DeviceHub's command line), into
-# fastlane/screenshots_raw/<locale>/Vision Pro NN.png. Frame them with
+# ios/fastlane/screenshots_raw/<locale>/Vision Pro NN.png. Frame them with
 # `fastlane frame_vision_screenshots`.
 #
 # The simulator can't be pinched from the command line, so each state is
@@ -17,7 +17,8 @@
 # Usage: tools/capture_vision_screenshots.sh [simulator-udid]
 
 set -eu
-ROOT=${0:A:h:h}
+# The iOS app's directory (ios/, FOX-89), next to this script's tools/.
+ROOT=${0:A:h:h}/ios
 DEVICE=${1:-$(xcrun simctl list devices booted | grep -m1 "Apple Vision Pro" | grep -oE "[0-9A-F-]{36}")}
 BUNDLE_ID=com.kfpun.twaqi
 DERIVED=/tmp/twaqi-vision-screenshots

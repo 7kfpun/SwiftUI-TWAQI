@@ -14,9 +14,9 @@ import ci_test_level as level  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 GUARDED = [
-    "TWAQI/Utils/PushService.swift",
-    "TWAQI/**/StationCam*.swift",
-    "TWAQITests/PushServiceTests.swift",
+    "ios/TWAQI/Utils/PushService.swift",
+    "ios/TWAQI/**/StationCam*.swift",
+    "ios/TWAQITests/PushServiceTests.swift",
 ]
 
 
@@ -29,16 +29,31 @@ class DecideTests(unittest.TestCase):
         result = decide(
             "workers/twaqi-push-sender/src/index.ts",
             "web/index.html",
-            "fastlane/Fastfile",
+            "ios/fastlane/Fastfile",
             "assets/appstore/1.png",
             "README.md",
             "docs/ci-cd-guardrails.md",
             "screenshots/iphone/01.png",
-            "TWAQI/Resources/intro.mp4",
+            "ios/TWAQI/Resources/intro.mp4",
             ".github/pull_request_template.md",
         )
         self.assertEqual(result.level, level.SKIP)
         self.assertEqual(len(result.files), 9)
+
+    def test_android_only_skips(self):
+        # FOX-89: android/ never feeds the iOS build; its own CI comes with FOX-52.
+        result = decide(
+            "android/README.md",
+            "android/app/build.gradle.kts",
+            "android/app/src/main/java/com/kfpun/twaqi/MainActivity.kt",
+            "android/app/src/main/res/values/strings.xml",
+        )
+        self.assertEqual(result.level, level.SKIP)
+        self.assertEqual(len(result.files), 4)
+        # An iOS file alongside still builds.
+        mixed = decide("android/app/build.gradle.kts", "ios/TWAQI/ContentView.swift")
+        self.assertEqual(mixed.level, level.BUILD)
+        self.assertEqual(mixed.files, ["ios/TWAQI/ContentView.swift"])
 
     def test_a_workflow_other_than_ci_yml_skips(self):
         # PR #54 ran the whole job for this file alone.
@@ -68,9 +83,9 @@ class DecideTests(unittest.TestCase):
 
     def test_dependency_pins_and_this_script_test(self):
         for path in (
-            "Podfile",
-            "Podfile.lock",
-            "TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+            "ios/Podfile",
+            "ios/Podfile.lock",
+            "ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved",
             "tools/ci_test_level.py",
             "tools/test_ci_test_level.py",
         ):
@@ -78,19 +93,19 @@ class DecideTests(unittest.TestCase):
                 self.assertEqual(decide(path).level, level.TEST)
 
     def test_a_view_change_builds(self):
-        result = decide("TWAQI/Views/Forecast/ForecastView.swift", "README.md")
+        result = decide("ios/TWAQI/Views/Forecast/ForecastView.swift", "README.md")
         self.assertEqual(result.level, level.BUILD)
-        self.assertEqual(result.files, ["TWAQI/Views/Forecast/ForecastView.swift"])
+        self.assertEqual(result.files, ["ios/TWAQI/Views/Forecast/ForecastView.swift"])
 
     def test_other_app_paths_build(self):
         for path in (
-            "TWAQI.xcodeproj/project.pbxproj",
-            "TWAQI/Localization/en.lproj/Localizable.strings",
-            "TWAQI/Assets.xcassets/AppIcon.appiconset/Contents.json",
-            "TWAQIWidget/TWAQIWidget.swift",
-            "TWAQIWatch/ContentView.swift",
-            "TWAQIVision/Favourites.swift",
-            "TWAQITests/StationParsingTests.swift",
+            "ios/TWAQI.xcodeproj/project.pbxproj",
+            "ios/TWAQI/Localization/en.lproj/Localizable.strings",
+            "ios/TWAQI/Assets.xcassets/AppIcon.appiconset/Contents.json",
+            "ios/TWAQIWidget/TWAQIWidget.swift",
+            "ios/TWAQIWatch/ContentView.swift",
+            "ios/TWAQIVision/Favourites.swift",
+            "ios/TWAQITests/StationParsingTests.swift",
             "tools/pr_policy.py",
         ):
             with self.subTest(path=path):
@@ -98,10 +113,10 @@ class DecideTests(unittest.TestCase):
 
     def test_a_guarded_file_tests(self):
         for path in (
-            "TWAQI/Utils/PushService.swift",
-            "TWAQI/Utils/StationCamFrameCache.swift",
-            "TWAQI/Views/Details/StationCamView.swift",
-            "TWAQITests/PushServiceTests.swift",
+            "ios/TWAQI/Utils/PushService.swift",
+            "ios/TWAQI/Utils/StationCamFrameCache.swift",
+            "ios/TWAQI/Views/Details/StationCamView.swift",
+            "ios/TWAQITests/PushServiceTests.swift",
         ):
             with self.subTest(path=path):
                 self.assertEqual(decide(path).level, level.TEST)
@@ -109,15 +124,15 @@ class DecideTests(unittest.TestCase):
     def test_mixed_list_highest_level_wins(self):
         result = decide(
             "workers/twaqi-workers/src/forecast.ts",
-            "TWAQI/ContentView.swift",
-            "TWAQI/Utils/PushService.swift",
+            "ios/TWAQI/ContentView.swift",
+            "ios/TWAQI/Utils/PushService.swift",
             "README.md",
         )
         self.assertEqual(result.level, level.TEST)
-        self.assertEqual(result.files, ["TWAQI/Utils/PushService.swift"])
-        result = decide("workers/twaqi-workers/src/forecast.ts", "TWAQI/ContentView.swift")
+        self.assertEqual(result.files, ["ios/TWAQI/Utils/PushService.swift"])
+        result = decide("workers/twaqi-workers/src/forecast.ts", "ios/TWAQI/ContentView.swift")
         self.assertEqual(result.level, level.BUILD)
-        self.assertEqual(result.files, ["TWAQI/ContentView.swift"])
+        self.assertEqual(result.files, ["ios/TWAQI/ContentView.swift"])
 
     def test_empty_list_tests(self):
         self.assertEqual(decide().level, level.TEST)
@@ -131,14 +146,14 @@ class DecideTests(unittest.TestCase):
         self.assertEqual(decide("README.md", labels=["documentation"]).level, level.SKIP)
 
     def test_paths_are_normalized_and_case_insensitive(self):
-        self.assertEqual(decide("./TWAQI/Utils/pushservice.swift").level, level.TEST)
+        self.assertEqual(decide("./ios/TWAQI/Utils/pushservice.swift").level, level.TEST)
         self.assertEqual(decide("Docs/NOTES.MD").level, level.SKIP)
 
 
 class GlobTests(unittest.TestCase):
     def test_star_stays_in_one_segment(self):
-        self.assertTrue(level.matches("TWAQI/Utils/StationCamStore.swift", ["TWAQI/Utils/StationCam*.swift"]))
-        self.assertFalse(level.matches("TWAQI/Utils/Sub/StationCam.swift", ["TWAQI/Utils/StationCam*.swift"]))
+        self.assertTrue(level.matches("ios/TWAQI/Utils/StationCamStore.swift", ["ios/TWAQI/Utils/StationCam*.swift"]))
+        self.assertFalse(level.matches("ios/TWAQI/Utils/Sub/StationCam.swift", ["ios/TWAQI/Utils/StationCam*.swift"]))
 
     def test_double_star_spans_directories(self):
         self.assertTrue(level.matches("Package.resolved", ["**/Package.resolved"]))
@@ -166,17 +181,17 @@ class WorkflowListTests(unittest.TestCase):
     def test_check_finds_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "TWAQITests").mkdir()
-            (root / "TWAQI").mkdir()
-            (root / "TWAQI/A.swift").write_text("")
-            (root / "TWAQITests/ATests.swift").write_text("final class ATests: XCTestCase {}\n")
-            (root / "TWAQITests/BTests.swift").write_text("final class BTests: XCTestCase {}\n")
-            in_step = level.check(root, ["ATests"], ["TWAQI/A.swift", "TWAQITests/ATests.swift"])
+            (root / "ios/TWAQITests").mkdir(parents=True)
+            (root / "ios/TWAQI").mkdir(parents=True)
+            (root / "ios/TWAQI/A.swift").write_text("")
+            (root / "ios/TWAQITests/ATests.swift").write_text("final class ATests: XCTestCase {}\n")
+            (root / "ios/TWAQITests/BTests.swift").write_text("final class BTests: XCTestCase {}\n")
+            in_step = level.check(root, ["ATests"], ["ios/TWAQI/A.swift", "ios/TWAQITests/ATests.swift"])
             self.assertEqual(in_step, [])
-            problems = level.check(root, ["ATests", "BTests", "CTests"], ["TWAQI/A.swift", "TWAQI/Gone.swift", "TWAQITests/ATests.swift"])
+            problems = level.check(root, ["ATests", "BTests", "CTests"], ["ios/TWAQI/A.swift", "ios/TWAQI/Gone.swift", "ios/TWAQITests/ATests.swift"])
             self.assertEqual(len(problems), 3, problems)
-            self.assertTrue(any("TWAQI/Gone.swift" in problem for problem in problems))
-            self.assertTrue(any("BTests lives in TWAQITests/BTests.swift" in problem for problem in problems))
+            self.assertTrue(any("ios/TWAQI/Gone.swift" in problem for problem in problems))
+            self.assertTrue(any("BTests lives in ios/TWAQITests/BTests.swift" in problem for problem in problems))
             self.assertTrue(any("CTests" in problem for problem in problems))
 
 
@@ -250,13 +265,13 @@ class RepositoryTests(unittest.TestCase):
     def test_ci_yml_guards_each_area_from_the_ticket(self):
         _, guarded = level.load_lists(ROOT / level.WORKFLOW)
         for path in (
-            "TWAQI/Utils/PollutantCache.swift",
-            "TWAQI/Utils/OfflineCacheRetention.swift",
-            "TWAQI/Utils/PushService.swift",
-            "TWAQI/Utils/DirectusPushMirror.swift",  # OneSignalTags lives here
-            "TWAQI/Utils/FavouriteAlerts.swift",
-            "TWAQI/Utils/StationCamHistoryCache.swift",
-            "TWAQI/Utils/SettingsStore.swift",
+            "ios/TWAQI/Utils/PollutantCache.swift",
+            "ios/TWAQI/Utils/OfflineCacheRetention.swift",
+            "ios/TWAQI/Utils/PushService.swift",
+            "ios/TWAQI/Utils/DirectusPushMirror.swift",  # OneSignalTags lives here
+            "ios/TWAQI/Utils/FavouriteAlerts.swift",
+            "ios/TWAQI/Utils/StationCamHistoryCache.swift",
+            "ios/TWAQI/Utils/SettingsStore.swift",
         ):
             with self.subTest(path=path):
                 self.assertEqual(level.classify(path, guarded), level.TEST)

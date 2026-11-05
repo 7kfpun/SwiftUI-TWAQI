@@ -33,9 +33,9 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
 
 | Level | PR touches only… | Runs |
 |---|---|---|
-| **skip** | `workers/`, `services/`, `web/`, `fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing more; the check is green |
+| **skip** | `android/`, `workers/`, `services/`, `web/`, `ios/fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing more; the check is green |
 | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | config, caches, `pod install`, `build-for-testing`; no simulator pick (it starts CoreSimulatorService), boot or test run |
-| **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` or its test, `Podfile`, `Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
+| **test** | a `CI_GUARDED_PATHS` entry, `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` or its test, `ios/Podfile`, `ios/Podfile.lock`, `Package.resolved` | everything below: build, boot, the subset |
 
 - `CI_GUARDED_PATHS` (job `env` in `ci.yml`) sits beside `CI_TEST_SUITES`, the subset: the
   suites' test files and the source files they test, read off each suite. `check` fails the
@@ -51,7 +51,7 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
 `Unit tests` speed-ups (FOX-64): the simulator is picked in the background during the
 build and booted after it, in sequence: booting during the build slowed both down on slow
 runners. The build targets a generic simulator (`ARCHS=arm64`) and the tests run with
-`test-without-building` against the booted simulator's udid. Swift packages, `Pods/` and the
+`test-without-building` against the booted simulator's udid. Swift packages, `ios/Pods/` and the
 DerivedData build products are cached. The DerivedData key is exact
 (Xcode build + `Podfile.lock` + `Podfile` + `Package.resolved`, no restore-keys), so
 products built against other dependencies are never restored, and app and test sources
@@ -68,7 +68,7 @@ limit with a handful of open PRs, so caches were also evicted). Now:
   The `Prepare gitignored config` step stays in each workflow file (its placeholder Firebase
   host is allowed by `Public text` only in `.github/workflows/*.yml`); `ci_test_level.py
   check` fails the `Unit tests` job when `ci-cache.yml`'s copy differs from `ci.yml`'s.
-- `CI cache` runs on `master` only: on a push that changes `Podfile`, `Podfile.lock`,
+- `CI cache` runs on `master` only: on a push that changes `ios/Podfile`, `ios/Podfile.lock`,
   `Package.resolved`, the `TWAQI-CI` scheme, `ci.yml`, `ci-cache.yml` or the action; daily
   (03:17 UTC: a runner image with a new Xcode build changes the DerivedData key, so PRs
   save their own copy for a day at most after an image update; caches unused for 7 days are
@@ -253,9 +253,9 @@ under the proposed ruleset, so the version/build bump lands through its own smal
 ```sh
 git fetch origin && git switch -c feature/fox-nn-release-3.1.5 origin/master
 # New version only: bump MARKETING_VERSION in every non-visionOS config and APP_VERSION
-# in fastlane/Fastfile, and update fastlane/metadata/{en-US,zh-Hant}/release_notes.txt.
+# in ios/fastlane/Fastfile, and update ios/fastlane/metadata/{en-US,zh-Hant}/release_notes.txt.
 python3 tools/check_release_consistency.py   # also run by release_build and PR policy
-fastlane release_build                       # checks again, bumps the build number, archives, uploads
+cd ios && fastlane release_build             # checks again, bumps the build number, archives, uploads
 # release_build rewrites TWAQIVision's build number too; put the visionOS configs back.
 git commit -am "FOX-nn: Bump 3.1.5 (147) for TestFlight"
 # PR → CI + another agent's review → squash-merge
@@ -278,5 +278,5 @@ state is `PREPARE_FOR_SUBMISSION`, `DEVELOPER_REJECTED`, `REJECTED`, `METADATA_R
 `INVALID_BINARY`. There is no override: pulling a version from review is the user's call.
 
 ```sh
-fastlane asc_version_state   # read-only: "IOS 3.1.4: PREPARE_FOR_SUBMISSION — screenshots editable"
+cd ios && fastlane asc_version_state   # read-only: "IOS 3.1.4: PREPARE_FOR_SUBMISSION — screenshots editable"
 ```

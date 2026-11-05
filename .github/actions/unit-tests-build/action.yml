@@ -37,7 +37,7 @@ runs:
         # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
         # runs DerivedData/SourcePackages/checkouts/firebase-ios-sdk/...
         path: ${{ runner.temp }}/DerivedData/SourcePackages
-        key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+        key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
         restore-keys: |
           spm-${{ runner.os }}-${{ runner.arch }}-
 
@@ -45,9 +45,9 @@ runs:
       id: pods
       uses: actions/cache/restore@v4
       with:
-        path: Pods
+        path: ios/Pods
         # Podfile too: its post_install hook patches the pods' sources.
-        key: pods-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Podfile.lock', 'Podfile') }}
+        key: pods-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile') }}
         restore-keys: |
           pods-${{ runner.os }}-${{ runner.arch }}-
 
@@ -63,7 +63,7 @@ runs:
         path: |
           ${{ runner.temp }}/DerivedData/Build
           ${{ runner.temp }}/DerivedData/ModuleCache.noindex
-        key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('Podfile.lock', 'Podfile', 'TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+        key: deriveddata-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode.outputs.build }}-${{ hashFiles('ios/Podfile.lock', 'ios/Podfile', 'ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
 
     - name: Check the cache hits
       id: cached
@@ -92,6 +92,7 @@ runs:
     - name: Install CocoaPods dependencies
       if: steps.cached.outputs.skip != 'true'
       shell: bash
+      working-directory: ios
       env:
         COCOAPODS_DISABLE_STATS: "true"
       run: |
@@ -104,6 +105,7 @@ runs:
     - name: Build for testing
       if: steps.cached.outputs.skip != 'true'
       shell: bash
+      working-directory: ios
       run: |
         set -euo pipefail
         # Generic destination, so the build does not depend on a simulator.
@@ -142,7 +144,7 @@ runs:
       if: steps.cached.outputs.skip != 'true' && steps.pods.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
-        path: Pods
+        path: ios/Pods
         key: ${{ steps.pods.outputs.cache-primary-key }}
 
     - name: Save DerivedData
