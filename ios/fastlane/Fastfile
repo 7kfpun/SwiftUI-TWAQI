@@ -4,14 +4,19 @@ default_platform(:ios)
 
 APP_VERSION = "3.1.4"
 
-# fastlane runs with the working directory set to fastlane/, not the repo root,
+# fastlane runs with the working directory set to fastlane/, not the iOS root,
 # and `sh` inherits that. Anchor every path to an absolute root so nothing
 # depends on which directory a command happens to start in — a relative `rm`
 # against the wrong root fails silently.
+#
+# ROOT is the iOS app's directory (ios/ in the repo since FOX-89), the one that
+# holds TWAQI.xcworkspace and fastlane/. REPO_ROOT is the repository, for the
+# shared tools/.
 ROOT = begin
   here = File.expand_path(Dir.pwd)
   File.basename(here) == "fastlane" ? File.expand_path("..", here) : here
 end
+REPO_ROOT = File.expand_path("..", ROOT)
 
 # Raw simulator captures, one directory per App Store locale, kept pristine.
 # Never written to by these lanes.
@@ -473,7 +478,7 @@ platform :ios do
   lane :release_build do
     # Version, build numbers and What's New must agree before anything is
     # archived or uploaded (FOX-38). Same check as CI's PR policy job.
-    sh("python3 '#{File.join(ROOT, "tools/check_release_consistency.py")}'")
+    sh("python3 '#{File.join(REPO_ROOT, "tools/check_release_consistency.py")}' '#{ROOT}'")
 
     key = asc_api_key
     UI.user_error!("release_build needs the App Store Connect API key (ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH)") unless key

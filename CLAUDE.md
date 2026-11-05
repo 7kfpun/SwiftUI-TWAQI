@@ -4,6 +4,15 @@ Taiwan air-quality app: SwiftUI iPhone/iPad app (`TWAQI`, iOS 15), Home Screen w
 Apple Watch app + complication, visionOS app, and Cloudflare Workers under `workers/`.
 Read `README.md` first — it is the source of truth for services, tests and CI.
 
+## Layout: two platforms (FOX-89)
+
+- `ios/` — the Apple app: `TWAQI.xcworkspace`, `TWAQI.xcodeproj`, the `TWAQI*` target
+  folders (app, widget, watch, watch widget, visionOS, unit and UI tests), `Podfile`,
+  `fastlane/` and `.swiftlint.yml`. Run `pod install`, `xcodebuild` and `fastlane` from `ios/`.
+- `android/` — the Android app (Kotlin + Jetpack Compose); the project arrives with FOX-52.
+- Root, shared by both: `.github/`, `.githooks/`, `docs/`, `tools/`, `assets/`, `services/`,
+  `web/`, `workers/`, `firebase.json`, `.firebaserc`, `screenshots/` (PR screenshots).
+
 ## Facts that are easy to get wrong
 
 - **Backend is Directus** (the app's `DirectusUrl`), not Airtable. In-app feedback
@@ -29,8 +38,9 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
   uses `Asia/Taipei`, never the device zone. UTC timestamps from the API stay UTC.
 - Offline caches are purged after a week; any new cache directory must sit inside a
   directory `OfflineCacheRetention` scans.
-- `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist` are gitignored — copy
-  from `TWAQI/Config/example.xcconfig`. Never commit real keys.
+- `ios/TWAQI/Config/debug.xcconfig`, `release.xcconfig`, `ios/TWAQI/GoogleService-Info.plist`
+  and `ios/fastlane/.env` are gitignored — copy from `ios/TWAQI/Config/example.xcconfig`.
+  Never commit real keys.
 
 ## Workflow
 
@@ -55,17 +65,17 @@ Read `README.md` first — it is the source of truth for services, tests and CI.
 
 ## Tests
 
-- Run the **full** `TWAQITests` locally before a PR is marked ready / merged:
-  `xcodebuild test -workspace TWAQI.xcworkspace -scheme TWAQI -destination 'platform=iOS Simulator,name=<iPhone>,OS=latest' -only-testing:TWAQITests`
+- Run the **full** `TWAQITests` locally before a PR is marked ready / merged, from `ios/`:
+  `cd ios && xcodebuild test -workspace TWAQI.xcworkspace -scheme TWAQI -destination 'platform=iOS Simulator,name=<iPhone>,OS=latest' -only-testing:TWAQITests`
 - GitHub CI runs only a high-signal subset (offline caches, push dual-write,
   favourites ↔ alerts, cam history, `SettingsStore`) — `CI_TEST_SUITES` in `.github/workflows/ci.yml`.
   Add a suite there only if it guards one of those areas, **and** add its test file and the
   source files it tests to `CI_GUARDED_PATHS` beside it (the job fails if they drift apart).
 - The `Unit tests` job has three levels (FOX-79, `tools/ci_test_level.py`): **skip** for PRs
-  touching only `workers/`, `web/`, `fastlane/`, `assets/`, docs, media or `.github/` other than
-  `ci.yml` and `.github/actions/unit-tests-build`; **build** (no simulator) for any other app
-  path; **test** (build + subset) when a guarded path, `ci.yml`, its build action, the level
-  script, `Podfile(.lock)` or `Package.resolved` changes, or the PR has the `ci-full-tests`
+  touching only `android/`, `workers/`, `services/`, `web/`, `ios/fastlane/`, `assets/`, docs,
+  media or `.github/` other than `ci.yml` and `.github/actions/unit-tests-build`; **build** (no
+  simulator) for any other app path; **test** (build + subset) when a guarded path, `ci.yml`,
+  its build action, the level script, `ios/Podfile(.lock)` or `Package.resolved` changes, or the PR has the `ci-full-tests`
   label. The check name stays `Unit tests` at every level.
 - CI builds the CI-only `TWAQI-CI` scheme (`TWAQI` minus the `TWAQIUITests` runner) with
   `build-for-testing` + `test-without-building`. Use `-scheme TWAQI` locally; if you change

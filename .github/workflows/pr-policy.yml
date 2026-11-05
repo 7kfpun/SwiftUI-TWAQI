@@ -46,12 +46,13 @@ jobs:
 
       - name: Version, build numbers and What's New
         # master's script, run against the PR's project file, Fastfile and notes.
+        # Its argument is the iOS app's directory (ios/, FOX-89).
         run: |
           set -euo pipefail
           script="$RUNNER_TEMP/check_release_consistency.py"
           git show origin/master:tools/check_release_consistency.py >"$script" 2>/dev/null \
             || cp tools/check_release_consistency.py "$script"
-          python3 "$script" "$PWD"
+          python3 "$script" "$PWD/ios"
 
   secret-files:
     name: Secret files

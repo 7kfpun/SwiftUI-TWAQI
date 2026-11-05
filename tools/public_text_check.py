@@ -51,9 +51,9 @@ FILES_THAT_NEED_HOSTS = (
     "workers/*/directus/*",
     "services/*/scripts/*",
     "services/*/test/fixtures/*",
-    "TWAQI/Config/example.xcconfig",
-    "TWAQI/**/*.swift",
-    "TWAQITests/*.swift",
+    "ios/TWAQI/Config/example.xcconfig",
+    "ios/TWAQI/**/*.swift",
+    "ios/TWAQITests/*.swift",
     "web/*.html",
     "web/**/*.html",
     ".github/workflows/*.yml",
@@ -61,7 +61,7 @@ FILES_THAT_NEED_HOSTS = (
 
 # Lines from these files aren't checked at all (generated or vendored).
 SKIPPED_FILES = (
-    "*.lock", "**/package-lock.json", "Pods/*", "**/*.pbxproj", "*.png", "*.jpg",
+    "*.lock", "**/package-lock.json", "ios/Pods/*", "**/*.pbxproj", "*.png", "*.jpg",
     # This checker and its tests spell out the patterns (with made-up values).
     "tools/public_text_check.py", "tools/test_public_text_check.py",
 )
