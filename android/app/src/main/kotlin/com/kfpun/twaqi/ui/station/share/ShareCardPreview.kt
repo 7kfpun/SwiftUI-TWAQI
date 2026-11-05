@@ -362,7 +362,10 @@ private fun ShareCardCapture(content: ShareCardContent, shape: ShareCardShape, o
                 Modifier
                     .wrapContentSize(Alignment.TopStart, unbounded = true)
                     // Recorded only: nothing calls `drawLayer(layer)`, which would put it on screen.
-                    .drawWithContent { layer.record { this@drawWithContent.drawContent() } }
+                    .drawWithContent {
+                        val card = this
+                        layer.record { card.drawContent() }
+                    }
             ) {
                 ShareCard(content, shape)
             }
