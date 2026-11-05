@@ -78,6 +78,15 @@ android {
         buildConfigField("String", "DIRECTUS_FEEDBACK_TOKEN", javaString(secret("DIRECTUS_FEEDBACK_TOKEN")))
         buildConfigField("String", "DIRECTUS_COOPERATE_TOKEN", javaString(secret("DIRECTUS_COOPERATE_TOKEN")))
         manifestPlaceholders["MAPS_API_KEY"] = secret("MAPS_API_KEY")
+        // AdMob (FOX-58). The example file holds Google's test ids.
+        manifestPlaceholders["ADMOB_APP_ID"] = secret("ADMOB_APP_ID")
+        listOf(
+            "AD_UNIT_ID_MAIN_FOOTER",
+            "AD_UNIT_ID_DETAILS_LIST_FOOTER",
+            "AD_UNIT_ID_DETAILS_FOOTER",
+            "AD_UNIT_ID_FAVOURITES_FOOTER",
+            "AD_UNIT_ID_HELP_FOOTER"
+        ).forEach { buildConfigField("String", it, javaString(secret(it))) }
     }
 
     signingConfigs {
@@ -108,6 +117,11 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    testOptions {
+        // android.util.Log and friends return defaults in JVM tests instead of throwing.
+        unitTests.isReturnDefaultValues = true
     }
 
     lint {
@@ -148,6 +162,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.play.billing)
+    implementation(libs.play.services.ads)
+    implementation(libs.google.ump)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(platform(libs.firebase.bom))
@@ -155,4 +175,5 @@ dependencies {
     implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

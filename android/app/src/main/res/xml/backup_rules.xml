@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="root" path="cache" />
+    <!-- Pro is re-read from Google Play on every start; a copy restored on
+         another phone or account must not unlock it there (FOX-58). -->
+    <exclude domain="file" path="datastore/pro.preferences_pb" />
 </full-backup-content>

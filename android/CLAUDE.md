@@ -33,6 +33,14 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
 - **Backup:** `allowBackup` is on so favourites and settings follow the user to a new phone.
   Exclude device secrets (e.g. the push device secret) and caches in
   `res/xml/backup_rules.xml` and `data_extraction_rules.xml` when they are added.
+- **Pro** (FOX-58) has one source: `ProGraph.repository(context)` (`isPro`, `entitlement`),
+  re-read from Play Billing on every start and cached in DataStore (left out of backups).
+  Widgets, the alert limit and ads read it; never keep a separate Pro flag. The Play products
+  are one subscription `com.kfpun.twaqi.subscription.adfree` with base plans `adfree-1m`,
+  `adfree-6m`, `adfree-12m` (`ProPlan`). Open the Pro screen only through `ProNavigation`
+  (with a `ProScreenSource`); `twaqi://pro?source=…` opens it too. Banners are `AdBanner`, shown
+  only by `AdsPolicy` (free user, UMP consent given). Debug builds launched with
+  `--ez demo_billing true` sell demo plans without Play (`DemoBillingGateway`).
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)

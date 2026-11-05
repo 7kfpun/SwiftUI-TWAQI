@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pro and ads (FOX-58), from ios/TWAQI/Localization/zh-Hant.lproj/Localizable.strings. -->
+<resources>
+    <string name="help_in_app_purchase">App 內購買</string>
+    <string name="help_ad_free">移除廣告並解鎖錶面數值</string>
+    <string name="help_restore_purchase">回復購買項目</string>
+
+    <string name="pro_title">Taiwan Air Pro</string>
+    <string name="pro_subtitle">畫面更清爽，空氣品質直接顯示在錶面。</string>
+    <string name="pro_features">Pro 包含</string>
+    <string name="pro_feature_no_ads">移除廣告</string>
+    <string name="pro_feature_no_ads_detail">所有畫面都不再顯示廣告，包含地圖。</string>
+    <string name="pro_feature_complications">錶面數值與更多樣式</string>
+    <string name="pro_feature_complications_detail">在錶面顯示數值與更多樣式，AQI、PM2.5 等 7 項指標任選。表情樣式與手錶 App 免費。</string>
+    <string name="pro_feature_widgets_android">中、大尺寸小工具</string>
+    <string name="pro_feature_widgets_android_detail">在主畫面查看目前測站與最愛測站。</string>
+    <string name="pro_feature_support">支持獨立開發</string>
+    <string name="pro_feature_support_detail">讓 App 持續維護、資料持續更新。</string>
+    <string name="pro_choose_plan">選擇方案</string>
+    <string name="pro_best_value">最划算</string>
+    <string name="pro_per_month">每月 %s</string>
+    <string name="pro_billed_monthly">按月計費</string>
+    <string name="pro_renewal_terms">訂閱會自動續訂，除非在當期結束前至少 24 小時取消。可在「Google Play › 付款和訂閱 › 訂閱」中管理。</string>
+    <string name="pro_terms_of_use">使用條款</string>
+    <string name="pro_privacy_policy">隱私權政策</string>
+    <string name="pro_purchase_failed">無法完成購買，請再試一次。</string>
+
+    <string name="pro_plan_1m">1 個月</string>
+    <string name="pro_plan_6m">6 個月</string>
+    <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_retry">重試</string>
+    <string name="pro_close">關閉</string>
+    <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>
+    <string name="ads_remove">移除廣告</string>
+</resources>
