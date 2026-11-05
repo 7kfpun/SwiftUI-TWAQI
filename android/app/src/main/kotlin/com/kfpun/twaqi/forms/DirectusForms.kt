@@ -3,7 +3,6 @@ package com.kfpun.twaqi.forms
 import java.io.IOException
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -107,11 +106,6 @@ object DirectusForms {
             }
         }
     }
-
-    /** 20 seconds, as on iOS. */
-    fun defaultHttpClient(): OkHttpClient = OkHttpClient.Builder()
-        .callTimeout(20, TimeUnit.SECONDS)
-        .build()
 
     private val JSON = "application/json".toMediaType()
 }

@@ -41,6 +41,18 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
   runs without an activity (widgets, notifications, workers) must get its text from
   `AppLocale.localizedContext(context)`, or it shows the phone's language below Android 13
   (the iOS widget bug FOX-42).
+- **Pro** (FOX-58) has one source: `ProGraph.repository(context)` (`isPro`, `entitlement`),
+  re-read from Play Billing on every start and cached in DataStore (left out of backups).
+  Widgets, the alert limit and ads read it; never keep a separate Pro flag. The Play products
+  are one subscription `com.kfpun.twaqi.subscription.adfree` with base plans `adfree-1m`,
+  `adfree-6m`, `adfree-12m` (`ProPlan`). Open the Pro screen only through `ProNavigation`
+  (with a `ProScreenSource`); `twaqi://pro?source=…` opens it too. Banners are `AdBanner`, shown
+  only by `AdsPolicy` (free user, UMP consent given). Debug builds launched with
+  `--ez demo_billing true` sell demo plans without Play (`DemoBillingGateway`).
+- **Appearance** (FOX-97): Help › Appearance (System / Light / Dark) is AppCompat's night mode,
+  applied at process start (`AppAppearanceStore`, `TwaqiApplication`). Activities must be
+  `AppCompatActivity`, and anything dark-aware (the map style, FOX-54) follows
+  `isSystemInDarkTheme()`; never read the phone's setting directly.
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)

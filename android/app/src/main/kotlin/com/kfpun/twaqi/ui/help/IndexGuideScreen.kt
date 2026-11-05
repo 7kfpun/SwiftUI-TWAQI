@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kfpun.twaqi.R
 import com.kfpun.twaqi.analytics.Analytics
+import com.kfpun.twaqi.data.model.AirStatus
 import com.kfpun.twaqi.locale.AppLocale
 
 /**
@@ -64,10 +65,10 @@ fun IndexGuideScreen(page: DefinitionPage, onBack: () -> Unit) {
 }
 
 @Composable
-private fun BandRow(page: DefinitionPage, band: GuideBand, isLast: Boolean) {
+private fun BandRow(page: DefinitionPage, band: AirStatus.Band, isLast: Boolean) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.size(10.dp).background(Color(band.status.color), CircleShape))
+            Spacer(Modifier.size(10.dp).background(Color(0xFF000000 or band.status.color.toLong()), CircleShape))
             Spacer(Modifier.width(8.dp))
             Text(
                 stringResource(band.status.label),
@@ -82,9 +83,10 @@ private fun BandRow(page: DefinitionPage, band: GuideBand, isLast: Boolean) {
             )
         }
         // The AQI is what the health advice is keyed to.
-        if (page == DefinitionPage.AQI) {
+        val guidance = band.status.generalPublicGuidance
+        if (page == DefinitionPage.AQI && guidance != null) {
             Text(
-                stringResource(band.status.generalPublicGuidance),
+                stringResource(guidance),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 18.dp, top = 2.dp)

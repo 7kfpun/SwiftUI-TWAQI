@@ -291,6 +291,16 @@
     <string name="pro_privacy_policy">隱私權政策</string>
     <string name="pro_purchase_failed">無法完成購買，請再試一次。</string>
 
+    <string name="pro_feature_widgets_android">中、大尺寸小工具</string>
+    <string name="pro_feature_widgets_android_detail">在主畫面查看目前測站與最愛測站。</string>
+    <string name="pro_plan_1m">1 個月</string>
+    <string name="pro_plan_6m">6 個月</string>
+    <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_retry">重試</string>
+    <string name="pro_close">關閉</string>
+    <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>
+    <string name="ads_remove">移除廣告</string>
+
     <!-- Guide -->
     <string name="guide_section_what">這是什麼</string>
     <string name="guide_section_sources">從哪裡來</string>
@@ -491,4 +501,8 @@
     <string name="onboarding_pro_trial_years">免費試用 %d 年</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">資料層</string>
+    <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>
 </resources>

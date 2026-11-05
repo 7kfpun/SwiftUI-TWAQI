@@ -291,6 +291,17 @@
     <string name="pro_privacy_policy">Privacy Policy</string>
     <string name="pro_purchase_failed">The purchase couldn\'t be completed. Please try again.</string>
 
+    <!-- Android only (FOX-58): no iPad or extra large widget; Play base plans have no names. -->
+    <string name="pro_feature_widgets_android">Medium and large widgets</string>
+    <string name="pro_feature_widgets_android_detail">Your station and favourite stations on the home screen.</string>
+    <string name="pro_plan_1m">1 month</string>
+    <string name="pro_plan_6m">6 months</string>
+    <string name="pro_plan_12m">12 months</string>
+    <string name="pro_retry">Retry</string>
+    <string name="pro_close">Close</string>
+    <string name="pro_purchase_pending">Your payment is pending. Pro turns on as soon as Google Play confirms it.</string>
+    <string name="ads_remove">Remove ads</string>
+
     <!-- Guide -->
     <string name="guide_section_what">What it is</string>
     <string name="guide_section_sources">Where it comes from</string>
@@ -491,4 +502,8 @@
     <string name="onboarding_pro_trial_years">%d-year free trial</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">Data layer</string>
+    <string name="debug_data_counts">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>
 </resources>

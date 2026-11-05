@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="root" path="cache" />
+    <!-- Offline caches (FOX-53): refetched, and purged after a week. -->
+    <exclude domain="file" path="offline-cache" />
+    <!-- Pro is re-read from Google Play on every start; a copy restored on
+         another phone or account must not unlock it there (FOX-58). -->
+    <exclude domain="file" path="datastore/pro.preferences_pb" />
 </full-backup-content>

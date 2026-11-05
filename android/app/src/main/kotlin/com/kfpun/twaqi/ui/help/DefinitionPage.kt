@@ -2,6 +2,8 @@ package com.kfpun.twaqi.ui.help
 
 import androidx.annotation.StringRes
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.data.model.AirIndexType
+import com.kfpun.twaqi.data.model.AirStatus
 import java.net.URLEncoder
 import java.util.Locale
 
@@ -9,24 +11,24 @@ import java.util.Locale
  * One index guide page (iOS `DefinitionPages`): what the index means, where it comes from, what
  * to do about it, and the colour bands the app scores it against.
  *
- * @property unit shown after the band ranges, as on iOS (none for the AQI).
+ * @property type the index this page explains, for its unit and colour bands.
  * @property step the smallest change the bands break at: tenths for PM2.5 and CO, else whole numbers.
  */
 enum class DefinitionPage(
     val key: String,
     @param:StringRes val title: Int,
-    val unit: String,
+    val type: AirIndexType,
     val step: Double,
     private val englishArticle: String,
     private val chineseArticle: String
 ) {
-    AQI("aqi", R.string.airindex_meaning_aqi, "", 1.0, "Air_quality_index", "空氣品質指標"),
-    PM25("pm25", R.string.airindex_meaning_pm25, "μg/m3", 0.1, "Particulates", "細懸浮微粒"),
-    PM10("pm10", R.string.airindex_meaning_pm10, "μg/m3", 1.0, "Particulates", "懸浮粒子"),
-    O3("o3", R.string.airindex_meaning_o3, "ppb", 1.0, "Tropospheric_ozone", "臭氧"),
-    CO("co", R.string.airindex_meaning_co, "ppm", 0.1, "Carbon_monoxide", "一氧化碳"),
-    SO2("so2", R.string.airindex_meaning_so2, "ppb", 1.0, "Sulfur_dioxide", "二氧化硫"),
-    NO2("no2", R.string.airindex_meaning_no2, "ppb", 1.0, "Nitrogen_dioxide", "二氧化氮")
+    AQI("aqi", R.string.airindex_meaning_aqi, AirIndexType.AQI, 1.0, "Air_quality_index", "空氣品質指標"),
+    PM25("pm25", R.string.airindex_meaning_pm25, AirIndexType.PM25, 0.1, "Particulates", "細懸浮微粒"),
+    PM10("pm10", R.string.airindex_meaning_pm10, AirIndexType.PM10, 1.0, "Particulates", "懸浮粒子"),
+    O3("o3", R.string.airindex_meaning_o3, AirIndexType.O3, 1.0, "Tropospheric_ozone", "臭氧"),
+    CO("co", R.string.airindex_meaning_co, AirIndexType.CO, 0.1, "Carbon_monoxide", "一氧化碳"),
+    SO2("so2", R.string.airindex_meaning_so2, AirIndexType.SO2, 1.0, "Sulfur_dioxide", "二氧化硫"),
+    NO2("no2", R.string.airindex_meaning_no2, AirIndexType.NO2, 1.0, "Nitrogen_dioxide", "二氧化氮")
     ;
 
     /** A section: its header and body. */
@@ -93,8 +95,8 @@ enum class DefinitionPage(
             )
         }
 
-    /** The colour bands for this index, lowest first. */
-    val bands: List<GuideBand> get() = GuideBand.forPage(this)
+    /** The colour bands for this index, lowest first (iOS `AirStatuses.bands`). */
+    val bands: List<AirStatus.Band> get() = AirStatus.bands[type].orEmpty()
 
     /** Wikipedia in the reader's language, for anyone who wants more depth. */
     fun url(chinese: Boolean): String {
@@ -107,9 +109,9 @@ enum class DefinitionPage(
      * "15.5–35.4 μg/m3": bounds as a reader would say them, not the half-open ranges in code.
      * The first band starts at zero; the last is open-ended.
      */
-    fun rangeText(band: GuideBand, isLast: Boolean): String {
+    fun rangeText(band: AirStatus.Band, isLast: Boolean): String {
         val decimals = if (step < 1) 1 else 0
-        val unitText = if (unit.isEmpty()) "" else " $unit"
+        val unitText = if (type.unit.isEmpty()) "" else " ${type.unit}"
         val lower = if (band.from <= step) 0.0 else band.from
         val lowerText = format(lower, decimals)
         if (isLast) return "$lowerText+$unitText"

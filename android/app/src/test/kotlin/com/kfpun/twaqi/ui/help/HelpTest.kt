@@ -1,5 +1,6 @@
 package com.kfpun.twaqi.ui.help
 
+import com.kfpun.twaqi.data.model.AirStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -52,7 +53,7 @@ class HelpTest {
         DefinitionPage.entries.forEach { page ->
             val bands = page.bands
             assertEquals(6, bands.size)
-            assertEquals(GuideStatus.entries, bands.map { it.status })
+            assertEquals(AirStatus.showAllCases, bands.map { it.status })
             bands.zipWithNext().forEach { (lower, upper) -> assertEquals(lower.until, upper.from, 0.0) }
         }
     }

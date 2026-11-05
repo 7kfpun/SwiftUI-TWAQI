@@ -29,8 +29,8 @@ enum class AppAppearance(val id: String, val nightMode: Int) {
  * Saves and applies [AppAppearance]. It is applied as AppCompat's night mode, which sets the
  * `uiMode` of every activity: `values-night` resources, the system bar icons, and Compose's
  * `isSystemInDarkTheme()` all follow it, so every screen and the map style (FOX-54) do too.
- * AppCompat keeps the mode only for the process, so [applyStored] runs before each activity is
- * created.
+ * AppCompat keeps the mode only for the process, so [applyStored] runs when the app process
+ * starts (`TwaqiApplication`).
  */
 object AppAppearanceStore {
     /** The same preferences file as the app language (FOX-56), backed up with it. */
@@ -48,7 +48,7 @@ object AppAppearanceStore {
         Analytics.logEvent(context, Analytics.SELECT_APPEARANCE, mapOf("label" to appearance.id))
     }
 
-    /** Applies the saved choice. Call before `super.onCreate` of an activity. */
+    /** Applies the saved choice. Call before any activity is created. */
     fun applyStored(context: Context) = apply(current(context))
 
     internal fun read(prefs: SharedPreferences): AppAppearance = AppAppearance.fromId(prefs.getString(KEY, null))

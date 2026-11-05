@@ -1,20 +1,21 @@
 package com.kfpun.twaqi.cooperate
 
 import com.kfpun.twaqi.BuildConfig
+import com.kfpun.twaqi.data.remote.ApiClient
 import com.kfpun.twaqi.forms.DirectusForms
 import com.kfpun.twaqi.forms.SubmitResult
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
- * Posts enquiries to Directus `items/twaqi_cooperate`, create-only. Its own OkHttp client for now;
- * it can move onto the shared client of the data layer (FOX-53) later.
+ * Posts enquiries to Directus `items/twaqi_cooperate`, create-only, with the data layer's OkHttp
+ * client settings (FOX-53, `ApiClient.defaultHttpClient`).
  */
 class OkHttpCooperateRepository(
     private val baseUrl: String = BuildConfig.DIRECTUS_URL,
     private val cooperateToken: String = BuildConfig.DIRECTUS_COOPERATE_TOKEN,
     private val feedbackToken: String = BuildConfig.DIRECTUS_FEEDBACK_TOKEN,
-    private val http: OkHttpClient = DirectusForms.defaultHttpClient()
+    private val http: OkHttpClient = ApiClient.defaultHttpClient()
 ) : CooperateRepository {
 
     override suspend fun submit(submission: CooperateSubmission): SubmitResult =
