@@ -13,7 +13,7 @@ name: Android
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [master]
+    branches: [master, feature/fox-52-android-project-setup]
   push:
     branches: [master]
     paths: ["android/**", ".github/workflows/android.yml"]

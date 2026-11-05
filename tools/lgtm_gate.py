@@ -56,6 +56,9 @@ import subprocess
 import sys
 
 CONTEXT = "LGTM"
+# Bases whose PRs get the status: master, and the Android integration branch
+# that Android ticket PRs target until it merges to master itself (FOX-52, #77).
+GATED_BASES = ("master", "feature/fox-52-android-project-setup")
 TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
 # First line: an optional one-word reviewer name, then the verdict.
 # Nothing may follow LGTM on that line except emphasis, "." "!" ":" or a
@@ -255,8 +258,8 @@ def commit_time(sha):
 def main():
     repo, number = os.environ["REPO"], os.environ["PR"]
     pull = json.loads(run("gh", "api", f"repos/{repo}/pulls/{number}"))
-    if pull["base"]["ref"] != "master":
-        print(f"{CONTEXT}: skip — base is {pull['base']['ref']}, not master")
+    if pull["base"]["ref"] not in GATED_BASES:
+        print(f"{CONTEXT}: skip — base is {pull['base']['ref']}, not one of {', '.join(GATED_BASES)}")
         return 0
     head, base_ref = pull["head"]["sha"], pull["base"]["ref"]
     reviews = [normalize_review(review) for review in gh_json_lines(f"repos/{repo}/pulls/{number}/reviews?per_page=100")]
@@ -381,10 +384,38 @@ def self_test():
             print(f"FAIL {name}: got {state} ({description}), want {want}")
         else:
             print(f"ok   {name}: {state}")
+
+    # Same verdicts on a PR into the Android integration branch: decide() takes
+    # the PR's base ref and passes it to the fingerprint.
+    seen_bases = []
+
+    def same_on_base(reviewed, base):
+        seen_bases.append(base)
+        return same(reviewed, base)
+
+    android_base = "feature/fox-52-android-project-setup"
+    base_cases = [
+        ("integration base: lgtm after an update", [item("Codex LGTM", commit_id="old")], "success"),
+        ("integration base: new commits since lgtm", [item("Orca LGTM", commit_id="other")], "pending"),
+    ]
+    for name, items, want in base_cases:
+        state, description = decide(items, head, "2026-11-02T11:00:00Z", android_base, same_on_base)
+        if state != want or (seen_bases and set(seen_bases) != {android_base}):
+            failed += 1
+            print(f"FAIL {name}: got {state} ({description}) on bases {sorted(set(seen_bases))}, want {want}")
+        else:
+            print(f"ok   {name}: {state}")
+    gate_cases = [("master", True), (android_base, True), ("feature/fox-99-other", False)]
+    for base, want_gated in gate_cases:
+        if (base in GATED_BASES) != want_gated:
+            failed += 1
+            print(f"FAIL gated base {base}: want {want_gated}")
+        else:
+            print(f"ok   gated base {base}: {want_gated}")
     if failed:
         print(f"{failed} failed")
         return 1
-    print(f"{len(cases) + len(diff_cases)} passed")
+    print(f"{len(cases) + len(diff_cases) + len(base_cases) + len(gate_cases)} passed")
     return 0
 
 
