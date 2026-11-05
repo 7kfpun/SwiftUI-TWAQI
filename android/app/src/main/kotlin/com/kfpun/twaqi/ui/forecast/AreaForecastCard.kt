@@ -21,13 +21,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +48,9 @@ import com.kfpun.twaqi.data.model.AqiForecast
 import com.kfpun.twaqi.data.model.AreaForecast
 import com.kfpun.twaqi.data.model.ForecastTabArea
 import com.kfpun.twaqi.locale.AppLocale
+import com.kfpun.twaqi.translation.OnDeviceTranslation
+import com.kfpun.twaqi.translation.TranslatesOnDevice
+import com.kfpun.twaqi.translation.rememberShownTranslations
 import com.kfpun.twaqi.ui.common.SectionLabel
 import com.kfpun.twaqi.ui.common.rgb
 import com.kfpun.twaqi.ui.common.secondaryText
@@ -96,7 +103,7 @@ fun AreaForecastCard(
             val content = forecast.content
             if (showsContent && content != null) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                ForecastContentText(content, forecast.translatedContent(translationLanguage(chinese, locale)))
+                ForecastContentText(content, forecast.translatedContent(translationLanguage(chinese)))
             }
         }
 
@@ -109,11 +116,11 @@ fun AreaForecastCard(
 fun cardBackground() = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
 
 /**
- * The language the Worker's translation is looked up in: none in Chinese, which reads MOENV's
- * text as written; else the app language's code ("en"), as iOS `OnDeviceTranslation.target`.
+ * The language the Worker's translation is looked up in, the same one text is translated into on
+ * the device (iOS `OnDeviceTranslation.target`): none in Chinese, which reads MOENV's text as
+ * written; else English, the app's only other language.
  */
-fun translationLanguage(chinese: Boolean, locale: Locale): String? =
-    if (chinese) null else locale.language.takeIf { it.isNotEmpty() }
+fun translationLanguage(chinese: Boolean): String? = OnDeviceTranslation.target(chinese)
 
 @Composable
 private fun Label(forecast: AreaForecast, heading: ForecastHeading) {
@@ -257,13 +264,36 @@ fun CaptionText(text: String, modifier: Modifier = Modifier) {
  * MOENV's forecast text (iOS `ForecastContentText`), three lines until opened: on a station's card,
  * and once above the Forecast tab's cards when every zone carries the same paragraph. Outside
  * Chinese it is the Worker's translation ([translated]) when there is one made from this text,
- * else the text as written.
+ * else translated on the device once it can be (the sentences the collapsed lines show first, the
+ * rest on opening), else the text as written (FOX-98).
  */
 @Composable
 fun ForecastContentText(content: String, translated: String?, modifier: Modifier = Modifier) {
     var expanded by rememberSaveable(content) { mutableStateOf(false) }
     // Whether the text runs past the collapsed lines; the toggle only shows when there is more.
     var truncated by rememberSaveable(content) { mutableStateOf(false) }
+    // Width the text lays out at, to guess how much of it the collapsed lines show. Zero until measured.
+    var textWidth by remember { mutableIntStateOf(0) }
+    val style = MaterialTheme.typography.bodySmall
+    val fontSize = with(LocalDensity.current) { style.fontSize.toPx() }
+    val translations = rememberShownTranslations()
+    val segments = remember(content) { OnDeviceTranslation.segments(content) }
+    val shown = translations.forecastText(content, translated)
+    TranslatesOnDevice(
+        when {
+            translated != null -> emptyList()
+
+            expanded -> segments
+
+            textWidth <= 0 || fontSize <= 0f -> emptyList()
+
+            // A CJK character is about one font size wide.
+            else -> OnDeviceTranslation.leadingSegments(
+                segments,
+                (textWidth / fontSize).toInt().coerceAtLeast(1) * COLLAPSED_LINES
+            )
+        }
+    )
     val toggle = if (truncated) {
         Modifier.clickable(role = Role.Button) { expanded = !expanded }
     } else {
@@ -279,11 +309,12 @@ fun ForecastContentText(content: String, translated: String?, modifier: Modifier
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            translated ?: content,
-            style = MaterialTheme.typography.bodySmall,
+            shown,
+            style = style,
             maxLines = if (expanded) Int.MAX_VALUE else COLLAPSED_LINES,
             overflow = TextOverflow.Ellipsis,
-            onTextLayout = { if (it.hasVisualOverflow) truncated = true }
+            onTextLayout = { if (it.hasVisualOverflow) truncated = true },
+            modifier = Modifier.fillMaxWidth().onSizeChanged { textWidth = it.width }
         )
         if (truncated) {
             Text(

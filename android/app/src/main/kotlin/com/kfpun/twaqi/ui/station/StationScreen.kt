@@ -46,6 +46,9 @@ import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.StationType
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.push.FavouriteAlerts
+import com.kfpun.twaqi.translation.OnDeviceTranslation
+import com.kfpun.twaqi.translation.TranslatesOnDevice
+import com.kfpun.twaqi.translation.rememberShownTranslations
 import com.kfpun.twaqi.ui.common.OfflineEmptyState
 import com.kfpun.twaqi.ui.common.OfflineNotice
 import java.time.Instant
@@ -182,10 +185,14 @@ fun StationContent(
                     OfflineEmptyState(onRetry = onRefresh, modifier = Modifier.padding(bottom = 24.dp))
                 }
 
+                // Township and street address come from the API in Chinese only; outside Chinese
+                // they are translated on the device once it can (FOX-98).
+                val translations = rememberShownTranslations()
+                TranslatesOnDevice(OnDeviceTranslation.stationTexts(pollutant, station))
                 StationHeader(
                     title = pollutant?.displayName(chinese) ?: station?.displayName(chinese) ?: "",
-                    // FOX-98 translates the Chinese-only township in English.
-                    locality = pollutant?.displayLocality(chinese) ?: station?.displayLocality(chinese),
+                    locality = pollutant?.displayLocality(chinese, translations::display)
+                        ?: station?.displayLocality(chinese, translations::display),
                     area = pollutant?.displayArea(chinese) ?: station?.displayArea(chinese),
                     stationType = pollutant?.stationType ?: station?.stationType ?: StationType.UNKNOWN,
                     aqi = aqi,
@@ -239,7 +246,7 @@ fun StationContent(
                     StationLocation(
                         lat = lat,
                         lon = lon,
-                        address = pollutant?.address ?: station?.address,
+                        address = (pollutant?.address ?: station?.address)?.let(translations::display),
                         coordinateText = String.format(Locale.US, "%.6f, %.6f", lat, lon),
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
