@@ -50,6 +50,10 @@ class ApiClient(private val config: ApiConfig, private val http: OkHttpClient = 
     suspend fun currentPollutants(stationId: Int): String =
         get(api(CURRENT_POLLUTANTS) { addQueryParameter("station_id", stationId.toString()) })
 
+    /** Several stations in one request (Favourites), as iOS asks: `station_id=126,85`. */
+    suspend fun currentPollutants(stationIds: List<Int>): String =
+        get(api(CURRENT_POLLUTANTS) { addQueryParameter("station_id", stationIds.joinToString(",")) })
+
     suspend fun historicalPollutants(stationId: Int, limit: Int = 24): String = get(
         api(HISTORICAL_POLLUTANTS) {
             addQueryParameter("station_id", stationId.toString())

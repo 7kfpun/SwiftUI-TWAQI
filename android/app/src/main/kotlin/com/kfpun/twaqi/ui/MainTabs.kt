@@ -32,6 +32,7 @@ import com.kfpun.twaqi.R
 import com.kfpun.twaqi.ads.AdBanner
 import com.kfpun.twaqi.ads.AdPlacement
 import com.kfpun.twaqi.data.model.Pollutant
+import com.kfpun.twaqi.ui.favourites.FavouritesScreen
 import com.kfpun.twaqi.ui.help.HelpHost
 import com.kfpun.twaqi.ui.main.MainScreen
 import com.kfpun.twaqi.ui.main.MainViewModel
@@ -40,11 +41,12 @@ import com.kfpun.twaqi.ui.navigation.StationRoute
 import kotlinx.coroutines.delay
 
 /**
- * The app's tabs (iOS `ContentView`). The map (FOX-54) is home, the station list is Search, and
- * Help is FOX-97's; the forecast and favourites tabs join with FOX-90 and FOX-55.
+ * The app's tabs (iOS `ContentView`). The map (FOX-54) is home, Favourites is FOX-55's, the
+ * station list is Search, and Help is FOX-97's; the forecast tab joins with FOX-90.
  */
 enum class MainTab(@param:StringRes val label: Int, @param:DrawableRes val icon: Int, val adPlacement: AdPlacement) {
     MAIN(R.string.tabbar_main, R.drawable.ic_tab_home, AdPlacement.MAIN),
+    FAVOURITES(R.string.tabbar_favourites, R.drawable.ic_tab_favourites, AdPlacement.FAVOURITES),
     DETAILS_LIST(R.string.tabbar_details_list, R.drawable.ic_tab_list, AdPlacement.DETAILS_LIST),
     HELP(R.string.tabbar_help, R.drawable.ic_tab_help, AdPlacement.HELP)
 }
@@ -117,6 +119,10 @@ fun MainTabs(
                         content,
                         onOpenDataScreen
                     )
+
+                    MainTab.FAVOURITES -> FavouritesScreen(onOpenStation = {
+                        onOpenStation(StationRoute(it))
+                    }, modifier = content)
 
                     MainTab.HELP -> HelpHost(isPro = isPro, onOpenPro = onOpenPro, modifier = content)
                 }

@@ -81,6 +81,12 @@ object Analytics {
     /** A map marker opened its station: `name`, `nameLocal`, `stationId`. */
     const val CHECK_MAIN_DETAILS = "check_main_details"
 
+    // Station page and Favourites (FOX-55).
+
+    /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
+    const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
+    const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
+
     // Feedback and review (FOX-60), as on iOS.
 
     /** `source` ([com.kfpun.twaqi.feedback.FeedbackSource]): where the form was opened from. */
