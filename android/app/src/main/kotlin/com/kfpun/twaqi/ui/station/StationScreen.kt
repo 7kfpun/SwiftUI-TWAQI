@@ -64,7 +64,7 @@ import java.util.Locale
  * @property forecast FOX-90: the 空品區 forecast (iOS `AreaForecastView`).
  * @property weather FOX-93: the CWA weather card (iOS `StationWeatherView`).
  * @property cam FOX-92: the station cam with its 24-hour history (iOS `StationCamView`).
- * @property wind the wind reading under the chart (iOS `WindView`); no ticket yet.
+ * @property wind the wind reading under the chart (iOS `WindView`), FOX-101.
  */
 data class StationPageSlots(
     val share: (@Composable (StationDetailsUiState) -> Unit)? = null,
