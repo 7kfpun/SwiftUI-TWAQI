@@ -15,6 +15,7 @@ import com.kfpun.twaqi.push.AlertsUnavailableCard
 import com.kfpun.twaqi.push.StationAlertsCard
 import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
+import com.kfpun.twaqi.ui.station.cam.StationCamSection
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -43,11 +44,13 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             onBack = onBack,
             modifier = modifier,
             onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) },
-            // FOX-57: the alert switches, or why they can't be shown yet.
             slots = StationPageSlots(
+                // FOX-57: the alert switches, or why they can't be shown yet.
                 alerts = { state, retry ->
                     if (state.stationLoadFailed) AlertsUnavailableCard(retry) else StationAlertsCard(route.stationId)
-                }
+                },
+                // FOX-92: the station cam with its 24-hour history.
+                cam = { StationCamSection(it) }
             )
         )
     }
