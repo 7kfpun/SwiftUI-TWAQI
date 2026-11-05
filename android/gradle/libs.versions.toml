@@ -8,6 +8,7 @@ composeBom = "2026.06.01"
 activityCompose = "1.12.4"
 coreKtx = "1.18.0"
 lifecycle = "2.10.0"
+appcompat = "1.7.1"
 firebaseBom = "35.1.0"
 googleServices = "4.5.0"
 crashlytics = "3.0.8"
@@ -18,6 +19,7 @@ junit = "4.13.2"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
