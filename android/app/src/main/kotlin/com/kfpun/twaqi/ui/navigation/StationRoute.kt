@@ -16,6 +16,7 @@ import com.kfpun.twaqi.push.StationAlertsCard
 import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
 import com.kfpun.twaqi.ui.station.cam.StationCamSection
+import com.kfpun.twaqi.ui.station.forecast.StationForecastSection
 import com.kfpun.twaqi.ui.station.weather.StationWeatherSection
 
 /**
@@ -28,8 +29,8 @@ data class StationRoute(val stationId: Int)
  * The station page (FOX-55) for [route], with its own view model each time it opens, cleared on
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
  * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60); its
- * alerts slot holds the station's alert switches (FOX-57), its cam slot the station cam (FOX-92)
- * and its weather slot the CWA weather card (FOX-93).
+ * alerts slot holds the station's alert switches (FOX-57), its cam slot the station cam (FOX-92),
+ * its weather slot the CWA weather card (FOX-93) and its forecast slot the zone forecast (FOX-90).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -53,6 +54,8 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
                 },
                 // FOX-92: the station cam with its 24-hour history.
                 cam = { StationCamSection(it) },
+                // FOX-90: the station's 空品區 forecast, hidden when its zone has none.
+                forecast = { StationForecastSection(it) },
                 // FOX-93: CWA weather near the station, hidden when nothing is in range.
                 weather = { StationWeatherSection(it) }
             )

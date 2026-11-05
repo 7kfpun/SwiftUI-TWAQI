@@ -33,6 +33,7 @@ import com.kfpun.twaqi.ads.AdBanner
 import com.kfpun.twaqi.ads.AdPlacement
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.ui.favourites.FavouritesScreen
+import com.kfpun.twaqi.ui.forecast.ForecastScreen
 import com.kfpun.twaqi.ui.help.HelpHost
 import com.kfpun.twaqi.ui.main.MainScreen
 import com.kfpun.twaqi.ui.main.MainViewModel
@@ -42,10 +43,12 @@ import kotlinx.coroutines.delay
 
 /**
  * The app's tabs (iOS `ContentView`). The map (FOX-54) is home, Favourites is FOX-55's, the
- * station list is Search, and Help is FOX-97's; the forecast tab joins with FOX-90.
+ * station list is Search, Help is FOX-97's, and Forecast (FOX-90) sits second, as iOS FOX-32 put it.
+ * [adPlacement] is null where iOS shows no banner (the Forecast tab).
  */
-enum class MainTab(@param:StringRes val label: Int, @param:DrawableRes val icon: Int, val adPlacement: AdPlacement) {
+enum class MainTab(@param:StringRes val label: Int, @param:DrawableRes val icon: Int, val adPlacement: AdPlacement?) {
     MAIN(R.string.tabbar_main, R.drawable.ic_tab_home, AdPlacement.MAIN),
+    FORECAST(R.string.tabbar_forecast, R.drawable.ic_tab_forecast, null),
     FAVOURITES(R.string.tabbar_favourites, R.drawable.ic_tab_favourites, AdPlacement.FAVOURITES),
     DETAILS_LIST(R.string.tabbar_details_list, R.drawable.ic_tab_list, AdPlacement.DETAILS_LIST),
     HELP(R.string.tabbar_help, R.drawable.ic_tab_help, AdPlacement.HELP)
@@ -124,10 +127,12 @@ fun MainTabs(
                         onOpenStation(StationRoute(it))
                     }, modifier = content)
 
+                    MainTab.FORECAST -> ForecastScreen(modifier = content)
+
                     MainTab.HELP -> HelpHost(isPro = isPro, onOpenPro = onOpenPro, modifier = content)
                 }
             }
-            AdBanner(selected.adPlacement)
+            selected.adPlacement?.let { AdBanner(it) }
         }
     }
 }
