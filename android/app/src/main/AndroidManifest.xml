@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Air quality alerts (FOX-57): asked for on Android 13+ when an alert is switched on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- The map's blue dot, "my location" and the nearest-first station list (FOX-54). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -26,6 +28,23 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${ADMOB_APP_ID}" />
+        <!-- Push alerts (FOX-57): FCM shows background alerts on this channel, with this icon. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="aqi_alerts" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <!-- On only with app/google-services.json (FCM_ENABLED); the app builds and runs without it. -->
+        <service
+            android:name=".push.TwaqiMessagingService"
+            android:enabled="${FCM_ENABLED}"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <!-- Below Android 13, AppCompat keeps the app language (AppCompatDelegate.setApplicationLocales)
              and moves it to the system's per-app locale after an upgrade to 13+ (FOX-56). -->
         <service

@@ -1,5 +1,6 @@
 package com.kfpun.twaqi.push
 
+import kotlin.math.roundToInt
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -11,7 +12,6 @@ import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.math.roundToInt
 
 /** The station page's two alerts (iOS `PushDirection`). */
 enum class PushDirection(val wire: String) {

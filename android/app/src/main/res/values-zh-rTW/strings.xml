@@ -511,4 +511,12 @@
     <!-- Debug builds only: the data-layer check screen (FOX-53). -->
     <string name="debug_data_title">資料層</string>
     <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>
+
+    <!-- Android only (FOX-57): the alerts' notification channel, and an alert's text when the sender
+         sends none (same wording as the push Worker's message.ts). -->
+    <string name="push_channel_alerts_name">空品通知</string>
+    <string name="push_channel_alerts_description">你關注的測站 AQI 超過或低於你設定的數值時通知你。</string>
+    <string name="push_alert_title">%1$s AQI %2$d</string>
+    <string name="push_alert_above_body">空氣品質指標已高於你設定的 %d，外出請留意。</string>
+    <string name="push_alert_below_body">空氣品質指標已低於你設定的 %d，空氣變好了。</string>
 </resources>

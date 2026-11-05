@@ -1,6 +1,17 @@
 package com.kfpun.twaqi.push
 
 import com.kfpun.twaqi.data.remote.ApiClient
+import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.security.MessageDigest
+import java.time.Instant
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -21,17 +32,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.IOException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import java.security.MessageDigest
-import java.time.Instant
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 /** Why a push API call failed (iOS `PushError`). */
 sealed class PushException(message: String) : Exception(message) {
@@ -255,9 +255,13 @@ class OkHttpPushApi(private val config: PushConfig, private val http: OkHttpClie
                 .header("X-Device-Id", config.deviceId)
                 .header("Authorization", "Bearer ${config.secret}")
                 .header("Accept", "application/json")
-                .method(method, body?.toString()?.toRequestBody(JSON_TYPE))
+                // OkHttp wants a body on POST and PUT; iOS sends `archive-all` without one.
+                .method(method, body?.toString()?.toRequestBody(JSON_TYPE) ?: emptyBody(method))
                 .build()
         }
+
+        private fun emptyBody(method: String) =
+            if (method == "POST" || method == "PUT") ByteArray(0).toRequestBody(null) else null
 
         /** `{ site_id?, above, below }`: off is an explicit null, not a missing key; an unknown cam is left out. */
         fun stationChange(siteId: String?, alerts: StationAlerts): JsonObject {
