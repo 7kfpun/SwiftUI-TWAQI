@@ -51,7 +51,7 @@ All of these are gitignored. A clean checkout builds without any of them.
 
 | File | What | Template |
 | --- | --- | --- |
-| `secrets.properties` | `API_DOMAIN`, `MAPS_API_KEY`, Directus URL and tokens, Play service-account path | `secrets.example.properties` |
+| `secrets.properties` | `API_DOMAIN`, `MAPS_API_KEY`, Directus URL and tokens, AdMob app and ad unit ids, Play service-account path | `secrets.example.properties` |
 | `app/google-services.json` | Firebase (Crashlytics, Analytics) | Firebase console |
 | `keystore.properties` | release signing | `keystore.example.properties` |
 | `play-service-account.json` | Play upload (or the path in `PLAY_SERVICE_ACCOUNT_JSON`) | Google Cloud / Play Console |
@@ -67,6 +67,20 @@ All of these are gitignored. A clean checkout builds without any of them.
 - **Firebase:** register the Android app `com.kfpun.twaqi` in the TWAQI Firebase project and
   save its `google-services.json` to `android/app/`. The google-services and Crashlytics Gradle
   plugins apply only when that file exists.
+
+## Pro and ads (FOX-58)
+
+- **Play Console → Monetize → Subscriptions:** one subscription
+  `com.kfpun.twaqi.subscription.adfree` with three auto-renewing base plans, `adfree-1m`
+  (1 month), `adfree-6m` (6 months) and `adfree-12m` (12 months). The app shows each base
+  plan's own offer (no trial or intro offer, as on iOS). Test with license testers on a
+  closed-test track; an emulator without Play shows "Retry" instead of plans.
+- **AdMob:** the Android app's id goes in `ADMOB_APP_ID`, its banner units in
+  `AD_UNIT_ID_*_FOOTER` (one per placement, as on iOS). The example file holds Google's test
+  ids. Ads load only after Google's UMP consent allows them, and never for Pro.
+- **Without Play:** a debug build started with
+  `adb shell am start -n com.kfpun.twaqi/.MainActivity --ez demo_billing true` sells demo
+  plans in memory, for screenshots and UI checks.
 
 ## Version
 

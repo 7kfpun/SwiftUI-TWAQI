@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,6 +42,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.ads.AdBanner
+import com.kfpun.twaqi.ads.AdPlacement
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.locale.AppLocale
@@ -116,6 +119,8 @@ fun FavouritesContent(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        // Below the content, never over it (iOS reserves the space for the same reason).
+        bottomBar = { AdBanner(AdPlacement.FAVOURITES, Modifier.navigationBarsPadding()) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.favouritelist_favourites)) },
