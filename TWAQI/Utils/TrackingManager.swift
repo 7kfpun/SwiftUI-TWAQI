@@ -51,8 +51,8 @@ struct TrackingManager {
         !isExcluded && arguments.contains("-FIRDebugEnabled")
     }
 
-    /// Persists the choice and stops or resumes Firebase immediately. Bugsnag
-    /// and Sentry have no off switch once started; they follow on next launch.
+    /// Persists the choice and stops or resumes Firebase immediately: Analytics
+    /// and Crashlytics, the only crash reporter, both take effect at once.
     static func setExcluded(_ excluded: Bool) {
         UserDefaults.standard.set(excluded, forKey: excludedKey)
         setFirebaseCollection(enabled: !excluded)

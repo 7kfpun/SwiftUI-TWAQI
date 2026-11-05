@@ -60,7 +60,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | Business partner form (Help → Interested to be our Business Partner?) | Directus collection `twaqi_cooperate`, create-only with `DirectusCooperateToken`, or `DirectusFeedbackToken` when that is empty; soft delete via `archived` |
 | Station webcams | R2 bucket `twaqi-station-cams` behind the webcam host (its custom domain), synced every 10 min by `workers/twaqi-workers` |
 | Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
-| Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
+| Crash reporting / analytics | Firebase Crashlytics + Analytics only (Swift Package Manager) |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
 ### Station webcams
