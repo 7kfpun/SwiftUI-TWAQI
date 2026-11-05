@@ -19,6 +19,7 @@ import com.kfpun.twaqi.ui.station.cam.StationCamSection
 import com.kfpun.twaqi.ui.station.forecast.StationForecastSection
 import com.kfpun.twaqi.ui.station.share.ShareCardButton
 import com.kfpun.twaqi.ui.station.weather.StationWeatherSection
+import com.kfpun.twaqi.ui.station.wind.StationWindSection
 
 /**
  * The one way into a station's screen: the map's markers and closest-station card and the
@@ -31,8 +32,8 @@ data class StationRoute(val stationId: Int)
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
  * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60); its
  * alerts slot holds the station's alert switches (FOX-57), its cam slot the station cam (FOX-92),
- * its weather slot the CWA weather card (FOX-93), its forecast slot the zone forecast (FOX-90)
- * and its share button the share card (FOX-94).
+ * its weather slot the CWA weather card (FOX-93), its forecast slot the zone forecast (FOX-90),
+ * its wind slot the wind section (FOX-101) and its share button the share card (FOX-94).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -61,7 +62,9 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
                 // FOX-90: the station's 空品區 forecast, hidden when its zone has none.
                 forecast = { StationForecastSection(it) },
                 // FOX-93: CWA weather near the station, hidden when nothing is in range.
-                weather = { StationWeatherSection(it) }
+                weather = { StationWeatherSection(it) },
+                // FOX-101: wind under the chart, its arrow in the selected pollutant's colour.
+                wind = { state, selected -> StationWindSection(state, selected) }
             )
         )
     }
