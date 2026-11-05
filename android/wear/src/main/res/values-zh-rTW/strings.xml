@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_stations">測站</string>
+    <string name="watch_loading_failed">無法載入資料</string>
+    <string name="watch_retry">重試</string>
+    <string name="watch_widget_name">空氣品質</string>
+    <string name="watch_widget_description">在 App 中選擇的測站空氣品質。表情樣式免費；數值與其他樣式屬於 Pro。</string>
+    <string name="watch_widget_short">%1$s（僅數值）</string>
+    <string name="watch_widget_face">%1$s（表情）</string>
+    <string name="watch_widget_status">%1$s（狀態）</string>
+    <string name="watch_widget_pro">%1$s・Pro</string>
+    <string name="watch_no_station">開啟 App 選擇測站</string>
+    <string name="watch_history">過去 12 小時</string>
+    <string name="watch_closest">最近測站</string>
+    <string name="watch_default_station">預設測站（未定位）</string>
+    <string name="watch_pro_title">錶面數值與樣式・Pro</string>
+    <string name="watch_pro_failed">找不到購買項目，請再試一次或回復購買。</string>
+    <string name="watch_pro_locked">Pro・開啟 App 解鎖</string>
+    <string name="watch_pro_feature_complications">在錶面顯示數值</string>
+    <string name="watch_pro_feature_no_ads">手機無廣告</string>
+    <string name="watch_pro_feature_indices">AQI、PM2.5 等 7 項指標</string>
+    <string name="watch_pro_complications_cta">在錶面顯示數值</string>
+
+    <string name="watch_pro_open_on_phone">在手機上訂閱</string>
+    <string name="watch_pro_continue_on_phone">請在手機上繼續。</string>
+    <string name="watch_pro_phone_unavailable">請在手機上開啟 Taiwan Air 訂閱。</string>
+    <string name="watch_complication_index">指標</string>
+    <string name="watch_complication_style">樣式</string>
+
+    <string name="airstatus_good">良好</string>
+    <string name="airstatus_moderate">普通</string>
+    <string name="airstatus_unhealthyforsensitivegroup">對敏感族群不健康</string>
+    <string name="airstatus_unhealthy">對所有族群不健康</string>
+    <string name="airstatus_veryunhealthy">非常不健康</string>
+    <string name="airstatus_hazardous">危害</string>
+    <string name="airstatus_unknown">－</string>
+
+    <string name="details_no_trend_data">資料還不夠，無法顯示趨勢</string>
+    <string name="wind_calm">無風</string>
+    <string name="help_restore_purchase">回復購買項目</string>
+    <string name="favouritelist_favourites">我的最愛</string>
+    <string name="detailslist_search">搜尋</string>
+</resources>

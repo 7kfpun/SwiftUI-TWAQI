@@ -178,6 +178,8 @@ ktlint {
 }
 
 dependencies {
+    // FOX-62: the indices, level bands and colours, Taiwan time and the watch contract, shared with :wear.
+    implementation(project(":core"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -221,6 +223,9 @@ dependencies {
 
     // The review prompt (FOX-60): Play In-App Review.
     implementation(libs.play.review)
+
+    // FOX-62: favourites, Pro and the language to the Wear OS app; its locked-complication events back.
+    implementation(libs.play.services.wearable)
 
     // On-device translation of Chinese-only API text (FOX-98): ML Kit, the model downloaded on Wi-Fi.
     implementation(libs.mlkit.translate)

@@ -156,6 +156,19 @@
             </intent-filter>
         </service>
 
+        <!-- Wear OS (FOX-62): the watch's locked-complication events, logged to Firebase here. -->
+        <service
+            android:name=".wear.WatchEventListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/twaqi/watch-events"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+
         <!-- Home screen widgets (FOX-59): the air-quality widget (small free; medium and large Pro)
              and the station detail widget (Pro). Both are set up in WidgetConfigureActivity. -->
         <receiver

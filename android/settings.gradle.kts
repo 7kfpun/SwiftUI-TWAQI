@@ -22,3 +22,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "TWAQI"
 include(":app")
+// FOX-62: code shared by the phone app and the Wear OS app, and the Wear OS app itself.
+include(":core")
+include(":wear")

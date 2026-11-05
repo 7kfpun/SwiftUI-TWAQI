@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The tile picker's preview: the "Good" face on the tile's ring. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@android:color/black" />
+            <stroke
+                android:width="6dp"
+                android:color="#009866" />
+            <size
+                android:width="192dp"
+                android:height="192dp" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/status_good"
+        android:gravity="center"
+        android:width="72dp"
+        android:height="72dp" />
+</layer-list>

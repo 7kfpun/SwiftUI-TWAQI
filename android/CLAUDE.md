@@ -1,6 +1,7 @@
 # TWAQI Android — agent context
 
-Native Kotlin + Jetpack Compose + Material 3 app, one `app` module (FOX-51, FOX-52).
+Native Kotlin + Jetpack Compose + Material 3 app: the `app` module (FOX-51, FOX-52), the Wear OS
+app `wear` and the shared `core` library (FOX-62).
 The repo-wide rules in the root `CLAUDE.md` still apply (branches, draft PRs, LGTM, merge
 only on the user's greenlight). Read `README.md` here for setup.
 
@@ -53,6 +54,11 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
   applied at process start (`AppAppearanceStore`, `TwaqiApplication`). Activities must be
   `AppCompatActivity`, and anything dark-aware (the map style, FOX-54) follows
   `isSystemInDarkTheme()`; never read the phone's setting directly.
+- **Wear OS** (FOX-62): `wear` has the same application id and signing key as `app` (Play and the
+  Data Layer need both), versionCodes from **203000000** (`WearIdentityTest`), minSdk 30. Kotlin
+  both apps need (indices, level bands and colours, `TaiwanTime`, the Data Layer contract) lives
+  in `core`, not copied; resources (strings, the face images) are each app's own. `PhoneStateRelay` sends the watch the favourites, Pro and language; keep
+  it fed when any of those gets a new source.
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)
