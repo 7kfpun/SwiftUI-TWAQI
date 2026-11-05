@@ -16,7 +16,7 @@
 //
 //  Usage:
 //    swiftc -O tools/BakeTaiwanTerrain.swift -o /tmp/bake
-//    /tmp/bake <scratch-dir> TWAQIVision/Resources
+//    /tmp/bake <scratch-dir> ios/TWAQIVision/Resources
 //
 //  Writes, into that directory:
 //

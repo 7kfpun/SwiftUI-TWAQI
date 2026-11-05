@@ -2,12 +2,12 @@
 """Check that the version, build numbers and What's New agree before a release.
 
 Fails (exit 1) when:
-  - fastlane/Fastfile APP_VERSION differs from MARKETING_VERSION in any
+  - ios/fastlane/Fastfile APP_VERSION differs from MARKETING_VERSION in any
     non-visionOS build configuration that sets one (app, widget, watch app,
     watch widget, notification extension);
   - those configurations do not all share one CURRENT_PROJECT_VERSION
     (App Store Connect rejects an app whose extensions carry a different build);
-  - fastlane/metadata/<locale>/release_notes.txt is missing, empty, or longer
+  - ios/fastlane/metadata/<locale>/release_notes.txt is missing, empty, or longer
     than App Store Connect's 4000-character limit, for en-US or zh-Hant.
 
 visionOS (SDKROOT = xros) is reported but not checked: it ships its own build
@@ -16,10 +16,12 @@ numbers and can trail the iPhone version.
 Used by CI (PR policy) and by `fastlane release_build` before it archives.
 Standard library only. Run from anywhere:
 
-    python3 tools/check_release_consistency.py [repo-root]
+    python3 tools/check_release_consistency.py [ios-root]
 
-The root defaults to the checkout the script sits in. CI runs master's copy of
-the script against the PR's checkout by passing the root.
+The root is the iOS app's directory, the one holding TWAQI.xcodeproj and
+fastlane/ (ios/ since FOX-89). It defaults to ios/ in the checkout the script
+sits in. CI runs master's copy of the script against the PR's checkout by
+passing the PR's ios/.
 """
 
 import os
@@ -27,7 +29,7 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else pathlib.Path(__file__).parent.parent).resolve()
+ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else pathlib.Path(__file__).parent.parent / "ios").resolve()
 PBXPROJ = ROOT / "TWAQI.xcodeproj" / "project.pbxproj"
 FASTFILE = ROOT / "fastlane" / "Fastfile"
 METADATA = ROOT / "fastlane" / "metadata"

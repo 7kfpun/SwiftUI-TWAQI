@@ -3,15 +3,15 @@
 
 Three levels, decided from the PR's changed files. The highest level wins:
 
-  skip   only workers/, services/, web/, fastlane/, assets/, docs (.md), media, or .github/
-         other than the CI workflow and its build action changed: nothing runs and the
-         check is green.
+  skip   only android/, workers/, services/, web/, ios/fastlane/, assets/, docs (.md),
+         media, or .github/ other than the CI workflow and its build action changed:
+         nothing runs and the check is green.
   build  any other path (Swift, strings, asset catalogs, widget / watch / visionOS,
-         project.pbxproj): build-for-testing only, no simulator.
+         project.pbxproj, all under ios/): build-for-testing only, no simulator.
   test   a guarded path changed (the sources and test files behind the CI subset,
          listed in ci.yml as CI_GUARDED_PATHS), or the CI workflow, its build action
-         (.github/actions/unit-tests-build, FOX-65), this script, the Podfile /
-         Podfile.lock or Package.resolved: build, boot, run the subset.
+         (.github/actions/unit-tests-build, FOX-65), this script, ios/Podfile /
+         ios/Podfile.lock or Package.resolved: build, boot, run the subset.
 
 The PR label `ci-full-tests`, an empty file list, or a failed API call give `test`:
 the job never skips on doubt.
@@ -53,14 +53,17 @@ ALWAYS_TEST = (
     BUILD_ACTION,
     "tools/ci_test_level.py",
     "tools/test_ci_test_level.py",
-    "Podfile",
-    "Podfile.lock",
+    "ios/Podfile",
+    "ios/Podfile.lock",
     "**/Package.resolved",
 )
 
-# These do not feed the app build. workers/ is checked by the Workers workflow,
-# services/ is Cloud Run, deployed by hand (services/twaqi-api/README.md).
-SKIP_PREFIXES = ("assets/", "fastlane/", "services/", "web/", "workers/", ".github/")
+# These do not feed the iOS app build. workers/ is checked by the Workers workflow,
+# services/ is Cloud Run, deployed by hand (services/twaqi-api/README.md). android/
+# is the Android app (FOX-89), which gets its own CI (FOX-52).
+SKIP_PREFIXES = ("android/", "assets/", "ios/fastlane/", "services/", "web/", "workers/", ".github/")
+# The iOS test target's sources, searched by `check` for the CI_TEST_SUITES classes.
+TESTS_DIR = "ios/TWAQITests/"
 DOC_SUFFIXES = {".md", ".markdown"}
 MEDIA_SUFFIXES = {
     ".m4a", ".mp3", ".wav", ".aac", ".caf", ".aiff", ".aif", ".m4b", ".flac", ".ogg",
@@ -152,7 +155,7 @@ def decide(files, labels=(), guarded=(), api_error=False) -> Decision:
     reason = {
         TEST: "guarded paths, the CI workflow or the dependency pins changed",
         BUILD: "app files changed, none of them guarded by the CI subset",
-        SKIP: "only Workers, web, fastlane, assets, docs, media or .github files changed",
+        SKIP: "only Android, Workers, web, fastlane, assets, docs, media or .github files changed",
     }[level]
     return Decision(level, reason, [path for path in files if levels[path] == level])
 
@@ -230,12 +233,12 @@ def check(root: Path, suites, guarded) -> list[str]:
     for pattern in guarded:
         if not any(matches(path, [pattern]) for path in files):
             problems.append(f"CI_GUARDED_PATHS entry matches no file: {pattern}")
-    tests = sorted(path for path in files if path.startswith("TWAQITests/") and path.endswith(".swift"))
+    tests = sorted(path for path in files if path.startswith(TESTS_DIR) and path.endswith(".swift"))
     for suite in suites:
         declared = re.compile(rf"\bclass\s+{re.escape(suite)}\b")
         homes = [path for path in tests if declared.search((root / path).read_text(errors="replace"))]
         if not homes:
-            problems.append(f"CI_TEST_SUITES suite is not declared in TWAQITests/: {suite}")
+            problems.append(f"CI_TEST_SUITES suite is not declared in {TESTS_DIR}: {suite}")
         for home in homes:
             if classify(home, guarded) != TEST:
                 problems.append(f"{suite} lives in {home}, which CI_GUARDED_PATHS does not list")

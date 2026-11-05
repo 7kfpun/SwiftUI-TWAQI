@@ -61,43 +61,43 @@ jobs:
       # entry matches no file. `*` stays in one folder, `**/` spans folders.
       CI_GUARDED_PATHS: |
         # Test files of the subset suites
-        TWAQITests/PollutantCacheTests.swift
-        TWAQITests/OfflineCacheRetentionTests.swift
-        TWAQITests/PushServiceTests.swift
-        TWAQITests/StationCamTests.swift
-        TWAQITests/AppLanguageTests.swift
-        TWAQITests/FeedbackServiceTests.swift
-        TWAQITests/CooperateServiceTests.swift
-        TWAQITests/WidgetExtraLargeTests.swift
+        ios/TWAQITests/PollutantCacheTests.swift
+        ios/TWAQITests/OfflineCacheRetentionTests.swift
+        ios/TWAQITests/PushServiceTests.swift
+        ios/TWAQITests/StationCamTests.swift
+        ios/TWAQITests/AppLanguageTests.swift
+        ios/TWAQITests/FeedbackServiceTests.swift
+        ios/TWAQITests/CooperateServiceTests.swift
+        ios/TWAQITests/WidgetExtraLargeTests.swift
         # Offline caches (PollutantCacheTests, OfflineCacheRetentionTests,
         # WidgetExtraLargeTests for the widget's station detail cache; the watch's
         # reading expiry is checked against the same ceiling)
-        TWAQI/Utils/PollutantCache.swift
-        TWAQI/Utils/WidgetStationDetail.swift
-        TWAQI/Utils/OfflineCacheRetention.swift
-        TWAQIWatch/Shared/WatchStore.swift
-        TWAQIWatch/Shared/WatchReading.swift
+        ios/TWAQI/Utils/PollutantCache.swift
+        ios/TWAQI/Utils/WidgetStationDetail.swift
+        ios/TWAQI/Utils/OfflineCacheRetention.swift
+        ios/TWAQIWatch/Shared/WatchStore.swift
+        ios/TWAQIWatch/Shared/WatchReading.swift
         # Push dual-write (PushServiceTests): OneSignalTags and PushDeviceIdentity
         # live in DirectusPushMirror.swift
-        TWAQI/Utils/PushService.swift
-        TWAQI/Utils/DirectusPushMirror.swift
-        TWAQI/Models/StationAlertSetting.swift
+        ios/TWAQI/Utils/PushService.swift
+        ios/TWAQI/Utils/DirectusPushMirror.swift
+        ios/TWAQI/Models/StationAlertSetting.swift
         # Favourites ↔ alerts (FavouriteAlertsTests)
-        TWAQI/Utils/FavouriteAlerts.swift
+        ios/TWAQI/Utils/FavouriteAlerts.swift
         # Station-cam history (StationCam*Tests): models and matcher, frame and hour
         # caches, StationCamHistoryLoader in StationCamView.swift, StationCamStore
-        TWAQI/**/StationCam*.swift
+        ios/TWAQI/**/StationCam*.swift
         # SettingsStore (AppLanguageTests): AppLanguage and Locale.app in
         # LocaleExtension.swift, String.localized, on-device translation,
         # Pollutant.displayLocality
-        TWAQI/Utils/SettingsStore.swift
-        TWAQI/Utils/LocaleExtension.swift
-        TWAQI/Utils/StringExtension.swift
-        TWAQI/Utils/OnDeviceTranslation.swift
-        TWAQI/Models/Pollutants.swift
+        ios/TWAQI/Utils/SettingsStore.swift
+        ios/TWAQI/Utils/LocaleExtension.swift
+        ios/TWAQI/Utils/StringExtension.swift
+        ios/TWAQI/Utils/OnDeviceTranslation.swift
+        ios/TWAQI/Models/Pollutants.swift
         # Directus create-only forms (FeedbackServiceTests, CooperateServiceTests)
-        TWAQI/Utils/FeedbackService.swift
-        TWAQI/Utils/CooperateService.swift
+        ios/TWAQI/Utils/FeedbackService.swift
+        ios/TWAQI/Utils/CooperateService.swift
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -147,8 +147,8 @@ jobs:
           # The project will not build without these, and they are gitignored
           # because they hold local API keys. Example values are enough to
           # compile and launch the host app for unit tests.
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/debug.xcconfig
-          cp TWAQI/Config/example.xcconfig TWAQI/Config/release.xcconfig
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/debug.xcconfig
+          cp ios/TWAQI/Config/example.xcconfig ios/TWAQI/Config/release.xcconfig
           # example.xcconfig sets GMSServicesApiKey to an empty value
           # (`= // Required` is a comment). An empty key skips meaningful
           # GMSServices.provideAPIKey, and creating GMSMapView then crashes
@@ -157,7 +157,7 @@ jobs:
           from pathlib import Path
           key_line = "GMSServicesApiKey = AIzaSyCIPlaceholderKeyForUnitTests000"
           for name in ("debug.xcconfig", "release.xcconfig"):
-              path = Path("TWAQI/Config") / name
+              path = Path("ios/TWAQI/Config") / name
               lines = path.read_text().splitlines()
               out, replaced = [], False
               for line in lines:
@@ -170,7 +170,7 @@ jobs:
                   out.append(key_line)
               path.write_text("\n".join(out) + "\n")
           PY
-          cat > TWAQI/GoogleService-Info.plist <<'EOF'
+          cat > ios/TWAQI/GoogleService-Info.plist <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -419,8 +419,8 @@ jobs:
           fi
 
           osv-scanner scan source \
-            --lockfile=Podfile.lock \
-            --lockfile=TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved \
+            --lockfile=ios/Podfile.lock \
+            --lockfile=ios/TWAQI.xcworkspace/xcshareddata/swiftpm/Package.resolved \
             >"$deps_log" 2>&1
           echo $? >"$RUNNER_TEMP/osv.exit"
 

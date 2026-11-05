@@ -8,7 +8,7 @@ dark features sit on a coloured fill, so each file reads in light and dark mode.
 
     python3 tools/make_onboarding_animations.py
 
-writes TWAQI/OnboardingAnimations/onboarding_*.json. Re-run it after a change
+writes ios/TWAQI/OnboardingAnimations/onboarding_*.json. Re-run it after a change
 here and commit both.
 """
 
@@ -18,7 +18,7 @@ import os
 import sys
 
 FPS = 30
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "TWAQI", "OnboardingAnimations")
+OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ios", "TWAQI", "OnboardingAnimations")
 
 # AirStatuses.getColor()
 GOOD = 0x009866
