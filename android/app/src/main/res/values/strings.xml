@@ -87,6 +87,8 @@
     <string name="feedback_error_generic">Something went wrong. Please try again later.</string>
     <string name="feedback_try_again">Try Again</string>
     <string name="feedback_cancel">Cancel</string>
+    <string name="help_analytics_excluded">This device is now excluded from analytics and crash reports.</string>
+    <string name="help_analytics_included">This device now sends analytics and crash reports again.</string>
 
     <string name="cooperate_title">Business Partnership</string>
     <string name="cooperate_intro_header">Partnership enquiry</string>

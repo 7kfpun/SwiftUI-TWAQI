@@ -87,6 +87,8 @@
     <string name="feedback_error_generic">發生錯誤，請稍後再試。</string>
     <string name="feedback_try_again">再試一次</string>
     <string name="feedback_cancel">取消</string>
+    <string name="help_analytics_excluded">此裝置已停止傳送分析資料與當機報告。</string>
+    <string name="help_analytics_included">此裝置已恢復傳送分析資料與當機報告。</string>
 
     <string name="cooperate_title">商業合作</string>
     <string name="cooperate_intro_header">合作洽詢</string>

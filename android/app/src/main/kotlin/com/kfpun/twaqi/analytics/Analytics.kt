@@ -2,10 +2,16 @@ package com.kfpun.twaqi.analytics
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.kfpun.twaqi.BuildConfig
 
-/** Firebase Analytics events, named as on iOS (`AnalyticsEvent.swift`). */
+/**
+ * Firebase Analytics events, named as on iOS (`AnalyticsEvent.swift`, `docs/analytics.md`). Every
+ * event goes through [logEvent]. Never rename one: Firebase would count the new name separately.
+ * Whether anything is sent is [TrackingManager]'s call (debug builds and opted-out installs don't).
+ */
 object Analytics {
     /** `label`: the language id (`system`, `zh-Hant`, `en`). */
     const val SELECT_LANGUAGE = "select_language"
@@ -81,13 +87,47 @@ object Analytics {
     const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
     const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
 
-    /** `source`: where the feedback form was opened from (`station_page`). */
+    // Feedback and review (FOX-60), as on iOS.
+
+    /** `source` ([com.kfpun.twaqi.feedback.FeedbackSource]): where the form was opened from. */
     const val OPEN_FEEDBACK_FORM = "open_feedback_form"
 
-    /** Does nothing when Firebase is not set up (no `google-services.json`). */
-    fun logEvent(context: Context, name: String, parameters: Map<String, String> = emptyMap()) {
+    /** `platform`, `rating` (1–5), `interview_interest` (1 / 0). */
+    const val SUBMIT_FEEDBACK = "submit_feedback"
+
+    /** `reason`, as for [SUBMIT_COOPERATE_FAILED]. */
+    const val SUBMIT_FEEDBACK_FAILED = "submit_feedback_failed"
+
+    /**
+     * `source` (`app_opens` / `feedback`), plus `app_open_count` or `rating`. The app asked Play
+     * for the review prompt; Play decides whether it shows.
+     */
+    const val REVIEW_REQUESTED = "review_requested"
+
+    /** `source`: feedback. "Rate on Google Play" tapped in the thank-you after a 4- or 5-star feedback. */
+    const val WRITE_REVIEW_TAPPED = "write_review_tapped"
+
+    /**
+     * Logs [name] with [parameters]: text as strings, whole numbers as longs, other numbers as
+     * doubles, and booleans as 1 / 0 (how Firebase records the iOS app's booleans). Does nothing
+     * when Firebase is not set up (no `google-services.json`) or this launch doesn't report.
+     */
+    fun logEvent(context: Context, name: String, parameters: Map<String, Any> = emptyMap()) {
+        if (BuildConfig.DEBUG) Log.d("Analytics", "LogEvent $name $parameters")
         if (FirebaseApp.getApps(context).isEmpty()) return
-        val bundle = Bundle().apply { parameters.forEach { (key, value) -> putString(key, value) } }
-        FirebaseAnalytics.getInstance(context).logEvent(name, bundle)
+        if (!TrackingManager.get(context).isReporting) return
+        FirebaseAnalytics.getInstance(context).logEvent(name, bundle(parameters))
+    }
+
+    private fun bundle(parameters: Map<String, Any>) = Bundle().apply {
+        parameters.forEach { (key, value) ->
+            when (value) {
+                is Boolean -> putLong(key, if (value) 1L else 0L)
+                is Int -> putLong(key, value.toLong())
+                is Long -> putLong(key, value)
+                is Number -> putDouble(key, value.toDouble())
+                else -> putString(key, value.toString())
+            }
+        }
     }
 }

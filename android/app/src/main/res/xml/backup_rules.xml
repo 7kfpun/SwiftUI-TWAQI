@@ -6,4 +6,6 @@
     <!-- Pro is re-read from Google Play on every start; a copy restored on
          another phone or account must not unlock it there (FOX-58). -->
     <exclude domain="file" path="datastore/pro.preferences_pb" />
+    <!-- Per-install: the analytics opt-out and the feedback's anonymous id (FOX-60). -->
+    <exclude domain="sharedpref" path="install.xml" />
 </full-backup-content>

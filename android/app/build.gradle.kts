@@ -101,7 +101,13 @@ android {
     }
 
     buildTypes {
+        // Debug builds never report to Analytics or Crashlytics, from the first event on
+        // (TrackingManager, FOX-60); release builds report unless the install opted out.
+        debug {
+            manifestPlaceholders["FIREBASE_COLLECTION_ENABLED"] = "false"
+        }
         release {
+            manifestPlaceholders["FIREBASE_COLLECTION_ENABLED"] = "true"
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -196,6 +202,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+
+    // The review prompt (FOX-60): Play In-App Review.
+    implementation(libs.play.review)
 
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)
