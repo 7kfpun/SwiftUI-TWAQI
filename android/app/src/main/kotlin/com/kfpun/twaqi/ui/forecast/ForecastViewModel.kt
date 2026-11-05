@@ -104,7 +104,7 @@ class ForecastViewModel(
     private var rows: List<AqiForecast>? = null
     private var stations: List<Pollutant> = emptyList()
     private var savedFavourites: Map<Int, Pollutant> = emptyMap()
-    private var favouriteStationIds: List<Int> = emptyList()
+    private var favouriteIds: List<Int> = emptyList()
     private var location: GeoPoint? = null
 
     /**
@@ -112,7 +112,7 @@ class ForecastViewModel(
      * favourites may have changed since.
      */
     fun load(favouriteStationIds: List<Int>) {
-        this.favouriteStationIds = favouriteStationIds
+        favouriteIds = favouriteStationIds
         // Favourites edited since the last visit re-pin at once.
         render()
 
@@ -134,7 +134,7 @@ class ForecastViewModel(
                 // A failed request keeps the list it had.
                 if (fetched.isNotEmpty()) stations = fetched
                 val known = stations.map { it.stationId }.toSet()
-                val missing = this@ForecastViewModel.favouriteStationIds.filter { it !in known }
+                val missing = favouriteIds.filter { it !in known }
                 savedFavourites = if (missing.isEmpty()) {
                     emptyMap()
                 } else {
@@ -181,7 +181,7 @@ class ForecastViewModel(
     /** The favourite stations, in favourites order, as far as they are known. */
     private fun favourites(): List<Pollutant> {
         val byId = stations.associateBy { it.stationId }
-        return favouriteStationIds.mapNotNull { byId[it] ?: savedFavourites[it] }
+        return favouriteIds.mapNotNull { byId[it] ?: savedFavourites[it] }
     }
 
     companion object {
