@@ -7,6 +7,11 @@
     <!-- The map's blue dot, "my location" and the nearest-first station list (FOX-54). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Share card "Save to Photos" (FOX-94): only Android 8–9 need it, asked for at the tap.
+         Android 10+ adds the photo through MediaStore with no permission. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:name=".TwaqiApplication"
@@ -73,6 +78,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Share card (FOX-94): the card PNG in the cache, shared as a content:// URI. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_card_paths" />
+        </provider>
 
         <!-- Feedback form opened outside Help, e.g. from a station's page (FOX-60, FeedbackNavigation). -->
         <activity
