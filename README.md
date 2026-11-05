@@ -61,7 +61,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 | Station webcams | R2 bucket `twaqi-station-cams` behind the webcam host (its custom domain), synced every 10 min by `workers/twaqi-workers` |
 | Weather on the station page (FOX-11) | Central Weather Administration (CWA) open data (`F-C0032-001` county forecast, `O-A0003-001` observations), written hourly by [`workers/twaqi-workers`](workers/twaqi-workers/README.md#cwa-weather-fox-11) to `weather/latest.json` in the same bucket, read from the webcam host. The CWA key stays in the Worker |
 | Push alerts | Firebase Cloud Messaging, settings in Directus (see below) |
-| Crash reporting / analytics | Firebase Crashlytics + Analytics (Swift Package Manager), Bugsnag, Sentry |
+| Crash reporting / analytics | Firebase Crashlytics + Analytics only (Swift Package Manager) |
 | Website, privacy policy, terms | `web/` on Firebase Hosting at `https://taiwanair.wahthefox.com` (site `taiwanair-wahthefox`); `kf-twaqi.web.app` 301s there. Cutover runbook: [`docs/web-hosting.md`](docs/web-hosting.md) |
 
 ### Station webcams
