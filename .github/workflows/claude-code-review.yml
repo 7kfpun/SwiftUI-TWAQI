@@ -3,7 +3,7 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [master]
+    branches: [master, feature/fox-52-android-project-setup]
 
 # Draftness is part of the key, as in ci.yml: a stale draft run must not cancel
 # the run that "Ready for review" starts (FOX-38).
@@ -16,7 +16,7 @@ jobs:
     if: >-
       github.event.pull_request.draft == false &&
       startsWith(github.head_ref, 'feature/') &&
-      github.base_ref == 'master'
+      (github.base_ref == 'master' || github.base_ref == 'feature/fox-52-android-project-setup')
     runs-on: ubuntu-latest
     permissions:
       contents: read

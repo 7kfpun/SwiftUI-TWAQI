@@ -7,6 +7,17 @@ Decisions: FOX-51. Setup: FOX-52. Features follow from FOX-53.
 The iOS app is in [`../ios`](../ios). Shared parts stay at the repository root:
 `workers/`, `services/`, `web/`, `docs/`, `tools/`, `assets/` and `.github/` (FOX-89).
 
+## Branches: the Android integration branch
+
+Until PR #77 merges to master, `feature/fox-52-android-project-setup` is the Android
+integration branch. Branch each Android ticket (`feature/fox-nn-*`) off it and open the PR
+**against it**, not master: `gh pr create --base feature/fox-52-android-project-setup`.
+The coordinator merges those PRs in; #77 then takes everything to master. The Android
+check, the Claude review, PR policy, Secret files, Public text and the LGTM gate run on
+PRs into it as on master. One gap until the gate change reaches master: an LGTM written as
+a PR *comment* runs master's gate, which skips this base, so the `LGTM` status updates only
+on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it at once.
+
 ## Toolchain
 
 JDK 17 and the Android command-line tools (Homebrew), with platform 36 and build-tools:
