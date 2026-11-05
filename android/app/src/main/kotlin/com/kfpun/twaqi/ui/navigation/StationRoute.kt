@@ -17,6 +17,7 @@ import com.kfpun.twaqi.ui.station.StationPageSlots
 import com.kfpun.twaqi.ui.station.StationScreen
 import com.kfpun.twaqi.ui.station.cam.StationCamSection
 import com.kfpun.twaqi.ui.station.forecast.StationForecastSection
+import com.kfpun.twaqi.ui.station.share.ShareCardButton
 import com.kfpun.twaqi.ui.station.weather.StationWeatherSection
 
 /**
@@ -30,7 +31,8 @@ data class StationRoute(val stationId: Int)
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
  * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60); its
  * alerts slot holds the station's alert switches (FOX-57), its cam slot the station cam (FOX-92),
- * its weather slot the CWA weather card (FOX-93) and its forecast slot the zone forecast (FOX-90).
+ * its weather slot the CWA weather card (FOX-93), its forecast slot the zone forecast (FOX-90)
+ * and its share button the share card (FOX-94).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -48,6 +50,8 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
             modifier = modifier,
             onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) },
             slots = StationPageSlots(
+                // FOX-94: the share card preview, opened from the top bar.
+                share = { ShareCardButton(it) },
                 // FOX-57: the alert switches, or why they can't be shown yet.
                 alerts = { state, retry ->
                     if (state.stationLoadFailed) AlertsUnavailableCard(retry) else StationAlertsCard(route.stationId)
