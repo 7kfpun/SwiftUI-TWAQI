@@ -5,9 +5,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.kfpun.twaqi.feedback.FeedbackNavigation
+import com.kfpun.twaqi.feedback.FeedbackSource
 import com.kfpun.twaqi.ui.station.StationScreen
 
 /**
@@ -19,7 +22,7 @@ data class StationRoute(val stationId: Int)
 /**
  * The station page (FOX-55) for [route], with its own view model each time it opens, cleared on
  * back, as iOS builds a new `DetailsViewModel` per push: a page opened again reloads rather than
- * showing what it held last time.
+ * showing what it held last time. Its "Send feedback" link opens the feedback form (FOX-60).
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -29,7 +32,13 @@ fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifi
         }
     }
     DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
+    val context = LocalContext.current
     CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
-        StationScreen(stationId = route.stationId, onBack = onBack, modifier = modifier)
+        StationScreen(
+            stationId = route.stationId,
+            onBack = onBack,
+            modifier = modifier,
+            onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) }
+        )
     }
 }
