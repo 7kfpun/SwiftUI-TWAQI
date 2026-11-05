@@ -33,6 +33,14 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
 - **Backup:** `allowBackup` is on so favourites and settings follow the user to a new phone.
   Exclude device secrets (e.g. the push device secret) and caches in
   `res/xml/backup_rules.xml` and `data_extraction_rules.xml` when they are added.
+- **Strings** (FOX-56): `values/strings.xml` (en) and `values-zh-rTW/strings.xml` (zh-Hant)
+  are ported from the iOS `Localizable.strings`; names are the iOS keys in snake_case
+  (`Help.language` → `help_language`). Add every new string to both files
+  (`StringResourcesTest` fails otherwise).
+- **App language** (FOX-56): `AppLocale` holds the in-app choice (Help › Language). Code that
+  runs without an activity (widgets, notifications, workers) must get its text from
+  `AppLocale.localizedContext(context)`, or it shows the phone's language below Android 13
+  (the iOS widget bug FOX-42).
 - **Pro** (FOX-58) has one source: `ProGraph.repository(context)` (`isPro`, `entitlement`),
   re-read from Play Billing on every start and cached in DataStore (left out of backups).
   Widgets, the alert limit and ads read it; never keep a separate Pro flag. The Play products

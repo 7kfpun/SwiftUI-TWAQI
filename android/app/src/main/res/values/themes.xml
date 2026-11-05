@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window theme only; the UI theme is TWAQITheme in Compose. -->
-    <style name="Theme.TWAQI" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.TWAQI" parent="Theme.AppCompat.Light.NoActionBar" />
 </resources>

@@ -2,11 +2,15 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="root" path="cache" />
+        <!-- Offline caches (FOX-53): refetched, and purged after a week. -->
+        <exclude domain="file" path="offline-cache" />
         <!-- Pro is re-read from Google Play (FOX-58). -->
         <exclude domain="file" path="datastore/pro.preferences_pb" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="root" path="cache" />
+        <!-- Offline caches (FOX-53): refetched, and purged after a week. -->
+        <exclude domain="file" path="offline-cache" />
         <exclude domain="file" path="datastore/pro.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>

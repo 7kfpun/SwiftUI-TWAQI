@@ -1,23 +1,30 @@
 package com.kfpun.twaqi
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -28,19 +35,31 @@ import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.ProActivity
 import com.kfpun.twaqi.pro.ProGraph
 import com.kfpun.twaqi.pro.ProSettingsRow
+import com.kfpun.twaqi.ui.debug.DataDebugScreen
+import com.kfpun.twaqi.ui.settings.LanguageSection
 import com.kfpun.twaqi.ui.theme.TWAQITheme
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+// AppCompatActivity, so AppCompatDelegate.setApplicationLocales applies the app language
+// below Android 13 (FOX-56).
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startPro()
         setContent {
             TWAQITheme {
-                HomeScreen()
+                // Debug builds can open the data-layer check screen (FOX-53) until the real
+                // screens land; back returns home.
+                var showDataScreen by rememberSaveable { mutableStateOf(false) }
+                if (showDataScreen) {
+                    BackHandler { showDataScreen = false }
+                    DataDebugScreen()
+                } else {
+                    HomeScreen(onOpenDataScreen = if (BuildConfig.DEBUG) ({ showDataScreen = true }) else null)
+                }
             }
         }
     }
@@ -65,24 +84,34 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Placeholder home screen; the map, list and details come with FOX-53 and later.
- * The Pro row and banner sit here until Help / settings and the real screens exist.
+ * Placeholder home screen; the map, list and details come with the later Android tickets. The
+ * language picker and the Pro row sit here until the Help screen exists, and the banner until
+ * the real screens do. [onOpenDataScreen] (debug builds only) adds a button to the data-layer
+ * check screen.
  */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier, onOpenDataScreen: (() -> Unit)? = null) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = { AdBanner(AdPlacement.MAIN, modifier = Modifier.navigationBarsPadding()) }
     ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            LanguageSection(Modifier.fillMaxWidth().padding(top = 24.dp))
+            ProSettingsRow(Modifier.padding(top = 8.dp))
+            if (onOpenDataScreen != null) {
+                OutlinedButton(onClick = onOpenDataScreen, modifier = Modifier.padding(top = 24.dp)) {
+                    Text(stringResource(R.string.debug_data_title))
+                }
             }
-            ProSettingsRow()
         }
     }
 }

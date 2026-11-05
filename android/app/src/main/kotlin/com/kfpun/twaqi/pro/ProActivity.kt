@@ -1,9 +1,9 @@
 package com.kfpun.twaqi.pro
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,9 +18,10 @@ import kotlinx.coroutines.launch
 
 /**
  * The Pro screen, over whatever opened it (iOS presents `ProView` as a sheet).
- * Open it with [ProNavigation]; `twaqi://pro?source=…` opens it too.
+ * Open it with [ProNavigation]; `twaqi://pro?source=…` opens it too. AppCompatActivity, so
+ * the in-app language applies below Android 13 (FOX-56).
  */
-class ProActivity : ComponentActivity() {
+class ProActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

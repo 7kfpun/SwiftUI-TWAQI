@@ -106,6 +106,11 @@ metadata rule.
 
 ## Apply (after the FOX-38 PR is merged)
 
+> **Before PUTting the whole file:** it lists `Android`, so applying it before the FOX-52
+> PR is merged blocks every other PR (see [Android check](#android-check-fox-52)). It also
+> replaces the live required checks, which may differ (the live ruleset also requires
+> `Public text`). For a single check, edit the live ruleset as in that section instead.
+
 ```sh
 # 1. Save the current ruleset, for rollback.
 gh api repos/7kfpun/SwiftUI-TWAQI/rulesets/25890340 > /tmp/master-ruleset.before.json

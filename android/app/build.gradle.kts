@@ -124,6 +124,14 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 
+    // The in-app language picker (FOX-56) switches to a language the phone may not use, so
+    // the bundle keeps every language in the base APK instead of splitting them by locale.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     lint {
         abortOnError = true
         checkReleaseBuilds = true
@@ -157,6 +165,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -169,11 +178,20 @@ dependencies {
     implementation(libs.play.services.ads)
     implementation(libs.google.ump)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Data layer (FOX-53): OkHttp for the AQI API and Directus, kotlinx.serialization's JSON tree
+    // for tolerant parsing (no compiler plugin), coroutines for the repositories.
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -7,6 +7,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 
 /** Firebase Analytics events, named as on iOS (`AnalyticsEvent.swift`). */
 object Analytics {
+    /** `label`: the language id (`system`, `zh-Hant`, `en`). */
+    const val SELECT_LANGUAGE = "select_language"
+
     // Pro upsell funnel (FOX-58): pro_screen_opened → pro_plan_selected →
     // user_premium_buy_product_done, each with `source`.
 
