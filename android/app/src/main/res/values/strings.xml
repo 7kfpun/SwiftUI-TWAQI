@@ -479,4 +479,8 @@
     <string name="onboarding_pro_trial_years">%d-year free trial</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">Data layer</string>
+    <string name="debug_data_counts">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>
 </resources>

@@ -479,4 +479,8 @@
     <string name="onboarding_pro_trial_years">免費試用 %d 年</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">資料層</string>
+    <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>
 </resources>
