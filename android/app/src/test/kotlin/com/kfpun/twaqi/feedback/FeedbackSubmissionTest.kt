@@ -115,11 +115,11 @@ class FeedbackSubmissionTest {
     fun thankYouSaysWeMayReplyOnlyWithoutTheStoreOffer() {
         assertEquals(
             R.string.feedback_sent_message_may_reply,
-            FeedbackSubmission.thankYouMessage(offersStoreReview = false, email = "a@b.co")
+            FeedbackSubmission.thankYouMessage(offersStoreReview = false, email = "me@example.com")
         )
         assertEquals(
             R.string.feedback_sent_message,
-            FeedbackSubmission.thankYouMessage(offersStoreReview = true, email = "a@b.co")
+            FeedbackSubmission.thankYouMessage(offersStoreReview = true, email = "me@example.com")
         )
         assertEquals(
             R.string.feedback_sent_message,
