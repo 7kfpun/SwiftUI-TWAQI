@@ -36,7 +36,8 @@ class StationCamFrameLoader<T>(private val source: CamFrameSource<T>, private va
     private val mutableState = MutableStateFlow(CamFrameState<T>())
     val state: StateFlow<CamFrameState<T>> = mutableState.asStateFlow()
 
-    private var cam: StationCam? = null
+    /** The cam last asked for; an answer for any other is dropped. */
+    private var currentCam: StationCam? = null
 
     /**
      * Shows [cam]'s saved frame, then fetches its latest. Called on every appearance: the same cam
@@ -44,9 +45,9 @@ class StationCamFrameLoader<T>(private val source: CamFrameSource<T>, private va
      */
     fun load(cam: StationCam) {
         val current = mutableState.value
-        if (cam == this.cam && (current.isRefreshing || !current.refreshFailed)) return
-        val sameSite = cam.siteId == this.cam?.siteId
-        this.cam = cam
+        if (cam == currentCam && (current.isRefreshing || !current.refreshFailed)) return
+        val sameSite = cam.siteId == currentCam?.siteId
+        currentCam = cam
         mutableState.value = current.copy(
             image = if (sameSite) current.image else null,
             imageTime = if (sameSite) current.imageTime else null,
@@ -56,7 +57,7 @@ class StationCamFrameLoader<T>(private val source: CamFrameSource<T>, private va
 
         scope.launch {
             val saved = source.savedFrame(cam.siteId)
-            if (this@StationCamFrameLoader.cam != cam) return@launch
+            if (currentCam != cam) return@launch
             if (mutableState.value.image == null && saved != null) {
                 mutableState.value = mutableState.value.copy(image = saved.image, imageTime = saved.time)
             }
@@ -68,7 +69,7 @@ class StationCamFrameLoader<T>(private val source: CamFrameSource<T>, private va
             }
 
             val fresh = source.fetch(cam)
-            if (this@StationCamFrameLoader.cam != cam) return@launch
+            if (currentCam != cam) return@launch
             mutableState.value = if (fresh != null) {
                 mutableState.value.copy(image = fresh.image, imageTime = fresh.time, isRefreshing = false)
             } else {
