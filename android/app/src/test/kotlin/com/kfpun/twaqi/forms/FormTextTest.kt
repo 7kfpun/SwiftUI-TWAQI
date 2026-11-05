@@ -25,7 +25,8 @@ class FormTextTest {
         assertFalse(FormText.isValidEmail("me@@example.com"))
         assertFalse(FormText.isValidEmail("m e@example.com"))
         assertFalse(FormText.isValidEmail("@example.com"))
-        assertFalse(FormText.isValidEmail("me@.example.com"))
+        // A domain that starts with a dot.
+        assertFalse(FormText.isValidEmail("me@" + ".example.com"))
         assertFalse(FormText.isValidEmail("me@example.com."))
     }
 
