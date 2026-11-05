@@ -19,7 +19,7 @@ data class Country(
     val hasValidLocation: Boolean get() = !(lat == 0.0 && lon == 0.0)
 
     /** Never blank: falls back through the other language, then the code. */
-    fun displayName(chinese: Boolean = AppLocale.isChinese()): String {
+    fun displayName(chinese: Boolean): String {
         val preferred = if (chinese) nameLocal else name
         if (preferred.isNotEmpty()) return preferred
         val alternate = if (chinese) name else nameLocal

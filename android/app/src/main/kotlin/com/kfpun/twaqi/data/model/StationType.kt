@@ -8,12 +8,12 @@ import com.kfpun.twaqi.R
  * [UNKNOWN] is a normal case, not an error.
  */
 enum class StationType(val apiValue: String, @param:StringRes val label: Int?) {
-    GENERAL("GENERAL", R.string.station_type_general),
-    TRAFFIC("TRAFFIC", R.string.station_type_traffic),
-    INDUSTRIAL("INDUSTRIAL", R.string.station_type_industrial),
-    BACKGROUND("BACKGROUND", R.string.station_type_background),
-    NATIONAL_PARK("NATIONAL-park", R.string.station_type_national_park),
-    OTHER("OTHER", R.string.station_type_other),
+    GENERAL("GENERAL", R.string.stationtype_general),
+    TRAFFIC("TRAFFIC", R.string.stationtype_traffic),
+    INDUSTRIAL("INDUSTRIAL", R.string.stationtype_industrial),
+    BACKGROUND("BACKGROUND", R.string.stationtype_background),
+    NATIONAL_PARK("NATIONAL-park", R.string.stationtype_national_park),
+    OTHER("OTHER", R.string.stationtype_other),
     UNKNOWN("", null)
     ;
 

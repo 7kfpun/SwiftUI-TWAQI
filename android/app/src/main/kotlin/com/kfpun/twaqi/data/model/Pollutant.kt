@@ -48,14 +48,13 @@ data class Pollutant(
 
     val publishedAt: Instant? get() = TaiwanTime.parsePublishTime(publishTime)
 
-    fun displayName(chinese: Boolean = AppLocale.isChinese()): String =
+    fun displayName(chinese: Boolean): String =
         StationText.displayName(if (chinese) nameLocal else name, code, stationId)
 
-    fun displayLocality(chinese: Boolean = AppLocale.isChinese(), translate: (String) -> String = { it }): String? =
+    fun displayLocality(chinese: Boolean, translate: (String) -> String = { it }): String? =
         StationText.locality(township?.let(translate), if (chinese) countyLocal else county)
 
-    fun displayArea(chinese: Boolean = AppLocale.isChinese()): String? =
-        (if (chinese) areaLocal else area)?.takeIf { it.isNotEmpty() }
+    fun displayArea(chinese: Boolean): String? = (if (chinese) areaLocal else area)?.takeIf { it.isNotEmpty() }
 
     /** `"25.129167, 121.760056"` */
     val coordinateText: String get() = String.format(java.util.Locale.US, "%.6f, %.6f", lat, lon)

@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,8 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
 import com.kfpun.twaqi.data.model.AirIndexType
-import com.kfpun.twaqi.data.model.AppLocale
 import com.kfpun.twaqi.data.model.Pollutant
+import com.kfpun.twaqi.locale.AppLocale
 import java.time.Instant
 
 /**
@@ -116,7 +117,7 @@ private fun StatusLine(state: DataDebugUiState) {
 
 @Composable
 private fun PollutantRow(pollutant: Pollutant) {
-    val chinese = AppLocale.isChinese()
+    val chinese = AppLocale.isChinese(LocalContext.current)
     val status = pollutant.status()
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),

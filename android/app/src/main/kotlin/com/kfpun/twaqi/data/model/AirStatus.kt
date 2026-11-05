@@ -19,53 +19,53 @@ enum class AirStatus(
         "good",
         0x009866,
         WHITE,
-        R.string.air_status_good,
-        R.string.air_status_general_public_guidance_good,
-        R.string.air_status_sensitive_group_guidance_good
+        R.string.airstatus_good,
+        R.string.airstatus_general_public_guidance_good,
+        R.string.airstatus_sensitive_group_guidance_good
     ),
     MODERATE(
         "moderate",
         0xFEDE33,
         BLACK,
-        R.string.air_status_moderate,
-        R.string.air_status_general_public_guidance_moderate,
-        R.string.air_status_sensitive_group_guidance_moderate
+        R.string.airstatus_moderate,
+        R.string.airstatus_general_public_guidance_moderate,
+        R.string.airstatus_sensitive_group_guidance_moderate
     ),
     UNHEALTHY_FOR_SENSITIVE_GROUP(
         "unhealthyforsensitivegroup",
         0xFE9833,
         BLACK,
-        R.string.air_status_unhealthyforsensitivegroup,
-        R.string.air_status_general_public_guidance_unhealthyforsensitivegroup,
-        R.string.air_status_sensitive_group_guidance_unhealthyforsensitivegroup
+        R.string.airstatus_unhealthyforsensitivegroup,
+        R.string.airstatus_general_public_guidance_unhealthyforsensitivegroup,
+        R.string.airstatus_sensitive_group_guidance_unhealthyforsensitivegroup
     ),
     UNHEALTHY(
         "unhealthy",
         0xCC0033,
         WHITE,
-        R.string.air_status_unhealthy,
-        R.string.air_status_general_public_guidance_unhealthy,
-        R.string.air_status_sensitive_group_guidance_unhealthy
+        R.string.airstatus_unhealthy,
+        R.string.airstatus_general_public_guidance_unhealthy,
+        R.string.airstatus_sensitive_group_guidance_unhealthy
     ),
     VERY_UNHEALTHY(
         "veryunhealthy",
         0x660098,
         WHITE,
-        R.string.air_status_veryunhealthy,
-        R.string.air_status_general_public_guidance_veryunhealthy,
-        R.string.air_status_sensitive_group_guidance_veryunhealthy
+        R.string.airstatus_veryunhealthy,
+        R.string.airstatus_general_public_guidance_veryunhealthy,
+        R.string.airstatus_sensitive_group_guidance_veryunhealthy
     ),
     HAZARDOUS(
         "hazardous",
         0x7E2200,
         WHITE,
-        R.string.air_status_hazardous,
-        R.string.air_status_general_public_guidance_hazardous,
-        R.string.air_status_sensitive_group_guidance_hazardous
+        R.string.airstatus_hazardous,
+        R.string.airstatus_general_public_guidance_hazardous,
+        R.string.airstatus_sensitive_group_guidance_hazardous
     ),
 
     /** No reading (0, negative, or outside every band). Grey, and no face image. */
-    UNKNOWN("unknown", 0x676767, WHITE, R.string.air_status_unknown, null, null)
+    UNKNOWN("unknown", 0x676767, WHITE, R.string.airstatus_unknown, null, null)
     ;
 
     /** Drawable name of the face, `status_good`; there is none for [UNKNOWN]. */

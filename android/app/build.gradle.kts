@@ -110,6 +110,14 @@ android {
         buildConfig = true
     }
 
+    // The in-app language picker (FOX-56) switches to a language the phone may not use, so
+    // the bundle keeps every language in the base APK instead of splitting them by locale.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     lint {
         abortOnError = true
         checkReleaseBuilds = true
@@ -143,6 +151,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

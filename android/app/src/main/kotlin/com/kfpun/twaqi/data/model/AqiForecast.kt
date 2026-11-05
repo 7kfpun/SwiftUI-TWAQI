@@ -36,7 +36,7 @@ data class AqiForecast(
     }
 
     /** MOENV's Chinese name in Chinese, the usual symbol otherwise; null when none is named. */
-    fun displayMajorPollutant(chinese: Boolean = AppLocale.isChinese()): String? =
+    fun displayMajorPollutant(chinese: Boolean): String? =
         majorPollutant?.let { AqiForecastPollutant.display(it, chinese) }
 
     companion object {
