@@ -6,6 +6,9 @@
         <exclude domain="file" path="offline-cache" />
         <!-- Pro is re-read from Google Play (FOX-58). -->
         <exclude domain="file" path="datastore/pro.preferences_pb" />
+        <!-- Push (FOX-57): the device identity and sync state stay on this install. -->
+        <exclude domain="sharedpref" path="push_identity.xml" />
+        <exclude domain="sharedpref" path="push_sync.xml" />
         <!-- Per-install: the analytics opt-out and the feedback's anonymous id (FOX-60). -->
         <exclude domain="sharedpref" path="install.xml" />
     </cloud-backup>
@@ -14,6 +17,8 @@
         <!-- Offline caches (FOX-53): refetched, and purged after a week. -->
         <exclude domain="file" path="offline-cache" />
         <exclude domain="file" path="datastore/pro.preferences_pb" />
+        <exclude domain="sharedpref" path="push_identity.xml" />
+        <exclude domain="sharedpref" path="push_sync.xml" />
         <exclude domain="sharedpref" path="install.xml" />
     </device-transfer>
 </data-extraction-rules>

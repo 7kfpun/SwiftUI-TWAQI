@@ -515,6 +515,13 @@
     <string name="debug_data_title">Data layer</string>
     <string name="debug_data_counts">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>
 
+    <!-- Android only (FOX-57): the alerts' notification channel, and an alert's text when the sender
+         sends none (same wording as the push Worker's message.ts). -->
+    <string name="push_channel_alerts_name">Air quality alerts</string>
+    <string name="push_channel_alerts_description">Alerts when the AQI at a station you follow crosses the level you set.</string>
+    <string name="push_alert_title">%1$s: AQI %2$d</string>
+    <string name="push_alert_above_body">Air quality is now above your alert level of %d.</string>
+    <string name="push_alert_below_body">Air quality is now below your alert level of %d. The air has cleared up.</string>
     <!-- Android only (FOX-55): the Favourites edit mode and the station page's controls. iOS uses system buttons. -->
     <string name="favourites_edit">Edit</string>
     <string name="favourites_done">Done</string>

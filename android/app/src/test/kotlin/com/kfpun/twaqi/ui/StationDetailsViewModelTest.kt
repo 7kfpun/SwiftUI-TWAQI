@@ -3,6 +3,7 @@ package com.kfpun.twaqi.ui
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.FavouritesRepositoryTest.FakeAlerts
 import com.kfpun.twaqi.data.FavouritesRepositoryTest.MemoryStore
+import com.kfpun.twaqi.data.favourites.FavouriteAlertsHint
 import com.kfpun.twaqi.data.favourites.FavouritesRepository
 import com.kfpun.twaqi.data.model.HistoricalPollutant
 import com.kfpun.twaqi.data.model.Pollutant
@@ -220,6 +221,32 @@ class StationDetailsViewModelTest {
         vm.removeFromFavourites()
         assertTrue(favourites.favourites.value.isEmpty())
         assertEquals(listOf(91), alerts.cleared)
+    }
+
+    @Test
+    fun aNewFavouriteSwitchesItsAlertsOn() {
+        // iOS FOX-31: favouriting from the station page turns its alerts on.
+        val alerts = FakeAlerts()
+        val favourites = FavouritesRepository(MemoryStore(emptyList()), alerts)
+        val vm = model(FakeSource(current = fresh(pollutant(54.0))), favourites)
+        vm.toggleFavourite()
+        assertEquals(listOf(91), alerts.enabled)
+        assertNull(vm.uiState.value.favouriteAlertsHint)
+    }
+
+    @Test
+    fun aNewFavouriteWhoseAlertsStayOffSaysWhy() {
+        for (hint in FavouriteAlertsHint.entries) {
+            val alerts = FakeAlerts().apply { this.hint = hint }
+            val favourites = FavouritesRepository(MemoryStore(emptyList()), alerts)
+            val vm = model(FakeSource(current = fresh(pollutant(54.0))), favourites)
+            vm.toggleFavourite()
+            // The favourite stands either way.
+            assertEquals(listOf(91), favourites.favourites.value)
+            assertEquals(hint, vm.uiState.value.favouriteAlertsHint)
+            vm.dismissFavouriteAlertsHint()
+            assertNull(vm.uiState.value.favouriteAlertsHint)
+        }
     }
 
     @Test

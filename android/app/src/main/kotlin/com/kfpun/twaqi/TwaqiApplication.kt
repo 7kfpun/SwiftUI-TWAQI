@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.data.AppContainer
+import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.settings.AppAppearanceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,8 @@ class TwaqiApplication : Application() {
         // Before anything is logged: debug builds and opted-out installs don't report (FOX-60).
         TrackingManager.get(this).applyAtLaunch()
         container = AppContainer(this)
+        // Push alerts (FOX-57): the channel in the app language, before any alert arrives.
+        AlertNotifications.ensureChannel(this)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {
             val removed = container.purgeExpiredCaches()
