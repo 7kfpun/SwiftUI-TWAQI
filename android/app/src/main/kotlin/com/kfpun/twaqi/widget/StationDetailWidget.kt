@@ -20,6 +20,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
@@ -57,16 +58,21 @@ class StationDetailWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val source = WidgetDataSource(context)
+        // Loaded before the first frame, so the widget never draws empty while it reads the caches.
+        val initial = source.snapshot(
+            WidgetStateKeys.config(getAppWidgetState<Preferences>(context, id)),
+            includeHistory = true
+        )
         provideContent {
             val prefs = currentState<Preferences>()
             val config = WidgetStateKeys.config(prefs)
             val version = prefs[WidgetStateKeys.VERSION] ?: 0L
-            var snapshot by remember { mutableStateOf<WidgetSnapshot?>(null) }
+            var snapshot by remember { mutableStateOf(initial) }
             LaunchedEffect(config, version) { snapshot = source.snapshot(config, includeHistory = true) }
             val text = remember(version) { WidgetText.of(context) }
             val size = LocalSize.current
             GlanceTheme {
-                snapshot?.let { loaded ->
+                snapshot.let { loaded ->
                     val entry = WidgetEntry.make(
                         family = WidgetFamily.STATION_DETAIL,
                         leading = loaded.leading,

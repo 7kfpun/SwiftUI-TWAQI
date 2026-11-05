@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.res.Configuration
 import android.util.Log
 import com.kfpun.twaqi.data.AppContainer
-import com.kfpun.twaqi.pro.ProGraph
 import com.kfpun.twaqi.settings.AppAppearanceStore
 import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -23,8 +22,8 @@ class TwaqiApplication : Application() {
         // Help › Appearance (FOX-97), before any activity (the Pro screen can be the first one).
         AppAppearanceStore.applyStored(this)
         container = AppContainer(this)
-        // FOX-59: widgets redraw when favourites or Pro change, and refresh while any is placed.
-        WidgetUpdater.observe(this, container.favourites.favourites, ProGraph.repository(this).isPro)
+        // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
+        WidgetUpdater.observeFavourites(this, container.favourites.favourites)
         // iOS purges at launch too (OfflineCacheRetention.purgeInBackground).
         scope.launch {
             val removed = container.purgeExpiredCaches()

@@ -63,14 +63,22 @@ object WidgetUpdater {
     }
 
     /**
-     * Keeps the widgets in step with the app while its process runs (iOS `WidgetBridge.publish`):
-     * favourites and Pro redraw every widget, and the refresh schedule is checked once.
+     * Keeps the widgets in step with the favourites while the app's process runs (iOS
+     * `WidgetBridge.publish(favouriteStationIds:)`), and checks the refresh schedule once.
      */
-    fun observe(context: Context, favourites: Flow<List<Int>>, isPro: Flow<Boolean>) {
+    fun observeFavourites(context: Context, favourites: Flow<List<Int>>) {
         val app = context.applicationContext
         scope.launch { syncSchedule(app) }
         // The first value is what the widgets already show.
         scope.launch { favourites.drop(1).collect { redrawAll(app) } }
+    }
+
+    /**
+     * Buying Pro, or Play turning it off, redraws every widget (iOS `WidgetBridge.publish(isPro:)`).
+     * Called once by [com.kfpun.twaqi.pro.ProGraph] when it creates the repository.
+     */
+    fun observePro(context: Context, isPro: Flow<Boolean>) {
+        val app = context.applicationContext
         scope.launch { isPro.drop(1).collect { redrawAll(app) } }
     }
 
