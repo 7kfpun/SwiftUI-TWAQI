@@ -75,11 +75,11 @@
 "DataSources.cams_title" = "測站即時影像";
 "DataSources.cams_detail" = "環境部監測站的即時影像，每 10 分鐘更新一張，並保留過去 24 小時、每小時一張。";
 "DataSources.weather_title" = "天氣";
-"DataSources.weather_detail" = "中央氣象署開放資料：各縣市未來 36 小時天氣預報，以及最近的局屬氣象站觀測，每小時更新。";
+"DataSources.weather_detail" = "中央氣象署開放資料：各縣市未來 36 小時天氣預報，約每 6 小時發布；以及最近的局屬氣象站觀測，每 10 分鐘更新。";
 "DataSources.map_title" = "地圖";
 "DataSources.map_detail" = "Google 地圖。";
 "DataSources.licence_title" = "政府資料開放授權條款－第1版";
-"DataSources.footer" = "環境部與中央氣象署的資料依「政府資料開放授權條款－第1版」使用。Taiwan Air 是獨立開發的 App，並非政府經營。";
+"DataSources.footer" = "環境部與中央氣象署的資料依「政府資料開放授權條款－第1版」進行公眾釋出，使用者於遵守本條款各項規定之前提下，得利用之。Taiwan Air 是獨立開發的 App，並非政府經營。";
 "Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
 "Feedback.title" = "意見回饋";
