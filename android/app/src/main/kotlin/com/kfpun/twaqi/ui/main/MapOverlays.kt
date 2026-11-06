@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -75,7 +75,8 @@ fun ValuePill(type: AirIndexType, value: Double, modifier: Modifier = Modifier) 
     Box(
         modifier = modifier
             .widthIn(min = 56.dp)
-            .height(24.dp)
+            // Grows with the font scale rather than clipping the text (FOX-112).
+            .heightIn(min = 24.dp)
             .clip(RoundedCornerShape(6.dp))
             .background(rgb(status.color))
             .padding(horizontal = 6.dp),
@@ -117,7 +118,9 @@ fun ClosestStationCard(
     Surface(
         modifier = modifier
             .width(CardWidth)
-            .height(96.dp)
+            // iOS's 96 pt at the default font size; taller when its lines need it (FOX-112), so the
+            // last line ("Last updated 11:00", the timeline's hour) is never cut off.
+            .heightIn(min = 96.dp)
             .let { if (onClick != null) it.clickable(role = Role.Button, onClick = onClick) else it },
         shape = RoundedCornerShape(10.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -125,7 +128,7 @@ fun ClosestStationCard(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(
-                modifier = Modifier.weight(1f).padding(start = 12.dp, end = 4.dp),
+                modifier = Modifier.weight(1f).padding(start = 12.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
@@ -160,7 +163,10 @@ fun ClosestStationCard(
             }
             Column(
                 // At least iOS's 72 dp; a longer reading ("PM2.5 21") takes what it needs.
-                modifier = Modifier.widthIn(min = 72.dp).fillMaxHeight().padding(top = 12.dp, end = 8.dp),
+                modifier = Modifier
+                    .widthIn(min = 72.dp)
+                    .align(Alignment.Top)
+                    .padding(top = 12.dp, end = 8.dp, bottom = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ValuePill(type, value)
@@ -324,3 +330,24 @@ fun WindModeButton(isWindMode: Boolean, onToggle: () -> Unit, modifier: Modifier
 /** iOS `maxLength`: cuts at [length] characters and adds "...". */
 internal fun maxLength(text: String, length: Int): String =
     if (text.length >= length) text.take(length) + "..." else text
+
+/**
+ * Where the wind button goes (FOX-112). It sits bottom left above the index bar, as on iOS, unless
+ * that would put it over the closest-station card or the level legend, which happens in landscape
+ * and at large font sizes: then it moves to the right, beside the location buttons, where there is
+ * room across the width.
+ */
+object MapButtonsLayout {
+    /**
+     * @param overlayBottom bottom of the card and legend, in px in window coordinates; 0 before
+     *   the first layout.
+     * @param buttonRowBottom bottom of the map buttons' row, in the same coordinates.
+     * @param buttonHeight the wind button's height; [gap] the space kept above it.
+     */
+    fun windBesideLocationButtons(
+        overlayBottom: Float,
+        buttonRowBottom: Float,
+        buttonHeight: Float,
+        gap: Float
+    ): Boolean = overlayBottom > 0f && buttonRowBottom > 0f && buttonRowBottom - buttonHeight - gap < overlayBottom
+}
