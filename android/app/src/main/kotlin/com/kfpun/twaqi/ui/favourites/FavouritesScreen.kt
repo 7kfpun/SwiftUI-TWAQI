@@ -3,7 +3,9 @@ package com.kfpun.twaqi.ui.favourites
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -81,6 +85,7 @@ fun FavouritesScreen(
         onRetry = viewModel::refresh,
         onRemove = { viewModel.requestRemove(listOf(it)) },
         onMove = viewModel::move,
+        onReorder = viewModel::reorder,
         onConfirmRemoval = viewModel::confirmRemoval,
         onCancelRemoval = viewModel::cancelRemoval,
         modifier = modifier
@@ -95,6 +100,7 @@ fun FavouritesContent(
     onRetry: () -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
+    onReorder: (stationIds: List<Int>) -> Unit,
     onConfirmRemoval: () -> Unit,
     onCancelRemoval: () -> Unit,
     modifier: Modifier = Modifier
@@ -133,7 +139,7 @@ fun FavouritesContent(
                     Modifier.align(Alignment.TopCenter).padding(top = 64.dp)
                 )
 
-                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove)
+                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, onReorder)
             }
         }
     }
@@ -172,7 +178,8 @@ private fun FavouriteList(
     editing: Boolean,
     onOpenStation: (Int) -> Unit,
     onRemove: (Int) -> Unit,
-    onMove: (Int, Int) -> Unit
+    onMove: (Int, Int) -> Unit,
+    onReorder: (List<Int>) -> Unit
 ) {
     val chinese = AppLocale.isChinese(LocalContext.current)
     val listState = rememberLazyListState()
@@ -183,7 +190,7 @@ private fun FavouriteList(
     val byId = state.pollutants.associateBy { it.stationId }
     val shown = drag.order?.mapNotNull { byId[it] } ?: state.pollutants
     val currentIds by rememberUpdatedState(savedIds)
-    val currentOnMove by rememberUpdatedState(onMove)
+    val currentOnReorder by rememberUpdatedState(onReorder)
 
     LazyColumn(Modifier.fillMaxSize(), state = listState) {
         if (state.isShowingLastGood) {
@@ -202,18 +209,33 @@ private fun FavouriteList(
                         }
                     )
                     .pointerInput(id) {
-                        detectDragGesturesAfterLongPress(
-                            onDragStart = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                drag.start(id, currentIds)
-                            },
-                            onDrag = { change, amount ->
-                                change.consume()
-                                drag.drag(amount.y)
-                            },
-                            onDragEnd = { drag.end()?.let { (from, to) -> currentOnMove(from, to) } },
-                            onDragCancel = drag::cancel
-                        )
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            // Null when the finger moved first: a scroll, or the row's swipe.
+                            val press = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            drag.start(id, currentIds)
+                            var dropped = false
+                            try {
+                                // The long press won: take the rest of the stroke on the Initial
+                                // pass, before the row's swipe and click see it, so a diagonal drag
+                                // can't turn into a removal and lifting the finger isn't a tap.
+                                while (true) {
+                                    val change = awaitPointerEvent(PointerEventPass.Initial)
+                                        .changes.firstOrNull { it.id == press.id } ?: break
+                                    val dy = change.positionChange().y
+                                    change.consume()
+                                    if (!change.pressed) {
+                                        dropped = true
+                                        break
+                                    }
+                                    drag.drag(dy)
+                                }
+                            } finally {
+                                // Saved by station id, so a refresh mid-drag can't move another row.
+                                if (dropped) drag.end()?.let(currentOnReorder) else drag.cancel()
+                            }
+                        }
                     }
             ) {
                 FavouriteItem(
@@ -225,7 +247,6 @@ private fun FavouriteList(
                     swipeEnabled = drag.draggedId == null,
                     canMoveUp = index > 0,
                     canMoveDown = index < shown.lastIndex,
-                    // A long press that never moved ends here too; it isn't a tap.
                     onOpen = { if (drag.draggedId == null) onOpenStation(id) },
                     onRemove = { onRemove(id) },
                     onMoveUp = { onMove(index, index - 1) },

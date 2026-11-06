@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** FOX-121: the order on screen while a favourite is dragged, and the one move saved on drop. */
+/** FOX-121: the order on screen while a favourite is dragged, and the one order saved on drop. */
 class FavouriteDragOrderTest {
     @Test
     fun aRowDraggedOverAnotherTakesItsPlace() {
@@ -28,7 +28,8 @@ class FavouriteDragOrderTest {
         // Held at the top, dragged past each row in turn.
         for (target in listOf(2, 3, 4)) order = FavouriteDragOrder.moveOnto(order, id = 1, target = target)
         assertEquals(listOf(2, 3, 4, 1), order)
-        assertEquals(0 to 3, FavouriteDragOrder.drop(before, order, id = 1))
+        // Saved as station ids, not indices, so a refresh mid-drag can't move another row.
+        assertEquals(listOf(2, 3, 4, 1), FavouriteDragOrder.drop(before, order, id = 1))
     }
 
     @Test

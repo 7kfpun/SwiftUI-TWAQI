@@ -145,8 +145,8 @@ class FavouritesViewModelTest {
         val w = WithAlerts(eagerScope(), listOf(1, 2, 3, 4), alerted = mapOf(3 to StationAlerts(above = 120)))
         val vm = model(FakeReadings(current = DataResult.Fresh((1..4).map(::p), Instant.EPOCH)), w.favourites)
 
-        // Held at the bottom and dragged to the top: one move on drop.
-        vm.move(3, 0)
+        // Held at the bottom and dragged to the top: one save on drop.
+        vm.reorder(listOf(4, 1, 2, 3))
 
         assertEquals(listOf(4, 1, 2, 3), vm.uiState.value.pollutants.map { it.stationId })
         assertEquals(listOf(4, 1, 2, 3), FavouritesRepository(w.store).favourites.value)
@@ -159,14 +159,57 @@ class FavouritesViewModelTest {
         val w = WithAlerts(eagerScope(), listOf(1, 2, 3), alerted)
         val vm = model(FakeReadings(current = DataResult.Fresh((1..3).map(::p), Instant.EPOCH)), w.favourites)
 
+        vm.reorder(listOf(2, 3, 1))
+        vm.reorder(listOf(2, 1, 3))
         vm.move(0, 2)
-        vm.move(2, 1)
 
-        assertEquals(listOf(2, 1, 3), w.favourites.favourites.value)
+        assertEquals(listOf(1, 3, 2), w.favourites.favourites.value)
         assertTrue(w.alertStore.writes.isEmpty())
         assertEquals(alerted, w.alertStore.alertedStations.value)
         assertEquals(setOf(1, 3), vm.uiState.value.alertedStationIds)
         assertTrue(w.logger.events.isEmpty())
+    }
+
+    @Test
+    fun aDropSavesTheDraggedStationsEvenWhenTheListRefreshedMidDrag() {
+        // Saved 1, 2, 3; only 1 and 3 have a cached reading, so the list opens as 1, 3.
+        val favourites = FavouritesRepository(MemoryStore(listOf(1, 2, 3)))
+        val readings = FakeReadings(saved = listOf(p(1), p(3)))
+        val vm = model(readings, favourites)
+        assertEquals(listOf(1, 3), vm.uiState.value.pollutants.map { it.stationId })
+
+        // 3 is held and dragged above 1; before the finger lifts, the request returns all three.
+        readings.current = DataResult.Fresh((1..3).map(::p), Instant.EPOCH)
+        vm.refresh()
+        assertEquals(listOf(1, 2, 3), vm.uiState.value.pollutants.map { it.stationId })
+        vm.reorder(listOf(3, 1))
+
+        // 3 moved, not 2, which wasn't on screen when the drag started and goes after the rest.
+        assertEquals(listOf(3, 1, 2), favourites.favourites.value)
+        assertEquals(listOf(3, 1, 2), vm.uiState.value.pollutants.map { it.stationId })
+        assertEquals(1, events.count { it.first == Analytics.FAVOURITE_STATION_REORDERED })
+    }
+
+    @Test
+    fun aDropOfAStationRemovedMidDragKeepsTheRest() {
+        val favourites = FavouritesRepository(MemoryStore(listOf(1, 2, 3)))
+        val vm = model(FakeReadings(current = DataResult.Fresh((1..3).map(::p), Instant.EPOCH)), favourites)
+
+        // 3 is held while 1 is removed elsewhere (e.g. its station page), then dropped on top.
+        favourites.remove(listOf(1))
+        vm.reorder(listOf(3, 1, 2))
+
+        assertEquals(listOf(3, 2), favourites.favourites.value)
+    }
+
+    @Test
+    fun aDropThatChangesNothingSavesNothing() {
+        val favourites = FavouritesRepository(MemoryStore(listOf(1, 2)))
+        val vm = model(FakeReadings(current = DataResult.Fresh(listOf(p(1), p(2)), Instant.EPOCH)), favourites)
+
+        vm.reorder(listOf(1, 2))
+
+        assertEquals(0, events.count { it.first == Analytics.FAVOURITE_STATION_REORDERED })
     }
 
     @Test

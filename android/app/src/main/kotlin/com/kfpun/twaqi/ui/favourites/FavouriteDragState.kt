@@ -28,11 +28,14 @@ internal object FavouriteDragOrder {
         return order.toMutableList().apply { add(to, removeAt(from)) }
     }
 
-    /** The one move from [before] to [after] for [id], as `from` and `to` indices; null when it didn't move. */
-    fun drop(before: List<Int>, after: List<Int>, id: Int): Pair<Int, Int>? {
+    /**
+     * The station ids to save on drop, [after]; null when [id] is back where it started. Ids, not
+     * indices: a refresh that adds or drops a row while the finger is down can't move another station.
+     */
+    fun drop(before: List<Int>, after: List<Int>, id: Int): List<Int>? {
         val from = before.indexOf(id)
         val to = after.indexOf(id)
-        return if (from < 0 || to < 0 || from == to) null else from to to
+        return if (from < 0 || to < 0 || from == to) null else after
     }
 }
 
@@ -92,8 +95,8 @@ internal class FavouriteDragState(private val listState: LazyListState, private 
         }
     }
 
-    /** Ends the drag: the move to save, or null when the row is back where it started. */
-    fun end(): Pair<Int, Int>? {
+    /** Ends the drag: the station ids in their new order, or null when the row is back where it started. */
+    fun end(): List<Int>? {
         val id = draggedId
         val result = id?.let { FavouriteDragOrder.drop(startOrder, order.orEmpty(), it) }
         cancel()
