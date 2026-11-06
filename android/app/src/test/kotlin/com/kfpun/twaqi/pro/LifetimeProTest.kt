@@ -272,4 +272,54 @@ class LifetimeProTest {
             demo.queryPurchases().purchases.flatMap { it.productIds }.toSet()
         )
     }
+
+    // Reading Play's lifetime product (PlayBillingGateway)
+
+    private fun oneTime(
+        offerId: String? = null,
+        token: String? = "token",
+        price: String = "NT$990",
+        micros: Long = 990_000_000
+    ) = OneTimeOffer(offerId, token, price, micros, "TWD")
+
+    @Test
+    fun singleOfferProductUsesTheSingleOfferAccessor() {
+        // A plain one-time product: Play leaves the offer list null and fills only the single offer.
+        val offer = lifetimeOffer(ProProducts.LIFETIME_ID, offers = null, singleOffer = oneTime(token = "single"))
+        assertEquals(ProPlan.LIFETIME, offer?.plan)
+        assertEquals(ProProducts.LIFETIME_ID, offer?.productId)
+        assertEquals("single", offer?.offerToken)
+        assertEquals("NT$990", offer?.formattedPrice)
+        assertEquals(990_000_000L, offer?.priceMicros)
+        assertEquals("TWD", offer?.currencyCode)
+    }
+
+    @Test
+    fun emptyOfferListFallsBackToTheSingleOffer() {
+        val offer =
+            lifetimeOffer(ProProducts.LIFETIME_ID, offers = emptyList(), singleOffer = oneTime(token = "single"))
+        assertEquals("single", offer?.offerToken)
+    }
+
+    @Test
+    fun singleOfferWithoutATokenIsSoldWithoutOne() {
+        val offer = lifetimeOffer(ProProducts.LIFETIME_ID, offers = null, singleOffer = oneTime(token = null))
+        assertEquals("", offer?.offerToken)
+    }
+
+    @Test
+    fun multiOfferProductPrefersThePurchaseOptionOverADiscount() {
+        val offers = listOf(
+            oneTime(offerId = "launch-discount", token = "discount", price = "NT$490", micros = 490_000_000),
+            oneTime(offerId = null, token = "base")
+        )
+        val offer = lifetimeOffer(ProProducts.LIFETIME_ID, offers, singleOffer = oneTime(token = "single"))
+        assertEquals("base", offer?.offerToken)
+        assertEquals("NT$990", offer?.formattedPrice)
+    }
+
+    @Test
+    fun noOfferAtAllHidesLifetime() {
+        assertNull(lifetimeOffer(ProProducts.LIFETIME_ID, offers = null, singleOffer = null))
+    }
 }

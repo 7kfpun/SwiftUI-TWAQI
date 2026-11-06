@@ -27,6 +27,35 @@ data class PlanOffer(
     val currencyCode: String
 )
 
+/** A one-time product's purchase option or offer as Play lists it, reduced to what [lifetimeOffer] reads. */
+data class OneTimeOffer(
+    val offerId: String?,
+    val offerToken: String?,
+    val formattedPrice: String,
+    val priceMicros: Long,
+    val currencyCode: String
+)
+
+/**
+ * The lifetime product's offer. Play fills `oneTimePurchaseOfferDetailsList` only
+ * for a one-time product with several purchase options or offers; a plain one has
+ * just `oneTimePurchaseOfferDetails`, here [singleOffer]. From the list, the
+ * purchase option's own price wins over a discount offer.
+ */
+fun lifetimeOffer(productId: String, offers: List<OneTimeOffer>?, singleOffer: OneTimeOffer?): PlanOffer? {
+    val listed = offers.orEmpty()
+    val offer = listed.firstOrNull { it.offerId == null } ?: listed.firstOrNull() ?: singleOffer ?: return null
+    return PlanOffer(
+        plan = ProPlan.LIFETIME,
+        productId = productId,
+        // Optional for a one-time product: Play sells the purchase option without it.
+        offerToken = offer.offerToken.orEmpty(),
+        formattedPrice = offer.formattedPrice,
+        priceMicros = offer.priceMicros,
+        currencyCode = offer.currencyCode
+    )
+}
+
 /** A purchase Play reports, for a product of ours or not. */
 data class OwnedPurchase(
     val productIds: List<String>,

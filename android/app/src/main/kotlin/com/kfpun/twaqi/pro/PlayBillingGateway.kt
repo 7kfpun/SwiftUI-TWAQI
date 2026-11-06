@@ -87,19 +87,11 @@ class PlayBillingGateway(context: Context) : BillingGateway {
                     }
             },
             lifetime = queryOffers(ProProducts.LIFETIME_ID, BillingClient.ProductType.INAPP) { product ->
-                // The purchase option's own price, without a discount offer.
-                val offer = product.oneTimePurchaseOfferDetailsList.orEmpty().firstOrNull { it.offerId == null }
-                    ?: product.oneTimePurchaseOfferDetailsList.orEmpty().firstOrNull()
-                    ?: return@queryOffers emptyList()
-                listOf(
-                    PlanOffer(
-                        plan = ProPlan.LIFETIME,
+                listOfNotNull(
+                    lifetimeOffer(
                         productId = product.productId,
-                        // Optional for a one-time product: Play sells the purchase option without it.
-                        offerToken = offer.offerToken.orEmpty(),
-                        formattedPrice = offer.formattedPrice,
-                        priceMicros = offer.priceAmountMicros,
-                        currencyCode = offer.priceCurrencyCode
+                        offers = product.oneTimePurchaseOfferDetailsList?.map { it.toOneTimeOffer() },
+                        singleOffer = product.oneTimePurchaseOfferDetails?.toOneTimeOffer()
                     )
                 )
             }
@@ -215,6 +207,14 @@ class PlayBillingGateway(context: Context) : BillingGateway {
         },
         isAcknowledged = isAcknowledged,
         purchaseToken = purchaseToken
+    )
+
+    private fun ProductDetails.OneTimePurchaseOfferDetails.toOneTimeOffer() = OneTimeOffer(
+        offerId = offerId,
+        offerToken = offerToken,
+        formattedPrice = formattedPrice,
+        priceMicros = priceAmountMicros,
+        currencyCode = priceCurrencyCode
     )
 
     private companion object {
