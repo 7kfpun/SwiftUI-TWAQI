@@ -17,6 +17,7 @@ import androidx.glance.GlanceTheme
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -98,6 +99,33 @@ class AirQualityWidget : GlanceAppWidget() {
             }
         }
     }
+
+    /** The picker's preview draws each size it is shown at: small, medium, large. */
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(WidgetPreviews.airQualitySizes)
+
+    /**
+     * The widget picker's preview (API 35+, published by [WidgetPreviews]): the sample stations
+     * ([WidgetPreviewData]) at each size, the Pro sizes unlocked, as iOS's gallery (`isPreview`).
+     */
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val now = Instant.now()
+        val snapshot = WidgetPreviewData.snapshot(now)
+        val text = WidgetText.of(context)
+        provideContent {
+            val size = LocalSize.current
+            val family = WidgetFamily.forSize(size.width.value, size.height.value)
+            GlanceTheme {
+                AirQualityContent(
+                    context = context,
+                    entry = WidgetPreviewData.entry(family, snapshot, now),
+                    snapshot = snapshot,
+                    offline = false,
+                    text = text,
+                    heightDp = size.height.value
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -136,7 +164,7 @@ private fun Small(context: Context, entry: WidgetEntry, reading: Pollutant, upda
     if (entry.listedFavourites.isEmpty()) {
         WidgetContainer(onClick = WidgetTaps.app(context), background = rgb(status.color)) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
-                IndexLabel(type, entry.cyclesIndex, color = foreground)
+                IndexLabel(type, entry.cyclesIndex, text, color = foreground)
                 WidgetLabel(value, size = 40.sp, weight = FontWeight.Bold, color = foreground)
                 WidgetLabel(text.status(status), size = 12.sp, weight = FontWeight.Medium, color = foreground)
                 Spacer(GlanceModifier.defaultWeight())
@@ -156,7 +184,7 @@ private fun Small(context: Context, entry: WidgetEntry, reading: Pollutant, upda
             ) {
                 Column(modifier = GlanceModifier.defaultWeight()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IndexLabel(type, entry.cyclesIndex, color = foreground)
+                        IndexLabel(type, entry.cyclesIndex, text, color = foreground)
                         Spacer(GlanceModifier.width(4.dp))
                         WidgetLabel(text.name(reading), size = 11.sp, weight = FontWeight.Bold, color = foreground)
                     }
@@ -190,7 +218,7 @@ private fun Medium(context: Context, entry: WidgetEntry, reading: Pollutant, upd
                 updated?.let { SecondaryLabel(it, size = 10.sp) }
                 Spacer(GlanceModifier.defaultWeight())
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth()) {
-                    IndexLabel(type, entry.cyclesIndex)
+                    IndexLabel(type, entry.cyclesIndex, text)
                     Spacer(GlanceModifier.width(4.dp))
                     WidgetLabel(
                         value,
@@ -245,7 +273,7 @@ private fun Large(
                         Spacer(GlanceModifier.height(2.dp))
                         StatusPill(status, text, size = 12.sp)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IndexLabel(type, entry.cyclesIndex)
+                            IndexLabel(type, entry.cyclesIndex, text)
                             Spacer(GlanceModifier.width(4.dp))
                             WidgetLabel("$value ${type.unit}".trim(), size = 20.sp, weight = FontWeight.Bold)
                         }
