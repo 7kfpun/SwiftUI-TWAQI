@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- FOX-120: the widget picker's preview before Android 15 (previewLayout, API 31+), a capture of
-     the generated preview (WidgetPreviews) in drawable-nodpi, in the phone's language. -->
+     the generated preview (WidgetPreviews) in drawable-nodpi (en) and drawable-zh-rTW-nodpi, in the
+     phone's language. They don't follow layout changes by themselves: when the widget's look changes,
+     recapture both from the widget picker on an API 35+ emulator (each preview card, its corners
+     transparent) at the same pixel size. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
