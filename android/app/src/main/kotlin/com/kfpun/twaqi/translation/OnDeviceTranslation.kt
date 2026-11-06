@@ -1,7 +1,5 @@
 package com.kfpun.twaqi.translation
 
-import com.kfpun.twaqi.data.model.Pollutant
-import com.kfpun.twaqi.data.model.Station
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +10,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Puts Chinese-only data from the API (MOENV's forecast text, a station's township and street
- * address) into English on the device (iOS `OnDeviceTranslation`), through a [Translator] (ML Kit
- * in the app, a fake in tests).
+ * Puts Chinese-only free text from the API (MOENV's area forecast text) into English on the device
+ * (iOS `OnDeviceTranslation`), through a [Translator] (ML Kit in the app, a fake in tests).
  *
- * Only free text from the API goes through it; day names, statuses and pollutants are ordinary
+ * Only the forecast text goes through it; day names, statuses and pollutants are ordinary
  * localized strings. CWA's weather text is never translated (FOX-93 shows it in Chinese only).
+ * Place names never are either (FOX-114): machine translation garbled them (新店區 became "New
+ * store area", 八德路四段 "paragraph 4, Baide Road"), so a station's township and county come from
+ * `TaiwanPlaceNames` and its street address shows as written.
  * Chinese UIs get the original. Anywhere translation can't happen (model not downloaded, offline,
  * any error) the original Chinese is shown, with no error and no label saying it was translated.
  *
@@ -126,18 +126,6 @@ class OnDeviceTranslation(private val translator: Translator, private val disk: 
             target: String?,
             cached: (text: String, target: String) -> String?
         ): String = workerTranslation ?: display(segments(content), target, cached)
-
-        /**
-         * What a station page sends to be translated (iOS `DetailsView.translatableLocation`): the
-         * township and the street address, from the reading and the station record. Never the
-         * station name, county or air quality zone, which the API also gives in English.
-         */
-        fun stationTexts(pollutant: Pollutant?, station: Station?): List<String> = listOfNotNull(
-            pollutant?.township,
-            pollutant?.address,
-            station?.township,
-            station?.address
-        )
 
         // Long text, a sentence at a time.
 

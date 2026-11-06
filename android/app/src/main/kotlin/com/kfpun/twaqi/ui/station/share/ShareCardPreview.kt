@@ -76,9 +76,7 @@ import androidx.core.content.edit
 import com.kfpun.twaqi.R
 import com.kfpun.twaqi.data.model.AirStatus
 import com.kfpun.twaqi.locale.AppLocale
-import com.kfpun.twaqi.translation.OnDeviceTranslation
-import com.kfpun.twaqi.translation.TranslatesOnDevice
-import com.kfpun.twaqi.translation.rememberShownTranslations
+import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
 import com.kfpun.twaqi.ui.common.rgb
 import com.kfpun.twaqi.ui.common.secondaryText
 import com.kfpun.twaqi.ui.station.StationDetailsUiState
@@ -99,10 +97,8 @@ fun ShareCardButton(state: StationDetailsUiState) {
     val context = LocalContext.current
     var showing by rememberSaveable { mutableStateOf(false) }
     val aqi = state.currentAqi(Instant.now())
-    // The township comes in Chinese only; translated as on the station page (FOX-98, iOS
-    // DetailsView.displayLocality), and asked for here so it is ready before the card is drawn.
-    val translations = rememberShownTranslations()
-    TranslatesOnDevice(OnDeviceTranslation.stationTexts(state.pollutant, state.station))
+    // The township comes in Chinese only; named as on the station page (FOX-114).
+    val places = rememberTaiwanPlaceNames()
     IconButton(onClick = { showing = true }, enabled = aqi > 0) {
         Icon(painterResource(R.drawable.ic_share), contentDescription = stringResource(R.string.share_share))
     }
@@ -112,7 +108,7 @@ fun ShareCardButton(state: StationDetailsUiState) {
         val station = state.station
         val content = ShareCardContent(
             title = pollutant?.displayName(chinese) ?: station?.displayName(chinese) ?: "",
-            locality = ShareCardContent.locality(pollutant, station, chinese, translations::display),
+            locality = ShareCardContent.locality(pollutant, station, chinese, places),
             aqi = aqi,
             readings = ShareCardContent.readings(pollutant),
             publishTime = state.latestPublishTime

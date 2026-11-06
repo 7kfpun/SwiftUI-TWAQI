@@ -64,7 +64,7 @@ class AppContainer(
     val weather = StationWeatherStore(stationCamsUrl, store)
 
     /**
-     * FOX-98: Chinese-only API text (forecast text, township, address) in English on the device,
+     * FOX-98: Chinese-only API text (the area forecast text; never place names, FOX-114) in English on the device,
      * with ML Kit; its translations kept under [cacheRoot] for a week.
      */
     val translation = OnDeviceTranslation(

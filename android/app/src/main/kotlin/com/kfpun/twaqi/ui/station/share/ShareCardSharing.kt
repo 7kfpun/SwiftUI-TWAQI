@@ -23,6 +23,7 @@ import com.kfpun.twaqi.data.model.AirStatus
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.data.model.Station
 import com.kfpun.twaqi.data.model.TaiwanTime
+import com.kfpun.twaqi.data.places.TaiwanPlaceNames
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.review.ReviewPrompt
 import java.io.File
@@ -53,15 +54,15 @@ data class ShareCardContent(
             pollutant?.let { reading -> pollutants.map { it to reading.value(it) } }
 
         /**
-         * The line under the title, as the station page shows it: the township through [translate]
-         * (on-device translation outside Chinese, FOX-98), then the county.
+         * The line under the title, as the station page shows it: the township, then the county,
+         * with English names from [places] (FOX-114).
          */
         fun locality(
             pollutant: Pollutant?,
             station: Station?,
             chinese: Boolean,
-            translate: (String) -> String
-        ): String? = pollutant?.displayLocality(chinese, translate) ?: station?.displayLocality(chinese, translate)
+            places: TaiwanPlaceNames = TaiwanPlaceNames.EMPTY
+        ): String? = pollutant?.displayLocality(chinese, places) ?: station?.displayLocality(chinese, places)
     }
 }
 

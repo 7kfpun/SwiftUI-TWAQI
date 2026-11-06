@@ -211,6 +211,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { pro.refresh() }
         }
+        // FOX-116: Help's privacy row, from UMP's last answer, for Pro users too.
+        AdConsent.useDebugSettings(this, intent)
+        AdConsent.restore(this)
         lifecycleScope.launch {
             // Pro users see no ads, so no consent form; one who lapses gets it then.
             pro.entitlement.filterNotNull().first { it != Entitlement.PRO }

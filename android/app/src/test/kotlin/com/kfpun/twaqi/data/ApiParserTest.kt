@@ -2,8 +2,10 @@ package com.kfpun.twaqi.data
 
 import com.kfpun.twaqi.data.model.Country
 import com.kfpun.twaqi.data.model.StationType
+import com.kfpun.twaqi.data.places.TaiwanPlaceNames
 import com.kfpun.twaqi.data.remote.ApiFormatException
 import com.kfpun.twaqi.data.remote.ApiParser
+import java.io.File
 import java.time.Instant
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -64,7 +66,10 @@ class ApiParserTest {
         assertEquals("基隆", keelung.displayName(chinese = true))
         assertEquals("信義區, Keelung City", keelung.displayLocality(chinese = false))
         assertEquals("信義區, 基隆市", keelung.displayLocality(chinese = true))
-        assertEquals("Xinyi, Keelung City", keelung.displayLocality(chinese = false) { "Xinyi" })
+        // FOX-114: the township's official English name, from the bundled table.
+        assertEquals("Xinyi District, Keelung City", keelung.displayLocality(chinese = false, places()))
+        // The API sends no English township today.
+        assertNull(keelung.townshipEn)
         assertEquals("北部空品區", keelung.displayArea(chinese = true))
     }
 
@@ -191,4 +196,8 @@ class ApiParserTest {
     }
 
     private fun obj(json: String): JsonObject = ApiParser.element(json).jsonObject
+
+    private fun places() = TaiwanPlaceNames.parse(
+        File("src/main/assets/${TaiwanPlaceNames.ASSET}").readText()
+    )
 }

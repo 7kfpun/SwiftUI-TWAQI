@@ -43,6 +43,7 @@ import com.kfpun.twaqi.ui.common.OfflineEmptyState
 import com.kfpun.twaqi.ui.common.OfflineNotice
 import com.kfpun.twaqi.ui.common.StationRow
 import com.kfpun.twaqi.ui.common.StationRowReading
+import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
 
 /** The Favourites tab (iOS `FavouriteListView`); [onOpenStation] pushes the station page (`StationRoute`). */
 @Composable
@@ -195,8 +196,8 @@ private fun FavouriteList(
 private fun FavouriteRow(pollutant: Pollutant, chinese: Boolean, alerted: Set<Int>, modifier: Modifier) {
     StationRow(
         title = pollutant.displayName(chinese),
-        // As written, as iOS lists show it: only the station page translates the township (FOX-98).
-        subtitle = pollutant.displayLocality(chinese),
+        // The official English names, as the station page shows them (FOX-114).
+        subtitle = pollutant.displayLocality(chinese, rememberTaiwanPlaceNames()),
         reading = StationRowReading(
             aqi = pollutant.aqi,
             publishTime = pollutant.publishTime,
