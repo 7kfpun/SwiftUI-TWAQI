@@ -117,8 +117,10 @@ Two more modules sit beside `app`:
 
 ## Launcher and Play icon (FOX-108)
 
-The iOS app icon, drawn from the same geometry and colours as the visionOS layers by
-`tools/DrawAndroidAppIcon.swift`. It writes the adaptive icon layers for `app` and `wear`
+The iOS app icon, drawn by `tools/DrawAndroidAppIcon.swift`. Its sky and cloud use the
+visionOS layer geometry and colours; the warning sign and exclamation mark are measured
+from `ios/TWAQI/Assets.xcassets/AppIcon.appiconset/icon-1024.png` so the Play artwork
+matches the iOS raster. It writes the adaptive icon layers for `app` and `wear`
 (`res/drawable/ic_launcher_background.xml`, `_foreground.xml`, `_monochrome.xml`, used by
 `mipmap-anydpi/ic_launcher.xml` and `ic_launcher_round.xml`) and the 512x512 Play icon
 (`app/src/main/play/listings/*/graphics/icon/1.png`). Don't edit those files by hand; change

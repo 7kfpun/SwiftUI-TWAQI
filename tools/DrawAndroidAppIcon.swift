@@ -2,10 +2,12 @@
 //  DrawAndroidAppIcon.swift
 //  tools
 //
-//  Draws the Android launcher icon (FOX-108) from the iOS icon's design, with
-//  the same geometry and colours as DrawVisionAppIcon.swift: the
+//  Draws the Android launcher icon (FOX-108) from the iOS icon's design: the
 //  orange-to-purple sky, the cloud and the warning sign, laid out on the iOS
-//  icon's 1024 grid.
+//  icon's 1024 grid. The sky, cloud and colours are DrawVisionAppIcon.swift's;
+//  the sign and its mark are measured from the iOS icon itself
+//  (ios/TWAQI/Assets.xcassets/AppIcon.appiconset/icon-1024.png), which has a
+//  larger sign and a shorter mark than the visionOS layers.
 //
 //  It writes, for each Android module given:
 //    res/drawable/ic_launcher_background.xml   the sky (a vector gradient)
@@ -68,7 +70,7 @@ let cloudGradient = Gradient(
 )
 let signGradient = Gradient(
     stops: [(0, 0xFFD503), (1, 0xFEC401)],
-    start: CGPoint(x: 0, y: 455), end: CGPoint(x: 0, y: 848)
+    start: CGPoint(x: 0, y: 425), end: CGPoint(x: 0, y: 847)
 )
 let markColor: UInt32 = 0x222222
 
@@ -83,28 +85,30 @@ let cloud: CGPath = {
 }()
 
 let sign: CGPath = {
-    // Rounded triangle: each corner is an arc tangent to its two sides.
-    let top = CGPoint(x: 512, y: 455), left = CGPoint(x: 292, y: 848), right = CGPoint(x: 732, y: 848)
+    // Rounded triangle: each corner is an arc tangent to its two sides. Fitted to
+    // icon-1024.png: sides sloping 0.61 across per 1 down, extent x 294...730, y 471...847.
+    let top = CGPoint(x: 512, y: 425), left = CGPoint(x: 254, y: 847), right = CGPoint(x: 770, y: 847)
     let path = CGMutablePath()
     path.move(to: CGPoint(x: (left.x + right.x) / 2, y: left.y))
-    path.addArc(tangent1End: right, tangent2End: top, radius: 44)
-    path.addArc(tangent1End: top, tangent2End: left, radius: 44)
-    path.addArc(tangent1End: left, tangent2End: right, radius: 44)
+    path.addArc(tangent1End: right, tangent2End: top, radius: 50)
+    path.addArc(tangent1End: top, tangent2End: left, radius: 50)
+    path.addArc(tangent1End: left, tangent2End: right, radius: 50)
     path.closeSubpath()
     return path
 }()
 
 let mark: CGPath = {
-    // The exclamation mark: a bar tapering towards its foot, then the dot.
+    // The exclamation mark: a bar tapering towards its foot, then the dot
+    // (icon-1024.png: bar y 582...732, dot y 751...803).
     let path = CGMutablePath()
-    path.move(to: CGPoint(x: 482, y: 600))
-    path.addLine(to: CGPoint(x: 542, y: 600))
-    path.addLine(to: CGPoint(x: 530, y: 742))
-    path.addLine(to: CGPoint(x: 494, y: 742))
+    path.move(to: CGPoint(x: 483, y: 600))
+    path.addLine(to: CGPoint(x: 541, y: 600))
+    path.addLine(to: CGPoint(x: 531, y: 716))
+    path.addLine(to: CGPoint(x: 493, y: 716))
     path.closeSubpath()
-    path.addEllipse(in: CGRect(x: 482, y: 584, width: 60, height: 32))   // rounded top of the bar
-    path.addEllipse(in: CGRect(x: 494, y: 726, width: 36, height: 32))   // rounded foot
-    path.addEllipse(in: CGRect(x: 484, y: 768, width: 56, height: 56))   // dot
+    path.addEllipse(in: CGRect(x: 483, y: 584, width: 58, height: 32))   // rounded top of the bar
+    path.addEllipse(in: CGRect(x: 493, y: 700, width: 38, height: 32))   // rounded foot
+    path.addEllipse(in: CGRect(x: 486, y: 751, width: 52, height: 52))   // dot
     return path.normalized()
 }()
 
