@@ -3,6 +3,7 @@ package com.kfpun.twaqi.ui.station.share
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.data.model.Station
+import com.kfpun.twaqi.data.places.TaiwanPlaceNames
 import java.io.File
 import java.nio.file.Files
 import java.time.Duration
@@ -81,28 +82,33 @@ class ShareCardTest {
     }
 
     /**
-     * #77 review: the card's locality is the station page's, township translated (FOX-98); the
-     * county is the API's English or Chinese, never translated.
+     * #77 review: the card's locality is the station page's. FOX-114: the township's English comes
+     * from the place-name table, the county from the API; neither is machine-translated.
      */
     @Test
-    fun localityTranslatesTheTownshipAsTheStationPageDoes() {
+    fun localityNamesTheTownshipAsTheStationPageDoes() {
         val pollutant = Pollutant(
             stationId = 12, code = "KL", lat = 25.1, lon = 121.7, aqi = 54.0, pm25 = 18.0, pm10 = 40.0,
             no2 = 9.0, so2 = 1.0, co = 0.3, o3 = 31.5, windDirection = 0.0, windSpeed = 0.0,
             publishTime = "2026-08-07T22:00:00", name = "Keelung", nameLocal = "基隆",
             county = "Keelung City", countyLocal = "基隆市", township = "信義區"
         )
-        val translate: (String) -> String = { if (it == "信義區") "Xinyi" else it }
+        val places = TaiwanPlaceNames.parse(File("src/main/assets/place_names/taiwan_place_names.json").readText())
 
-        assertEquals("Xinyi, Keelung City", ShareCardContent.locality(pollutant, null, chinese = false, translate))
-        assertEquals("信義區, 基隆市", ShareCardContent.locality(pollutant, null, chinese = true) { it })
+        assertEquals(
+            "Xinyi District, Keelung City",
+            ShareCardContent.locality(pollutant, null, chinese = false, places)
+        )
+        assertEquals("信義區, 基隆市", ShareCardContent.locality(pollutant, null, chinese = true, places))
+        // Without the table, the township shows as written.
+        assertEquals("信義區, Keelung City", ShareCardContent.locality(pollutant, null, chinese = false))
         // Without a reading, the station's own locality.
         val station = Station(
             id = 12, countryId = 1, countryCode = "TW", code = "KL", lat = 25.1, lon = 121.7, imageUrl = null,
             name = "Keelung", nameLocal = "基隆", county = "Keelung City", countyLocal = "基隆市", township = "信義區"
         )
-        assertEquals("Xinyi, Keelung City", ShareCardContent.locality(null, station, chinese = false, translate))
-        assertNull(ShareCardContent.locality(null, null, chinese = false, translate))
+        assertEquals("Xinyi District, Keelung City", ShareCardContent.locality(null, station, chinese = false, places))
+        assertNull(ShareCardContent.locality(null, null, chinese = false, places))
     }
 
     // endregion
