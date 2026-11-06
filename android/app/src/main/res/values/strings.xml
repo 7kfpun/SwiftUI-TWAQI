@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ported from ios/TWAQI/Localization/en.lproj/Localizable.strings (FOX-56).
+     Names are the iOS keys in snake_case. Every name here must also be in the
+     other language's file (StringResourcesTest). -->
+<resources>
+    <string name="app_name">Taiwan Air</string>
+
+    <string name="tabbar_main">Main</string>
+    <string name="tabbar_forecast">Forecast</string>
+    <string name="tabbar_favourites">Favourites</string>
+    <string name="tabbar_details_list">Search</string>
+    <string name="tabbar_help">Help</string>
+
+    <string name="favouritelist_favourites">Favourites</string>
+    <string name="favourites_add_your_first_favourite_station">Add your first favourite station</string>
+    <string name="favourites_add_to_favourites">Add to Favourites</string>
+    <string name="favourites_remove_from_favourites">Remove from Favourites</string>
+    <string name="favourites_alerts_on">Alerts on</string>
+    <string name="favourites_remove_station_with_alerts_title">Remove from Favourites?</string>
+    <string name="favourites_remove_station_with_alerts_message">This station has AQI alerts on. Removing it from Favourites also turns its alerts off.</string>
+    <string name="favourites_remove_and_turn_off_alerts">Remove and Turn Off Alerts</string>
+    <string name="favourites_cancel">Cancel</string>
+    <string name="favourites_added_to_favourites">Added to Favourites</string>
+    <string name="favourites_alerts_cap_reached_message">Alerts are already on for %d stations, the most you can have, so they stay off for this one. Turn one off on its station page to get alerts here.</string>
+    <string name="favourites_notifications_off_message">Notifications are off for Taiwan Air, so alerts for this station stay off. Turn them on in Settings, then switch alerts on below.</string>
+    <string name="favourites_open_settings">Open Settings</string>
+    <string name="favourites_ok">OK</string>
+    <string name="favourites_removed_from_favourites">Removed from Favourites</string>
+
+    <string name="detailslist_details">Details</string>
+    <string name="detailslist_search">Search</string>
+
+    <string name="details_general_public">General public</string>
+    <string name="details_sensitive_group">Sensitive group</string>
+
+    <string name="settings_notice_me_when_aqi_is_above">Notice me when AQI is above</string>
+    <string name="settings_the_value_is_too_small_you_would_get_lots_of_notifications">The value is too small, you would get lots of notifications</string>
+    <string name="settings_notice_me_when_aqi_is_below">Notice me when AQI is below</string>
+    <string name="settings_the_value_is_too_large_you_would_get_lots_of_notifications">The value is too large, you would get lots of notifications</string>
+    <string name="settings_alerts_station_limit">You can turn on alerts for up to %d stations.</string>
+
+    <string name="help_help">Help</string>
+    <string name="help_select_a_topic">Select a topic</string>
+    <string name="help_do_not_disturb">Do Not Disturb</string>
+    <string name="help_turn_on_do_not_disturb">Turn on Do Not Disturb</string>
+    <string name="help_start_time">Start Time</string>
+    <string name="help_end_time">End Time</string>
+    <string name="help_language">Language</string>
+    <string name="help_language_system">System default</string>
+    <string name="help_language_footer">Addresses and forecast text from the government are in Chinese. In other languages they are translated on this device, once that language is downloaded for Translate in Settings.</string>
+    <string name="help_appearance">Appearance</string>
+    <string name="help_appearance_system">System default</string>
+    <string name="help_appearance_light">Light</string>
+    <string name="help_appearance_dark">Dark</string>
+    <string name="help_cancel_site_notification">Cancel site notification</string>
+    <string name="help_all_site_notification_has_been_cancelled">All site notification has been cancelled</string>
+    <string name="help_in_app_purchase">In-app purchase</string>
+    <string name="help_ad_free">Remove ads &amp; get complication numbers</string>
+    <string name="help_restore_purchase">Restore purchase</string>
+    <string name="help_contact_us">Contact us</string>
+    <string name="help_interested_to_be_our_business_partner">Interested to be our Business Partner?</string>
+    <string name="help_feedback_or_contact_us">Feedback / Contact us</string>
+    <string name="help_definition">Understanding the readings</string>
+    <string name="help_data_provided_by_government">The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)</string>
+
+    <string name="feedback_title">Feedback</string>
+    <string name="feedback_rating_header">How satisfied are you with the app?</string>
+    <string name="feedback_rating_stars">%d stars</string>
+    <string name="feedback_message_header">Suggestions</string>
+    <string name="feedback_message_placeholder">Which feature do you think we need to improve?</string>
+    <string name="feedback_other_header">Other feedback / questions</string>
+    <string name="feedback_optional">Optional</string>
+    <string name="feedback_interview">Interested in our user interviews?</string>
+    <string name="feedback_interview_footer">We hold user interviews in Taipei from time to time. Turn this on and we may email you to invite you.</string>
+    <string name="feedback_name_placeholder">Name (optional)</string>
+    <string name="feedback_email_placeholder">Email *</string>
+    <string name="feedback_email_footer">So we can reply to you.</string>
+    <string name="feedback_email_invalid">Please check the email address.</string>
+    <string name="feedback_privacy_footer">To help us look into it, the app version, device model, OS version and language are sent with your feedback.</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_sent_title">Thank you!</string>
+    <string name="feedback_sent_message">Your feedback has been sent.</string>
+    <string name="feedback_sent_message_may_reply">Your feedback has been sent. We may reply to you by email.</string>
+    <string name="feedback_rate_on_app_store">Rate on Google Play</string>
+    <string name="feedback_error_title">Couldn\'t send feedback</string>
+    <string name="feedback_error_offline">You seem to be offline. Check your connection and try again.</string>
+    <string name="feedback_error_generic">Something went wrong. Please try again later.</string>
+    <string name="feedback_try_again">Try Again</string>
+    <string name="feedback_cancel">Cancel</string>
+    <string name="help_analytics_excluded">This device is now excluded from analytics and crash reports.</string>
+    <string name="help_analytics_included">This device now sends analytics and crash reports again.</string>
+
+    <string name="cooperate_title">Business Partnership</string>
+    <string name="cooperate_intro_header">Partnership enquiry</string>
+    <string name="cooperate_intro_footer">Brands, media, schools and public bodies are all welcome. We\'ll reply by email as soon as we can.</string>
+    <string name="cooperate_type">Type</string>
+    <string name="cooperate_type_choose">Choose</string>
+    <string name="cooperate_type_advertising">Advertising</string>
+    <string name="cooperate_type_data_api">Data &amp; API</string>
+    <string name="cooperate_type_sponsorship">Sponsorship</string>
+    <string name="cooperate_type_media">Media &amp; PR</string>
+    <string name="cooperate_type_other">Other</string>
+    <string name="cooperate_company_header">Company or organisation</string>
+    <string name="cooperate_company_placeholder">Company or organisation name *</string>
+    <string name="cooperate_website_placeholder">Website (optional)</string>
+    <string name="cooperate_contact_header">Contact</string>
+    <string name="cooperate_name_placeholder">Name *</string>
+    <string name="cooperate_job_title_placeholder">Job title (optional)</string>
+    <string name="cooperate_phone_placeholder">Phone (optional)</string>
+    <string name="cooperate_contact_footer">We\'ll get back to you by email.</string>
+    <string name="cooperate_message_header">About the partnership</string>
+    <string name="cooperate_message_placeholder">Tell us your idea, and any timeline or budget.</string>
+    <string name="cooperate_privacy_footer">We use what you enter only to reply to this enquiry. The app version, device model, OS version, language and time zone are sent with it.</string>
+    <string name="cooperate_sent_title">Thank you!</string>
+    <string name="cooperate_sent_message">We\'ve received your enquiry and will be in touch soon.</string>
+    <string name="cooperate_error_title">Couldn\'t send enquiry</string>
+
+    <string name="help_widgets_and_watch">Widgets &amp; Wear OS</string>
+    <string name="help_widgets_title">Home screen widgets</string>
+    <string name="help_widgets_shows_header">What it shows</string>
+    <string name="help_widgets_shows_body">The current reading for your nearest station, or a station you choose. You choose when you add the widget; to change it later, touch and hold the widget and open its settings.</string>
+    <string name="help_widgets_favourites_header">Favourite stations</string>
+    <string name="help_widgets_favourites_body">Small, medium and large widgets list your other favourite stations under the main one, without repeating it. The station detail widget shows one station in detail: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and station detail widgets are part of Pro.</string>
+    <string name="help_widgets_favourites_add">To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.</string>
+    <string name="help_widgets_favourites_offline">Without a connection, the widget shows the last readings it saved.</string>
+    <string name="help_widgets_index_header">Which index</string>
+    <string name="help_widgets_index_body">In the widget\'s settings, choose AQI, PM2.5, PM10, O3, CO, SO2, or NO2.</string>
+    <string name="help_widgets_paging_header">Page through favourites</string>
+    <string name="help_widgets_paging_body">On a medium or large widget, tap ‹ or › to step through your favourites one station at a time; the number between them, like 2 / 5, shows where you are. Tap anywhere else to open that station in the app. The widget goes back to its own station after 30 minutes without a tap, or when new readings come in. Needs Pro and at least two favourites.</string>
+    <string name="help_widgets_cycle_body">Tap the index name (AQI, PM2.5…) on a widget to switch to the next index. It starts from the index chosen in the widget\'s settings.</string>
+    <string name="help_widgets_stack_tip">Tip: add several Taiwan Air widgets and set each one differently, for example nearest station and first favourite, or AQI and PM2.5.</string>
+    <string name="help_widgets_sizes_header">Sizes</string>
+    <string name="help_widgets_home_sizes">Small, medium and large. Touch and hold a widget and drag its edges to resize it.</string>
+    <string name="help_widgets_add_header">How to add</string>
+    <string name="help_widgets_add_1">1. Touch and hold an empty spot on the home screen, then tap Widgets.</string>
+    <string name="help_widgets_add_2">2. Find Taiwan Air in the list, or search for it.</string>
+    <string name="help_widgets_add_3">3. Touch and hold a widget, drag it onto the home screen, then choose the station and the index.</string>
+    <string name="help_widgets_footer">Open this app once so a station and a reading are ready.</string>
+    <string name="help_back">Back</string>
+    <string name="help_watch_title">Wear OS</string>
+    <string name="help_watch_app_header">The watch app</string>
+    <string name="help_watch_app_body">Free. It shows the current reading for the closest station, or one you pick, and the past 12 hours. Your phone\'s favourites come first in its station list, in their level colours.</string>
+    <string name="help_watch_complications_header">Watch-face complications</string>
+    <string name="help_watch_complications_body">The face style is free: the level\'s face in its colour, for AQI, PM2.5 or any of 7 indices. Pro adds the number and more styles: a label with the number, number only, and the status in words. The watch app itself is free.</string>
+    <string name="help_watch_tile_header">Tile</string>
+    <string name="help_watch_tile_body">Part of Pro. Swipe left from the watch face to the end of your tiles, tap +, and add Taiwan Air. It shows the nearest station or one you choose.</string>
+    <string name="help_watch_add_header">How to add a complication</string>
+    <string name="help_watch_add_1">1. Touch and hold your watch face, tap Edit, and choose a complication.</string>
+    <string name="help_watch_add_2">2. Choose Taiwan Air.</string>
+    <string name="help_watch_footer">Open this app or the watch app once so a station and a reading are available.</string>
+    <!-- Android (#77 review): Help's shortcuts guide, in place of iOS Help.shortcuts_* (Siri, Shortcuts,
+         Control Center). What FOX-95 shipped: launcher shortcuts, Google Assistant, the Quick Settings tile. -->
+    <string name="help_shortcuts_title">Shortcuts &amp; Quick Settings</string>
+    <string name="help_shortcuts_launcher_header">App shortcuts</string>
+    <string name="help_shortcuts_launcher_body">Touch and hold the Taiwan Air icon. “Air Quality” shows the AQI of your nearest station, its level, the main pollutant and what to do. Below it are your favourite and recently opened stations; tap one to open it. Drag a shortcut onto the home screen to keep it there.</string>
+    <string name="help_shortcuts_assistant_header">Google Assistant</string>
+    <string name="help_shortcuts_assistant_body">Say “Hey Google, open Air Quality in Taiwan Air” for the same card, or “Hey Google, open Songshan in Taiwan Air” for a favourite or recent station.</string>
+    <string name="help_shortcuts_location_body">Nearest uses your location only if you have already allowed it for this app. Otherwise you get your first favourite.</string>
+    <string name="help_shortcuts_tile_header">Quick Settings tile</string>
+    <string name="help_shortcuts_tile_body">Swipe down from the top of the screen twice, tap the pencil to edit, and drag the Air Quality tile into place. It shows the AQI of your nearest station or first favourite; tap it to open the station.</string>
+    <string name="help_shortcuts_footer">Free for everyone.</string>
+
+    <string name="airindex_meaning_aqi">Air quality index</string>
+    <string name="airindex_meaning_pm25">Particulates (PM2.5)</string>
+    <string name="airindex_meaning_pm10">Particulates (PM10)</string>
+    <string name="airindex_meaning_o3">Ozone</string>
+    <string name="airindex_meaning_co">Carbon monoxide</string>
+    <string name="airindex_meaning_so2">Sulfur dioxide</string>
+    <string name="airindex_meaning_no2">Nitrogen dioxide</string>
+
+    <string name="airstatus_good">Good</string>
+    <string name="airstatus_moderate">Moderate</string>
+    <string name="airstatus_unhealthyforsensitivegroup">Unhealthy for sensitive groups</string>
+    <string name="airstatus_unhealthy">Unhealthy</string>
+    <string name="airstatus_veryunhealthy">Very unhealthy</string>
+    <string name="airstatus_hazardous">Hazardous</string>
+    <string name="airstatus_unknown">-</string>
+
+    <string name="airstatus_general_public_guidance_good">Enjoy your usual outdoor activities</string>
+    <string name="airstatus_general_public_guidance_moderate">Enjoy your usual outdoor activities</string>
+    <string name="airstatus_general_public_guidance_unhealthyforsensitivegroup">Consider reducing outdoor activities</string>
+    <string name="airstatus_general_public_guidance_unhealthy">Should reduce physical exertion, particularly outdoors</string>
+    <string name="airstatus_general_public_guidance_veryunhealthy">Reduce outdoor activities</string>
+    <string name="airstatus_general_public_guidance_hazardous">Avoid outdoor activities and keep doors and windows closed</string>
+
+    <string name="airstatus_sensitive_group_guidance_good">Enjoy your usual outdoor activities</string>
+    <string name="airstatus_sensitive_group_guidance_moderate">Can still be active outside</string>
+    <string name="airstatus_sensitive_group_guidance_unhealthyforsensitivegroup">Reduce physical exertion and outdoor activities</string>
+    <string name="airstatus_sensitive_group_guidance_unhealthy">Stay indoors and reduce physical exertion</string>
+    <string name="airstatus_sensitive_group_guidance_veryunhealthy">Stay indoors and reduce physical exertion</string>
+    <string name="airstatus_sensitive_group_guidance_hazardous">Stay indoors and avoid physical exertion</string>
+
+    <string name="details_last_updated">Last updated</string>
+    <string name="details_address">Address</string>
+    <string name="details_coordinates">Coordinates</string>
+    <string name="details_wind">Wind</string>
+    <string name="details_location">Location</string>
+    <string name="details_no_data">No data</string>
+    <string name="details_select_a_station">Select a station</string>
+
+    <string name="stationtype_general">General</string>
+    <string name="stationtype_traffic">Roadside</string>
+    <string name="stationtype_industrial">Industrial</string>
+    <string name="stationtype_background">Background</string>
+    <string name="stationtype_national_park">National park</string>
+    <string name="stationtype_other">Other</string>
+
+    <string name="wind_calm">Calm</string>
+    <string name="wind_light_air">Light air</string>
+    <string name="wind_light_breeze">Light breeze</string>
+    <string name="wind_gentle_breeze">Gentle breeze</string>
+    <string name="wind_moderate_breeze">Moderate breeze</string>
+    <string name="wind_strong_breeze">Strong breeze</string>
+
+    <!-- 24-hour AQI trend -->
+    <string name="details_trend_improving">Improving</string>
+    <string name="details_trend_worsening">Getting worse</string>
+    <string name="details_trend_steady">Steady</string>
+    <string name="details_trend_improving_detail">AQI down %d over the last few hours</string>
+    <string name="details_trend_worsening_detail">AQI up %d over the last few hours</string>
+    <string name="details_trend_steady_detail">Holding around AQI %d</string>
+    <string name="details_now">Now</string>
+    <string name="details_low">Low</string>
+    <string name="details_high">High</string>
+    <string name="details_average">Average</string>
+    <string name="details_no_trend_data">Not enough readings yet to show a trend</string>
+    <string name="details_not_reporting">No live readings</string>
+    <string name="details_not_reporting_message">This station isn\'t reporting right now. It may be offline for maintenance, or retired. Stations nearby are on the map.</string>
+    <string name="details_pollutants">Pollutants</string>
+    <string name="details_health_advice">Health advice</string>
+    <string name="details_alerts_title">Air quality alerts</string>
+    <string name="details_alerts_pitch">Get notified when the air here gets worse or clears up.</string>
+    <string name="details_alerts_on">On</string>
+    <string name="details_alerts_off">Off</string>
+    <string name="details_alerts_unavailable">Alerts can\'t be loaded right now. Check your connection and try again.</string>
+    <string name="details_alerts_try_again">Try Again</string>
+    <string name="details_live_cam">Live camera</string>
+    <string name="details_cam_captured">Captured %s</string>
+    <string name="details_cam_source">Image: MOENV</string>
+    <string name="details_no_cam">This station has no camera</string>
+    <string name="details_cam_unavailable">Couldn\'t load the camera image</string>
+    <string name="details_cam_showing_saved">Couldn\'t load the latest image — showing the last one saved</string>
+    <string name="details_cam_live">Live</string>
+    <string name="details_cam_timeline">Camera, past 24 hours</string>
+    <string name="details_cam_hour_missing">No image for this hour</string>
+    <string name="details_send_feedback">Send feedback</string>
+
+    <!-- Share card -->
+    <string name="share_share">Share</string>
+    <string name="share_message">%1$s: AQI %2$d, %3$s — via Taiwan Air</string>
+    <string name="share_preview_title">Share Card</string>
+    <string name="share_shape">Shape</string>
+    <string name="share_shape_feed">Post 4:5</string>
+    <string name="share_shape_story">Story 9:16</string>
+    <string name="share_shape_square">Chat 1:1</string>
+    <string name="share_save_to_photos">Save to Photos</string>
+    <string name="share_saved">Saved to Photos</string>
+    <string name="share_save_denied">Taiwan Air isn\'t allowed to add photos. You can allow it in Settings.</string>
+    <string name="share_save_failed">The card couldn\'t be saved. Please try again.</string>
+    <string name="share_open_settings">Open Settings</string>
+    <string name="share_cancel">Cancel</string>
+    <string name="share_download">Get Taiwan Air on Google Play</string>
+
+    <!-- Watch -->
+
+    <string name="widget_widget_name">Air quality</string>
+    <string name="widget_widget_description">Current AQI at your nearest station or first favourite, plus your other favourites.</string>
+    <string name="widget_favourites">Favourites</string>
+    <string name="widget_no_favourites">Save stations in Favourites to list them here.</string>
+    <string name="widget_station">Station</string>
+    <string name="widget_station_closest">Closest station</string>
+    <string name="widget_station_first_favourite">First favourite</string>
+    <string name="widget_pro_only_title">Pro widget</string>
+    <string name="widget_pro_only_body">Medium, large and extra large widgets are for Pro users. Open the app to upgrade.</string>
+    <string name="widget_pro_unlock">Unlock every reading with Pro</string>
+    <string name="widget_next_station">Next station</string>
+    <string name="widget_previous_station">Previous station</string>
+    <string name="widget_show_index">Show %s</string>
+    <string name="widget_page_position">Station %1$d of %2$d</string>
+    <string name="widget_intent_page_title">Show a station in the widget</string>
+    <string name="widget_intent_index_title">Change the widget\'s index</string>
+    <!-- FOX-59: Android widgets. -->
+    <string name="widget_index">Index</string>
+    <string name="widget_configure_title">Set up the widget</string>
+    <string name="widget_configure_save">Save</string>
+    <string name="widget_all_stations">All stations</string>
+    <string name="widget_detail_name">Station detail</string>
+    <string name="widget_detail_description">One station in detail: every index, wind, the last 24 hours and the regional forecast.</string>
+    <string name="widget_pro_only_body_android">Medium, large and station detail widgets are part of Pro. Tap to upgrade.</string>
+    <string name="widget_updated_at">Updated %s</string>
+    <string name="widget_wind_speed">Wind</string>
+    <string name="widget_offline_saved_at">Offline · saved %s</string>
+    <string name="widget_intent_widget">Widget</string>
+    <string name="watch_no_station">Open the app to choose a station</string>
+
+    <!-- Pro -->
+    <string name="pro_title">Taiwan Air Pro</string>
+    <string name="pro_subtitle">Cleaner screens, and air quality on your watch face.</string>
+    <string name="pro_features">What you get</string>
+    <string name="pro_feature_no_ads">No ads</string>
+    <string name="pro_feature_no_ads_detail">Every screen, the map included.</string>
+    <string name="pro_feature_complications">Complication numbers &amp; styles</string>
+    <string name="pro_feature_complications_detail">The number and more styles on your watch face, for AQI, PM2.5 or any of 7 indices. The face style and the watch app are free.</string>
+    <string name="pro_feature_widgets">Medium, large and extra large widgets</string>
+    <string name="pro_feature_widgets_detail">Your station and favourite stations on the Home Screen, or on iPad one station in full detail.</string>
+    <string name="pro_feature_support">Support an independent app</string>
+    <string name="pro_feature_support_detail">Keeps the app maintained and the readings coming.</string>
+    <string name="pro_choose_plan">Choose a plan</string>
+    <string name="pro_best_value">Best value</string>
+    <string name="pro_per_month">%s / month</string>
+    <string name="pro_billed_monthly">Billed monthly</string>
+    <string name="pro_lifetime_detail">Pay once, keep Pro forever</string>
+    <string name="pro_renewal_terms">Subscriptions renew automatically unless cancelled at least 24 hours before the period ends. Manage them in Google Play › Payments &amp; subscriptions › Subscriptions.</string>
+    <string name="pro_terms_of_use">Terms of Use</string>
+    <string name="pro_privacy_policy">Privacy Policy</string>
+    <string name="pro_purchase_failed">The purchase couldn\'t be completed. Please try again.</string>
+
+    <!-- Android only (FOX-58): no iPad or extra large widget; Play base plans have no names. -->
+    <string name="pro_feature_widgets_android">Medium and large widgets</string>
+    <string name="pro_feature_widgets_android_detail">Your station and favourite stations on the home screen.</string>
+    <string name="pro_plan_1m">1 month</string>
+    <string name="pro_plan_6m">6 months</string>
+    <string name="pro_plan_12m">12 months</string>
+    <string name="pro_retry">Retry</string>
+    <string name="pro_close">Close</string>
+    <string name="pro_purchase_pending">Your payment is pending. Pro turns on as soon as Google Play confirms it.</string>
+    <string name="ads_remove">Remove ads</string>
+
+    <!-- Guide -->
+    <string name="guide_section_what">What it is</string>
+    <string name="guide_section_sources">Where it comes from</string>
+    <string name="guide_section_health">Health effects</string>
+    <string name="guide_section_measure">How it\'s measured</string>
+    <string name="guide_section_tips">What you can do</string>
+    <string name="guide_section_bands">Colour bands in this app</string>
+    <string name="guide_bands_footer">Every reading on the map, the station pages and the watch is coloured by these bands.</string>
+    <string name="guide_further_reading">Read more on Wikipedia</string>
+    <string name="guide_sources_footer">Sources: Ministry of Environment (Taiwan); World Health Organization, Global Air Quality Guidelines (2021).</string>
+
+    <string name="guide_aqi_what">A single number from 0 to 500 that sums up the air. Each of the six pollutants is converted onto the same 0–500 scale, and the AQI is the highest of the six; that pollutant is reported as the main pollutant. A reading of 160 driven by ozone calls for different precautions from one driven by PM2.5, so it\'s worth checking which pollutant is behind it.</string>
+    <string name="guide_aqi_measure">Taiwan\'s Ministry of Environment publishes the AQI every hour. It isn\'t a snapshot of that hour: particulates use a weighted moving average (half the last 12 hours, half the last 4), ozone and carbon monoxide use 8-hour averages, and sulfur dioxide and nitrogen dioxide use the latest hour. A sudden spike therefore shows in the individual pollutant readings before it moves the AQI.</string>
+    <string name="guide_aqi_tips">Look at the trend as well as the number: a rising AQI in the morning often keeps rising until the weather changes. Above 100, sensitive groups (children, older adults, and people with heart or lung disease) should cut back on long or strenuous time outdoors; above 150, everyone should.</string>
+
+    <string name="guide_pm25_what">Particles 2.5 micrometres across or smaller, about a thirtieth of the width of a human hair. They are small enough to reach deep into the lungs, and the finest can pass into the bloodstream.</string>
+    <string name="guide_pm25_sources">Vehicle exhaust, power stations, factories and burning of all kinds, plus particles that form in the air itself from sulfur dioxide, nitrogen oxides and ammonia. In Taiwan, levels usually climb from autumn to spring, when weaker winds trap local pollution and the northeast monsoon carries in haze from the Asian mainland. The central and southern west coast is often worst.</string>
+    <string name="guide_pm25_health">Long-term exposure is linked to heart disease, stroke, lung cancer and slower lung development in children; short spikes can trigger asthma attacks and heart problems. The WHO guideline is 15 µg/m³ averaged over 24 hours and 5 µg/m³ over a year.</string>
+    <string name="guide_pm25_measure">Micrograms per cubic metre (µg/m³), measured hourly. The AQI uses a moving average, so the hourly reading reacts first.</string>
+    <string name="guide_pm25_tips">On high days, close the windows and run an air purifier with a HEPA filter. Outdoors, a well-fitted N95 or KN95 mask filters fine particles; ordinary surgical masks fit too loosely to do much.</string>
+
+    <string name="guide_pm10_what">Particles up to 10 micrometres across, PM2.5 included. The coarser part is mostly caught in the nose, throat and upper airways rather than the deep lung.</string>
+    <string name="guide_pm10_sources">Road and construction dust, bare ground, sea salt, and in spring, dust storms blown from northern China and Mongolia. On windy days in autumn and winter, the dry bed of the Zhuoshui River raises dust across Yunlin and Changhua.</string>
+    <string name="guide_pm10_health">Irritates the eyes, nose and throat and aggravates asthma and bronchitis. The WHO guideline is 45 µg/m³ averaged over 24 hours.</string>
+    <string name="guide_pm10_measure">Micrograms per cubic metre (µg/m³), measured hourly; the AQI uses the same moving average as PM2.5.</string>
+    <string name="guide_pm10_tips">On dusty days keep the windows shut and wipe surfaces with a damp cloth rather than dry-dusting. Masks work better against coarse dust than against PM2.5.</string>
+
+    <string name="guide_o3_what">Ozone at ground level, not the protective layer high in the atmosphere. Nothing emits it directly: it forms when nitrogen oxides and volatile organic compounds react in sunlight.</string>
+    <string name="guide_o3_sources">The ingredients come mostly from traffic, industry and solvents. Because ozone takes hours to form, it usually peaks in the early-to-mid afternoon on sunny, warm days, and is often higher downwind of cities than in them.</string>
+    <string name="guide_o3_health">Irritates the airways, causing coughing, chest tightness and shortness of breath, and lowers lung function, especially during exercise. People with asthma are affected most.</string>
+    <string name="guide_o3_measure">Parts per billion (ppb), measured hourly. The AQI uses an 8-hour average, so it lags the afternoon peak.</string>
+    <string name="guide_o3_tips">On high-ozone days, exercise in the morning or evening. Ozone breaks down quickly indoors, so staying inside works well; masks don\'t filter gases.</string>
+
+    <string name="guide_co_what">A colourless, odourless gas produced when fuel burns without enough oxygen.</string>
+    <string name="guide_co_sources">Mainly vehicle exhaust, so levels are highest beside busy roads at rush hour. Outdoors in Taiwan it rarely leaves the good band.</string>
+    <string name="guide_co_health">Carbon monoxide takes the place of oxygen in the blood. At outdoor levels it mainly matters for people with heart disease; at high concentrations it causes headache, dizziness, confusion and death.</string>
+    <string name="guide_co_measure">Parts per million (ppm), measured hourly, with an 8-hour average in the AQI.</string>
+    <string name="guide_co_tips">The real danger is indoors. Gas water heaters in enclosed balconies or bathrooms cause carbon monoxide poisoning in Taiwan every winter: keep them well ventilated and fit a CO alarm.</string>
+
+    <string name="guide_so2_what">A pungent gas released when fuel containing sulfur is burned.</string>
+    <string name="guide_so2_sources">Coal- and oil-fired power stations, refineries, heavy industry and shipping. Volcanic vents emit it too, so stations near the Datun volcanoes around Yangmingshan can read higher.</string>
+    <string name="guide_so2_health">Irritates the airways and can set off asthma within minutes. In the air it turns into sulfate particles, which add to PM2.5, and it contributes to acid rain.</string>
+    <string name="guide_so2_measure">Parts per billion (ppb), as the latest hourly value in the AQI.</string>
+    <string name="guide_so2_tips">If you have asthma, keep your reliever inhaler with you when levels rise, especially near industrial areas or volcanic vents.</string>
+
+    <string name="guide_no2_what">A reddish-brown gas formed during high-temperature combustion.</string>
+    <string name="guide_no2_sources">Mostly road traffic, then power stations and industry. Levels are highest beside busy roads and at rush hour, and drop off within a few hundred metres.</string>
+    <string name="guide_no2_health">Inflames the airways and lowers resistance to respiratory infection; long-term exposure is linked to children developing asthma. It also helps form ozone and PM2.5.</string>
+    <string name="guide_no2_measure">Parts per billion (ppb), as the latest hourly value in the AQI.</string>
+    <string name="guide_no2_tips">Walk, run or cycle a block away from main roads where you can, and avoid rush hours.</string>
+
+    <!-- visionOS -->
+
+    <!-- Map timeline -->
+    <string name="timeline_title">Past 24 hours</string>
+    <string name="timeline_now">Now</string>
+    <string name="timeline_latest">Latest</string>
+    <string name="timeline_hours_ago">%d h ago</string>
+    <string name="timeline_yesterday">Yesterday</string>
+    <string name="timeline_loading">Loading %1$d/%2$d</string>
+    <string name="timeline_play">Play the past 24 hours</string>
+    <string name="timeline_pause">Pause</string>
+    <string name="timeline_accessibility_label">Timeline</string>
+
+    <!-- Area forecast (MOENV AQF_P_01) -->
+    <string name="forecast_title">Regional forecast</string>
+    <string name="forecast_today">Today</string>
+    <string name="forecast_tomorrow">Tomorrow</string>
+    <string name="forecast_day_after_tomorrow">In 2 days</string>
+    <string name="forecast_major_pollutant">Main pollutant: %s</string>
+    <string name="forecast_no_value">No forecast value</string>
+    <string name="forecast_published">Issued %s</string>
+    <string name="forecast_source">Source: MOENV</string>
+    <string name="forecast_more">Show more</string>
+    <string name="forecast_less">Show less</string>
+    <string name="forecast_tab_title">AQI Forecast</string>
+    <string name="forecast_your_area">Your area</string>
+    <string name="forecast_favourite_area">Favourites</string>
+    <string name="forecast_none_current">No current forecast to show. MOENV\'s latest one couldn\'t be loaded; try again later.</string>
+
+    <!-- Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) -->
+    <string name="weather_title">Weather</string>
+    <string name="weather_source">Data: Central Weather Administration</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_rain_today">Rain today</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_temperature">Temperature %s</string>
+    <string name="weather_chance_of_rain">Chance of rain %s</string>
+    <string name="weather_station_named">%1$s station, %2$s away</string>
+    <string name="weather_station_nearby">CWA station %s away</string>
+    <string name="weather_observed">observed %s</string>
+    <!-- CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) -->
+    <string name="weather_wx_1">Clear</string>
+    <string name="weather_wx_2">Mostly clear</string>
+    <string name="weather_wx_3">Partly clear</string>
+    <string name="weather_wx_4">Partly cloudy</string>
+    <string name="weather_wx_5">Mostly cloudy</string>
+    <string name="weather_wx_6">Mostly cloudy</string>
+    <string name="weather_wx_7">Cloudy</string>
+    <string name="weather_wx_8">Partly cloudy, occasional showers</string>
+    <string name="weather_wx_9">Mostly cloudy, occasional rain</string>
+    <string name="weather_wx_10">Mostly cloudy, occasional rain</string>
+    <string name="weather_wx_11">Cloudy, occasional rain</string>
+    <string name="weather_wx_12">Mostly cloudy with showers</string>
+    <string name="weather_wx_13">Mostly cloudy with rain</string>
+    <string name="weather_wx_14">Rain</string>
+    <string name="weather_wx_15">Partly cloudy, showers or thunderstorms</string>
+    <string name="weather_wx_16">Mostly cloudy, showers or thunderstorms</string>
+    <string name="weather_wx_17">Mostly cloudy, thundershowers</string>
+    <string name="weather_wx_18">Showers or thunderstorms</string>
+    <string name="weather_wx_19">Clear, local afternoon rain</string>
+    <string name="weather_wx_20">Partly cloudy, afternoon showers</string>
+    <string name="weather_wx_21">Clear, afternoon thundershowers</string>
+    <string name="weather_wx_22">Partly cloudy, afternoon thundershowers</string>
+    <string name="weather_wx_23">Rain or snow</string>
+    <string name="weather_wx_24">Clear with fog</string>
+    <string name="weather_wx_25">Mostly clear with fog</string>
+    <string name="weather_wx_26">Partly clear with fog</string>
+    <string name="weather_wx_27">Partly cloudy with fog</string>
+    <string name="weather_wx_28">Cloudy with fog</string>
+    <string name="weather_wx_29">Partly cloudy, local rain</string>
+    <string name="weather_wx_30">Mostly cloudy, local rain</string>
+    <string name="weather_wx_31">Partly cloudy, fog and local rain</string>
+    <string name="weather_wx_32">Mostly cloudy, fog and local rain</string>
+    <string name="weather_wx_33">Partly cloudy, local thundershowers</string>
+    <string name="weather_wx_34">Mostly cloudy, local thundershowers</string>
+    <string name="weather_wx_35">Partly cloudy, thunderstorms and fog</string>
+    <string name="weather_wx_36">Mostly cloudy, thunderstorms and fog</string>
+    <string name="weather_wx_37">Rain or snow with fog</string>
+    <string name="weather_wx_38">Occasional rain with fog</string>
+    <string name="weather_wx_39">Rain with fog</string>
+    <string name="weather_wx_41">Showers or thunderstorms with fog</string>
+    <string name="weather_wx_42">Snow</string>
+
+    <!-- Offline: last good readings -->
+    <string name="offline_showing_saved_readings">Offline — showing the last saved readings</string>
+    <string name="offline_updated_ago">Offline · updated %s</string>
+    <string name="offline_nothing_saved">Can\'t connect, and there\'s nothing saved to show. Check your connection and try again.</string>
+    <string name="offline_retry">Try Again</string>
+
+    <!-- Welcome flow (FOX-34) -->
+    <string name="help_welcome">Getting started</string>
+    <string name="help_show_welcome_guide">Show welcome guide</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_not_now">Not Now</string>
+    <string name="onboarding_open_settings">Open Settings</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_done">Start Using Taiwan Air</string>
+    <string name="onboarding_welcome_title">Air quality across Taiwan</string>
+    <string name="onboarding_welcome_body">See the AQI and pollutant readings from every monitoring station in Taiwan, on a map and in a list, and keep your favourite stations one tap away.</string>
+    <string name="onboarding_location_title">Find your nearest station</string>
+    <string name="onboarding_location_body">Allow location so Taiwan Air can find the monitoring station closest to you and show where you are on the map.</string>
+    <string name="onboarding_enable_location">Allow Location</string>
+    <string name="onboarding_location_on">Location is on.</string>
+    <string name="onboarding_location_off">Location is off. Until you turn it on in Settings, Taiwan Air starts from Zhongzheng District, Taipei.</string>
+    <string name="onboarding_closest_title">Your closest station</string>
+    <string name="onboarding_closest_body">Add it to Favourites and its alerts switch on with it, so you hear when the air there turns unhealthy. Not your area? Choose another station.</string>
+    <string name="onboarding_closest_fallback">Location is off, so this is a stand-in: the station nearest Zhongzheng District, Taipei. Choose your own station below.</string>
+    <string name="onboarding_closest_failed">Stations couldn\'t be loaded right now. You can add favourites later from the map or Search.</string>
+    <string name="onboarding_add_to_favourites">Add to Favourites &amp; Alerts</string>
+    <string name="onboarding_in_favourites">In your Favourites</string>
+    <string name="onboarding_alerts_need_notifications">Alerts stay off until notifications are allowed for Taiwan Air.</string>
+    <string name="onboarding_notifications_title">Get air quality alerts</string>
+    <string name="onboarding_notifications_body">Allow notifications so Taiwan Air can tell you when the air at your favourite stations changes. Choose the levels on each station page.</string>
+    <string name="onboarding_allow_notifications">Allow Notifications</string>
+    <string name="onboarding_notifications_on">Notifications are on.</string>
+    <string name="onboarding_notifications_off">Notifications are off. You can turn them on in Settings.</string>
+    <string name="onboarding_dnd_title">Quiet hours</string>
+    <string name="onboarding_dnd_body">Taiwan Air\'s own setting, separate from Do Not Disturb on your phone: between these times it sends no alerts.</string>
+    <string name="onboarding_dnd_footer">You can change this anytime in Help.</string>
+    <string name="onboarding_premium_body">Alerts, favourites, the map and the watch app are free. Pro is optional: it removes ads and adds more.</string>
+    <string name="onboarding_see_pro_plans">See Pro Plans</string>
+    <string name="onboarding_premium_active">You have Pro. Thank you for your support!</string>
+    <string name="onboarding_welcome_data">Readings come every hour from the Ministry of Environment (MOENV). Taiwan Air is an independent app, not run by the government.</string>
+    <string name="onboarding_choose_station">Choose Another Station</string>
+    <string name="onboarding_choose_station_title">Choose a Station</string>
+    <string name="onboarding_cancel">Cancel</string>
+    <string name="onboarding_close">Close</string>
+    <string name="onboarding_alerts_now_on">Its alerts are now on. Change or turn them off on its station page.</string>
+    <string name="onboarding_dnd_after_notifications">Once notifications are on, you can set quiet hours here.</string>
+    <string name="onboarding_more_title">More in Taiwan Air</string>
+    <string name="onboarding_more_body">The air at a glance, without opening the app.</string>
+    <string name="onboarding_more_widgets_title">Widgets</string>
+    <string name="onboarding_more_widgets_body">On the home screen. Page through your favourites with ‹ ›, and the station detail widget shows one station in detail.</string>
+    <string name="onboarding_more_forecast_title">AQI Forecast</string>
+    <string name="onboarding_more_forecast_body">Tap AQI Forecast at the bottom of the screen for each area\'s forecast for the coming days.</string>
+    <string name="onboarding_how_to_add">How to add</string>
+    <string name="onboarding_free_heading">Free</string>
+    <string name="onboarding_free_complication">The watch face complication, with the level\'s face</string>
+    <string name="onboarding_free_index_cycling">Small widget: tap the index name to cycle AQI, PM2.5 and more</string>
+    <string name="onboarding_pro_heading">With Pro</string>
+    <string name="onboarding_pro_trial_days">%d-day free trial</string>
+    <string name="onboarding_pro_trial_weeks">%d-week free trial</string>
+    <string name="onboarding_pro_trial_months">%d-month free trial</string>
+    <string name="onboarding_pro_trial_years">%d-year free trial</string>
+    <!-- Android (FOX-96): the "More" step's shortcuts row and free line, in place of iOS's Siri,
+         Shortcuts and Control Center (FOX-95 brought launcher shortcuts, Assistant and the tile). -->
+    <string name="onboarding_more_shortcuts_title">Shortcuts, Assistant &amp; Quick Settings</string>
+    <string name="onboarding_more_shortcuts_body">Touch and hold the app icon for your stations, ask Google Assistant about the air, or add the Quick Settings tile.</string>
+    <string name="onboarding_free_shortcuts">Launcher shortcuts, Google Assistant and the Quick Settings tile</string>
+
+    <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Map (FOX-54): Android-only labels for TalkBack and the station screen stub. -->
+    <string name="map_my_location">Move to my location</string>
+    <string name="map_default_location">Move to the default location</string>
+    <string name="map_clear_search">Clear search</string>
+    <string name="map_back">Back</string>
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">Data layer</string>
+    <string name="debug_data_counts">Stations %1$d · Readings %2$d · Forecast rows %3$d</string>
+
+    <!-- Android only (FOX-57): the alerts' notification channel, and an alert's text when the sender
+         sends none (same wording as the push Worker's message.ts). -->
+    <string name="push_channel_alerts_name">Air quality alerts</string>
+    <string name="push_channel_alerts_description">Alerts when the AQI at a station you follow crosses the level you set.</string>
+    <string name="push_alert_title">%1$s: AQI %2$d</string>
+    <string name="push_alert_above_body">Air quality is now above your alert level of %d.</string>
+    <string name="push_alert_below_body">Air quality is now below your alert level of %d. The air has cleared up.</string>
+    <!-- Android only (FOX-55): the Favourites edit mode and the station page's controls. iOS uses system buttons. -->
+    <string name="favourites_edit">Edit</string>
+    <string name="favourites_done">Done</string>
+    <string name="favourites_move_up">Move up</string>
+    <string name="favourites_move_down">Move down</string>
+    <string name="details_back">Back</string>
+    <string name="details_about_index">About %s</string>
+    <string name="details_map">Map of the station\'s location</string>
+    <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's
+         Siri, Shortcuts and Control Center strings (Intent.*, Control.*). -->
+    <string name="intent_get_air_quality_title">Get Air Quality</string>
+    <string name="intent_get_air_quality_short">Air Quality</string>
+    <string name="intent_open_station_title">Open Station</string>
+    <string name="intent_answer_fallback_favourite">Taiwan Air doesn\'t have your location, so here is your first favourite.</string>
+    <string name="intent_answer_fallback_default">Taiwan Air doesn\'t have your location and you have no favourites, so here is central Taipei.</string>
+    <string name="intent_answer_no_reading">There\'s no reading yet. Open Taiwan Air once while online.</string>
+    <string name="intent_answer_no_aqi">%s has no AQI reading right now.</string>
+    <string name="intent_answer_reading">%1$s: AQI %2$s, %3$s.</string>
+    <string name="intent_answer_main_pollutant">Main pollutant: %s.</string>
+    <string name="intent_answer_guidance">%s.</string>
+    <string name="intent_answer_cached_age">You\'re offline, so this is the last saved reading, from %s ago.</string>
+    <string name="intent_answer_cached">You\'re offline, so this is the last saved reading.</string>
+    <string name="intent_answer_old_age">This reading is from %s ago.</string>
+    <string name="control_display_name">Air Quality</string>
+    <!-- Android only (FOX-95): the answer card's close button, and what Assistant hears for the
+         "Air quality" shortcut (actions.intent.OPEN_APP_FEATURE). -->
+    <string name="intent_answer_close">Close</string>
+    <string name="intent_assistant_feature_air_quality">air quality</string>
+    <!-- How old a reading is, as iOS DateComponentsFormatter (.full, one unit) says it. -->
+    <plurals name="intent_age_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="intent_age_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="intent_age_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+</resources>

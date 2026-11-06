@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- On-device translation (FOX-98): its model downloads only on an unmetered network. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Air quality alerts (FOX-57): asked for on Android 13+ when an alert is switched on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- The map's blue dot, "my location" and the nearest-first station list (FOX-54). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Share card "Save to Photos" (FOX-94): only Android 8–9 need it, asked for at the tap.
+         Android 10+ adds the photo through MediaStore with no permission. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <application
+        android:name=".TwaqiApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TWAQI">
+
+        <!-- Maps SDK: the legacy renderer (used where the latest one isn't available) needs
+             Apache HTTP, which apps targeting API 28+ must declare, or the map crashes on load. -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <!-- AdMob app id (FOX-58), from secrets.properties. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${ADMOB_APP_ID}" />
+        <!-- Push alerts (FOX-57): FCM shows background alerts on this channel, with this icon. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="aqi_alerts" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <!-- On only with app/google-services.json (FCM_ENABLED); the app builds and runs without it. -->
+        <service
+            android:name=".push.TwaqiMessagingService"
+            android:enabled="${FCM_ENABLED}"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- Firebase collection at start-up: off in debug builds (FOX-60). TrackingManager sets it
+             at every launch, from the build and the per-install opt-out. -->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="${FIREBASE_COLLECTION_ENABLED}" />
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${FIREBASE_COLLECTION_ENABLED}" />
+
+        <!-- Below Android 13, AppCompat keeps the app language (AppCompatDelegate.setApplicationLocales)
+             and moves it to the system's per-app locale after an upgrade to 13+ (FOX-56). -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TWAQI">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Launcher shortcuts and Google Assistant App Actions (FOX-95). -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <!-- twaqi://station?id=…&source=… (FOX-59 widget taps, FOX-95 shortcuts and tile; DeepLink). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="station"
+                    android:scheme="twaqi" />
+            </intent-filter>
+        </activity>
+
+        <!-- Share card (FOX-94): the card PNG in the cache, shared as a content:// URI. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_card_paths" />
+        </provider>
+
+        <!-- Feedback form opened outside Help, e.g. from a station's page (FOX-60, FeedbackNavigation). -->
+        <activity
+            android:name=".feedback.FeedbackActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TWAQI" />
+
+        <!-- Pro (FOX-58): opened in-app through ProNavigation, and by twaqi://pro?source=… -->
+        <activity
+            android:name=".pro.ProActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TWAQI">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="pro"
+                    android:scheme="twaqi" />
+            </intent-filter>
+        </activity>
+
+        <!-- "What's the air?" (FOX-95): the answer card, over whatever was on screen, opened by the
+             "Air quality" shortcut and Google Assistant through twaqi://air-quality (DeepLink). -->
+        <activity
+            android:name=".shortcuts.AirQualityAnswerActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.TWAQI.Answer">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="air-quality"
+                    android:scheme="twaqi" />
+            </intent-filter>
+        </activity>
+
+        <!-- Quick Settings tile (FOX-95), Android's Control Center control. -->
+        <service
+            android:name=".shortcuts.AirQualityTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_aqi_low"
+            android:label="@string/control_display_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Wear OS (FOX-62): the watch's locked-complication events, logged to Firebase here. -->
+        <service
+            android:name=".wear.WatchEventListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/twaqi/watch-events"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+
+        <!-- Home screen widgets (FOX-59): the air-quality widget (small free; medium and large Pro)
+             and the station detail widget (Pro). Both are set up in WidgetConfigureActivity. -->
+        <receiver
+            android:name=".widget.AirQualityWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_air_quality_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.StationDetailWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_detail_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_station_detail_info" />
+        </receiver>
+
+        <activity
+            android:name=".widget.WidgetConfigureActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.TWAQI">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

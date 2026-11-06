@@ -12,7 +12,7 @@ name: LGTM
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [master]
+    branches: [master, feature/fox-52-android-project-setup]
   pull_request_review:
     types: [submitted, edited, dismissed]
   issue_comment:
@@ -29,7 +29,7 @@ jobs:
   gate:
     name: LGTM gate
     # issue_comment events don't carry the base ref; the script skips other bases.
-    if: ${{ (github.event_name == 'issue_comment' && github.event.issue.pull_request) || (github.event_name != 'issue_comment' && github.event.pull_request.base.ref == 'master') }}
+    if: ${{ (github.event_name == 'issue_comment' && github.event.issue.pull_request) || (github.event_name != 'issue_comment' && (github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'feature/fox-52-android-project-setup')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,9 +47,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref || 'master' }}
         run: |
           set -euo pipefail
-          # master's copy when there is one, so a PR can't rewrite its own gate.
+          # The base branch's copy when there is one (master's for comments), so a
+          # PR can't rewrite its own gate.
           script="$RUNNER_TEMP/lgtm_gate.py"
-          git show origin/master:tools/lgtm_gate.py >"$script" 2>/dev/null || cp tools/lgtm_gate.py "$script"
+          git show "origin/$BASE_REF:tools/lgtm_gate.py" >"$script" 2>/dev/null || cp tools/lgtm_gate.py "$script"
           python3 "$script"

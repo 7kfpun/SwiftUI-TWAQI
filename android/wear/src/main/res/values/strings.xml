@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Wear OS app's text (FOX-62), ported from the iOS watch strings (ios/TWAQI/Localization,
+     Watch.* and the shared keys), named as in the phone app: the iOS key in snake_case.
+     Every string is also in values-zh-rTW (WearStringResourcesTest). -->
+<resources>
+    <string name="app_name" translatable="false">Taiwan Air</string>
+
+    <string name="watch_stations">Stations</string>
+    <string name="watch_loading_failed">Couldn\'t load readings</string>
+    <string name="watch_retry">Retry</string>
+    <string name="watch_widget_name">Air quality</string>
+    <string name="watch_widget_description">Air quality at the station you chose in the app. The face is free; the number and other styles are Pro.</string>
+    <string name="watch_widget_short">%1$s (number only)</string>
+    <string name="watch_widget_face">%1$s (face)</string>
+    <string name="watch_widget_status">%1$s (status)</string>
+    <string name="watch_widget_pro">%1$s · Pro</string>
+    <string name="watch_no_station">Open the app to choose a station</string>
+    <string name="watch_history">Past 12 hours</string>
+    <string name="watch_closest">Closest station</string>
+    <string name="watch_default_station">Default · no location</string>
+    <string name="watch_pro_title">Numbers &amp; styles · Pro</string>
+    <string name="watch_pro_failed">Purchase not found. Try again, or restore.</string>
+    <string name="watch_pro_locked">Pro · Open the app to unlock</string>
+    <string name="watch_pro_feature_complications">The number on your watch face</string>
+    <!-- iOS: "No ads on iPhone". -->
+    <string name="watch_pro_feature_no_ads">No ads on your phone</string>
+    <string name="watch_pro_feature_indices">AQI, PM2.5 and 5 more indices</string>
+    <string name="watch_pro_complications_cta">Numbers on the watch face</string>
+
+    <!-- Android only: Pro is bought in the phone app (Play Billing, FOX-58). -->
+    <string name="watch_pro_open_on_phone">Subscribe on your phone</string>
+    <string name="watch_pro_continue_on_phone">Continue on your phone.</string>
+    <string name="watch_pro_phone_unavailable">Open Taiwan Air on your phone to subscribe.</string>
+    <!-- Android only: the complication's setup screen (iOS lists each combination in the face picker). -->
+    <string name="watch_complication_index">Index</string>
+    <string name="watch_complication_style">Style</string>
+
+    <string name="airstatus_good">Good</string>
+    <string name="airstatus_moderate">Moderate</string>
+    <string name="airstatus_unhealthyforsensitivegroup">Unhealthy for sensitive groups</string>
+    <string name="airstatus_unhealthy">Unhealthy</string>
+    <string name="airstatus_veryunhealthy">Very unhealthy</string>
+    <string name="airstatus_hazardous">Hazardous</string>
+    <string name="airstatus_unknown">-</string>
+
+    <string name="details_no_trend_data">Not enough readings yet to show a trend</string>
+    <string name="wind_calm">Calm</string>
+    <string name="help_restore_purchase">Restore purchase</string>
+    <string name="favouritelist_favourites">Favourites</string>
+    <string name="detailslist_search">Search</string>
+</resources>
