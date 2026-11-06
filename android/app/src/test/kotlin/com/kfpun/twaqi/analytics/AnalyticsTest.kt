@@ -36,4 +36,13 @@ class AnalyticsTest {
         assertEquals("review_requested", Analytics.REVIEW_REQUESTED)
         assertEquals("write_review_tapped", Analytics.WRITE_REVIEW_TAPPED)
     }
+
+    /** #77 review: Help's cancel-all and the shortcuts guide, named as iOS `AnalyticsEvent`. */
+    @Test
+    fun helpNamesMatchIos() {
+        assertEquals("favourite_station_all_removed", Analytics.FAVOURITE_STATION_ALL_REMOVED)
+        assertEquals("open_shortcuts_guide", Analytics.OPEN_SHORTCUTS_GUIDE)
+        assertEquals("open_widget_guide", Analytics.OPEN_WIDGET_GUIDE)
+        assertEquals("open_watch_guide", Analytics.OPEN_WATCH_GUIDE)
+    }
 }

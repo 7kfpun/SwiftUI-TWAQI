@@ -120,7 +120,7 @@
     <string name="help_widgets_shows_header">顯示內容</string>
     <string name="help_widgets_shows_body">顯示最近測站或你選定測站目前的數值。加入小工具時即可選擇；之後要更改，請按住小工具並開啟它的設定。</string>
     <string name="help_widgets_favourites_header">最愛測站</string>
-    <string name="help_widgets_favourites_body">中、大尺寸小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。測站詳情小工具則詳細顯示單一測站：各項指標、風向風速、過去 24 小時、空品區預報與測站即時影像。中、大尺寸與測站詳情小工具屬於 Pro。</string>
+    <string name="help_widgets_favourites_body">小、中、大尺寸小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。測站詳情小工具則詳細顯示單一測站：各項指標、風向風速、過去 24 小時、空品區預報與測站即時影像。中、大尺寸與測站詳情小工具屬於 Pro。</string>
     <string name="help_widgets_favourites_add">開啟測站並點一下愛心，即可加入最愛。小工具會依「我的最愛」的順序列出：在該頁點「編輯」並拖移即可調整順序。</string>
     <string name="help_widgets_favourites_offline">沒有網路時，小工具會顯示最後一次儲存的數值。</string>
     <string name="help_widgets_index_header">選擇指標</string>
@@ -139,7 +139,7 @@
     <string name="help_back">返回</string>
     <string name="help_watch_title">Wear OS</string>
     <string name="help_watch_app_header">手錶 App</string>
-    <string name="help_watch_app_body">免費。以等級顏色顯示你的最愛測站與目前數值。</string>
+    <string name="help_watch_app_body">免費。顯示最近測站或你選定的測站目前數值，以及過去 12 小時。手機上的最愛測站會以等級顏色排在測站清單最前面。</string>
     <string name="help_watch_complications_header">錶面複雜功能</string>
     <string name="help_watch_complications_body">表情樣式免費：以等級顏色顯示表情，AQI、PM2.5 等 7 項指標任選。Pro 加上數值與更多樣式：指標名稱加數值、僅數值，以及狀態文字。手錶 App 本身免費。</string>
     <string name="help_watch_tile_header">資訊方塊</string>
@@ -148,6 +148,17 @@
     <string name="help_watch_add_1">1. 按住錶面，點一下「編輯」，選擇一個複雜功能。</string>
     <string name="help_watch_add_2">2. 選擇 Taiwan Air。</string>
     <string name="help_watch_footer">請先開啟手機上的 App 或手錶 App 一次，讓測站與數值就緒。</string>
+    <!-- Android (#77 review): Help's shortcuts guide, in place of iOS Help.shortcuts_* (Siri, Shortcuts,
+         Control Center). What FOX-95 shipped: launcher shortcuts, Google Assistant, the Quick Settings tile. -->
+    <string name="help_shortcuts_title">捷徑、Google 助理與快速設定</string>
+    <string name="help_shortcuts_launcher_header">App 捷徑</string>
+    <string name="help_shortcuts_launcher_body">按住 Taiwan Air 圖示。「空氣品質」會顯示最近測站的 AQI、等級、主要污染物與活動建議。下方是你的最愛測站與最近開啟的測站，點一下即可開啟。把捷徑拖到主畫面，就能一直留著。</string>
+    <string name="help_shortcuts_assistant_header">Google 助理</string>
+    <string name="help_shortcuts_assistant_body">說「Hey Google，在 Taiwan Air 開啟空氣品質」即可看到同一張卡片，或說「Hey Google，在 Taiwan Air 開啟松山」開啟最愛或最近開啟的測站。</string>
+    <string name="help_shortcuts_location_body">只有在你已允許本 App 使用位置時，才會查詢最近的測站；否則會改用你的第一個最愛測站。</string>
+    <string name="help_shortcuts_tile_header">快速設定圖塊</string>
+    <string name="help_shortcuts_tile_body">從螢幕頂端向下滑兩次，點一下鉛筆圖示進入編輯，再把「空氣品質」圖塊拖到想要的位置。它會顯示最近測站或第一個最愛測站的 AQI，點一下即可開啟該測站。</string>
+    <string name="help_shortcuts_footer">所有人皆可免費使用。</string>
 
     <string name="airindex_meaning_aqi">空氣品質指標</string>
     <string name="airindex_meaning_pm25">細懸浮微粒</string>

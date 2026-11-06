@@ -41,6 +41,7 @@ class HelpTest {
             listOf(
                 HelpDestination.WidgetGuide,
                 HelpDestination.WearOsGuide,
+                HelpDestination.ShortcutsGuide,
                 HelpDestination.Cooperate,
                 HelpDestination.Feedback
             )

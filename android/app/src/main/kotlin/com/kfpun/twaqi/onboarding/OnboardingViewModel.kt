@@ -149,9 +149,12 @@ class OnboardingViewModel(
             viewModelScope.launch {
                 location = locateOrNull() ?: return@launch
                 // Back from the station step with location now on: find the station near the
-                // reader instead of the 中正 stand-in.
+                // reader instead of the 中正 stand-in. Resolved here, not left to the step: a fix
+                // slower than the success pause lands after the step has already asked
+                // (loadClosestStation returns while the stand-in is showing). A station the
+                // reader chose is not a stand-in, so it stays.
                 val shown = (state.value.closest as? ClosestState.Loaded)?.station
-                if (shown?.isFallback == true) state.update { it.copy(closest = ClosestState.Loading) }
+                if (shown?.isFallback == true) resolveClosestStation()
             }
         }
         locationJob?.cancel()
@@ -174,6 +177,11 @@ class OnboardingViewModel(
     /** Finds the nearest station, or the one nearest 中正 without a location. Never prompts. */
     fun loadClosestStation() {
         if (state.value.closest is ClosestState.Loaded) return
+        resolveClosestStation()
+    }
+
+    /** Shows a spinner, then the station nearest the fix (or 中正 without one). A station chosen meanwhile stays. */
+    private fun resolveClosestStation() {
         state.update { it.copy(closest = ClosestState.Loading) }
         viewModelScope.launch {
             if (location == null && state.value.location == PermissionState.ON) location = locateOrNull()

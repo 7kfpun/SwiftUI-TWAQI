@@ -2,6 +2,7 @@ package com.kfpun.twaqi.ui.station.share
 
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.Pollutant
+import com.kfpun.twaqi.data.model.Station
 import java.io.File
 import java.nio.file.Files
 import java.time.Duration
@@ -77,6 +78,31 @@ class ShareCardTest {
             listOf(AirIndexType.PM25 to 18.0, AirIndexType.PM10 to 40.0, AirIndexType.O3 to 31.5),
             ShareCardContent.readings(pollutant)
         )
+    }
+
+    /**
+     * #77 review: the card's locality is the station page's, township translated (FOX-98); the
+     * county is the API's English or Chinese, never translated.
+     */
+    @Test
+    fun localityTranslatesTheTownshipAsTheStationPageDoes() {
+        val pollutant = Pollutant(
+            stationId = 12, code = "KL", lat = 25.1, lon = 121.7, aqi = 54.0, pm25 = 18.0, pm10 = 40.0,
+            no2 = 9.0, so2 = 1.0, co = 0.3, o3 = 31.5, windDirection = 0.0, windSpeed = 0.0,
+            publishTime = "2026-08-07T22:00:00", name = "Keelung", nameLocal = "基隆",
+            county = "Keelung City", countyLocal = "基隆市", township = "信義區"
+        )
+        val translate: (String) -> String = { if (it == "信義區") "Xinyi" else it }
+
+        assertEquals("Xinyi, Keelung City", ShareCardContent.locality(pollutant, null, chinese = false, translate))
+        assertEquals("信義區, 基隆市", ShareCardContent.locality(pollutant, null, chinese = true) { it })
+        // Without a reading, the station's own locality.
+        val station = Station(
+            id = 12, countryId = 1, countryCode = "TW", code = "KL", lat = 25.1, lon = 121.7, imageUrl = null,
+            name = "Keelung", nameLocal = "基隆", county = "Keelung City", countyLocal = "基隆市", township = "信義區"
+        )
+        assertEquals("Xinyi, Keelung City", ShareCardContent.locality(null, station, chinese = false, translate))
+        assertNull(ShareCardContent.locality(null, null, chinese = false, translate))
     }
 
     // endregion
