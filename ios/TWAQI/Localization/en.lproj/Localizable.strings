@@ -62,6 +62,20 @@
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
 "Help.feedback_or_contact_us" = "Feedback / Contact us";
 "Help.definition" = "Understanding the readings";
+/* Help → Data sources (FOX-88): every source, named here instead of on each screen */
+"DataSources.header" = "Data sources";
+"DataSources.air_quality_title" = "Air quality readings";
+"DataSources.air_quality_detail" = "Ministry of Environment (MOENV), Air Quality Monitoring Network: AQI, pollutants and wind. Published every hour.";
+"DataSources.forecast_title" = "Regional forecast";
+"DataSources.forecast_detail" = "MOENV's air quality forecast for each region. Issued a few times a day.";
+"DataSources.cams_title" = "Station cameras";
+"DataSources.cams_detail" = "MOENV's view from each monitoring station. A new image every 10 minutes; the last 24 hours are kept, one an hour.";
+"DataSources.weather_title" = "Weather";
+"DataSources.weather_detail" = "Central Weather Administration (CWA) open data: the 36-hour forecast for each county, and observations from the nearest staffed weather station, refreshed every hour.";
+"DataSources.map_title" = "Map";
+"DataSources.map_detail" = "Google Maps.";
+"DataSources.licence_title" = "Open Government Data License, version 1.0";
+"DataSources.footer" = "MOENV and CWA data are used under Taiwan's Open Government Data License, version 1.0. Taiwan Air is an independent app, not run by the government.";
 "Help.data_provided_by_government" = "The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)";
 
 "Feedback.title" = "Feedback";
@@ -229,7 +243,6 @@
 "Details.alerts_try_again" = "Try Again";
 "Details.live_cam" = "Live camera";
 "Details.cam_captured %@" = "Captured %@";
-"Details.cam_source" = "Image: MOENV";
 "Details.no_cam" = "This station has no camera";
 "Details.cam_unavailable" = "Couldn't load the camera image";
 "Details.cam_showing_saved" = "Couldn't load the latest image — showing the last one saved";
@@ -409,24 +422,22 @@
 "Forecast.major_pollutant %@" = "Main pollutant: %@";
 "Forecast.no_value" = "No forecast value";
 "Forecast.published %@" = "Issued %@";
-"Forecast.source" = "Source: MOENV";
 "Forecast.more" = "Show more";
 "Forecast.less" = "Show less";
 "Forecast.tab_title" = "AQI Forecast";
 "Forecast.your_area" = "Your area";
 "Forecast.favourite_area" = "Favourites";
-"Forecast.none_current" = "No current forecast to show. MOENV's latest one couldn't be loaded; try again later.";
+"Forecast.none_current" = "No current forecast to show. The latest one couldn't be loaded; try again later.";
 
 /* Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) */
 "Weather.title" = "Weather";
-"Weather.source" = "Data: Central Weather Administration";
 "Weather.humidity" = "Humidity";
 "Weather.rain_today" = "Rain today";
 "Weather.wind" = "Wind";
 "Weather.temperature %@" = "Temperature %@";
 "Weather.chance_of_rain %@" = "Chance of rain %@";
 "Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
-"Weather.station_nearby %@" = "CWA station %@ away";
+"Weather.station_nearby %@" = "Weather station %@ away";
 "Weather.observed %@" = "observed %@";
 /* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
 "Weather.wx.1" = "Clear";

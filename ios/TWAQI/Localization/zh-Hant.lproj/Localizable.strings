@@ -66,6 +66,20 @@
 "Help.interested_to_be_our_business_partner" = "想成為我們的合作夥伴嗎？";
 "Help.feedback_or_contact_us" = "意見回饋 / 聯絡我們";
 "Help.definition" = "認識空氣品質指標";
+/* 說明 → 資料來源（FOX-88）：所有資料來源集中在此，不在各畫面標示 */
+"DataSources.header" = "資料來源";
+"DataSources.air_quality_title" = "空氣品質監測數值";
+"DataSources.air_quality_detail" = "環境部「空氣品質監測網」：AQI、各項污染物與風向風速，每小時發布。";
+"DataSources.forecast_title" = "空品區預報";
+"DataSources.forecast_detail" = "環境部各空品區的空氣品質預報，每天發布數次。";
+"DataSources.cams_title" = "測站即時影像";
+"DataSources.cams_detail" = "環境部監測站的即時影像，每 10 分鐘更新一張，並保留過去 24 小時、每小時一張。";
+"DataSources.weather_title" = "天氣";
+"DataSources.weather_detail" = "中央氣象署開放資料：各縣市未來 36 小時天氣預報，以及最近的局屬氣象站觀測，每小時更新。";
+"DataSources.map_title" = "地圖";
+"DataSources.map_detail" = "Google 地圖。";
+"DataSources.licence_title" = "政府資料開放授權條款－第1版";
+"DataSources.footer" = "環境部與中央氣象署的資料依「政府資料開放授權條款－第1版」使用。Taiwan Air 是獨立開發的 App，並非政府經營。";
 "Help.data_provided_by_government" = "本 App 資料由環境部「空氣品質監測網」開放資料提供。";
 
 "Feedback.title" = "意見回饋";
@@ -233,7 +247,6 @@
 "Details.alerts_try_again" = "再試一次";
 "Details.live_cam" = "即時影像";
 "Details.cam_captured %@" = "拍攝於 %@";
-"Details.cam_source" = "影像來源：環境部";
 "Details.no_cam" = "此測站沒有即時影像";
 "Details.cam_unavailable" = "目前無法載入影像";
 "Details.cam_showing_saved" = "無法載入最新影像，顯示最後儲存的畫面";
@@ -413,24 +426,22 @@
 "Forecast.major_pollutant %@" = "主要污染物：%@";
 "Forecast.no_value" = "尚無預報值";
 "Forecast.published %@" = "發布 %@";
-"Forecast.source" = "資料來源：環境部";
 "Forecast.more" = "顯示更多";
 "Forecast.less" = "收合";
 "Forecast.tab_title" = "空品區預報";
 "Forecast.your_area" = "所在地區";
 "Forecast.favourite_area" = "最愛測站";
-"Forecast.none_current" = "目前沒有可顯示的最新預報，環境部的最新預報暫時無法載入，請稍後再試。";
+"Forecast.none_current" = "目前沒有可顯示的最新預報，暫時無法載入，請稍後再試。";
 
 /* 測站頁的天氣（FOX-11，中央氣象署 F-C0032-001、O-A0003-001） */
 "Weather.title" = "天氣";
-"Weather.source" = "資料來源：中央氣象署";
 "Weather.humidity" = "濕度";
 "Weather.rain_today" = "今日雨量";
 "Weather.wind" = "風速";
 "Weather.temperature %@" = "氣溫 %@";
 "Weather.chance_of_rain %@" = "降雨機率 %@";
 "Weather.station_named %@ %@" = "%1$@測站，距離 %2$@";
-"Weather.station_nearby %@" = "中央氣象署測站，距離 %@";
+"Weather.station_nearby %@" = "氣象測站，距離 %@";
 "Weather.observed %@" = "觀測於%@";
 /* 中央氣象署預報天氣描述代碼，每個代碼一則代表描述 */
 "Weather.wx.1" = "晴天";
