@@ -22,7 +22,7 @@ function fakeDirectus(url: string, init: RequestInit = {}): Response {
   if (method === 'GET' && id) return Response.json({ data: rows.find((r) => r.id === Number(id)) ?? null })
   if (method === 'GET') return Response.json({ data: rows.filter(match).sort((a, b) => a.id - b.id) })
   if (method === 'POST') {
-    if (collection === 'twaqi_push_devices' && rows.some((r) => r.device_id === body.device_id || r.device_token === body.device_token)) {
+    if (collection === 'twaqi_push_devices' && rows.some((r) => r.device_id === body.device_id || (body.device_token != null && r.device_token === body.device_token))) {
       return new Response('{"errors":[{"message":"unique"}]}', { status: 400 })
     }
     const row = { id: nextId++, ...body }
@@ -147,6 +147,76 @@ describe('app API auth', () => {
   })
 })
 
+describe('app API platforms (FOX-100)', () => {
+  // What the Android app sends from FOX-100 on: no device_token unless a test gives one.
+  const android = (over: Record<string, unknown> = {}) => {
+    const body: Record<string, unknown> = device({ platform: 'android', fcm_token: 'fcm:android', ...over })
+    if (!('device_token' in over)) delete body.device_token
+    return body
+  }
+
+  it('stores ios for a body without a platform, as every iOS build sends', async () => {
+    assert.equal((await call('PUT', '/app/v1/device', device())).status, 200)
+    assert.equal(tables.twaqi_push_devices[0].platform, 'ios')
+    assert.equal(tables.twaqi_push_devices[0].device_token, TOKEN)
+  })
+
+  it('keeps iOS validation: an iOS row still needs a hex APNs token', async () => {
+    const noToken: Record<string, unknown> = device()
+    delete noToken.device_token
+    assert.equal((await call('PUT', '/app/v1/device', noToken)).status, 400)
+    assert.equal((await call('PUT', '/app/v1/device', device({ platform: 'ios' }))).status, 200)
+    assert.equal((await call('PUT', '/app/v1/device', device({ platform: 'ios', device_token: null }))).status, 400)
+    assert.equal((await call('PUT', '/app/v1/device', device({ device_token: 'not-hex' }))).status, 400)
+    assert.equal((await call('PUT', '/app/v1/device', device({ environment: undefined }))).status, 400)
+  })
+
+  it('refuses a platform it does not know', async () => {
+    assert.equal((await call('PUT', '/app/v1/device', device({ platform: 'web' }))).status, 400)
+    assert.equal((await call('PUT', '/app/v1/device', device({ platform: 1 }))).status, 400)
+    assert.equal(tables.twaqi_push_devices.length, 0)
+  })
+
+  it('stores an Android device with no device_token, and its alerts', async () => {
+    assert.deepEqual(await call('PUT', '/app/v1/device', android()), { status: 200, body: { id: 1, created: true } })
+    const row = tables.twaqi_push_devices[0]
+    assert.equal(row.platform, 'android')
+    assert.equal(row.fcm_token, 'fcm:android')
+    assert.equal('device_token' in row, false)
+    assert.equal((await call('PUT', '/app/v1/stations/105', { site_id: '015', above: 120 })).status, 200)
+    const subs = (await call('GET', '/app/v1/device')).body.subscriptions as Row[]
+    assert.deepEqual(subs.map((s) => [s.station_id, s.direction, s.threshold, s.enabled]), [['105', 'above', 120, true]])
+    // Updated in place, still Android.
+    assert.deepEqual((await call('PUT', '/app/v1/device', android({ locale: 'en' }))).body, { id: 1, created: false })
+    assert.deepEqual([tables.twaqi_push_devices.length, row.platform, row.locale], [1, 'android', 'en'])
+  })
+
+  it('accepts a null device_token from Android', async () => {
+    assert.equal((await call('PUT', '/app/v1/device', android({ device_token: null }))).status, 200)
+    assert.equal(tables.twaqi_push_devices[0].platform, 'android')
+  })
+
+  it('keeps existing Android installs working: the 64-hex SHA-256 shim is accepted', async () => {
+    const shim = await sha256(ME)
+    assert.match(shim, /^[0-9a-f]{64}$/)
+    assert.equal((await call('PUT', '/app/v1/device', android({ device_token: shim }))).status, 200)
+    const row = tables.twaqi_push_devices[0]
+    assert.deepEqual([row.platform, row.device_token, row.fcm_token], ['android', shim, 'fcm:android'])
+    // A shim that is not hex is refused, as on iOS.
+    assert.equal((await call('PUT', '/app/v1/device', android({ device_token: 'zz' }))).status, 400)
+  })
+
+  it('an Android row with no device_token retires nothing else', async () => {
+    tables.twaqi_push_devices.push({ id: 3, ...device({ device_id: null }), secret_hash: null })
+    nextId = 4
+    assert.deepEqual((await call('PUT', '/app/v1/device', android())).body, { id: 4, created: true })
+    assert.equal(tables.twaqi_push_devices[0].archived, false)
+    // Two Android rows without a token don't collide.
+    const other = { id: '6f1c2e7a-0000-4000-8000-000000000002', secret: 'c'.repeat(43) }
+    assert.deepEqual((await call('PUT', '/app/v1/device', android(), other)).body, { id: 5, created: true })
+  })
+})
+
 describe('app API alerts', () => {
   beforeEach(async () => {
     await call('PUT', '/app/v1/device', device())
@@ -217,5 +287,33 @@ describe('plan', () => {
 
   it('archives duplicates from an earlier race', () => {
     assert.deepEqual(plan([row(1, 'above', 120), row(2, 'above', 120)], '5', null, { above: 120, below: null }), { save: [], archive: [2] })
+  })
+})
+
+describe('twaqi_push_devices platform schema (FOX-100)', () => {
+  it('adds platform with ios as the default, and only the values the Worker accepts', async () => {
+    const { platformField } = await import('../directus/push-devices-platform.mjs')
+    assert.equal(platformField.field, 'platform')
+    assert.equal(platformField.schema.default_value, 'ios')
+    assert.deepEqual(platformField.meta.options.choices.map((c: { value: string }) => c.value), ['ios', 'android'])
+  })
+
+  it('lets device_token be empty only where it is not yet', async () => {
+    const { deviceTokenChange } = await import('../directus/push-devices-platform.mjs')
+    assert.equal(deviceTokenChange({ meta: { required: false }, schema: { is_nullable: true } }), null)
+    assert.deepEqual(deviceTokenChange({ meta: { required: true }, schema: { is_nullable: true } }), { meta: { required: false } })
+    assert.deepEqual(deviceTokenChange({ meta: {}, schema: { is_nullable: false } }), { schema: { is_nullable: true } })
+  })
+
+  it('adds platform to a worker permission that lists fields, and leaves * alone', async () => {
+    const { permissionFields } = await import('../directus/push-devices-platform.mjs')
+    assert.equal(permissionFields(['*']), null)
+    assert.equal(permissionFields('*'), null)
+    assert.equal(permissionFields(['device_token', 'platform']), null)
+    assert.deepEqual(permissionFields(['device_token', 'fcm_token']), ['device_token', 'fcm_token', 'platform'])
+    // No fields at all: left alone rather than narrowed to platform.
+    assert.equal(permissionFields(null), null)
+    assert.equal(permissionFields([]), null)
+    assert.equal(permissionFields(''), null)
   })
 })
