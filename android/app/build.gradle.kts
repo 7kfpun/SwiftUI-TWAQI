@@ -44,6 +44,61 @@ if (hasReleaseKeystore) {
         )
     }
 }
+// AdMob (FOX-58, FOX-61). Debug builds always use Google's published test ids
+// (developers.google.com/admob/android/test-ads), so a debug build on a real phone never
+// serves real ads, and taps on them never count. Release builds use the real ids from
+// secrets.properties, and verifyReleaseAdIds stops a release from packaging with test,
+// placeholder or malformed ids.
+val adMobTestPublisher = "ca-app-pub-3940256099942544"
+val adMobTestAppId = "$adMobTestPublisher~3347511713"
+val adMobTestBannerUnitId = "$adMobTestPublisher/6300978111"
+val adUnitKeys = listOf(
+    "AD_UNIT_ID_MAIN_FOOTER",
+    "AD_UNIT_ID_DETAILS_LIST_FOOTER",
+    "AD_UNIT_ID_DETAILS_FOOTER",
+    "AD_UNIT_ID_FAVOURITES_FOOTER",
+    "AD_UNIT_ID_HELP_FOOTER"
+)
+
+fun com.android.build.api.dsl.ApplicationBuildType.adMobIds(appId: String, unitId: (String) -> String) {
+    manifestPlaceholders["ADMOB_APP_ID"] = appId
+    buildConfigField("String", "ADMOB_APP_ID", javaString(appId))
+    adUnitKeys.forEach { buildConfigField("String", it, javaString(unitId(it))) }
+}
+
+// Why a release id is unusable, or null when it is a real one.
+fun releaseAdIdProblem(name: String, value: String, separator: Char): String? {
+    val format = Regex("ca-app-pub-(\\d{16})\\$separator\\d{10}")
+    val publisher = format.matchEntire(value)?.groupValues?.get(1)
+    return when {
+        value.startsWith(adMobTestPublisher) -> "$name is one of Google's test ids"
+        publisher == null -> "$name is not an AdMob id (ca-app-pub-<16 digits>$separator<10 digits>)"
+        publisher.all { it == '0' } -> "$name is the placeholder from secrets.example.properties"
+        else -> null
+    }
+}
+val releaseAdIdProblems = buildList {
+    releaseAdIdProblem("ADMOB_APP_ID", secret("ADMOB_APP_ID"), '~')?.let(::add)
+    adUnitKeys.forEach { key -> releaseAdIdProblem(key, secret(key), '/')?.let(::add) }
+}
+val verifyReleaseAdIds by tasks.registering {
+    description = "Fails when a release build would ship AdMob test, placeholder or malformed ids."
+    val problems = releaseAdIdProblems
+    doLast {
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "Release builds need the real AdMob ids in android/secrets.properties:\n  " +
+                    problems.joinToString("\n  ")
+            )
+        }
+    }
+}
+// Packaging a release APK or bundle (and so every Play upload) runs the check first. Release
+// unit tests and lint don't package, so CI's example config still builds them.
+tasks.matching { it.name == "packageRelease" || it.name == "packageReleaseBundle" }.configureEach {
+    dependsOn(verifyReleaseAdIds)
+}
+
 // Firebase config (gitignored). Without it the Firebase plugins stay off and FCM is not wired.
 val hasGoogleServices = file("google-services.json").isFile
 
@@ -83,15 +138,7 @@ android {
         // The webcam host (FOX-92): station cams, their hourly history and the manifest.
         buildConfigField("String", "STATION_CAMS_URL", javaString(secret("STATION_CAMS_URL")))
         manifestPlaceholders["MAPS_API_KEY"] = secret("MAPS_API_KEY")
-        // AdMob (FOX-58). The example file holds Google's test ids.
-        manifestPlaceholders["ADMOB_APP_ID"] = secret("ADMOB_APP_ID")
-        listOf(
-            "AD_UNIT_ID_MAIN_FOOTER",
-            "AD_UNIT_ID_DETAILS_LIST_FOOTER",
-            "AD_UNIT_ID_DETAILS_FOOTER",
-            "AD_UNIT_ID_FAVOURITES_FOOTER",
-            "AD_UNIT_ID_HELP_FOOTER"
-        ).forEach { buildConfigField("String", it, javaString(secret(it))) }
+        // AdMob ids are per build type (FOX-61): see buildTypes below.
         // Push alerts (FOX-57): the push Worker's base URL (iOS: PushApiUrl). Empty: alerts are
         // saved on the phone and not synced. FCM is on only with app/google-services.json.
         buildConfigField("String", "PUSH_API_URL", javaString(secret("PUSH_API_URL")))
@@ -115,9 +162,13 @@ android {
         // (TrackingManager, FOX-60); release builds report unless the install opted out.
         debug {
             manifestPlaceholders["FIREBASE_COLLECTION_ENABLED"] = "false"
+            // Google's test ads only, whatever secrets.properties says (FOX-61).
+            adMobIds(adMobTestAppId) { adMobTestBannerUnitId }
         }
         release {
             manifestPlaceholders["FIREBASE_COLLECTION_ENABLED"] = "true"
+            // The real ids from secrets.properties; verifyReleaseAdIds checks them.
+            adMobIds(secret("ADMOB_APP_ID")) { secret(it) }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

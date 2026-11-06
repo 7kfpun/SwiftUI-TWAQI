@@ -77,8 +77,13 @@ All of these are gitignored. A clean checkout builds without any of them.
   plan's own offer (no trial or intro offer, as on iOS). Test with license testers on a
   closed-test track; an emulator without Play shows "Retry" instead of plans.
 - **AdMob:** the Android app's id goes in `ADMOB_APP_ID`, its banner units in
-  `AD_UNIT_ID_*_FOOTER` (one per placement, as on iOS). The example file holds Google's test
-  ids. Ads load only after Google's UMP consent allows them, and never for Pro.
+  `AD_UNIT_ID_*_FOOTER` (one per placement, as on iOS). Release builds use them; **debug builds
+  always use Google's test ids** (`app/build.gradle.kts`), so a debug build on a real phone never
+  serves a real ad (FOX-61). Packaging a release (`packageRelease`, `bundleRelease`, every
+  `publish…` task) first runs `verifyReleaseAdIds`, which fails on Google's test ids, the
+  example file's `ca-app-pub-0000000000000000…` placeholders or a malformed id. Banners are
+  the standard 320x50 (`AdsPolicy.bannerSize`), as on iOS. Ads load only after Google's UMP
+  consent allows them, and never for Pro.
 - **Without Play:** a debug build started with
   `adb shell am start -n com.kfpun.twaqi/.MainActivity --ez demo_billing true` sells demo
   plans in memory, for screenshots and UI checks.
@@ -121,6 +126,36 @@ Two more modules sit beside `app`:
 upload (the old React Native app used codes up to 2097176). `versionName` starts at 2.0.0.
 Both live in `app/build.gradle.kts`; `AppIdentityTest` fails if the code drops below 3000000.
 
+## Store listing (FOX-61)
+
+Gradle Play Publisher's layout under `app/src/main/play/`:
+
+| Path | What |
+| --- | --- |
+| `listings/{en-US,zh-TW}/title.txt`, `short-description.txt`, `full-description.txt` | Store text (30 / 80 / 4000 characters) |
+| `listings/<lang>/graphics/icon/1.png` | 512x512, drawn from the launcher icon |
+| `listings/<lang>/graphics/feature-graphic/1.png` | 1024x500 |
+| `listings/<lang>/graphics/phone-screenshots/1..4.png` | The top four features, framed with a caption |
+| `listings/<lang>/graphics/wear-screenshots/1..2.png` | Wear OS, unframed (Play wants the watch UI alone) |
+| `release-notes/<lang>/default.txt` | What's new (500 characters), uploaded with each bundle |
+
+The graphics come from `tools/frame_play_screenshots.py` (Pillow), from the raw captures in
+`../screenshots/fox-61-android-raw/<lang>/` (`<n>-<name>.png` for the phone, `wear-<n>.png` for
+the watch). To redo them: build the debug app with the real `secrets.properties`, run it on an
+emulator (`system-images;android-36;google_apis;arm64-v8a`, 1080x2400) with a clean status bar
+(`adb shell settings put global sysui_demo_allowed 1`, then the `com.android.systemui.demo`
+broadcasts), make it Pro so no banner shows (start it with `--ez demo_billing true` and buy a
+demo plan), capture with `adb exec-out screencap -p`, then:
+
+```sh
+python3 tools/frame_play_screenshots.py          # from the repo root; writes the PNGs and checks Play's limits
+python3 tools/frame_play_screenshots.py --check  # only the checks: text lengths, image sizes, no alpha
+```
+
+Captions live in the script (`CAPTIONS`, `FEATURE_TEXT`). The compliance answers (Data safety,
+content rating, target audience, ads, advertising ID) are drafted in
+[`../docs/android-play-compliance.md`](../docs/android-play-compliance.md).
+
 ## Release (Play internal track)
 
 Done by hand, only when asked. Nothing in CI signs or uploads.
@@ -135,10 +170,31 @@ Done by hand, only when asked. Nothing in CI signs or uploads.
    Console → Users and permissions, invite it with release rights for this app. Save the key
    as `android/play-service-account.json` (or set `PLAY_SERVICE_ACCOUNT_JSON` in
    `secrets.properties`).
-3. **Upload.** Raise `versionCode`, then:
+3. **Bundle.** Raise `versionCode` (above every earlier upload), then build and check the
+   signed bundle:
 
    ```sh
-   ./gradlew publishReleaseBundle   # Gradle Play Publisher: internal track, as a draft
+   ./gradlew :app:bundleRelease     # app/build/outputs/bundle/release/app-release.aab
+   jarsigner -verify app/build/outputs/bundle/release/app-release.aab
    ```
 
-   Roll the draft out to internal testers in Play Console.
+   Without `keystore.properties` the bundle is unsigned and Play rejects it.
+4. **Upload to internal testing, as a draft.**
+
+   ```sh
+   ./gradlew :app:publishReleaseBundle   # internal track, draft, with release-notes/<lang>/default.txt
+   ```
+
+   Then roll the draft out to internal testers in Play Console. `publishReleaseBundle` uploads
+   only the bundle and its release notes. The store text and graphics go up separately, and
+   only when asked: `./gradlew :app:publishReleaseListing`, or paste them into Play Console
+   (the main store listing).
+5. **Wear OS** (by hand, after the Wear OS form factor is added in Play Console, Test and
+   release › Advanced settings › Form factors):
+
+   ```sh
+   ./gradlew :wear:bundleRelease    # wear/build/outputs/bundle/release/wear-release.aab
+   ```
+
+   Upload it to the Wear OS internal testing track in Play Console. Gradle Play Publisher is
+   not applied to `:wear`, so nothing in Gradle uploads it.

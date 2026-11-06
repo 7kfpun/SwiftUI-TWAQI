@@ -1,0 +1,8 @@
+Taiwan Air 2.0 is a new app, rebuilt from the ground up for Android.
+• A live map of every station, with AQI, six pollutants, wind mode and the past 24 hours
+• Station pages with a trend verdict, station camera, weather and the AQI forecast
+• A Forecast tab for every air-quality region
+• Favourites with AQI alerts and quiet hours
+• Home screen widgets, launcher shortcuts and a Quick Settings tile
+• A Wear OS app and complication
+• Pro: no ads, more widgets and complication styles
