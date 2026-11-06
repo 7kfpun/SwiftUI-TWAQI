@@ -192,6 +192,8 @@
 "Details.coordinates" = "座標";
 "Details.wind" = "風向風速";
 "Details.location" = "位置";
+"Details.map_of %@" = "%@的地圖";
+"Details.open_in_maps" = "在 Apple 地圖中打開";
 "Details.no_data" = "無資料";
 "Details.select_a_station" = "選擇一個測站";
 

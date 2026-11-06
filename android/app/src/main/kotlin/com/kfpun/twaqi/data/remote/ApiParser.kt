@@ -107,6 +107,7 @@ object ApiParser {
             county = info?.obj("county")?.string("en"),
             countyLocal = info?.obj("county")?.string("zh"),
             township = info?.obj("township")?.string("zh"),
+            townshipEn = info?.obj("township")?.string("en"),
             stationType = StationType.fromApi(o.string("station_type"))
         )
     }
@@ -141,6 +142,7 @@ object ApiParser {
             county = info?.obj("county")?.string("en"),
             countyLocal = info?.obj("county")?.string("zh"),
             township = info?.obj("township")?.string("zh"),
+            townshipEn = info?.obj("township")?.string("en"),
             stationType = StationType.fromApi(o.string("station_type")),
             imageUrl = o.string("image_url")?.takeIf { it.isNotEmpty() }
         )

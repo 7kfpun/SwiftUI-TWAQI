@@ -47,7 +47,7 @@
     <string name="help_end_time">結束時間</string>
     <string name="help_language">語言</string>
     <string name="help_language_system">跟隨系統</string>
-    <string name="help_language_footer">政府提供的地址與預報內容為中文。選擇其他語言時，若已在「設定」下載該翻譯語言，會在本機上翻譯。</string>
+    <string name="help_language_footer">政府提供的預報內容為中文。選擇其他語言時，若已在「設定」下載該翻譯語言，會在本機上翻譯；地址維持中文。</string>
     <string name="help_appearance">外觀</string>
     <string name="help_appearance_system">跟隨系統</string>
     <string name="help_appearance_light">淺色</string>
@@ -313,6 +313,8 @@
     <string name="pro_renewal_terms">訂閱會自動續訂，除非在當期結束前至少 24 小時取消。可在「Google Play › 付款和訂閱 › 訂閱」中管理。</string>
     <string name="pro_terms_of_use">使用條款</string>
     <string name="pro_privacy_policy">隱私權政策</string>
+    <!-- Android only (FOX-116): Google UMP's privacy options form, where consent is required. -->
+    <string name="help_privacy_settings">廣告隱私設定</string>
     <string name="pro_purchase_failed">無法完成購買，請再試一次。</string>
 
     <string name="pro_feature_widgets_android">中、大尺寸小工具</string>
@@ -320,6 +322,7 @@
     <string name="pro_plan_1m">1 個月</string>
     <string name="pro_plan_6m">6 個月</string>
     <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_plan_lifetime">終身</string>
     <string name="pro_retry">重試</string>
     <string name="pro_close">關閉</string>
     <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>

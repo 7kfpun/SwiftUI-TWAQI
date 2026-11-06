@@ -5,6 +5,7 @@ import com.kfpun.twaqi.data.cache.OfflineCacheRetention
 import com.kfpun.twaqi.data.model.AqiForecast
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.data.model.Station
+import com.kfpun.twaqi.data.places.TaiwanPlaceNames
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -93,26 +94,48 @@ class OnDeviceTranslationTest {
 
     // Which fields are translated, and which never are.
 
+    /**
+     * FOX-114: ML Kit garbled place names (新店區 "New store area", 八德路四段 "paragraph 4, Baide
+     * Road"), so no screen that shows a station's township, county or street address sends text
+     * to the translator: only the area forecast does. The station page, the welcome flow's card,
+     * the favourites and the share card name places from `TaiwanPlaceNames`.
+     */
     @Test
-    fun stationPageSendsOnlyTheTownshipAndAddress() {
-        val texts = OnDeviceTranslation.translatable(OnDeviceTranslation.stationTexts(pollutant(), station()))
-        assertEquals(listOf("板橋區", "新北市板橋區文化路一段25號"), texts)
-        // The name, county and air quality zone have English from the API, so never go.
-        listOf("板橋", "新北市", "北部空品區").forEach { assertFalse(it in texts) }
+    fun placeNamesAndAddressesNeverGoToTheTranslator() {
+        val sources = File("src/main/kotlin/com/kfpun/twaqi").walkTopDown().filter { it.isFile }.toList()
+        assertTrue("sources not found from ${File(".").absolutePath}", sources.isNotEmpty())
+        val senders = sources.filter { "TranslatesOnDevice(" in it.readText() }.map { it.name }.toSet()
+        // TranslationCompose.kt defines it; AreaForecastCard.kt sends the forecast text.
+        assertEquals(setOf("TranslationCompose.kt", "AreaForecastCard.kt"), senders)
+        sources.filter { it.name == "AreaForecastCard.kt" }.forEach { file ->
+            listOf("township", "address", "displayLocality").forEach {
+                assertFalse("${file.name} mentions $it", it in file.readText())
+            }
+        }
+        listOf("ui/station", "ui/favourites", "onboarding").forEach { dir ->
+            File("src/main/kotlin/com/kfpun/twaqi/$dir").walkTopDown().filter { it.isFile }.forEach { file ->
+                listOf("OnDeviceTranslation", "rememberShownTranslations", "translations::display").forEach {
+                    assertFalse("${file.path} uses $it", it in file.readText())
+                }
+            }
+        }
     }
 
     @Test
-    fun stationPageFallsBackToTheStationRecord() {
-        assertEquals(
-            listOf("板橋區", "新北市板橋區文化路一段25號"),
-            OnDeviceTranslation.translatable(OnDeviceTranslation.stationTexts(null, station()))
+    fun stationPlacesAreNamedFromTheTableNotTheTranslationCache() = runTest {
+        // A cache from a FOX-98 build may still hold ML Kit's garbled names: they never show.
+        val translator = FakeTranslator()
+        val translation = OnDeviceTranslation(translator)
+        translation.store("Banqiao area", "板橋區", "en")
+        translation.store("No. 25, Section 1, Culture Road", "新北市板橋區文化路一段25號", "en")
+        val places = TaiwanPlaceNames.parse(
+            File("src/main/assets/place_names/taiwan_place_names.json").readText()
         )
-        assertEquals(emptyList<String>(), OnDeviceTranslation.stationTexts(null, null))
-        // A micro sensor has neither.
-        assertEquals(
-            emptyList<String>(),
-            OnDeviceTranslation.stationTexts(pollutant(null, null), station(null, null))
-        )
+
+        assertEquals("Banqiao District, New Taipei City", pollutant().displayLocality(chinese = false, places))
+        assertEquals("Banqiao District, New Taipei City", station().displayLocality(chinese = false, places))
+        assertEquals("板橋區, 新北市", pollutant().displayLocality(chinese = true, places))
+        assertTrue(translator.requests.isEmpty())
     }
 
     @Test

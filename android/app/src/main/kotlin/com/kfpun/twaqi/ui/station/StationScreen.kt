@@ -46,11 +46,9 @@ import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.StationType
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.push.FavouriteAlerts
-import com.kfpun.twaqi.translation.OnDeviceTranslation
-import com.kfpun.twaqi.translation.TranslatesOnDevice
-import com.kfpun.twaqi.translation.rememberShownTranslations
 import com.kfpun.twaqi.ui.common.OfflineEmptyState
 import com.kfpun.twaqi.ui.common.OfflineNotice
+import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
 import java.time.Instant
 import java.util.Locale
 
@@ -185,14 +183,14 @@ fun StationContent(
                     OfflineEmptyState(onRetry = onRefresh, modifier = Modifier.padding(bottom = 24.dp))
                 }
 
-                // Township and street address come from the API in Chinese only; outside Chinese
-                // they are translated on the device once it can (FOX-98).
-                val translations = rememberShownTranslations()
-                TranslatesOnDevice(OnDeviceTranslation.stationTexts(pollutant, station))
+                // Township and street address come from the API in Chinese only. Neither goes to the
+                // on-device translator, which garbles place names (FOX-114): the township and county
+                // come from the official English names, the address shows as written.
+                val places = rememberTaiwanPlaceNames()
                 StationHeader(
                     title = pollutant?.displayName(chinese) ?: station?.displayName(chinese) ?: "",
-                    locality = pollutant?.displayLocality(chinese, translations::display)
-                        ?: station?.displayLocality(chinese, translations::display),
+                    locality = pollutant?.displayLocality(chinese, places)
+                        ?: station?.displayLocality(chinese, places),
                     area = pollutant?.displayArea(chinese) ?: station?.displayArea(chinese),
                     stationType = pollutant?.stationType ?: station?.stationType ?: StationType.UNKNOWN,
                     aqi = aqi,
@@ -246,7 +244,7 @@ fun StationContent(
                     StationLocation(
                         lat = lat,
                         lon = lon,
-                        address = (pollutant?.address ?: station?.address)?.let(translations::display),
+                        address = pollutant?.address ?: station?.address,
                         coordinateText = String.format(Locale.US, "%.6f, %.6f", lat, lon),
                         modifier = Modifier.padding(vertical = 16.dp)
                     )

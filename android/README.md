@@ -120,6 +120,25 @@ Two more modules sit beside `app`:
   Console, then upload `./gradlew :wear:bundleRelease` to a Wear OS track. Nothing in Gradle
   uploads it.
 
+## Launcher and Play icon (FOX-108)
+
+The iOS app icon, drawn by `tools/DrawAndroidAppIcon.swift`. Its sky and cloud use the
+visionOS layer geometry and colours; the warning sign and exclamation mark are measured
+from `ios/TWAQI/Assets.xcassets/AppIcon.appiconset/icon-1024.png` so the Play artwork
+matches the iOS raster. It writes the adaptive icon layers for `app` and `wear`
+(`res/drawable/ic_launcher_background.xml`, `_foreground.xml`, `_monochrome.xml`, used by
+`mipmap-anydpi/ic_launcher.xml` and `ic_launcher_round.xml`) and the 512x512 Play icon
+(`app/src/main/play/listings/*/graphics/icon/1.png`). Don't edit those files by hand; change
+the tool and run it from the repository root:
+
+```sh
+swiftc -O tools/DrawAndroidAppIcon.swift -o /tmp/draw-android-icon
+/tmp/draw-android-icon android
+```
+
+minSdk is 26 (30 on Wear OS), so every device uses the adaptive icon and no per-density
+PNGs are needed. `LauncherIconTest` checks the wiring.
+
 ## Version
 
 `versionCode` starts at **3000000** and must always be above it and increase with every
@@ -133,13 +152,14 @@ Gradle Play Publisher's layout under `app/src/main/play/`:
 | Path | What |
 | --- | --- |
 | `listings/{en-US,zh-TW}/title.txt`, `short-description.txt`, `full-description.txt` | Store text (30 / 80 / 4000 characters) |
-| `listings/<lang>/graphics/icon/1.png` | 512x512, drawn from the launcher icon |
+| `listings/<lang>/graphics/icon/1.png` | 512x512, written by `tools/DrawAndroidAppIcon.swift` (see "Launcher and Play icon") |
 | `listings/<lang>/graphics/feature-graphic/1.png` | 1024x500 |
 | `listings/<lang>/graphics/phone-screenshots/1..4.png` | The top four features, framed with a caption |
 | `listings/<lang>/graphics/wear-screenshots/1..2.png` | Wear OS, unframed (Play wants the watch UI alone) |
 | `release-notes/<lang>/default.txt` | What's new (500 characters), uploaded with each bundle |
 
-The graphics come from `tools/frame_play_screenshots.py` (Pillow), from the raw captures in
+The other graphics come from `tools/frame_play_screenshots.py` (Pillow; the feature graphic
+uses the Play icon above, so run `DrawAndroidAppIcon` first), from the raw captures in
 `../screenshots/fox-61-android-raw/<lang>/` (`<n>-<name>.png` for the phone, `wear-<n>.png` for
 the watch). To redo them: build the debug app with the real `secrets.properties`, run it on an
 emulator (`system-images;android-36;google_apis;arm64-v8a`, 1080x2400) with a clean status bar

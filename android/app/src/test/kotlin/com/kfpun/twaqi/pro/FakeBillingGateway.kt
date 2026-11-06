@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 class FakeBillingGateway : BillingGateway {
     override val purchaseUpdates = MutableSharedFlow<PurchasesResult>(extraBufferCapacity = 16)
 
-    /** What [queryPurchases] lists; Play drops expired, refunded and revoked ones. */
+    /** What [queryPurchases] lists, both product types; Play drops expired, refunded and revoked ones. */
     var purchases = mutableListOf<OwnedPurchase>()
     var queryStatus = BillingStatus.OK
     var acknowledgeStatus = BillingStatus.OK
@@ -47,10 +47,13 @@ class FakeBillingGateway : BillingGateway {
 
     override fun launcher(activity: Activity) = launcher
 
-    /** A completed purchase: Play lists it and tells the listener. */
+    /**
+     * A completed purchase: Play lists it and tells the listener. A subscription plan
+     * replaces the current one; lifetime is a separate product.
+     */
     fun buy(plan: ProPlan, state: OwnedPurchase.State = OwnedPurchase.State.PURCHASED): OwnedPurchase {
         val purchase = purchase(plan, state)
-        purchases.removeAll { it.isPro }
+        purchases.removeAll { it.productIds == purchase.productIds }
         purchases += purchase
         purchaseUpdates.tryEmit(PurchasesResult(BillingStatus.OK, listOf(purchase)))
         return purchase
@@ -59,10 +62,10 @@ class FakeBillingGateway : BillingGateway {
     companion object {
         fun offer(plan: ProPlan) = PlanOffer(
             plan = plan,
-            productId = ProProducts.SUBSCRIPTION_ID,
-            offerToken = "offer-${plan.basePlanId}",
-            formattedPrice = "$${plan.months}.00",
-            priceMicros = plan.months * 1_000_000L,
+            productId = plan.productId,
+            offerToken = "offer-${plan.analyticsName}",
+            formattedPrice = "$${plan.months ?: 30}.00",
+            priceMicros = (plan.months ?: 30) * 1_000_000L,
             currencyCode = "USD"
         )
 
@@ -70,12 +73,12 @@ class FakeBillingGateway : BillingGateway {
             plan: ProPlan,
             state: OwnedPurchase.State = OwnedPurchase.State.PURCHASED,
             acknowledged: Boolean = false,
-            productId: String = ProProducts.SUBSCRIPTION_ID
+            productId: String = plan.productId
         ) = OwnedPurchase(
             productIds = listOf(productId),
             state = state,
             isAcknowledged = acknowledged,
-            purchaseToken = "token-${plan.basePlanId}-$state"
+            purchaseToken = "token-${plan.analyticsName}-$state"
         )
     }
 }
