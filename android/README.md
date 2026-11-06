@@ -115,6 +115,23 @@ Two more modules sit beside `app`:
   Console, then upload `./gradlew :wear:bundleRelease` to a Wear OS track. Nothing in Gradle
   uploads it.
 
+## Launcher and Play icon (FOX-108)
+
+The iOS app icon, drawn from the same geometry and colours as the visionOS layers by
+`tools/DrawAndroidAppIcon.swift`. It writes the adaptive icon layers for `app` and `wear`
+(`res/drawable/ic_launcher_background.xml`, `_foreground.xml`, `_monochrome.xml`, used by
+`mipmap-anydpi/ic_launcher.xml` and `ic_launcher_round.xml`) and the 512x512 Play icon
+(`app/src/main/play/listings/*/graphics/icon/1.png`). Don't edit those files by hand; change
+the tool and run it from the repository root:
+
+```sh
+swiftc -O tools/DrawAndroidAppIcon.swift -o /tmp/draw-android-icon
+/tmp/draw-android-icon android
+```
+
+minSdk is 26 (30 on Wear OS), so every device uses the adaptive icon and no per-density
+PNGs are needed. `LauncherIconTest` checks the wiring.
+
 ## Version
 
 `versionCode` starts at **3000000** and must always be above it and increase with every
