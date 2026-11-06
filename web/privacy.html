@@ -12,32 +12,37 @@
   @media (prefers-color-scheme: dark) { body { background:#111; color:#ddd; } a { color:#5ac8e8; } }
 </style>
 </head>
-<body><main><h1>Privacy Policy</h1>Last updated: 5 November 2026
+<body><main><h1>Privacy Policy</h1>Last updated: 6 November 2026
 
-Taiwan Air (&quot;the App&quot;, App Store ID 1286516443, bundle com.kfpun.twaqi) shows air quality readings from government monitoring stations in Taiwan on iPhone, iPad, Apple Watch and Apple Vision Pro. It is made by an independent developer. We keep data collection to a minimum. This policy explains what is collected, why, and who it is shared with.
+Taiwan Air (&quot;the App&quot;, App Store ID 1286516443, bundle com.kfpun.twaqi) shows air quality readings from government monitoring stations in Taiwan on iPhone, iPad, Apple Watch and Apple Vision Pro, and on Android phones and tablets and Wear OS watches (Google Play, package com.kfpun.twaqi). It is made by an independent developer. We keep data collection to a minimum. This policy explains what is collected, why, and who it is shared with.
 
 Summary
 • No accounts. You can use the App without telling us who you are.
 • Your list of favourites and most settings stay on your device. The exception is alerts: for a station with an alert on — including one switched on when you favourite it — the station and its alert settings are stored on our own server so the alert can be delivered (see Notifications).
 • Location is optional and is only used on your device.
-• We receive your name and email address only if you send us the Feedback / Contact us form or the Business partner form.
+• We receive your name and email address only if you send us the Feedback / Contact us form or the Business partner form, or email us.
+• The Android and Wear OS apps collect the same kinds of data, for the same reasons, as the iPhone app. Where they differ, the section says &quot;On Android&quot; or &quot;On Wear OS&quot;.
 
 Where the air quality data comes from
 • Readings are open data published by Taiwan&#x27;s Ministry of Environment (環境部, formerly the Environmental Protection Administration). The App fetches them through our own API hosted on Amazon Web Services.
 • That data describes monitoring stations, not people. Requests to our API carry only a country code, a station ID and a row limit — no account, no device identifier and no coordinates.
+• The Android and Wear OS apps fetch the same public data from the same places, with the same kind of requests.
 • The air quality zone forecast (空品區預報) is read from our content server at cms.wahthefox.com (Directus). Station webcam images are loaded from twaqi.app.wahthefox.com (Cloudflare). These requests carry no personal data.
 
 Information stored on your device
 • The App has no accounts.
 • Your settings stay on your device: the index you have selected (AQI, PM2.5, and so on), your favourite stations, the last map position, quiet-hours times, language, the nearest station last resolved, and whether Taiwan Air Pro is active. The Home Screen widget and Apple Watch app read the same settings from your device. Your list of favourites is not sent anywhere, but while a station has an alert on, its alert settings, your quiet-hours times, the App&#x27;s language and whether Pro is active are also sent off the device (see Notifications).
+• On Android, the same settings are kept in the App&#x27;s private storage on your phone. The Home Screen widgets read them there, and the Wear OS app gets the ones it needs from your phone (see Watches, widgets and Apple Vision Pro).
+• On Android, if backup is turned on for your phone, Android may copy the App&#x27;s settings (favourites, alert and quiet-hours settings, the selected index, language and the last map position, which is the latitude and longitude the map was last centred on) into your phone&#x27;s backup in your Google account, under Google&#x27;s terms, so they come back on a new phone. The App leaves out of that backup the device ID and secret used for alerts, whether Pro is active, the Feedback form&#x27;s installation ID, the analytics opt-out, your device&#x27;s last location that the App saw (kept for the widgets&#x27; nearest station) and the offline caches.
 • Air quality readings, forecasts and webcam images are cached on the device for offline use and removed automatically after about a week.
-• This on-device data is removed when you delete the App. The one exception is the random device ID used for alerts (see Notifications): it is kept in the iOS Keychain with &quot;this device only&quot; accessibility (ThisDeviceOnly), so it may persist after you delete and reinstall the App on the same device. It is not carried to a new device by a backup or restore.
+• This on-device data is removed when you delete the App. On iPhone and iPad, the one exception is the random device ID used for alerts (see Notifications): it is kept in the iOS Keychain with &quot;this device only&quot; accessibility (ThisDeviceOnly), so it may persist after you delete and reinstall the App on the same device. It is not carried to a new device by a backup or restore. On Android, uninstalling the App removes everything it kept on the phone, including the device ID used for alerts.
 
 Feedback / Contact us and Business partner forms
 • These forms are the only place the App asks for personal details, and sending them is entirely up to you. What you submit is sent over HTTPS to our Directus content management system at cms.wahthefox.com and stored there (in collections named twaqi_feedback and twaqi_cooperate).
 • Feedback / Contact us (Help screen) sends: your email address (required, so we can reply), your name (optional), your star rating, your suggestion, any other feedback or question (optional), and whether you are interested in a user interview.
 • Business partner (Help › &quot;Interested to be our Business Partner?&quot;) sends: the type of cooperation, company name, your name, email address, job title (optional), phone number (optional), website (optional) and your message.
 • To help us look into problems, both forms also send technical details: app version and build, the App&#x27;s bundle ID, device model and type (for example iPhone, iPad or Apple Vision Pro), iOS version, language and region settings including your top three preferred languages, time zone and platform. The Feedback / Contact us form also includes your device&#x27;s identifier for vendor (shared by our apps on your device; resets only when all our apps are removed) so repeat reports from the same device can be grouped; the Business partner form does not send it.
+• On Android, the forms send the same fields. The technical details are: app version and build, the App&#x27;s package name, device manufacturer and model, whether it is a phone or a tablet, Android version, language and region settings including your top three preferred languages, the App&#x27;s language, time zone and platform. In place of the identifier for vendor, the Android Feedback / Contact us form sends a random ID that the App creates the first time it is needed; it stays with that installation, is left out of backups and is removed when you uninstall the App. The Business partner form does not send it.
 • We use this information only to read and reply to your message, follow up on a partnership enquiry, invite you to a user interview if you asked to be invited, and improve the App. We do not add you to marketing lists and we do not sell it.
 
 Location
@@ -45,11 +50,14 @@ Location
 • Your coordinates are used on the device to centre the map and to pick the closest monitoring station. They are not sent to our API or to our content server, and we do not store them.
 • The map itself is drawn by the Google Maps SDK. Google may process location and device data for map display under Google&#x27;s own privacy policy.
 • If you decline location access the App still works; it falls back to a default station and to whichever station you choose on the map.
+• On Android, the App asks for approximate and precise location while you are using it; Android lets you allow approximate location only. The App uses your location on the phone to centre the map, list stations nearest first, pick your forecast region and choose the nearest station for the Home Screen widgets, which use the last location the App saw (kept on the phone only). Your location is not sent to our API, our content server or our push server, and we do not store it. The map is drawn by the Google Maps SDK for Android, under Google&#x27;s privacy policy.
+• On Wear OS, the watch app asks for approximate location only and uses it on the watch to pick the nearest station.
 
 Notifications
-• Push notifications are delivered through Google Firebase Cloud Messaging and Apple Push Notification service, which receive your device&#x27;s push tokens and standard device information.
-• The App is also registered with OneSignal, a push notification service, so that we can use it to send alerts in future. OneSignal receives your device&#x27;s push token, standard device information and, as tags, the same alert settings: the station, the threshold for each alert that is on, and your quiet-hours times. We do not currently send notifications through OneSignal.
+• Push notifications are delivered through Google Firebase Cloud Messaging and Apple Push Notification service, which receive your device&#x27;s push tokens and standard device information. On Android, they are delivered through Firebase Cloud Messaging only; on Android 13 and later the App asks for permission to show notifications when you switch an alert on.
+• On iPhone and iPad, the App is also registered with OneSignal, a push notification service, so that we can use it to send alerts in future. OneSignal receives your device&#x27;s push token, standard device information and, as tags, the same alert settings: the station, the threshold for each alert that is on, and your quiet-hours times. We do not currently send notifications through OneSignal. The Android app does not include OneSignal.
 • If you turn on alerts for a station, your alert settings are stored on our Directus server (cms.wahthefox.com) so the alert can be sent. They contain a random device ID generated by the App and stored in the iOS Keychain (so it may persist after a reinstall on the same device, and lets your alerts come back after one), a one-way hash of a random secret kept next to that ID (the secret proves that changes come from your device; our server stores only its hash), the push tokens, app version, the App&#x27;s language (so alerts arrive in it), whether Taiwan Air Pro is active, whether notifications are allowed for the App in iOS Settings (so we stop sending when they are off), time zone, your quiet-hours setting, and for each station with alerts: the station, the index, the threshold and whether the alert is on. They contain no name, email or location.
+• On Android, the App sends your alert settings to our push server, which stores them in the same place with the same contents, with these differences. The random device ID and secret are made by the App and kept in its private storage, encrypted with a key held in the Android Keystore; they are left out of backups and removed when you uninstall the App, so a reinstall gets a new ID (alert settings restored from an Android backup are then stored under the new ID, and the old record is no longer used). The only push token is the Firebase Cloud Messaging token; in place of an Apple push token the record holds a one-way hash of the device ID. For each station, the settings hold the AQI level for each alert you switch on (when AQI rises above a level, or falls below one) and the station&#x27;s webcam site. They contain no name, email or location.
 • Turning an alert off (or cancelling all alerts) marks the matching rows on our server as inactive (archived); they are not deleted. Deleting the App stops delivery but does not remove them from our server. To have them deleted, send a request through &quot;Feedback / Contact us&quot;.
 • Each alert we send is also logged on the same server so we can check delivery: the station, the AQI, why it was sent, whether it was delivered, and only the last six characters of the push token (never the whole token). Log rows are archived, not deleted, and are covered by the same deletion request.
 • Favouriting a station (the heart on its station screen) also switches on an alert for it: a notification when AQI rises above 120 (unhealthy for sensitive groups), which you can change or turn off on the station screen. This happens only if notifications are allowed for the App and fewer than three stations already have alerts on (the App&#x27;s limit); otherwise the station is only saved as a favourite, no alert is switched on and nothing about it is sent. When the alert is switched on, the station and its threshold are stored on our server exactly as described above.
@@ -58,25 +66,38 @@ Notifications
 Analytics and crash reporting
 • Google Firebase Analytics records anonymous usage events — for example which air index you select, opening a station, or starting, completing or restoring a purchase — together with standard device and app information.
 • Crash and error reports go to Google Firebase Crashlytics only: stack traces, device model, OS version and app version. These help us fix bugs.
+• The Android app uses the same Firebase Analytics and Crashlytics. With the events and crash reports they use a Firebase app instance ID, a Crashlytics installation ID and, where your phone provides one, the advertising ID (see Advertising).
+• You can stop a device from sending analytics and crash reports: tap the version number on the Help screen seven times. On Android this switches reporting off at once and deletes crash reports not yet sent; a message confirms it, and seven more taps switch reporting back on. On iPhone and iPad the taps show a Developer section with an &quot;Exclude this device from analytics&quot; switch.
+• The Wear OS app has no analytics or crash reporting of its own. When a free user picks a Pro-only complication style on the watch, the watch tells the phone, and the phone app records it as an analytics event.
 • None of this is used to identify you personally, and we do not link it to the details you send in the forms.
 
 Advertising
 • The free version shows banner ads through Google AdMob.
-• The App does not present the iOS App Tracking Transparency prompt, so ads are not personalised using your device&#x27;s advertising identifier (IDFA).
+• On iPhone and iPad, the App does not present the iOS App Tracking Transparency prompt, so ads are not personalised using your device&#x27;s advertising identifier (IDFA).
 • AdMob still receives the information any ad request carries, such as IP address, device type, and coarse location inferred from the IP address, under Google&#x27;s privacy policy.
-• While Taiwan Air Pro is active (a current subscription or the lifetime purchase), no banners are requested at all.
+• On Android, AdMob uses your phone&#x27;s advertising ID, which Google uses to show and measure ads, and may use to personalise them, under Google&#x27;s privacy policy. Where the law requires consent, for example in the European Economic Area and the United Kingdom, Google&#x27;s consent form (User Messaging Platform) asks you first, and the App requests no ads until your choice allows it. You can reset or delete the advertising ID, or opt out of personalised ads, in your phone&#x27;s settings (on most phones, Settings › Privacy › Ads, or Settings › Google › Ads).
+• While Taiwan Air Pro is active (a current subscription or the lifetime purchase), no banners are requested at all, and on Android the consent form is not shown.
+• The Wear OS app shows no ads.
 
 Purchases
-• Taiwan Air Pro is optional and is sold through Apple as an auto-renewing subscription (1 month, 6 months or 12 months) or as a lifetime purchase. Anyone who bought the earlier one-time ad-free upgrade keeps Pro for life.
+• On Apple devices, Taiwan Air Pro is optional and is sold through Apple as an auto-renewing subscription (1 month, 6 months or 12 months) or as a lifetime purchase. Anyone who bought the earlier one-time ad-free upgrade keeps Pro for life.
 • Apple processes every payment, renewal, cancellation and refund. We never see your payment details, your Apple ID or your name; the App only learns from Apple on your device whether Pro is active.
 • The App keeps that yes/no status on your device, shared with its Home Screen widgets and Apple Watch app (and, while a station has an alert on, with the alert settings on our server; see Notifications), and re-checks it with Apple so that a subscription that ends or is refunded switches Pro off. Restoring purchases asks Apple for the same status.
-• Subscriptions are managed and cancelled in Settings › Apple ID › Subscriptions; see our Terms of Service for renewal details.
+• On Apple devices, subscriptions are managed and cancelled in Settings › Apple ID › Subscriptions; see our Terms of Service for renewal details.
+• On Android, Taiwan Air Pro is optional and is sold through Google Play as an auto-renewing subscription (1 month, 6 months or 12 months); there is no lifetime purchase on Android. Google Play processes every payment, renewal, cancellation and refund through Google Play Billing. We never see your payment details, your Google account or your name.
+• The Android app asks Google Play on your phone whether Pro is active whenever it opens, keeps only that yes/no answer (left out of backups), and shares it with the Wear OS app and, while a station has an alert on, with the alert settings on our server (see Notifications). Manage or cancel the subscription in the Google Play Store › Payments &amp; subscriptions › Subscriptions.
 
-Apple Watch, widgets and Apple Vision Pro
+Watches, widgets and Apple Vision Pro
 • The Apple Watch app, complications, Home Screen widgets and the Apple Vision Pro app fetch the same public air quality readings. They do not collect anything additional.
+• The Android Home Screen widgets fetch the same public readings and use the location described under Location. They do not collect anything additional.
+• The Wear OS app, its tiles and complications fetch the same public readings straight from our API, so they also work without the phone. Your phone sends the watch your favourites, whether Pro is active and the App&#x27;s language over Google&#x27;s Wearable Data Layer, which runs between your phone and watch, not through our servers. The watch sends the phone only the complication notes described under Analytics and crash reporting.
+
+Translation on the device
+• When the App is in English, text that the government data has only in Chinese, such as the forecast text and station addresses, is translated into English on your device: on iPhone and iPad by Apple&#x27;s Translation framework, on Android by Google ML Kit. The text is not sent to us or to anyone else to be translated.
+• On Android, ML Kit downloads its translation model from Google once, only on an unmetered network such as Wi-Fi. Until it is ready, or if translation fails, the original Chinese is shown.
 
 Who your data is shared with
-• Service providers acting for the purposes described above, each under its own privacy policy: Google (Firebase Analytics, Firebase Crashlytics, Firebase Cloud Messaging, AdMob, Google Maps), OneSignal, Amazon Web Services, Cloudflare and Apple.
+• Service providers acting for the purposes described above, each under its own privacy policy: Google (Firebase Analytics, Firebase Crashlytics, Firebase Cloud Messaging, AdMob and its User Messaging Platform, Google Maps, and on Android also Google Play Billing, ML Kit model downloads and the Wearable Data Layer), OneSignal (iPhone and iPad only), Amazon Web Services, Cloudflare and Apple.
 • Form submissions and alert settings are stored on our own Directus server and are only accessible to us.
 • We do not sell your data and we do not share it with data brokers.
 
@@ -84,17 +105,26 @@ Data retention
 • On-device settings and your list of favourites stay on your device until you delete the App. Alert settings sent to our server are kept as described below.
 • Feedback and Business partner submissions are kept for as long as we need them to reply, follow up and improve the App. When we no longer need one we archive it; you can ask us to delete yours at any time (see Your choices).
 • Alert settings on our server are marked inactive (archived) when you turn alerts off, and are kept until you ask us to delete them; deleting the App does not remove them.
+• On Android, a copy of the App&#x27;s settings may stay in your Android backup until Google removes it under its backup rules.
 • Analytics and crash reports are kept by those providers under their own standard retention schedules; we do not keep a separate copy.
 • Our API and image server serve public data and do not store personal data. Ordinary server logs may record request metadata such as IP addresses for a short period for security and troubleshooting.
 
 Your choices
 • Turn location off in iOS Settings › Privacy &amp; Security › Location Services.
 • Turn notifications off in iOS Settings, or disable individual station alerts (or cancel all alerts) inside the App.
+• On Android, turn location off, or allow approximate location only, in Settings › Apps › Taiwan Air › Permissions; turn notifications off in Settings › Apps › Taiwan Air › Notifications. On Wear OS, change the App&#x27;s location permission in the watch&#x27;s settings.
+• On Android, reset or delete your advertising ID, or opt out of personalised ads, in your phone&#x27;s settings (see Advertising).
+• Stop analytics and crash reports from a device with seven taps on the version number on the Help screen (see Analytics and crash reporting).
 • Get Taiwan Air Pro (subscription or lifetime) to remove ads and ad requests.
 • Don&#x27;t send the forms if you don&#x27;t want us to have your name and email — the rest of the App works without them.
 • To see, correct or delete what you sent us through a form, send a request through &quot;Feedback / Contact us&quot; from the email address you used, and we will act on it.
-• Delete the App to remove the data held on your device, apart from the Keychain device ID described above, which may persist after a reinstall on the same device.
+• Delete the App to remove the data held on your device, apart from the Keychain device ID described above, which may persist after a reinstall on the same device. On Android, uninstalling removes all of it.
 • To have your alert settings deleted from our server, send a request through &quot;Feedback / Contact us&quot;.
+
+Asking us to delete your data
+• You can ask us to delete the data we hold about you on our server (form submissions, alert settings and their delivery logs), from any of the apps and whether or not the App is still installed: use &quot;Feedback / Contact us&quot; on the Help screen in the App, or email <a href="mailto:info@dllm.io">info@dllm.io</a>.
+• Tell us what to delete. For a form, write from the email address you used in it. For alert settings, tell us the stations and roughly when you set the alerts up, so we can find them.
+• We will delete it and let you know. Analytics and crash reports are not linked to you; Google deletes them under its own retention schedules, and you can stop a device sending them as described above. Data kept only on your device is removed when you delete the App.
 
 Children
 • The App is not directed to children under 13 and we do not knowingly collect personal information from them.
@@ -103,7 +133,7 @@ Changes
 • We may update this policy; the &quot;Last updated&quot; date above will change.
 
 Contact
-• Questions? Use &quot;Feedback / Contact us&quot; on the Help screen in the App to reach us.
+• Questions? Use &quot;Feedback / Contact us&quot; on the Help screen in the App, or email <a href="mailto:info@dllm.io">info@dllm.io</a>.
 
 繁體中文版本： <a href="/zh-Hant/privacy.html">隱私權政策</a>
 </main></body>
