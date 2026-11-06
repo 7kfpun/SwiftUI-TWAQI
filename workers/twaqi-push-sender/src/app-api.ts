@@ -44,9 +44,12 @@ interface DeviceRow {
 /** The fields the app may set on its own row. Anything else in the body is
  * dropped, so a device can't touch the sender's state or another row. */
 const DEVICE_FIELDS = [
-  'device_token', 'fcm_token', 'environment', 'app_version', 'locale', 'is_pro', 'notifications_allowed',
+  'platform', 'device_token', 'fcm_token', 'environment', 'app_version', 'locale', 'is_pro', 'notifications_allowed',
   'last_seen_at', 'dnd_enabled', 'dnd_start', 'dnd_end', 'timezone',
 ] as const
+
+const PLATFORMS = ['ios', 'android'] as const
+type Platform = (typeof PLATFORMS)[number]
 
 const SUBSCRIPTION_FIELDS = 'id,station_id,site_id,metric,direction,threshold,enabled'
 
@@ -163,7 +166,15 @@ export function deviceFields(input: Record<string, unknown>): Record<string, unk
   for (const key of DEVICE_FIELDS) {
     if (input[key] !== undefined) out[key] = input[key]
   }
-  if (typeof out.device_token !== 'string' || !/^[0-9a-f]{16,200}$/i.test(out.device_token)) {
+  // Builds from before FOX-100 send no platform: they are all iOS.
+  out.platform ??= 'ios'
+  if (!PLATFORMS.includes(out.platform as Platform)) throw new ApiError(400, 'platform must be ios or android')
+  // iOS needs its APNs token. Android has none (FCM's token is what it is
+  // sent to), so it may leave device_token out; one it does send, like the
+  // SHA-256 of its device id that builds before FOX-100 sent, is checked the
+  // same way.
+  const tokenOptional = out.platform === 'android' && out.device_token == null
+  if (!tokenOptional && (typeof out.device_token !== 'string' || !/^[0-9a-f]{16,200}$/i.test(out.device_token))) {
     throw new ApiError(400, 'device_token is required')
   }
   if (out.environment !== 'sandbox' && out.environment !== 'production') throw new ApiError(400, 'environment is required')
@@ -182,7 +193,7 @@ async function putDevice(env: DirectusConfig, auth: Credentials, input: Record<s
   const fields = deviceFields(input)
   // A device seen again is alive, even if FCM once rejected its token.
   const row = { ...fields, archived: false }
-  const token = fields.device_token as string
+  const token = typeof fields.device_token === 'string' ? fields.device_token : null
 
   const mine = await findDevice(env, 'device_id', auth.deviceId)
   if (mine?.secret_hash) {
@@ -193,11 +204,11 @@ async function putDevice(env: DirectusConfig, auth: Credentials, input: Record<s
 
   // Rows this request can't prove are its own, never adopted: one under this
   // device_id without a secret (from before there was one), and any row
-  // holding this APNs token, which is this phone's now. Their alerts are
-  // archived, not moved: the app sends its own again to the new row, which
-  // it sees by the new id.
+  // holding this device_token (when it sent one), which is this phone's now.
+  // Their alerts are archived, not moved: the app sends its own again to the
+  // new row, which it sees by the new id.
   if (mine) await retire(env, mine.id)
-  const byToken = await findDevice(env, 'device_token', token)
+  const byToken = token === null ? null : await findDevice(env, 'device_token', token)
   if (byToken) await retire(env, byToken.id)
 
   try {
