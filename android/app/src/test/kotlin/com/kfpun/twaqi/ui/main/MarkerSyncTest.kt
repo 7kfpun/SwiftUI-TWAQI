@@ -10,7 +10,8 @@ import org.junit.Test
 /**
  * FOX-110: the map's markers must follow the index, wind mode and timeline hour. Each case pins
  * that the new list is *equal* to the old one (stations are equal by id, which is all maps-compose's
- * `Clustering` compares, so it skips it) and that [MarkerSync] still asks for the push.
+ * `Clustering`, Compose effect keys and `rememberUpdatedState` compare, so they all skip it) and that
+ * [MarkerSync] still asks for the push.
  */
 class MarkerSyncTest {
     private val live = mapOf(
@@ -84,5 +85,16 @@ class MarkerSyncTest {
         val all = stations()
         assertTrue(MarkerSync.needsPush(all, all.drop(1)))
         assertTrue(MarkerSync.needsPush(all.drop(1), all))
+    }
+
+    /** What the map sees: AQI, PM2.5, the same PM2.5 again (a history tick), then wind mode. */
+    @Test
+    fun takePushesEachNewLookOnce() {
+        val sync = MarkerSync()
+        assertTrue(sync.take(stations(AirIndexType.AQI)))
+        assertTrue(sync.take(stations(AirIndexType.PM25)))
+        assertFalse(sync.take(stations(AirIndexType.PM25)))
+        assertTrue(sync.take(stations(AirIndexType.PM25, MapMode.WIND)))
+        assertFalse(sync.take(stations(AirIndexType.PM25, MapMode.WIND)))
     }
 }

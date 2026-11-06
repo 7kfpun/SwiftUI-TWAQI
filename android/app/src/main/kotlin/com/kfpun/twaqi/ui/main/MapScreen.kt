@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -338,6 +339,22 @@ private fun StationMap(
     }
     val latestStations by rememberUpdatedState(stations)
     val openStation by rememberUpdatedState(onOpenStation)
+    var clusterManager by remember { mutableStateOf<ClusterManager<MapStation>?>(null) }
+
+    // FOX-110: the markers must follow the index, wind mode and timeline hour. A restyled list is
+    // equal by id to the last one, so nothing keyed on it fires: not `Clustering`, not an effect key,
+    // not the map content's captures. After each recomposition, hand the cluster manager the list
+    // when a marker would look different; the renderer reuses each marker and swaps only the icons
+    // that changed. History arriving for hours off screen changes nothing and is skipped.
+    val markerSync = remember(clusterManager) { MarkerSync() }
+    SideEffect {
+        val manager = clusterManager ?: return@SideEffect
+        if (markerSync.take(stations)) {
+            manager.clearItems()
+            manager.addItems(stations)
+            manager.cluster()
+        }
+    }
 
     GoogleMap(
         modifier = modifier,
@@ -354,7 +371,6 @@ private fun StationMap(
             indoorLevelPickerEnabled = false
         )
     ) {
-        var clusterManager by remember { mutableStateOf<ClusterManager<MapStation>?>(null) }
         MapEffect(Unit) { map ->
             val manager = ClusterManager<MapStation>(context, map)
             manager.renderer = StationClusterRenderer(context, map, manager)
@@ -383,22 +399,8 @@ private fun StationMap(
             }
             clusterManager = manager
         }
-        clusterManager?.let { manager ->
-            Clustering(items = stations, clusterManager = manager)
-            // Clustering skips a list equal by id to the last one, so a new index, wind mode or
-            // timeline hour would leave every marker as it was (FOX-110). Re-add the items when a
-            // marker would look different; the renderer reuses each marker and swaps only the icons
-            // that changed. History arriving for hours off screen changes nothing and is skipped.
-            var shown by remember(manager) { mutableStateOf<List<MapStation>?>(null) }
-            LaunchedEffect(manager, stations) {
-                if (MarkerSync.needsPush(shown, stations)) {
-                    manager.clearItems()
-                    manager.addItems(stations)
-                    manager.cluster()
-                    shown = stations
-                }
-            }
-        }
+        // Pushes a list whose stations changed (by id); restyles go through the SideEffect above.
+        clusterManager?.let { Clustering(items = stations, clusterManager = it) }
     }
 }
 

@@ -119,30 +119,38 @@ class MapStation(
 }
 
 /**
- * Decides when the cluster manager must be handed a new list of stations (FOX-110).
+ * Decides when the cluster manager must be handed a new list of stations (FOX-110). One per cluster
+ * manager.
  *
  * [MapStation]s are equal by id, so the renderer finds the marker it already has and only restyles
- * it. But maps-compose's `Clustering(items = …)` re-clusters only when the item list stops being
- * *equal* to the last one, and a list that differs only in looks (another index, wind mode, an
- * earlier hour) is equal by id: the markers never changed. The map asks [needsPush] for each new
- * list and, when a marker would look different, re-adds the items itself, which runs
+ * it. But that makes a list that differs only in looks (another index, wind mode, an earlier hour)
+ * *equal* to the last one, and everything that compares lists skips it: maps-compose's
+ * `Clustering(items = …)`, Compose effect keys, `rememberUpdatedState`. The map hands each list to
+ * [take] instead and, when a marker would look different, re-adds the items itself, which runs
  * `onClusterItemUpdated` on the reused markers.
  */
-object MarkerSync {
-    /**
-     * True when [next] would draw anything differently from [shown], the list the cluster manager
-     * last got (null: none yet). Comparing ids alone, as list equality does, misses every restyle.
-     */
-    fun needsPush(shown: List<MapStation>?, next: List<MapStation>): Boolean =
-        shown == null || shown.size != next.size || shown.indices.any { !drawsTheSame(shown[it], next[it]) }
+class MarkerSync {
+    private var shown: List<MapStation>? = null
 
-    /** Same station, drawn the same: everything the renderer and a tap read. */
-    fun drawsTheSame(a: MapStation, b: MapStation): Boolean = a == b &&
-        a.appearance == b.appearance &&
-        a.isInteractive == b.isInteractive &&
-        a.title == b.title &&
-        a.pollutant.lat == b.pollutant.lat &&
-        a.pollutant.lon == b.pollutant.lon
+    /** True when [next] must be pushed; it is then remembered as what the markers show. */
+    fun take(next: List<MapStation>): Boolean = needsPush(shown, next).also { if (it) shown = next }
+
+    companion object {
+        /**
+         * True when [next] would draw anything differently from [shown], the list the cluster manager
+         * last got (null: none yet). Comparing ids alone, as list equality does, misses every restyle.
+         */
+        fun needsPush(shown: List<MapStation>?, next: List<MapStation>): Boolean =
+            shown == null || shown.size != next.size || shown.indices.any { !drawsTheSame(shown[it], next[it]) }
+
+        /** Same station, drawn the same: everything the renderer and a tap read. */
+        fun drawsTheSame(a: MapStation, b: MapStation): Boolean = a == b &&
+            a.appearance == b.appearance &&
+            a.isInteractive == b.isInteractive &&
+            a.title == b.title &&
+            a.pollutant.lat == b.pollutant.lat &&
+            a.pollutant.lon == b.pollutant.lon
+    }
 }
 
 /**
