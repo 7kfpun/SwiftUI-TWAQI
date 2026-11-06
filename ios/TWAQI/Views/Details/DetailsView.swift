@@ -407,7 +407,11 @@ extension StationLocationView {
     init(station: Station) {
         self.init(
             address: station.address,
-            coordinateText: String(format: "%.6f, %.6f", station.lat, station.lon)
+            coordinateText: String(format: "%.6f, %.6f", station.lat, station.lon),
+            lat: station.lat,
+            lon: station.lon,
+            stationName: station.displayName,
+            aqi: nil
         )
     }
 }

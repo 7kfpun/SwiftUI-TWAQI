@@ -18,6 +18,7 @@ enum HelpSection: String, CaseIterable, Identifiable {
     case contact
     case widgetsAndWatch
     case definition
+    case dataSources
     case about
     case developer
 
@@ -34,6 +35,38 @@ enum HelpSection: String, CaseIterable, Identifiable {
             }
         }
     }
+}
+
+/// Every source the app shows data from, named once under Help → Data
+/// sources rather than under each card (FOX-88). MOENV and CWA publish under
+/// Taiwan's Open Government Data License 1.0, whose attribution asks for the
+/// provider's name and the licence, not a credit on every screen.
+enum DataSource: String, CaseIterable, Identifiable {
+    case airQuality = "air_quality"
+    case forecast
+    case cams
+    case weather
+    case map
+
+    var id: String { rawValue }
+
+    /// What the app shows from it: "Air quality readings".
+    var titleKey: String { "DataSources.\(rawValue)_title" }
+    /// Who provides it, what it covers and how often it updates.
+    var detailKey: String { "DataSources.\(rawValue)_detail" }
+
+    var url: URL {
+        switch self {
+        case .airQuality: return URL(string: "https://airtw.moenv.gov.tw/")!
+        case .forecast: return URL(string: "https://data.moenv.gov.tw/dataset/detail/AQF_P_01")!
+        case .cams: return URL(string: "https://data.moenv.gov.tw/dataset/detail/AQX_P_01")!
+        case .weather: return URL(string: "https://opendata.cwa.gov.tw/")!
+        case .map: return URL(string: "https://maps.google.com/")!
+        }
+    }
+
+    /// 政府資料開放授權條款－第1版, which MOENV and CWA open data use.
+    static let licenceURL = URL(string: "https://data.gov.tw/license")!
 }
 
 struct HelpView: View {
@@ -85,6 +118,7 @@ struct HelpView: View {
         case .contact: contactSection
         case .widgetsAndWatch: widgetsAndWatchSection
         case .definition: definitionSection
+        case .dataSources: dataSourcesSection
         case .about: aboutSection
         case .developer: developerSection
         }
@@ -227,8 +261,48 @@ struct HelpView: View {
         }
     }
 
+    /// Where each kind of data comes from, with a link to it (FOX-88). The
+    /// screens themselves carry no source labels.
+    private var dataSourcesSection: some View {
+        Section(
+            header: Label("DataSources.header", systemImage: "antenna.radiowaves.left.and.right"),
+            footer: Text("DataSources.footer").fontWeight(.light)
+        ) {
+            ForEach(DataSource.allCases) { source in
+                linkRow(
+                    destination: source.url,
+                    title: LocalizedStringKey(source.titleKey),
+                    detail: LocalizedStringKey(source.detailKey)
+                )
+            }
+
+            linkRow(destination: DataSource.licenceURL, title: "DataSources.licence_title", detail: nil)
+        }
+    }
+
+    private func linkRow(destination: URL, title: LocalizedStringKey, detail: LocalizedStringKey?) -> some View {
+        Link(destination: destination) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .foregroundColor(.primary)
+                    if let detail {
+                        Text(detail)
+                            .font(.footnote.weight(.light))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "arrow.up.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
     private var aboutSection: some View {
-        Section(footer: Text("Help.data_provided_by_government").fontWeight(.light)) {
+        Section {
             HStack {
                 Text(verbatim: "Version")
                     .fontWeight(.light)

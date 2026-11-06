@@ -29,8 +29,6 @@ struct AreaForecastView: View {
     /// False on the Forecast tab when this area's text is the paragraph
     /// shown once above every card.
     var showsContent = true
-    /// False on the Forecast tab, which names the source once for all cards.
-    var showsSource = true
 
     static let cornerRadius: CGFloat = 12
 
@@ -135,17 +133,14 @@ struct AreaForecastView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 「發布 16:30 · 資料來源：環境部」
+    /// 「發布 16:30」. The source is named under Help → Data sources (FOX-88).
     private var caption: some View {
         HStack(spacing: 4) {
             Image(systemName: "clock")
             if let published = forecast.publishedAt {
                 Text("Forecast.published \(Self.publishedText(published))")
             }
-            Spacer(minLength: 8)
-            if showsSource {
-                Text("Forecast.source")
-            }
+            Spacer(minLength: 0)
         }
         .font(.caption.weight(.light))
         .foregroundColor(.secondary)

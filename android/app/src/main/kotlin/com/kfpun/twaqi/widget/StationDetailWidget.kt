@@ -20,6 +20,7 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -113,6 +114,43 @@ class StationDetailWidget : GlanceAppWidget() {
                             size.height.value
                         )
                     }
+                }
+            }
+        }
+    }
+
+    /** The picker's preview draws the narrow and the wide layout, as the widget does. */
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(WidgetPreviews.stationDetailSizes)
+
+    /**
+     * The widget picker's preview (API 35+, published by [WidgetPreviews]): 松山 from the sample
+     * stations ([WidgetPreviewData]) with its day of history and the forecast, unlocked although
+     * station detail is Pro, as iOS's gallery (`isPreview`). No cam, as on iOS.
+     */
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        val now = Instant.now()
+        val snapshot = WidgetPreviewData.snapshot(now)
+        val text = WidgetText.of(context)
+        val entry = WidgetPreviewData.entry(WidgetFamily.STATION_DETAIL, snapshot, now)
+        provideContent {
+            val size = LocalSize.current
+            GlanceTheme {
+                val reading = entry.reading
+                when {
+                    entry.isLocked -> LockedPlaceholder(context, reading, text)
+
+                    reading == null -> EmptyWidget(context, text)
+
+                    else -> DetailContent(
+                        context,
+                        reading,
+                        entry.type,
+                        snapshot,
+                        text,
+                        null,
+                        size.width.value,
+                        size.height.value
+                    )
                 }
             }
         }
