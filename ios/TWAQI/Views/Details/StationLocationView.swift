@@ -156,8 +156,11 @@ struct StationMiniMap: View {
                     snapshot = Snapshot(key: key, image: cached)
                     return
                 }
-                guard let image = await Self.render(key), !Task.isCancelled else { return }
+                guard let image = await Self.render(key) else { return }
+                // Cached even when the view has moved on, so scrolling back
+                // or rotating back doesn't draw it again.
                 Self.cache.setObject(image, forKey: key.cacheKey)
+                guard !Task.isCancelled else { return }
                 snapshot = Snapshot(key: key, image: image)
             }
         }
