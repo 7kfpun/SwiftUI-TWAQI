@@ -50,7 +50,9 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
   iOS's id) listed last (`ProPlan`). Pro = a paid subscription or an acknowledged lifetime
   purchase; both product types are queried, and lifetime's row is hidden until Play lists it. Open the Pro screen only through `ProNavigation`
   (with a `ProScreenSource`); `twaqi://pro?source=…` opens it too. Banners are `AdBanner`, shown
-  only by `AdsPolicy` (free user, UMP consent given). Debug builds launched with
+  only by `AdsPolicy` (free user, UMP consent given), at the standard 320x50 (`AdsPolicy.bannerSize`).
+  Debug builds always use Google's test AdMob ids; `verifyReleaseAdIds` stops a release that
+  would ship test, placeholder or malformed ids (FOX-61). Debug builds launched with
   `--ez demo_billing true` sell demo plans without Play (`DemoBillingGateway`).
 - **Appearance** (FOX-97): Help › Appearance (System / Light / Dark) is AppCompat's night mode,
   applied at process start (`AppAppearanceStore`, `TwaqiApplication`). Activities must be

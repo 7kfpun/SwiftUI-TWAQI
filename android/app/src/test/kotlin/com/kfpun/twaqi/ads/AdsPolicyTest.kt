@@ -1,5 +1,6 @@
 package com.kfpun.twaqi.ads
 
+import com.google.android.gms.ads.AdSize
 import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.FakeBillingGateway
 import com.kfpun.twaqi.pro.InMemoryEntitlementStore
@@ -8,6 +9,7 @@ import com.kfpun.twaqi.pro.ProRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,6 +17,14 @@ import org.junit.Test
 /** Ads are for free users only (FOX-58). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AdsPolicyTest {
+    /** FOX-61: the standard 320x50 banner, as on iOS (AdSizeBanner), never a taller adaptive one. */
+    @Test
+    fun bannerIsTheStandard320x50() {
+        assertEquals(AdSize.BANNER, AdsPolicy.bannerSize)
+        assertEquals(320, AdsPolicy.bannerSize.width)
+        assertEquals(50, AdsPolicy.bannerSize.height)
+    }
+
     @Test
     fun proHidesTheBanner() {
         assertFalse(AdsPolicy.showBanner(Entitlement.PRO, canRequestAds = true))
