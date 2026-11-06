@@ -121,7 +121,7 @@
     <string name="help_widgets_shows_body">顯示最近測站或你選定測站目前的數值。加入小工具時即可選擇；之後要更改，請按住小工具並開啟它的設定。</string>
     <string name="help_widgets_favourites_header">最愛測站</string>
     <string name="help_widgets_favourites_body">小、中、大尺寸小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。測站詳情小工具則詳細顯示單一測站：各項指標、風向風速、過去 24 小時、空品區預報與測站即時影像。中、大尺寸與測站詳情小工具屬於 Pro。</string>
-    <string name="help_widgets_favourites_add">開啟測站並點一下愛心，即可加入最愛。小工具會依「我的最愛」的順序列出：在該頁點「編輯」並拖移即可調整順序。</string>
+    <string name="help_widgets_favourites_add">開啟測站並點一下愛心，即可加入最愛。小工具會依「我的最愛」的順序列出：在該頁按住測站並拖移即可調整順序，或點「編輯」後使用箭頭。</string>
     <string name="help_widgets_favourites_offline">沒有網路時，小工具會顯示最後一次儲存的數值。</string>
     <string name="help_widgets_index_header">選擇指標</string>
     <string name="help_widgets_index_body">在小工具的設定中，可選擇顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。</string>
