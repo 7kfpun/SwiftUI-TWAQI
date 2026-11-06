@@ -32,6 +32,8 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -114,20 +116,27 @@ internal fun SecondaryLabel(text: String, size: TextUnit = 11.sp, maxLines: Int 
 
 /**
  * The index's name. Tapping it steps to the next index ([WidgetPaging.indexCycle]), except on a
- * locked widget and on station detail.
+ * locked widget and on station detail. TalkBack reads it as "Show PM2.5", the index a tap shows.
  */
 @Composable
-internal fun IndexLabel(type: AirIndexType, cycles: Boolean, color: ColorProvider = GlanceTheme.colors.onSurface) {
+internal fun IndexLabel(
+    type: AirIndexType,
+    cycles: Boolean,
+    text: WidgetText,
+    color: ColorProvider = GlanceTheme.colors.onSurface
+) {
     val label = @Composable {
         WidgetLabel(type.label, size = 11.sp, weight = FontWeight.Bold, color = color)
     }
     if (cycles) {
         val next = WidgetPaging.nextIndex(type)
+        val description = WidgetAccessibility.showIndex(type).resolve(text)
         Box(
             modifier = GlanceModifier
                 .cornerRadius(8.dp)
                 .background(rgb(0x808080, 0.22f))
                 .padding(horizontal = 5.dp, vertical = 1.dp)
+                .semantics { contentDescription = description }
                 .clickable(
                     actionRunCallback<CycleWidgetIndexAction>(
                         actionParametersOf(CycleWidgetIndexAction.INDEX to next.key)
@@ -209,7 +218,14 @@ internal fun Pager(entry: WidgetEntry, text: WidgetText) {
             label = text.string(R.string.widget_previous_station)
         )
         Spacer(GlanceModifier.width(6.dp))
-        SecondaryLabel("${entry.page + 1} / $count")
+        // TalkBack reads "Station 2 of 5", not "2 slash 5".
+        val position = WidgetAccessibility.pagePosition(entry.page, count).resolve(text)
+        WidgetLabel(
+            "${entry.page + 1} / $count",
+            size = 11.sp,
+            color = GlanceTheme.colors.onSurfaceVariant,
+            modifier = GlanceModifier.semantics { contentDescription = position }
+        )
         Spacer(GlanceModifier.width(6.dp))
         PageButton(
             entry,
