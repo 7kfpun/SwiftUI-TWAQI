@@ -52,6 +52,9 @@ enum class ProScreenSource(val analyticsName: String) {
     /** "Remove ads" beside a banner. */
     AD_BANNER("ad_banner"),
 
+    /** The Wear OS app's Pro screen, opened on the phone (FOX-62). */
+    WATCH("watch"),
+
     /** `twaqi://pro` with no `source`, or one this build doesn't know. */
     DEEP_LINK("deep_link")
     ;

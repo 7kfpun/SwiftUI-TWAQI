@@ -1,7 +1,8 @@
 # TWAQI for Android
 
-Native Kotlin + Jetpack Compose + Material 3. One `app` module, package `com.kfpun.twaqi`
-(it updates the existing Play listing), minSdk 26, compileSdk / targetSdk 36.
+Native Kotlin + Jetpack Compose + Material 3. The `app` module, package `com.kfpun.twaqi`
+(it updates the existing Play listing), minSdk 26, compileSdk / targetSdk 36; the Wear OS app
+`wear` and the shared `core` (FOX-62, see Wear OS below).
 Decisions: FOX-51. Setup: FOX-52. Features follow from FOX-53.
 
 The iOS app is in [`../ios`](../ios). Shared parts stay at the repository root:
@@ -33,7 +34,7 @@ Android Studio works too: open the `android/` folder. Always build with `./gradl
 
 ```sh
 cd android
-./gradlew assembleDebug        # app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleDebug        # app/build/outputs/apk/debug/app-debug.apk (and wear/…/wear-debug.apk)
 ./gradlew test                 # JVM unit tests
 ./gradlew lint                 # Android lint
 ./gradlew ktlintCheck          # Kotlin style (ktlintFormat fixes it)
@@ -81,6 +82,38 @@ All of these are gitignored. A clean checkout builds without any of them.
 - **Without Play:** a debug build started with
   `adb shell am start -n com.kfpun.twaqi/.MainActivity --ez demo_billing true` sells demo
   plans in memory, for screenshots and UI checks.
+
+## Wear OS (FOX-62)
+
+Two more modules sit beside `app`:
+
+| Module | What |
+| --- | --- |
+| `core` | Android library, no resources: `AirIndexType`, `AirLevel` (the level bands and colours the phone's `AirStatus` builds on), `TaiwanTime`, and the phone ↔ watch contract (`WearContract`, `PhoneState`, `LockedComplicationPayload`). Both apps depend on it. |
+| `wear` | The Wear OS app (Compose for Wear OS, minSdk 30): the reading for the nearest or chosen station, the station picker with the phone's favourites, the Pro paywall, a complication (`AqiComplicationService`, set up in `ComplicationConfigActivity`) and a tile (`AqiTileService`). The iOS counterparts are `ios/TWAQIWatch` and `ios/TWAQIWatchWidget`. |
+
+- **Same application id** `com.kfpun.twaqi` as the phone app: Play takes a Wear OS app into the
+  same listing only with it, and the Wearable Data Layer only pairs apps with the same id **and
+  signing key**. `:wear` signs its release with the same `keystore.properties`.
+- **versionCode:** Wear OS builds use **203000000 and up**, above every phone code (3000000 and
+  up, which must stay below 200000000) and increasing with every Wear OS upload. Play needs every
+  APK and bundle in a listing to have its own code, so the two ranges never meet.
+  `WearIdentityTest` guards the range; `versionName` follows the phone's.
+- **Data:** the watch reads the API itself (`WatchApi`, `API_DOMAIN` from `secrets.properties`)
+  and caches its readings, purged after a week as on the phone. The phone sends the favourites,
+  Pro (`ProRepository.isPro`) and the app language over the Data Layer (`PhoneStateRelay` in
+  `app`); the watch sends back the locked-complication events, which the phone logs to Firebase
+  as `watch_complication_locked` (`WatchEventListenerService`), as on iOS.
+- **Pro:** the watch app and the face complication are free; the complication's number, its other
+  styles and the tile are Pro. The watch follows the phone's Pro; its paywall opens the phone's Pro
+  screen (`twaqi://pro?source=watch`). Debug builds have a Pro override in the station list's
+  developer section (tap the version 7 times).
+- **Language:** the phone app's language when the phone has sent one, else the watch's.
+- **Try it:** `./gradlew :wear:installDebug` onto a Wear OS emulator or watch. Pair it with a phone
+  running `app` (Wear OS app on the phone) for favourites, Pro and the language.
+- **Release:** done by hand, only when asked. Add the Wear OS form factor to the app in Play
+  Console, then upload `./gradlew :wear:bundleRelease` to a Wear OS track. Nothing in Gradle
+  uploads it.
 
 ## Version
 

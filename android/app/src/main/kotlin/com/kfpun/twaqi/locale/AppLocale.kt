@@ -12,6 +12,7 @@ import androidx.core.os.LocaleListCompat
 import com.kfpun.twaqi.TwaqiApplication
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.shortcuts.StationShortcuts
+import com.kfpun.twaqi.wear.PhoneStateRelay
 import com.kfpun.twaqi.widget.WidgetUpdater
 import java.util.Locale
 
@@ -65,6 +66,8 @@ object AppLocale {
         WidgetUpdater.requestRedrawAll(context)
         // Launcher shortcuts are named in the app language too (FOX-95).
         StationShortcuts.requestRefresh(context)
+        // The Wear OS app follows the app language (FOX-62).
+        PhoneStateRelay.languageChanged(context)
         Analytics.logEvent(context, Analytics.SELECT_LANGUAGE, mapOf("label" to language.id))
     }
 

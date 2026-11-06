@@ -181,6 +181,11 @@ object Analytics {
     const val ONBOARDING_COMPLETED = "onboarding_completed"
     const val ONBOARDING_OPEN_FROM_HELP = "onboarding_open_from_help"
 
+    // Wear OS (FOX-62), as on iOS: the watch has no Firebase, so the phone logs for it.
+
+    /** `style`, `family`, `index`: a free reader's complication set to a Pro style shows the lock. Once per setup. */
+    const val WATCH_COMPLICATION_LOCKED = "watch_complication_locked"
+
     /**
      * Logs [name] with [parameters]: text as strings, whole numbers as longs, other numbers as
      * doubles, and booleans as 1 / 0 (how Firebase records the iOS app's booleans). Does nothing

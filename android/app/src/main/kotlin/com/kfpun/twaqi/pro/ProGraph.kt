@@ -2,6 +2,7 @@ package com.kfpun.twaqi.pro
 
 import android.content.Context
 import com.kfpun.twaqi.BuildConfig
+import com.kfpun.twaqi.wear.PhoneStateRelay
 import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,8 @@ object ProGraph {
             repository = it
             // FOX-59: widgets redraw when Pro changes.
             WidgetUpdater.observePro(context, it.isPro)
+            // FOX-62: the Wear OS app's complication and tile follow it too.
+            PhoneStateRelay.observePro(context, it.isPro)
         }
     }
 
