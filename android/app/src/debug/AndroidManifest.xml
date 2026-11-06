@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only (FOX-59): pin a widget from adb for screenshots and checks. Start
+     .widget.WidgetPinDebugActivity with the string extra "widget" set to "air" or "detail". -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".widget.WidgetPinDebugActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TWAQI" />
+    </application>
+
+</manifest>

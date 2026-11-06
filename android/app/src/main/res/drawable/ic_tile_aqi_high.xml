@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick Settings tile icon (FOX-95): high AQI, drawn as how dense the particles are
+     (iOS aqi.high). Tiles tint it; the level is also in words. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M2,4a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM8,4a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM14,4a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM19,7a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM5,9a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM11,9a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM17,12a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM2,14a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM8,14a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM14,16a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM4,20a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM10,20a2,2 0,1 1,4,0a2,2 0,1 1,-4,0zM18,20a2,2 0,1 1,4,0a2,2 0,1 1,-4,0z" />
+</vector>

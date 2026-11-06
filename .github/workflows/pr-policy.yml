@@ -10,7 +10,7 @@ name: PR policy
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review]
-    branches: [master]
+    branches: [master, feature/fox-52-android-project-setup]
 
 concurrency:
   group: pr-policy-${{ github.event.pull_request.number }}

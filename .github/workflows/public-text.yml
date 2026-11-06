@@ -13,7 +13,7 @@ name: Public text
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, edited]
-    branches: [master]
+    branches: [master, feature/fox-52-android-project-setup]
 
 permissions:
   contents: read

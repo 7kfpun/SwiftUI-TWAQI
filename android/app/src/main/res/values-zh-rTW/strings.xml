@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ported from ios/TWAQI/Localization/zh-Hant.lproj/Localizable.strings (FOX-56).
+     Names are the iOS keys in snake_case. Every name here must also be in the
+     other language's file (StringResourcesTest). -->
+<resources>
+    <string name="app_name">Taiwan Air</string>
+
+    <string name="tabbar_main">首頁</string>
+    <string name="tabbar_forecast">預報</string>
+    <string name="tabbar_favourites">最愛</string>
+    <string name="tabbar_details_list">搜尋</string>
+    <string name="tabbar_help">說明</string>
+
+    <string name="favouritelist_favourites">我的最愛</string>
+    <string name="favourites_add_your_first_favourite_station">新增第一個常用測站</string>
+    <string name="favourites_add_to_favourites">加入我的最愛</string>
+    <string name="favourites_remove_from_favourites">從我的最愛移除</string>
+    <string name="favourites_alerts_on">已開啟通知</string>
+    <string name="favourites_remove_station_with_alerts_title">要從我的最愛移除嗎？</string>
+    <string name="favourites_remove_station_with_alerts_message">這個測站已開啟 AQI 通知，從我的最愛移除後，通知也會一併關閉。</string>
+    <string name="favourites_remove_and_turn_off_alerts">移除並關閉通知</string>
+    <string name="favourites_cancel">取消</string>
+    <string name="favourites_added_to_favourites">已加入我的最愛</string>
+    <string name="favourites_alerts_cap_reached_message">已有 %d 個測站開啟通知，已達上限，這個測站的通知暫不開啟。到其中一個測站頁面關閉通知後，即可為這個測站開啟。</string>
+    <string name="favourites_notifications_off_message">Taiwan Air 的通知已關閉，因此這個測站的通知暫不開啟。請到「設定」開啟通知，再於下方開啟測站通知。</string>
+    <string name="favourites_open_settings">開啟設定</string>
+    <string name="favourites_ok">好</string>
+    <string name="favourites_removed_from_favourites">已從我的最愛移除</string>
+
+    <string name="detailslist_details">測站列表</string>
+    <string name="detailslist_search">搜尋</string>
+
+    <string name="details_general_public">一般民眾</string>
+    <string name="details_sensitive_group">敏感族群</string>
+
+    <string name="settings_notice_me_when_aqi_is_above">當 AQI 高於此數值時通知我</string>
+    <string name="settings_the_value_is_too_small_you_would_get_lots_of_notifications">數值設定偏低，可能會收到大量通知</string>
+    <string name="settings_notice_me_when_aqi_is_below">當 AQI 低於此數值時通知我</string>
+    <string name="settings_the_value_is_too_large_you_would_get_lots_of_notifications">數值設定偏高，可能會收到大量通知</string>
+    <string name="settings_alerts_station_limit">最多可為 %d 個測站開啟通知</string>
+
+    <string name="help_help">說明</string>
+    <string name="help_select_a_topic">選擇一個項目</string>
+    <string name="help_do_not_disturb">勿擾模式</string>
+    <string name="help_turn_on_do_not_disturb">開啟勿擾模式</string>
+    <string name="help_start_time">開始時間</string>
+    <string name="help_end_time">結束時間</string>
+    <string name="help_language">語言</string>
+    <string name="help_language_system">跟隨系統</string>
+    <string name="help_language_footer">政府提供的地址與預報內容為中文。選擇其他語言時，若已在「設定」下載該翻譯語言，會在本機上翻譯。</string>
+    <string name="help_appearance">外觀</string>
+    <string name="help_appearance_system">跟隨系統</string>
+    <string name="help_appearance_light">淺色</string>
+    <string name="help_appearance_dark">深色</string>
+    <string name="help_cancel_site_notification">取消所有測站通知</string>
+    <string name="help_all_site_notification_has_been_cancelled">已取消所有測站通知</string>
+    <string name="help_in_app_purchase">App 內購買</string>
+    <string name="help_ad_free">移除廣告並解鎖錶面數值</string>
+    <string name="help_restore_purchase">回復購買項目</string>
+    <string name="help_contact_us">聯絡我們</string>
+    <string name="help_interested_to_be_our_business_partner">想成為我們的合作夥伴嗎？</string>
+    <string name="help_feedback_or_contact_us">意見回饋 / 聯絡我們</string>
+    <string name="help_definition">認識空氣品質指標</string>
+    <string name="help_data_provided_by_government">本 App 資料由環境部「空氣品質監測網」開放資料提供。</string>
+
+    <string name="feedback_title">意見回饋</string>
+    <string name="feedback_rating_header">您對應用程序的滿意程度如何？</string>
+    <string name="feedback_rating_stars">%d 顆星</string>
+    <string name="feedback_message_header">建議</string>
+    <string name="feedback_message_placeholder">哪個功能您覺得我們須要改善？</string>
+    <string name="feedback_other_header">其他反饋/問題？</string>
+    <string name="feedback_optional">選填</string>
+    <string name="feedback_interview">對我們的用戶訪談有興趣嗎？</string>
+    <string name="feedback_interview_footer">我們不定期在台北舉辦用戶訪談。開啟後，我們可能會以電子郵件邀請您參加。</string>
+    <string name="feedback_name_placeholder">名字（選填）</string>
+    <string name="feedback_email_placeholder">電子郵件 *</string>
+    <string name="feedback_email_footer">方便我們回覆您。</string>
+    <string name="feedback_email_invalid">請確認電子郵件地址。</string>
+    <string name="feedback_privacy_footer">為協助我們查明問題，App 版本、裝置型號、系統版本與語言會隨內容一併送出。</string>
+    <string name="feedback_send">送出</string>
+    <string name="feedback_sent_title">謝謝您！</string>
+    <string name="feedback_sent_message">已收到您的意見回饋。</string>
+    <string name="feedback_sent_message_may_reply">已收到您的意見回饋，我們可能會以電子郵件回覆您。</string>
+    <string name="feedback_rate_on_app_store">到 Google Play 評分</string>
+    <string name="feedback_error_title">無法送出意見回饋</string>
+    <string name="feedback_error_offline">目前似乎沒有網路連線，請確認後再試一次。</string>
+    <string name="feedback_error_generic">發生錯誤，請稍後再試。</string>
+    <string name="feedback_try_again">再試一次</string>
+    <string name="feedback_cancel">取消</string>
+    <string name="help_analytics_excluded">此裝置已停止傳送分析資料與當機報告。</string>
+    <string name="help_analytics_included">此裝置已恢復傳送分析資料與當機報告。</string>
+
+    <string name="cooperate_title">商業合作</string>
+    <string name="cooperate_intro_header">合作洽詢</string>
+    <string name="cooperate_intro_footer">歡迎品牌、媒體、學校與機關單位與我們聯繫，我們會盡快以電子郵件回覆。</string>
+    <string name="cooperate_type">合作類型</string>
+    <string name="cooperate_type_choose">請選擇</string>
+    <string name="cooperate_type_advertising">廣告投放</string>
+    <string name="cooperate_type_data_api">資料與 API 合作</string>
+    <string name="cooperate_type_sponsorship">贊助</string>
+    <string name="cooperate_type_media">媒體與公關</string>
+    <string name="cooperate_type_other">其他</string>
+    <string name="cooperate_company_header">公司或單位</string>
+    <string name="cooperate_company_placeholder">公司或單位名稱 *</string>
+    <string name="cooperate_website_placeholder">網站（選填）</string>
+    <string name="cooperate_contact_header">聯絡人</string>
+    <string name="cooperate_name_placeholder">姓名 *</string>
+    <string name="cooperate_job_title_placeholder">職稱（選填）</string>
+    <string name="cooperate_phone_placeholder">電話（選填）</string>
+    <string name="cooperate_contact_footer">我們會以電子郵件與您聯繫。</string>
+    <string name="cooperate_message_header">合作內容</string>
+    <string name="cooperate_message_placeholder">請簡述合作構想，以及預計時程或預算。</string>
+    <string name="cooperate_privacy_footer">您填寫的資料僅用於回覆此次合作洽詢。App 版本、裝置型號、系統版本、語言與時區會一併送出。</string>
+    <string name="cooperate_sent_title">謝謝您！</string>
+    <string name="cooperate_sent_message">已收到您的合作洽詢，我們會盡快與您聯繫。</string>
+    <string name="cooperate_error_title">無法送出合作洽詢</string>
+
+    <string name="help_widgets_and_watch">小工具與 Wear OS</string>
+    <string name="help_widgets_title">主畫面小工具</string>
+    <string name="help_widgets_shows_header">顯示內容</string>
+    <string name="help_widgets_shows_body">顯示最近測站或你選定測站目前的數值。加入小工具時即可選擇；之後要更改，請按住小工具並開啟它的設定。</string>
+    <string name="help_widgets_favourites_header">最愛測站</string>
+    <string name="help_widgets_favourites_body">小、中、大尺寸小工具會在主要測站下方列出你其他的最愛測站，不會重複列出主要測站。測站詳情小工具則詳細顯示單一測站：各項指標、風向風速、過去 24 小時、空品區預報與測站即時影像。中、大尺寸與測站詳情小工具屬於 Pro。</string>
+    <string name="help_widgets_favourites_add">開啟測站並點一下愛心，即可加入最愛。小工具會依「我的最愛」的順序列出：在該頁點「編輯」並拖移即可調整順序。</string>
+    <string name="help_widgets_favourites_offline">沒有網路時，小工具會顯示最後一次儲存的數值。</string>
+    <string name="help_widgets_index_header">選擇指標</string>
+    <string name="help_widgets_index_body">在小工具的設定中，可選擇顯示 AQI、PM2.5、PM10、O3、CO、SO2 或 NO2。</string>
+    <string name="help_widgets_paging_header">瀏覽最愛測站</string>
+    <string name="help_widgets_paging_body">在中、大尺寸小工具上點一下 ‹ 或 ›，即可逐一瀏覽最愛測站；中間的數字（例如 2 / 5）顯示目前位置。點其他地方，會在 App 中開啟該測站。30 分鐘沒有點按，或有新數值時，小工具會回到原本的測站。需要 Pro 及至少兩個最愛測站。</string>
+    <string name="help_widgets_cycle_body">點一下小工具上的指標名稱（AQI、PM2.5…），即可切換到下一個指標。會從小工具設定中選擇的指標開始。</string>
+    <string name="help_widgets_stack_tip">小技巧：加入幾個 Taiwan Air 小工具，各自設定不同，例如最近測站與第一個最愛測站，或 AQI 與 PM2.5。</string>
+    <string name="help_widgets_sizes_header">尺寸</string>
+    <string name="help_widgets_home_sizes">小、中、大。按住小工具並拖曳邊框，即可調整大小。</string>
+    <string name="help_widgets_add_header">如何加入</string>
+    <string name="help_widgets_add_1">1. 按住主畫面的空白處，點一下「小工具」。</string>
+    <string name="help_widgets_add_2">2. 在清單中找到 Taiwan Air，或搜尋它。</string>
+    <string name="help_widgets_add_3">3. 按住小工具，拖到主畫面上，再選擇要顯示的測站與指標。</string>
+    <string name="help_widgets_footer">請先開啟本 App 一次，讓測站與數值準備好。</string>
+    <string name="help_back">返回</string>
+    <string name="help_watch_title">Wear OS</string>
+    <string name="help_watch_app_header">手錶 App</string>
+    <string name="help_watch_app_body">免費。顯示最近測站或你選定的測站目前數值，以及過去 12 小時。手機上的最愛測站會以等級顏色排在測站清單最前面。</string>
+    <string name="help_watch_complications_header">錶面複雜功能</string>
+    <string name="help_watch_complications_body">表情樣式免費：以等級顏色顯示表情，AQI、PM2.5 等 7 項指標任選。Pro 加上數值與更多樣式：指標名稱加數值、僅數值，以及狀態文字。手錶 App 本身免費。</string>
+    <string name="help_watch_tile_header">資訊方塊</string>
+    <string name="help_watch_tile_body">屬於 Pro。從錶面向左滑到資訊方塊的最後，點一下 +，加入 Taiwan Air。它會顯示最近測站或你選定的測站。</string>
+    <string name="help_watch_add_header">如何加入複雜功能</string>
+    <string name="help_watch_add_1">1. 按住錶面，點一下「編輯」，選擇一個複雜功能。</string>
+    <string name="help_watch_add_2">2. 選擇 Taiwan Air。</string>
+    <string name="help_watch_footer">請先開啟手機上的 App 或手錶 App 一次，讓測站與數值就緒。</string>
+    <!-- Android (#77 review): Help's shortcuts guide, in place of iOS Help.shortcuts_* (Siri, Shortcuts,
+         Control Center). What FOX-95 shipped: launcher shortcuts, Google Assistant, the Quick Settings tile. -->
+    <string name="help_shortcuts_title">捷徑、Google 助理與快速設定</string>
+    <string name="help_shortcuts_launcher_header">App 捷徑</string>
+    <string name="help_shortcuts_launcher_body">按住 Taiwan Air 圖示。「空氣品質」會顯示最近測站的 AQI、等級、主要污染物與活動建議。下方是你的最愛測站與最近開啟的測站，點一下即可開啟。把捷徑拖到主畫面，就能一直留著。</string>
+    <string name="help_shortcuts_assistant_header">Google 助理</string>
+    <string name="help_shortcuts_assistant_body">說「Hey Google，在 Taiwan Air 開啟空氣品質」即可看到同一張卡片，或說「Hey Google，在 Taiwan Air 開啟松山」開啟最愛或最近開啟的測站。</string>
+    <string name="help_shortcuts_location_body">只有在你已允許本 App 使用位置時，才會查詢最近的測站；否則會改用你的第一個最愛測站。</string>
+    <string name="help_shortcuts_tile_header">快速設定圖塊</string>
+    <string name="help_shortcuts_tile_body">從螢幕頂端向下滑兩次，點一下鉛筆圖示進入編輯，再把「空氣品質」圖塊拖到想要的位置。它會顯示最近測站或第一個最愛測站的 AQI，點一下即可開啟該測站。</string>
+    <string name="help_shortcuts_footer">所有人皆可免費使用。</string>
+
+    <string name="airindex_meaning_aqi">空氣品質指標</string>
+    <string name="airindex_meaning_pm25">細懸浮微粒</string>
+    <string name="airindex_meaning_pm10">懸浮微粒</string>
+    <string name="airindex_meaning_o3">臭氧</string>
+    <string name="airindex_meaning_co">一氧化碳</string>
+    <string name="airindex_meaning_so2">二氧化硫</string>
+    <string name="airindex_meaning_no2">二氧化氮</string>
+
+    <string name="airstatus_good">良好</string>
+    <string name="airstatus_moderate">普通</string>
+    <string name="airstatus_unhealthyforsensitivegroup">對敏感族群不健康</string>
+    <string name="airstatus_unhealthy">對所有族群不健康</string>
+    <string name="airstatus_veryunhealthy">非常不健康</string>
+    <string name="airstatus_hazardous">危害</string>
+    <string name="airstatus_unknown">－</string>
+
+    <string name="airstatus_general_public_guidance_good">可正常從事戶外活動</string>
+    <string name="airstatus_general_public_guidance_moderate">可正常從事戶外活動</string>
+    <string name="airstatus_general_public_guidance_unhealthyforsensitivegroup">建議減少戶外活動</string>
+    <string name="airstatus_general_public_guidance_unhealthy">建議減少體力消耗活動，尤其是戶外活動</string>
+    <string name="airstatus_general_public_guidance_veryunhealthy">建議減少戶外活動</string>
+    <string name="airstatus_general_public_guidance_hazardous">避免戶外活動，並緊閉門窗</string>
+
+    <string name="airstatus_sensitive_group_guidance_good">可正常從事戶外活動</string>
+    <string name="airstatus_sensitive_group_guidance_moderate">仍可從事戶外活動</string>
+    <string name="airstatus_sensitive_group_guidance_unhealthyforsensitivegroup">建議減少體力消耗及戶外活動</string>
+    <string name="airstatus_sensitive_group_guidance_unhealthy">建議留在室內並減少體力消耗活動</string>
+    <string name="airstatus_sensitive_group_guidance_veryunhealthy">建議留在室內並減少體力消耗活動</string>
+    <string name="airstatus_sensitive_group_guidance_hazardous">應留在室內並避免體力消耗活動</string>
+
+    <string name="details_last_updated">最後更新</string>
+    <string name="details_address">地址</string>
+    <string name="details_coordinates">座標</string>
+    <string name="details_wind">風向風速</string>
+    <string name="details_location">位置</string>
+    <string name="details_no_data">無資料</string>
+    <string name="details_select_a_station">選擇一個測站</string>
+
+    <string name="stationtype_general">一般測站</string>
+    <string name="stationtype_traffic">交通測站</string>
+    <string name="stationtype_industrial">工業測站</string>
+    <string name="stationtype_background">背景測站</string>
+    <string name="stationtype_national_park">國家公園測站</string>
+    <string name="stationtype_other">其他測站</string>
+
+    <string name="wind_calm">無風</string>
+    <string name="wind_light_air">軟風</string>
+    <string name="wind_light_breeze">輕風</string>
+    <string name="wind_gentle_breeze">微風</string>
+    <string name="wind_moderate_breeze">和風</string>
+    <string name="wind_strong_breeze">清勁風</string>
+
+    <!-- 24-hour AQI trend -->
+    <string name="details_trend_improving">正在好轉</string>
+    <string name="details_trend_worsening">正在變差</string>
+    <string name="details_trend_steady">大致持平</string>
+    <string name="details_trend_improving_detail">近幾小時 AQI 下降 %d</string>
+    <string name="details_trend_worsening_detail">近幾小時 AQI 上升 %d</string>
+    <string name="details_trend_steady_detail">維持在 AQI %d 左右</string>
+    <string name="details_now">現在</string>
+    <string name="details_low">最低</string>
+    <string name="details_high">最高</string>
+    <string name="details_average">平均</string>
+    <string name="details_no_trend_data">資料還不夠，無法顯示趨勢</string>
+    <string name="details_not_reporting">目前沒有即時資料</string>
+    <string name="details_not_reporting_message">這個測站目前沒有回報資料，可能正在維修或已停止運作。附近的測站可在地圖上查看。</string>
+    <string name="details_pollutants">污染物</string>
+    <string name="details_health_advice">健康建議</string>
+    <string name="details_alerts_title">空品通知</string>
+    <string name="details_alerts_pitch">這裡的空氣變差或轉好時，馬上通知你。</string>
+    <string name="details_alerts_on">已開啟</string>
+    <string name="details_alerts_off">未開啟</string>
+    <string name="details_alerts_unavailable">目前無法載入通知設定，請檢查網路連線後再試一次。</string>
+    <string name="details_alerts_try_again">再試一次</string>
+    <string name="details_live_cam">即時影像</string>
+    <string name="details_cam_captured">拍攝於 %s</string>
+    <string name="details_cam_source">影像來源：環境部</string>
+    <string name="details_no_cam">此測站沒有即時影像</string>
+    <string name="details_cam_unavailable">目前無法載入影像</string>
+    <string name="details_cam_showing_saved">無法載入最新影像，顯示最後儲存的畫面</string>
+    <string name="details_cam_live">即時</string>
+    <string name="details_cam_timeline">過去 24 小時影像</string>
+    <string name="details_cam_hour_missing">這個小時沒有影像</string>
+    <string name="details_send_feedback">提供意見回饋</string>
+
+    <!-- Share card -->
+    <string name="share_share">分享</string>
+    <string name="share_message">%1$s：AQI %2$d，%3$s — 來自 Taiwan Air</string>
+    <string name="share_preview_title">分享卡片</string>
+    <string name="share_shape">尺寸</string>
+    <string name="share_shape_feed">貼文 4:5</string>
+    <string name="share_shape_story">限動 9:16</string>
+    <string name="share_shape_square">聊天 1:1</string>
+    <string name="share_save_to_photos">儲存到照片</string>
+    <string name="share_saved">已儲存到照片</string>
+    <string name="share_save_denied">Taiwan Air 沒有加入照片的權限，可以到「設定」開啟。</string>
+    <string name="share_save_failed">無法儲存卡片，請再試一次。</string>
+    <string name="share_open_settings">打開設定</string>
+    <string name="share_cancel">取消</string>
+    <string name="share_download">在 Google Play 下載 Taiwan Air</string>
+
+    <!-- Watch -->
+
+    <string name="widget_widget_name">空氣品質</string>
+    <string name="widget_widget_description">顯示最近測站或第一個最愛測站的目前 AQI，並列出你其他的最愛測站。</string>
+    <string name="widget_favourites">最愛</string>
+    <string name="widget_no_favourites">在「最愛」加入測站，即可在此顯示。</string>
+    <string name="widget_station">測站</string>
+    <string name="widget_station_closest">最近測站</string>
+    <string name="widget_station_first_favourite">第一個最愛測站</string>
+    <string name="widget_pro_only_title">Pro 小工具</string>
+    <string name="widget_pro_only_body">中、大、特大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。</string>
+    <string name="widget_pro_unlock">升級 Pro，解鎖所有數值</string>
+    <string name="widget_next_station">下一個測站</string>
+    <string name="widget_previous_station">上一個測站</string>
+    <string name="widget_show_index">顯示 %s</string>
+    <string name="widget_page_position">第 %1$d 個測站，共 %2$d 個</string>
+    <string name="widget_intent_page_title">在小工具顯示測站</string>
+    <string name="widget_intent_index_title">切換小工具的指標</string>
+    <!-- FOX-59: Android widgets. -->
+    <string name="widget_index">指標</string>
+    <string name="widget_configure_title">設定小工具</string>
+    <string name="widget_configure_save">儲存</string>
+    <string name="widget_all_stations">所有測站</string>
+    <string name="widget_detail_name">測站詳情</string>
+    <string name="widget_detail_description">詳細顯示單一測站：各項指標、風向風速、過去 24 小時與空品區預報。</string>
+    <string name="widget_pro_only_body_android">中、大尺寸與測站詳情小工具屬於 Pro。輕觸即可升級。</string>
+    <string name="widget_updated_at">%s 更新</string>
+    <string name="widget_wind_speed">風速</string>
+    <string name="widget_offline_saved_at">離線 · %s 儲存</string>
+    <string name="widget_intent_widget">小工具</string>
+    <string name="watch_no_station">開啟 App 選擇測站</string>
+
+    <!-- Pro -->
+    <string name="pro_title">Taiwan Air Pro</string>
+    <string name="pro_subtitle">畫面更清爽，空氣品質直接顯示在錶面。</string>
+    <string name="pro_features">Pro 包含</string>
+    <string name="pro_feature_no_ads">移除廣告</string>
+    <string name="pro_feature_no_ads_detail">所有畫面都不再顯示廣告，包含地圖。</string>
+    <string name="pro_feature_complications">錶面數值與更多樣式</string>
+    <string name="pro_feature_complications_detail">在錶面顯示數值與更多樣式，AQI、PM2.5 等 7 項指標任選。表情樣式與手錶 App 免費。</string>
+    <string name="pro_feature_widgets">中、大、特大尺寸小工具</string>
+    <string name="pro_feature_widgets_detail">在主畫面查看目前測站與最愛測站，或在 iPad 上詳細查看單一測站。</string>
+    <string name="pro_feature_support">支持獨立開發</string>
+    <string name="pro_feature_support_detail">讓 App 持續維護、資料持續更新。</string>
+    <string name="pro_choose_plan">選擇方案</string>
+    <string name="pro_best_value">最划算</string>
+    <string name="pro_per_month">每月 %s</string>
+    <string name="pro_billed_monthly">按月計費</string>
+    <string name="pro_lifetime_detail">一次購買，永久使用</string>
+    <string name="pro_renewal_terms">訂閱會自動續訂，除非在當期結束前至少 24 小時取消。可在「Google Play › 付款和訂閱 › 訂閱」中管理。</string>
+    <string name="pro_terms_of_use">使用條款</string>
+    <string name="pro_privacy_policy">隱私權政策</string>
+    <string name="pro_purchase_failed">無法完成購買，請再試一次。</string>
+
+    <string name="pro_feature_widgets_android">中、大尺寸小工具</string>
+    <string name="pro_feature_widgets_android_detail">在主畫面查看目前測站與最愛測站。</string>
+    <string name="pro_plan_1m">1 個月</string>
+    <string name="pro_plan_6m">6 個月</string>
+    <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_retry">重試</string>
+    <string name="pro_close">關閉</string>
+    <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>
+    <string name="ads_remove">移除廣告</string>
+
+    <!-- Guide -->
+    <string name="guide_section_what">這是什麼</string>
+    <string name="guide_section_sources">從哪裡來</string>
+    <string name="guide_section_health">對健康的影響</string>
+    <string name="guide_section_measure">如何量測</string>
+    <string name="guide_section_tips">你可以怎麼做</string>
+    <string name="guide_section_bands">本 App 使用的顏色分級</string>
+    <string name="guide_bands_footer">地圖、測站頁面與手錶上的每一筆數值，都依照這些分級上色。</string>
+    <string name="guide_further_reading">在維基百科閱讀更多</string>
+    <string name="guide_sources_footer">資料來源：環境部；世界衛生組織《全球空氣品質準則》（2021）。</string>
+
+    <string name="guide_aqi_what">用 0 到 500 的單一數字概括空氣品質。六項污染物各自換算到同一個 0–500 的尺度，AQI 取其中最高者，該項污染物即為「指標污染物」。同樣是 160，由臭氧造成與由 PM2.5 造成，需要的防護並不相同，所以值得看看是哪一項污染物在主導。</string>
+    <string name="guide_aqi_measure">環境部每小時發布 AQI，但它不是當下那一小時的快照：懸浮微粒採加權移動平均（前 12 小時平均與前 4 小時平均各占一半），臭氧與一氧化碳採 8 小時平均，二氧化硫與二氧化氮則採最新一小時的數值。因此空氣突然變差時，各項污染物的數值會比 AQI 更早反映。</string>
+    <string name="guide_aqi_tips">除了數字，也要看趨勢：早上 AQI 若持續上升，往往會一直升到天氣轉變為止。超過 100 時，敏感族群（兒童、長者及心臟或肺部疾病患者）應減少長時間或劇烈的戶外活動；超過 150 時，所有人都應如此。</string>
+
+    <string name="guide_pm25_what">粒徑 2.5 微米以下的微粒，約為頭髮直徑的三十分之一。小到足以深入肺部，最細的還能進入血液。</string>
+    <string name="guide_pm25_sources">汽機車廢氣、發電廠、工廠與各種燃燒，加上二氧化硫、氮氧化物與氨在空氣中反應生成的微粒。在台灣，濃度通常從秋季升高到春季：風力減弱讓本地污染累積，東北季風又帶來境外霾害，中南部西半部往往最嚴重。</string>
+    <string name="guide_pm25_health">長期暴露與心臟病、中風、肺癌及兒童肺功能發育遲緩有關；短時間的高濃度也可能誘發氣喘與心臟問題。世界衛生組織的準則值為 24 小時平均 15 µg/m³、年平均 5 µg/m³。</string>
+    <string name="guide_pm25_measure">單位為微克/立方公尺（µg/m³），每小時量測。AQI 採移動平均，所以每小時的數值會先反映變化。</string>
+    <string name="guide_pm25_tips">濃度高時關窗，並開啟具 HEPA 濾網的空氣清淨機。外出時，密合的 N95 或 KN95 口罩能過濾細懸浮微粒；一般醫用口罩不夠密合，效果有限。</string>
+
+    <string name="guide_pm10_what">粒徑 10 微米以下的微粒，包含 PM2.5。其中較粗的部分大多停留在鼻腔、喉嚨與上呼吸道，較少進入肺部深處。</string>
+    <string name="guide_pm10_sources">道路與工地揚塵、裸露地表、海鹽，以及春季從中國北方與蒙古吹來的沙塵暴。秋冬起風時，濁水溪裸露的河床會在雲林、彰化一帶揚起大量塵土。</string>
+    <string name="guide_pm10_health">刺激眼睛、鼻子與喉嚨，並加重氣喘與支氣管炎。世界衛生組織的準則值為 24 小時平均 45 µg/m³。</string>
+    <string name="guide_pm10_measure">單位為微克/立方公尺（µg/m³），每小時量測；AQI 採用與 PM2.5 相同的移動平均。</string>
+    <string name="guide_pm10_tips">揚塵日請關窗，清潔時用濕布擦拭，避免乾擦揚起灰塵。口罩對粗顆粒的效果比對 PM2.5 更好。</string>
+
+    <string name="guide_o3_what">指地面的臭氧，而非高空中保護地球的臭氧層。它不是直接排放出來的，而是氮氧化物與揮發性有機物在陽光下反應生成。</string>
+    <string name="guide_o3_sources">這些前驅物主要來自交通、工業與溶劑。臭氧需要數小時才會生成，因此常在晴朗炎熱日的中午過後到下午達到高峰，而且下風處的郊區往往比市區更高。</string>
+    <string name="guide_o3_health">刺激呼吸道，引起咳嗽、胸悶與呼吸急促，並降低肺功能，運動時尤其明顯。氣喘患者受影響最大。</string>
+    <string name="guide_o3_measure">單位為 ppb（十億分之一），每小時量測。AQI 採 8 小時平均，因此會落後於下午的高峰。</string>
+    <string name="guide_o3_tips">臭氧偏高的日子，請改在早晨或傍晚運動。臭氧在室內很快就會分解，待在室內相當有效；口罩無法過濾氣體。</string>
+
+    <string name="guide_co_what">燃料在氧氣不足時燃燒所產生的無色無味氣體。</string>
+    <string name="guide_co_sources">主要來自汽機車廢氣，因此在交通繁忙的路旁與尖峰時段最高。在台灣的戶外環境中，數值很少超出良好等級。</string>
+    <string name="guide_co_health">一氧化碳會取代血液中的氧氣。以戶外的濃度來說，主要影響心臟病患者；高濃度時會造成頭痛、暈眩、意識不清甚至死亡。</string>
+    <string name="guide_co_measure">單位為 ppm（百萬分之一），每小時量測，AQI 採 8 小時平均。</string>
+    <string name="guide_co_tips">真正的危險在室內。每年冬天，台灣都有裝在密閉陽台或浴室的燃氣熱水器造成一氧化碳中毒：請保持通風，並加裝一氧化碳警報器。</string>
+
+    <string name="guide_so2_what">燃燒含硫燃料時釋放的刺鼻氣體。</string>
+    <string name="guide_so2_sources">燃煤與燃油電廠、煉油廠、重工業與船舶。火山噴氣孔也會排放，所以陽明山大屯火山群附近的測站數值可能較高。</string>
+    <string name="guide_so2_health">刺激呼吸道，數分鐘內就可能誘發氣喘。在空氣中會轉變為硫酸鹽微粒，增加 PM2.5，也是酸雨的成因之一。</string>
+    <string name="guide_so2_measure">單位為 ppb（十億分之一），AQI 採最新一小時的數值。</string>
+    <string name="guide_so2_tips">氣喘患者在數值升高時，特別是在工業區或火山噴氣孔附近，請隨身攜帶緩解型吸入劑。</string>
+
+    <string name="guide_no2_what">高溫燃燒時產生的紅棕色氣體。</string>
+    <string name="guide_no2_sources">主要來自道路交通，其次是發電廠與工業。在交通繁忙的路旁與尖峰時段最高，離開幾百公尺後就會明顯下降。</string>
+    <string name="guide_no2_health">使呼吸道發炎、降低對呼吸道感染的抵抗力；長期暴露與兒童罹患氣喘有關。它也會參與生成臭氧與 PM2.5。</string>
+    <string name="guide_no2_measure">單位為 ppb（十億分之一），AQI 採最新一小時的數值。</string>
+    <string name="guide_no2_tips">盡量在離大馬路一個街區外的巷道步行、跑步或騎車，並避開尖峰時段。</string>
+
+    <!-- visionOS -->
+
+    <!-- Map timeline -->
+    <string name="timeline_title">過去 24 小時</string>
+    <string name="timeline_now">現在</string>
+    <string name="timeline_latest">最新</string>
+    <string name="timeline_hours_ago">%d 小時前</string>
+    <string name="timeline_yesterday">昨天</string>
+    <string name="timeline_loading">載入中 %1$d/%2$d</string>
+    <string name="timeline_play">播放過去 24 小時</string>
+    <string name="timeline_pause">暫停</string>
+    <string name="timeline_accessibility_label">時間軸</string>
+
+    <!-- Area forecast (MOENV AQF_P_01) -->
+    <string name="forecast_title">空品區預報</string>
+    <string name="forecast_today">今天</string>
+    <string name="forecast_tomorrow">明天</string>
+    <string name="forecast_day_after_tomorrow">後天</string>
+    <string name="forecast_major_pollutant">主要污染物：%s</string>
+    <string name="forecast_no_value">尚無預報值</string>
+    <string name="forecast_published">發布 %s</string>
+    <string name="forecast_source">資料來源：環境部</string>
+    <string name="forecast_more">顯示更多</string>
+    <string name="forecast_less">收合</string>
+    <string name="forecast_tab_title">空品區預報</string>
+    <string name="forecast_your_area">所在地區</string>
+    <string name="forecast_favourite_area">最愛測站</string>
+    <string name="forecast_none_current">目前沒有可顯示的最新預報，環境部的最新預報暫時無法載入，請稍後再試。</string>
+
+    <!-- Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) -->
+    <string name="weather_title">天氣</string>
+    <string name="weather_source">資料來源：中央氣象署</string>
+    <string name="weather_humidity">濕度</string>
+    <string name="weather_rain_today">今日雨量</string>
+    <string name="weather_wind">風速</string>
+    <string name="weather_temperature">氣溫 %s</string>
+    <string name="weather_chance_of_rain">降雨機率 %s</string>
+    <string name="weather_station_named">%1$s測站，距離 %2$s</string>
+    <string name="weather_station_nearby">中央氣象署測站，距離 %s</string>
+    <string name="weather_observed">觀測於%s</string>
+    <!-- CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) -->
+    <string name="weather_wx_1">晴天</string>
+    <string name="weather_wx_2">晴時多雲</string>
+    <string name="weather_wx_3">多雲時晴</string>
+    <string name="weather_wx_4">多雲</string>
+    <string name="weather_wx_5">多雲時陰</string>
+    <string name="weather_wx_6">陰時多雲</string>
+    <string name="weather_wx_7">陰天</string>
+    <string name="weather_wx_8">多雲短暫陣雨</string>
+    <string name="weather_wx_9">多雲時陰短暫雨</string>
+    <string name="weather_wx_10">陰時多雲短暫雨</string>
+    <string name="weather_wx_11">陰短暫雨</string>
+    <string name="weather_wx_12">多雲時陰陣雨</string>
+    <string name="weather_wx_13">陰時多雲有雨</string>
+    <string name="weather_wx_14">陰有雨</string>
+    <string name="weather_wx_15">多雲短暫陣雨或雷雨</string>
+    <string name="weather_wx_16">多雲時陰陣雨或雷雨</string>
+    <string name="weather_wx_17">陰時多雲陣雨或雷雨</string>
+    <string name="weather_wx_18">陰陣雨或雷雨</string>
+    <string name="weather_wx_19">晴午後多雲局部雨</string>
+    <string name="weather_wx_20">多雲午後局部陣雨</string>
+    <string name="weather_wx_21">晴午後多雲雷陣雨</string>
+    <string name="weather_wx_22">多雲午後雷陣雨</string>
+    <string name="weather_wx_23">有雨或雪</string>
+    <string name="weather_wx_24">晴有霧</string>
+    <string name="weather_wx_25">晴時多雲有霧</string>
+    <string name="weather_wx_26">多雲時晴有霧</string>
+    <string name="weather_wx_27">多雲有霧</string>
+    <string name="weather_wx_28">陰有霧</string>
+    <string name="weather_wx_29">多雲局部雨</string>
+    <string name="weather_wx_30">多雲時陰局部雨</string>
+    <string name="weather_wx_31">多雲有霧有局部雨</string>
+    <string name="weather_wx_32">多雲時陰有霧有局部雨</string>
+    <string name="weather_wx_33">多雲局部雷陣雨</string>
+    <string name="weather_wx_34">多雲時陰局部雷陣雨</string>
+    <string name="weather_wx_35">多雲局部雷陣雨有霧</string>
+    <string name="weather_wx_36">多雲時陰局部雷陣雨有霧</string>
+    <string name="weather_wx_37">有雨或雪有霧</string>
+    <string name="weather_wx_38">短暫雨有霧</string>
+    <string name="weather_wx_39">有雨有霧</string>
+    <string name="weather_wx_41">陣雨或雷雨有霧</string>
+    <string name="weather_wx_42">下雪</string>
+
+    <!-- Offline: last good readings -->
+    <string name="offline_showing_saved_readings">目前離線，顯示最後儲存的資料</string>
+    <string name="offline_updated_ago">離線・%s更新</string>
+    <string name="offline_nothing_saved">目前無法連線，也沒有已儲存的資料。請檢查網路連線後再試一次。</string>
+    <string name="offline_retry">重試</string>
+
+    <!-- Welcome flow (FOX-34) -->
+    <string name="help_welcome">開始使用</string>
+    <string name="help_show_welcome_guide">顯示歡迎導覽</string>
+    <string name="onboarding_back">上一步</string>
+    <string name="onboarding_skip">略過</string>
+    <string name="onboarding_step">第 %1$d 步，共 %2$d 步</string>
+    <string name="onboarding_continue">繼續</string>
+    <string name="onboarding_not_now">現在不要</string>
+    <string name="onboarding_open_settings">開啟設定</string>
+    <string name="onboarding_get_started">開始</string>
+    <string name="onboarding_done">開始使用 Taiwan Air</string>
+    <string name="onboarding_welcome_title">掌握全臺空氣品質</string>
+    <string name="onboarding_welcome_body">在地圖與列表上查看全臺每個監測站的 AQI 與各項污染物數值，常用測站加入我的最愛，一點就看到。</string>
+    <string name="onboarding_location_title">找到離你最近的測站</string>
+    <string name="onboarding_location_body">允許取用位置，Taiwan Air 就能找出離你最近的監測站，並在地圖上顯示你的位置。</string>
+    <string name="onboarding_enable_location">允許取用位置</string>
+    <string name="onboarding_location_on">已開啟定位。</string>
+    <string name="onboarding_location_off">定位已關閉。在「設定」開啟前，Taiwan Air 會以臺北市中正區為起點。</string>
+    <string name="onboarding_closest_title">離你最近的測站</string>
+    <string name="onboarding_closest_body">加入我的最愛後會一併開啟通知，當地空氣品質變差時就會通知你。不是你所在的地區？可以選擇其他測站。</string>
+    <string name="onboarding_closest_fallback">定位已關閉，這只是暫代的測站：離臺北市中正區最近的測站。請在下方選擇你自己的測站。</string>
+    <string name="onboarding_closest_failed">目前無法載入測站。之後可從地圖或「搜尋」加入我的最愛。</string>
+    <string name="onboarding_add_to_favourites">加入我的最愛並開啟通知</string>
+    <string name="onboarding_in_favourites">已在我的最愛</string>
+    <string name="onboarding_alerts_need_notifications">允許 Taiwan Air 傳送通知後，才能開啟測站通知。</string>
+    <string name="onboarding_notifications_title">接收空氣品質通知</string>
+    <string name="onboarding_notifications_body">允許通知，最愛測站的空氣品質有變化時，Taiwan Air 就會通知你。通知門檻可在各測站頁面設定。</string>
+    <string name="onboarding_allow_notifications">允許通知</string>
+    <string name="onboarding_notifications_on">已開啟通知。</string>
+    <string name="onboarding_notifications_off">通知已關閉，可到「設定」開啟。</string>
+    <string name="onboarding_dnd_title">勿擾時段</string>
+    <string name="onboarding_dnd_body">Taiwan Air 的 App 內設定，與手機的「零打擾」模式無關：在這段時間內不會傳送通知。</string>
+    <string name="onboarding_dnd_footer">之後可隨時在「說明」中修改。</string>
+    <string name="onboarding_premium_body">通知、我的最愛、地圖與手錶 App 皆可免費使用。Pro 可自由選購：移除廣告並加入更多功能。</string>
+    <string name="onboarding_see_pro_plans">查看 Pro 方案</string>
+    <string name="onboarding_premium_active">你已是 Pro 用戶，感謝支持！</string>
+    <string name="onboarding_welcome_data">數值每小時來自環境部。Taiwan Air 是獨立開發的 App，並非政府經營。</string>
+    <string name="onboarding_choose_station">選擇其他測站</string>
+    <string name="onboarding_choose_station_title">選擇測站</string>
+    <string name="onboarding_cancel">取消</string>
+    <string name="onboarding_close">關閉</string>
+    <string name="onboarding_alerts_now_on">這個測站的通知已開啟。可在測站頁面調整或關閉。</string>
+    <string name="onboarding_dnd_after_notifications">開啟通知後，可以在這裡設定勿擾時段。</string>
+    <string name="onboarding_more_title">Taiwan Air 還能做什麼</string>
+    <string name="onboarding_more_body">不必打開 App，也能隨時掌握空氣品質。</string>
+    <string name="onboarding_more_widgets_title">小工具</string>
+    <string name="onboarding_more_widgets_body">放在主畫面。用 ‹ › 逐一瀏覽最愛測站；測站詳情小工具可詳細顯示單一測站。</string>
+    <string name="onboarding_more_forecast_title">空品區預報</string>
+    <string name="onboarding_more_forecast_body">點畫面下方的「空品區預報」，查看各空品區未來幾天的預報。</string>
+    <string name="onboarding_how_to_add">如何加入</string>
+    <string name="onboarding_free_heading">免費</string>
+    <string name="onboarding_free_complication">錶面複雜功能，顯示等級表情</string>
+    <string name="onboarding_free_index_cycling">小尺寸小工具：點指標名稱即可切換 AQI、PM2.5 等指標</string>
+    <string name="onboarding_pro_heading">Pro 加入</string>
+    <string name="onboarding_pro_trial_days">免費試用 %d 天</string>
+    <string name="onboarding_pro_trial_weeks">免費試用 %d 週</string>
+    <string name="onboarding_pro_trial_months">免費試用 %d 個月</string>
+    <string name="onboarding_pro_trial_years">免費試用 %d 年</string>
+    <string name="onboarding_more_shortcuts_title">捷徑、Google 助理與快速設定</string>
+    <string name="onboarding_more_shortcuts_body">按住 App 圖示即可開啟你的測站，也可以問 Google 助理空氣如何，或加入快速設定圖塊。</string>
+    <string name="onboarding_free_shortcuts">啟動器捷徑、Google 助理與快速設定圖塊</string>
+
+    <!-- Siri, Shortcuts and Control Center (FOX-74) -->
+
+    <!-- Map (FOX-54): Android-only labels for TalkBack and the station screen stub. -->
+    <string name="map_my_location">移到我的位置</string>
+    <string name="map_default_location">移到預設位置</string>
+    <string name="map_clear_search">清除搜尋</string>
+    <string name="map_back">返回</string>
+
+    <!-- Debug builds only: the data-layer check screen (FOX-53). -->
+    <string name="debug_data_title">資料層</string>
+    <string name="debug_data_counts">測站 %1$d · 讀數 %2$d · 預報 %3$d 筆</string>
+
+    <!-- Android only (FOX-57): the alerts' notification channel, and an alert's text when the sender
+         sends none (same wording as the push Worker's message.ts). -->
+    <string name="push_channel_alerts_name">空品通知</string>
+    <string name="push_channel_alerts_description">你關注的測站 AQI 超過或低於你設定的數值時通知你。</string>
+    <string name="push_alert_title">%1$s AQI %2$d</string>
+    <string name="push_alert_above_body">空氣品質指標已高於你設定的 %d，外出請留意。</string>
+    <string name="push_alert_below_body">空氣品質指標已低於你設定的 %d，空氣變好了。</string>
+    <!-- Android only (FOX-55): the Favourites edit mode and the station page's controls. iOS uses system buttons. -->
+    <string name="favourites_edit">編輯</string>
+    <string name="favourites_done">完成</string>
+    <string name="favourites_move_up">上移</string>
+    <string name="favourites_move_down">下移</string>
+    <string name="details_back">返回</string>
+    <string name="details_about_index">關於 %s</string>
+    <string name="details_map">測站位置地圖</string>
+    <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's
+         Siri, Shortcuts and Control Center strings (Intent.*, Control.*). -->
+    <string name="intent_get_air_quality_title">查詢空氣品質</string>
+    <string name="intent_get_air_quality_short">空氣品質</string>
+    <string name="intent_open_station_title">開啟測站</string>
+    <string name="intent_answer_fallback_favourite">Taiwan Air 無法取得你的位置，以下是你的第一個最愛測站。</string>
+    <string name="intent_answer_fallback_default">Taiwan Air 無法取得你的位置，你也還沒有最愛測站，以下是臺北市中正區附近的測站。</string>
+    <string name="intent_answer_no_reading">目前還沒有數值。請在有網路時開啟 Taiwan Air 一次。</string>
+    <string name="intent_answer_no_aqi">%s目前沒有 AQI 數值。</string>
+    <string name="intent_answer_reading">%1$s：AQI %2$s，%3$s。</string>
+    <string name="intent_answer_main_pollutant">主要污染物：%s。</string>
+    <string name="intent_answer_guidance">%s。</string>
+    <string name="intent_answer_cached_age">目前沒有網路，這是最後儲存的數值，為 %s前的資料。</string>
+    <string name="intent_answer_cached">目前沒有網路，這是最後儲存的數值。</string>
+    <string name="intent_answer_old_age">這筆數值是 %s前發布的。</string>
+    <string name="control_display_name">空氣品質</string>
+    <!-- Android only (FOX-95): the answer card's close button, and what Assistant hears for the
+         "Air quality" shortcut (actions.intent.OPEN_APP_FEATURE). -->
+    <string name="intent_answer_close">關閉</string>
+    <string name="intent_assistant_feature_air_quality">空氣品質</string>
+    <!-- How old a reading is, as iOS DateComponentsFormatter (.full, one unit) says it. -->
+    <plurals name="intent_age_minutes">
+        <item quantity="other">%d分鐘</item>
+    </plurals>
+    <plurals name="intent_age_hours">
+        <item quantity="other">%d小時</item>
+    </plurals>
+    <plurals name="intent_age_days">
+        <item quantity="other">%d天</item>
+    </plurals>
+</resources>
