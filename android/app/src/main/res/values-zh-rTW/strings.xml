@@ -322,6 +322,7 @@
     <string name="pro_plan_1m">1 個月</string>
     <string name="pro_plan_6m">6 個月</string>
     <string name="pro_plan_12m">12 個月</string>
+    <string name="pro_plan_lifetime">終身</string>
     <string name="pro_retry">重試</string>
     <string name="pro_close">關閉</string>
     <string name="pro_purchase_pending">付款處理中，Google Play 確認後就會開啟 Pro。</string>

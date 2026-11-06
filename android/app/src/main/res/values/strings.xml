@@ -323,6 +323,7 @@
     <string name="pro_plan_1m">1 month</string>
     <string name="pro_plan_6m">6 months</string>
     <string name="pro_plan_12m">12 months</string>
+    <string name="pro_plan_lifetime">Lifetime</string>
     <string name="pro_retry">Retry</string>
     <string name="pro_close">Close</string>
     <string name="pro_purchase_pending">Your payment is pending. Pro turns on as soon as Google Play confirms it.</string>
