@@ -90,7 +90,8 @@ data class MarkerAppearance(
 /**
  * One station on the map. Equal by [countryCode] and station id (ids are only unique within a
  * country), so the cluster renderer keeps the marker and only restyles it when the index, the
- * readings or the timeline hour change.
+ * readings or the timeline hour change. Because of that equality, a restyle reaches the map only
+ * through [MarkerSync].
  */
 class MapStation(
     val countryCode: String,
@@ -115,6 +116,33 @@ class MapStation(
         other is MapStation && other.countryCode == countryCode && other.stationId == stationId
 
     override fun hashCode(): Int = 31 * countryCode.hashCode() + stationId
+}
+
+/**
+ * Decides when the cluster manager must be handed a new list of stations (FOX-110).
+ *
+ * [MapStation]s are equal by id, so the renderer finds the marker it already has and only restyles
+ * it. But maps-compose's `Clustering(items = …)` re-clusters only when the item list stops being
+ * *equal* to the last one, and a list that differs only in looks (another index, wind mode, an
+ * earlier hour) is equal by id: the markers never changed. The map asks [needsPush] for each new
+ * list and, when a marker would look different, re-adds the items itself, which runs
+ * `onClusterItemUpdated` on the reused markers.
+ */
+object MarkerSync {
+    /**
+     * True when [next] would draw anything differently from [shown], the list the cluster manager
+     * last got (null: none yet). Comparing ids alone, as list equality does, misses every restyle.
+     */
+    fun needsPush(shown: List<MapStation>?, next: List<MapStation>): Boolean =
+        shown == null || shown.size != next.size || shown.indices.any { !drawsTheSame(shown[it], next[it]) }
+
+    /** Same station, drawn the same: everything the renderer and a tap read. */
+    fun drawsTheSame(a: MapStation, b: MapStation): Boolean = a == b &&
+        a.appearance == b.appearance &&
+        a.isInteractive == b.isInteractive &&
+        a.title == b.title &&
+        a.pollutant.lat == b.pollutant.lat &&
+        a.pollutant.lon == b.pollutant.lon
 }
 
 /**

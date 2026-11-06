@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -152,6 +156,32 @@ fun MapScreen(
         }
     }
 
+    // The wind button moves right when the card and legend reach down to it (FOX-112).
+    var overlayBottom by remember { mutableFloatStateOf(0f) }
+    var buttonRowBottom by remember { mutableFloatStateOf(0f) }
+    val density = LocalDensity.current
+    val windBesideButtons = with(density) {
+        MapButtonsLayout.windBesideLocationButtons(
+            overlayBottom,
+            buttonRowBottom,
+            MAP_BUTTON_SIZE.toPx(),
+            MAP_BUTTON_GAP.toPx()
+        )
+    }
+    val windButton = @Composable {
+        WindModeButton(
+            isWindMode = state.mapMode == MapMode.WIND,
+            onToggle = {
+                val mode = viewModel.toggleWindMode()
+                Analytics.logEvent(
+                    context,
+                    Analytics.SET_WIND_MODE,
+                    mapOf("label" to if (mode == MapMode.WIND) "on" else "off")
+                )
+            }
+        )
+    }
+
     Box(modifier.fillMaxSize()) {
         StationMap(
             viewModel = viewModel,
@@ -163,7 +193,10 @@ fun MapScreen(
         )
 
         Column(
-            modifier = Modifier.statusBarsPadding().padding(start = 15.dp, top = 8.dp),
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(start = 15.dp, top = 8.dp)
+                .onGloballyPositioned { overlayBottom = it.boundsInRoot().bottom },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             state.closest?.let { closest ->
@@ -196,22 +229,19 @@ fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp)
+                    .onGloballyPositioned { buttonRowBottom = it.boundsInRoot().bottom },
                 verticalAlignment = Alignment.Bottom
             ) {
-                WindModeButton(
-                    isWindMode = state.mapMode == MapMode.WIND,
-                    onToggle = {
-                        val mode = viewModel.toggleWindMode()
-                        Analytics.logEvent(
-                            context,
-                            Analytics.SET_WIND_MODE,
-                            mapOf("label" to if (mode == MapMode.WIND) "on" else "off")
-                        )
-                    }
-                )
+                if (!windBesideButtons) windButton()
                 Spacer(Modifier.weight(1f))
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (windBesideButtons) {
+                    windButton()
+                    Spacer(Modifier.width(MAP_BUTTON_GAP))
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(MAP_BUTTON_GAP)) {
                     MapRoundButton(
                         icon = R.drawable.ic_map_default_location,
                         contentDescription = stringResource(R.string.map_default_location),
@@ -353,8 +383,27 @@ private fun StationMap(
             }
             clusterManager = manager
         }
-        clusterManager?.let { Clustering(items = stations, clusterManager = it) }
+        clusterManager?.let { manager ->
+            Clustering(items = stations, clusterManager = manager)
+            // Clustering skips a list equal by id to the last one, so a new index, wind mode or
+            // timeline hour would leave every marker as it was (FOX-110). Re-add the items when a
+            // marker would look different; the renderer reuses each marker and swaps only the icons
+            // that changed. History arriving for hours off screen changes nothing and is skipped.
+            var shown by remember(manager) { mutableStateOf<List<MapStation>?>(null) }
+            LaunchedEffect(manager, stations) {
+                if (MarkerSync.needsPush(shown, stations)) {
+                    manager.clearItems()
+                    manager.addItems(stations)
+                    manager.cluster()
+                    shown = stations
+                }
+            }
+        }
     }
 }
 
 private val CLUSTER_PADDING = 64.dp
+
+/** The round map buttons' size and the space between them (iOS: 60 pt, 12 pt). */
+private val MAP_BUTTON_SIZE = 60.dp
+private val MAP_BUTTON_GAP = 12.dp

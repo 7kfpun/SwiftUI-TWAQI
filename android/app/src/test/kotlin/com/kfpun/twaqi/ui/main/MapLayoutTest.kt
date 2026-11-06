@@ -50,4 +50,18 @@ class MapLayoutTest {
         assertEquals(440f, WideLayout.listWidth(1280f))
         assertEquals(442f, WideLayout.listWidth(884f, foldX = 442f))
     }
+
+    /** FOX-112: the wind button leaves the legend's corner when it would cover it. */
+    @Test
+    fun windButtonMovesRightOnlyWhenItWouldCoverTheLegend() {
+        // Portrait: legend ends at 480 px, the button row at 2000 px: plenty of room.
+        assertFalse(MapButtonsLayout.windBesideLocationButtons(480f, 2000f, 158f, 32f))
+        // Landscape: legend ends at 440 px, the row at 560 px: a 158 px button would reach 370.
+        assertTrue(MapButtonsLayout.windBesideLocationButtons(440f, 560f, 158f, 32f))
+        // Exactly touching the gap still fits.
+        assertFalse(MapButtonsLayout.windBesideLocationButtons(400f, 590f, 158f, 32f))
+        // Before the first layout nothing is measured: it stays where iOS has it.
+        assertFalse(MapButtonsLayout.windBesideLocationButtons(0f, 560f, 158f, 32f))
+        assertFalse(MapButtonsLayout.windBesideLocationButtons(440f, 0f, 158f, 32f))
+    }
 }
