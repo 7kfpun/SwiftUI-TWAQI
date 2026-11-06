@@ -456,8 +456,9 @@ private struct StationCamFrameView: View {
             + " " + Self.relativeFormatter.localizedString(for: hour.hour, relativeTo: Date())
     }
 
-    /// "Captured 22:30 · 36 min. ago · Image: MOENV" — of the live frame shown,
-    /// which offline may be older than the manifest's, or of the picked hour.
+    /// "Captured 22:30 · 36 min. ago" — of the live frame shown, which offline
+    /// may be older than the manifest's, or of the picked hour. The source is
+    /// named under Help → Data sources (FOX-88).
     private var caption: some View {
         let date: Date?
         if let hour = history.selected, selectedIndex != nil {
@@ -474,8 +475,7 @@ private struct StationCamFrameView: View {
                 Text("· \(Self.relativeFormatter.localizedString(for: date, relativeTo: Date()))")
                     .foregroundColor(.secondary)
             }
-            Spacer(minLength: 8)
-            Text("Details.cam_source")
+            Spacer(minLength: 0)
         }
         .font(.caption.weight(.light))
         .foregroundColor(.secondary)
