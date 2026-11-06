@@ -264,10 +264,16 @@ fun HomeScreen(
     val navigation: HomeNavigationViewModel = viewModel(factory = HomeNavigationViewModel.Factory)
     val nav by navigation.uiState.collectAsStateWithLifecycle()
     val isWide = WideLayout.isWide(currentWindowAdaptiveInfo().windowSizeClass)
+    // FOX-95: an opened station becomes a recent one, for the launcher's shortcuts. Recorded when it
+    // opens, not when a tab with a station open comes back to the front or the activity is recreated.
+    val open: (Int) -> Unit = { stationId ->
+        navigation.openStation(stationId)
+        StationShortcuts.stationOpened(context, stationId)
+    }
     // A tapped alert (FOX-57) or a widget's station link (FOX-59) opens its station.
     LaunchedEffect(openStation) {
         openStation?.filterNotNull()?.collect {
-            navigation.openStation(it)
+            open(it)
             openStation.value = null
         }
     }
@@ -276,8 +282,6 @@ fun HomeScreen(
     val tabsState = rememberSaveableStateHolder()
     val station = nav.fullScreenStation(isWide)
     val opened = nav.stations[nav.tab]
-    // FOX-95: an opened station becomes a recent one, for the launcher's shortcuts.
-    LaunchedEffect(opened) { opened?.let { StationShortcuts.stationOpened(context, it) } }
     // Back closes the station, full screen or beside the map or list.
     BackHandler(enabled = opened != null) { navigation.closeStation() }
     if (station != null) {
@@ -292,7 +296,7 @@ fun HomeScreen(
             MainTabs(
                 isPro = entitlement == Entitlement.PRO,
                 onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
-                onOpenStation = { navigation.openStation(it.stationId) },
+                onOpenStation = { open(it.stationId) },
                 selected = nav.tab,
                 onSelect = navigation::selectTab,
                 onOpenDataScreen = onOpenDataScreen,

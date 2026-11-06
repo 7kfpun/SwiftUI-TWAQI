@@ -142,6 +142,9 @@ fun MainTabs(
         // Each tab's banner sits above the tab bar (iOS: the footer banner of each tab), hidden for Pro.
         Column(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)) {
             val content = Modifier.weight(1f).fillMaxWidth()
+            // FOX-119: in the tabletop posture the lists, Help and Forecast keep above the hinge. In a
+            // wide window the list-detail scaffold already splits on a book-style hinge.
+            val pageContent = content.offHinge(book = panes == null)
             tabStates.SaveableStateProvider(selected.name) {
                 // FOX-119: each list's scroll position is held here, above the phone/wide switch, so
                 // it survives folding, unfolding and resizing.
@@ -155,7 +158,7 @@ fun MainTabs(
                         panel = panes?.panel(MainTab.MAIN)
                     )
 
-                    MainTab.DETAILS_LIST -> panes.listDetail(MainTab.DETAILS_LIST, content) { listModifier ->
+                    MainTab.DETAILS_LIST -> panes.listDetail(MainTab.DETAILS_LIST, pageContent) { listModifier ->
                         StationListScreen(
                             viewModel,
                             state,
@@ -168,7 +171,7 @@ fun MainTabs(
                         )
                     }
 
-                    MainTab.FAVOURITES -> panes.listDetail(MainTab.FAVOURITES, content) { listModifier ->
+                    MainTab.FAVOURITES -> panes.listDetail(MainTab.FAVOURITES, pageContent) { listModifier ->
                         FavouritesScreen(
                             onOpenStation = { onOpenStation(StationRoute(it)) },
                             modifier = listModifier,
@@ -181,14 +184,14 @@ fun MainTabs(
                     MainTab.HELP -> HelpHost(
                         isPro = isPro,
                         onOpenPro = onOpenPro,
-                        modifier = content,
+                        modifier = pageContent,
                         onShowWelcomeGuide = onShowWelcomeGuide,
                         wide = panes != null,
                         listState = listState
                     )
                 }
             }
-            selected.adPlacement?.let { AdBanner(it, Modifier.offHinge()) }
+            selected.adPlacement?.let { AdBanner(it, Modifier.offHinge(tabletop = false)) }
         }
     }
 }

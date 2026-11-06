@@ -43,6 +43,22 @@ class HingeLayoutTest {
     }
 
     @Test
+    fun windowContentKeepsOffTheHingeInBothPostures() {
+        // No hinge, or a flat fold: nothing.
+        assertEquals(HingePadding.NONE, HingeLayout.windowPadding(null, 840f, 700f))
+        assertEquals(HingePadding.NONE, HingeLayout.windowPadding(book(separating = false), 840f, 700f))
+        // Book: the larger side, here the leading half.
+        assertEquals(HingePadding(end = 420f), HingeLayout.windowPadding(book(), 840f, 700f))
+        // Tabletop: above the hinge, so a scrolling station page never stops a switch on the fold.
+        assertEquals(HingePadding(bottom = 350f), HingeLayout.windowPadding(tabletop, 840f, 700f))
+        // A layout that splits on a book hinge itself (list-detail) asks only for the tabletop.
+        assertEquals(HingePadding.NONE, HingeLayout.windowPadding(book(), 840f, 700f, book = false))
+        assertEquals(HingePadding(bottom = 350f), HingeLayout.windowPadding(tabletop, 840f, 700f, book = false))
+        // The ad banner under the tabs asks only for the book posture.
+        assertEquals(HingePadding.NONE, HingeLayout.windowPadding(tabletop, 840f, 700f, tabletop = false))
+    }
+
+    @Test
     fun tabBarSplitsAtTheHinge() {
         assertNull(HingeLayout.tabsBeforeHinge(5, 840f, null))
         assertNull(HingeLayout.tabsBeforeHinge(5, 840f, book(separating = false)))

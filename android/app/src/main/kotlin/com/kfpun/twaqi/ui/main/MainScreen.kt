@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -87,7 +88,13 @@ fun MainScreen(
                 MapScreen(viewModel, state, onOpenStation, Modifier.weight(1f), hingeInsets)
                 if (panel != null && panelWidth != null) {
                     VerticalDivider()
-                    panel(Modifier.width(panelWidth.dp).fillMaxHeight())
+                    // Tabletop: the station page stays above the hinge with the map.
+                    val panelHeight = hingeInsets.mapHeight
+                    panel(
+                        Modifier.width(panelWidth.dp).then(
+                            if (panelHeight != null) Modifier.height(panelHeight.dp) else Modifier.fillMaxHeight()
+                        )
+                    )
                 }
             }
         }
