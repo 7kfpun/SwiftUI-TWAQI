@@ -61,16 +61,14 @@ fun mergePurchases(subscriptions: PurchasesResult, lifetime: PurchasesResult): P
 /**
  * The subscription plans and the lifetime offer as one list in display order. The
  * lifetime product is optional: Play lists none until it's created in Play Console,
- * so a missing or failed lifetime query only leaves its row out. The read fails
- * when nothing at all can be sold.
+ * so a missing or failed lifetime query only leaves its row out. A failed
+ * subscription query fails the read even when lifetime loaded, so the screen offers
+ * a retry rather than lifetime alone.
  */
 fun mergeOffers(subscriptions: OffersResult, lifetime: OffersResult): OffersResult {
-    val offers = (subscriptions.offers + lifetime.offers.takeIf { lifetime.status == BillingStatus.OK }.orEmpty())
-        .inDisplayOrder()
-    return when {
-        subscriptions.status == BillingStatus.OK || offers.isNotEmpty() -> OffersResult(BillingStatus.OK, offers)
-        else -> OffersResult(subscriptions.status)
-    }
+    if (subscriptions.status != BillingStatus.OK) return OffersResult(subscriptions.status)
+    val lifetimeOffers = if (lifetime.status == BillingStatus.OK) lifetime.offers else emptyList()
+    return OffersResult(BillingStatus.OK, (subscriptions.offers + lifetimeOffers).inDisplayOrder())
 }
 
 /**

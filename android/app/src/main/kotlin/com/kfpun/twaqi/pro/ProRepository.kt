@@ -182,7 +182,11 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
             .filter { it.isPro && it.state == OwnedPurchase.State.PURCHASED && !it.isAcknowledged }
             .filter { it.purchaseToken !in acknowledged }
             .forEach { purchase ->
-                if (gateway.acknowledge(purchase.purchaseToken) == BillingStatus.OK) {
+                // One retry at once for a passing error, so a paid lifetime purchase
+                // doesn't wait as pending until the next start.
+                val status = gateway.acknowledge(purchase.purchaseToken).takeIf { it == BillingStatus.OK }
+                    ?: gateway.acknowledge(purchase.purchaseToken)
+                if (status == BillingStatus.OK) {
                     acknowledged += purchase.purchaseToken
                 } else {
                     Log.w(TAG, "Acknowledge failed; retried on the next refresh")

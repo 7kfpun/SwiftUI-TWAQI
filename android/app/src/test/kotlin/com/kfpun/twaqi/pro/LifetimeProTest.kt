@@ -179,6 +179,22 @@ class LifetimeProTest {
     }
 
     @Test
+    fun acknowledgementIsRetriedOnceAtOnce() = runTest {
+        var calls = 0
+        val flaky = object : BillingGateway by play {
+            override suspend fun acknowledge(purchaseToken: String): BillingStatus =
+                if (++calls == 1) BillingStatus.UNAVAILABLE else play.acknowledge(purchaseToken)
+        }
+        val repository = ProRepository(flaky, store, backgroundScope).also { runCurrent() }
+        assertEquals(
+            PurchaseOutcome.PURCHASED,
+            repository.purchase(FakeBillingGateway.offer(ProPlan.LIFETIME), play.launcher)
+        )
+        assertEquals(Entitlement.PRO, repository.entitlement.value)
+        assertEquals(2, calls)
+    }
+
+    @Test
     fun lifetimeBoughtButNotAcknowledgedIsPending() = runTest {
         play.acknowledgeStatus = BillingStatus.ERROR
         val repository = repository()

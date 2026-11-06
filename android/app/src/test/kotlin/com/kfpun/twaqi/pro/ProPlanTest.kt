@@ -64,12 +64,13 @@ class ProPlanTest {
     }
 
     @Test
-    fun offersFailOnlyWhenNothingCanBeSold() {
+    fun failedSubscriptionsFailTheReadEvenWhenLifetimeLoads() {
+        // Otherwise the screen would show lifetime alone, with no plans and no retry.
         val lifetimeOnly = mergeOffers(
             OffersResult(BillingStatus.UNAVAILABLE),
             OffersResult(BillingStatus.OK, listOf(FakeBillingGateway.offer(ProPlan.LIFETIME)))
         )
-        assertEquals(listOf(ProPlan.LIFETIME), lifetimeOnly.offers.map { it.plan })
+        assertEquals(OffersResult(BillingStatus.UNAVAILABLE), lifetimeOnly)
 
         val neither = mergeOffers(OffersResult(BillingStatus.UNAVAILABLE), OffersResult(BillingStatus.ERROR))
         assertEquals(OffersResult(BillingStatus.UNAVAILABLE), neither)
