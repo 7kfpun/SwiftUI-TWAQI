@@ -188,6 +188,8 @@
 "Details.coordinates" = "Coordinates";
 "Details.wind" = "Wind";
 "Details.location" = "Location";
+"Details.map_of %@" = "Map of %@";
+"Details.open_in_maps" = "Opens in Apple Maps";
 "Details.no_data" = "No data";
 "Details.select_a_station" = "Select a station";
 
