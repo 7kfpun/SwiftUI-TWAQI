@@ -1,0 +1,53 @@
+Taiwan Air shows you the air you are actually breathing, right now, measured by the government monitoring stations across Taiwan.
+
+IS IT GETTING BETTER OR WORSE?
+Every station page answers the question you actually have. A 24-hour AQI chart, coloured hour by hour, with a one-line verdict above it: improving, getting worse, or steady. The day's low, high and average sit underneath. No chart-reading required.
+
+A LIVE MAP OF EVERY STATION
+• Every official monitoring station on one map, each pinned with its current reading and coloured by health band
+• Switch the whole map between AQI, PM2.5, PM10, O3, CO, SO2 and NO2
+• Wind mode turns every marker into an arrow: which way the air is moving, and how hard
+• Play back the past 24 hours on the map with the timeline
+• A card shows the station nearest the middle of the map, with its reading and the time it was measured
+• The map reopens where you left it
+
+EVERYTHING ABOUT ONE STATION
+• AQI plus all six pollutants: PM2.5, PM10, ozone, carbon monoxide, sulphur dioxide and nitrogen dioxide
+• The station camera: the latest view, and the past 24 hours hour by hour
+• The weather there now and the forecast, from the Central Weather Administration
+• The AQI forecast for the station's air-quality region
+• Wind direction and speed, in plain words
+• Health advice for everyone and for sensitive groups
+• Address, coordinates and a map of the station
+• Share any station's reading as a card for a post, a story or a chat
+
+AQI FORECAST
+The Forecast tab shows the official AQI forecast for every air-quality region in Taiwan, for today and the next two days.
+
+ALERTS THAT RESPECT YOUR SLEEP
+• Get a notification when the AQI at a station you follow rises above your level
+• Or when it drops below one, so you know when it is safe to open the windows again
+• Set quiet hours and nothing arrives overnight
+
+ON YOUR HOME SCREEN AND WRIST
+• Home screen widgets for your nearest station, a station you choose or your favourites
+• Touch and hold the app icon for the air near you and your favourite stations
+• A Quick Settings tile with the AQI of your nearest station
+• A Wear OS app with a watch face complication
+
+BUILT FOR EVERY DAY
+• Save home, work and school as favourites and check them all at a glance
+• Search every station by name, township or county
+• Works offline with the last readings saved
+• English and 繁體中文, with light and dark themes
+
+TAIWAN AIR PRO
+A subscription that removes every ad, adds the medium, large and station detail widgets, and puts the number and more styles on your watch face complication and the Wear OS tile. The app, the map, alerts and the small widget stay free.
+
+WHY IT MATTERS
+Air pollution is not only a respiratory problem. It raises the risk of cardiovascular disease, stroke and other chronic illness, and in 2013 the International Agency for Research on Cancer classified outdoor air pollution as a Group 1 carcinogen. Children and older adults are affected most. Thirty seconds before you leave the house tells you whether to take the mask, or to run the purifier instead of opening the window.
+
+WHERE THE DATA COMES FROM
+Air quality readings, forecasts and station cameras are open data from Taiwan's Ministry of Environment; weather is open data from the Central Weather Administration. We display it; we do not adjust it.
+
+Questions, problems or ideas? Send them from Help › Feedback in the app. We read everything.
