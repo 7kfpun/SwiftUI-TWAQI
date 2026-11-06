@@ -71,6 +71,7 @@ fun releaseAdIdProblem(name: String, value: String, separator: Char): String? {
     val format = Regex("ca-app-pub-(\\d{16})\\$separator\\d{10}")
     val publisher = format.matchEntire(value)?.groupValues?.get(1)
     return when {
+        value.isBlank() -> "$name is missing from android/secrets.properties"
         value.startsWith(adMobTestPublisher) -> "$name is one of Google's test ids"
         publisher == null -> "$name is not an AdMob id (ca-app-pub-<16 digits>$separator<10 digits>)"
         publisher.all { it == '0' } -> "$name is the placeholder from secrets.example.properties"
