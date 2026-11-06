@@ -9,6 +9,7 @@ import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.settings.AppAppearanceStore
 import com.kfpun.twaqi.shortcuts.StationShortcuts
 import com.kfpun.twaqi.wear.PhoneStateRelay
+import com.kfpun.twaqi.widget.WidgetPreviews
 import com.kfpun.twaqi.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,8 @@ class TwaqiApplication : Application() {
         // FOX-59: widgets redraw when favourites change (Pro: ProGraph), and refresh while any is placed.
         WidgetUpdater.observeFavourites(this, container.favourites.favourites)
         WidgetUpdater.redrawIfLanguageChanged(this)
+        // FOX-120: the widget picker's previews (API 35+), after an update or in a new language.
+        WidgetPreviews.publishIfNeeded(this)
         // FOX-95: the launcher's station shortcuts follow the favourites (and are rebuilt at start).
         StationShortcuts.observe(this, container.favourites.favourites)
         // FOX-62: the Wear OS app follows the favourites, Pro (ProGraph) and the app language.

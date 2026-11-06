@@ -63,6 +63,8 @@ object WidgetUpdater {
         val app = context.applicationContext
         languagePrefs(app).edit { putString(KEY_DRAWN_LANGUAGE, AppLocale.locale(app).toLanguageTag()) }
         scope.launch { redrawAll(app) }
+        // The picker's previews follow the language too (FOX-120).
+        WidgetPreviews.publishIfNeeded(app)
     }
 
     /**
