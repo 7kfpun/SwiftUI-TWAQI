@@ -120,7 +120,7 @@
     <string name="help_widgets_shows_header">What it shows</string>
     <string name="help_widgets_shows_body">The current reading for your nearest station, or a station you choose. You choose when you add the widget; to change it later, touch and hold the widget and open its settings.</string>
     <string name="help_widgets_favourites_header">Favourite stations</string>
-    <string name="help_widgets_favourites_body">Medium and large widgets list your other favourite stations under the main one, without repeating it. The station detail widget shows one station in detail: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and station detail widgets are part of Pro.</string>
+    <string name="help_widgets_favourites_body">Small, medium and large widgets list your other favourite stations under the main one, without repeating it. The station detail widget shows one station in detail: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and station detail widgets are part of Pro.</string>
     <string name="help_widgets_favourites_add">To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.</string>
     <string name="help_widgets_favourites_offline">Without a connection, the widget shows the last readings it saved.</string>
     <string name="help_widgets_index_header">Which index</string>
@@ -139,7 +139,7 @@
     <string name="help_back">Back</string>
     <string name="help_watch_title">Wear OS</string>
     <string name="help_watch_app_header">The watch app</string>
-    <string name="help_watch_app_body">Free. It shows your favourite stations in their level colours, with the current reading.</string>
+    <string name="help_watch_app_body">Free. It shows the current reading for the closest station, or one you pick, and the past 12 hours. Your phone\'s favourites come first in its station list, in their level colours.</string>
     <string name="help_watch_complications_header">Watch-face complications</string>
     <string name="help_watch_complications_body">The face style is free: the level\'s face in its colour, for AQI, PM2.5 or any of 7 indices. Pro adds the number and more styles: a label with the number, number only, and the status in words. The watch app itself is free.</string>
     <string name="help_watch_tile_header">Tile</string>
@@ -148,6 +148,17 @@
     <string name="help_watch_add_1">1. Touch and hold your watch face, tap Edit, and choose a complication.</string>
     <string name="help_watch_add_2">2. Choose Taiwan Air.</string>
     <string name="help_watch_footer">Open this app or the watch app once so a station and a reading are available.</string>
+    <!-- Android (#77 review): Help's shortcuts guide, in place of iOS Help.shortcuts_* (Siri, Shortcuts,
+         Control Center). What FOX-95 shipped: launcher shortcuts, Google Assistant, the Quick Settings tile. -->
+    <string name="help_shortcuts_title">Shortcuts &amp; Quick Settings</string>
+    <string name="help_shortcuts_launcher_header">App shortcuts</string>
+    <string name="help_shortcuts_launcher_body">Touch and hold the Taiwan Air icon. “Air Quality” shows the AQI of your nearest station, its level, the main pollutant and what to do. Below it are your favourite and recently opened stations; tap one to open it. Drag a shortcut onto the home screen to keep it there.</string>
+    <string name="help_shortcuts_assistant_header">Google Assistant</string>
+    <string name="help_shortcuts_assistant_body">Say “Hey Google, open Air Quality in Taiwan Air” for the same card, or “Hey Google, open Songshan in Taiwan Air” for a favourite or recent station.</string>
+    <string name="help_shortcuts_location_body">Nearest uses your location only if you have already allowed it for this app. Otherwise you get your first favourite.</string>
+    <string name="help_shortcuts_tile_header">Quick Settings tile</string>
+    <string name="help_shortcuts_tile_body">Swipe down from the top of the screen twice, tap the pencil to edit, and drag the Air Quality tile into place. It shows the AQI of your nearest station or first favourite; tap it to open the station.</string>
+    <string name="help_shortcuts_footer">Free for everyone.</string>
 
     <string name="airindex_meaning_aqi">Air quality index</string>
     <string name="airindex_meaning_pm25">Particulates (PM2.5)</string>

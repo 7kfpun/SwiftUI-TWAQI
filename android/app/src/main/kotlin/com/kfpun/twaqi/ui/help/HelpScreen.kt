@@ -75,6 +75,8 @@ fun HelpHost(
 
             HelpDestination.WearOsGuide -> WearOsGuideScreen(onBack = back)
 
+            HelpDestination.ShortcutsGuide -> ShortcutsGuideScreen(onBack = back)
+
             HelpDestination.Cooperate -> CooperateScreen(onBack = back)
 
             HelpDestination.Feedback -> FeedbackScreen(source = FeedbackSource.HELP, onBack = back)
@@ -156,6 +158,7 @@ private fun LazyListScope.section(
             SectionHeader(stringResource(R.string.help_widgets_and_watch))
             LinkRow(stringResource(R.string.help_widgets_title), onClick = { onOpen(HelpDestination.WidgetGuide) })
             LinkRow(stringResource(R.string.help_watch_title), onClick = { onOpen(HelpDestination.WearOsGuide) })
+            LinkRow(stringResource(R.string.help_shortcuts_title), onClick = { onOpen(HelpDestination.ShortcutsGuide) })
         }
 
         HelpSection.DEFINITION -> {

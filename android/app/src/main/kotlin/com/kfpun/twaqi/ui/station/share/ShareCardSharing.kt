@@ -21,6 +21,7 @@ import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.AirIndexType
 import com.kfpun.twaqi.data.model.AirStatus
 import com.kfpun.twaqi.data.model.Pollutant
+import com.kfpun.twaqi.data.model.Station
 import com.kfpun.twaqi.data.model.TaiwanTime
 import com.kfpun.twaqi.locale.AppLocale
 import com.kfpun.twaqi.review.ReviewPrompt
@@ -50,6 +51,17 @@ data class ShareCardContent(
 
         fun readings(pollutant: Pollutant?): List<Pair<AirIndexType, Double>>? =
             pollutant?.let { reading -> pollutants.map { it to reading.value(it) } }
+
+        /**
+         * The line under the title, as the station page shows it: the township through [translate]
+         * (on-device translation outside Chinese, FOX-98), then the county.
+         */
+        fun locality(
+            pollutant: Pollutant?,
+            station: Station?,
+            chinese: Boolean,
+            translate: (String) -> String
+        ): String? = pollutant?.displayLocality(chinese, translate) ?: station?.displayLocality(chinese, translate)
     }
 }
 

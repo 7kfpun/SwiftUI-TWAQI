@@ -77,6 +77,31 @@ fun WearOsGuideScreen(onBack: () -> Unit) {
     )
 }
 
+/**
+ * Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95). iOS `ShortcutsGuideView`
+ * (Siri, Shortcuts, Control Center), reworded for what Android has.
+ */
+@Composable
+fun ShortcutsGuideScreen(onBack: () -> Unit) {
+    GuideScreen(
+        title = R.string.help_shortcuts_title,
+        event = Analytics.OPEN_SHORTCUTS_GUIDE,
+        sections = listOf(
+            GuideSection(R.string.help_shortcuts_launcher_header, listOf(R.string.help_shortcuts_launcher_body)),
+            GuideSection(
+                R.string.help_shortcuts_assistant_header,
+                listOf(R.string.help_shortcuts_assistant_body, R.string.help_shortcuts_location_body)
+            ),
+            GuideSection(
+                R.string.help_shortcuts_tile_header,
+                listOf(R.string.help_shortcuts_tile_body),
+                footer = R.string.help_shortcuts_footer
+            )
+        ),
+        onBack = onBack
+    )
+}
+
 @Composable
 private fun GuideScreen(@StringRes title: Int, event: String, sections: List<GuideSection>, onBack: () -> Unit) {
     val context = LocalContext.current

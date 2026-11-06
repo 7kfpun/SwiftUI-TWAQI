@@ -44,6 +44,10 @@ sealed interface HelpDestination {
         override val route = "wear"
     }
 
+    data object ShortcutsGuide : HelpDestination {
+        override val route = "shortcuts"
+    }
+
     data object Cooperate : HelpDestination {
         override val route = "cooperate"
     }
@@ -57,6 +61,7 @@ sealed interface HelpDestination {
             route.startsWith("guide/") -> DefinitionPage.fromKey(route.removePrefix("guide/"))?.let(::IndexGuide)
             route == WidgetGuide.route -> WidgetGuide
             route == WearOsGuide.route -> WearOsGuide
+            route == ShortcutsGuide.route -> ShortcutsGuide
             route == Cooperate.route -> Cooperate
             route == Feedback.route -> Feedback
             else -> null

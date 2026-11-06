@@ -27,6 +27,9 @@ object Analytics {
     /** The Wear OS guide; same name as the iOS watch guide. */
     const val OPEN_WATCH_GUIDE = "open_watch_guide"
 
+    /** Help's shortcuts guide (launcher shortcuts, Assistant, the Quick Settings tile); same name as iOS's. */
+    const val OPEN_SHORTCUTS_GUIDE = "open_shortcuts_guide"
+
     const val OPEN_COOPERATE_FORM = "open_cooperate_form"
 
     /** `cooperation_type`. */
@@ -110,6 +113,9 @@ object Analytics {
     /** `label`: on / off, `stationId`. One per station, also when several leave at once. */
     const val FAVOURITE_STATION_SAVED = "favourite_station_saved"
     const val FAVOURITE_STATION_REORDERED = "favourite_station_reordered"
+
+    /** Help's cancel-all: every station's alerts off. No parameters (iOS `HelpViewModel.removeAllNotification`). */
+    const val FAVOURITE_STATION_ALL_REMOVED = "favourite_station_all_removed"
 
     // Share card (FOX-94), as on iOS (FOX-73).
 

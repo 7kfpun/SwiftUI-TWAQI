@@ -7,6 +7,7 @@ import com.kfpun.twaqi.ui.main.GeoPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -254,10 +255,73 @@ class OnboardingViewModelTest {
         vm.walkTo(OnboardingStep.LOCATION)
         vm.locationAnswered(granted = true, prompted = true)
         runCurrent()
-        assertEquals(ClosestState.Loading, vm.uiState.value.closest)
+        // The fix came at once: the nearest station replaces the stand-in without the step asking again.
+        assertEquals(1, (vm.uiState.value.closest as ClosestState.Loaded).station.pollutant.stationId)
         vm.loadClosestStation()
         runCurrent()
         assertEquals(1, (vm.uiState.value.closest as ClosestState.Loaded).station.pollutant.stationId)
+    }
+
+    /** #77 review: a fix slower than the success pause lands after the step already asked; no endless spinner. */
+    @Test
+    fun aSlowFixAfterTheStepAskedReplacesTheStandIn() = runTest(dispatcher) {
+        val slowFix = OnboardingViewModel.SUCCESS_PAUSE_MILLIS + 2_000
+        val vm = model(locate = {
+            delay(slowFix)
+            GeoPoint(22.63, 120.30)
+        })
+        // Location refused: the station step stands in with 中正.
+        vm.walkTo(OnboardingStep.LOCATION)
+        vm.locationAnswered(granted = false, prompted = true)
+        runCurrent()
+        vm.loadClosestStation()
+        runCurrent()
+        assertTrue((vm.uiState.value.closest as ClosestState.Loaded).station.isFallback)
+
+        // Back, allowed now; the flow moves on after the pause, and the step asks while the
+        // stand-in still shows, so loadClosestStation returns at once.
+        vm.goBack()
+        vm.locationAnswered(granted = true, prompted = true)
+        advanceTimeBy(OnboardingViewModel.SUCCESS_PAUSE_MILLIS + 1)
+        runCurrent()
+        assertEquals(OnboardingStep.CLOSEST_STATION, vm.uiState.value.step)
+        vm.loadClosestStation()
+        runCurrent()
+        assertTrue((vm.uiState.value.closest as ClosestState.Loaded).station.isFallback)
+
+        // The fix arrives afterwards: the nearest station shows, not a spinner.
+        advanceTimeBy(slowFix)
+        runCurrent()
+        val loaded = vm.uiState.value.closest as ClosestState.Loaded
+        assertEquals(1, loaded.station.pollutant.stationId)
+        assertFalse(loaded.station.isFallback)
+    }
+
+    @Test
+    fun aSlowFixKeepsAStationTheReaderChose() = runTest(dispatcher) {
+        val slowFix = OnboardingViewModel.SUCCESS_PAUSE_MILLIS + 2_000
+        val vm = model(locate = {
+            delay(slowFix)
+            GeoPoint(22.63, 120.30)
+        })
+        vm.loadClosestStation()
+        runCurrent()
+        vm.walkTo(OnboardingStep.LOCATION)
+        vm.locationAnswered(granted = true, prompted = true)
+        advanceTimeBy(OnboardingViewModel.SUCCESS_PAUSE_MILLIS + 1)
+        runCurrent()
+        vm.chooseStation(kaohsiung)
+        // Chosen over the stand-in, before the fix.
+        assertEquals(
+            OnboardingClosestStation.Origin.CHOSEN,
+            (vm.uiState.value.closest as ClosestState.Loaded).station.origin
+        )
+
+        advanceTimeBy(slowFix)
+        runCurrent()
+        val loaded = vm.uiState.value.closest as ClosestState.Loaded
+        assertEquals(OnboardingClosestStation.Origin.CHOSEN, loaded.station.origin)
+        assertEquals(1, loaded.station.pollutant.stationId)
     }
 
     // Notifications (step 4)

@@ -75,6 +75,7 @@ fun DoNotDisturbRows(showsCancelAll: Boolean = true) {
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.clickable(role = Role.Button) {
             graph.favouriteAlerts.cancelAll()
+            Analytics.logEvent(context, Analytics.FAVOURITE_STATION_ALL_REMOVED)
             showCancelled = true
         }
     )
