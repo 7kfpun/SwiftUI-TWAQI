@@ -46,7 +46,7 @@ The app has **no Directus token for the push collections**. It writes its own ro
 
 | Route | |
 | --- | --- |
-| `PUT /app/v1/device` | Upsert this device's row (tokens, `environment`, `app_version`, `locale`, `is_pro`, `last_seen_at`, DND, `timezone`) → `{ id }`. Other fields in the body are dropped. |
+| `PUT /app/v1/device` | Upsert this device's row (`platform`, tokens, `environment`, `app_version`, `locale`, `is_pro`, `last_seen_at`, DND, `timezone`) → `{ id }`. Other fields in the body are dropped. `platform` is `ios` or `android`; a body without one is `ios` (every iOS build). iOS must send its APNs `device_token` (hex); Android may leave it out or `null`, since it is sent to by `fcm_token`, and a hex one it does send (the SHA-256 of its device id, from Android builds before FOX-100) is still accepted. |
 | `GET /app/v1/device` | For a restore: `{ device: { id, dnd_* } \| null, subscriptions: [...] }`. Takes no query: the device is named by its signed headers, and no token goes in a URL. |
 | `PUT /app/v1/stations/:stationId` | `{ site_id, above, below }` (a whole AQI, or `null` for off): brings that station's rows in line, archiving what's off. The station limit is the app's; the Worker doesn't check it. |
 | `POST /app/v1/archive-all` | Help's "cancel all": archives this device's live alerts. |
@@ -98,9 +98,18 @@ curl -X POST "$WORKER/test"    -H "Authorization: Bearer $SYNC_TOKEN" -d '{"devi
 
 ## Directus
 
-`twaqi_push_devices`: `device_id` (Keychain), `secret_hash` (SHA-256 of the app's secret, hidden), `device_token` (APNs, hex), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `notifications_allowed` (iOS lets the app show notifications), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
+`twaqi_push_devices`: `device_id` (Keychain), `secret_hash` (SHA-256 of the app's secret, hidden), `platform` (`ios` | `android`, default `ios`, FOX-100), `device_token` (APNs, hex; empty or a hash of the device id on Android), `fcm_token`, `environment`, `app_version`, `locale` (the language chosen under Help, else iOS's), `is_pro` (Taiwan Air Pro active), `notifications_allowed` (iOS lets the app show notifications), `last_seen_at`, `dnd_enabled`, `dnd_start`, `dnd_end` (`HH:mm`), `timezone`, `archived`.
 
 `twaqi_push_subscriptions`: `device` (M2O), `station_id` (AQI API station id, stored as a string), `site_id` (MOENV SiteId, for cams only), `metric` (`aqi`), `direction` (`above`|`below`), `threshold`, `enabled`, `last_value`, `in_zone`, `last_fired_at`, `archived`.
+
+The sender sends to `fcm_token` on every platform, and logs only its suffix.
+
+`platform` and an empty `device_token` come from [`directus/push-devices-platform.mjs`](directus/push-devices-platform.mjs) (FOX-100). Run it with `--apply` **before** the Worker that writes `platform` deploys. It is idempotent: it adds the field if missing, lets `device_token` be empty if it can't be yet, and adds `platform` to the TWAQI Push Worker policy's device permissions if they list fields one by one.
+
+```sh
+DIRECTUS_ADMIN_TOKEN=… DIRECTUS_URL=… node directus/push-devices-platform.mjs          # show the plan, write nothing
+DIRECTUS_ADMIN_TOKEN=… DIRECTUS_URL=… node directus/push-devices-platform.mjs --apply  # make it so
+```
 
 The Worker's token belongs to the **TWAQI Push Worker** user. It needs:
 - `twaqi_push_devices`: create, read and update, including `secret_hash`;
