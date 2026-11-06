@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.feedback.FeedbackNavigation
 import com.kfpun.twaqi.feedback.FeedbackSource
 import com.kfpun.twaqi.push.AlertsUnavailableCard
@@ -35,28 +36,50 @@ data class StationRoute(val stationId: Int)
  * alerts slot holds the station's alert switches (FOX-57), its cam slot the station cam (FOX-92),
  * its weather slot the CWA weather card (FOX-93), its forecast slot the zone forecast (FOX-90),
  * its wind slot the wind section (FOX-101) and its share button the share card (FOX-94).
+ *
+ * FOX-119: pass a [viewModelStore] from HomeNavigationViewModel so the page outlives rotation,
+ * folding and the move between panel and full screen; [closeButton] shows the pane close glyph.
  */
 @Composable
-fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun StationDestination(
+    route: StationRoute,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModelStore: ViewModelStore? = null,
+    closeButton: Boolean = false
+) {
     // A link that opens another station over this one (FOX-115: the one MainActivity takes it in
     // onNewIntent) starts a fresh page, scrolled to the top, not this one's state.
-    key(route.stationId) { StationPage(route, onBack, modifier) }
+    key(route.stationId) {
+        StationPage(route, onBack, modifier, viewModelStore, closeButton)
+    }
 }
 
 @Composable
-private fun StationPage(route: StationRoute, onBack: () -> Unit, modifier: Modifier) {
-    val owner = remember(route.stationId) {
+private fun StationPage(
+    route: StationRoute,
+    onBack: () -> Unit,
+    modifier: Modifier,
+    viewModelStore: ViewModelStore?,
+    closeButton: Boolean
+) {
+    // FOX-119: a [viewModelStore] from HomeNavigationViewModel outlives rotation, folding and the
+    // move between panel and full screen; its owner clears it when the page closes. Without one the
+    // page's view models go when it leaves the screen.
+    val owner = remember(route.stationId, viewModelStore) {
         object : ViewModelStoreOwner {
-            override val viewModelStore = ViewModelStore()
+            override val viewModelStore = viewModelStore ?: ViewModelStore()
         }
     }
-    DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
+    if (viewModelStore == null) DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
     val context = LocalContext.current
     CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
         StationScreen(
             stationId = route.stationId,
             onBack = onBack,
             modifier = modifier,
+            closeButton = closeButton,
+            scrollState = if (viewModelStore != null) viewModel<StationPageScroll>().scrollState else null,
             onSendFeedback = { FeedbackNavigation.open(context, FeedbackSource.STATION_PAGE) },
             slots = StationPageSlots(
                 // FOX-94: the share card preview, opened from the top bar.

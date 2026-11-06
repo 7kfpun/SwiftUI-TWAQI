@@ -269,6 +269,9 @@ dependencies {
     // Map tab (FOX-54): marker clustering, and the fold line for the wide layout.
     implementation(libs.maps.compose.utils)
     implementation(libs.androidx.window)
+    // FOX-119: tablets, foldables and flip phones: window size classes and list-detail panes.
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.layout)
 
     // Home screen widgets (FOX-59): Glance, refreshed by WorkManager (below, with FOX-57).
     implementation(libs.androidx.glance.appwidget)

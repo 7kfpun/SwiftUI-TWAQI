@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,7 +52,9 @@ import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
 fun FavouritesScreen(
     onOpenStation: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: FavouritesViewModel = viewModel(factory = FavouritesViewModel.Factory)
+    viewModel: FavouritesViewModel = viewModel(factory = FavouritesViewModel.Factory),
+    // FOX-119: held by the tab, so the scroll position survives the move to and from the wide layout.
+    listState: LazyListState = rememberLazyListState()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Like iOS `onAppear`: every time the list shows again, e.g. back from a station.
@@ -63,7 +67,8 @@ fun FavouritesScreen(
         onMove = viewModel::move,
         onConfirmRemoval = viewModel::confirmRemoval,
         onCancelRemoval = viewModel::cancelRemoval,
-        modifier = modifier
+        modifier = modifier,
+        listState = listState
     )
 }
 
@@ -77,7 +82,8 @@ fun FavouritesContent(
     onMove: (from: Int, to: Int) -> Unit,
     onConfirmRemoval: () -> Unit,
     onCancelRemoval: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     var editRequested by rememberSaveable { mutableStateOf(false) }
     val canEdit = state.favouriteIds.isNotEmpty() && state.pollutants.isNotEmpty()
@@ -113,7 +119,7 @@ fun FavouritesContent(
                     Modifier.align(Alignment.TopCenter).padding(top = 64.dp)
                 )
 
-                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove)
+                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, listState)
             }
         }
     }
@@ -147,10 +153,11 @@ private fun FavouriteList(
     editing: Boolean,
     onOpenStation: (Int) -> Unit,
     onRemove: (Int) -> Unit,
-    onMove: (Int, Int) -> Unit
+    onMove: (Int, Int) -> Unit,
+    listState: LazyListState
 ) {
     val chinese = AppLocale.isChinese(LocalContext.current)
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(Modifier.fillMaxSize(), state = listState) {
         if (state.isShowingLastGood) {
             item(key = "offline") { OfflineNotice(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) }
         }
