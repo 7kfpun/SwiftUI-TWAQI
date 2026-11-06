@@ -81,6 +81,13 @@ fun releaseAdIdProblem(name: String, value: String, separator: Char): String? {
 val releaseAdIdProblems = buildList {
     releaseAdIdProblem("ADMOB_APP_ID", secret("ADMOB_APP_ID"), '~')?.let(::add)
     adUnitKeys.forEach { key -> releaseAdIdProblem(key, secret(key), '/')?.let(::add) }
+    // Ad units belong to the app id's AdMob account: a different publisher means an id was
+    // copied from another account.
+    if (isEmpty()) {
+        val publisher = secret("ADMOB_APP_ID").substringBefore('~')
+        adUnitKeys.filter { secret(it).substringBefore('/') != publisher }
+            .forEach { add("$it is from a different AdMob account than ADMOB_APP_ID") }
+    }
 }
 val verifyReleaseAdIds by tasks.registering {
     description = "Fails when a release build would ship AdMob test, placeholder or malformed ids."
