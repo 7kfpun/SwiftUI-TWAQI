@@ -56,14 +56,14 @@ permission to the merged manifest.
 | --- | --- | --- | --- | --- | --- |
 | Location › Approximate location | Yes | Yes | No | Advertising or marketing | AdMob derives it from the IP address for ads. The app's own use of the phone's location stays on the device (table above). |
 | Location › Precise location | **No** | No | – | – | Read only on the device; never sent anywhere (`data/remote/ApiClient.kt:45-60`). |
-| Personal info › Name | Yes | No | Yes | App functionality (replying to the user) | Feedback form (optional field) and business partner form. |
-| Personal info › Email address | Yes | No | Yes | App functionality (replying to the user) | Both forms; only when the user sends one. |
+| Personal info › Name | Yes | No | No | App functionality (replying to the user) | Feedback form (optional field) and business partner form (required field, `CooperateSubmission.kt:41`). |
+| Personal info › Email address | Yes | No | No | App functionality (replying to the user) | Both forms; a valid email is required to send either (`FeedbackSubmission.kt:47`, `CooperateSubmission.kt:42`). |
 | Personal info › Phone number | Yes | No | Yes | App functionality | Business partner form, optional field. |
-| Personal info › Other info | Yes | No | Yes | App functionality | Business partner form: company, job title, website. |
+| Personal info › Other info | Yes | No | No | App functionality | Business partner form: company (required, `CooperateSubmission.kt:40`), job title and website (optional). |
 | Financial info › Purchase history | Yes | No | No | App functionality | Pro yes/no, sent with the push device so Pro features follow the subscription (`push/PushApi.kt:121`). Payment details stay with Google Play. |
-| Messages › Other in-app messages | Yes | No | Yes | App functionality | The feedback and business partner messages. |
+| Messages › Other in-app messages | Yes | No | No | App functionality | The feedback and business partner messages; both forms require one. |
 | App activity › App interactions | Yes | Yes | No | Analytics; Advertising or marketing | Firebase Analytics events (analytics, as a service provider); AdMob ad interactions (shared, advertising). |
-| App activity › Other actions | Yes | No | Yes | App functionality | The stations a user follows for alerts, their AQI levels and quiet hours (`push/PushApi.kt:267-271`); only once alerts are switched on. |
+| App activity › Other actions | Yes | No | No | App functionality | The stations a user follows for alerts, their AQI levels and quiet hours (`push/PushApi.kt:267-271`); only once alerts are switched on. |
 | App info and performance › Crash logs | Yes | No | No | Analytics | Crashlytics. |
 | App info and performance › Diagnostics | Yes | No | No | Analytics; App functionality | Crashlytics and Analytics device info; device model, OS version and app version in the forms. |
 | Device or other IDs | Yes | Yes | No | App functionality; Analytics; Advertising or marketing | Advertising ID (AdMob, shared, advertising); FCM token and the random push device id (alerts); Firebase app instance and installation ids (analytics); the random per-install id in the feedback form. |
@@ -72,8 +72,13 @@ Not collected: health and fitness, contacts, calendar, photos and videos (the sh
 made on the device and handed to the share sheet or saved locally), audio, files, web
 browsing, installed apps, search history (station search runs on the device), SMS, emails.
 
-Optional vs required: alerts and the forms only send when the user acts, so they are
-optional. Analytics, crash reports and ads data are sent by default in release builds; the
+Optional vs required: **Optional** means the user can leave that field blank and still use
+the feature. Only the phone number qualifies (business partner form). Everything a feature
+cannot work without is **required**, even though the feature itself is opt-in: the email
+and message in both forms; the name, company and enquiry type in the business partner form
+(`FeedbackSubmission.kt:46-47`, `CooperateSubmission.kt:38-43`); the followed stations for
+alerts. Where one form makes a field optional and the other requires it (name), answer
+required. Analytics, crash reports and ads data are sent by default in release builds; the
 per-install analytics opt-out sits behind a hidden developer gesture
 (`ui/help/HelpScreen.kt:184-187`), so answer **required** for them.
 
