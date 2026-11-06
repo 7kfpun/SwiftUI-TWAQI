@@ -23,6 +23,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.kfpun.twaqi.ads.AdConsent
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.analytics.TrackingManager
+import com.kfpun.twaqi.onboarding.Onboarding
+import com.kfpun.twaqi.onboarding.OnboardingHost
+import com.kfpun.twaqi.onboarding.OnboardingStore
 import com.kfpun.twaqi.pro.Entitlement
 import com.kfpun.twaqi.pro.ProActivity
 import com.kfpun.twaqi.pro.ProGraph
@@ -55,6 +58,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // FOX-96: whether the welcome flow opens by itself, decided once per process, before the
+        // review prompt below can stack over it.
+        val opensOnboarding = Onboarding.decideLaunch(OnboardingStore(this).showsOnLaunch)
         startPro()
         startPush(savedInstanceState == null)
         if (savedInstanceState == null) handleLink(intent)
@@ -68,10 +74,13 @@ class MainActivity : AppCompatActivity() {
                     BackHandler { showDataScreen = false }
                     DataDebugScreen()
                 } else {
-                    HomeScreen(
-                        onOpenDataScreen = if (BuildConfig.DEBUG) ({ showDataScreen = true }) else null,
-                        openStation = openStation
-                    )
+                    OnboardingHost(opensAtLaunch = opensOnboarding) { showWelcomeGuide ->
+                        HomeScreen(
+                            onOpenDataScreen = if (BuildConfig.DEBUG) ({ showDataScreen = true }) else null,
+                            openStation = openStation,
+                            onShowWelcomeGuide = showWelcomeGuide
+                        )
+                    }
                 }
             }
         }
@@ -164,7 +173,8 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * FOX-60: count the app open for the review prompt, once per process start (not when a
-     * language or appearance change recreates the activity). Debug builds started with
+     * language or appearance change recreates the activity). Not over the welcome flow (FOX-96):
+     * on the launch it opens, after it, as on iOS. Debug builds started with
      * `--ez analytics_debug true` send events to Firebase DebugView.
      */
     private fun startTracking(savedInstanceState: Bundle?) {
@@ -173,10 +183,21 @@ class MainActivity : AppCompatActivity() {
         ) {
             TrackingManager.get(this).enableDebugView()
         }
-        if (savedInstanceState != null || appOpenCounted) return
-        appOpenCounted = true
+        if (savedInstanceState == null && !appOpenCounted) {
+            appOpenCounted = true
+            appOpenPending = true
+        }
+        if (!appOpenPending) return
         val appContext = applicationContext
-        ReviewPrompt.onAppOpen(this) { name, parameters -> Analytics.logEvent(appContext, name, parameters) }
+        lifecycleScope.launch {
+            Onboarding.isOpenAtLaunch.first { !it }
+            // A recreated activity may have taken it already.
+            if (!appOpenPending) return@launch
+            appOpenPending = false
+            ReviewPrompt.onAppOpen(this@MainActivity) { name, parameters ->
+                Analytics.logEvent(appContext, name, parameters)
+            }
+        }
     }
 
     /** FOX-58: re-check Pro with Play whenever the app comes to the front; ask for ad consent if free. */
@@ -203,6 +224,9 @@ class MainActivity : AppCompatActivity() {
 
         /** This process has counted its app open. */
         private var appOpenCounted = false
+
+        /** The open is counted once the welcome flow that opened at launch is done. */
+        private var appOpenPending = false
     }
 }
 
@@ -210,12 +234,14 @@ class MainActivity : AppCompatActivity() {
  * The tabs, with the map as home (FOX-54) and Help (FOX-97), and the station screen over them.
  * [onOpenDataScreen] (debug builds only) adds a button to the data-layer check screen.
  * [openStation] carries a tapped alert's station (FOX-57) or a widget's station link (FOX-59).
+ * [onShowWelcomeGuide] runs the welcome flow again, from Help (FOX-96).
  */
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onOpenDataScreen: (() -> Unit)? = null,
-    openStation: MutableStateFlow<Int?>? = null
+    openStation: MutableStateFlow<Int?>? = null,
+    onShowWelcomeGuide: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val pro = remember(context) { ProGraph.repository(context) }
@@ -244,7 +270,8 @@ fun HomeScreen(
                 onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
                 onOpenStation = { stationId = it.stationId },
                 onOpenDataScreen = onOpenDataScreen,
-                modifier = modifier
+                modifier = modifier,
+                onShowWelcomeGuide = onShowWelcomeGuide
             )
         }
     }

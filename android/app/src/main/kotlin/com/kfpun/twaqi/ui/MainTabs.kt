@@ -58,6 +58,7 @@ enum class MainTab(@param:StringRes val label: Int, @param:DrawableRes val icon:
  * @param isPro from the Pro entitlement (FOX-58); hides Help's Premium section.
  * @param onOpenPro opens the Pro screen (FOX-58).
  * @param onOpenStation a station tapped on the map, its card or the list (FOX-54).
+ * @param onShowWelcomeGuide Help's "Show welcome guide" (FOX-96).
  * @param onOpenDataScreen debug builds only: a button on the Search tab to the data-layer check (FOX-53).
  */
 @Composable
@@ -66,7 +67,8 @@ fun MainTabs(
     onOpenPro: () -> Unit,
     onOpenStation: (StationRoute) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenDataScreen: (() -> Unit)? = null
+    onOpenDataScreen: (() -> Unit)? = null,
+    onShowWelcomeGuide: () -> Unit = {}
 ) {
     var selected by rememberSaveable { mutableStateOf(MainTab.MAIN) }
     var query by rememberSaveable { mutableStateOf("") }
@@ -129,7 +131,12 @@ fun MainTabs(
 
                     MainTab.FORECAST -> ForecastScreen(modifier = content)
 
-                    MainTab.HELP -> HelpHost(isPro = isPro, onOpenPro = onOpenPro, modifier = content)
+                    MainTab.HELP -> HelpHost(
+                        isPro = isPro,
+                        onOpenPro = onOpenPro,
+                        modifier = content,
+                        onShowWelcomeGuide = onShowWelcomeGuide
+                    )
                 }
             }
             selected.adPlacement?.let { AdBanner(it) }
