@@ -60,6 +60,8 @@ object AdConsent {
      * Debug builds started with `--ez ump_debug_eea true` (and `--es ump_test_device <hashed id>`,
      * which UMP logs on first use) act as if in the EEA, for testing the consent form and the
      * privacy row. `--ez ump_reset true` forgets the choice made. Release builds ignore them.
+     * Read only when MainActivity is created, so test from a cold start (`am force-stop` first): a
+     * running app gets later intents in `onNewIntent`, which leaves these alone.
      */
     fun useDebugSettings(context: Context, intent: Intent) {
         if (!BuildConfig.DEBUG) return

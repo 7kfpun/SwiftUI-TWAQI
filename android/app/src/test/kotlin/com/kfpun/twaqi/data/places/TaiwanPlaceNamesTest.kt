@@ -3,6 +3,9 @@ package com.kfpun.twaqi.data.places
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.data.model.Station
 import java.io.File
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -15,6 +18,22 @@ class TaiwanPlaceNamesTest {
     fun theTableHasEveryCountyAndTownship() {
         assertEquals(22, places.countyCount)
         assertEquals(368, places.townshipCount)
+    }
+
+    /**
+     * Townships with no county are found by name alone, which works only while every name has one
+     * English form. A regenerated table that romanises a namesake differently fails here, rather
+     * than silently showing that name in Chinese.
+     */
+    @Test
+    fun everyTownshipNameHasOneEnglishForm() {
+        val json = Json.parseToJsonElement(File("src/main/assets/${TaiwanPlaceNames.ASSET}").readText()).jsonObject
+        val byName = json.getValue("townships").jsonObject.values
+            .flatMap { county -> county.jsonObject.entries.map { it.key to it.value.jsonPrimitive.content } }
+            .groupBy({ it.first }, { it.second })
+        val ambiguous = byName.filterValues { it.distinct().size > 1 }
+        assertEquals(emptyMap<String, List<String>>(), ambiguous)
+        byName.keys.forEach { assertEquals(byName.getValue(it).first(), places.township(it)) }
     }
 
     @Test
