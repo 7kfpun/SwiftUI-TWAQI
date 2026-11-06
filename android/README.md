@@ -155,6 +155,7 @@ Gradle Play Publisher's layout under `app/src/main/play/`:
 | `listings/<lang>/graphics/icon/1.png` | 512x512, written by `tools/DrawAndroidAppIcon.swift` (see "Launcher and Play icon") |
 | `listings/<lang>/graphics/feature-graphic/1.png` | 1024x500 |
 | `listings/<lang>/graphics/phone-screenshots/1..4.png` | The top four features, framed with a caption |
+| `listings/<lang>/graphics/seven-inch-screenshots/1..4.png`, `ten-inch-screenshots/1..4.png` | Tablets (FOX-119): the same four features and captions, in a tablet outline |
 | `listings/<lang>/graphics/wear-screenshots/1..2.png` | Wear OS, unframed (Play wants the watch UI alone) |
 | `release-notes/<lang>/default.txt` | What's new (500 characters), uploaded with each bundle |
 
@@ -171,6 +172,13 @@ demo plan), capture with `adb exec-out screencap -p`, then:
 python3 tools/frame_play_screenshots.py          # from the repo root; writes the PNGs and checks Play's limits
 python3 tools/frame_play_screenshots.py --check  # only the checks: text lengths, image sizes, no alpha
 ```
+
+Tablet captures (FOX-119) go in `../screenshots/fox-119-android-tablet-raw/<lang>/`, named
+`seven-<n>-<name>.png` and `ten-<n>-<name>.png`, n = 1..4 in the phone shots' order; the same
+script frames them. Take them on the `pixel_tablet` device profile (2560x1600, 320 dpi): the
+10-inch ones in landscape, the 7-inch ones in portrait at a 7-inch window
+(`adb shell wm size 1200x1920` and `adb shell wm density 320`; `wm size reset` and
+`wm density reset` afterwards).
 
 Captions live in the script (`CAPTIONS`, `FEATURE_TEXT`). The compliance answers (Data safety,
 content rating, target audience, ads, advertising ID) are drafted in
