@@ -61,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         // FOX-96: whether the welcome flow opens by itself, decided once per process, before the
         // review prompt below can stack over it.
         val opensOnboarding = Onboarding.decideLaunch(OnboardingStore(this).showsOnLaunch)
+        // Debug builds' UMP test extras (FOX-116), once: a recreated activity has the same intent,
+        // and `ump_reset` would wipe the choice just made in the consent form.
+        if (savedInstanceState == null) AdConsent.useDebugSettings(this, intent)
         startPro()
         startPush(savedInstanceState == null)
         if (savedInstanceState == null) handleLink(intent)
@@ -212,7 +215,6 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) { pro.refresh() }
         }
         // FOX-116: Help's privacy row, from UMP's last answer, for Pro users too.
-        AdConsent.useDebugSettings(this, intent)
         AdConsent.restore(this)
         lifecycleScope.launch {
             // Pro users see no ads, so no consent form; one who lapses gets it then.

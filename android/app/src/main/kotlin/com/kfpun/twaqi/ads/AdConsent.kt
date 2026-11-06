@@ -48,7 +48,8 @@ object AdConsent {
     /**
      * At every launch, for free and Pro users alike: whether the privacy row shows, from the answer
      * UMP kept from an earlier launch. Pro users never [gather], but keep the row while UMP still
-     * requires it (FOX-116).
+     * requires it (FOX-116). Only a read of what UMP stored; [gather] is what asks UMP again (free
+     * users), and it updates the row too.
      */
     fun restore(context: Context) {
         privacyOptions.value = showsPrivacyOptions(
