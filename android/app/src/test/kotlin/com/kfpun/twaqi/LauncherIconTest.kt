@@ -53,6 +53,11 @@ class LauncherIconTest {
     fun playIconIs512SquareInEveryListing() {
         val listings = File("src/main/play/listings").listFiles { file -> file.isDirectory }.orEmpty()
         assertTrue(listings.map { it.name }.containsAll(listOf("en-US", "zh-TW")))
+        // One icon for every language: the listings can't drift apart.
+        val icon = File("src/main/play/listings/en-US/graphics/icon/1.png").readBytes()
+        for (listing in listings) {
+            assertArrayEquals(listing.name, icon, File(listing, "graphics/icon/1.png").readBytes())
+        }
         for (listing in listings) {
             DataInputStream(File(listing, "graphics/icon/1.png").inputStream()).use { png ->
                 val signature = ByteArray(8).also { png.readFully(it) }
