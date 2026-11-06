@@ -36,8 +36,9 @@ class PlayBillingGateway(context: Context) : BillingGateway {
         .setListener { result, purchases ->
             updates.tryEmit(PurchasesResult(result.status(), purchases.orEmpty().map { it.toOwned() }))
         }
-        // The library requires it. A subscription paid with a slow method (cash,
-        // some bank transfers) arrives PENDING either way, handled by ProRepository.
+        // The library requires it. A purchase paid with a slow method (cash, some
+        // bank transfers) arrives PENDING, handled by ProRepository: the lifetime
+        // product (FOX-123) is a one-time product, subscriptions arrive PENDING either way.
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
         .enableAutoServiceReconnection()
         .build()
@@ -66,14 +67,58 @@ class PlayBillingGateway(context: Context) : BillingGateway {
     override suspend fun queryOffers(): OffersResult {
         val connected = connect()
         if (connected != BillingStatus.OK) return OffersResult(connected)
+        // One query per product type: Play rejects a product list that mixes them.
+        return mergeOffers(
+            subscriptions = queryOffers(ProProducts.SUBSCRIPTION_ID, BillingClient.ProductType.SUBS) { product ->
+                product.subscriptionOfferDetails.orEmpty()
+                    // The base plan's own offer: no trial or intro price, as on iOS.
+                    .filter { it.offerId == null }
+                    .mapNotNull { offer ->
+                        val plan = ProPlan.forBasePlan(offer.basePlanId) ?: return@mapNotNull null
+                        val price = offer.pricingPhases.pricingPhaseList.lastOrNull() ?: return@mapNotNull null
+                        PlanOffer(
+                            plan = plan,
+                            productId = product.productId,
+                            offerToken = offer.offerToken,
+                            formattedPrice = price.formattedPrice,
+                            priceMicros = price.priceAmountMicros,
+                            currencyCode = price.priceCurrencyCode
+                        )
+                    }
+            },
+            lifetime = queryOffers(ProProducts.LIFETIME_ID, BillingClient.ProductType.INAPP) { product ->
+                // The purchase option's own price, without a discount offer.
+                val offer = product.oneTimePurchaseOfferDetailsList.orEmpty().firstOrNull { it.offerId == null }
+                    ?: product.oneTimePurchaseOfferDetailsList.orEmpty().firstOrNull()
+                    ?: return@queryOffers emptyList()
+                listOf(
+                    PlanOffer(
+                        plan = ProPlan.LIFETIME,
+                        productId = product.productId,
+                        // Optional for a one-time product: Play sells the purchase option without it.
+                        offerToken = offer.offerToken.orEmpty(),
+                        formattedPrice = offer.formattedPrice,
+                        priceMicros = offer.priceAmountMicros,
+                        currencyCode = offer.priceCurrencyCode
+                    )
+                )
+            }
+        )
+    }
+
+    private suspend fun queryOffers(
+        productId: String,
+        productType: String,
+        offersOf: (ProductDetails) -> List<PlanOffer>
+    ): OffersResult {
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(
-                ProProducts.productIds.map {
+                listOf(
                     QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(it)
-                        .setProductType(BillingClient.ProductType.SUBS)
+                        .setProductId(productId)
+                        .setProductType(productType)
                         .build()
-                }
+                )
             )
             .build()
         val (result, details) = suspendCancellableCoroutine { continuation ->
@@ -83,30 +128,21 @@ class PlayBillingGateway(context: Context) : BillingGateway {
         }
         if (result.status() != BillingStatus.OK) return OffersResult(result.status())
         details.forEach { productDetails[it.productId] = it }
-        val offers = details.flatMap { product ->
-            product.subscriptionOfferDetails.orEmpty()
-                // The base plan's own offer: no trial or intro price, as on iOS.
-                .filter { it.offerId == null }
-                .mapNotNull { offer ->
-                    val plan = ProPlan.forBasePlan(offer.basePlanId) ?: return@mapNotNull null
-                    val price = offer.pricingPhases.pricingPhaseList.lastOrNull() ?: return@mapNotNull null
-                    PlanOffer(
-                        plan = plan,
-                        productId = product.productId,
-                        offerToken = offer.offerToken,
-                        formattedPrice = price.formattedPrice,
-                        priceMicros = price.priceAmountMicros,
-                        currencyCode = price.priceCurrencyCode
-                    )
-                }
-        }.sortedBy { it.plan.ordinal }
-        return OffersResult(BillingStatus.OK, offers)
+        return OffersResult(BillingStatus.OK, details.flatMap(offersOf))
     }
 
+    /** Both product types, so restore finds a lifetime purchase as well as a subscription. */
     override suspend fun queryPurchases(): PurchasesResult {
         val connected = connect()
         if (connected != BillingStatus.OK) return PurchasesResult(connected)
-        val params = QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
+        return mergePurchases(
+            subscriptions = queryPurchases(BillingClient.ProductType.SUBS),
+            lifetime = queryPurchases(BillingClient.ProductType.INAPP)
+        )
+    }
+
+    private suspend fun queryPurchases(productType: String): PurchasesResult {
+        val params = QueryPurchasesParams.newBuilder().setProductType(productType).build()
         return suspendCancellableCoroutine { continuation ->
             client.queryPurchasesAsync(params) { result, purchases ->
                 continuation.resume(PurchasesResult(result.status(), purchases.map { it.toOwned() }))
@@ -128,10 +164,11 @@ class PlayBillingGateway(context: Context) : BillingGateway {
         if (details == null || !client.isReady) return@PurchaseLauncher BillingStatus.UNAVAILABLE
         val product = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(details)
-            .setOfferToken(offer.offerToken)
+            .apply { if (offer.offerToken.isNotEmpty()) setOfferToken(offer.offerToken) }
             .build()
         val params = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(product))
-        if (oldPurchaseToken != null) {
+        // Only a subscription replaces another plan; lifetime is bought beside it.
+        if (oldPurchaseToken != null && !offer.plan.isLifetime) {
             // Changing plan: the new one starts now, with the unused time credited.
             // Billing 9 deprecates the replacement mode here for per-product
             // replacement params; move once a plan switch is tested with a license tester.

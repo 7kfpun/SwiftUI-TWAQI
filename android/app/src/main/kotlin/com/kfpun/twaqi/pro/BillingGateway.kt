@@ -14,7 +14,10 @@ enum class BillingStatus {
     ERROR
 }
 
-/** A plan as Play sells it: the base plan's own offer and its recurring price. */
+/**
+ * A plan as Play sells it: a subscription base plan's own offer and its recurring
+ * price, or the lifetime product's one-time price.
+ */
 data class PlanOffer(
     val plan: ProPlan,
     val productId: String,
@@ -34,11 +37,41 @@ data class OwnedPurchase(
     enum class State { PURCHASED, PENDING, UNSPECIFIED }
 
     val isPro: Boolean get() = productIds.any { it in ProProducts.productIds }
+
+    val isSubscription: Boolean get() = ProProducts.SUBSCRIPTION_ID in productIds
+
+    val isLifetime: Boolean get() = ProProducts.LIFETIME_ID in productIds
 }
 
 data class PurchasesResult(val status: BillingStatus, val purchases: List<OwnedPurchase> = emptyList())
 
 data class OffersResult(val status: BillingStatus, val offers: List<PlanOffer> = emptyList())
+
+/**
+ * The subscription and lifetime purchase lists, read with one Play query per
+ * product type, as one result. Either failing fails the whole read, so a lifetime
+ * buyer isn't turned free because only the subscription list came back.
+ */
+fun mergePurchases(subscriptions: PurchasesResult, lifetime: PurchasesResult): PurchasesResult {
+    val failed = listOf(subscriptions, lifetime).firstOrNull { it.status != BillingStatus.OK }
+    return failed?.let { PurchasesResult(it.status) }
+        ?: PurchasesResult(BillingStatus.OK, subscriptions.purchases + lifetime.purchases)
+}
+
+/**
+ * The subscription plans and the lifetime offer as one list in display order. The
+ * lifetime product is optional: Play lists none until it's created in Play Console,
+ * so a missing or failed lifetime query only leaves its row out. The read fails
+ * when nothing at all can be sold.
+ */
+fun mergeOffers(subscriptions: OffersResult, lifetime: OffersResult): OffersResult {
+    val offers = (subscriptions.offers + lifetime.offers.takeIf { lifetime.status == BillingStatus.OK }.orEmpty())
+        .inDisplayOrder()
+    return when {
+        subscriptions.status == BillingStatus.OK || offers.isNotEmpty() -> OffersResult(BillingStatus.OK, offers)
+        else -> OffersResult(subscriptions.status)
+    }
+}
 
 /**
  * Starts Play's purchase sheet. Its result arrives later on
@@ -57,7 +90,10 @@ interface BillingGateway {
 
     suspend fun queryOffers(): OffersResult
 
-    /** Active subscriptions. Play leaves out expired, refunded, revoked and on-hold ones. */
+    /**
+     * Active subscriptions and the owned lifetime purchase. Play leaves out expired,
+     * refunded, revoked and on-hold subscriptions, and refunded or voided one-time purchases.
+     */
     suspend fun queryPurchases(): PurchasesResult
 
     suspend fun acknowledge(purchaseToken: String): BillingStatus

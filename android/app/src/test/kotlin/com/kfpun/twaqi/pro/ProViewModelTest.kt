@@ -59,7 +59,41 @@ class ProViewModelTest {
 
         play.queryStatus = BillingStatus.OK
         model.load()
-        assertEquals(3, model.uiState.value.offers.size)
+        assertEquals(4, model.uiState.value.offers.size)
+    }
+
+    @Test
+    fun lifetimeIsListedLast() {
+        assertEquals(ProPlan.LIFETIME, model().uiState.value.offers.last().plan)
+    }
+
+    @Test
+    fun lifetimeMissingFromPlayLeavesTheSubscriptionsWithoutAnError() {
+        play.offers = play.offers.filterNot { it.plan.isLifetime }
+        val model = model()
+        assertEquals(
+            listOf(ProPlan.ONE_MONTH, ProPlan.SIX_MONTHS, ProPlan.TWELVE_MONTHS),
+            model.uiState.value.offers.map { it.plan }
+        )
+        assertFalse(model.uiState.value.loadFailed)
+    }
+
+    @Test
+    fun lifetimePurchaseLogsTheLifetimePlanAndCloses() {
+        val model = model()
+        model.buy(FakeBillingGateway.offer(ProPlan.LIFETIME), play.launcher)
+        assertEquals(Analytics.BUY_PRODUCT_DONE, names.last())
+        assertEquals(mapOf("plan" to "lifetime", "source" to "ad_banner"), events.last().second)
+        assertTrue(model.uiState.value.done)
+    }
+
+    @Test
+    fun restoreThatFindsLifetimeCloses() {
+        play.purchases += FakeBillingGateway.purchase(ProPlan.LIFETIME)
+        val model = model()
+        model.restore()
+        assertEquals(Analytics.RESTORE_PURCHASE_DONE, names.last())
+        assertTrue(model.uiState.value.done)
     }
 
     @Test

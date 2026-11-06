@@ -3,21 +3,119 @@ package com.kfpun.twaqi.pro
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ProPlanTest {
     @Test
     fun plansKeepTheIosAnalyticsNamesAndOrder() {
-        assertEquals(listOf("1m", "6m", "12m"), ProPlan.entries.map { it.analyticsName })
+        assertEquals(listOf("1m", "6m", "12m", "lifetime"), ProPlan.entries.map { it.analyticsName })
         assertEquals(listOf(ProPlan.TWELVE_MONTHS), ProPlan.entries.filter { it.isBestValue })
+    }
+
+    @Test
+    fun lifetimeIsTheIosOneTimeProduct() {
+        assertEquals("com.kfpun.twaqi.adfree", ProProducts.LIFETIME_ID)
+        assertEquals(ProProducts.LIFETIME_ID, ProPlan.LIFETIME.productId)
+        assertNull(ProPlan.LIFETIME.basePlanId)
+        assertNull(ProPlan.LIFETIME.months)
+        assertEquals(
+            setOf("com.kfpun.twaqi.subscription.adfree", "com.kfpun.twaqi.adfree"),
+            ProProducts.productIds
+        )
+        assertEquals(listOf(ProPlan.LIFETIME), ProPlan.entries.filter { it.isLifetime })
     }
 
     @Test
     fun basePlansMapToPlans() {
         assertEquals(ProPlan.SIX_MONTHS, ProPlan.forBasePlan("adfree-6m"))
         assertNull(ProPlan.forBasePlan("adfree-2y"))
+        // Lifetime has no base plan, so none maps to it.
         assertNull(ProPlan.forBasePlan(null))
     }
+
+    // Product ordering: subscriptions shortest first, then lifetime (iOS `IAPManager.products()`).
+
+    @Test
+    fun offersAreShownInIosOrder() {
+        val shuffled = listOf(ProPlan.LIFETIME, ProPlan.TWELVE_MONTHS, ProPlan.ONE_MONTH, ProPlan.SIX_MONTHS)
+            .map { FakeBillingGateway.offer(it) }
+        assertEquals(ProPlan.entries, shuffled.inDisplayOrder().map { it.plan })
+    }
+
+    @Test
+    fun lifetimeIsListedAfterTheSubscriptions() {
+        val merged = mergeOffers(
+            subscriptions = OffersResult(BillingStatus.OK, subscriptionOffers.reversed()),
+            lifetime = OffersResult(BillingStatus.OK, listOf(FakeBillingGateway.offer(ProPlan.LIFETIME)))
+        )
+        assertEquals(BillingStatus.OK, merged.status)
+        assertEquals(ProPlan.entries, merged.offers.map { it.plan })
+    }
+
+    @Test
+    fun lifetimeNotYetInPlayHidesItsRowWithoutAnError() {
+        // Play lists no INAPP product until it's created in Play Console.
+        val missing = mergeOffers(OffersResult(BillingStatus.OK, subscriptionOffers), OffersResult(BillingStatus.OK))
+        assertEquals(OffersResult(BillingStatus.OK, subscriptionOffers), missing)
+
+        val failed = mergeOffers(OffersResult(BillingStatus.OK, subscriptionOffers), OffersResult(BillingStatus.ERROR))
+        assertEquals(OffersResult(BillingStatus.OK, subscriptionOffers), failed)
+    }
+
+    @Test
+    fun offersFailOnlyWhenNothingCanBeSold() {
+        val lifetimeOnly = mergeOffers(
+            OffersResult(BillingStatus.UNAVAILABLE),
+            OffersResult(BillingStatus.OK, listOf(FakeBillingGateway.offer(ProPlan.LIFETIME)))
+        )
+        assertEquals(listOf(ProPlan.LIFETIME), lifetimeOnly.offers.map { it.plan })
+
+        val neither = mergeOffers(OffersResult(BillingStatus.UNAVAILABLE), OffersResult(BillingStatus.ERROR))
+        assertEquals(OffersResult(BillingStatus.UNAVAILABLE), neither)
+    }
+
+    // Restore reads both product types.
+
+    @Test
+    fun purchasesOfBothTypesAreRead() {
+        val subscription = FakeBillingGateway.purchase(ProPlan.ONE_MONTH)
+        val lifetime = FakeBillingGateway.purchase(ProPlan.LIFETIME)
+        assertEquals(
+            PurchasesResult(BillingStatus.OK, listOf(subscription, lifetime)),
+            mergePurchases(
+                PurchasesResult(BillingStatus.OK, listOf(subscription)),
+                PurchasesResult(BillingStatus.OK, listOf(lifetime))
+            )
+        )
+    }
+
+    @Test
+    fun eitherTypeFailingFailsTheRead() {
+        // Otherwise a lifetime buyer would turn free when only the subscriptions came back.
+        val subscription = FakeBillingGateway.purchase(ProPlan.ONE_MONTH)
+        assertEquals(
+            PurchasesResult(BillingStatus.UNAVAILABLE),
+            mergePurchases(
+                PurchasesResult(BillingStatus.OK, listOf(subscription)),
+                PurchasesResult(BillingStatus.UNAVAILABLE)
+            )
+        )
+        assertEquals(
+            PurchasesResult(BillingStatus.ERROR),
+            mergePurchases(PurchasesResult(BillingStatus.ERROR), PurchasesResult(BillingStatus.OK))
+        )
+    }
+
+    @Test
+    fun purchasesKnowTheirType() {
+        val lifetime = FakeBillingGateway.purchase(ProPlan.LIFETIME)
+        val subscription = FakeBillingGateway.purchase(ProPlan.SIX_MONTHS)
+        assertTrue(lifetime.isPro && lifetime.isLifetime && !lifetime.isSubscription)
+        assertTrue(subscription.isPro && subscription.isSubscription && !subscription.isLifetime)
+    }
+
+    private val subscriptionOffers = ProPlan.entries.filterNot { it.isLifetime }.map { FakeBillingGateway.offer(it) }
 
     @Test
     fun sourcesUseTheIosNames() {
