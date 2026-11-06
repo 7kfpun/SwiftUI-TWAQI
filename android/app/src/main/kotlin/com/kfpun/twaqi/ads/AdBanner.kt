@@ -1,18 +1,18 @@
 package com.kfpun.twaqi.ads
 
 import android.util.Log
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,13 +58,10 @@ fun AdBanner(placement: AdPlacement, modifier: Modifier = Modifier) {
         ) {
             Text(stringResource(R.string.ads_remove), style = MaterialTheme.typography.labelMedium)
         }
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            val width = maxWidth.value.toInt()
-            key(width) {
-                val adSize =
-                    remember(width) { AdSize.getLargeAnchoredAdaptiveBannerAdSize(context, width) }
-                BannerView(placement, adSize)
-            }
+        // The standard 320x50 banner, centred, as on iOS (AdSizeBanner); FOX-61. The large
+        // adaptive banner it replaced was often over 100dp tall on phones.
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            BannerView(placement, AdsPolicy.bannerSize)
         }
     }
 }
@@ -85,7 +82,7 @@ private fun BannerView(placement: AdPlacement, adSize: AdSize) {
         onDispose { lifecycle.removeObserver(observer) }
     }
     AndroidView(
-        modifier = Modifier.fillMaxWidth().height(adSize.height.dp),
+        modifier = Modifier.width(adSize.width.dp).height(adSize.height.dp),
         factory = { viewContext ->
             AdView(viewContext).apply {
                 setAdSize(adSize)
