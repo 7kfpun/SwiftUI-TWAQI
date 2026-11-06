@@ -17,6 +17,7 @@ class HelpTest {
                 HelpSection.DO_NOT_DISTURB,
                 HelpSection.LANGUAGE,
                 HelpSection.APPEARANCE,
+                HelpSection.WELCOME,
                 HelpSection.CONTACT,
                 HelpSection.WIDGETS_AND_WATCH,
                 HelpSection.DEFINITION,

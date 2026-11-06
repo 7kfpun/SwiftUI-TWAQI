@@ -49,7 +49,7 @@ import java.util.Locale
 private val ProGreen = Color(0xFF009866)
 
 /** Only what Pro adds, in the iOS order (`ProFeature`). */
-private enum class ProFeature(@DrawableRes val icon: Int, @StringRes val title: Int, @StringRes val detail: Int) {
+internal enum class ProFeature(@DrawableRes val icon: Int, @StringRes val title: Int, @StringRes val detail: Int) {
     NO_ADS(R.drawable.ic_pro_ad_off, R.string.pro_feature_no_ads, R.string.pro_feature_no_ads_detail),
     COMPLICATIONS(
         R.drawable.ic_pro_watch,
@@ -298,7 +298,7 @@ private fun PlanRow(offer: PlanOffer, isPurchasing: Boolean, enabled: Boolean, o
     }
 }
 
-private val ProPlan.nameRes: Int
+internal val ProPlan.nameRes: Int
     get() = when (this) {
         ProPlan.ONE_MONTH -> R.string.pro_plan_1m
         ProPlan.SIX_MONTHS -> R.string.pro_plan_6m

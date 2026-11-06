@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.kfpun.twaqi.BuildConfig
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.analytics.VersionTapCounter
 import com.kfpun.twaqi.feedback.FeedbackSource
@@ -44,9 +45,15 @@ import com.kfpun.twaqi.ui.settings.LanguageRow
  *
  * @param isPro hides the Premium section; from the Pro entitlement (FOX-58).
  * @param onOpenPro opens the Pro screen (FOX-58).
+ * @param onShowWelcomeGuide runs the welcome flow again, over the tabs (FOX-96).
  */
 @Composable
-fun HelpHost(isPro: Boolean, onOpenPro: () -> Unit, modifier: Modifier = Modifier) {
+fun HelpHost(
+    isPro: Boolean,
+    onOpenPro: () -> Unit,
+    modifier: Modifier = Modifier,
+    onShowWelcomeGuide: () -> Unit = {}
+) {
     var stack by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val top = stack.lastOrNull()?.let(HelpDestination::fromRoute)
     val open: (HelpDestination) -> Unit = { stack = stack + it.route }
@@ -55,11 +62,21 @@ fun HelpHost(isPro: Boolean, onOpenPro: () -> Unit, modifier: Modifier = Modifie
 
     Box(modifier.fillMaxSize()) {
         when (top) {
-            null -> HelpScreen(isPro = isPro, onOpenPro = onOpenPro, onOpen = open)
+            null -> HelpScreen(
+                isPro = isPro,
+                onOpenPro = onOpenPro,
+                onOpen = open,
+                onShowWelcomeGuide = onShowWelcomeGuide
+            )
+
             is HelpDestination.IndexGuide -> IndexGuideScreen(top.page, onBack = back)
+
             HelpDestination.WidgetGuide -> WidgetGuideScreen(onBack = back)
+
             HelpDestination.WearOsGuide -> WearOsGuideScreen(onBack = back)
+
             HelpDestination.Cooperate -> CooperateScreen(onBack = back)
+
             HelpDestination.Feedback -> FeedbackScreen(source = FeedbackSource.HELP, onBack = back)
         }
     }
@@ -67,7 +84,12 @@ fun HelpHost(isPro: Boolean, onOpenPro: () -> Unit, modifier: Modifier = Modifie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HelpScreen(isPro: Boolean, onOpenPro: () -> Unit, onOpen: (HelpDestination) -> Unit) {
+internal fun HelpScreen(
+    isPro: Boolean,
+    onOpenPro: () -> Unit,
+    onOpen: (HelpDestination) -> Unit,
+    onShowWelcomeGuide: () -> Unit = {}
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -77,13 +99,18 @@ internal fun HelpScreen(isPro: Boolean, onOpenPro: () -> Unit, onOpen: (HelpDest
     ) { padding ->
         HelpList(padding) {
             HelpSection.order(isPro).forEach { section ->
-                section(section, onOpenPro, onOpen)
+                section(section, onOpenPro, onOpen, onShowWelcomeGuide)
             }
         }
     }
 }
 
-private fun LazyListScope.section(section: HelpSection, onOpenPro: () -> Unit, onOpen: (HelpDestination) -> Unit) {
+private fun LazyListScope.section(
+    section: HelpSection,
+    onOpenPro: () -> Unit,
+    onOpen: (HelpDestination) -> Unit,
+    onShowWelcomeGuide: () -> Unit
+) {
     when (section) {
         HelpSection.PURCHASE -> item(key = "purchase") {
             SectionHeader(stringResource(R.string.help_in_app_purchase))
@@ -104,6 +131,15 @@ private fun LazyListScope.section(section: HelpSection, onOpenPro: () -> Unit, o
         HelpSection.APPEARANCE -> item(key = "appearance") {
             SectionHeader(stringResource(R.string.help_appearance))
             AppearanceRow()
+        }
+
+        HelpSection.WELCOME -> item(key = "welcome") {
+            val context = LocalContext.current
+            SectionHeader(stringResource(R.string.help_welcome))
+            LinkRow(stringResource(R.string.help_show_welcome_guide), onClick = {
+                onShowWelcomeGuide()
+                Analytics.logEvent(context, Analytics.ONBOARDING_OPEN_FROM_HELP)
+            })
         }
 
         HelpSection.CONTACT -> item(key = "contact") {

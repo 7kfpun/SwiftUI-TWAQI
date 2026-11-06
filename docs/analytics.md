@@ -93,3 +93,7 @@ Forecast tab and Pro). Builds before it had seven: `do_not_disturb` (5),
 `data_source` (6) and `premium` (7). Read a funnel across both by step name,
 not index: index 5 and `step_5` mean `do_not_disturb` before FOX-84 and `more`
 after it.
+
+Android (FOX-96) logs the same events over the same five steps; there `more` lists the
+widgets, the launcher shortcuts, Google Assistant and the Quick Settings tile, the Forecast
+tab and Pro.

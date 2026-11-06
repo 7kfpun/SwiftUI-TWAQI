@@ -53,6 +53,11 @@ on the next push or LGTM-gate re-run. An LGTM left as a PR *review* updates it a
   applied at process start (`AppAppearanceStore`, `TwaqiApplication`). Activities must be
   `AppCompatActivity`, and anything dark-aware (the map style, FOX-54) follows
   `isSystemInDarkTheme()`; never read the phone's setting directly.
+- **Welcome flow** (FOX-96): opens by itself once, behind iOS's versioned flag
+  (`OnboardingStore.CURRENT_VERSION`, key `onboardingShownVersion` in the `settings` prefs),
+  marked when it opens; Help › Getting started runs it again. Raise the version to show a
+  reworked flow once more. Its Lottie files in `assets/onboarding/` are the iOS files, unchanged
+  (`OnboardingTest` compares them byte for byte).
 - Don't upload to Play, bump versions or release unless asked.
 
 ## Commands (from `android/`)

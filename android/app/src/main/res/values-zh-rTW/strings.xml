@@ -500,7 +500,7 @@
     <string name="onboarding_more_title">Taiwan Air 還能做什麼</string>
     <string name="onboarding_more_body">不必打開 App，也能隨時掌握空氣品質。</string>
     <string name="onboarding_more_widgets_title">小工具</string>
-    <string name="onboarding_more_widgets_body">放在主畫面與鎖定畫面。用 ‹ › 逐一瀏覽最愛測站；在 iPad 上，超大尺寸小工具可顯示單一測站的詳細資訊。</string>
+    <string name="onboarding_more_widgets_body">放在主畫面。用 ‹ › 逐一瀏覽最愛測站；測站詳情小工具可詳細顯示單一測站。</string>
     <string name="onboarding_more_forecast_title">空品區預報</string>
     <string name="onboarding_more_forecast_body">點畫面下方的「空品區預報」，查看各空品區未來幾天的預報。</string>
     <string name="onboarding_how_to_add">如何加入</string>
@@ -512,6 +512,9 @@
     <string name="onboarding_pro_trial_weeks">免費試用 %d 週</string>
     <string name="onboarding_pro_trial_months">免費試用 %d 個月</string>
     <string name="onboarding_pro_trial_years">免費試用 %d 年</string>
+    <string name="onboarding_more_shortcuts_title">捷徑、Google 助理與快速設定</string>
+    <string name="onboarding_more_shortcuts_body">按住 App 圖示即可開啟你的測站，也可以問 Google 助理空氣如何，或加入快速設定圖塊。</string>
+    <string name="onboarding_free_shortcuts">啟動器捷徑、Google 助理與快速設定圖塊</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
 

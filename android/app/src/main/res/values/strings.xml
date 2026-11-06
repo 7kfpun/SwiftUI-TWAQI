@@ -501,7 +501,7 @@
     <string name="onboarding_more_title">More in Taiwan Air</string>
     <string name="onboarding_more_body">The air at a glance, without opening the app.</string>
     <string name="onboarding_more_widgets_title">Widgets</string>
-    <string name="onboarding_more_widgets_body">On the Home Screen and Lock Screen. Page through your favourites with ‹ ›, and on iPad the extra large widget shows one station in detail.</string>
+    <string name="onboarding_more_widgets_body">On the home screen. Page through your favourites with ‹ ›, and the station detail widget shows one station in detail.</string>
     <string name="onboarding_more_forecast_title">AQI Forecast</string>
     <string name="onboarding_more_forecast_body">Tap AQI Forecast at the bottom of the screen for each area\'s forecast for the coming days.</string>
     <string name="onboarding_how_to_add">How to add</string>
@@ -513,6 +513,11 @@
     <string name="onboarding_pro_trial_weeks">%d-week free trial</string>
     <string name="onboarding_pro_trial_months">%d-month free trial</string>
     <string name="onboarding_pro_trial_years">%d-year free trial</string>
+    <!-- Android (FOX-96): the "More" step's shortcuts row and free line, in place of iOS's Siri,
+         Shortcuts and Control Center (FOX-95 brought launcher shortcuts, Assistant and the tile). -->
+    <string name="onboarding_more_shortcuts_title">Shortcuts, Assistant &amp; Quick Settings</string>
+    <string name="onboarding_more_shortcuts_body">Touch and hold the app icon for your stations, ask Google Assistant about the air, or add the Quick Settings tile.</string>
+    <string name="onboarding_free_shortcuts">Launcher shortcuts, Google Assistant and the Quick Settings tile</string>
 
     <!-- Siri, Shortcuts and Control Center (FOX-74) -->
 
