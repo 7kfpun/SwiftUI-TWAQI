@@ -17,10 +17,8 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.google.common.util.concurrent.ListenableFuture
 import com.kfpun.twaqi.data.model.AirIndexType
-import com.kfpun.twaqi.data.model.AirLevel
 import com.kfpun.twaqi.watch.R
 import com.kfpun.twaqi.watch.complication.ComplicationContent
-import com.kfpun.twaqi.watch.complication.faceDrawable
 import com.kfpun.twaqi.watch.complication.statusLabel
 import com.kfpun.twaqi.watch.data.WatchLocale
 import com.kfpun.twaqi.watch.data.WatchPro
@@ -32,7 +30,7 @@ import com.kfpun.twaqi.watch.ui.WatchActivity
 /**
  * The Taiwan Air tile (FOX-62; the Wear OS counterpart of the iOS Smart Stack widget): the AQI of
  * the station the app follows (the nearest, or one the reader chose), in its level colour, with
- * the phone app's face. Part of Pro, as the Help guide says; without it the tile shows a lock that
+ * a ring that fills by level. Part of Pro, as the Help guide says; without it the tile shows a lock that
  * opens the paywall.
  */
 class AqiTileService : TileService() {
@@ -58,9 +56,6 @@ class AqiTileService : TileService() {
         requestParams: RequestBuilders.ResourcesRequest
     ): ListenableFuture<ResourceBuilders.Resources> = SuspendToFutureAdapter.launchFuture {
         ResourceBuilders.Resources.Builder().setVersion(RESOURCES_VERSION).apply {
-            AirLevel.showAllCases.forEach { level ->
-                faceDrawable(level)?.let { addIdToImageMapping(faceId(level), image(it)) }
-            }
             addIdToImageMapping(LOCK_ID, image(R.drawable.ic_lock))
         }.build()
     }
@@ -100,15 +95,7 @@ class AqiTileService : TileService() {
                 val colour = OPAQUE or level.color
                 content.addContent(text(reading.displayName(WatchLocale.isChinese(context)), 13f, SECONDARY))
                 content.addContent(text(reading.formatted(type), 44f, colour, bold = true))
-                val row = LayoutElementBuilders.Row.Builder().setVerticalAlignment(
-                    LayoutElementBuilders.VERTICAL_ALIGN_CENTER
-                )
-                if (level.hasFaceImage) {
-                    row.addContent(imageElement(faceId(level), 20f))
-                    row.addContent(LayoutElementBuilders.Spacer.Builder().setWidth(dp(4f)).build())
-                }
-                row.addContent(text(context.getString(statusLabel(level)), 14f, colour, bold = true, maxLines = 2))
-                content.addContent(row.build())
+                content.addContent(text(context.getString(statusLabel(level)), 14f, colour, bold = true, maxLines = 2))
                 content.addContent(spacer(2f))
                 content.addContent(
                     text("${type.label} · ${WatchReading.hourMinute(reading.publishTime)}", 12f, SECONDARY)
@@ -180,8 +167,12 @@ class AqiTileService : TileService() {
             )
             .build()
 
-    private fun imageElement(id: String, size: Float) =
-        LayoutElementBuilders.Image.Builder().setResourceId(id).setWidth(dp(size)).setHeight(dp(size)).build()
+    private fun imageElement(id: String, size: Float) = LayoutElementBuilders.Image.Builder()
+        .setResourceId(id)
+        .setWidth(dp(size))
+        .setHeight(dp(size))
+        .setContentScaleMode(LayoutElementBuilders.CONTENT_SCALE_MODE_FIT)
+        .build()
 
     private fun spacer(height: Float) = LayoutElementBuilders.Spacer.Builder().setHeight(dp(height)).build()
 
@@ -192,14 +183,12 @@ class AqiTileService : TileService() {
         .build()
 
     private companion object {
-        const val RESOURCES_VERSION = "1"
+        const val RESOURCES_VERSION = "2"
         const val FRESHNESS_MILLIS = 30L * 60 * 1000
         const val LOCK_ID = "lock"
         const val PADDING = 22f
         const val OPAQUE = 0xFF000000.toInt()
         val WHITE = 0xFFFFFFFF.toInt()
         val SECONDARY = 0xFFBDC1C6.toInt()
-
-        fun faceId(level: AirLevel) = "face_${level.key}"
     }
 }

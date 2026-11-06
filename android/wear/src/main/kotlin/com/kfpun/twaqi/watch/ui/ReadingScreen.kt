@@ -219,7 +219,8 @@ private fun History(state: WatchUiState, type: AirIndexType) {
         }
         return
     }
-    Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+    // Inset from the round edge, which would clip the first and last bars.
+    Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Text("${type.label} ${type.unit}".trim(), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         HistoryBars(state.history, type, Modifier.padding(vertical = 4.dp))
         Row(Modifier.fillMaxWidth()) {
