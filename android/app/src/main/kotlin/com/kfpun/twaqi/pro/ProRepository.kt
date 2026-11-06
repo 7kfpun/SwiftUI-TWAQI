@@ -38,10 +38,12 @@ enum class RestoreOutcome { RESTORED, PENDING, NOT_FOUND, FAILED }
  * The one source of Pro (iOS: `IAPManager.isEntitled` + `SettingsStore.refreshPro`),
  * read by the ads, and later by the widgets and the alert limit.
  *
- * Pro follows Play rather than a flag set once on purchase: Play's purchase
- * list leaves out expired, refunded, revoked and on-hold subscriptions, so
- * re-reading it on every start ([refresh]) turns Pro off when any of those
- * happen. A cancelled subscription stays listed, and Pro, until its period ends.
+ * Pro is an active subscription or an owned, acknowledged lifetime purchase
+ * (FOX-123), as on iOS. It follows Play rather than a flag set once on purchase:
+ * Play's purchase lists leave out expired, refunded, revoked and on-hold
+ * subscriptions and refunded or voided one-time purchases, so re-reading them on
+ * every start ([refresh]) turns Pro off when any of those happen. A cancelled
+ * subscription stays listed, and Pro, until its period ends.
  * When Play can't be reached the last confirmed value is kept, so a paying
  * user offline doesn't get ads.
  *
@@ -60,8 +62,11 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
     private val lock = Mutex()
     private var loaded = false
 
-    /** The active Pro purchase, so buying another plan switches it rather than adding one. */
-    private var ownedPurchaseToken: String? = null
+    /**
+     * The active subscription, so buying another subscription plan switches it rather
+     * than adding one. Lifetime is never switched from or to: it's bought beside it.
+     */
+    private var subscriptionToken: String? = null
     private val acknowledged = mutableSetOf<String>()
 
     /** Updates after [handleUpdate] has applied them, for [purchase] to wait on. */
@@ -92,19 +97,22 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
     suspend fun purchase(offer: PlanOffer, launcher: PurchaseLauncher): PurchaseOutcome = coroutineScope {
         // Listen before the sheet opens, so a fast result isn't missed.
         val update = async(start = CoroutineStart.UNDISPATCHED) { appliedUpdates.first() }
-        val launched = launcher.launch(offer, lock.withLock { ownedPurchaseToken })
+        val oldToken = if (offer.plan.isLifetime) null else lock.withLock { subscriptionToken }
+        val launched = launcher.launch(offer, oldToken)
         if (launched != BillingStatus.OK) {
             update.cancel()
             return@coroutineScope launchFailed(launched)
         }
         val result = update.await()
         when (result.status) {
-            BillingStatus.OK -> {
-                val ours = result.purchases.filter { it.isPro }
-                when {
-                    ours.any { it.state == OwnedPurchase.State.PURCHASED } -> PurchaseOutcome.PURCHASED
-                    ours.any { it.state == OwnedPurchase.State.PENDING } -> PurchaseOutcome.PENDING
-                    state.value == Entitlement.PRO -> PurchaseOutcome.PURCHASED
+            BillingStatus.OK -> when (lock.withLock { entitlementOf(result.purchases) }) {
+                Entitlement.PRO -> PurchaseOutcome.PURCHASED
+
+                Entitlement.PENDING -> PurchaseOutcome.PENDING
+
+                // Not this update's purchase: Pro may already be on from another.
+                Entitlement.FREE -> when (state.value) {
+                    Entitlement.PRO -> PurchaseOutcome.PURCHASED
                     else -> PurchaseOutcome.FAILED
                 }
             }
@@ -164,7 +172,7 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
     /** Call with [lock] held. */
     private suspend fun apply(purchases: List<OwnedPurchase>) {
         acknowledgeNew(purchases)
-        ownedPurchaseToken = purchases.firstOrNull { it.isPro && it.state == OwnedPurchase.State.PURCHASED }
+        subscriptionToken = purchases.firstOrNull { it.isSubscription && it.state == OwnedPurchase.State.PURCHASED }
             ?.purchaseToken
         save(entitlementOf(purchases))
     }
@@ -174,7 +182,11 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
             .filter { it.isPro && it.state == OwnedPurchase.State.PURCHASED && !it.isAcknowledged }
             .filter { it.purchaseToken !in acknowledged }
             .forEach { purchase ->
-                if (gateway.acknowledge(purchase.purchaseToken) == BillingStatus.OK) {
+                // One retry at once for a passing error, so a paid lifetime purchase
+                // doesn't wait as pending until the next start.
+                val status = gateway.acknowledge(purchase.purchaseToken).takeIf { it == BillingStatus.OK }
+                    ?: gateway.acknowledge(purchase.purchaseToken)
+                if (status == BillingStatus.OK) {
                     acknowledged += purchase.purchaseToken
                 } else {
                     Log.w(TAG, "Acknowledge failed; retried on the next refresh")
@@ -197,16 +209,26 @@ class ProRepository(private val gateway: BillingGateway, private val store: Enti
         runCatching { store.write(entitlement) }.onFailure { Log.w(TAG, "Couldn't save Pro", it) }
     }
 
+    /**
+     * Call with [lock] held, after [acknowledgeNew]. A paid subscription is Pro at once
+     * (its acknowledgement is retried if it fails). A paid lifetime purchase is Pro once
+     * acknowledged, by Play's flag or by our call: until then Play may still refund it,
+     * so it waits as [Entitlement.PENDING] and is acknowledged again on the next refresh.
+     */
+    private fun entitlementOf(purchases: List<OwnedPurchase>): Entitlement {
+        val paid = purchases.filter { it.isPro && it.state == OwnedPurchase.State.PURCHASED }
+        val ownsLifetime = paid.any { it.isLifetime && (it.isAcknowledged || it.purchaseToken in acknowledged) }
+        return when {
+            ownsLifetime || paid.any { it.isSubscription } -> Entitlement.PRO
+
+            paid.isNotEmpty() || purchases.any { it.isPro && it.state == OwnedPurchase.State.PENDING } ->
+                Entitlement.PENDING
+
+            else -> Entitlement.FREE
+        }
+    }
+
     private companion object {
         const val TAG = "TWAQIPro"
-
-        fun entitlementOf(purchases: List<OwnedPurchase>): Entitlement {
-            val ours = purchases.filter { it.isPro }
-            return when {
-                ours.any { it.state == OwnedPurchase.State.PURCHASED } -> Entitlement.PRO
-                ours.any { it.state == OwnedPurchase.State.PENDING } -> Entitlement.PENDING
-                else -> Entitlement.FREE
-            }
-        }
     }
 }

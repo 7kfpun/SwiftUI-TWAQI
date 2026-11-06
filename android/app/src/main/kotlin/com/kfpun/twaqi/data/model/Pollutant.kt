@@ -1,5 +1,6 @@
 package com.kfpun.twaqi.data.model
 
+import com.kfpun.twaqi.data.places.TaiwanPlaceNames
 import java.time.Instant
 
 /**
@@ -32,7 +33,9 @@ data class Pollutant(
     val countyLocal: String? = null,
     val township: String? = null,
     val stationType: StationType = StationType.UNKNOWN,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    /** The township in English, if the API ever sends one (today it sends Chinese only). */
+    val townshipEn: String? = null
 ) {
     fun value(type: AirIndexType): Double = when (type) {
         AirIndexType.AQI -> aqi
@@ -51,8 +54,9 @@ data class Pollutant(
     fun displayName(chinese: Boolean): String =
         StationText.displayName(if (chinese) nameLocal else name, code, stationId)
 
-    fun displayLocality(chinese: Boolean, translate: (String) -> String = { it }): String? =
-        StationText.locality(township?.let(translate), if (chinese) countyLocal else county)
+    /** "Xindian District, New Taipei City", as [Station.displayLocality] (FOX-114). */
+    fun displayLocality(chinese: Boolean, places: TaiwanPlaceNames = TaiwanPlaceNames.EMPTY): String? =
+        StationText.locality(chinese, township, townshipEn, county, countyLocal, places)
 
     fun displayArea(chinese: Boolean): String? = (if (chinese) areaLocal else area)?.takeIf { it.isNotEmpty() }
 

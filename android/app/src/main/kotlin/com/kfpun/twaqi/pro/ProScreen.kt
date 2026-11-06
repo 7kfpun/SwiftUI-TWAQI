@@ -277,14 +277,18 @@ private fun PlanRow(offer: PlanOffer, isPurchasing: Boolean, enabled: Boolean, o
                 Text(stringResource(offer.plan.nameRes), style = MaterialTheme.typography.titleMedium)
                 if (offer.plan.isBestValue) BestValueBadge()
             }
+            // iOS `ProPlanRow.detail`: the monthly equivalent, "billed monthly", or pay once.
+            val months = offer.plan.months
             Text(
-                if (offer.plan.months > 1) {
-                    stringResource(
+                when {
+                    months == null -> stringResource(R.string.pro_lifetime_detail)
+
+                    months > 1 -> stringResource(
                         R.string.pro_per_month,
-                        ProPricing.perMonth(offer.priceMicros, offer.plan.months, offer.currencyCode)
+                        ProPricing.perMonth(offer.priceMicros, months, offer.currencyCode)
                     )
-                } else {
-                    stringResource(R.string.pro_billed_monthly)
+
+                    else -> stringResource(R.string.pro_billed_monthly)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -303,6 +307,7 @@ internal val ProPlan.nameRes: Int
         ProPlan.ONE_MONTH -> R.string.pro_plan_1m
         ProPlan.SIX_MONTHS -> R.string.pro_plan_6m
         ProPlan.TWELVE_MONTHS -> R.string.pro_plan_12m
+        ProPlan.LIFETIME -> R.string.pro_plan_lifetime
     }
 
 @Composable
@@ -364,14 +369,8 @@ private fun ProScreenPreview() {
         ProScreen(
             state = ProUiState(
                 offers = ProPlan.entries.map {
-                    PlanOffer(
-                        it,
-                        ProProducts.SUBSCRIPTION_ID,
-                        "",
-                        "NT$${it.months * 70}.00",
-                        it.months * 70_000_000L,
-                        "TWD"
-                    )
+                    val dollars = (it.months ?: 20) * 70
+                    PlanOffer(it, it.productId, "", "NT$$dollars.00", dollars * 1_000_000L, "TWD")
                 }
             ),
             entitlement = Entitlement.FREE,

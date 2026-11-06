@@ -3,6 +3,7 @@ package com.kfpun.twaqi.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +38,13 @@ data class StationRoute(val stationId: Int)
  */
 @Composable
 fun StationDestination(route: StationRoute, onBack: () -> Unit, modifier: Modifier = Modifier) {
+    // A link that opens another station over this one (FOX-115: the one MainActivity takes it in
+    // onNewIntent) starts a fresh page, scrolled to the top, not this one's state.
+    key(route.stationId) { StationPage(route, onBack, modifier) }
+}
+
+@Composable
+private fun StationPage(route: StationRoute, onBack: () -> Unit, modifier: Modifier) {
     val owner = remember(route.stationId) {
         object : ViewModelStoreOwner {
             override val viewModelStore = ViewModelStore()
