@@ -1,6 +1,8 @@
 package com.kfpun.twaqi.ui.help
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -28,8 +30,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kfpun.twaqi.BuildConfig
 import com.kfpun.twaqi.R
+import com.kfpun.twaqi.ads.AdConsent
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.analytics.VersionTapCounter
@@ -199,6 +203,13 @@ private fun AboutSection() {
             Toast.makeText(context, analyticsToastText(context, excluded), Toast.LENGTH_SHORT).show()
         }
     )
+    // FOX-116: where UMP requires it (EEA, UK), the way to change the ad consent choice.
+    val privacyOptionsRequired by AdConsent.privacyOptionsRequired.collectAsStateWithLifecycle()
+    if (privacyOptionsRequired) {
+        LinkRow(stringResource(R.string.help_privacy_settings), onClick = {
+            context.findActivity()?.let(AdConsent::showPrivacyOptions)
+        })
+    }
     LinkRow(stringResource(R.string.pro_privacy_policy), onClick = {
         uriHandler.openSafely(LegalPage.PRIVACY.url(chinese))
     }, external = true)
@@ -206,6 +217,16 @@ private fun AboutSection() {
         uriHandler.openSafely(LegalPage.TERMS.url(chinese))
     }, external = true)
     SectionFooter(stringResource(R.string.help_data_provided_by_government))
+}
+
+/** The activity UMP's privacy form shows over. */
+private fun Context.findActivity(): Activity? {
+    var current: Context? = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
 }
 
 /** The toast after the 7th tap on the version row. */

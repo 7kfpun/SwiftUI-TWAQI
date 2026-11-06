@@ -7,11 +7,12 @@ Publisher's layout):
   phone-screenshots/1..4.png  each raw capture framed: a phone outline on the
                               iOS store screenshots' sky-blue gradient, with a
                               one-line caption in that language (1440x2560)
-  icon/1.png                  512x512, from the launcher icon
-                              (res/drawable/ic_launcher_foreground.xml on
-                              @color/ic_launcher_background)
   feature-graphic/1.png       1024x500: the icon, app name and tagline, and
                               the framed map screenshot
+
+The Play icon itself (icon/1.png) is written by tools/DrawAndroidAppIcon.swift
+(FOX-108) with the launcher icon; this script only reads it for the feature
+graphic and checks its size.
 
 Raw captures come from the debug build on an emulator (android/README.md,
 "Store listing"), saved as screenshots/fox-61-android-raw/<lang>/<n>-<name>.png,
@@ -19,7 +20,7 @@ n = 1..4. Wear OS screenshots are copied in unframed (Play wants the watch UI
 alone, no device frame): screenshots/fox-61-android-raw/<lang>/wear-<n>.png
 goes to wear-screenshots/<n>.png.
 
-Needs only Pillow (the icon's vector paths are drawn here). Fonts
+Needs only Pillow. Fonts
 default to the macOS ones the iOS frame lanes use; pass --font-latin and
 --font-cjk elsewhere.
 
@@ -30,17 +31,14 @@ default to the macOS ones the iOS frame lanes use; pass --font-latin and
 from __future__ import annotations
 
 import argparse
-import math
 import re
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 PLAY = ROOT / "android/app/src/main/play"
-RES = ROOT / "android/app/src/main/res"
 RAW = ROOT / "screenshots/fox-61-android-raw"
 
 # The iOS store screenshots' palette (ios/fastlane/Fastfile, GRADIENT_* and *_COLOR).
@@ -154,135 +152,6 @@ def frame_screenshot(raw: Path, caption: str, lang: str, latin: str, cjk: str) -
     return canvas.convert("RGB")
 
 
-def path_points(data: str) -> list[list[tuple[float, float]]]:
-    """A VectorDrawable pathData (M L H V A Z, absolute or relative) as polylines; arcs are
-    sampled, which is all the launcher glyph uses. Other commands stop with a message."""
-    tokens = re.findall(r"[MmLlHhVvAaZz]|-?\d*\.?\d+(?:e-?\d+)?", data)
-    polylines: list[list[tuple[float, float]]] = []
-    x = y = start_x = start_y = 0.0
-    i, cmd = 0, ""
-
-    def num() -> float:
-        nonlocal i
-        i += 1
-        return float(tokens[i - 1])
-
-    while i < len(tokens):
-        if tokens[i].isalpha():
-            cmd = tokens[i]
-            i += 1
-        rel = cmd.islower()
-        c = cmd.upper()
-        if c == "M":
-            nx, ny = num(), num()
-            x, y = (x + nx, y + ny) if rel else (nx, ny)
-            start_x, start_y = x, y
-            polylines.append([(x, y)])
-            cmd = "l" if rel else "L"
-        elif c in "LHV":
-            if c == "L":
-                nx, ny = num(), num()
-                x, y = (x + nx, y + ny) if rel else (nx, ny)
-            elif c == "H":
-                v = num()
-                x = x + v if rel else v
-            else:
-                v = num()
-                y = y + v if rel else v
-            polylines[-1].append((x, y))
-        elif c == "A":
-            rx, ry, rot, large, sweep, nx, ny = (num() for _ in range(7))
-            ex, ey = (x + nx, y + ny) if rel else (nx, ny)
-            polylines[-1].extend(arc_points(x, y, rx, ry, rot, bool(large), bool(sweep), ex, ey))
-            x, y = ex, ey
-        elif c == "Z":
-            x, y = start_x, start_y
-            polylines[-1].append((x, y))
-        else:
-            sys.exit(f"pathData command {cmd} is not supported: {data}")
-    return polylines
-
-
-def arc_points(x1, y1, rx, ry, rot, large, sweep, x2, y2, steps=64):
-    """SVG elliptical arc, endpoint to centre parameterisation (SVG 1.1, F.6.5), sampled."""
-    phi = math.radians(rot)
-    cos, sin = math.cos(phi), math.sin(phi)
-    dx, dy = (x1 - x2) / 2, (y1 - y2) / 2
-    xp, yp = cos * dx + sin * dy, -sin * dx + cos * dy
-    scale = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry)
-    if scale > 1:
-        rx, ry = rx * math.sqrt(scale), ry * math.sqrt(scale)
-    num = rx * rx * ry * ry - rx * rx * yp * yp - ry * ry * xp * xp
-    den = rx * rx * yp * yp + ry * ry * xp * xp
-    coef = math.sqrt(max(num / den, 0)) * (-1 if large == sweep else 1)
-    cxp, cyp = coef * rx * yp / ry, -coef * ry * xp / rx
-    cx = cos * cxp - sin * cyp + (x1 + x2) / 2
-    cy = sin * cxp + cos * cyp + (y1 + y2) / 2
-    start = math.atan2((yp - cyp) / ry, (xp - cxp) / rx)
-    end = math.atan2((-yp - cyp) / ry, (-xp - cxp) / rx)
-    delta = end - start
-    if sweep and delta < 0:
-        delta += 2 * math.pi
-    elif not sweep and delta > 0:
-        delta -= 2 * math.pi
-    pts = []
-    for k in range(1, steps + 1):
-        t = start + delta * k / steps
-        ex, ey = rx * math.cos(t), ry * math.sin(t)
-        pts.append((cx + cos * ex - sin * ey, cy + sin * ex + cos * ey))
-    return pts
-
-
-def argb(value: str | None) -> tuple[int, int, int] | None:
-    """#AARRGGBB or #RRGGBB → (r, g, b) (the launcher's colours are opaque)."""
-    if not value:
-        return None
-    hexes = value.strip().lstrip("#")
-    hexes = hexes[2:] if len(hexes) == 8 else hexes
-    return tuple(int(hexes[k:k + 2], 16) for k in (0, 2, 4))
-
-
-def launcher_background() -> tuple[int, int, int]:
-    colors = ET.parse(RES / "values/colors.xml").getroot()
-    for c in colors.iter("color"):
-        if c.get("name") == "ic_launcher_background":
-            return argb(c.text)
-    sys.exit("ic_launcher_background not found in res/values/colors.xml")
-
-
-def render_icon(supersample: int = 4) -> Image.Image:
-    """The adaptive launcher icon: the background colour and the foreground vector's paths,
-    cropped to the 72dp of the 108dp canvas a launcher shows (inset 18dp on each side)."""
-    ns = "{http://schemas.android.com/apk/res/android}"
-    root = ET.parse(RES / "drawable/ic_launcher_foreground.xml").getroot()
-    viewport = float(root.get(ns + "viewportWidth"))
-    inset = viewport / 6
-    size = ICON_SIZE * supersample
-    k = size / (viewport - 2 * inset)
-
-    def pt(p):
-        return ((p[0] - inset) * k, (p[1] - inset) * k)
-
-    img = Image.new("RGB", (size, size), launcher_background())
-    draw = ImageDraw.Draw(img)
-    for path in root.iter("path"):
-        fill = argb(path.get(ns + "fillColor"))
-        stroke = argb(path.get(ns + "strokeColor"))
-        width = float(path.get(ns + "strokeWidth") or 0) * k
-        round_cap = path.get(ns + "strokeLineCap") == "round"
-        for line in path_points(path.get(ns + "pathData")):
-            pts = [pt(p) for p in line]
-            if fill:
-                draw.polygon(pts, fill=fill)
-            if stroke and width:
-                draw.line(pts, fill=stroke, width=round(width), joint="curve")
-                if round_cap:
-                    r = width / 2
-                    for cx, cy in (pts[0], pts[-1]):
-                        draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=stroke)
-    return img.resize((ICON_SIZE, ICON_SIZE), Image.LANCZOS)
-
-
 def feature_graphic(lang: str, icon: Image.Image, map_shot: Path, latin: str, cjk: str) -> Image.Image:
     w, h = FEATURE_SIZE
     canvas = gradient((w, h)).convert("RGBA")
@@ -353,9 +222,12 @@ def main() -> int:
     if args.check:
         return check()
 
-    icon = render_icon()
     for lang, captions in CAPTIONS.items():
         graphics = PLAY / "listings" / lang / "graphics"
+        icon_path = graphics / "icon" / "1.png"
+        if not icon_path.exists():
+            sys.exit(f"{icon_path.relative_to(ROOT)} missing: run tools/DrawAndroidAppIcon.swift first")
+        icon = Image.open(icon_path).convert("RGB")
         raws = {int(m.group(1)): f for f in sorted((args.raw / lang).glob("*.png"))
                 if (m := re.match(r"(\d+)-", f.name))}
         missing = sorted(set(captions) - set(raws))
@@ -364,7 +236,6 @@ def main() -> int:
         for n, caption in captions.items():
             save(frame_screenshot(raws[n], caption, lang, args.font_latin, args.font_cjk),
                  graphics / "phone-screenshots" / f"{n}.png")
-        save(icon, graphics / "icon" / "1.png")
         save(feature_graphic(lang, icon, raws[1], args.font_latin, args.font_cjk),
              graphics / "feature-graphic" / "1.png")
         for wear in sorted((args.raw / lang).glob("wear-*.png")):

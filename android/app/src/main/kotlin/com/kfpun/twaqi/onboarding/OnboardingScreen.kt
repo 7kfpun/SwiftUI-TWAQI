@@ -90,9 +90,7 @@ import com.kfpun.twaqi.pro.ProScreenSource
 import com.kfpun.twaqi.push.AlertNotifications
 import com.kfpun.twaqi.push.FavouriteAlerts
 import com.kfpun.twaqi.push.PushGraph
-import com.kfpun.twaqi.translation.OnDeviceTranslation
-import com.kfpun.twaqi.translation.TranslatesOnDevice
-import com.kfpun.twaqi.translation.rememberShownTranslations
+import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
 import com.kfpun.twaqi.ui.common.rgb
 import com.kfpun.twaqi.ui.help.WidgetGuideScreen
 import com.kfpun.twaqi.ui.main.LocationAccess
@@ -508,9 +506,8 @@ private fun IconLine(text: String, @DrawableRes icon: Int, tint: Color = Materia
 @Composable
 private fun StationCard(pollutant: Pollutant) {
     val chinese = AppLocale.isChinese(LocalContext.current)
-    // The township in the reader's language, as the station page shows it (FOX-98).
-    val translations = rememberShownTranslations()
-    TranslatesOnDevice(OnDeviceTranslation.stationTexts(pollutant, null))
+    // The township and county in the reader's language, as the station page shows them (FOX-114).
+    val places = rememberTaiwanPlaceNames()
     val value = pollutant.value(AirIndexType.AQI)
     val status = AirStatus.of(AirIndexType.AQI, value)
     Surface(
@@ -529,7 +526,7 @@ private fun StationCard(pollutant: Pollutant) {
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                pollutant.displayLocality(chinese, translations::display)?.let {
+                pollutant.displayLocality(chinese, places)?.let {
                     Text(
                         it,
                         style = MaterialTheme.typography.bodyMedium,
