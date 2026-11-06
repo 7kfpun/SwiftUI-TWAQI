@@ -150,7 +150,7 @@
     <string name="help_watch_footer">Open this app or the watch app once so a station and a reading are available.</string>
     <!-- Android (#77 review): Help's shortcuts guide, in place of iOS Help.shortcuts_* (Siri, Shortcuts,
          Control Center). What FOX-95 shipped: launcher shortcuts, Google Assistant, the Quick Settings tile. -->
-    <string name="help_shortcuts_title">Shortcuts, Assistant &amp; Quick Settings</string>
+    <string name="help_shortcuts_title">Shortcuts &amp; Quick Settings</string>
     <string name="help_shortcuts_launcher_header">App shortcuts</string>
     <string name="help_shortcuts_launcher_body">Touch and hold the Taiwan Air icon. “Air Quality” shows the AQI of your nearest station, its level, the main pollutant and what to do. Below it are your favourite and recently opened stations; tap one to open it. Drag a shortcut onto the home screen to keep it there.</string>
     <string name="help_shortcuts_assistant_header">Google Assistant</string>
