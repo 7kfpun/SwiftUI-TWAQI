@@ -45,10 +45,12 @@ export function deviceTokenChange(field) {
   }
 }
 
-/** The fields list a permission needs to write `platform`, or null when it already can. */
+/** The fields list a permission needs to write `platform`; null when it
+ * already can, or when it lists no fields at all (adding `platform` alone
+ * would narrow it, so that one is left for a person to look at). */
 export function permissionFields(fields) {
-  const list = Array.isArray(fields) ? fields : typeof fields === 'string' ? fields.split(',') : []
-  if (list.includes('*') || list.includes('platform')) return null
+  const list = Array.isArray(fields) ? fields : typeof fields === 'string' ? fields.split(',').filter(Boolean) : []
+  if (!list.length || list.includes('*') || list.includes('platform')) return null
   return [...list, 'platform']
 }
 
@@ -112,6 +114,10 @@ async function main() {
       continue
     }
     const next = permissionFields(perm.fields)
+    if (!next && !(Array.isArray(perm.fields) ? perm.fields.length : perm.fields)) {
+      console.log(`warning: "${WORKER_POLICY}" ${action} on ${COLLECTION} lists no fields; left alone, check it by hand`)
+      continue
+    }
     if (!next) {
       console.log(`"${WORKER_POLICY}" may already ${action} ${COLLECTION}.platform`)
       continue

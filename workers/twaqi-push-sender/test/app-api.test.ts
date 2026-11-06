@@ -311,6 +311,9 @@ describe('twaqi_push_devices platform schema (FOX-100)', () => {
     assert.equal(permissionFields('*'), null)
     assert.equal(permissionFields(['device_token', 'platform']), null)
     assert.deepEqual(permissionFields(['device_token', 'fcm_token']), ['device_token', 'fcm_token', 'platform'])
-    assert.deepEqual(permissionFields(null), ['platform'])
+    // No fields at all: left alone rather than narrowed to platform.
+    assert.equal(permissionFields(null), null)
+    assert.equal(permissionFields([]), null)
+    assert.equal(permissionFields(''), null)
   })
 })
