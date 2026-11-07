@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F0A76D1E0000000000000138 /* WidgetStationChoiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */; };
 		F133A0000000000000000402 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000401 /* PrivacyInfo.xcprivacy */; };
 		F133A0000000000000000302 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000301 /* PrivacyInfo.xcprivacy */; };
 		F133A0000000000000000202 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000201 /* PrivacyInfo.xcprivacy */; };
@@ -421,6 +422,7 @@
 		A8544981F11CA37788E5429C /* WidgetExtraLargeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetExtraLargeTests.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000001 /* WidgetPaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPaging.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000004 /* WidgetPagingIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingIntents.swift; sourceTree = "<group>"; };
+		F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStationChoiceTests.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000006 /* WidgetPagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingTests.swift; sourceTree = "<group>"; };
 		3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityAnswer.swift; sourceTree = "<group>"; };
 		30C4BFA857FEEE037C6C242B /* StationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationEntity.swift; sourceTree = "<group>"; };
@@ -803,6 +805,7 @@
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
 				CB032C4EF1224FBBA5C5EA5B /* WidgetRelevanceTests.swift */,
 				F0A76D1E0000000000000006 /* WidgetPagingTests.swift */,
+				F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */,
 			);
 			path = TWAQITests;
 			sourceTree = SOURCE_ROOT;
@@ -1635,6 +1638,7 @@
 				770E61E5B1EA99B320C16058 /* AirQualityIntentTests.swift in Sources */,
 				8238948F2B134126BC272BA3 /* WidgetRelevanceTests.swift in Sources */,
 				F0A76D1E0000000000000007 /* WidgetPagingTests.swift in Sources */,
+				F0A76D1E0000000000000138 /* WidgetStationChoiceTests.swift in Sources */,
 				FEC3DE3DAF39B017A6EFB46A /* OnboardingTests.swift in Sources */,
 				F0A45D1E0000000000000002 /* StoreReviewTests.swift in Sources */,
 				F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */,
