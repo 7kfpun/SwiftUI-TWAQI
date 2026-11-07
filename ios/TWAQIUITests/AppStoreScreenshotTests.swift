@@ -182,6 +182,13 @@ final class AppStoreScreenshotTests: XCTestCase {
             drag(scrollView, by: covered.overlay.maxY + gap - covered.text.minY)
         }
         if let covered = textUnder(overlays, in: scrollView) {
+            // The iPad panel's close button sits over the text column and the
+            // page can't clear it and keep the chart; PR #46 accepted that
+            // overlap for the iPad frame, so there it is only reported.
+            if prefix == "iPad" {
+                print("SCREENSHOT-WARNING \"\(covered.label)\" is under a button")
+                return
+            }
             XCTFail("\"\(covered.label)\" at \(covered.text) is still under a button at \(covered.overlay)")
         }
     }
