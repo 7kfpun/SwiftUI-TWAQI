@@ -184,6 +184,7 @@
 "AirStatus.unhealthy" = "對所有族群不健康";
 "AirStatus.veryunhealthy" = "非常不健康";
 "AirStatus.hazardous" = "危害";
+"AirStatus.unknown" = "－";
 
 "AirStatus.general_public_guidance_good" = "可正常從事戶外活動";
 "AirStatus.general_public_guidance_moderate" = "可正常從事戶外活動";
