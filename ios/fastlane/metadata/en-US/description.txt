@@ -34,4 +34,4 @@ Air pollution is not only a respiratory problem. It raises the risk of cardiovas
 WHERE THE DATA COMES FROM
 Every reading is open data published by Taiwan's Ministry of Environment air quality monitoring network. We display it; we do not adjust it.
 
-Questions, problems or ideas? Write to info@dllm.io — we read everything.
+Questions, problems or ideas? Write to info@wahthefox.com — we read everything.

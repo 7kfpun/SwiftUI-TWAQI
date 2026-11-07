@@ -82,7 +82,7 @@ IP = re.compile(r"(?<![\d.])(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d
 FINE_IPS = {"127.0.0.1", "0.0.0.0"}
 EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 FINE_EMAIL = re.compile(
-    r"^info@dllm\.io$|@users\.noreply\.github\.com$|^noreply@|@anthropic\.com$|@example\.(com|org|net)$|^[^@]+@[^@]+\.(png|jpg|jpeg|pdf)$",
+    r"^info@(wahthefox\.com|dllm\.io)$|@users\.noreply\.github\.com$|^noreply@|@anthropic\.com$|@example\.(com|org|net)$|^[^@]+@[^@]+\.(png|jpg|jpeg|pdf)$",
     re.IGNORECASE,
 )
 POSTURE = re.compile(
