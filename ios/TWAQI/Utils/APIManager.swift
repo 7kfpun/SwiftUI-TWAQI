@@ -6,9 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
-import Alamofire
 import Foundation
-import SwiftyJSON
 
 enum NetworkError: Error {
     case badURL
@@ -16,16 +14,64 @@ enum NetworkError: Error {
 }
 
 struct APIManager {
-    /// Alamofire's default session waits 60 s for a response and has no
-    /// overall limit, so on a flaky connection a screen could sit on its
+    /// URLSession's default waits 60 s for a response and has no overall
+    /// limit (7 days), so on a flaky connection a screen could sit on its
     /// placeholder for minutes before falling back to the last good copy.
     /// 20 s matches the Directus requests.
-    static let session: Session = {
-        let configuration = URLSessionConfiguration.af.default
+    static let session: URLSession = {
+        let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 20
         configuration.timeoutIntervalForResource = 30
-        return Session(configuration: configuration)
+        return URLSession(configuration: configuration)
     }()
+
+    /// GET `url` with `query`, and call back on the main queue (as Alamofire
+    /// did) with the body of a 2xx `application/json` response; anything else
+    /// is `.networkError`.
+    static func get(_ url: URL, query: [String: String] = [:], completion: @escaping (Result<Data, NetworkError>) -> Void) {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            completion(.failure(.badURL))
+            return
+        }
+        if !query.isEmpty {
+            let extra = query.sorted { $0.key < $1.key }
+                .map { URLQueryItem(name: $0.key, value: $0.value) }
+            components.queryItems = (components.queryItems ?? []) + extra
+        }
+        guard let requestURL = components.url else {
+            completion(.failure(.badURL))
+            return
+        }
+
+        session.dataTask(with: requestURL) { data, response, error in
+            let result: Result<Data, NetworkError>
+            if let error {
+                print(error)
+                result = .failure(.networkError)
+            } else if let data, let http = response as? HTTPURLResponse, isJSON(http) {
+                result = .success(data)
+            } else {
+                result = .failure(.networkError)
+            }
+            DispatchQueue.main.async { completion(result) }
+        }.resume()
+    }
+
+    /// The status/content-type check `.validate(contentType:)` did.
+    static func isJSON(_ response: HTTPURLResponse) -> Bool {
+        guard (200..<300).contains(response.statusCode) else { return false }
+        let type = response.value(forHTTPHeaderField: "Content-Type")?
+            .split(separator: ";").first?
+            .trimmingCharacters(in: .whitespaces).lowercased()
+        return type == "application/json"
+    }
+
+    /// The decoded body when it is a JSON object with `"success": true`.
+    static func successObject(_ data: Data) -> [String: Any]? {
+        guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              object["success"] as? Bool == true else { return nil }
+        return object
+    }
 
     static let apiDomain = getEnv("ApiDomain")!
     static let apiEnpointCountries = getEnv("ApiEnpointCountries")!
@@ -41,34 +87,32 @@ struct APIManager {
             return
         }
 
-        session.request(url)
-            .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
-                let json = JSON(response.data as Any)
-                debugPrint("getCountries.responseJSON: \(json)")
-                if json["success"] == true {
-                    var countries: Countries = []
-                    for (_, countryJSON) in json["data"] {
-                        let code = countryJSON["code"].string ?? ""
-                        let nameEn = countryJSON["name"]["en"].string
-                        let nameZh = countryJSON["name"]["zh"].string
-                        let nameTh = countryJSON["name"]["th"].string
-                        countries.append(Country(
-                            id: countryJSON["id"].int ?? 0,
-                            code: code,
-                            lat: countryJSON["lat"].double ?? 0,
-                            lon: countryJSON["lon"].double ?? 0,
-                            zoom: countryJSON["zoom"].float ?? 0,
-                            name: nameEn ?? nameZh ?? nameTh ?? code.uppercased(),
-                            nameLocal: nameZh ?? nameTh ?? nameEn ?? code.uppercased()
-                        ))
-                    }
-                    completionHandler(.success(countries))
-                } else {
-                    // Without this an offline launch never called back.
-                    completionHandler(.failure(.networkError))
-                }
+        get(url) { result in
+            // Without the failure branches an offline launch never called back.
+            guard case .success(let data) = result,
+                  let json = successObject(data) else {
+                completionHandler(.failure(.networkError))
+                return
             }
+            let items = json["data"] as? [[String: Any]] ?? []
+            let countries: Countries = items.map { item in
+                let code = item.string("code") ?? ""
+                let name = item.object("name")
+                let nameEn = name.string("en")
+                let nameZh = name.string("zh")
+                let nameTh = name.string("th")
+                return Country(
+                    id: item.int("id") ?? 0,
+                    code: code,
+                    lat: item.double("lat") ?? 0,
+                    lon: item.double("lon") ?? 0,
+                    zoom: item.float("zoom") ?? 0,
+                    name: nameEn ?? nameZh ?? nameTh ?? code.uppercased(),
+                    nameLocal: nameZh ?? nameTh ?? nameEn ?? code.uppercased()
+                )
+            }
+            completionHandler(.success(countries))
+        }
     }
 
     static func getStations(countryCode: String, completionHandler: @escaping (Result<Stations, NetworkError>) -> Void) {
@@ -77,25 +121,15 @@ struct APIManager {
             return
         }
 
-        let parameters: Parameters = [
-            "country": countryCode,
-        ]
-
-        session.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
-                let json = JSON(response.data as Any)
-                debugPrint("getStations.responseJSON: \(json)")
-                if json["success"] == true {
-                    var stations: Stations = []
-                    for (_, stationJSON) in json["data"] {
-                        stations.append(Station.make(from: stationJSON))
-                    }
-                    completionHandler(.success(stations))
-                } else {
-                    completionHandler(.failure(.networkError))
-                }
+        get(url, query: ["country": countryCode]) { result in
+            guard case .success(let data) = result,
+                  let json = successObject(data) else {
+                completionHandler(.failure(.networkError))
+                return
             }
+            let items = json["data"] as? [[String: Any]] ?? []
+            completionHandler(.success(items.map { Station.make(from: $0) }))
+        }
     }
 
     static func getCurrentPollutants(countryCode: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
@@ -104,31 +138,23 @@ struct APIManager {
             return
         }
 
-        let parameters: Parameters = [
-            "country": countryCode,
-        ]
-
-        session.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                debugPrint(response)
-                // Every path calls back: transport/validation failure, an
-                // undecodable body, or success. Only a decoded response is saved.
-                switch response.result {
-                case .success(let data):
-                    do {
-                        let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
-                        PollutantCache.shared.save(countryCode: countryCode, response: data)
-                        completionHandler(.success(pollutantsResponse.data))
-                    } catch {
-                        print(error)
-                        completionHandler(.failure(.networkError))
-                    }
-                case .failure(let error):
+        get(url, query: ["country": countryCode]) { result in
+            // Every path calls back: transport/validation failure, an
+            // undecodable body, or success. Only a decoded response is saved.
+            switch result {
+            case .success(let data):
+                do {
+                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    PollutantCache.shared.save(countryCode: countryCode, response: data)
+                    completionHandler(.success(pollutantsResponse.data))
+                } catch {
                     print(error)
                     completionHandler(.failure(.networkError))
                 }
+            case .failure(let error):
+                completionHandler(.failure(error))
             }
+        }
     }
 
     static func getCurrentPollutantsByStationId(stationId: String, completionHandler: @escaping (Result<Pollutants, NetworkError>) -> Void) {
@@ -137,31 +163,21 @@ struct APIManager {
             return
         }
 
-        let parameters: Parameters = [
-            "station_id": stationId,
-        ]
-
-        session.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseData { response in
-                debugPrint(response)
-                // Every path calls back: transport/validation failure, an
-                // undecodable body, or success. Only a decoded response is saved.
-                switch response.result {
-                case .success(let data):
-                    do {
-                        let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
-                        PollutantCache.shared.saveStations(response: data)
-                        completionHandler(.success(pollutantsResponse.data))
-                    } catch {
-                        print(error)
-                        completionHandler(.failure(.networkError))
-                    }
-                case .failure(let error):
+        get(url, query: ["station_id": stationId]) { result in
+            switch result {
+            case .success(let data):
+                do {
+                    let pollutantsResponse = try JSONDecoder().decode(PollutantsResponse.self, from: data)
+                    PollutantCache.shared.saveStations(response: data)
+                    completionHandler(.success(pollutantsResponse.data))
+                } catch {
                     print(error)
                     completionHandler(.failure(.networkError))
                 }
+            case .failure(let error):
+                completionHandler(.failure(error))
             }
+        }
     }
 
     static func getHistoricalPollutants(stationId: Int, limit: Int = 24, completionHandler: @escaping (Result<[String: Any], NetworkError>) -> Void) {
@@ -170,44 +186,34 @@ struct APIManager {
             return
         }
 
-        let parameters: Parameters = [
-            "station_id": stationId,
-            "limit": limit,
-        ]
-
-        session.request(url, parameters: parameters)
-            .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
-                let json = JSON(response.data as Any)
-                debugPrint("getHistoricalPollutants.responseJSON: \(json)")
-                if json["success"] == true {
-                    let station = Station.make(from: json["station"])
-
-                    var historicalPollutants: HistoricalPollutants = []
-                    for (_, historicalPollutantJSON) in json["data"] {
-                        historicalPollutants.append(HistoricalPollutant(
-                            aqi: historicalPollutantJSON["aqi"].double ?? 0,
-                            pm25: historicalPollutantJSON["pm25"].double ?? 0,
-                            pm10: historicalPollutantJSON["pm10"].double ?? 0,
-                            no2: historicalPollutantJSON["no2"].double ?? 0,
-                            so2: historicalPollutantJSON["so2"].double ?? 0,
-                            co: historicalPollutantJSON["co"].double ?? 0,
-                            o3: historicalPollutantJSON["o3"].double ?? 0,
-                            windDirection: historicalPollutantJSON["wind_direction"].double ?? 0,
-                            windSpeed: historicalPollutantJSON["wind_speed"].double ?? 0,
-                            publishTime: historicalPollutantJSON["publish_time"].string ?? ""
-                        ))
-                    }
-
-                    completionHandler(.success([
-                        "station": station,
-                        "data": historicalPollutants,
-                    ]))
-                } else {
-                    // Without this a failed request never called back, and the
-                    // map timeline's request queue waited on it for good.
-                    completionHandler(.failure(.networkError))
-                }
+        get(url, query: ["station_id": String(stationId), "limit": String(limit)]) { result in
+            // Without the failure branches a failed request never called back,
+            // and the map timeline's request queue waited on it for good.
+            guard case .success(let data) = result,
+                  let json = successObject(data) else {
+                completionHandler(.failure(.networkError))
+                return
             }
+            let station = Station.make(from: json.object("station"))
+            let items = json["data"] as? [[String: Any]] ?? []
+            let historicalPollutants: HistoricalPollutants = items.map { item in
+                HistoricalPollutant(
+                    aqi: item.double("aqi") ?? 0,
+                    pm25: item.double("pm25") ?? 0,
+                    pm10: item.double("pm10") ?? 0,
+                    no2: item.double("no2") ?? 0,
+                    so2: item.double("so2") ?? 0,
+                    co: item.double("co") ?? 0,
+                    o3: item.double("o3") ?? 0,
+                    windDirection: item.double("wind_direction") ?? 0,
+                    windSpeed: item.double("wind_speed") ?? 0,
+                    publishTime: item.string("publish_time") ?? ""
+                )
+            }
+            completionHandler(.success([
+                "station": station,
+                "data": historicalPollutants,
+            ]))
+        }
     }
 }
