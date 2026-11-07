@@ -63,7 +63,7 @@ The Duo keeps capture_duo_screenshots
 
 Capture the raw iPhone Duo screenshots on the unfolded iPhone Duo simulator (iOS 27.1+)
 
-DuoScreenshotTests takes 01-03 and ShareScreenshotTests 04, once per locale, into
+DuoScreenshotTests takes 01-02, once per locale, into
 
 fastlane/screenshots_raw/<locale>/iPhone Duo NN.png. Then run frame_duo_screenshots
 

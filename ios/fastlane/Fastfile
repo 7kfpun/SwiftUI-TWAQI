@@ -253,7 +253,7 @@ platform :ios do
   end
 
   desc "Capture the raw iPhone Duo screenshots on the unfolded iPhone Duo simulator (iOS 27.1+)"
-  desc "DuoScreenshotTests takes 01-03 and ShareScreenshotTests 04, once per locale, into"
+  desc "DuoScreenshotTests takes 01-02, once per locale, into"
   desc "fastlane/screenshots_raw/<locale>/iPhone Duo NN.png. Then run frame_duo_screenshots"
   desc "Options: device (simulator name, default \"iPhone Duo\")"
   lane :capture_duo_screenshots do |options|
@@ -276,13 +276,11 @@ platform :ios do
       # with the prefix stripped.
       env = {
         "TEST_RUNNER_SCREENSHOT_DIR" => out_dir,
-        "TEST_RUNNER_SCREENSHOT_LANGUAGE" => language,
-        "TEST_RUNNER_SCREENSHOT_FILE" => "iPhone Duo 04.png"
+        "TEST_RUNNER_SCREENSHOT_LANGUAGE" => language
       }.map { |key, value| "#{key}=#{value.shellescape}" }.join(" ")
       tests = (xcodebuild + [
         "test-without-building",
-        "-only-testing:TWAQIUITests/DuoScreenshotTests",
-        "-only-testing:TWAQIUITests/ShareScreenshotTests"
+        "-only-testing:TWAQIUITests/DuoScreenshotTests"
       ]).shelljoin
       sh("#{env} #{tests}")
       UI.success("#{locale}: #{Dir["#{out_dir}/iPhone Duo *.png"].count} iPhone Duo capture(s)")
