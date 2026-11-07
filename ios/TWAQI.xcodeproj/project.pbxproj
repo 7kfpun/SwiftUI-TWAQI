@@ -297,6 +297,7 @@
 		575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */; };
 		89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28105738488F92DC053659E1 /* StationCamHistoryCache.swift */; };
 		4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */; };
+		A1640000000000000000B001 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1640000000000000000F001 /* AppLog.swift */; };
 		E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B28C564E6535A1380C29C4 /* FoldLine.swift */; };
 		B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7601D6C9CFBFEDB76837949B /* PollutantCache.swift */; };
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
@@ -609,6 +610,7 @@
 		DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamFrameCache.swift; sourceTree = "<group>"; };
 		28105738488F92DC053659E1 /* StationCamHistoryCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamHistoryCache.swift; sourceTree = "<group>"; };
 		CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetention.swift; sourceTree = "<group>"; };
+		A1640000000000000000F001 /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		46B28C564E6535A1380C29C4 /* FoldLine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoldLine.swift; sourceTree = "<group>"; };
 		7601D6C9CFBFEDB76837949B /* PollutantCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCache.swift; sourceTree = "<group>"; };
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
@@ -1026,6 +1028,7 @@
 				DE7ECD67B7C643203CEBAEE8 /* StationCamFrameCache.swift */,
 				28105738488F92DC053659E1 /* StationCamHistoryCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
+				A1640000000000000000F001 /* AppLog.swift */,
 				46B28C564E6535A1380C29C4 /* FoldLine.swift */,
 				7601D6C9CFBFEDB76837949B /* PollutantCache.swift */,
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
@@ -1760,6 +1763,7 @@
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
+				A1640000000000000000B001 /* AppLog.swift in Sources */,
 				E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */,
 				B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,

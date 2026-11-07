@@ -215,7 +215,7 @@ final class DirectusPushMirror {
                 try await restore(config: config)
             } catch {
                 // Writing now could overwrite the row being restored from.
-                print("Directus push: restore failed: \(error)")
+                AppLog.push.error("Directus push: restore failed: \(error.localizedDescription)")
                 recover(from: error)
                 return
             }
@@ -230,7 +230,7 @@ final class DirectusPushMirror {
                 save(wanted, Keys.wanted)
                 save([String: StationAlerts](), Keys.synced)
             } catch {
-                print("Directus push: cancel all failed: \(error)")
+                AppLog.push.error("Directus push: cancel all failed: \(error.localizedDescription)")
                 recover(from: error)
                 return
             }
@@ -254,7 +254,7 @@ final class DirectusPushMirror {
         do {
             _ = try await deviceId(token: token, fcmToken: fcmToken, config: config)
         } catch {
-            print("Directus push: device sync failed: \(error)")
+            AppLog.push.error("Directus push: device sync failed: \(error.localizedDescription)")
             recover(from: error)
             return
         }
@@ -275,7 +275,7 @@ final class DirectusPushMirror {
                 }
                 save(done, Keys.synced)
             } catch {
-                print("Directus push: station \(key) failed: \(error)")
+                AppLog.push.error("Directus push: station sync failed: \(error.localizedDescription)")
                 recover(from: error)
             }
         }
@@ -569,7 +569,7 @@ enum PushDeviceIdentity {
         case errSecDuplicateItem:
             return read(account: account)
         case let status:
-            print("Push: Keychain refused \(account) (\(status))")
+            AppLog.push.error("Keychain write refused (status \(status))")
             return nil
         }
     }
@@ -605,7 +605,6 @@ enum PushDeviceIdentity {
 enum OneSignalTags {
     static let pollutionSuffix = "_pollution_therhold"
     static let cleanlinessSuffix = "_cleanliness_therhold"
-    static let dndKeys = ["isDndEnabled", "dndStartTime", "dndEndTime", "isDndStartEarlierThanEnd"]
 
     private enum Keys {
         static let written = "oneSignalWrittenTags"
@@ -701,7 +700,7 @@ enum OneSignalTags {
                 }
             }, onFailure: { error in
                 // Tried again on the next change, launch or foreground.
-                print("OneSignal tags failed: \(error?.localizedDescription ?? "unknown")")
+                AppLog.push.error("OneSignal tags failed: \(error?.localizedDescription ?? "unknown")")
             })
         }
 

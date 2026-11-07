@@ -120,11 +120,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         application.registerForRemoteNotifications()
 
         if promptsAtLaunch {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, error in
                 if let error = error {
-                    print("Notification permission request failed: \(error.localizedDescription)")
+                    AppLog.push.error("Notification permission request failed: \(error.localizedDescription)")
                 }
-                print("User accepted notifications: \(granted)")
                 Task { @MainActor in DirectusPushMirror.shared.notificationsChanged() }
             }
         }
@@ -136,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("APNs registration failed: \(error.localizedDescription)")
+        AppLog.push.error("APNs registration failed: \(error.localizedDescription)")
     }
 }
 

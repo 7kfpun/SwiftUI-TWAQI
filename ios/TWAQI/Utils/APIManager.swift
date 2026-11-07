@@ -43,9 +43,8 @@ struct APIManager {
 
         session.request(url)
             .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
+            .responseData { response in
                 let json = JSON(response.data as Any)
-                debugPrint("getCountries.responseJSON: \(json)")
                 if json["success"] == true {
                     var countries: Countries = []
                     for (_, countryJSON) in json["data"] {
@@ -83,9 +82,8 @@ struct APIManager {
 
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
+            .responseData { response in
                 let json = JSON(response.data as Any)
-                debugPrint("getStations.responseJSON: \(json)")
                 if json["success"] == true {
                     var stations: Stations = []
                     for (_, stationJSON) in json["data"] {
@@ -111,7 +109,6 @@ struct APIManager {
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
-                debugPrint(response)
                 // Every path calls back: transport/validation failure, an
                 // undecodable body, or success. Only a decoded response is saved.
                 switch response.result {
@@ -121,11 +118,11 @@ struct APIManager {
                         PollutantCache.shared.save(countryCode: countryCode, response: data)
                         completionHandler(.success(pollutantsResponse.data))
                     } catch {
-                        print(error)
+                        AppLog.network.error("undecodable pollutants response: \(error.localizedDescription)")
                         completionHandler(.failure(.networkError))
                     }
                 case .failure(let error):
-                    print(error)
+                    AppLog.network.error("pollutants request failed: \(error.localizedDescription)")
                     completionHandler(.failure(.networkError))
                 }
             }
@@ -144,7 +141,6 @@ struct APIManager {
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
             .responseData { response in
-                debugPrint(response)
                 // Every path calls back: transport/validation failure, an
                 // undecodable body, or success. Only a decoded response is saved.
                 switch response.result {
@@ -154,11 +150,11 @@ struct APIManager {
                         PollutantCache.shared.saveStations(response: data)
                         completionHandler(.success(pollutantsResponse.data))
                     } catch {
-                        print(error)
+                        AppLog.network.error("undecodable pollutants response: \(error.localizedDescription)")
                         completionHandler(.failure(.networkError))
                     }
                 case .failure(let error):
-                    print(error)
+                    AppLog.network.error("pollutants request failed: \(error.localizedDescription)")
                     completionHandler(.failure(.networkError))
                 }
             }
@@ -177,9 +173,8 @@ struct APIManager {
 
         session.request(url, parameters: parameters)
             .validate(contentType: ["application/json"])
-            .responseJSON { (response) -> Void in
+            .responseData { response in
                 let json = JSON(response.data as Any)
-                debugPrint("getHistoricalPollutants.responseJSON: \(json)")
                 if json["success"] == true {
                     let station = Station.make(from: json["station"])
 
