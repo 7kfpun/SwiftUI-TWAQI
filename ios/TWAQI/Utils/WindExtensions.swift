@@ -72,12 +72,18 @@ struct Wind {
     static let strongBreezeThreshold = 8.0
 }
 
+extension TimeZone {
+    /// Taiwan local time, where MOENV `publish_time` values are expressed.
+    static let taipei = TimeZone(identifier: "Asia/Taipei") ?? TimeZone(secondsFromGMT: 8 * 3600)!
+}
+
 extension Date {
     private static let apiFormatter: DateFormatter = {
         let formatter = DateFormatter()
         // `publish_time` carries no timezone and is Taiwan local time.
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .taipei
         return formatter
     }()
 
@@ -93,6 +99,7 @@ extension String {
         guard let date = Date.fromApi(self) else { return self }
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
+        formatter.timeZone = .taipei
         return formatter.string(from: date)
     }
 
@@ -104,6 +111,7 @@ extension String {
         // device's calendar preference, which rendered this reading's timestamp
         // as 佛曆 2569 for anyone on the Buddhist calendar.
         formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .taipei
         formatter.locale = .app
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
