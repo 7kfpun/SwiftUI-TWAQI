@@ -28,9 +28,6 @@ struct DetailsView: View {
     /// it, neither of which has a back button.
     private let onClose: (() -> Void)?
 
-    /// Bumped when an on-device translation of the township or address lands.
-    @State private var translationRevision = 0
-
     /// The share button opens a preview of the card first (FOX-73).
     @State private var showingSharePreview = false
 
@@ -226,7 +223,6 @@ struct DetailsView: View {
         .onAppear {
             self.getData()
         }
-        .translatesOnDevice(translatableLocation, revision: $translationRevision)
         // A sheet rather than a push: this page is also shown in the panel
         // beside the map and in a sheet over it, which have no stack to push
         // onto. Its own stack, so the form keeps its title bar on iPad too.
@@ -334,10 +330,9 @@ struct DetailsView: View {
 
     /// From the live reading, else the station record — fixed metadata, so a
     /// station with no reading still says where it is.
-    /// The street address is translated on device outside Chinese.
+    /// The street address shows as the API writes it, in Chinese: machine
+    /// translation garbles Taiwan street names (FOX-117).
     private var location: StationLocationView? {
-        // Read so a finished translation redraws.
-        _ = translationRevision
         var location: StationLocationView
         if let pollutant = viewModel.pollutant {
             location = StationLocationView(pollutant: pollutant)
@@ -346,8 +341,7 @@ struct DetailsView: View {
         } else {
             return nil
         }
-        let address = location.address
-        location.displayAddress = address.map(OnDeviceTranslation.display)
+        location.displayAddress = location.address
         return location
     }
 
@@ -357,23 +351,11 @@ struct DetailsView: View {
             ?? ""
     }
 
-    /// Township and street address come from the API in Chinese only; outside
-    /// Chinese they are translated on device when the language is installed.
-    /// From the live reading, else the station record, like `location`.
-    private var translatableLocation: [String] {
-        if let pollutant = viewModel.pollutant {
-            return [pollutant.township, pollutant.address].compactMap { $0 }
-        }
-        guard let station = viewModel.station else { return [] }
-        return [station.township, station.address].compactMap { $0 }
-    }
-
-    /// "Banqiao District, New Taipei City": the township translated on device.
+    /// "Banqiao District, New Taipei City": outside Chinese the township comes
+    /// from the fixed table of official names, never machine translation.
     private var displayLocality: String? {
-        // Read so a finished translation redraws.
-        _ = translationRevision
-        return viewModel.pollutant?.displayLocality(township: OnDeviceTranslation.display)
-            ?? viewModel.station?.displayLocality(township: OnDeviceTranslation.display)
+        viewModel.pollutant?.displayLocality(township: TaiwanPlaceNames.displayTownship)
+            ?? viewModel.station?.displayLocality(township: TaiwanPlaceNames.displayTownship)
     }
 
     private var header: some View {

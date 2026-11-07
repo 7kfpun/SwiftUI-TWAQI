@@ -185,7 +185,7 @@ final class AppLanguageTests: XCTestCase {
         )
     }
 
-    func testTownshipGoesThroughTranslation() throws {
+    func testTownshipComesFromThePlaceTable() throws {
         let json = """
         {"station_id": 1, "lat": 25, "lon": 121, "aqi": 50, "pm25": 1, "pm10": 1, "no2": 1,
          "so2": 1, "co": 1, "o3": 1, "wind_direction": 0, "wind_speed": 0,
@@ -199,9 +199,21 @@ final class AppLanguageTests: XCTestCase {
         UserDefaults.standard.set(AppLanguage.english.rawValue, forKey: AppLanguage.defaultsKey)
         XCTAssertEqual(pollutant.displayLocality, "板橋區, New Taipei City")
         XCTAssertEqual(
-            pollutant.displayLocality(township: { $0 == "板橋區" ? "Banqiao District" : $0 }),
+            pollutant.displayLocality(township: TaiwanPlaceNames.displayTownship),
             "Banqiao District, New Taipei City"
         )
+    }
+
+    func testPlaceNamesAreOfficialNotMachineTranslated() {
+        XCTAssertEqual(TaiwanPlaceNames.township("大安區"), "Da'an District")
+        XCTAssertEqual(TaiwanPlaceNames.township("新店區"), "Xindian District")
+        XCTAssertEqual(TaiwanPlaceNames.county("台北市"), "Taipei City")
+        XCTAssertEqual(TaiwanPlaceNames.county("臺北市"), "Taipei City")
+        // Unknown names stay in Chinese.
+        XCTAssertEqual(TaiwanPlaceNames.displayTownship("某某區"), "某某區")
+        XCTAssertNil(TaiwanPlaceNames.township("某某區"))
+        XCTAssertEqual(TaiwanPlaceNames.townships.count, 357)
+        XCTAssertEqual(TaiwanPlaceNames.counties.count, 22)
     }
 
     // MARK: - Forecast, a sentence at a time
