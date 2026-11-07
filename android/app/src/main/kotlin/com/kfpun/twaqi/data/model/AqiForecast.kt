@@ -128,6 +128,7 @@ object AqiForecastPollutant {
         "細懸浮微粒" to "PM2.5",
         "懸浮微粒" to "PM10",
         "臭氧8小時" to "O₃ (8h)",
+        "臭氧八小時" to "O₃ (8h)",
         "臭氧" to "O₃",
         "二氧化氮" to "NO₂",
         "二氧化硫" to "SO₂",
