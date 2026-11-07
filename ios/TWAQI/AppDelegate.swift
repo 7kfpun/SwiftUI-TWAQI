@@ -166,7 +166,14 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        Messaging.messaging().appDidReceiveMessage(response.notification.request.content.userInfo)
+        let userInfo = response.notification.request.content.userInfo
+        Messaging.messaging().appDidReceiveMessage(userInfo)
+        // Open the station the alert is about. Held until a scene is active,
+        // so a cold launch and a tap from the background both land (FOX-141).
+        if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+           let url = DeepLink.pushTapURL(userInfo: userInfo) {
+            Task { @MainActor in PendingLink.post(url) }
+        }
         completionHandler()
     }
 }
