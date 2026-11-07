@@ -174,7 +174,7 @@ struct DetailsHistoryView: View {
     }
 
     private func label(at index: Int) -> String {
-        // Same formatter as the watch, so this view needs no SwiftDate and can
+        // Same formatter as the watch, so this view can
         // be shared with the visionOS app.
         guard points.indices.contains(index), Date.fromApi(points[index].time) != nil else { return "" }
         return points[index].time.asPublishTime
