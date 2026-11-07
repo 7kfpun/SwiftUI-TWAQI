@@ -17,7 +17,11 @@ def kinds(text, **kw):
 class CheckText(unittest.TestCase):
     def test_website_hosts_are_fine(self):
         self.assertEqual(kinds("see https://taiwanair.wahthefox.com/privacy.html and kf-twaqi.web.app"), [])
-        self.assertEqual(kinds("kf-nihongo.web.app, japanesedaily.wahthefox.com"), [])
+        self.assertEqual(kinds("kf-nihongo.web.app"), [])
+
+    def test_legacy_alias_domain_is_flagged(self):
+        # Only the three sites in CLAUDE.md are allowed; a sibling wahthefox.com name is not.
+        self.assertEqual(kinds("see japanesedaily.wahthefox.com"), [("host", "japanesedaily.wahthefox.com")])
 
     def test_other_hosts_are_flagged(self):
         for host in (
