@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,8 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.ads.AdConsent
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.analytics.TrackingManager
@@ -38,8 +41,12 @@ import com.kfpun.twaqi.review.ReviewPrompt
 import com.kfpun.twaqi.shortcuts.AirQualityAnswerActivity
 import com.kfpun.twaqi.shortcuts.StationShortcuts
 import com.kfpun.twaqi.ui.MainTabs
+import com.kfpun.twaqi.ui.StationPanes
+import com.kfpun.twaqi.ui.adaptive.offHinge
 import com.kfpun.twaqi.ui.debug.DataDebugScreen
+import com.kfpun.twaqi.ui.main.WideLayout
 import com.kfpun.twaqi.ui.navigation.DeepLink
+import com.kfpun.twaqi.ui.navigation.HomeNavigationViewModel
 import com.kfpun.twaqi.ui.navigation.KnownStations
 import com.kfpun.twaqi.ui.navigation.StationDestination
 import com.kfpun.twaqi.ui.navigation.StationLinkSource
@@ -251,32 +258,66 @@ fun HomeScreen(
     val context = LocalContext.current
     val pro = remember(context) { ProGraph.repository(context) }
     val entitlement by pro.entitlement.collectAsState()
-    var stationId by rememberSaveable { mutableStateOf<Int?>(null) }
+    // FOX-119: the tab and each tab's open station live in a view model with a SavedStateHandle, so
+    // rotation, folding, unfolding and resizing keep them, and a station moves between the full
+    // screen (phones) and the panel beside the map or list (wide windows) as the width changes.
+    val navigation: HomeNavigationViewModel = viewModel(factory = HomeNavigationViewModel.Factory)
+    val nav by navigation.uiState.collectAsStateWithLifecycle()
+    val isWide = WideLayout.isWide(currentWindowAdaptiveInfo().windowSizeClass)
+    // FOX-95: an opened station becomes a recent one, for the launcher's shortcuts. Recorded when it
+    // opens, not when a tab with a station open comes back to the front or the activity is recreated.
+    val open: (Int) -> Unit = { stationId ->
+        navigation.openStation(stationId)
+        StationShortcuts.stationOpened(context, stationId)
+    }
     // A tapped alert (FOX-57) or a widget's station link (FOX-59) opens its station.
     LaunchedEffect(openStation) {
         openStation?.filterNotNull()?.collect {
-            stationId = it
+            open(it)
             openStation.value = null
         }
     }
-    // The tabs leave composition while a station is open; this keeps their state (the selected tab,
-    // the search text, the map's camera) so back returns to the tab the station was opened from.
+    // The tabs leave composition while a station is open; this keeps their state (the search text,
+    // the map's camera, the lists' scroll) so back returns to the tab the station was opened from.
     val tabsState = rememberSaveableStateHolder()
-    val station = stationId
-    // FOX-95: an opened station becomes a recent one, for the launcher's shortcuts.
-    LaunchedEffect(station) { station?.let { StationShortcuts.stationOpened(context, it) } }
+    val station = nav.fullScreenStation(isWide)
+    val opened = nav.stations[nav.tab]
+    // Back closes the station, full screen or beside the map or list.
+    BackHandler(enabled = opened != null) { navigation.closeStation() }
     if (station != null) {
-        BackHandler { stationId = null }
-        StationDestination(StationRoute(station), onBack = { stationId = null }, modifier = modifier)
+        StationDestination(
+            StationRoute(station),
+            onBack = { navigation.closeStation() },
+            modifier = modifier.offHinge(),
+            viewModelStore = navigation.stationStore(nav.tab, station)
+        )
     } else {
         tabsState.SaveableStateProvider("tabs") {
             MainTabs(
                 isPro = entitlement == Entitlement.PRO,
                 onOpenPro = { ProNavigation.open(context, ProScreenSource.HELP_ROW) },
-                onOpenStation = { stationId = it.stationId },
+                onOpenStation = { open(it.stationId) },
+                selected = nav.tab,
+                onSelect = navigation::selectTab,
                 onOpenDataScreen = onOpenDataScreen,
                 modifier = modifier,
-                onShowWelcomeGuide = onShowWelcomeGuide
+                onShowWelcomeGuide = onShowWelcomeGuide,
+                panes = if (isWide) {
+                    StationPanes(
+                        stationOf = { nav.paneStation(it, isWide = true) },
+                        page = { tab, stationId, paneModifier ->
+                            StationDestination(
+                                StationRoute(stationId),
+                                onBack = { navigation.closeStation(tab) },
+                                modifier = paneModifier,
+                                viewModelStore = navigation.stationStore(tab, stationId),
+                                closeButton = true
+                            )
+                        }
+                    )
+                } else {
+                    null
+                }
             )
         }
     }

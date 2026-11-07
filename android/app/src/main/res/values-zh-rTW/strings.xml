@@ -555,6 +555,7 @@
     <string name="favourites_move_up">上移</string>
     <string name="favourites_move_down">下移</string>
     <string name="details_back">返回</string>
+    <string name="details_close">關閉</string>
     <string name="details_about_index">關於 %s</string>
     <string name="details_map">測站位置地圖</string>
     <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's

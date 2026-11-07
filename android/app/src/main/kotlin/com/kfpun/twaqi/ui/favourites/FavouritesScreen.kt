@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
@@ -74,7 +75,9 @@ import kotlinx.coroutines.launch
 fun FavouritesScreen(
     onOpenStation: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: FavouritesViewModel = viewModel(factory = FavouritesViewModel.Factory)
+    viewModel: FavouritesViewModel = viewModel(factory = FavouritesViewModel.Factory),
+    // FOX-119: held by the tab, so the scroll position survives the move to and from the wide layout.
+    listState: LazyListState = rememberLazyListState()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // Like iOS `onAppear`: every time the list shows again, e.g. back from a station.
@@ -88,7 +91,8 @@ fun FavouritesScreen(
         onReorder = viewModel::reorder,
         onConfirmRemoval = viewModel::confirmRemoval,
         onCancelRemoval = viewModel::cancelRemoval,
-        modifier = modifier
+        modifier = modifier,
+        listState = listState
     )
 }
 
@@ -103,7 +107,8 @@ fun FavouritesContent(
     onReorder: (stationIds: List<Int>) -> Unit,
     onConfirmRemoval: () -> Unit,
     onCancelRemoval: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     var editRequested by rememberSaveable { mutableStateOf(false) }
     val canEdit = state.favouriteIds.isNotEmpty() && state.pollutants.isNotEmpty()
@@ -139,7 +144,7 @@ fun FavouritesContent(
                     Modifier.align(Alignment.TopCenter).padding(top = 64.dp)
                 )
 
-                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, onReorder)
+                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, onReorder, listState)
             }
         }
     }
@@ -179,10 +184,10 @@ private fun FavouriteList(
     onOpenStation: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (Int, Int) -> Unit,
-    onReorder: (List<Int>) -> Unit
+    onReorder: (List<Int>) -> Unit,
+    listState: LazyListState
 ) {
     val chinese = AppLocale.isChinese(LocalContext.current)
-    val listState = rememberLazyListState()
     val drag = rememberFavouriteDragState(listState)
     val haptics = LocalHapticFeedback.current
     val savedIds = state.pollutants.map { it.stationId }

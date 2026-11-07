@@ -289,12 +289,22 @@ private fun TimelineTrack(
             radius
         )
 
-        for (tick in ticks) {
+        // The end label ("Now") hangs left of its tick rather than off the bar. In a narrow bar
+        // (a map beside the station panel) labels would run into each other, so walk from "Now"
+        // back and skip any label that would touch the one already kept (FOX-119).
+        val labels = ticks.map { tick ->
             val layout = measurer.measure(tick.text, labelStyle)
-            // The end label ("Now") hangs left of its tick rather than off the bar.
             val left = (x(tick.index.toFloat()) - layout.size.width / 2f)
                 .coerceIn(0f, (size.width - layout.size.width).coerceAtLeast(0f))
-            drawText(layout, topLeft = Offset(left, trackY + 6.dp.toPx()))
+            layout to left
+        }
+        val keptLefts = visibleLabelLefts(
+            lefts = labels.map { it.second },
+            widths = labels.map { it.first.size.width.toFloat() },
+            gap = 6.dp.toPx()
+        )
+        labels.forEachIndexed { i, (layout, left) ->
+            if (i in keptLefts) drawText(layout, topLeft = Offset(left, trackY + 6.dp.toPx()))
         }
 
         val thumbRadius = ThumbSize.toPx() / 2
@@ -303,4 +313,20 @@ private fun TimelineTrack(
         drawCircle(Color.White, thumbRadius, center)
         drawCircle(MapAccent, thumbRadius - 1.5.dp.toPx(), center, style = Stroke(3.dp.toPx()))
     }
+}
+
+/**
+ * Which labels to draw, as indices into [lefts] (ordered left to right). The last one always shows;
+ * going back, a label shows only if it ends at least [gap] before the next shown one starts.
+ */
+internal fun visibleLabelLefts(lefts: List<Float>, widths: List<Float>, gap: Float): Set<Int> {
+    val kept = mutableSetOf<Int>()
+    var nextStart = Float.POSITIVE_INFINITY
+    for (i in lefts.indices.reversed()) {
+        if (lefts[i] + widths[i] + gap <= nextStart) {
+            kept += i
+            nextStart = lefts[i]
+        }
+    }
+    return kept
 }

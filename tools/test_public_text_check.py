@@ -41,6 +41,7 @@ class CheckText(unittest.TestCase):
 
     def test_emails(self):
         self.assertEqual(kinds("write to info@dllm.io"), [])
+        self.assertEqual(kinds("write to info@wahthefox.com"), [])
         self.assertEqual(kinds("Co-Authored-By: Claude <noreply@anthropic.com>"), [])
         self.assertEqual(kinds("icon@2x.png"), [])
         self.assertEqual(kinds("owner is someone@gmail.com"), [("email", "someone@gmail.com")])

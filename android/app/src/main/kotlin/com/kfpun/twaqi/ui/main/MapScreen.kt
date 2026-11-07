@@ -3,6 +3,7 @@ package com.kfpun.twaqi.ui.main
 import android.content.res.Configuration
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,9 +12,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +62,7 @@ import com.kfpun.twaqi.R
 import com.kfpun.twaqi.analytics.Analytics
 import com.kfpun.twaqi.data.model.Pollutant
 import com.kfpun.twaqi.locale.AppLocale
+import com.kfpun.twaqi.ui.adaptive.HingeInsets
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -66,13 +72,16 @@ import kotlinx.coroutines.launch
  * buttons and the index selector at the bottom.
  *
  * @param onOpenStation a tapped marker or the closest card, for a station in the supported country.
+ * @param hingeInsets on a half-open foldable (FOX-119): the side of the hinge the controls keep to,
+ *   or, in the tabletop posture, the map above the hinge and its controls below.
  */
 @Composable
 fun MapScreen(
     viewModel: MainViewModel,
     state: MainUiState,
     onOpenStation: (Pollutant) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hingeInsets: HingeInsets = HingeInsets.NONE
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -183,6 +192,8 @@ fun MapScreen(
         )
     }
 
+    val mapHeight = hingeInsets.mapHeight
+    val controlsTop = hingeInsets.controlsTop
     Box(modifier.fillMaxSize()) {
         StationMap(
             viewModel = viewModel,
@@ -190,11 +201,21 @@ fun MapScreen(
             cameraPositionState = cameraPositionState,
             locationGranted = locationGranted,
             onOpenStation = onOpenStation,
-            modifier = Modifier.fillMaxSize()
+            modifier = if (mapHeight != null) Modifier.fillMaxWidth().height(mapHeight.dp) else Modifier.fillMaxSize()
         )
+        if (controlsTop != null) {
+            // Tabletop: the half below the hinge holds the controls, not more map.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = controlsTop.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+            )
+        }
 
         Column(
             modifier = Modifier
+                .padding(start = hingeInsets.start.dp, end = hingeInsets.end.dp)
                 .statusBarsPadding()
                 .padding(start = 15.dp, top = 8.dp)
                 .onGloballyPositioned { overlayBottom = it.boundsInRoot().bottom },
@@ -226,7 +247,19 @@ fun MapScreen(
         }
 
         Column(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 10.dp),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = hingeInsets.start.dp, end = hingeInsets.end.dp)
+                .then(
+                    // Tabletop: below the hinge, scrolling if it doesn't fit.
+                    if (controlsTop != null) {
+                        Modifier.padding(top = controlsTop.dp).verticalScroll(rememberScrollState())
+                    } else {
+                        Modifier
+                    }
+                )
+                .fillMaxWidth()
+                .padding(bottom = 10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
