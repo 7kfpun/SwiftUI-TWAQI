@@ -195,7 +195,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func callGetCountriesApi() {
-        APIManager.getCountries { result in
+        APIManager.getCountries { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success(let result):
                 self.countries = result
@@ -251,12 +252,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// The 15-minute data refresh. Held weakly by the run loop's target
     /// (the block captures `self` weakly) and invalidated in `deinit`.
     private(set) var refreshTimer: Timer?
+    /// When the paused timer was due, kept across a background trip.
+    private var pausedFireDate: Date?
 
     func callGetCurrentPollutantsApi(countryCode: String) {
         guard !pollutantRequestsInFlight.contains(countryCode) else { return }
         pollutantRequestsInFlight.insert(countryCode)
 
-        APIManager.getCurrentPollutants(countryCode: countryCode) { result in
+        APIManager.getCurrentPollutants(countryCode: countryCode) { [weak self] result in
+            guard let self = self else { return }
             self.pollutantRequestsInFlight.remove(countryCode)
 
             switch result {
@@ -750,9 +754,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         loadContent()
     }
 
+    static let refreshInterval: TimeInterval = 60 * 15
+
+    /// Arms the refresh timer. A timer paused by `stopRefreshTimer()` resumes
+    /// on its saved fire date, so short background trips don't push the
+    /// refresh back a full interval. An armed timer is left alone.
     func startRefreshTimer() {
-        refreshTimer?.invalidate()
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { [weak self] _ in
+        if let timer = refreshTimer, timer.isValid { return }
+        let fireDate = pausedFireDate ?? Date().addingTimeInterval(Self.refreshInterval)
+        pausedFireDate = nil
+        let timer = Timer(fire: fireDate, interval: Self.refreshInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             if self.countries.isEmpty {
                 self.callGetCountriesApi()
@@ -761,9 +772,14 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 self.callGetCurrentPollutantsApi(countryCode: countryCode)
             }
         }
+        RunLoop.main.add(timer, forMode: .default)
+        refreshTimer = timer
     }
 
     func stopRefreshTimer() {
+        if let timer = refreshTimer, timer.isValid {
+            pausedFireDate = timer.fireDate
+        }
         refreshTimer?.invalidate()
         refreshTimer = nil
     }

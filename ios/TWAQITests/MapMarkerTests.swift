@@ -191,4 +191,16 @@ final class MapMarkerTests: XCTestCase {
         XCTAssertEqual(timer?.isValid, false)
         XCTAssertNil(controller.refreshTimer)
     }
+
+    func testRestartKeepsPausedFireDate() throws {
+        let controller = GoogleMapViewController()
+        controller.startRefreshTimer()
+        let due = Date().addingTimeInterval(30)
+        controller.refreshTimer?.fireDate = due
+        controller.stopRefreshTimer()
+        controller.startRefreshTimer()
+        let restarted = try XCTUnwrap(controller.refreshTimer?.fireDate)
+        XCTAssertEqual(restarted.timeIntervalSince1970, due.timeIntervalSince1970, accuracy: 0.01)
+        controller.stopRefreshTimer()
+    }
 }
