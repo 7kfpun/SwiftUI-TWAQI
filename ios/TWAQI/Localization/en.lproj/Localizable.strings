@@ -290,6 +290,8 @@
 "Widget.station" = "Station";
 "Widget.station_closest" = "Closest station";
 "Widget.station_first_favourite" = "First favourite";
+"Widget.station_chosen" = "Choose a station";
+"Widget.station_picker" = "Choose station";
 "Widget.pro_only_title" = "Pro widget";
 "Widget.pro_only_body" = "Medium, large and extra large widgets are for Pro users. Open the app to upgrade.";
 "Widget.pro_unlock" = "Unlock every reading with Pro";
