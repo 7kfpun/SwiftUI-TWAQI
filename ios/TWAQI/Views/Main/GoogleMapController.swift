@@ -73,7 +73,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private var lastLayoutWidth: CGFloat = 0
 
     deinit {
-        onboardingObserver.map(NotificationCenter.default.removeObserver)
+        // A closed iPad window must free its map: stop the refresh timer and
+        // drop every observer this controller registered (FOX-135).
+        refreshTimer?.invalidate()
+        [onboardingObserver, proObserver, foregroundObserver, backgroundObserver]
+            .forEach { $0.map(NotificationCenter.default.removeObserver) }
     }
 
     @objc func toggleIsWindMode() {
@@ -243,6 +247,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     private var foregroundObserver: NSObjectProtocol?
+    private var backgroundObserver: NSObjectProtocol?
+    /// The 15-minute data refresh. Held weakly by the run loop's target
+    /// (the block captures `self` weakly) and invalidated in `deinit`.
+    private(set) var refreshTimer: Timer?
 
     func callGetCurrentPollutantsApi(countryCode: String) {
         guard !pollutantRequestsInFlight.contains(countryCode) else { return }
@@ -723,8 +731,29 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self?.updateBannerClearance()
         }
 
-        Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { (_) in
-            // Schedule in seconds
+        startRefreshTimer()
+
+        foregroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.startRefreshTimer()
+            self?.refreshAfterForeground()
+        }
+
+        // No polling while the app is in the background.
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.stopRefreshTimer()
+        }
+
+        loadContent()
+    }
+
+    func startRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             if self.countries.isEmpty {
                 self.callGetCountriesApi()
             }
@@ -732,14 +761,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 self.callGetCurrentPollutantsApi(countryCode: countryCode)
             }
         }
+    }
 
-        foregroundObserver = NotificationCenter.default.addObserver(
-            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
-        ) { [weak self] _ in
-            self?.refreshAfterForeground()
-        }
-
-        loadContent()
+    func stopRefreshTimer() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
 
     private func updateBannerClearance() {

@@ -164,4 +164,31 @@ final class MapMarkerTests: XCTestCase {
         """
         return try JSONDecoder().decode(Pollutant.self, from: Data(json.utf8))
     }
+
+    // MARK: - Refresh timer (FOX-135)
+
+    /// Closing an iPad window drops its map controller; the repeating refresh
+    /// timer must not keep it alive.
+    func testRefreshTimerDoesNotRetainController() {
+        weak var weakController: GoogleMapViewController?
+        var timer: Timer?
+        autoreleasepool {
+            let controller = GoogleMapViewController()
+            controller.startRefreshTimer()
+            timer = controller.refreshTimer
+            XCTAssertEqual(timer?.isValid, true)
+            weakController = controller
+        }
+        XCTAssertNil(weakController, "The map controller leaked")
+        XCTAssertEqual(timer?.isValid, false, "deinit invalidates the timer")
+    }
+
+    func testStopRefreshTimerInvalidates() {
+        let controller = GoogleMapViewController()
+        controller.startRefreshTimer()
+        let timer = controller.refreshTimer
+        controller.stopRefreshTimer()
+        XCTAssertEqual(timer?.isValid, false)
+        XCTAssertNil(controller.refreshTimer)
+    }
 }
