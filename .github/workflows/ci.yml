@@ -18,12 +18,76 @@ permissions:
   contents: read
 
 jobs:
-  tests:
-    name: Unit tests
+  # Decides the level on a cheap Linux runner, so a PR that needs no iOS build
+  # never starts a macOS runner (FOX-143). At the skip level `Unit tests` below
+  # shows as skipped, which GitHub counts as passing for a required check.
+  scope:
+    name: Unit tests scope
     if: >-
       github.event.pull_request.draft == false &&
       startsWith(github.head_ref, 'feature/') &&
       github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      level: ${{ steps.scope.outputs.level }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # The level decision's own tests, and the two lists in the `Unit tests`
+      # job's env against this checkout. Seconds, before anything is built.
+      - name: Check the test-level lists
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools -p 'test_ci_test_level.py'
+          python3 tools/ci_test_level.py check
+
+      # skip: nothing more runs and the check is green. build: build-for-testing
+      # only, no simulator. test: build, boot and run the subset.
+      # tools/ci_test_level.py has the rules; the README "Tests" has the table.
+      - name: Decide the test level
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # Shallow checkout does not contain the base commit, so use the pull
+          # request file list. Labels are read live, so re-running the job after
+          # adding ci-full-tests picks it up. An empty list or an API error
+          # gives the test level: never skip on doubt.
+          files="$RUNNER_TEMP/pr-files.txt"
+          labels="$RUNNER_TEMP/pr-labels.txt"
+          api_error=""
+          if ! gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename' > "$files"; then
+            echo "::warning::Could not list the pull request's files. Running the unit tests."
+            api_error="--api-error"
+          fi
+          if ! gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
+              --jq '.labels[].name' > "$labels"; then
+            echo "::warning::Could not read the pull request's labels. Running the unit tests."
+            api_error="--api-error"
+          fi
+          # shellcheck disable=SC2086 # api_error is empty or one flag
+          python3 tools/ci_test_level.py decide --files "$files" --labels "$labels" $api_error
+
+  tests:
+    name: Unit tests
+    needs: scope
+    # Runs at the build and test levels. `!cancelled()` and the scope result
+    # check: if `Unit tests scope` fails (say the lists drifted), this job still
+    # runs and fails at its first step instead of being skipped, because a
+    # skipped required check would count as passing.
+    if: >-
+      !cancelled() &&
+      github.event.pull_request.draft == false &&
+      startsWith(github.head_ref, 'feature/') &&
+      github.base_ref == 'master' &&
+      (needs.scope.result != 'success' || needs.scope.outputs.level != 'skip')
     runs-on: macos-latest
     permissions:
       contents: read
@@ -99,49 +163,18 @@ jobs:
         ios/TWAQI/Utils/FeedbackService.swift
         ios/TWAQI/Utils/CooperateService.swift
     steps:
+      - name: Stop if the level could not be decided
+        if: needs.scope.result != 'success'
+        env:
+          SCOPE_RESULT: ${{ needs.scope.result }}
+        run: |
+          echo "::error::Unit tests scope did not succeed ($SCOPE_RESULT); see that job."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # The level decision's own tests, and the two lists above against this
-      # checkout. Seconds, before anything is built.
-      - name: Check the test-level lists
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s tools -p 'test_ci_test_level.py'
-          python3 tools/ci_test_level.py check
-
-      # skip: nothing more runs and the check is green. build: build-for-testing
-      # only, no simulator. test: build, boot and run the subset.
-      # tools/ci_test_level.py has the rules; the README "Tests" has the table.
-      - name: Decide the test level
-        id: scope
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          # Shallow checkout does not contain the base commit, so use the pull
-          # request file list. Labels are read live, so re-running the job after
-          # adding ci-full-tests picks it up. An empty list or an API error
-          # gives the test level: never skip on doubt.
-          files="$RUNNER_TEMP/pr-files.txt"
-          labels="$RUNNER_TEMP/pr-labels.txt"
-          api_error=""
-          if ! gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
-              --jq '.[].filename' > "$files"; then
-            echo "::warning::Could not list the pull request's files. Running the unit tests."
-            api_error="--api-error"
-          fi
-          if ! gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" \
-              --jq '.labels[].name' > "$labels"; then
-            echo "::warning::Could not read the pull request's labels. Running the unit tests."
-            api_error="--api-error"
-          fi
-          # shellcheck disable=SC2086 # api_error is empty or one flag
-          python3 tools/ci_test_level.py decide --files "$files" --labels "$labels" $api_error
-
       - name: Prepare gitignored config
-        if: steps.scope.outputs.level != 'skip'
         run: |
           set -euo pipefail
           # The project will not build without these, and they are gitignored
@@ -206,7 +239,7 @@ jobs:
           EOF
 
       - name: Pick simulator
-        if: steps.scope.outputs.level == 'test'
+        if: needs.scope.outputs.level == 'test'
         run: |
           set -euo pipefail
           # The first simctl call on a runner can take a minute (it starts
@@ -259,12 +292,11 @@ jobs:
       # and build-for-testing. Shared with ci-cache.yml, which fills the same
       # keys from master so a PR's first run starts warm (FOX-65).
       - name: Restore caches and build for testing
-        if: steps.scope.outputs.level != 'skip'
         uses: ./.github/actions/unit-tests-build
 
       - name: Boot simulator
         id: boot
-        if: steps.scope.outputs.level == 'test'
+        if: needs.scope.outputs.level == 'test'
         run: |
           set -euo pipefail
           # Booted after the build, not during it. On slow runners a first boot
@@ -288,7 +320,7 @@ jobs:
           xcrun simctl bootstatus "$udid" -b
 
       - name: Run unit tests
-        if: steps.scope.outputs.level == 'test'
+        if: needs.scope.outputs.level == 'test'
         env:
           UDID: ${{ steps.boot.outputs.udid }}
         run: |

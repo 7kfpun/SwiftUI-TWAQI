@@ -4,11 +4,12 @@ name: Android
 # and a debug build, with the example config only (no secrets in CI).
 #
 # Every pull request to master gets a single "Android" check, so branch
-# protection can require it (docs/master-protection.md). It is green straight
-# away when nothing under android/ and not this file changed, and on drafts.
-# That is why pull_request has no paths filter: a filtered-out workflow never
-# reports, and a required check that never reports blocks the merge (the same
-# pattern as workers.yml).
+# protection can require it (docs/master-protection.md). The small `Android
+# changes` job decides first; when nothing under android/ or this file changed,
+# and on drafts, `Android` is skipped, which GitHub counts as passing for a
+# required check (FOX-143). That is why pull_request has no paths filter: a
+# filtered-out workflow never reports, and a required check that never reports
+# blocks the merge (the same pattern as workers.yml).
 
 on:
   pull_request:
@@ -27,10 +28,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  android:
-    name: Android
+  changes:
+    name: Android changes
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.changes.outputs.build }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,22 +73,42 @@ jobs:
           echo "Build Android: $build"
           echo "build=$build" >> "$GITHUB_OUTPUT"
 
+  android:
+    name: Android
+    needs: changes
+    # `!cancelled()` and the result check: if `Android changes` fails, this job
+    # still runs and fails at its first step instead of being skipped, because a
+    # skipped required check would count as passing.
+    if: >-
+      !cancelled() &&
+      (needs.changes.result != 'success' || needs.changes.outputs.build == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Stop if the change check failed
+        if: needs.changes.result != 'success'
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: |
+          echo "::error::Android changes did not succeed ($CHANGES_RESULT); see that job."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up JDK 17
-        if: steps.changes.outputs.build == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Set up Gradle (with cache)
-        if: steps.changes.outputs.build == 'true'
         uses: gradle/actions/setup-gradle@v4
         with:
           # Only master writes the cache; pull requests read it.
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
       - name: Lint, unit tests and debug build
-        if: steps.changes.outputs.build == 'true'
         working-directory: android
         # The runner's preinstalled Android SDK (ANDROID_HOME); AGP fetches a
         # missing platform or build-tools on its own. No secrets: the build
@@ -93,7 +116,7 @@ jobs:
         run: ./gradlew ktlintCheck lint test assembleDebug --stacktrace
 
       - name: Upload lint and test reports
-        if: failure() && steps.changes.outputs.build == 'true'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: android-reports
