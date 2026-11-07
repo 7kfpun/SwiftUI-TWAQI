@@ -67,10 +67,6 @@ struct TrackingManager {
     /// Logs `event`. Names come from `AnalyticsEvent` only, so they stay
     /// consistent; with collection off (see above) Firebase drops it.
     static func logEvent(_ event: AnalyticsEvent, parameters: [String: Any] = [:]) {
-        #if DEBUG
-        print("LogEvent", event.rawValue, parameters)
-        #endif
-
         Analytics.logEvent(event.rawValue, parameters: parameters)
     }
 

@@ -70,20 +70,14 @@ struct StoreReviewHelper {
     @MainActor
     static func requestReviewAfterFeedback(rating: Int) {
         guard shouldRequestReview(afterFeedbackRating: rating),
-              let scene = UIApplication.shared.connectedScenes
-                  .compactMap({ $0 as? UIWindowScene })
-                  .first(where: { $0.activationState == .foregroundActive })
+              let scene = foregroundScene()
         else { return }
 
         TrackingManager.logEvent(
             .reviewRequested,
             parameters: ["source": ReviewRequestSource.feedback.rawValue, "rating": rating]
         )
-        if #available(iOS 16.0, *) {
-            AppStore.requestReview(in: scene)
-        } else {
-            SKStoreReviewController.requestReview(in: scene)
-        }
+        requestReview(in: scene)
     }
 
     static func checkAndAskForReview() { // call this whenever appropriate
@@ -93,21 +87,40 @@ struct StoreReviewHelper {
             return
         }
 
-        guard shouldRequestReview(appOpenCount: appOpenCount) else {
-            print("App run count is : \(appOpenCount)")
-            return
-        }
+        guard shouldRequestReview(appOpenCount: appOpenCount) else { return }
 
         TrackingManager.logEvent(.reviewRequested, parameters: [
             "source": ReviewRequestSource.appOpens.rawValue,
             "app_open_count": appOpenCount,
         ])
-        StoreReviewHelper().requestReview()
+        // A cold launch has no active scene yet: ask once the first one is.
+        if let scene = foregroundScene() {
+            Task { @MainActor in requestReview(in: scene) }
+        } else {
+            var token: NSObjectProtocol?
+            token = NotificationCenter.default.addObserver(
+                forName: UIScene.didActivateNotification, object: nil, queue: .main
+            ) { note in
+                guard let scene = note.object as? UIWindowScene else { return }
+                token.map(NotificationCenter.default.removeObserver)
+                token = nil
+                Task { @MainActor in requestReview(in: scene) }
+            }
+        }
     }
 
-    fileprivate func requestReview() {
-        if #available(iOS 10.3, *) {
-            SKStoreReviewController.requestReview()
+    private static func foregroundScene() -> UIWindowScene? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first(where: { $0.activationState == .foregroundActive })
+    }
+
+    @MainActor
+    private static func requestReview(in scene: UIWindowScene) {
+        if #available(iOS 16.0, *) {
+            AppStore.requestReview(in: scene)
+        } else {
+            SKStoreReviewController.requestReview(in: scene)
         }
     }
 }

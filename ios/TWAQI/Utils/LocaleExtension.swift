@@ -85,8 +85,13 @@ extension Locale {
     }
 
     var isChinese: Bool {
-        guard let languageCode = languageCode else { return false }
-        return languageCode.hasPrefix("zh")
+        let code: String?
+        if #available(iOS 16, watchOS 9, *) {
+            code = language.languageCode?.identifier
+        } else {
+            code = languageCode
+        }
+        return code?.hasPrefix("zh") ?? false
     }
 }
 

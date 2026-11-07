@@ -30,7 +30,6 @@
 "Favourites.notifications_off_message" = "Taiwan Air 的通知已關閉，因此這個測站的通知暫不開啟。請到「設定」開啟通知，再於下方開啟測站通知。";
 "Favourites.open_settings" = "開啟設定";
 "Favourites.ok" = "好";
-"Favourites.removed_from_favourites" = "已從我的最愛移除";
 
 "DetailsList.details" = "測站列表";
 "DetailsList.search" = "搜尋";

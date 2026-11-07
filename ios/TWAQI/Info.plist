@@ -278,8 +278,6 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Use location to select your nearest air quality monitoring station</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Use location to select your nearest air quality monitoring station</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
