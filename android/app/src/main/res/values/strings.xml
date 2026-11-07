@@ -558,6 +558,9 @@
     <string name="favourites_move_up">Move up</string>
     <string name="favourites_move_down">Move down</string>
     <string name="details_back">Back</string>
+    <!-- Android only (FOX-119): the cross that closes a station page beside the map or a list
+         (iOS DetailsView's xmark has no label). -->
+    <string name="details_close">Close</string>
     <string name="details_about_index">About %s</string>
     <string name="details_map">Map of the station\'s location</string>
     <!-- Launcher shortcuts, Google Assistant and the Quick Settings tile (FOX-95), from iOS FOX-74's

@@ -15,8 +15,11 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- FOX-119: resizeable, with no minimum size or fixed orientation, so the app fills tablets,
+         unfolded foldables, split screen and a flip phone's small cover screen. -->
     <application
         android:name=".TwaqiApplication"
+        android:resizeableActivity="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

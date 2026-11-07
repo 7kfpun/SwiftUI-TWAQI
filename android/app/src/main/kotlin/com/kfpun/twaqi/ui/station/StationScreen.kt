@@ -2,6 +2,7 @@ package com.kfpun.twaqi.ui.station
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,8 @@ fun StationScreen(
     slots: StationPageSlots = StationPageSlots(),
     onOpenDefinition: ((AirIndexType) -> Unit)? = null,
     onSendFeedback: (() -> Unit)? = null,
+    closeButton: Boolean = false,
+    scrollState: ScrollState? = null,
     viewModel: StationDetailsViewModel = viewModel(
         key = "station-$stationId",
         factory = StationDetailsViewModel.factory(
@@ -116,7 +119,9 @@ fun StationScreen(
         // The form logs `open_feedback_form` (source station_page) itself when it opens (FOX-60).
         onSendFeedback = onSendFeedback,
         slots = slots,
-        modifier = modifier
+        modifier = modifier,
+        closeButton = closeButton,
+        scrollState = scrollState
     )
 }
 
@@ -135,7 +140,11 @@ fun StationContent(
     onSendFeedback: (() -> Unit)?,
     slots: StationPageSlots,
     modifier: Modifier = Modifier,
-    now: Instant = Instant.now()
+    now: Instant = Instant.now(),
+    // FOX-119: beside the map or a list the page closes with a cross (iOS `DetailsView` onClose),
+    // and its scroll position can live outside it, to follow it between panel and full screen.
+    closeButton: Boolean = false,
+    scrollState: ScrollState? = null
 ) {
     // Local to this page: the chart's pollutant never re-scores the map (iOS FOX-25 note).
     var selected by rememberSaveable { mutableStateOf(AirIndexType.AQI) }
@@ -154,8 +163,12 @@ fun StationContent(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            painterResource(R.drawable.ic_station_back),
-                            contentDescription = stringResource(R.string.details_back)
+                            painterResource(
+                                if (closeButton) R.drawable.ic_station_close else R.drawable.ic_station_back
+                            ),
+                            contentDescription = stringResource(
+                                if (closeButton) R.string.details_close else R.string.details_back
+                            )
                         )
                     }
                 },
@@ -175,7 +188,7 @@ fun StationContent(
                     // A readable measure on tablets, as iOS caps the page at 640 points.
                     .widthIn(max = 640.dp)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState ?: rememberScrollState())
             ) {
                 if (state.isShowingLastGood) {
                     OfflineNotice(Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp))
