@@ -41,10 +41,25 @@ enum WatchAPI {
     /// list, as the iOS Favourites tab sends it.
     static func currentPollutants(stationIds: [Int]) async throws -> Pollutants {
         guard !stationIds.isEmpty else { return [] }
-        let response: PollutantsResponse = try await fetch(
+        let data = try await fetchData(
             "ApiEnpointCurrentPollutants", ["station_id": stationIds.map(String.init).joined(separator: ",")]
         )
-        return response.data
+        return try decodeStations(data)
+    }
+
+    /// The API answers HTTP 200 `{"success":false,"error":"No such a station"}`
+    /// with no `data` when none of the ids exist. That is a successful
+    /// request with no stations, not a failed one, so a widget can tell a
+    /// removed station from being offline. Every other error still throws.
+    static func decodeStations(_ data: Data) throws -> Pollutants {
+        struct Failure: Decodable { let error: String? }
+        if let response = try? JSONDecoder().decode(PollutantsResponse.self, from: data) {
+            return response.data
+        }
+        if (try? JSONDecoder().decode(Failure.self, from: data))?.error == "No such a station" {
+            return []
+        }
+        return try JSONDecoder().decode(PollutantsResponse.self, from: data).data
     }
 
     /// Hourly readings, oldest first.
@@ -65,6 +80,10 @@ enum WatchAPI {
     private static func fetch<Response: Decodable>(
         _ endpointKey: String, _ parameters: [String: String]
     ) async throws -> Response {
+        try JSONDecoder().decode(Response.self, from: try await fetchData(endpointKey, parameters))
+    }
+
+    private static func fetchData(_ endpointKey: String, _ parameters: [String: String]) async throws -> Data {
         guard
             let domain = getEnv("ApiDomain"),
             let path = getEnv(endpointKey),
@@ -81,7 +100,7 @@ enum WatchAPI {
         // cached reading instead.
         let (data, response) = try await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 20))
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw Failure.badResponse }
-        return try JSONDecoder().decode(Response.self, from: data)
+        return data
     }
 }
 
