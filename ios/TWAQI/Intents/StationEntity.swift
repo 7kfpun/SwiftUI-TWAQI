@@ -177,15 +177,18 @@ struct ChosenStationEntity: AppEntity {
 
 @available(iOS 16.0, *)
 struct ChosenStationQuery: EntityStringQuery {
-    /// Every station, fresh when the network answers, else the last list
-    /// saved in the app group.
-    private func directory() async -> [StationDirectoryEntry] {
+    /// Every station: the list saved in the app group (a search asks on
+    /// every keystroke), fetched when nothing is saved or `refresh` is set,
+    /// as when the picker opens.
+    private func directory(refresh: Bool = false) async -> [StationDirectoryEntry] {
+        let saved = WatchStore.stationDirectory
+        if !saved.isEmpty, !refresh { return saved }
         if let fetched = try? await WatchAPI.currentPollutants(), !fetched.isEmpty {
             let entries = fetched.map(StationDirectoryEntry.init)
             WatchStore.stationDirectory = entries
             return entries
         }
-        return WatchStore.stationDirectory
+        return saved
     }
 
     func entities(for identifiers: [ChosenStationEntity.ID]) async throws -> [ChosenStationEntity] {
@@ -205,7 +208,7 @@ struct ChosenStationQuery: EntityStringQuery {
     }
 
     func suggestedEntities() async throws -> [ChosenStationEntity] {
-        StationDirectoryEntry.search("", in: await directory(), favouriteIds: WatchStore.favouriteStationIds)
+        StationDirectoryEntry.search("", in: await directory(refresh: true), favouriteIds: WatchStore.favouriteStationIds)
             .map(ChosenStationEntity.init)
     }
 }

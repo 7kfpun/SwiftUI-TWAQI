@@ -8,10 +8,6 @@
 
 import Foundation
 
-/// State the watch app shares with its complications.
-///
-/// Lives in the app group rather than `.standard`: the widget extension is a
-/// separate process and can't read the app's own defaults.
 /// One monitoring station in the widget's station picker (FOX-137): the fields
 /// a name and a search need. Kept in the app group so the picker still lists
 /// every station offline. Naming and search live in `StationEntity.swift`.
@@ -29,6 +25,10 @@ struct StationDirectoryEntry: Codable, Equatable {
     }
 }
 
+/// State the watch app shares with its complications.
+///
+/// Lives in the app group rather than `.standard`: the widget extension is a
+/// separate process and can't read the app's own defaults.
 enum WatchStore {
     static let appGroup = "group.com.kfpun.twaqi"
 
@@ -201,10 +201,12 @@ enum WatchStore {
         chosenReadings = chosenReadings.filter { $0.stationId != stationId }
     }
 
-    /// The saved reading for a station a widget leads with: a favourite's,
-    /// else a chosen station's.
+    /// The saved reading for a station a widget leads with: the newer of its
+    /// favourite and chosen-station copies.
     static func cachedReading(stationId: Int) -> WatchReading? {
-        favouriteReadings.first { $0.stationId == stationId } ?? chosenReadings.first { $0.stationId == stationId }
+        (favouriteReadings + chosenReadings)
+            .filter { $0.stationId == stationId }
+            .max { $0.publishTime < $1.publishTime }
     }
 
     /// The widget's own record of each station's last two publishes, so its
