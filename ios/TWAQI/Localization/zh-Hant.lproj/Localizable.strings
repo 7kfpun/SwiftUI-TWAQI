@@ -292,6 +292,8 @@
 "Widget.station" = "測站";
 "Widget.station_closest" = "最近測站";
 "Widget.station_first_favourite" = "第一個最愛測站";
+"Widget.station_chosen" = "選擇測站";
+"Widget.station_picker" = "選擇測站";
 "Widget.pro_only_title" = "Pro 小工具";
 "Widget.pro_only_body" = "中、大、特大尺寸小工具僅限 Pro 使用者。開啟 App 即可升級。";
 "Widget.pro_unlock" = "升級 Pro，解鎖所有數值";

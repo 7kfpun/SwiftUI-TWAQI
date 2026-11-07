@@ -12,6 +12,23 @@ import Foundation
 ///
 /// Lives in the app group rather than `.standard`: the widget extension is a
 /// separate process and can't read the app's own defaults.
+/// One monitoring station in the widget's station picker (FOX-137): the fields
+/// a name and a search need. Kept in the app group so the picker still lists
+/// every station offline. Naming and search live in `StationEntity.swift`.
+struct StationDirectoryEntry: Codable, Equatable {
+    let id: Int
+    let name: String
+    let nameLocal: String
+    let code: String
+
+    init(id: Int, name: String, nameLocal: String, code: String) {
+        self.id = id
+        self.name = name
+        self.nameLocal = nameLocal
+        self.code = code
+    }
+}
+
 enum WatchStore {
     static let appGroup = "group.com.kfpun.twaqi"
 
@@ -27,6 +44,8 @@ enum WatchStore {
         static let favouriteStationIds = "favouriteStationIds"
         static let favouriteReadings = "favouriteReadings"
         static let relevanceHistory = "relevanceHistory"
+        static let stationDirectory = "stationDirectory"
+        static let chosenReadings = "chosenReadings"
         static let alertThresholds = "alertThresholds"
         static let appLocationAllowed = "appLocationAllowed"
     }
@@ -146,6 +165,46 @@ enum WatchStore {
         guard !fresh.isEmpty else { return }
         let freshIds = Set(fresh.map(\.stationId))
         favouriteReadings = favouriteReadings.filter { !freshIds.contains($0.stationId) } + fresh
+    }
+
+    /// Every station, for the widget's station picker offline (FOX-137).
+    static var stationDirectory: [StationDirectoryEntry] {
+        get {
+            defaults.data(forKey: Keys.stationDirectory)
+                .flatMap { try? JSONDecoder().decode([StationDirectoryEntry].self, from: $0) } ?? []
+        }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.stationDirectory) }
+    }
+
+    /// How many chosen-station readings are kept, newest last.
+    private static let maxChosenReadings = 8
+
+    /// Last reading fetched for a station a widget was set to that isn't a
+    /// favourite, so the widget shows it offline. Readings older than
+    /// `maxReadingAge` are left out.
+    static var chosenReadings: [WatchReading] {
+        get { storedChosenReadings.filter { !isExpired($0) } }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: Keys.chosenReadings) }
+    }
+
+    private static var storedChosenReadings: [WatchReading] {
+        defaults.data(forKey: Keys.chosenReadings)
+            .flatMap { try? JSONDecoder().decode([WatchReading].self, from: $0) } ?? []
+    }
+
+    static func cacheChosenReading(_ reading: WatchReading) {
+        let others = chosenReadings.filter { $0.stationId != reading.stationId }
+        chosenReadings = Array((others + [reading]).suffix(maxChosenReadings))
+    }
+
+    static func dropChosenReading(stationId: Int) {
+        chosenReadings = chosenReadings.filter { $0.stationId != stationId }
+    }
+
+    /// The saved reading for a station a widget leads with: a favourite's,
+    /// else a chosen station's.
+    static func cachedReading(stationId: Int) -> WatchReading? {
+        favouriteReadings.first { $0.stationId == stationId } ?? chosenReadings.first { $0.stationId == stationId }
     }
 
     /// The widget's own record of each station's last two publishes, so its

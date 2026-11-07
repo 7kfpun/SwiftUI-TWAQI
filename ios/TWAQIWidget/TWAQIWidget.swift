@@ -68,14 +68,23 @@ enum IndexOption: String, AppEnum {
 /// Which station a widget leads with. The rest of the favourites are listed
 /// under it either way.
 enum StationOption: String, AppEnum {
-    case closest, firstFavourite
+    case closest, firstFavourite, station
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Widget.station"
 
     static var caseDisplayRepresentations: [StationOption: DisplayRepresentation] = [
         .closest: "Widget.station_closest",
         .firstFavourite: "Widget.station_first_favourite",
+        .station: "Widget.station_chosen",
     ]
+
+    var mode: WidgetStationMode {
+        switch self {
+        case .closest: return .closest
+        case .firstFavourite: return .firstFavourite
+        case .station: return .station
+        }
+    }
 }
 
 struct SelectIndexIntent: WidgetConfigurationIntent {
@@ -84,13 +93,27 @@ struct SelectIndexIntent: WidgetConfigurationIntent {
     @Parameter(title: "Widget.station", default: .closest)
     var station: StationOption
 
+    /// Any of the country's stations, searchable. Read only when `station`
+    /// is "Station" (FOX-137).
+    @Parameter(title: "Widget.station_picker")
+    var chosenStation: ChosenStationEntity?
+
     @Parameter(title: "Index", default: .aqi)
     var index: IndexOption
 
+    static var parameterSummary: some ParameterSummary {
+        When(\.$station, .equalTo, StationOption.station) {
+            Summary("\(\.$station) \(\.$chosenStation) \(\.$index)")
+        } otherwise: {
+            Summary("\(\.$station) \(\.$index)")
+        }
+    }
+
     init() {}
 
-    init(station: StationOption = .closest, index: IndexOption) {
+    init(station: StationOption = .closest, chosenStation: ChosenStationEntity? = nil, index: IndexOption) {
         self.station = station
+        self.chosenStation = chosenStation
         self.index = index
     }
 
@@ -170,23 +193,29 @@ struct ReadingProvider: AppIntentTimelineProvider {
         case .systemLarge: name = "large"
         default: return nil
         }
-        return WidgetPaging.key(family: name, station: configuration.station.rawValue, index: configuration.index.rawValue)
+        let station = WidgetStationChoice.keyPart(mode: configuration.station.mode, chosenId: configuration.chosenStation?.stationId)
+        return WidgetPaging.key(family: name, station: station, index: configuration.index.rawValue)
     }
 
-    /// The favourite a widget leads with, when it's set to. `nil` means the
-    /// closest station, also the fallback while no favourite is saved.
-    private static func leadingFavouriteId(for configuration: SelectIndexIntent) -> Int? {
-        configuration.station == .firstFavourite ? WatchStore.favouriteStationIds.first : nil
+    /// The station a widget leads with, when it's set to a favourite or a
+    /// chosen station. `nil` means the closest station, also the fallback
+    /// while no favourite is saved or no station is picked.
+    private static func leadingStationId(for configuration: SelectIndexIntent) -> Int? {
+        WidgetStationChoice.leadingId(
+            mode: configuration.station.mode,
+            chosenId: configuration.chosenStation?.stationId,
+            firstFavouriteId: WatchStore.favouriteStationIds.first
+        )
     }
 
     private static func cachedFavourite(_ stationId: Int) -> WatchReading? {
-        WatchStore.favouriteReadings.first { $0.stationId == stationId }
+        WatchStore.cachedReading(stationId: stationId)
     }
 
     /// The widget's own station from saved readings only, as the last
     /// timeline left it.
     private static func cachedLeadingReading(for configuration: SelectIndexIntent) -> WatchReading? {
-        leadingFavouriteId(for: configuration).flatMap(cachedFavourite) ?? WatchStore.latestReading
+        leadingStationId(for: configuration).flatMap(cachedFavourite) ?? WatchStore.latestReading
     }
 
     /// What the widget draws, from saved readings: the page `state` points
@@ -296,17 +325,30 @@ struct ReadingProvider: AppIntentTimelineProvider {
         var hasNewData = false
         /// The leading station as this refresh fetched it, for extra large.
         var primary: Pollutant?
-        if let leadingId = Self.leadingFavouriteId(for: configuration) {
-            // The first favourite is one of the favourites, so one request
-            // covers both. Its reading goes to the favourite cache only:
-            // `latestReading` tracks the closest station.
-            let ids = favouriteIds.isEmpty ? [leadingId] : favouriteIds
-            fetched = (try? await WatchAPI.currentPollutants(stationIds: ids)) ?? []
-            hasNewData = !fetched.isEmpty
-            primary = fetched.first { $0.stationId == leadingId }
-            reading = primary.map(WatchReading.init)
-                ?? Self.cachedFavourite(leadingId) ?? reading
-        } else {
+        var leadingId = Self.leadingStationId(for: configuration)
+        if let id = leadingId {
+            // One request covers the leading station and the favourites. Its
+            // reading goes to the favourite cache (or the chosen-station
+            // cache): `latestReading` tracks the closest station.
+            let ids = favouriteIds.contains(id) ? favouriteIds : [id] + favouriteIds
+            let result = try? await WatchAPI.currentPollutants(stationIds: ids)
+            fetched = result ?? []
+            if configuration.station == .station,
+               WidgetStationChoice.isGone(chosenId: id, fetchedIds: fetched.map(\.stationId), fetchSucceeded: result != nil) {
+                // The chosen station no longer exists: show the closest.
+                WatchStore.dropChosenReading(stationId: id)
+                leadingId = nil
+            } else {
+                hasNewData = !fetched.isEmpty
+                primary = fetched.first { $0.stationId == id }
+                reading = primary.map(WatchReading.init)
+                    ?? Self.cachedFavourite(id) ?? reading
+                if let primary, !favouriteIds.contains(id) {
+                    WatchStore.cacheChosenReading(WatchReading(primary))
+                }
+            }
+        }
+        if leadingId == nil {
             // The app resolves home from the reader's location; the extension
             // can't, so it follows whichever station the app last showed.
             // Before the app has ever run, that is the 中正 default.
