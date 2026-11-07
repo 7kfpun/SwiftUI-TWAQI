@@ -72,26 +72,8 @@ final class DuoScreenshotTests: XCTestCase {
         settle()
         snapshot("02")
 
-        // 03: the station list with that station's details beside it.
-        app.buttons[isChinese ? "搜尋" : "Search"].firstMatch.tap()
-        let search = app.searchFields.firstMatch
-        XCTAssertTrue(search.waitForExistence(timeout: 15), "No search field")
-        search.tap()
-        // Typed in English in both languages: the list also matches the
-        // English name, and the simulator keyboard can't type Chinese.
-        // Return submits the search, which also puts the keyboard away.
-        search.typeText("Hualien\n")
-        // The row's label is "name, locality" ("name、locality" in Chinese).
-        // Matching on the separator skips both the map marker (bare name) and
-        // look-alikes such as "Hualien (Meilun)".
-        let row = app.buttons
-            .matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@",
-                                  station + ",", station + "、"))
-            .firstMatch
-        XCTAssertTrue(row.waitForExistence(timeout: 15), "No list row for \(station)")
-        row.tap()
-        settle()
-        snapshot("03")
+        // 03 (station list with search) is not captured: on iOS 27.2 the
+        // search field isn't exposed to XCUITest. Add it back when it is.
     }
 
     /// Location and notification prompts. Index 1 is "Allow While Using App"
