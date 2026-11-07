@@ -38,6 +38,32 @@ final class HelpSectionOrderTests: XCTestCase {
     }
 }
 
+/// FOX-118: Help's "Privacy settings" shows only where UMP requires it.
+final class PrivacySettingsVisibilityTests: XCTestCase {
+    func testOnlyRequiredStatusShowsTheRow() {
+        XCTAssertTrue(ConsentManager.showsPrivacyOptions(.required))
+        XCTAssertFalse(ConsentManager.showsPrivacyOptions(.notRequired))
+        XCTAssertFalse(ConsentManager.showsPrivacyOptions(.unknown))
+    }
+
+    func testHelpSectionFollowsTheRequirement() {
+        XCTAssertFalse(HelpSection.order(isPro: false, developerMode: false).contains(.privacy))
+        XCTAssertTrue(HelpSection.order(isPro: false, developerMode: false, privacyOptionsRequired: true).contains(.privacy))
+        XCTAssertFalse(HelpSection.order(isPro: true, developerMode: false, privacyOptionsRequired: true).contains(.privacy))
+    }
+
+    func testPrivacyStringsExistInEnglishAndChinese() throws {
+        for language in ["en", "zh-Hant"] {
+            let bundle = Bundle(for: HelpViewModel.self)
+            let url = try XCTUnwrap(bundle.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: language))
+            let table = try XCTUnwrap(NSDictionary(contentsOf: url) as? [String: String])
+            for key in ["Help.privacy", "Help.privacy_settings"] {
+                XCTAssertFalse(table[key]?.isEmpty ?? true, "\(key) missing in \(language)")
+            }
+        }
+    }
+}
+
 /// FOX-88: Help → Data sources names every source the screens used to label.
 final class DataSourcesTests: XCTestCase {
     private func strings(_ language: String) throws -> [String: String] {

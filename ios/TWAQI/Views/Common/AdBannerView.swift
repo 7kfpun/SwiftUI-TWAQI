@@ -20,6 +20,8 @@ enum AdPlacement: String {
 
 struct AdBannerView: View {
     @EnvironmentObject var settings: SettingsStore
+    /// No ad is requested until UMP allows it (FOX-118).
+    @ObservedObject private var consent = ConsentManager.shared
 
     var adUnitID: String
     var placement: AdPlacement
@@ -35,7 +37,7 @@ struct AdBannerView: View {
         // content — an enclosing `VStack { Spacer() ... }` reported maximal
         // height, so the inset claimed the whole screen and a full-screen
         // transparent view sat over the list swallowing every tap.
-        if !settings.isPro {
+        if !settings.isPro && consent.canRequestAds {
             GADBannerViewController(adUnitID: adUnitID, placement: placement)
                 .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
         }
