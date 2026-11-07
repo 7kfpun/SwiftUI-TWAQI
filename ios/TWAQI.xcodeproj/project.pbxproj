@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F133A0000000000000000402 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000401 /* PrivacyInfo.xcprivacy */; };
+		F133A0000000000000000302 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000301 /* PrivacyInfo.xcprivacy */; };
+		F133A0000000000000000202 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000201 /* PrivacyInfo.xcprivacy */; };
+		F133A0000000000000000102 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000101 /* PrivacyInfo.xcprivacy */; };
+		F133A0000000000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000001 /* PrivacyInfo.xcprivacy */; };
 		95E3353483BA62DF5D8CF59A /* StationWeatherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1AFD81FB955076250384E18 /* StationWeatherTests.swift */; };
 		39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC438F9A61389C50464FC038 /* StationWeatherView.swift */; };
 		DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AF890677A74B0C87F84851 /* StationWeatherStore.swift */; };
@@ -396,6 +401,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F133A0000000000000000401 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F133A0000000000000000301 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F133A0000000000000000201 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F133A0000000000000000101 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F133A0000000000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F1AFD81FB955076250384E18 /* StationWeatherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherTests.swift; sourceTree = "<group>"; };
 		AC438F9A61389C50464FC038 /* StationWeatherView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherView.swift; sourceTree = "<group>"; };
 		77AF890677A74B0C87F84851 /* StationWeatherStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherStore.swift; sourceTree = "<group>"; };
@@ -737,6 +747,7 @@
 		64F5094B22A0DB17FBBBDE86 /* TWAQIVision */ = {
 			isa = PBXGroup;
 			children = (
+				F133A0000000000000000401 /* PrivacyInfo.xcprivacy */,
 				618E38CBCD0ADFF6CA88C345 /* TWAQIVisionApp.swift */,
 				F8390196C538D33C8013792B /* StationStore.swift */,
 				4189A08C94D9EA23D1AB1AAB /* Map */,
@@ -805,6 +816,7 @@
 		760B27B02AB347B2996EEF43 /* TWAQIWidget */ = {
 			isa = PBXGroup;
 			children = (
+				F133A0000000000000000101 /* PrivacyInfo.xcprivacy */,
 				7EDAD0E57C69F1017C43D8DB /* StationDetailWidgetView.swift */,
 				3670A7238663AB08BCE2EFBE /* StationDetailLoader.swift */,
 				1E3EF5703753441C307F1D3F /* AirQualityControl.swift */,
@@ -820,6 +832,7 @@
 		86172A2EFD4E82E5C4149BE4 /* TWAQIWatch */ = {
 			isa = PBXGroup;
 			children = (
+				F133A0000000000000000201 /* PrivacyInfo.xcprivacy */,
 				BAB2AA4FD4850D8878556FE8 /* Shared */,
 				D7EAB76B0E108BC376109CA7 /* Views */,
 				913DCC07EB40441B55E33524 /* TWAQIWatchApp.swift */,
@@ -884,6 +897,7 @@
 		9E1AC53A233F981700AC862D /* TWAQI */ = {
 			isa = PBXGroup;
 			children = (
+				F133A0000000000000000001 /* PrivacyInfo.xcprivacy */,
 				3C5387673B80D8BA75A83693 /* Intents */,
 				9E34B4F92371D4EC00B6E600 /* Localization */,
 				9EC596072351BC0500B8AA99 /* Config */,
@@ -1139,6 +1153,7 @@
 		D65749B2F90D693EE11C667E /* TWAQIWatchWidget */ = {
 			isa = PBXGroup;
 			children = (
+				F133A0000000000000000301 /* PrivacyInfo.xcprivacy */,
 				912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */,
 				1FA93917C7744C06BD0DDBFE /* SmartStackHints.swift */,
 				A0BD0C4C416641ECADE9033C /* WatchWidgetIntent.swift */,
@@ -1371,6 +1386,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F133A0000000000000000202 /* PrivacyInfo.xcprivacy in Resources */,
 				456E83BBE81025F86C599CB2 /* Assets.xcassets in Resources */,
 				C0F2458C317128BC1DC48BD3 /* Localizable.strings in Resources */,
 				3A06016CAA3F954513296957 /* Faces.xcassets in Resources */,
@@ -1388,6 +1404,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F133A0000000000000000302 /* PrivacyInfo.xcprivacy in Resources */,
 				47328332214A050FF47B3717 /* Localizable.strings in Resources */,
 				DF1DF889F6EF2E7F4FC6D521 /* Faces.xcassets in Resources */,
 			);
@@ -1397,6 +1414,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F133A0000000000000000002 /* PrivacyInfo.xcprivacy in Resources */,
 				88EAE1FB01D306EE96BC1FAD /* AppShortcuts.strings in Resources */,
 				9E1AC548233F981900AC862D /* LaunchScreen.storyboard in Resources */,
 				9E34B5012371E7B700B6E600 /* Localizable.strings in Resources */,
@@ -1412,6 +1430,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F133A0000000000000000402 /* PrivacyInfo.xcprivacy in Resources */,
 				95947315E1BE1CBF25D6F112 /* TaiwanTerrain.bin in Resources */,
 				1193D26FF6613F45876F3BBF /* Localizable.strings in Resources */,
 				07483877742E742C1A1424CA /* Assets.xcassets in Resources */,
@@ -1423,6 +1442,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F133A0000000000000000102 /* PrivacyInfo.xcprivacy in Resources */,
 				C70EC8165B8DA67A791E0457 /* Localizable.strings in Resources */,
 				FD82CBFCB443469ECC82845D /* Faces.xcassets in Resources */,
 			);
