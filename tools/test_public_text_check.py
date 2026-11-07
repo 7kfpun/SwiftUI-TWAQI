@@ -21,7 +21,7 @@ class CheckText(unittest.TestCase):
 
     def test_legacy_alias_domain_is_flagged(self):
         # Only the three sites in CLAUDE.md are allowed; a sibling wahthefox.com name is not.
-        self.assertEqual(kinds("see japanesedaily.wahthefox.com"), [("host", "japanesedaily.wahthefox.com")])
+        self.assertEqual(kinds("see sibling-x.wahthefox.com"), [("host", "sibling-x.wahthefox.com")])
 
     def test_other_hosts_are_flagged(self):
         for host in (
