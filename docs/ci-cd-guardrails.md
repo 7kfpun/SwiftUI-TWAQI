@@ -230,8 +230,8 @@ points as before). It still deploys through `workers.yml` (`workers-production`)
 `push-sender.yml` runs in its own environment, `push-sender`: deployment branches
 limited to `master`, **no required reviewers** (`workers-production` makes every job wait
 for an approval, which a schedule can't). Its secrets, copies of the Worker's:
-`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, and `SYNC_TOKEN` (for the
-event forward to the Worker, whose URL is `PUSH_SENDER_URL` in the workflow). Create the environment before
+`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, `SYNC_TOKEN` and `PUSH_SENDER_URL` (for the
+event forward to the Worker). Create the environment before
 the workflow's first run, since a workflow that names a missing environment creates it
 unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#the-push-sender-environment-github-actions).
 

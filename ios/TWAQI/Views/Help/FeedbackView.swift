@@ -8,8 +8,8 @@
 
 import SwiftUI
 
-/// Sends feedback to the Directus `twaqi_feedback` collection on
-/// cms.wahthefox.com. Platform, app and device details are added
+/// Sends feedback to the Directus `twaqi_feedback` collection.
+/// Platform, app and device details are added
 /// automatically and never shown.
 struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
