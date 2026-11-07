@@ -8,10 +8,17 @@
 
 import Combine
 import Foundation
-import SwiftDate
 
 class HelpViewModel: ObservableObject {
     let settings = SettingsStore()
+
+    /// "HH:mm" in the device's zone, for the analytics labels.
+    private static let clock: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
 
     // These are bound directly to Toggles and DatePickers, so their side effects
     // run in `didSet` — a `willSet` would fire while SwiftUI is still evaluating
@@ -24,8 +31,8 @@ class HelpViewModel: ObservableObject {
 
             TrackingManager.logEvent(.setDndNotificationStartTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
+                "dndStartTime": Self.clock.string(from: dndStartTime),
+                "dndEndTime": Self.clock.string(from: dndEndTime),
             ])
         }
     }
@@ -37,8 +44,8 @@ class HelpViewModel: ObservableObject {
 
             TrackingManager.logEvent(.setDndNotificationEndTime, parameters: [
                 "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
+                "dndStartTime": Self.clock.string(from: dndStartTime),
+                "dndEndTime": Self.clock.string(from: dndEndTime),
             ])
         }
     }
@@ -51,8 +58,8 @@ class HelpViewModel: ObservableObject {
 
             TrackingManager.logEvent(.setDndNotification, parameters: [
                 "label": isDndEnabled ? "on" : "off",
-                "dndStartTime": dndStartTime.convertTo(region: .current).toFormat("HH:mm"),
-                "dndEndTime": dndEndTime.convertTo(region: .current).toFormat("HH:mm"),
+                "dndStartTime": Self.clock.string(from: dndStartTime),
+                "dndEndTime": Self.clock.string(from: dndEndTime),
             ])
         }
     }

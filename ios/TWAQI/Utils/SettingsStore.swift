@@ -8,7 +8,6 @@
 
 import Combine
 import StoreKit
-import SwiftDate
 import SwiftUI
 import UIKit
 
@@ -82,7 +81,7 @@ final class SettingsStore: ObservableObject {
             Keys.airIndexTypeSelected: AirIndexTypes.aqi.rawValue,
             Keys.dndEnabled: false,
             Keys.dndStartTime: Date(),
-            Keys.dndEndTime: Date() + 2.hours,
+            Keys.dndEndTime: Date() + 2 * 3600,
             Keys.closestCountryCode: "twn",
             Keys.closestStationName: "松山",
             Keys.lastestMapLat: MapHome.latitude,
@@ -170,7 +169,7 @@ final class SettingsStore: ObservableObject {
 
     var dndEndTime: Date {
         set { defaults.set(newValue, forKey: Keys.dndEndTime) }
-        get { defaults.object(forKey: Keys.dndEndTime) as? Date ?? Date() + 2.hours }
+        get { defaults.object(forKey: Keys.dndEndTime) as? Date ?? Date() + 2 * 3600 }
     }
 
     /// Country whose data the app fully supports, resolved from the countries

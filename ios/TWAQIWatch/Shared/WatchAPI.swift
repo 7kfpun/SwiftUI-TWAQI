@@ -9,11 +9,10 @@
 import CoreLocation
 import Foundation
 
-/// The pollutant endpoints, without Alamofire.
+/// The pollutant endpoints over plain URLSession.
 ///
-/// The iOS `APIManager` depends on Alamofire and SwiftyJSON, which would have
-/// to be pulled into two watchOS targets for two GETs. `Pollutant` is already
-/// `Decodable`, so URLSession is enough.
+/// Two GETs don't justify a networking library in two watchOS targets, and
+/// `Pollutant` is already `Decodable`.
 enum WatchAPI {
     enum Failure: Error {
         case badURL

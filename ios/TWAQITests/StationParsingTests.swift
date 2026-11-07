@@ -6,14 +6,13 @@
 //  Copyright © 2026 kf. All rights reserved.
 //
 
-import SwiftyJSON
 import XCTest
 @testable import Taiwan_Air
 
 final class StationParsingTests: XCTestCase {
 
     /// A fully populated station, as /v1/stations returns for the EPA sites.
-    private let complete = JSON([
+    private let complete = [
         "id": 91,
         "country_id": 3,
         "code": "基隆",
@@ -28,11 +27,11 @@ final class StationParsingTests: XCTestCase {
         "lat": 25.129167,
         "lon": 121.760056,
         "image_url": "https://taqm.epa.gov.tw/taqm/webcam.ashx?site=1&type=l",
-    ] as [String: Any])
+    ] as [String: Any]
 
     /// A micro-sensor station. The API returns these with every nested object
     /// empty and no English name — the shape that used to crash the list.
-    private let sparse = JSON([
+    private let sparse = [
         "id": 17281,
         "country_id": 3,
         "code": "臺灣大道",
@@ -44,7 +43,7 @@ final class StationParsingTests: XCTestCase {
         "lat": 24.1589,
         "lon": 120.656711,
         "image_url": "",
-    ] as [String: Any])
+    ] as [String: Any]
 
     // MARK: - Complete payload
 
@@ -124,7 +123,7 @@ final class StationParsingTests: XCTestCase {
     /// /v1/stations uses snake_case; the station object on
     /// /v1/historical-pollutants has used camelCase. Both must parse.
     func testAcceptsCamelCaseCountryKeys() {
-        let camel = JSON([
+        let camel = [
             "id": 63,
             "countryId": 3,
             "countryCode": "twn",
@@ -132,7 +131,7 @@ final class StationParsingTests: XCTestCase {
             "name": ["zh": "臺西", "en": "Taixi"],
             "lat": 23.717533,
             "lon": 120.202842,
-        ] as [String: Any])
+        ] as [String: Any]
 
         let station = Station.make(from: camel)
 
@@ -141,7 +140,7 @@ final class StationParsingTests: XCTestCase {
     }
 
     func testMissingCountryKeysDefaultRatherThanCrash() {
-        let station = Station.make(from: JSON(["id": 1] as [String: Any]))
+        let station = Station.make(from: ["id": 1])
 
         XCTAssertEqual(station.countryId, 0)
         XCTAssertEqual(station.countryCode, "")
@@ -172,5 +171,41 @@ final class StationParsingTests: XCTestCase {
         station.areaLocal = ""
 
         XCTAssertNil(station.displayArea)
+    }
+
+    // MARK: - Networking helpers (replace Alamofire / SwiftyJSON)
+
+    private func response(_ status: Int, contentType: String?) -> HTTPURLResponse {
+        HTTPURLResponse(
+            url: URL(string: "https://example.invalid")!,
+            statusCode: status,
+            httpVersion: nil,
+            headerFields: contentType.map { ["Content-Type": $0] }
+        )!
+    }
+
+    func testIsJSONAcceptsJsonWithCharset() {
+        XCTAssertTrue(APIManager.isJSON(response(200, contentType: "application/json; charset=utf-8")))
+    }
+
+    func testIsJSONRejectsOtherContentTypesAndStatuses() {
+        XCTAssertFalse(APIManager.isJSON(response(200, contentType: "text/html")))
+        XCTAssertFalse(APIManager.isJSON(response(200, contentType: nil)))
+        XCTAssertFalse(APIManager.isJSON(response(500, contentType: "application/json")))
+    }
+
+    func testSuccessObjectRequiresSuccessTrue() {
+        XCTAssertNotNil(APIManager.successObject(Data(#"{"success":true,"data":[]}"#.utf8)))
+        XCTAssertNil(APIManager.successObject(Data(#"{"success":false}"#.utf8)))
+        XCTAssertNil(APIManager.successObject(Data("not json".utf8)))
+    }
+
+    func testTypedReadersDegradeToNilOnWrongType() {
+        let json: [String: Any] = ["id": "7", "lat": 1.5, "name": 3]
+
+        XCTAssertNil(json.int("id"))
+        XCTAssertEqual(json.double("lat"), 1.5)
+        XCTAssertNil(json.string("name"))
+        XCTAssertTrue(json.object("missing").isEmpty)
     }
 }
