@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,9 +66,14 @@ internal fun HelpPage(title: String, onBack: () -> Unit, content: @Composable (P
 
 /** A list page made of sections, like an iOS grouped list. */
 @Composable
-internal fun HelpList(padding: PaddingValues, content: LazyListScope.() -> Unit) {
+internal fun HelpList(
+    padding: PaddingValues,
+    listState: LazyListState = rememberLazyListState(),
+    content: LazyListScope.() -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        state = listState,
         contentPadding = PaddingValues(
             top = padding.calculateTopPadding(),
             bottom =

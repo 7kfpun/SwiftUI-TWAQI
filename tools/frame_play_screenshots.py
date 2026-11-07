@@ -9,6 +9,10 @@ Publisher's layout):
                               one-line caption in that language (1440x2560)
   feature-graphic/1.png       1024x500: the icon, app name and tagline, and
                               the framed map screenshot
+  seven-inch-screenshots/1..4.png, ten-inch-screenshots/1..4.png
+                              tablet captures in a tablet outline, same
+                              captions (FOX-119; 2560x1600 or 1600x2560,
+                              following the capture)
 
 The Play icon itself (icon/1.png) is written by tools/DrawAndroidAppIcon.swift
 (FOX-108) with the launcher icon; this script only reads it for the feature
@@ -18,7 +22,8 @@ Raw captures come from the debug build on an emulator (android/README.md,
 "Store listing"), saved as screenshots/fox-61-android-raw/<lang>/<n>-<name>.png,
 n = 1..4. Wear OS screenshots are copied in unframed (Play wants the watch UI
 alone, no device frame): screenshots/fox-61-android-raw/<lang>/wear-<n>.png
-goes to wear-screenshots/<n>.png.
+goes to wear-screenshots/<n>.png. Tablet captures (FOX-119) live in
+screenshots/fox-119-android-tablet-raw/<lang>/{seven,ten}-<n>-<name>.png.
 
 Needs only Pillow. Fonts
 default to the macOS ones the iOS frame lanes use; pass --font-latin and
@@ -52,6 +57,13 @@ FONT_LATIN = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 FONT_CJK = "/System/Library/Fonts/STHeiti Medium.ttc"
 
 SCREENSHOT_SIZE = (1440, 2560)  # 9:16, Play's recommended phone shape
+
+# Tablets (FOX-119): raw captures in TABLET_RAW/<lang>/<kind>-<n>-<name>.png, kind "seven" or
+# "ten", framed on a canvas of the capture's orientation (16:10, Play's tablet shape).
+TABLET_RAW = ROOT / "screenshots/fox-119-android-tablet-raw"
+TABLET_KINDS = {"seven": "seven-inch-screenshots", "ten": "ten-inch-screenshots"}
+TABLET_LANDSCAPE = (2560, 1600)
+TABLET_PORTRAIT = (1600, 2560)
 FEATURE_SIZE = (1024, 500)
 ICON_SIZE = 512
 
@@ -97,13 +109,14 @@ def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
     return mask
 
 
-def phone(screen: Image.Image, width: int) -> Image.Image:
-    """The capture in a plain phone outline (dark bezel, rounded corners), with alpha."""
-    bezel = round(width * 0.028)
+def phone(screen: Image.Image, width: int, bezel_frac: float = 0.028, radius_frac: float = 0.09) -> Image.Image:
+    """The capture in a plain phone outline (dark bezel, rounded corners), with alpha. A tablet
+    passes a thinner bezel and smaller corners, as fractions of the outline's width."""
+    bezel = round(width * bezel_frac)
     inner_w = width - 2 * bezel
     inner_h = round(screen.height * inner_w / screen.width)
     screen = screen.convert("RGB").resize((inner_w, inner_h), Image.LANCZOS)
-    radius = round(width * 0.09)
+    radius = round(width * radius_frac)
     out = Image.new("RGBA", (width, inner_h + 2 * bezel), (0, 0, 0, 0))
     body = Image.new("RGBA", out.size, BEZEL + (255,))
     out.paste(body, (0, 0), rounded_mask(out.size, radius))
@@ -148,6 +161,40 @@ def frame_screenshot(raw: Path, caption: str, lang: str, latin: str, cjk: str) -
     if device.height > box_h:
         device = phone(shot, round(device_w * box_h / device.height))
     device, pad = with_shadow(device, blur=round(w * 0.012), offset=round(w * 0.008))
+    canvas.alpha_composite(device, ((w - device.width) // 2, text_bottom - pad))
+    return canvas.convert("RGB")
+
+
+def tablet(screen: Image.Image, width: int) -> Image.Image:
+    """The capture in a tablet outline: a bezel and corners sized from the short side, so a
+    landscape tablet doesn't get a phone's deep corners."""
+    height = width * screen.height / screen.width
+    short = min(width, height)
+    return phone(screen, width, bezel_frac=short * 0.03 / width, radius_frac=short * 0.05 / width)
+
+
+def frame_tablet_screenshot(raw: Path, caption: str, lang: str, size: tuple[int, int], latin: str, cjk: str) -> Image.Image:
+    """A tablet capture (portrait or landscape) under its caption, on the phone shots' gradient (FOX-119)."""
+    w, h = size
+    canvas = gradient((w, h)).convert("RGBA")
+    draw = ImageDraw.Draw(canvas)
+    short = min(w, h)
+    side = round(w * 0.06)
+    font = fit_line(draw, caption, lang, round(short * 0.06), w - 2 * side, latin, cjk)
+    top = round(h * 0.05)
+    draw.text((w / 2, top), caption, font=font, fill=HEADLINE, anchor="mt")
+    text_bottom = top + font.size + round(short * 0.04)
+
+    shot = Image.open(raw)
+    box_w = w - 2 * side
+    box_h = h - text_bottom - round(short * 0.05)
+    # The widest outline that fits the box; the bezel adds about the same on both axes.
+    device_w = min(box_w, round(box_h * shot.width / shot.height))
+    device = tablet(shot, device_w)
+    while device.height > box_h:
+        device_w -= 8
+        device = tablet(shot, device_w)
+    device, pad = with_shadow(device, blur=round(short * 0.012), offset=round(short * 0.008))
     canvas.alpha_composite(device, ((w - device.width) // 2, text_bottom - pad))
     return canvas.convert("RGB")
 
@@ -215,6 +262,8 @@ def check() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--raw", type=Path, default=RAW, help="raw captures: <raw>/<lang>/<n>-<name>.png")
+    parser.add_argument("--tablet-raw", type=Path, default=TABLET_RAW,
+                        help="tablet captures: <tablet-raw>/<lang>/{seven,ten}-<n>-<name>.png")
     parser.add_argument("--font-latin", default=FONT_LATIN)
     parser.add_argument("--font-cjk", default=FONT_CJK)
     parser.add_argument("--check", action="store_true", help="only check what is already written")
@@ -241,6 +290,18 @@ def main() -> int:
         for wear in sorted((args.raw / lang).glob("wear-*.png")):
             n = re.match(r"wear-(\d+)", wear.name).group(1)
             save(Image.open(wear).convert("RGB"), graphics / "wear-screenshots" / f"{n}.png")
+        for kind, folder in TABLET_KINDS.items():
+            shots = {int(m.group(1)): f for f in sorted((args.tablet_raw / lang).glob(f"{kind}-*.png"))
+                     if (m := re.match(rf"{kind}-(\d+)-", f.name))}
+            if not shots:
+                continue
+            if missing := sorted(set(captions) - set(shots)):
+                sys.exit(f"{args.tablet_raw / lang}: no {kind}-inch capture for screenshot(s) {missing}")
+            for n, caption in captions.items():
+                with Image.open(shots[n]) as raw:
+                    size = TABLET_LANDSCAPE if raw.width > raw.height else TABLET_PORTRAIT
+                save(frame_tablet_screenshot(shots[n], caption, lang, size, args.font_latin, args.font_cjk),
+                     graphics / folder / f"{n}.png")
     return check()
 
 

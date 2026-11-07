@@ -1,5 +1,6 @@
 package com.kfpun.twaqi.ui.main
 
+import androidx.window.core.layout.WindowSizeClass
 import com.kfpun.twaqi.data.model.Country
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -36,19 +37,42 @@ class MapLayoutTest {
     }
 
     @Test
-    fun wideWindowsShowTheListBesideTheMap() {
+    fun wideWindowsShowTheStationBesideTheMap() {
         assertFalse(WideLayout.isWide(411f, 891f))
         assertFalse(WideLayout.isWide(891f, 411f))
         assertTrue(WideLayout.isWide(800f, 1280f))
         assertTrue(WideLayout.isWide(1280f, 800f))
     }
 
+    /** FOX-119: the same answer from the window size class, the way the app asks. */
     @Test
-    fun listTakesTwoFifthsOrEndsOnTheFold() {
-        assertEquals(320f, WideLayout.listWidth(700f))
-        assertEquals(400f, WideLayout.listWidth(1000f))
-        assertEquals(440f, WideLayout.listWidth(1280f))
-        assertEquals(442f, WideLayout.listWidth(884f, foldX = 442f))
+    fun wideFollowsTheWindowSizeClass() {
+        fun wide(width: Float, height: Float) = WideLayout.isWide(WindowSizeClass.compute(width, height))
+        // Phones, portrait and landscape.
+        assertFalse(wide(411f, 891f))
+        assertFalse(wide(891f, 411f))
+        // A flip phone's cover screen (720 x 748 px at 306 dpi).
+        assertFalse(wide(376f, 391f))
+        // A folded Fold's outer screen.
+        assertFalse(wide(412f, 914f))
+        // Tablets, portrait and landscape, and an unfolded Fold.
+        assertTrue(wide(800f, 1280f))
+        assertTrue(wide(1280f, 800f))
+        assertTrue(wide(841f, 701f))
+        // A small tablet in portrait is medium width too.
+        assertTrue(wide(600f, 960f))
+        assertFalse(wide(599f, 960f))
+    }
+
+    @Test
+    fun panelTakesTwoFifthsOrStartsOnTheFold() {
+        assertEquals(320f, WideLayout.panelWidth(700f))
+        assertEquals(400f, WideLayout.panelWidth(1000f))
+        assertEquals(440f, WideLayout.panelWidth(1280f))
+        // An unfolded foldable: the map and the station each get a half.
+        assertEquals(442f, WideLayout.panelWidth(884f, foldX = 442f))
+        // The fold too close to an edge: the usual width.
+        assertEquals(400f, WideLayout.panelWidth(1000f, foldX = 900f))
     }
 
     /** FOX-112: the wind button leaves the legend's corner when it would cover it. */
