@@ -98,6 +98,29 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertNil(DeepLink.route(url, isPro: true, isKnownStation: { _ in false }))
     }
 
+    // MARK: - Push tap (FOX-141)
+
+    func testPushPayloadMapsToItsStation() throws {
+        let url = try XCTUnwrap(DeepLink.pushTapURL(userInfo: ["station_id": "126", "gcm.message_id": "x"]))
+        XCTAssertEqual(DeepLink(url: url), .station(id: 126, source: .push))
+        let numeric = try XCTUnwrap(DeepLink.pushTapURL(userInfo: ["station_id": 7]))
+        XCTAssertEqual(DeepLink(url: numeric), .station(id: 7, source: .push))
+    }
+
+    func testPushPayloadWithoutAValidStationOpensNothing() {
+        for info: [AnyHashable: Any] in [
+            [:], ["station_id": ""], ["station_id": "abc"], ["station_id": "0"],
+            ["station_id": "-3"], ["station_id": "1.5"], ["station_id": ["x"]], ["other": "126"],
+        ] {
+            XCTAssertNil(DeepLink.pushTapURL(userInfo: info), "\(info)")
+        }
+    }
+
+    func testPushLinkToUnknownStationIsDropped() throws {
+        let url = try XCTUnwrap(DeepLink.pushTapURL(userInfo: ["station_id": "999999"]))
+        XCTAssertNil(DeepLink.route(url, isPro: false, isKnownStation: { $0 == 126 }))
+    }
+
     func testRouterOpensTheLinkedStation() throws {
         let router = AppRouter()
 
