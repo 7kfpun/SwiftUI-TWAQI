@@ -66,4 +66,46 @@ final class PublishTimeTests: XCTestCase {
     func testRelativeAgeIsNonEmptyForAValidTimestamp() {
         XCTAssertFalse(sample.asRelativeAge.isEmpty)
     }
+
+    // MARK: - Device-zone independence
+
+    private func withDeviceZone(_ id: String, _ body: () -> Void) {
+        let saved = NSTimeZone.default
+        NSTimeZone.default = TimeZone(identifier: id)!
+        defer { NSTimeZone.default = saved }
+        body()
+    }
+
+    private static let zones = ["America/New_York", "Europe/London", "Pacific/Auckland", "Asia/Taipei"]
+
+    func testParsesAsTaipeiInAnyDeviceZone() {
+        // 22:00 in Taiwan (UTC+8) is 14:00 UTC.
+        for zone in Self.zones {
+            withDeviceZone(zone) {
+                XCTAssertEqual(Date.fromApi(sample)?.timeIntervalSince1970, 1_786_111_200, zone)
+            }
+        }
+    }
+
+    func testPublishTimeReadsTheSameInAnyDeviceZone() {
+        for zone in Self.zones {
+            withDeviceZone(zone) {
+                XCTAssertEqual(sample.asPublishTime, "22:00", zone)
+                XCTAssertTrue(sample.asPublishDateTime.contains("22:00") || sample.asPublishDateTime.contains("10:00"), zone)
+            }
+        }
+    }
+
+    /// 02:30 on 2026-03-08 doesn't exist in New York (spring-forward gap) and
+    /// 01:30 on 2026-03-29 doesn't exist in London. Taiwan has no DST, so both parse.
+    func testTimesInADeviceDaylightSavingGapStillParse() {
+        withDeviceZone("America/New_York") {
+            XCTAssertNotNil(Date.fromApi("2026-03-08T02:30:00"))
+            XCTAssertEqual("2026-03-08T02:30:00".asPublishTime, "02:30")
+        }
+        withDeviceZone("Europe/London") {
+            XCTAssertNotNil(Date.fromApi("2026-03-29T01:30:00"))
+            XCTAssertEqual("2026-03-29T01:30:00".asPublishTime, "01:30")
+        }
+    }
 }
