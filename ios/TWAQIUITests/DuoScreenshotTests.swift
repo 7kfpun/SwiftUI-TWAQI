@@ -73,9 +73,15 @@ final class DuoScreenshotTests: XCTestCase {
         snapshot("02")
 
         // 03: the station list with that station's details beside it.
-        app.buttons[isChinese ? "搜尋" : "Search"].firstMatch.tap()
+        // The station panel's open animation can swallow the first tap, and
+        // the field can sit above the list's first row until it is pulled down.
         let search = app.searchFields.firstMatch
-        XCTAssertTrue(search.waitForExistence(timeout: 15), "No search field")
+        app.buttons[isChinese ? "搜尋" : "Search"].firstMatch.tap()
+        for _ in 0..<3 where !search.waitForExistence(timeout: 6) {
+            let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.3))
+            from.press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.8)))
+        }
+        XCTAssertTrue(search.exists, "No search field")
         search.tap()
         // Typed in English in both languages: the list also matches the
         // English name, and the simulator keyboard can't type Chinese.
@@ -90,6 +96,7 @@ final class DuoScreenshotTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 15), "No list row for \(station)")
         row.tap()
+        settle()
         settle()
         snapshot("03")
     }

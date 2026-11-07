@@ -75,7 +75,10 @@ final class ShareScreenshotTests: XCTestCase {
         // The share sheet's own list of actions; its accessibility identifier
         // has been "ActivityListView" since iOS 13.
         let sheet = app.otherElements["ActivityListView"].firstMatch
-        if !sheet.waitForExistence(timeout: 15) {
+        // On the Duo the sheet is a popover whose content isn't in the app's
+        // accessibility tree, so its dismiss region also counts as open.
+        let popover = app.otherElements["PopoverDismissRegion"].firstMatch
+        if !sheet.waitForExistence(timeout: 15), !popover.exists {
             print("SHARE-DEBUG\n\(app.debugDescription)")
             XCTFail("Share sheet did not open")
         }
