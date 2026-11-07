@@ -12,4 +12,4 @@ Stations are grouped by air quality zone and ordered roughly north to south, and
 FASTER AND MORE STABLE
 Rebuilt with the latest tooling, with updated maps and components throughout, plus a range of stability and performance fixes.
 
-Questions or suggestions? Write to info@dllm.io — we read every one.
+Questions or suggestions? Write to info@wahthefox.com — we read every one.
