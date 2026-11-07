@@ -38,13 +38,14 @@ InAppPurchaseProductId = test
 // Directus (in-app feedback, and the 空品區 forecast read from twaqi_aqi_forecast).
 // The TWAQI App static token: create on twaqi_feedback, read on twaqi_aqi_forecast.
 // Keep the real value in debug.xcconfig / release.xcconfig, which are gitignored.
-DirectusUrl = https:\/\/cms.wahthefox.com
+DirectusUrl = https:\/\/directus.example.com
 DirectusFeedbackToken =
 
 // Push: the twaqi-push-sender Worker's app API (FOX-13 / FOX-37 M5). The app
 // holds no Directus token for the push collections; each install signs its
-// requests with a Keychain secret. Not a secret itself.
-PushApiUrl = https:\/\/twaqi-push-sender.710kfpun.workers.dev
+// requests with a Keychain secret. Not a secret itself, but the repo is public: put the
+// real URL in debug.xcconfig / release.xcconfig.
+PushApiUrl = https:\/\/push.example.com
 
 // Business partner form (Directus twaqi_cooperate, create only; the app
 // sends archived=false and never deletes). Optional: when empty the app uses

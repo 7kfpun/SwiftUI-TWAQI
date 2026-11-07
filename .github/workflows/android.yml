@@ -1,0 +1,126 @@
+name: Android
+
+# The Android app under android/ (FOX-52): ktlint, Android lint, JVM unit tests
+# and a debug build, with the example config only (no secrets in CI).
+#
+# Every pull request to master gets a single "Android" check, so branch
+# protection can require it (docs/master-protection.md). The small `Android
+# changes` job decides first; when nothing under android/ or this file changed,
+# and on drafts, `Android` is skipped, which GitHub counts as passing for a
+# required check (FOX-143). That is why pull_request has no paths filter: a
+# filtered-out workflow never reports, and a required check that never reports
+# blocks the merge (the same pattern as workers.yml).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master, feature/fox-52-android-project-setup]
+  push:
+    branches: [master]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Android changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.changes.outputs.build }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find Android changes
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          paths=(android/ .github/workflows/android.yml)
+          build=true
+          case "$EVENT" in
+            pull_request)
+              if [ "$DRAFT" = true ]; then
+                build=false
+              elif git diff --quiet "$PR_BASE...$PR_HEAD" -- "${paths[@]}"; then
+                build=false
+              fi
+              ;;
+            push)
+              # A first push or a force push may leave no usable base: build.
+              if [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ] \
+                && git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null \
+                && git diff --quiet "$PUSH_BEFORE" "$PUSH_AFTER" -- "${paths[@]}"; then
+                build=false
+              fi
+              ;;
+          esac
+          echo "Build Android: $build"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+  android:
+    name: Android
+    needs: changes
+    # `!cancelled()` and the result check: if `Android changes` fails, this job
+    # still runs and fails at its first step instead of being skipped, because a
+    # skipped required check would count as passing.
+    if: >-
+      !cancelled() &&
+      (needs.changes.result != 'success' || needs.changes.outputs.build == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Stop if the change check failed
+        if: needs.changes.result != 'success'
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: |
+          echo "::error::Android changes did not succeed ($CHANGES_RESULT); see that job."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # Only master writes the cache; pull requests read it.
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Lint, unit tests and debug build
+        working-directory: android
+        # The runner's preinstalled Android SDK (ANDROID_HOME); AGP fetches a
+        # missing platform or build-tools on its own. No secrets: the build
+        # uses secrets.example.properties and no google-services.json.
+        run: ./gradlew ktlintCheck lint test assembleDebug --stacktrace
+
+      - name: Upload lint and test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-reports
+          path: |
+            android/app/build/reports/
+            android/app/build/test-results/
+          retention-days: 7

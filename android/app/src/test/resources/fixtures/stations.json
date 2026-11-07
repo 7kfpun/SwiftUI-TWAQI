@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 91,
+      "country_id": 3,
+      "code": "基隆",
+      "district": "",
+      "name": {
+        "zh": "基隆",
+        "en": "Keelung"
+      },
+      "address": {
+        "zh": "基隆市東信路324號"
+      },
+      "area": {
+        "zh": "北部空品區",
+        "en": "North"
+      },
+      "station_type": "GENERAL",
+      "additional_info": {
+        "county": {
+          "zh": "基隆市",
+          "en": "Keelung City"
+        },
+        "township": {
+          "zh": "信義區"
+        }
+      },
+      "lat": 25.129167,
+      "lon": 121.760056,
+      "image_url": "https://example.com/webcam?site=1&type=l"
+    },
+    {
+      "id": 92,
+      "country_id": 3,
+      "code": "馬祖",
+      "district": "",
+      "name": {
+        "zh": "馬祖",
+        "en": "Matsu"
+      },
+      "address": {
+        "zh": "連江縣南竿鄉介壽村13號"
+      },
+      "area": {
+        "zh": "其他",
+        "en": "Other"
+      },
+      "station_type": "GENERAL",
+      "additional_info": {
+        "county": {
+          "zh": "連江縣",
+          "en": "Lianjiang County"
+        },
+        "township": {
+          "zh": "南竿鄉"
+        }
+      },
+      "lat": 26.160469,
+      "lon": 119.949875,
+      "image_url": "https://example.com/webcam?site=75&type=l"
+    },
+    {
+      "id": 898,
+      "country_id": 3,
+      "code": "桃園(楊梅)",
+      "district": "",
+      "name": {
+        "zh": "桃園(楊梅)",
+        "en": "Taoyuan (Yangmei)"
+      },
+      "address": {},
+      "area": {},
+      "station_type": "",
+      "additional_info": {},
+      "lat": 25.654444,
+      "lon": 121.385,
+      "image_url": ""
+    }
+  ]
+}

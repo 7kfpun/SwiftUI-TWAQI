@@ -6,12 +6,12 @@ target 'TWAQI' do
   platform :ios, '15.0'
 
   # Pods for TWAQI
-  pod 'Alamofire', '~> 5.2.0'
+  pod 'Alamofire', '~> 5.10'
   pod 'GoogleMaps', '~> 9.4'
-  pod 'SDWebImageSwiftUI', '~> 1.4.0'
+  pod 'SDWebImageSwiftUI', '~> 3.1'
   pod 'SnapKit', '~> 5.0'
   pod 'SwiftDate', '~> 6.1'
-  pod 'SwiftyJSON', '~> 5.0'
+  pod 'SwiftyJSON', '~> 5.0.2'
   # The welcome flow's animations (FOX-84). App target only.
   pod 'lottie-ios', '~> 4.5'
 

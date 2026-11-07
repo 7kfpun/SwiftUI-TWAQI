@@ -1,0 +1,139 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": null,
+      "code": "基隆",
+      "district": "",
+      "name": {
+        "zh": "基隆",
+        "en": "Keelung"
+      },
+      "address": {
+        "zh": "基隆市東信路324號"
+      },
+      "area": {
+        "zh": "北部空品區",
+        "en": "North"
+      },
+      "station_type": "GENERAL",
+      "additional_info": {
+        "county": {
+          "zh": "基隆市",
+          "en": "Keelung City"
+        },
+        "township": {
+          "zh": "信義區"
+        }
+      },
+      "lat": 25.129167,
+      "lon": 121.760056,
+      "image_url": "https://example.com/webcam?site=1&type=l",
+      "station_id": 91,
+      "aqi": 54,
+      "aqi_display": "54",
+      "aqhi": 0,
+      "aqhi_display": "0",
+      "pm25": 7.0,
+      "pm25_display": "7.0",
+      "pm10": 26.0,
+      "pm10_display": "26.0",
+      "no2": 3.0,
+      "no2_display": "3.0",
+      "so2": 1.2,
+      "so2_display": "1.2",
+      "co": 0.33,
+      "co_display": "0.3",
+      "o3": 52.0,
+      "o3_display": "52.0",
+      "wind_direction": 85.0,
+      "wind_speed": 1.6,
+      "publish_time": "2026-11-06T00:00:00"
+    },
+    {
+      "id": null,
+      "code": "大城",
+      "district": "",
+      "name": {
+        "zh": "大城",
+        "en": "Dacheng"
+      },
+      "address": {},
+      "area": {},
+      "station_type": "",
+      "additional_info": {},
+      "lat": 23.854931,
+      "lon": 120.269642,
+      "image_url": "",
+      "station_id": 876,
+      "aqi": 87,
+      "aqi_display": "87",
+      "aqhi": 0,
+      "aqhi_display": "0",
+      "pm25": 29.0,
+      "pm25_display": "29.0",
+      "pm10": 71.0,
+      "pm10_display": "71.0",
+      "no2": 4.0,
+      "no2_display": "4.0",
+      "so2": 1.8,
+      "so2_display": "1.8",
+      "co": 0.27,
+      "co_display": "0.3",
+      "o3": 50.0,
+      "o3_display": "50.0",
+      "wind_direction": 90.0,
+      "wind_speed": 0.4,
+      "publish_time": "2026-11-06T00:00:00"
+    },
+    {
+      "id": null,
+      "code": "汐止",
+      "district": "",
+      "name": {
+        "zh": "汐止",
+        "en": "Xizhi"
+      },
+      "address": {
+        "zh": "新北市汐止區樟樹一路141巷2號"
+      },
+      "area": {
+        "zh": "北部空品區",
+        "en": "North"
+      },
+      "station_type": "GENERAL",
+      "additional_info": {
+        "county": {
+          "zh": "新北市",
+          "en": "New Taipei City"
+        },
+        "township": {
+          "zh": "汐止區"
+        }
+      },
+      "lat": 25.067131,
+      "lon": 121.6423,
+      "image_url": "https://example.com/webcam?site=2&type=l",
+      "station_id": 115,
+      "aqi": 63,
+      "aqi_display": "63",
+      "aqhi": 0,
+      "aqhi_display": "0",
+      "pm25": 15.0,
+      "pm25_display": "15.0",
+      "pm10": 23.0,
+      "pm10_display": "23.0",
+      "no2": 6.0,
+      "no2_display": "6.0",
+      "so2": 1.3,
+      "so2_display": "1.3",
+      "co": 0.28,
+      "co_display": "0.3",
+      "o3": 48.0,
+      "o3_display": "48.0",
+      "wind_direction": 22.0,
+      "wind_speed": 2.3,
+      "publish_time": "2026-11-06T00:00:00"
+    }
+  ]
+}

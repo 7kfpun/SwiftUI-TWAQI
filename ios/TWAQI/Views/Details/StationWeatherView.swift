@@ -44,12 +44,6 @@ struct StationWeatherView: View {
             }
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: AreaForecastView.cornerRadius, style: .continuous))
-
-            Text("Weather.source")
-                .font(.caption.weight(.light))
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
         }
         .padding(.horizontal)
     }

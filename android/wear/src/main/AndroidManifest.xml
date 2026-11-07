@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Home: the station nearest the reader. Coarse is enough; stations are kilometres apart. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Play's advertising ID declaration is per app (the phone app shows AdMob ads and runs
+         Firebase Analytics), and Play blocks any artifact whose manifest lacks AD_ID (FOX-128).
+         The watch app has no ads or analytics and never reads the advertising ID. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TWAQI.Watch">
+
+        <!-- Works without the phone: readings come straight from the API (FOX-62). -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".ui.WatchActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- The watch-face complication (iOS TWAQIWatchWidget). Updated every 30 minutes, as iOS. -->
+        <service
+            android:name=".complication.AqiComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_air"
+            android:label="@string/watch_widget_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="RANGED_VALUE,SHORT_TEXT,LONG_TEXT,SMALL_IMAGE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="1800" />
+            <meta-data
+                android:name="android.support.wearable.complications.PROVIDER_CONFIG_ACTION"
+                android:value="com.kfpun.twaqi.watch.COMPLICATION_CONFIG" />
+        </service>
+
+        <!-- Index and style for each complication, opened by the watch face editor. -->
+        <activity
+            android:name=".complication.ComplicationConfigActivity"
+            android:exported="true"
+            android:label="@string/watch_widget_name"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="com.kfpun.twaqi.watch.COMPLICATION_CONFIG" />
+                <category android:name="android.support.wearable.complications.category.PROVIDER_CONFIG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- The tile (Pro). -->
+        <service
+            android:name=".tile.AqiTileService"
+            android:description="@string/watch_widget_description"
+            android:exported="true"
+            android:icon="@drawable/ic_air"
+            android:label="@string/watch_widget_name"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/tile_preview" />
+        </service>
+
+        <!-- The phone's favourites, Pro and language over the Data Layer (FOX-62). -->
+        <service
+            android:name=".relay.PhoneStateListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/twaqi/phone-state"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

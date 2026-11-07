@@ -1,0 +1,15 @@
+# FOX-115: MainActivity count after external twaqi:// links (debug build, emulator, Android 36)
+$ adb shell am start -a android.intent.action.VIEW -d 'twaqi://station?id=105&source=widget'
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+$ adb shell dumpsys activity activities | grep -c 'Hist .*com.kfpun.twaqi/.MainActivity'
+1
+$ adb shell am start -a android.intent.action.VIEW -d 'twaqi://station?id=126'
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+$ adb shell dumpsys activity activities | grep -c 'Hist .*com.kfpun.twaqi/.MainActivity'
+1
+$ adb shell am start -a android.intent.action.VIEW -d 'twaqi://station?id=999999'
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+$ adb shell dumpsys activity activities | grep -c 'Hist .*com.kfpun.twaqi/.MainActivity'
+1
+$ adb shell dumpsys activity activities | grep 'Hist .*com.kfpun.twaqi'
+    * Hist  #0: ActivityRecord{219709536 u0 com.kfpun.twaqi/.MainActivity t9}
