@@ -61,4 +61,72 @@ final class WidgetStationChoiceTests: XCTestCase {
         XCTAssertEqual(StationDirectoryEntry(id: 7, name: "", nameLocal: "", code: "C7").displayName(locale: en), "C7")
         XCTAssertEqual(StationDirectoryEntry(id: 7, name: "", nameLocal: "", code: "").displayName(locale: en), "#7")
     }
+
+    // MARK: Gone-station response and chosen-station cache
+
+    func testNoSuchStationBodyIsASuccessWithNoStations() throws {
+        let body = Data(#"{"success":false,"error":"No such a station"}"#.utf8)
+        XCTAssertEqual(try WatchAPI.decodeStations(body).count, 0)
+    }
+
+    func testOtherErrorBodiesStillFail() {
+        for error in ["Too many station ids", "boom"] {
+            let body = Data(#"{"success":false,"error":"\#(error)"}"#.utf8)
+            XCTAssertThrowsError(try WatchAPI.decodeStations(body))
+        }
+        XCTAssertThrowsError(try WatchAPI.decodeStations(Data("nope".utf8)))
+    }
+
+    private func reading(_ id: Int, publishTime: String) -> WatchReading {
+        let json: [String: Any] = [
+            "stationId": id, "code": "S\(id)", "name": "Station", "nameLocal": "測站",
+            "aqi": 50, "pm25": 10, "pm10": 20, "o3": 30, "co": 0.3, "so2": 1, "no2": 10,
+            "windDirection": 0, "windSpeed": 1, "publishTime": publishTime,
+        ]
+        return try! JSONDecoder().decode(WatchReading.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+
+    private func recent(minutesAgo: Int) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Asia/Taipei")
+        return formatter.string(from: Date().addingTimeInterval(TimeInterval(-minutesAgo * 60)))
+    }
+
+    func testChosenCacheKeepsNewestEightAndReplacesByStation() {
+        let savedChosen = WatchStore.chosenReadings
+        let savedFavourites = WatchStore.favouriteReadings
+        defer {
+            WatchStore.chosenReadings = savedChosen
+            WatchStore.favouriteReadings = savedFavourites
+        }
+        WatchStore.chosenReadings = []
+        for id in 1...9 { WatchStore.cacheChosenReading(reading(id, publishTime: recent(minutesAgo: 30))) }
+        XCTAssertEqual(WatchStore.chosenReadings.map(\.stationId), Array(2...9))
+
+        WatchStore.cacheChosenReading(reading(5, publishTime: recent(minutesAgo: 5)))
+        XCTAssertEqual(WatchStore.chosenReadings.count, 8)
+        XCTAssertEqual(WatchStore.chosenReadings.last?.stationId, 5)
+    }
+
+    func testCachedReadingPrefersNewerCopyAndDropForgetsBoth() {
+        let savedChosen = WatchStore.chosenReadings
+        let savedFavourites = WatchStore.favouriteReadings
+        defer {
+            WatchStore.chosenReadings = savedChosen
+            WatchStore.favouriteReadings = savedFavourites
+        }
+        let older = reading(7, publishTime: recent(minutesAgo: 60))
+        let newer = reading(7, publishTime: recent(minutesAgo: 10))
+        WatchStore.favouriteReadings = [older]
+        WatchStore.chosenReadings = [newer]
+        XCTAssertEqual(WatchStore.cachedReading(stationId: 7), newer)
+        WatchStore.favouriteReadings = [newer]
+        WatchStore.chosenReadings = [older]
+        XCTAssertEqual(WatchStore.cachedReading(stationId: 7), newer)
+
+        WatchStore.dropReading(stationId: 7)
+        XCTAssertNil(WatchStore.cachedReading(stationId: 7))
+    }
 }

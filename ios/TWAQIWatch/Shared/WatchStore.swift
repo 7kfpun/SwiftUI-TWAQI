@@ -201,6 +201,12 @@ enum WatchStore {
         chosenReadings = chosenReadings.filter { $0.stationId != stationId }
     }
 
+    /// Forgets a station that no longer exists, in both caches.
+    static func dropReading(stationId: Int) {
+        dropChosenReading(stationId: stationId)
+        favouriteReadings = favouriteReadings.filter { $0.stationId != stationId }
+    }
+
     /// The saved reading for a station a widget leads with: the newer of its
     /// favourite and chosen-station copies.
     static func cachedReading(stationId: Int) -> WatchReading? {

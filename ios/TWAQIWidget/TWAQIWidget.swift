@@ -336,7 +336,7 @@ struct ReadingProvider: AppIntentTimelineProvider {
             if configuration.station == .station,
                WidgetStationChoice.isGone(chosenId: id, fetchedIds: fetched.map(\.stationId), fetchSucceeded: result != nil) {
                 // The chosen station no longer exists: show the closest.
-                WatchStore.dropChosenReading(stationId: id)
+                WatchStore.dropReading(stationId: id)
                 leadingId = nil
             } else {
                 hasNewData = !fetched.isEmpty
