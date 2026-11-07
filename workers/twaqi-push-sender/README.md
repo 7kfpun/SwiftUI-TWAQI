@@ -120,7 +120,7 @@ It never deletes. The app's static token (TWAQI App role) needs **no** access to
 
 ## Secrets
 
-The Worker's are listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. The scheduled sends read `FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` (to forward events to `/internal/events`) from a second environment, `push-sender` (below). Never commit any of them.
+The Worker's are listed under `secrets.required` in `wrangler.jsonc`. CI uploads them from the `workers-production` environment secrets of the same names on every deploy, and refuses to deploy if one is missing. The scheduled sends read `FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE` and `SYNC_TOKEN` (to forward events to `/internal/events`) from a second environment, `push-sender` (below), plus the optional `HEALTHCHECK_PING_URL` for the [dead-man's switch](#dead-mans-switch-healthchecksio). Never commit any of them.
 
 | Secret | |
 | --- | --- |
@@ -161,13 +161,36 @@ Create it before the workflow's first run: a workflow that names a missing envir
 
 The workflow refuses any branch but `master` (and any fork) in a job that runs before the environment is touched, keeps two runs from overlapping (`concurrency`), and gives up after 30 minutes. The job fails when `run()` throws, or when it finishes with any alert that failed to send (`counts.failed`, after state and logs are saved; those alerts stay unsent and are retried next run). Dead tokens, sends deferred to the next run, and events that couldn't be forwarded don't fail it. The job log shows counts only: never device ids, token suffixes or `SYNC_TOKEN`. `workflow_dispatch` has a **dry run** input, on by default: it reads the AQI API and Directus, sends and writes nothing, and prints the counts.
 
-**GitHub's schedule is best effort.** A scheduled run can start late or be skipped when GitHub is busy, and scheduled workflows are switched off after **60 days without activity** in the repository (turn it back on under Actions → Push sender). A late or skipped run loses nothing: a crossing stays unsent until a run sends it, and nothing is sent twice.
+**GitHub's schedule is best effort.** A scheduled run can start late or be skipped when GitHub is busy, and scheduled workflows are switched off after **60 days without activity** in the repository (turn it back on under Actions → Push sender). A late or skipped run loses nothing: a crossing stays unsent until a run sends it, and nothing is sent twice. The dead-man's switch below emails when runs stop or fail.
+
+### Dead-man's switch (healthchecks.io)
+
+A silent stop would mean no alerts until users complain (FOX-77), so every real run pings a [healthchecks.io](https://healthchecks.io) check (free plan) in its last step, **Ping the monitor**:
+
+| Run | Ping | Email from healthchecks.io |
+| --- | --- | --- |
+| Sent, `run()` and every alert succeeded | the ping URL | none |
+| Failed: `run()` threw, an alert failed to send, or a step before it failed. Usually also a timed-out or cancelled job; if the runner stops before the ping step, the next row's email covers it | ping URL + `/fail` | at once ("down"), with the run's link in the ping body; "up" again at the next good run |
+| Skipped, late by more than the grace, or the schedule switched off (the 60-day rule, a disabled workflow) | none arrives | when no ping has come for the period + grace, about **1 hour after the missed slot** |
+| Dry run (`workflow_dispatch`, the default) | none | none |
+
+- **The check:** in healthchecks.io, a check named `twaqi push-sender`, **Simple** schedule, period **2 hours**, grace **1 hour**. Its notifications go to the account's email integration (the owner's address). A run that starts more than about an hour late (GitHub's queue) also trips it, and the next ping sends the "up" email.
+- **The secret:** the check's ping URL (`https://hc-ping.com/<uuid>`) as `HEALTHCHECK_PING_URL` in the `push-sender` environment. The URL is the only credential (anyone holding it can ping), so it is a secret, not a var:
+
+  ```sh
+  gh secret set HEALTHCHECK_PING_URL -R 7kfpun/SwiftUI-TWAQI --env push-sender   # paste https://hc-ping.com/<uuid>
+  ```
+
+  **Without the secret the step prints a line and skips the ping; the run is unaffected.** A ping that can't be delivered (healthchecks.io down, after curl's 5 retries) is a warning in the job and its summary, never a failed run: a missed success ping alerts by itself. healthchecks.io answers a wrong or deleted check's URL with HTTP 200 and `OK (not found)`, and a rate-limited ping with `OK (rate limited)`, so the step warns the same way (summary line, run still passes) unless the reply is exactly `OK`. A new check stays **New** and sends no email until its first ping, so after setting the secret, confirm the next real run leaves the check **Up** and its job summary has no warning.
+- **GitHub's own email:** a failed scheduled run also emails whoever last changed the workflow's `schedule`, if their GitHub notification settings send Actions failures. The `/fail` ping doesn't rely on that.
+- **Pause it** (planned downtime, moving back to the Worker): **Pause** on the check in healthchecks.io. A paused check sends nothing and goes back to watching at its next ping, so a run resumes it. To stop for good: pause or delete the check, then `gh secret delete HEALTHCHECK_PING_URL -R 7kfpun/SwiftUI-TWAQI --env push-sender`. If the workflow is deleted (Workers Paid, below), delete the check too.
+- **The 60-day rule** needs no keep-alive step: the repository has commits far more often than every 60 days, and if the schedule is ever switched off anyway, the missing pings trip the check within about an hour of the next slot. Turn it back on under Actions → Push sender → Enable workflow.
 
 ### Moving back to the Worker (Workers Paid)
 
 1. In `wrangler.jsonc`, restore `"triggers": { "crons": ["20 */2 * * *"] }` and `"limits": { "subrequests": 100000 }`, and set `SUBREQUEST_LIMIT` to `"100000"`.
 2. Restore the `scheduled` handler in `src/index.ts` (it called `run(env, { now: new Date(controller.scheduledTime) })` inside `ctx.waitUntil`; see the FOX-71 PR).
-3. Delete `.github/workflows/push-sender.yml` in the same PR, so the two never both send, and then the `push-sender` environment. `scripts/run.ts` can stay for local runs; `/internal/events` can go once nothing forwards to it (a cron run writes to the binding directly).
+3. Delete `.github/workflows/push-sender.yml` in the same PR, so the two never both send, and then the `push-sender` environment. Pause or delete the healthchecks.io check first, or it reports the stopped pings as down. `scripts/run.ts` can stay for local runs; `/internal/events` can go once nothing forwards to it (a cron run writes to the binding directly).
 
 ## Develop
 

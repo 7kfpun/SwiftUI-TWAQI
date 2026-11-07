@@ -179,7 +179,7 @@ Changes to who can reach what are recorded in Linear, never in the repo.
 | **Squash-merge** | GitHub merge button / `gh pr merge --squash`, after the user's greenlight | ruleset: required checks + `LGTM` (another agent's review); PR template checkboxes |
 | **Cloudflare Workers** | `workers.yml` on push to `master` (changed Workers only); `workflow_dispatch` to redeploy | the PR's `Workers` check; deploy runs from `master` only |
 | **Cloud Run `twaqi-api`** (read API origin, FOX-82) | by hand, `gcloud run deploy` from `services/twaqi-api` ([runbook](../services/twaqi-api/README.md#deploy-by-hand)) | the owner, from master; merging never deploys it |
-| **Push sends** (scheduled AQI alerts) | `push-sender.yml`: `schedule` `20 */2 * * *` and `workflow_dispatch` (dry run on by default), running `workers/twaqi-push-sender`'s `run()` under Node | `push-sender` environment (master only, **no reviewers**, so the schedule can run); the workflow also refuses other branches before the environment is used. See below. |
+| **Push sends** (scheduled AQI alerts) | `push-sender.yml`: `schedule` `20 */2 * * *` and `workflow_dispatch` (dry run on by default), running `workers/twaqi-push-sender`'s `run()` under Node | `push-sender` environment (master only, **no reviewers**, so the schedule can run); the workflow also refuses other branches before the environment is used. A missed or failed run emails the owner through healthchecks.io. See below. |
 | **Firebase Hosting** | `firebase-hosting.yml`, `workflow_dispatch` only, from `master`: `check-domain` · `deploy-main` | `firebase-hosting` environment (owner approval) |
 | **DNS cutover** | by hand, Cloudflare zone `wahthefox.com` + Firebase console custom domain | [web-hosting.md](web-hosting.md) steps 3-5; verify with the `check-domain` action |
 | **TestFlight** | `fastlane release_build` on the Mac mini (cloud-managed signing needs the Xcode Apple ID, so it can't run on GitHub's runners) | named in the ticket/PR; the lane runs `check_release_consistency.py` first |
@@ -243,8 +243,19 @@ unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-
 - GitHub's schedule is best effort: runs can start late or be skipped, and scheduled
   workflows switch off after 60 days without repository activity (re-enable under Actions).
   A late run loses nothing: unsent crossings go out on the next run, never twice.
+- Dead-man's switch (FOX-77): the job's last step, **Ping the monitor**, pings a
+  healthchecks.io check (free plan; period 2 h, grace 1 h) whose URL is the optional
+  `push-sender` secret `HEALTHCHECK_PING_URL`: success after a good real run, `/fail`
+  after a failed one (a timed-out or cancelled job that stops first alerts through the
+  missing success ping). healthchecks.io emails the owner on a
+  `/fail` ping and when no success ping arrives in time (a skipped run, or the schedule
+  switched off by the 60-day rule), about an hour after the missed slot. Dry runs don't
+  ping. No secret skips the ping; an undeliverable ping, or a reply other than `OK` (a
+  wrong or deleted check answers 200 `OK (not found)`), is a warning, not a failure. To
+  pause it, press Pause on the check (the next ping resumes it). Setup:
+  [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#dead-mans-switch-healthchecksio).
 - Back on Workers Paid: restore the cron, `limits` and the scheduled handler in the Worker,
-  and delete `push-sender.yml` in the same PR.
+  and delete `push-sender.yml` in the same PR (pause or delete the healthchecks.io check first).
 
 ## After the merge: TestFlight
 
