@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.2.2)
+  - Alamofire (5.12.2)
   - Google-Mobile-Ads-SDK (12.5.0):
     - GoogleUserMessagingPlatform (>= 1.1)
   - GoogleMaps (9.4.0):
@@ -17,25 +17,25 @@ PODS:
     - OneSignalXCFramework/OneSignalOutcomes
   - OneSignalXCFramework/OneSignalOutcomes (3.12.10):
     - OneSignalXCFramework/OneSignalCore
-  - SDWebImage (5.10.4):
-    - SDWebImage/Core (= 5.10.4)
-  - SDWebImage/Core (5.10.4)
-  - SDWebImageSwiftUI (1.4.0):
-    - SDWebImage (~> 5.7)
+  - SDWebImage (5.21.7):
+    - SDWebImage/Core (= 5.21.7)
+  - SDWebImage/Core (5.21.7)
+  - SDWebImageSwiftUI (3.1.4):
+    - SDWebImage (~> 5.21.1)
   - SnapKit (5.0.1)
   - SwiftDate (6.3.1)
-  - SwiftyJSON (5.0.0)
+  - SwiftyJSON (5.0.2)
 
 DEPENDENCIES:
-  - Alamofire (~> 5.2.0)
+  - Alamofire (~> 5.10)
   - Google-Mobile-Ads-SDK (~> 12.5)
   - GoogleMaps (~> 9.4)
   - lottie-ios (~> 4.5)
   - OneSignalXCFramework (< 4.0, >= 3.0.0)
-  - SDWebImageSwiftUI (~> 1.4.0)
+  - SDWebImageSwiftUI (~> 3.1)
   - SnapKit (~> 5.0)
   - SwiftDate (~> 6.1)
-  - SwiftyJSON (~> 5.0)
+  - SwiftyJSON (~> 5.0.2)
 
 SPEC REPOS:
   trunk:
@@ -52,18 +52,18 @@ SPEC REPOS:
     - SwiftyJSON
 
 SPEC CHECKSUMS:
-  Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
+  Alamofire: c5f37d8f438dc1d7fd3ff767f2f80fd01ca381d7
   Google-Mobile-Ads-SDK: 6df9aadcee32bce0ff05bcad56ef2c88a4a5e82b
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   GoogleUserMessagingPlatform: f8d0cdad3ca835406755d0a69aa634f00e76d576
   lottie-ios: 6467ca7035120c5b0e0acee58bb679cf15875686
   OneSignalXCFramework: e458f7a374192598a1d66418e1b61481c3cdf0e9
-  SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
-  SDWebImageSwiftUI: 034806fc7e19e0a36157fb8ecb9fc0437cc75230
+  SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
+  SDWebImageSwiftUI: 965cdad5a7210b7ec06aaa1a3d17180d0a152250
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SwiftDate: 72d28954e8e1c6c1c0f917ccc8005e4f83c7d4b2
-  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
+  SwiftyJSON: f5b1bf1cd8dd53cd25887ac0eabcfd92301c6a5a
 
-PODFILE CHECKSUM: 5f5adc0e222a3b9ab8ce8e61206cf4edcc10ae66
+PODFILE CHECKSUM: 4317527031be5660dc5c77a0164569c8075a3c01
 
 COCOAPODS: 1.17.0
