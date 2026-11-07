@@ -121,7 +121,7 @@
     <string name="help_widgets_shows_body">The current reading for your nearest station, or a station you choose. You choose when you add the widget; to change it later, touch and hold the widget and open its settings.</string>
     <string name="help_widgets_favourites_header">Favourite stations</string>
     <string name="help_widgets_favourites_body">Small, medium and large widgets list your other favourite stations under the main one, without repeating it. The station detail widget shows one station in detail: every index, wind, the last 24 hours, the regional forecast and the station camera. Medium, large and station detail widgets are part of Pro.</string>
-    <string name="help_widgets_favourites_add">To add a favourite, open a station and tap the heart. The widget follows your Favourites order: tap Edit there and drag to reorder.</string>
+    <string name="help_widgets_favourites_add">To add a favourite, open a station and tap the heart. The widget follows your Favourites order: touch and hold a station there and drag it to reorder, or tap Edit and use the arrows.</string>
     <string name="help_widgets_favourites_offline">Without a connection, the widget shows the last readings it saved.</string>
     <string name="help_widgets_index_header">Which index</string>
     <string name="help_widgets_index_body">In the widget\'s settings, choose AQI, PM2.5, PM10, O3, CO, SO2, or NO2.</string>

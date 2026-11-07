@@ -136,8 +136,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Always above 3000000 (the old app shipped codes up to 2097176) and increasing.
-        versionCode = 3_000_000
-        versionName = "2.0.0"
+        versionCode = 3_000_001
+        versionName = "2.0.1"
 
         buildConfigField("String", "API_DOMAIN", javaString(secret("API_DOMAIN")))
         buildConfigField("String", "DIRECTUS_URL", javaString(secret("DIRECTUS_URL")))

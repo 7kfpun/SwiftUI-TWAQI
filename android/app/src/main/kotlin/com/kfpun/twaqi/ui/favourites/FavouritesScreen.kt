@@ -1,8 +1,13 @@
 package com.kfpun.twaqi.ui.favourites
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,21 +24,38 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
@@ -46,6 +68,7 @@ import com.kfpun.twaqi.ui.common.OfflineNotice
 import com.kfpun.twaqi.ui.common.StationRow
 import com.kfpun.twaqi.ui.common.StationRowReading
 import com.kfpun.twaqi.ui.common.rememberTaiwanPlaceNames
+import kotlinx.coroutines.launch
 
 /** The Favourites tab (iOS `FavouriteListView`); [onOpenStation] pushes the station page (`StationRoute`). */
 @Composable
@@ -65,6 +88,7 @@ fun FavouritesScreen(
         onRetry = viewModel::refresh,
         onRemove = { viewModel.requestRemove(listOf(it)) },
         onMove = viewModel::move,
+        onReorder = viewModel::reorder,
         onConfirmRemoval = viewModel::confirmRemoval,
         onCancelRemoval = viewModel::cancelRemoval,
         modifier = modifier,
@@ -80,6 +104,7 @@ fun FavouritesContent(
     onRetry: () -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
+    onReorder: (stationIds: List<Int>) -> Unit,
     onConfirmRemoval: () -> Unit,
     onCancelRemoval: () -> Unit,
     modifier: Modifier = Modifier,
@@ -119,7 +144,7 @@ fun FavouritesContent(
                     Modifier.align(Alignment.TopCenter).padding(top = 64.dp)
                 )
 
-                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, listState)
+                else -> FavouriteList(state, editing, onOpenStation, onRemove, onMove, onReorder, listState)
             }
         }
     }
@@ -147,6 +172,11 @@ fun FavouritesContent(
 /** The pollutants that most often set Taiwan's AQI, on each row; the station page has all six. */
 private val KEY_POLLUTANTS = listOf(AirIndexType.PM25, AirIndexType.PM10, AirIndexType.O3)
 
+/**
+ * The rows, with iOS's list gestures: swipe a row to the left to remove it (`onDelete`), touch
+ * and hold one and drag it to reorder (`onMove`), in and out of Edit. Edit's buttons stay as the
+ * way to do both without gestures, and TalkBack gets the same as custom actions.
+ */
 @Composable
 private fun FavouriteList(
     state: FavouritesUiState,
@@ -154,47 +184,198 @@ private fun FavouriteList(
     onOpenStation: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onMove: (Int, Int) -> Unit,
+    onReorder: (List<Int>) -> Unit,
     listState: LazyListState
 ) {
     val chinese = AppLocale.isChinese(LocalContext.current)
+    val drag = rememberFavouriteDragState(listState)
+    val haptics = LocalHapticFeedback.current
+    val savedIds = state.pollutants.map { it.stationId }
+    // While a row is held, the rows follow the drag; the saved order comes back on drop.
+    val byId = state.pollutants.associateBy { it.stationId }
+    val shown = drag.order?.mapNotNull { byId[it] } ?: state.pollutants
+    val currentIds by rememberUpdatedState(savedIds)
+    val currentOnReorder by rememberUpdatedState(onReorder)
+
     LazyColumn(Modifier.fillMaxSize(), state = listState) {
         if (state.isShowingLastGood) {
             item(key = "offline") { OfflineNotice(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) }
         }
-        itemsIndexed(state.pollutants, key = { _, it -> it.stationId }) { index, pollutant ->
+        itemsIndexed(shown, key = { _, it -> it.stationId }) { index, pollutant ->
+            val id = pollutant.stationId
+            val held = drag.draggedId == id
+            Column(
+                Modifier
+                    .then(
+                        if (held) {
+                            Modifier.zIndex(1f).graphicsLayer { translationY = drag.draggedOffset }
+                        } else {
+                            Modifier.animateItem()
+                        }
+                    )
+                    .pointerInput(id) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            // Null when the finger moved first: a scroll, or the row's swipe.
+                            val press = awaitLongPressOrCancellation(down.id) ?: return@awaitEachGesture
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            drag.start(id, currentIds)
+                            var dropped = false
+                            try {
+                                // The long press won: take the rest of the stroke on the Initial
+                                // pass, before the row's swipe and click see it, so a diagonal drag
+                                // can't turn into a removal and lifting the finger isn't a tap.
+                                while (true) {
+                                    val change = awaitPointerEvent(PointerEventPass.Initial)
+                                        .changes.firstOrNull { it.id == press.id } ?: break
+                                    val dy = change.positionChange().y
+                                    change.consume()
+                                    if (!change.pressed) {
+                                        dropped = true
+                                        break
+                                    }
+                                    drag.drag(dy)
+                                }
+                            } finally {
+                                // Saved by station id, so a refresh mid-drag can't move another row.
+                                if (dropped) drag.end()?.let(currentOnReorder) else drag.cancel()
+                            }
+                        }
+                    }
+            ) {
+                FavouriteItem(
+                    pollutant = pollutant,
+                    chinese = chinese,
+                    alerted = state.alertedStationIds,
+                    editing = editing,
+                    held = held,
+                    swipeEnabled = drag.draggedId == null,
+                    canMoveUp = index > 0,
+                    canMoveDown = index < shown.lastIndex,
+                    onOpen = { if (drag.draggedId == null) onOpenStation(id) },
+                    onRemove = { onRemove(id) },
+                    onMoveUp = { onMove(index, index - 1) },
+                    onMoveDown = { onMove(index, index + 1) }
+                )
+                if (!held) HorizontalDivider(Modifier.padding(start = 16.dp))
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FavouriteItem(
+    pollutant: Pollutant,
+    chinese: Boolean,
+    alerted: Set<Int>,
+    editing: Boolean,
+    held: Boolean,
+    swipeEnabled: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onOpen: () -> Unit,
+    onRemove: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val swipe = rememberSwipeToDismissBoxState()
+    val removeLabel = stringResource(R.string.favourites_remove_from_favourites)
+    val moveUpLabel = stringResource(R.string.favourites_move_up)
+    val moveDownLabel = stringResource(R.string.favourites_move_down)
+
+    SwipeToDismissBox(
+        state = swipe,
+        // Like iOS: only a swipe to the left removes.
+        enableDismissFromStartToEnd = false,
+        gesturesEnabled = swipeEnabled,
+        onDismiss = {
+            // Removed at once, or the reader is asked first (alerts on): either way the row
+            // slides back, so a cancelled removal leaves it as it was.
+            onRemove()
+            scope.launch { swipe.reset() }
+        },
+        backgroundContent = { SwipeRemoveBackground(swipe.dismissDirection == SwipeToDismissBoxValue.EndToStart) }
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = if (held) 8.dp else 0.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .then(if (editing) Modifier else Modifier.clickable { onOpenStation(pollutant.stationId) })
+                    .then(if (editing) Modifier else Modifier.clickable(onClick = onOpen))
+                    // TalkBack's way to reorder and remove without the gestures or Edit.
+                    .semantics {
+                        customActions = buildList {
+                            if (canMoveUp) {
+                                add(
+                                    CustomAccessibilityAction(moveUpLabel) {
+                                        onMoveUp()
+                                        true
+                                    }
+                                )
+                            }
+                            if (canMoveDown) {
+                                add(
+                                    CustomAccessibilityAction(moveDownLabel) {
+                                        onMoveDown()
+                                        true
+                                    }
+                                )
+                            }
+                            add(
+                                CustomAccessibilityAction(removeLabel) {
+                                    onRemove()
+                                    true
+                                }
+                            )
+                        }
+                    }
                     .padding(horizontal = if (editing) 4.dp else 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (editing) {
-                    IconButton(onClick = { onRemove(pollutant.stationId) }) {
+                    IconButton(onClick = onRemove) {
                         Icon(
                             painterResource(R.drawable.ic_station_remove),
-                            contentDescription = stringResource(R.string.favourites_remove_from_favourites),
+                            contentDescription = removeLabel,
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
-                FavouriteRow(pollutant, chinese, state.alertedStationIds, Modifier.weight(1f))
+                FavouriteRow(pollutant, chinese, alerted, Modifier.weight(1f))
                 if (editing) {
-                    IconButton(onClick = { onMove(index, index - 1) }, enabled = index > 0) {
-                        Icon(
-                            painterResource(R.drawable.ic_station_move_up),
-                            contentDescription = stringResource(R.string.favourites_move_up)
-                        )
+                    IconButton(onClick = onMoveUp, enabled = canMoveUp) {
+                        Icon(painterResource(R.drawable.ic_station_move_up), contentDescription = moveUpLabel)
                     }
-                    IconButton(onClick = { onMove(index, index + 1) }, enabled = index < state.pollutants.lastIndex) {
-                        Icon(
-                            painterResource(R.drawable.ic_station_move_down),
-                            contentDescription = stringResource(R.string.favourites_move_down)
-                        )
+                    IconButton(onClick = onMoveDown, enabled = canMoveDown) {
+                        Icon(painterResource(R.drawable.ic_station_move_down), contentDescription = moveDownLabel)
                     }
                 }
             }
-            HorizontalDivider(Modifier.padding(start = 16.dp))
+        }
+    }
+}
+
+/** Behind a row swiped to the left: red, with the remove sign at the trailing edge (iOS's Delete). */
+@Composable
+private fun SwipeRemoveBackground(active: Boolean) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(if (active) MaterialTheme.colorScheme.error else Color.Transparent)
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        if (active) {
+            Icon(
+                painterResource(R.drawable.ic_station_remove),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onError
+            )
         }
     }
 }

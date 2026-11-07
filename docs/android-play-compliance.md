@@ -31,9 +31,12 @@ before sending the Data safety form, so the two say the same thing.
 Permissions (`app/src/main/AndroidManifest.xml:4-16`): `INTERNET`, `ACCESS_NETWORK_STATE`,
 `POST_NOTIFICATIONS`, `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, `WRITE_EXTERNAL_STORAGE`
 (Android 8–9 only, to save a share card). The Wear OS app asks only for `INTERNET` and
-`ACCESS_COARSE_LOCATION` (`wear/src/main/AndroidManifest.xml:6-8`). Libraries add
+`ACCESS_COARSE_LOCATION` (`wear/src/main/AndroidManifest.xml:6-8`), and declares
+`com.google.android.gms.permission.AD_ID` (lines 9-12) only because Play checks every artifact
+against the app-wide advertising ID declaration; the watch app has no ads or analytics and never
+reads it (FOX-128). In the phone app, libraries add
 `com.google.android.gms.permission.AD_ID`, `com.android.vending.BILLING` and the FCM receive
-permission to the merged manifest.
+permission to its merged manifest; the Wear OS app declares `AD_ID` itself.
 
 ## Data safety form
 

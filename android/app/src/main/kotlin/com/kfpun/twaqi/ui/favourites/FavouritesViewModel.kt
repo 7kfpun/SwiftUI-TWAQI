@@ -155,6 +155,23 @@ class FavouritesViewModel(
         logEvent(Analytics.FAVOURITE_STATION_REORDERED, emptyMap())
     }
 
+    /**
+     * Saves a dropped drag: [stationIds] in their new order. By id, so it holds even when the list
+     * was refreshed while the row was held; saved stations it doesn't name keep their place after
+     * the rest (`FavouritesRepository.reorder`). Alerts stay as they are.
+     */
+    fun reorder(stationIds: List<Int>) {
+        val before = favourites.favourites.value
+        favourites.reorder(stationIds)
+        val saved = favourites.favourites.value
+        if (saved == before) return
+        state.update { s ->
+            val rank = saved.withIndex().associate { (i, id) -> id to i }
+            s.copy(pollutants = s.pollutants.sortedBy { rank[it.stationId] ?: Int.MAX_VALUE })
+        }
+        logEvent(Analytics.FAVOURITE_STATION_REORDERED, emptyMap())
+    }
+
     private fun ordered(list: List<Pollutant>, order: List<Int>): List<Pollutant> {
         val byId = list.associateBy { it.stationId }
         return order.mapNotNull { byId[it] }
