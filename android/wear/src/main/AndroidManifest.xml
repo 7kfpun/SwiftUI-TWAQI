@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Home: the station nearest the reader. Coarse is enough; stations are kilometres apart. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Play's advertising ID declaration is per app (the phone app shows AdMob ads and runs
+         Firebase Analytics), and Play blocks any artifact whose manifest lacks AD_ID (FOX-128).
+         The watch app has no ads or analytics and never reads the advertising ID. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
         android:allowBackup="false"
