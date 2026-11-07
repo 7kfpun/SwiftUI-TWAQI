@@ -17,18 +17,18 @@ deliberate action, taken only when the ticket or PR names it.
 
 | Check | Workflow | Runs on | Fails when |
 |---|---|---|---|
-| `Unit tests` | `ci.yml` | non-draft `feature/*` | the level script's tests or list check fail; the build fails (**build** and **test** levels); or the `-only-testing` subset fails (**test** level, built from the CI-only `TWAQI-CI` scheme, which leaves out the UI-test runner). Green in seconds at the **skip** level. Levels below. |
+| `Unit tests` | `ci.yml` | non-draft `feature/*` | the level script's tests or list check fail; the build fails (**build** and **test** levels); or the `-only-testing` subset fails (**test** level, built from the CI-only `TWAQI-CI` scheme, which leaves out the UI-test runner). Skipped at the **skip** level: `Unit tests scope` (Linux) decides, so no macOS runner starts, and a skipped required check counts as passing. If `Unit tests scope` fails, `Unit tests` runs and fails rather than being skipped (FOX-143). Levels below. |
 | `Vulnerability checks` | `ci.yml` | non-draft `feature/*` | TruffleHog **verified** a secret in the PR's commits. Unverified findings, osv-scanner results and tool failures are warnings, posted as a PR comment. |
 | `PR policy` | `pr-policy.yml` | every PR, drafts too | the branch isn't `feature/…`; no `FOX-nn` in the branch or title; a `Depends on #N` PR isn't merged; Fastfile `APP_VERSION`, `MARKETING_VERSION`, build numbers or What's New disagree (`tools/check_release_consistency.py`). |
 | `Secret files` | `pr-policy.yml` | every PR, drafts too | the net diff adds or changes `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env*`, `.dev.vars*`, signing keys or profiles; force-adds a gitignored file; or adds a real-looking secret value (`tools/check_secret_files.py`). Example and placeholder files pass. |
 | `Workers` | `workers.yml` | non-draft PRs | a changed Worker fails its typecheck or `wrangler deploy --dry-run`. Green when no Worker changed. |
 | `Services` | `services.yml` | non-draft PRs | `services/twaqi-api` fails `cargo fmt --check`, clippy (`-D warnings`) or `cargo test --locked` (golden fixtures included). Green when `services/` didn't change. Deploys nothing. |
-| `Android` | `android.yml` | every PR to `master` (green at once on drafts and when nothing under `android/` or the workflow changed) | `./gradlew ktlintCheck lint test assembleDebug` fails in `android/` (ktlint, Android lint, JVM unit tests, debug build; example config, no secrets). Required on `master` once FOX-52 is merged ([master-protection.md](master-protection.md#android-check-fox-52)). |
+| `Android` | `android.yml` | every PR to `master` (skipped on drafts and when nothing under `android/` or the workflow changed: the `Android changes` job decides, and a skipped required check counts as passing; if that job fails, `Android` runs and fails, FOX-143) | `./gradlew ktlintCheck lint test assembleDebug` fails in `android/` (ktlint, Android lint, JVM unit tests, debug build; example config, no secrets). Required on `master` once FOX-52 is merged ([master-protection.md](master-protection.md#android-check-fox-52)). |
 | `Public text` | `public-text.yml` | non-draft PRs, again on each description edit | the title, description, a commit message or an added line names a non-website host, an IP or network range, a private email, or network-exposure details (`tools/public_text_check.py`). Hosts are fine in files that need them to work (config, scripts, app constants, tests). See [Public repo](#public-repo-what-stays-out). |
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
 
-`Unit tests` levels (FOX-79). The job's first steps check out the repo, run
+`Unit tests` levels (FOX-79). The `Unit tests scope` job (Linux, FOX-143) checks out the repo, runs
 `tools/test_ci_test_level.py` and `tools/ci_test_level.py check`, then decide a level from
 the PR's file list (`gh api …/pulls/N/files`). The highest level any file needs wins:
 
@@ -45,7 +45,7 @@ the PR's file list (`gh api …/pulls/N/files`). The highest level any file need
   add the label and re-run the job (or push). Adding a label alone starts no run.
 - An empty file list, or a failed files or labels API call, gives **test**: never skip on doubt.
 - The step prints the level and the files that decided it, and writes them to the job summary.
-- The check is `Unit tests` at every level, so `master`'s required checks and the `PR policy`
+- The check is `Unit tests` at every level (skipped at **skip**), so `master`'s required checks and the `PR policy`
   and `LGTM` gates are unaffected. The full `TWAQITests` still runs locally before a PR is
   marked ready; CI's simulator run is the second check.
 
