@@ -77,7 +77,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private var lastLayoutWidth: CGFloat = 0
 
     deinit {
-        onboardingObserver.map(NotificationCenter.default.removeObserver)
+        // A closed iPad window must free its map: stop the refresh timer and
+        // drop every observer this controller registered (FOX-135).
+        refreshTimer?.invalidate()
+        [onboardingObserver, proObserver, foregroundObserver, backgroundObserver]
+            .forEach { $0.map(NotificationCenter.default.removeObserver) }
     }
 
     @objc func toggleIsWindMode() {
@@ -191,7 +195,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func callGetCountriesApi() {
-        APIManager.getCountries { result in
+        APIManager.getCountries { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success(let result):
                 self.countries = result
@@ -242,12 +247,19 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     private var foregroundObserver: NSObjectProtocol?
+    private var backgroundObserver: NSObjectProtocol?
+    /// The 15-minute data refresh. Held weakly by the run loop's target
+    /// (the block captures `self` weakly) and invalidated in `deinit`.
+    private(set) var refreshTimer: Timer?
+    /// When the paused timer was due, kept across a background trip.
+    private var pausedFireDate: Date?
 
     func callGetCurrentPollutantsApi(countryCode: String) {
         guard !pollutantRequestsInFlight.contains(countryCode) else { return }
         pollutantRequestsInFlight.insert(countryCode)
 
-        APIManager.getCurrentPollutants(countryCode: countryCode) { result in
+        APIManager.getCurrentPollutants(countryCode: countryCode) { [weak self] result in
+            guard let self = self else { return }
             self.pollutantRequestsInFlight.remove(countryCode)
 
             switch result {
@@ -718,8 +730,36 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self?.updateBannerClearance()
         }
 
-        Timer.scheduledTimer(withTimeInterval: 60 * 15, repeats: true) { (_) in
-            // Schedule in seconds
+        startRefreshTimer()
+
+        foregroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.startRefreshTimer()
+            self?.refreshAfterForeground()
+        }
+
+        // No polling while the app is in the background.
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.stopRefreshTimer()
+        }
+
+        loadContent()
+    }
+
+    static let refreshInterval: TimeInterval = 60 * 15
+
+    /// Arms the refresh timer. A timer paused by `stopRefreshTimer()` resumes
+    /// on its saved fire date, so short background trips don't push the
+    /// refresh back a full interval. An armed timer is left alone.
+    func startRefreshTimer() {
+        if let timer = refreshTimer, timer.isValid { return }
+        let fireDate = pausedFireDate ?? Date().addingTimeInterval(Self.refreshInterval)
+        pausedFireDate = nil
+        let timer = Timer(fire: fireDate, interval: Self.refreshInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             if self.countries.isEmpty {
                 self.callGetCountriesApi()
             }
@@ -727,14 +767,16 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 self.callGetCurrentPollutantsApi(countryCode: countryCode)
             }
         }
+        RunLoop.main.add(timer, forMode: .default)
+        refreshTimer = timer
+    }
 
-        foregroundObserver = NotificationCenter.default.addObserver(
-            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
-        ) { [weak self] _ in
-            self?.refreshAfterForeground()
+    func stopRefreshTimer() {
+        if let timer = refreshTimer, timer.isValid {
+            pausedFireDate = timer.fireDate
         }
-
-        loadContent()
+        refreshTimer?.invalidate()
+        refreshTimer = nil
     }
 
     private func updateBannerClearance() {
