@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,7 +63,8 @@ fun StationList(
     onRetry: () -> Unit,
     onSelectIndex: (AirIndexType) -> Unit,
     showIndexSelector: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val focusManager = LocalFocusManager.current
     val chinese = AppLocale.isChinese(LocalContext.current)
@@ -125,7 +128,7 @@ fun StationList(
 
             rows.isEmpty() -> EmptyState(message = stringResource(R.string.details_no_data))
 
-            else -> LazyColumn(Modifier.fillMaxSize()) {
+            else -> LazyColumn(Modifier.fillMaxSize(), state = listState) {
                 items(rows, key = { it.first.stationId }) { (pollutant, distance) ->
                     StationListRow(pollutant, distance, state.indexType, lastGood, chinese, onClick = {
                         focusManager.clearFocus()

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,6 +49,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kfpun.twaqi.R
@@ -96,13 +98,16 @@ fun StationCamSection(state: StationDetailsUiState, modifier: Modifier = Modifie
         station?.let { viewModel.findCam(it.nameLocal, it.lat, it.lon) }
     }
     val cam by viewModel.cam.collectAsStateWithLifecycle()
+    // FOX-119: the scrubber's hour lives with the page's view models too, so it follows the page
+    // between the full screen and the panel beside the map or a list when a foldable folds or unfolds.
+    val scrubber: CamScrubberPosition = viewModel(key = "station-cam-position-${state.stationId}")
 
     Column(modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionLabel(stringResource(R.string.details_live_cam))
         when (val current = cam) {
             StationCamState.Loading -> CamBox { CamPlaceholder() }
 
-            is StationCamState.Available -> CamFrameView(current.cam, viewModel.frames, viewModel.history)
+            is StationCamState.Available -> CamFrameView(current.cam, viewModel.frames, viewModel.history, scrubber)
 
             StationCamState.Missing -> Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -126,13 +131,17 @@ fun StationCamSection(state: StationDetailsUiState, modifier: Modifier = Modifie
 private fun CamFrameView(
     cam: StationCam,
     frames: StationCamFrameLoader<ImageBitmap>,
-    history: StationCamHistoryLoader<ImageBitmap>
+    history: StationCamHistoryLoader<ImageBitmap>,
+    scrubber: CamScrubberPosition
 ) {
     val frame by frames.state.collectAsStateWithLifecycle()
     val hours by history.state.collectAsStateWithLifecycle()
 
     // 0 until 24 are the hourly slots, oldest first; 24 is live.
-    var position by rememberSaveable { mutableFloatStateOf(StationCamHour.COUNT.toFloat()) }
+    // Starts from [scrubber], which outlives a move of the page (FOX-119); rememberSaveable covers
+    // process death, and SideEffect hands its value back to [scrubber].
+    var position by rememberSaveable { mutableFloatStateOf(scrubber.position) }
+    SideEffect { scrubber.position = position }
     val selectedIndex = position.roundToInt().takeIf { it < StationCamHour.COUNT }
 
     // Keyed by the cam, whose capture time versions the frame: a new frame in the manifest loads
@@ -392,4 +401,13 @@ private fun CamMessage(@DrawableRes icon: Int, text: String) {
         Icon(painterResource(icon), contentDescription = null, tint = secondaryText(), modifier = Modifier.size(28.dp))
         Text(text, style = MaterialTheme.typography.bodySmall, color = secondaryText())
     }
+}
+
+/**
+ * The cam scrubber's position (0 until 24 are the hourly slots, 24 is live), held in the station
+ * page's view model store so the picked hour survives the page moving between the full screen and
+ * the panel beside the map or a list (FOX-119).
+ */
+class CamScrubberPosition : ViewModel() {
+    var position: Float = StationCamHour.COUNT.toFloat()
 }

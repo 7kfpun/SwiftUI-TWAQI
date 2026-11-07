@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -39,6 +41,8 @@ import com.kfpun.twaqi.analytics.TrackingManager
 import com.kfpun.twaqi.analytics.VersionTapCounter
 import com.kfpun.twaqi.feedback.FeedbackSource
 import com.kfpun.twaqi.locale.AppLocale
+import com.kfpun.twaqi.ui.adaptive.ListDetailLayout
+import com.kfpun.twaqi.ui.adaptive.SelectionPlaceholder
 import com.kfpun.twaqi.ui.settings.AppearanceRow
 import com.kfpun.twaqi.ui.settings.DoNotDisturbRows
 import com.kfpun.twaqi.ui.settings.LanguageRow
@@ -50,41 +54,62 @@ import com.kfpun.twaqi.ui.settings.LanguageRow
  * @param isPro hides the Premium section; from the Pro entitlement (FOX-58).
  * @param onOpenPro opens the Pro screen (FOX-58).
  * @param onShowWelcomeGuide runs the welcome flow again, over the tabs (FOX-96).
+ * @param wide a wide window (FOX-119, iOS `AdaptiveNavigation`): the list, with the chosen page
+ *   beside it, or "Select a topic" until one is chosen.
+ * @param listState held by the tab, so the list's scroll position survives folding and unfolding.
  */
 @Composable
 fun HelpHost(
     isPro: Boolean,
     onOpenPro: () -> Unit,
     modifier: Modifier = Modifier,
-    onShowWelcomeGuide: () -> Unit = {}
+    onShowWelcomeGuide: () -> Unit = {},
+    wide: Boolean = false,
+    listState: LazyListState = rememberLazyListState()
 ) {
     var stack by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val top = stack.lastOrNull()?.let(HelpDestination::fromRoute)
-    val open: (HelpDestination) -> Unit = { stack = stack + it.route }
+    // Beside the list, a chosen topic replaces the one shown rather than stacking on it.
+    val open: (HelpDestination) -> Unit = { stack = if (wide) listOf(it.route) else stack + it.route }
     val back: () -> Unit = { stack = stack.dropLast(1) }
     BackHandler(enabled = stack.isNotEmpty(), onBack = back)
 
-    Box(modifier.fillMaxSize()) {
-        when (top) {
-            null -> HelpScreen(
+    val list = @Composable { listModifier: Modifier ->
+        Box(listModifier.fillMaxSize()) {
+            HelpScreen(
                 isPro = isPro,
                 onOpenPro = onOpenPro,
                 onOpen = open,
-                onShowWelcomeGuide = onShowWelcomeGuide
+                onShowWelcomeGuide = onShowWelcomeGuide,
+                listState = listState
             )
-
-            is HelpDestination.IndexGuide -> IndexGuideScreen(top.page, onBack = back)
-
-            HelpDestination.WidgetGuide -> WidgetGuideScreen(onBack = back)
-
-            HelpDestination.WearOsGuide -> WearOsGuideScreen(onBack = back)
-
-            HelpDestination.ShortcutsGuide -> ShortcutsGuideScreen(onBack = back)
-
-            HelpDestination.Cooperate -> CooperateScreen(onBack = back)
-
-            HelpDestination.Feedback -> FeedbackScreen(source = FeedbackSource.HELP, onBack = back)
         }
+    }
+    if (wide) {
+        ListDetailLayout(
+            list = list,
+            detail = top?.let { page -> { pageModifier -> Box(pageModifier) { HelpPage(page, back) } } },
+            placeholder = {
+                SelectionPlaceholder(R.drawable.ic_tab_help, stringResource(R.string.help_select_a_topic))
+            },
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        Box(modifier.fillMaxSize()) {
+            if (top == null) list(Modifier) else HelpPage(top, back)
+        }
+    }
+}
+
+@Composable
+private fun HelpPage(page: HelpDestination, back: () -> Unit) {
+    when (page) {
+        is HelpDestination.IndexGuide -> IndexGuideScreen(page.page, onBack = back)
+        HelpDestination.WidgetGuide -> WidgetGuideScreen(onBack = back)
+        HelpDestination.WearOsGuide -> WearOsGuideScreen(onBack = back)
+        HelpDestination.ShortcutsGuide -> ShortcutsGuideScreen(onBack = back)
+        HelpDestination.Cooperate -> CooperateScreen(onBack = back)
+        HelpDestination.Feedback -> FeedbackScreen(source = FeedbackSource.HELP, onBack = back)
     }
 }
 
@@ -94,7 +119,8 @@ internal fun HelpScreen(
     isPro: Boolean,
     onOpenPro: () -> Unit,
     onOpen: (HelpDestination) -> Unit,
-    onShowWelcomeGuide: () -> Unit = {}
+    onShowWelcomeGuide: () -> Unit = {},
+    listState: LazyListState = rememberLazyListState()
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -103,7 +129,7 @@ internal fun HelpScreen(
             LargeTopAppBar(title = { Text(stringResource(R.string.help_help)) }, scrollBehavior = scrollBehavior)
         }
     ) { padding ->
-        HelpList(padding) {
+        HelpList(padding, listState) {
             HelpSection.order(isPro).forEach { section ->
                 section(section, onOpenPro, onOpen, onShowWelcomeGuide)
             }
