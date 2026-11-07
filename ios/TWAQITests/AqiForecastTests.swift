@@ -135,6 +135,7 @@ final class AqiForecastTests: XCTestCase {
         XCTAssertEqual(AqiForecastPollutant.display("細懸浮微粒", chinese: false), "PM2.5")
         XCTAssertEqual(AqiForecastPollutant.display("懸浮微粒", chinese: false), "PM10")
         XCTAssertEqual(AqiForecastPollutant.display("臭氧8小時", chinese: false), "O₃ (8h)")
+        XCTAssertEqual(AqiForecastPollutant.display("臭氧八小時", chinese: false), "O₃ (8h)")
         XCTAssertEqual(AqiForecastPollutant.display("臭氧8小時", chinese: true), "臭氧8小時")
         XCTAssertNil(AqiForecastPollutant.display(" ", chinese: true))
     }

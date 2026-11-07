@@ -151,6 +151,7 @@ class AqiForecastTest {
         assertEquals("PM2.5", AqiForecastPollutant.display("細懸浮微粒", chinese = false))
         assertEquals("PM10", AqiForecastPollutant.display("懸浮微粒", chinese = false))
         assertEquals("O₃ (8h)", AqiForecastPollutant.display("臭氧8小時", chinese = false))
+        assertEquals("O₃ (8h)", AqiForecastPollutant.display("臭氧八小時", chinese = false))
         assertEquals("臭氧8小時", AqiForecastPollutant.display("臭氧8小時", chinese = true))
         assertNull(AqiForecastPollutant.display(" ", chinese = true))
         assertNull(AqiForecastPollutant.display("-", chinese = false))
