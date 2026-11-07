@@ -32,6 +32,8 @@ enum StationLinkSource: String {
     /// A tap on a medium or large Home Screen widget, on the station it
     /// shows (FOX-76).
     case widget
+    /// A tap on a push alert, on the station it is about (FOX-141).
+    case push
     /// `twaqi://station` with no `source`, or one this build doesn't know.
     case deepLink = "deep_link"
 }
@@ -68,6 +70,21 @@ enum DeepLink: Equatable {
             URLQueryItem(name: sourceItem, value: source.rawValue),
         ]
         return components.url
+    }
+
+    /// The station link for a tapped push alert's payload (FOX-141): the
+    /// sender puts `station_id` in the data as a string (FCM data is strings
+    /// only). Nil when it is missing or not a positive whole number, so the
+    /// tap just opens the app.
+    static func pushTapURL(userInfo: [AnyHashable: Any]) -> URL? {
+        let id: Int?
+        switch userInfo["station_id"] {
+        case let string as String: id = Int(string.trimmingCharacters(in: .whitespaces))
+        case let number as NSNumber: id = number.intValue
+        default: id = nil
+        }
+        guard let id, id > 0 else { return nil }
+        return stationURL(stationId: id, source: .push)
     }
 
     /// Nil for any URL that isn't one of ours.
