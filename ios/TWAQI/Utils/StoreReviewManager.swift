@@ -101,11 +101,10 @@ struct StoreReviewHelper {
             token = NotificationCenter.default.addObserver(
                 forName: UIScene.didActivateNotification, object: nil, queue: .main
             ) { note in
+                guard let scene = note.object as? UIWindowScene else { return }
                 token.map(NotificationCenter.default.removeObserver)
                 token = nil
-                if let scene = note.object as? UIWindowScene {
-                    Task { @MainActor in requestReview(in: scene) }
-                }
+                Task { @MainActor in requestReview(in: scene) }
             }
         }
     }
