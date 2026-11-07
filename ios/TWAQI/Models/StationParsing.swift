@@ -7,7 +7,16 @@
 //
 
 import Foundation
-import SwiftyJSON
+
+/// Reads typed values out of a decoded JSON object, degrading to `nil` for a
+/// missing key or a different type (what SwiftyJSON's `.int`/`.string` did).
+extension Dictionary where Key == String, Value == Any {
+    func object(_ key: String) -> [String: Any] { self[key] as? [String: Any] ?? [:] }
+    func string(_ key: String) -> String? { self[key] as? String }
+    func int(_ key: String) -> Int? { (self[key] as? NSNumber)?.intValue }
+    func double(_ key: String) -> Double? { (self[key] as? NSNumber)?.doubleValue }
+    func float(_ key: String) -> Float? { (self[key] as? NSNumber)?.floatValue }
+}
 
 extension Station {
     /// Builds a `Station` from either `/v1/stations` or the `station` object on
@@ -15,33 +24,33 @@ extension Station {
     ///
     /// Every nested object (`address`, `area`, `additional_info`) is absent for
     /// newer micro-sensor stations, so each field degrades to `nil`.
-    static func make(from json: JSON) -> Station {
-        let nameEn = json["name"]["en"].string
-        let nameZh = json["name"]["zh"].string
-        let nameTh = json["name"]["th"].string
-        let code = json["code"].string ?? ""
+    static func make(from json: [String: Any]) -> Station {
+        let nameEn = json.object("name").string("en")
+        let nameZh = json.object("name").string("zh")
+        let nameTh = json.object("name").string("th")
+        let code = json.string("code") ?? ""
 
-        let imageUrl = json["image_url"].string
-        let additionalInfo = json["additional_info"]
+        let imageUrl = json.string("image_url")
+        let additionalInfo = json.object("additional_info")
 
         return Station(
-            id: json["id"].int ?? 0,
+            id: json.int("id") ?? 0,
             // The stations endpoint uses camelCase, the historical one snake_case.
-            countryId: json["countryId"].int ?? json["country_id"].int ?? 0,
-            countryCode: json["countryCode"].string ?? json["country_code"].string ?? "",
+            countryId: json.int("countryId") ?? json.int("country_id") ?? 0,
+            countryCode: json.string("countryCode") ?? json.string("country_code") ?? "",
             code: code,
-            lat: json["lat"].double ?? 0,
-            lon: json["lon"].double ?? 0,
+            lat: json.double("lat") ?? 0,
+            lon: json.double("lon") ?? 0,
             imageUrl: (imageUrl?.isEmpty ?? true) ? nil : imageUrl,
             name: nameEn ?? nameZh ?? nameTh ?? code,
             nameLocal: nameZh ?? nameTh ?? nameEn ?? code,
-            address: json["address"]["zh"].string,
-            area: json["area"]["en"].string,
-            areaLocal: json["area"]["zh"].string,
-            county: additionalInfo["county"]["en"].string,
-            countyLocal: additionalInfo["county"]["zh"].string,
-            township: additionalInfo["township"]["zh"].string,
-            stationTypeRaw: json["station_type"].string
+            address: json.object("address").string("zh"),
+            area: json.object("area").string("en"),
+            areaLocal: json.object("area").string("zh"),
+            county: additionalInfo.object("county").string("en"),
+            countyLocal: additionalInfo.object("county").string("zh"),
+            township: additionalInfo.object("township").string("zh"),
+            stationTypeRaw: json.string("station_type")
         )
     }
 }
