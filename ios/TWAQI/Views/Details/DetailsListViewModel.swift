@@ -33,7 +33,7 @@ class DetailsListViewModel: ObservableObject {
                 self.stations = stations
                 Self.cache(stations, countryCode: countryCode)
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("getStations failed: \(error.localizedDescription)")
                 self.loadFailed = self.stations.isEmpty
             }
         }

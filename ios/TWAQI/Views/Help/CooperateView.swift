@@ -223,7 +223,6 @@ struct CooperateView: View {
                 showingSuccess = true
             } catch {
                 let cooperateError = error as? FeedbackError ?? .network
-                debugPrint("CooperateService.submit failed: \(cooperateError)")
                 TrackingManager.logEvent(
                     .submitCooperateFailed,
                     parameters: ["reason": String(describing: cooperateError)]

@@ -29,7 +29,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         )
     }
 
-    let mapView = GMSMapView.map(withFrame: .zero, camera: GoogleMapViewController.initialCamera)
+    let mapView: GMSMapView = {
+        let options = GMSMapViewOptions()
+        options.camera = GoogleMapViewController.initialCamera
+        return GMSMapView(options: options)
+    }()
 
     var closestStationView: ClosestStationView!
     var defaultLocationButton: DefaultLocationButton!
@@ -94,7 +98,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     func goToMyLocation(isSkipLog: Bool = false) {
         if let mylocation = self.mapView.myLocation {
-            print("User's location: \(mylocation)")
             let mylocationCamera = GMSCameraPosition.camera(
                 withLatitude: mylocation.coordinate.latitude,
                 longitude: mylocation.coordinate.longitude,
@@ -107,8 +110,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             if !isSkipLog {
                 TrackingManager.logEvent(.moveToCurrentLocation)
             }
-        } else {
-            print("User's location is unknown")
         }
     }
 
@@ -129,7 +130,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     @objc func changeIndex(sender: UIButton?) {
         if let tag = sender?.tag {
             let airIndexTypes = AirIndexTypes.allCases[tag]
-            print(tag, airIndexTypes)
             self.airIndexTypeSelected = airIndexTypes
 
             indexSelectorView.setSelected(tag: tag)
@@ -211,9 +211,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
                 self.checkClosestCountry(latitude: self.currentLatitude, longitude: self.currentLongitude)
                 self.loadMarkers()
-                print("Total Countries: \(result.count)")
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("getCountries failed: \(error.localizedDescription)")
                 // Offline launch: the country list is only needed to know
                 // which country to load, and the last answer is saved. Its
                 // pollutants request falls back to the last good readings.
@@ -265,7 +264,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
             switch result {
             case .success(let result):
-                print("callGetCurrentPollutantsApi Total: \(result.count)")
                 self.lastGoodCountryCodes.remove(countryCode)
                 self.countryPollutants[countryCode] = result
                 WidgetBridge.publish(
@@ -273,7 +271,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                     closest: self.liveClosestPollutant
                 )
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("getCurrentPollutants failed: \(error.localizedDescription)")
                 // Keep what is on screen; with nothing on screen yet, show the
                 // last good readings rather than an empty map.
                 if self.countryPollutants[countryCode] == nil {
@@ -644,7 +642,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func checkClosestStation(latitude: Double, longitude: Double) {
-        print("checkClosestStation")
         var distance: Double = .greatestFiniteMagnitude
 
         var tempClosestPollutant = self.closestPollutant
@@ -659,7 +656,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
 
         if let closestPollutant = tempClosestPollutant {
-            print("checkClosestStation", closestPollutant)
             self.closestPollutant = closestPollutant
             // Last good readings stay on the map; the widgets keep whatever
             // they last had, which may be newer.
@@ -675,7 +671,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     func loadClosestStationView() {
         if let livePollutant = self.closestPollutant {
             let closestPollutant = displayedPollutant(livePollutant).pollutant
-            print("loadClosestStationView", closestPollutant)
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
             let text = value != 0 ? value.format(f: self.airIndexTypeSelected.getFormat()) : "-" 
             let airStatus = AirStatuses.checkAirStatus(
@@ -831,22 +826,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     // MARK: GMSMapViewDelegate
-    func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
-        print("You tapped at \(coordinate.latitude), \(coordinate.longitude)")
-    }
-
     func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
         guard let stationMarker = marker as? StationMarker else { return true }
 
         // Markers outside the supported country are context only.
         guard stationMarker.isInteractive else {
-            print("Marker tapped but not openable (outside supported country)", stationMarker.pollutant.stationId)
             return true
         }
 
         let pollutant = stationMarker.pollutant
-        print("Marker tapped", pollutant.stationId)
-
         TrackingManager.logEvent(.checkMainDetails, parameters: [
             "name": pollutant.name,
             "nameLocal": pollutant.nameLocal,
@@ -885,7 +873,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
-        print("Camera position", position)
         let latitude = position.target.latitude as Double
         let longitude = position.target.longitude as Double
         let zoom = position.zoom
