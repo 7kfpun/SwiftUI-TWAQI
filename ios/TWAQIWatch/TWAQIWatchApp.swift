@@ -48,6 +48,8 @@ final class WatchModel: ObservableObject {
     @Published private(set) var isLoadingHistory = false
     @Published private(set) var failed = false
     @Published private(set) var isPro = WatchPro.isUnlocked
+    /// The phone's favourites, in its order (FOX-174).
+    @Published private(set) var favouriteIds: [Int] = WatchStore.favouriteStationIds
 
     private let locator = Locator()
 
@@ -139,6 +141,24 @@ final class WatchModel: ObservableObject {
         Task { await refresh() }
     }
 
+    func reloadFavourites() {
+        favouriteIds = WatchStore.favouriteStationIds
+    }
+
+    /// Pins a station by id when the reader swipes to it. The complications
+    /// follow, as they do for a pick in the list; the reading shows at once
+    /// from the cached favourite and refreshes behind it.
+    func pin(stationId: Int) {
+        guard stationId != reading?.stationId || source != .pinned else { return }
+        WatchStore.pinnedStationId = stationId
+        source = .pinned
+        history = []
+        if let cached = WatchStore.favouriteReadings.first(where: { $0.stationId == stationId }) {
+            store(cached)
+        }
+        Task { await refresh() }
+    }
+
     private func store(_ reading: WatchReading) {
         self.reading = reading
         WatchStore.latestReading = reading
@@ -155,7 +175,10 @@ struct RootView: View {
 
     var body: some View {
         NavigationStack {
-            ReadingView(model: model)
+            pager
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .watchFavouritesChanged)) { _ in
+            model.reloadFavourites()
         }
         .task { await model.observeTransactions() }
         .task {
@@ -164,12 +187,42 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                model.reloadFavourites()
                 PhoneRelay.shared.flush()
                 Task {
                     await model.checkPro()
                     await model.refresh()
                 }
             }
+        }
+    }
+
+    /// Swipe between the favourites; with none, or only the one on screen,
+    /// it is the plain reading with the station list behind the toolbar button.
+    @ViewBuilder
+    private var pager: some View {
+        let pages = WatchFavourites.pages(favourites: model.favouriteIds, current: model.reading?.stationId)
+
+        if pages.count < 2 {
+            ReadingView(model: model)
+        } else {
+            TabView(selection: Binding(
+                get: { model.reading?.stationId ?? pages[0] },
+                set: { model.pin(stationId: $0) }
+            )) {
+                ForEach(pages, id: \.self) { id in
+                    // Only the page on screen is built: the model holds one station.
+                    Group {
+                        if model.reading?.stationId == id {
+                            ReadingView(model: model)
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    .tag(id)
+                }
+            }
+            .tabViewStyle(.page)
         }
     }
 }

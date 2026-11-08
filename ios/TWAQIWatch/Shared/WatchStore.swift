@@ -25,6 +25,34 @@ struct StationDirectoryEntry: Codable, Equatable {
     }
 }
 
+/// The phone's favourites on their way to the watch (FOX-174), and how the
+/// watch pages through them. The phone sends only station ids, in the reader's
+/// order: alerts are not part of it, so reordering never touches them.
+enum WatchFavourites {
+    /// Key in the `WCSession` application context.
+    static let contextKey = "favouriteStationIds"
+
+    static func context(for ids: [Int]) -> [String: Any] {
+        [contextKey: ids]
+    }
+
+    /// The ids in a received context; `nil` when it carries none, so an
+    /// unrelated context never wipes the list. Duplicates are dropped.
+    static func ids(fromContext context: [String: Any]) -> [Int]? {
+        guard let raw = context[contextKey] as? [Int] else { return nil }
+        var seen = Set<Int>()
+        return raw.filter { seen.insert($0).inserted }
+    }
+
+    /// The pages to swipe between: the favourites in order. A station on
+    /// screen that isn't one of them (home, or picked by hand) leads, so
+    /// leaving it never drops it. Fewer than two pages means no pager.
+    static func pages(favourites: [Int], current: Int?) -> [Int] {
+        guard let current, !favourites.contains(current) else { return favourites }
+        return [current] + favourites
+    }
+}
+
 /// State the watch app shares with its complications.
 ///
 /// Lives in the app group rather than `.standard`: the widget extension is a

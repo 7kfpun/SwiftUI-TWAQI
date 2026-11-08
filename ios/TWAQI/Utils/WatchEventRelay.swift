@@ -22,6 +22,16 @@ final class WatchEventRelay: NSObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
+    /// Sends the saved favourites to the watch as its application context:
+    /// only the latest list matters, and it is delivered even when the watch
+    /// app isn't running. Alerts are not sent (FOX-174).
+    func sendFavourites(_ ids: [Int]) {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
+        try? session.updateApplicationContext(WatchFavourites.context(for: ids))
+    }
+
     /// Logs every hit in `userInfo`; anything else in it is ignored.
     static func logEvents(fromUserInfo userInfo: [String: Any], log: (AnalyticsEvent, [String: Any]) -> Void = TrackingManager.logEvent) {
         for hit in LockedComplicationLog.hits(fromUserInfo: userInfo) {
@@ -33,7 +43,11 @@ final class WatchEventRelay: NSObject, WCSessionDelegate {
         Self.logEvents(fromUserInfo: userInfo)
     }
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        guard activationState == .activated else { return }
+        let ids = SettingsStore().savedFavouriteStations
+        DispatchQueue.main.async { self.sendFavourites(ids) }
+    }
 
     func sessionDidBecomeInactive(_ session: WCSession) {}
 
