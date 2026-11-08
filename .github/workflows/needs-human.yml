@@ -6,16 +6,20 @@ name: Needs your eyes
 # it is edited in place and removed when the labels go, the PR is drafted or closed.
 # A second job keeps one issue with a line per waiting PR.
 #
-# pull_request_target so labels work on every PR, but nothing from the PR is checked
-# out or run: the job checks out the default branch and runs master's tools/needs_human.py.
+# Every trigger here (pull_request_target, issue_comment, workflow_run, schedule) loads this
+# file from the default branch. Nothing from the PR is checked out or run: the job checks out the default branch and runs master's tools/needs_human.py.
 # Built-in token only, no secrets.
 
 on:
   pull_request_target:
     types: [opened, reopened, labeled, unlabeled, synchronize, ready_for_review, converted_to_draft, closed]
     branches: [master]
-  pull_request_review:
-    types: [submitted, edited, dismissed]
+  # A review lands -> the LGTM workflow runs -> this refreshes the bullets. workflow_run
+  # always uses the default branch's file, unlike pull_request_review, which would load the
+  # workflow from the PR's own merge commit.
+  workflow_run:
+    workflows: [LGTM]
+    types: [completed]
   issue_comment:
     types: [created, edited, deleted]
   schedule:
@@ -28,14 +32,14 @@ permissions:
 jobs:
   sticky:
     name: Needs your eyes comment
-    if: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && (github.event_name != 'issue_comment' || (github.event.issue.pull_request && github.event.comment.user.login != 'github-actions[bot]')) }}
+    if: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && (github.event_name != 'workflow_run' || github.event.workflow_run.pull_requests[0].number) && (github.event_name != 'issue_comment' || (github.event.issue.pull_request && github.event.comment.user.login != 'github-actions[bot]')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
       issues: write
     concurrency:
-      group: needs-human-${{ github.event.pull_request.number || github.event.issue.number }}
+      group: needs-human-${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number }}
       cancel-in-progress: true
     steps:
       - name: Checkout the default branch (never the PR)
@@ -53,7 +57,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number || github.event.workflow_run.pull_requests[0].number }}
         run: |
           [ -f tools/needs_human.py ] || exit 0
           python3 tools/needs_human.py pr

@@ -164,7 +164,9 @@ def build_comment(pr: dict, files: list[dict], bullets: list[str], withheld: int
     risky = risky_paths(files)
     parts.append("**Risky paths:** " + ("; ".join(risky) if risky else "none of workers/, iOS push, purchases, .github/"))
     parts += ["", "**Human check:**"]
-    parts += [f"- {b}" for b in bullets] if bullets else ["- none from the reviewer"]
+    parts += [f"- {b}" for b in bullets]
+    if not bullets and not withheld:
+        parts.append("- none from the reviewer")
     if withheld:
         parts.append(f"- {withheld} bullet(s) withheld by the public-text filter; see the reviewer's LGTM")
     parts += ["", f"<sub>Head `{pr['head']['sha'][:7]}`. Updated by `tools/needs_human.py`; removed when the labels are gone.</sub>"]

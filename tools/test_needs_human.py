@@ -99,7 +99,9 @@ class Comment(unittest.TestCase):
         for s in ("## Needs your eyes", "`merge-risk:high`, `needs-human`", "~14 min", "- Check X", "workers/"):
             self.assertIn(s, body)
         self.assertIn("none from the reviewer", nh.build_comment(pr(["needs-human"]), [], []))
-        self.assertIn("2 bullet(s) withheld", nh.build_comment(pr(["needs-human"]), [], [], 2))
+        withheld = nh.build_comment(pr(["needs-human"]), [], [], 2)
+        self.assertIn("2 bullet(s) withheld", withheld)
+        self.assertNotIn("none from the reviewer", withheld)
 
 
 if __name__ == "__main__":
