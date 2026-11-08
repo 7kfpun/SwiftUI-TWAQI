@@ -32,9 +32,7 @@ struct DetailsListView: View {
             // On the list itself so it stays in the list column when the
             // window is wide enough for two.
             .searchable(text: $searchText, prompt: Text("DetailsList.search"))
-            .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdDetailsListFooter")!, placement: .detailsList)
-            }
+            .adBannerBelow(adUnitID: getEnv("AdUnitIdDetailsListFooter")!, placement: .detailsList)
         }
         .onAppear(perform: getData)
     }
