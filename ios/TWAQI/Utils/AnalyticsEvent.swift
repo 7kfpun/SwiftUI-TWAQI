@@ -70,6 +70,13 @@ enum AnalyticsEvent: String, CaseIterable {
     /// after a 4- or 5-star feedback.
     case writeReviewTapped = "write_review_tapped"
 
+    // MARK: What's New (FOX-142)
+
+    /// `label`: launch / help, `version`. The popup opened.
+    case whatsNewShown = "whats_new_shown"
+    /// `label`: launch / help, `version`. Closed by the button or a swipe.
+    case whatsNewDismissed = "whats_new_dismissed"
+
     // MARK: Onboarding
 
     /// `label`: launch. The flow opened by itself at launch.

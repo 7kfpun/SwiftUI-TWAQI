@@ -80,6 +80,7 @@ struct HelpView: View {
 
     @State private var showingPro = false
     @State private var showingOnboarding = false
+    @State private var showingWhatsNew = false
     @State private var versionTapCount = 0
     @State private var analyticsExcluded = TrackingManager.isExcluded
     @State private var proOverride = IAPManager.proOverride
@@ -107,6 +108,13 @@ struct HelpView: View {
             // Help's own quiet-hours model, so its switch shows what the flow set.
             OnboardingView(doNotDisturb: viewModel) { showingOnboarding = false }
                 .environment(\.locale, settings.appLanguage.locale())
+        }
+        // Opened by hand: the once-per-version flag is left alone (FOX-142).
+        .sheet(isPresented: $showingWhatsNew) {
+            if let release = WhatsNew.release(for: WhatsNew.currentVersion) {
+                WhatsNewView(release: release, source: "help") { showingWhatsNew = false }
+                    .environment(\.locale, settings.appLanguage.locale())
+            }
         }
     }
 
@@ -136,6 +144,14 @@ struct HelpView: View {
                 TrackingManager.logEvent(.onboardingOpenFromHelp)
             } label: {
                 Text("Help.show_welcome_guide")
+            }
+
+            if WhatsNew.release(for: WhatsNew.currentVersion) != nil {
+                Button {
+                    showingWhatsNew = true
+                } label: {
+                    Text("Help.show_whats_new")
+                }
             }
         }
     }
