@@ -875,11 +875,15 @@ struct ReadingWidgetView: View {
                                 .minimumScaleFactor(0.7)
                         }
                     }
-                    Text(verbatim: weather.detailItems.joined(separator: " · "))
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
+                    // A free user's banner covers the bottom of the widget:
+                    // one line there leaves the fourth favourite clear.
+                    if !entry.isLocked {
+                        Text(verbatim: weather.detailItems.joined(separator: " · "))
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
                 }
             } else {
                 Text(verbatim: "—")
@@ -892,7 +896,7 @@ struct ReadingWidgetView: View {
         .padding(.vertical, 4)
         .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.compactText(chinese: Locale.isChinese) } ?? "—")"))
+        .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
     }
 
     /// Medium: one line, icon, temperature, wind and sky. Humidity and rain
@@ -903,11 +907,22 @@ struct ReadingWidgetView: View {
                 .symbolRenderingMode(.multicolor)
                 .opacity(entry.weather == nil ? 0.35 : 1)
                 .accessibilityHidden(true)
-            Text(verbatim: entry.weather.map { $0.compactText(chinese: Locale.isChinese) } ?? "—")
-                .monospacedDigit()
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+            if let weather = entry.weather {
+                Text(verbatim: weather.compactLead)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .fixedSize()
+                if let sky = weather.skyText(chinese: Locale.isChinese) {
+                    Text(verbatim: "· \(sky)")
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            } else {
+                Text(verbatim: "—")
+            }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Widget.weather_label \(entry.weather.map { $0.compactText(chinese: Locale.isChinese) } ?? "—")"))
         .font(.caption2)
         .foregroundStyle(.secondary)
     }

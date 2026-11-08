@@ -24,10 +24,12 @@ struct WidgetWeather: Equatable {
     var humidity: Double?
     /// mm since local midnight.
     var rain: Double?
-    /// m/s, from the CWA station.
+    /// m/s. The AQI station's own wind when it has a direction, else the
+    /// CWA station's speed alone: speed and direction always come from one
+    /// instrument.
     var windSpeed: Double?
-    /// Degrees the wind blows from, from the AQI station's own anemometer
-    /// (CWA's open data has no direction). Nil when calm or unknown.
+    /// Degrees the wind blows from; nil when calm, unknown, or the speed is
+    /// the CWA station's (its open data has no direction).
     var windDirection: Double?
     /// CWA weather code of the current forecast period.
     var code: Int?
@@ -71,6 +73,7 @@ struct WidgetWeather: Equatable {
             weather.windSpeed = reading.wind
         }
         if let speed = windSpeed, speed > 0, let direction = windDirection {
+            weather.windSpeed = speed
             weather.windDirection = direction
         }
         if let period = station.periods.first {
@@ -130,11 +133,23 @@ struct WidgetWeather: Equatable {
     /// rain and chance of rain are dropped: the least useful of the fields
     /// next to the air quality values.
     func compactText(chinese: Bool) -> String {
-        var parts = [Self.temperatureText(temperature), Self.windText(speed: windSpeed, direction: windDirection)]
+        var parts = [compactLead]
         if let sky = skyText(chinese: chinese) {
             parts.append(sky)
         }
         return parts.joined(separator: " · ")
+    }
+
+    /// The compact line without the sky: temperature and wind, which stay at
+    /// full size while a long sky text is truncated.
+    var compactLead: String {
+        "\(Self.temperatureText(temperature)) · \(Self.windText(speed: windSpeed, direction: windDirection))"
+    }
+
+    /// Everything the large row shows, for VoiceOver.
+    func spokenText(chinese: Bool) -> String {
+        ([Self.temperatureText(temperature), skyText(chinese: chinese)].compactMap { $0 } + detailItems)
+            .joined(separator: " · ")
     }
 }
 

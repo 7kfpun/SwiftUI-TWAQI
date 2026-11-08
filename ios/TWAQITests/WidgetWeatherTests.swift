@@ -56,7 +56,8 @@ final class WidgetWeatherTests: XCTestCase {
         XCTAssertEqual(weather.temperature, 24.3)
         XCTAssertEqual(weather.humidity, 75)
         XCTAssertEqual(weather.rain, 0.5)
-        XCTAssertEqual(weather.windSpeed, 3.2)
+        // The AQI station's wind (speed and direction together) wins.
+        XCTAssertEqual(weather.windSpeed, 2)
         XCTAssertEqual(weather.windDirection, 45)
         XCTAssertEqual(weather.code, 4)
         XCTAssertEqual(weather.cwaText, "多雲")
@@ -91,9 +92,11 @@ final class WidgetWeatherTests: XCTestCase {
     }
 
     func testCalmAirKeepsNoDirection() throws {
-        let weather = try XCTUnwrap(make(speed: 0, in: try file()))
-        XCTAssertNil(weather.windDirection)
-        XCTAssertNil(try XCTUnwrap(make(direction: nil, in: try file())).windDirection)
+        // No direction (calm or unknown): the CWA speed alone, no compass point.
+        for weather in [try XCTUnwrap(make(speed: 0, in: try file())), try XCTUnwrap(make(direction: nil, in: try file()))] {
+            XCTAssertNil(weather.windDirection)
+            XCTAssertEqual(weather.windSpeed, 3.2)
+        }
     }
 
     func testCountyFallsBackToTheNearestCwaStation() throws {
@@ -137,6 +140,14 @@ final class WidgetWeatherTests: XCTestCase {
         XCTAssertEqual(weather.compactText(chinese: true), "24° · NE 3.2 m/s · 多雲")
         XCTAssertFalse(weather.compactText(chinese: true).contains("75"))
         XCTAssertFalse(weather.compactText(chinese: true).contains("mm"))
+    }
+
+    func testSpokenTextCoversEveryShownField() {
+        let weather = WidgetWeather(
+            temperature: 24.3, humidity: 75, rain: 0.5, windSpeed: 3.2, windDirection: 45, code: 4, cwaText: "多雲"
+        )
+        XCTAssertEqual(weather.spokenText(chinese: true), "24° · 多雲 · 75% · 0.5 mm · NE 3.2 m/s")
+        XCTAssertEqual(weather.compactLead, "24° · NE 3.2 m/s")
     }
 
     func testCompactLineWithMissingFieldsShowsDashes() {
