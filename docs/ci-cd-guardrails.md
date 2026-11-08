@@ -27,6 +27,7 @@ deliberate action, taken only when the ticket or PR names it.
 | `Public text` | `public-text.yml` | non-draft PRs, again on each description edit | the title, description, a commit message or an added line names a non-website host, an IP or network range, a private email, or network-exposure details (`tools/public_text_check.py`). Hosts are fine in files that need them to work (config, scripts, app constants, tests). See [Public repo](#public-repo-what-stays-out). |
 | `LGTM` (status) | `lgtm.yml` | every push, review, and PR comment | pending until a reviewer's LGTM covers the head: a review or comment whose first line is `**<Name> LGTM**` (any name, or none). A rebase or update from `master` with no change of its own keeps the LGTM. A later "changes needed" sets it back to pending; the advisory `claude[bot]` doesn't count. |
 | `review` | `claude-code-review.yml` | non-draft `feature/*` | advisory Claude review, not required. |
+| `Needs your eyes` | `needs-human.yml` | label, push, draft/ready, close and PR-comment events, after each `LGTM` workflow run (`workflow_run`, so a review refreshes it), every 6 h | never fails a PR (not a gate). For a non-draft PR labelled `merge-risk:high`, `no-auto-merge` or `needs-human` it keeps ONE sticky comment headed `Needs your eyes`: read time (changed lines / 450 per hour, rounded up, minimum 5 min, lockfiles and generated files left out), risky paths touched (`workers/`, iOS push, purchases, `.github/`) and the `Human check:` bullets of the latest agent LGTM, after the public-text filter drops hosts, IPs, emails, exposure wording and secret-looking lines. The comment is edited in place and removed when the labels go, the PR is drafted or closed. The 6-hourly job keeps one issue `Needs your eyes` with a line per waiting PR. `pull_request_target` with no PR checkout: it runs master's `tools/needs_human.py` with the built-in token (`tools/test_needs_human.py` covers it). |
 
 `Unit tests` levels (FOX-79). The `Unit tests scope` job (Linux, FOX-143) checks out the repo, runs
 `tools/test_ci_test_level.py` and `tools/ci_test_level.py check`, then decide a level from
@@ -230,8 +231,8 @@ points as before). It still deploys through `workers.yml` (`workers-production`)
 `push-sender.yml` runs in its own environment, `push-sender`: deployment branches
 limited to `master`, **no required reviewers** (`workers-production` makes every job wait
 for an approval, which a schedule can't). Its secrets, copies of the Worker's:
-`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, and `SYNC_TOKEN` (for the
-event forward to the Worker, whose URL is `PUSH_SENDER_URL` in the workflow). Create the environment before
+`FCM_SERVICE_ACCOUNT`, `DIRECTUS_PUSH_TOKEN`, `AQI_API_BASE`, `SYNC_TOKEN` and `PUSH_SENDER_URL` (for the
+event forward to the Worker). Create the environment before
 the workflow's first run, since a workflow that names a missing environment creates it
 unprotected. Commands: [`workers/twaqi-push-sender/README.md`](../workers/twaqi-push-sender/README.md#the-push-sender-environment-github-actions).
 

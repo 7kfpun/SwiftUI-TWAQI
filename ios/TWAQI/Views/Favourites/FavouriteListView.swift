@@ -28,11 +28,8 @@ struct FavouriteListView: View {
             }
             .navigationBarTitle("FavouriteList.favourites")
             .navigationBarItems(leading: editButton)
-            // Insets the scroll content so the last row clears the banner,
-            // instead of padding the content by a guessed height.
-            .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdFavouritesFooter")!, placement: .favourites)
-            }
+            // Its own strip under the list: no row scrolls beneath the banner.
+            .adBannerBelow(adUnitID: getEnv("AdUnitIdFavouritesFooter")!, placement: .favourites)
         }
         .onAppear(perform: getData)
         .alert(
