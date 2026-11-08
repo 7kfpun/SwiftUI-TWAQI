@@ -8,6 +8,7 @@ name: Needs your eyes
 #
 # Every trigger here (pull_request_target, issue_comment, workflow_run, schedule) loads this
 # file from the default branch. Nothing from the PR is checked out or run: the job checks out the default branch and runs master's tools/needs_human.py.
+# Only PRs based on master get the comment (branches: [master] and a base check in the script).
 # Built-in token only, no secrets.
 
 on:

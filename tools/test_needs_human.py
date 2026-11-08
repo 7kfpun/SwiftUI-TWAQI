@@ -92,6 +92,9 @@ class Comment(unittest.TestCase):
         self.assertFalse(nh.needs_eyes(pr(["merge-risk:low"])))
         self.assertFalse(nh.needs_eyes(pr(["needs-human"], draft=True)))
         self.assertFalse(nh.needs_eyes(pr(["needs-human"], state="closed")))
+        stacked = pr(["needs-human"])
+        stacked["base"] = {"ref": "feature/other"}
+        self.assertFalse(nh.needs_eyes(stacked))
 
     def test_body(self):
         body = nh.build_comment(pr(["merge-risk:high", "needs-human"]), [f("workers/a.ts", 100)], ["Check X"])

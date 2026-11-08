@@ -148,7 +148,8 @@ def waiting_labels(pr: dict) -> list[str]:
 
 
 def needs_eyes(pr: dict) -> bool:
-    return pr.get("state") == "open" and not pr.get("draft") and bool(waiting_labels(pr))
+    base = pr.get("base", {}).get("ref", "master")  # stacked PRs are covered by the queue issue only
+    return pr.get("state") == "open" and base == "master" and not pr.get("draft") and bool(waiting_labels(pr))
 
 
 def build_comment(pr: dict, files: list[dict], bullets: list[str], withheld: int = 0) -> str:
