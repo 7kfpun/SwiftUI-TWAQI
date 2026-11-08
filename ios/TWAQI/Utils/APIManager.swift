@@ -46,7 +46,7 @@ struct APIManager {
         session.dataTask(with: requestURL) { data, response, error in
             let result: Result<Data, NetworkError>
             if let error {
-                print(error)
+                AppLog.network.error("request failed: \(error.localizedDescription)")
                 result = .failure(.networkError)
             } else if let data, let http = response as? HTTPURLResponse, isJSON(http) {
                 result = .success(data)
@@ -148,7 +148,7 @@ struct APIManager {
                     PollutantCache.shared.save(countryCode: countryCode, response: data)
                     completionHandler(.success(pollutantsResponse.data))
                 } catch {
-                    print(error)
+                    AppLog.network.error("undecodable pollutants response: \(error.localizedDescription)")
                     completionHandler(.failure(.networkError))
                 }
             case .failure(let error):
@@ -171,7 +171,7 @@ struct APIManager {
                     PollutantCache.shared.saveStations(response: data)
                     completionHandler(.success(pollutantsResponse.data))
                 } catch {
-                    print(error)
+                    AppLog.network.error("undecodable pollutants response: \(error.localizedDescription)")
                     completionHandler(.failure(.networkError))
                 }
             case .failure(let error):

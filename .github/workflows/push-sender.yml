@@ -90,13 +90,15 @@ jobs:
           AQI_API_BASE: ${{ secrets.AQI_API_BASE }}
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
           # The Worker that writes the forwarded events to Analytics Engine.
-          PUSH_SENDER_URL: https://twaqi-push-sender.710kfpun.workers.dev
+          PUSH_SENDER_URL: ${{ secrets.PUSH_SENDER_URL }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
         run: |
           set -euo pipefail
           # The secret is masked as a whole; a network error can print just its host.
           host="$(node -e 'try { console.log(new URL(process.env.AQI_API_BASE).host) } catch {}')"
           if [ -n "$host" ]; then echo "::add-mask::$host"; fi
+          sender_host="$(node -e 'try { console.log(new URL(process.env.PUSH_SENDER_URL).host) } catch {}')"
+          if [ -n "$sender_host" ]; then echo "::add-mask::$sender_host"; fi
           args=()
           if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
           # Exits non-zero, failing the job, when run() throws or any alert

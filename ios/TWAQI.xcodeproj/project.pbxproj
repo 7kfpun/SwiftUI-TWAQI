@@ -139,6 +139,7 @@
 		7F3ECAFC997F89C40EAC1870 /* NumberExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */; };
 		8249C2C83B32D720E58F53D6 /* TWAQIWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912EF49CA2E23AD595C87873 /* TWAQIWatchWidget.swift */; };
 		836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */; };
+		5A1C0E7B3D2F4A6B8C9D0E21 /* HelpTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E20 /* HelpTabUITests.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */; };
 		5A1C0E7B3D2F4A6B8C9D0E1A /* AppStoreScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */; };
 		838AE2B6805D7FE81DC68B49 /* AqiTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D50685ABB6D7832C10DAFD /* AqiTrend.swift */; };
@@ -299,6 +300,7 @@
 		89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28105738488F92DC053659E1 /* StationCamHistoryCache.swift */; };
 		4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */; };
 		F118C0A5E0000000000000B1 /* ConsentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F118C0A5E0000000000000F1 /* ConsentManager.swift */; };
+		A1640000000000000000B001 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1640000000000000000F001 /* AppLog.swift */; };
 		E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B28C564E6535A1380C29C4 /* FoldLine.swift */; };
 		B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7601D6C9CFBFEDB76837949B /* PollutantCache.swift */; };
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
@@ -593,6 +595,7 @@
 		CD383AA3C04F105BD89983D7 /* Locator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Locator.swift; sourceTree = "<group>"; };
 		CDABF31536526074C5DD15CB /* ScreenshotLaunch.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotLaunch.swift; sourceTree = "<group>"; };
 		CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DuoScreenshotTests.swift; sourceTree = "<group>"; };
+		5A1C0E7B3D2F4A6B8C9D0E20 /* HelpTabUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HelpTabUITests.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareScreenshotTests.swift; sourceTree = "<group>"; };
 		5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppStoreScreenshotTests.swift; sourceTree = "<group>"; };
 		D2A76960C78240C199D174A5 /* Pods-TWAQI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TWAQI.release.xcconfig"; path = "Target Support Files/Pods-TWAQI/Pods-TWAQI.release.xcconfig"; sourceTree = "<group>"; };
@@ -615,6 +618,7 @@
 		28105738488F92DC053659E1 /* StationCamHistoryCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamHistoryCache.swift; sourceTree = "<group>"; };
 		CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineCacheRetention.swift; sourceTree = "<group>"; };
 		F118C0A5E0000000000000F1 /* ConsentManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConsentManager.swift; sourceTree = "<group>"; };
+		A1640000000000000000F001 /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		46B28C564E6535A1380C29C4 /* FoldLine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoldLine.swift; sourceTree = "<group>"; };
 		7601D6C9CFBFEDB76837949B /* PollutantCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCache.swift; sourceTree = "<group>"; };
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
@@ -1036,6 +1040,7 @@
 				28105738488F92DC053659E1 /* StationCamHistoryCache.swift */,
 				CABD8ACA53760F72E703C4B7 /* OfflineCacheRetention.swift */,
 				F118C0A5E0000000000000F1 /* ConsentManager.swift */,
+				A1640000000000000000F001 /* AppLog.swift */,
 				46B28C564E6535A1380C29C4 /* FoldLine.swift */,
 				7601D6C9CFBFEDB76837949B /* PollutantCache.swift */,
 				E425F835864C0736F1EB0969 /* AqiForecastStore.swift */,
@@ -1142,6 +1147,7 @@
 			children = (
 				CEF09FF4416F19D9E2107B4C /* DuoScreenshotTests.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E17 /* ShareScreenshotTests.swift */,
+				5A1C0E7B3D2F4A6B8C9D0E20 /* HelpTabUITests.swift */,
 				5A1C0E7B3D2F4A6B8C9D0E19 /* AppStoreScreenshotTests.swift */,
 			);
 			path = TWAQIUITests;
@@ -1776,6 +1782,7 @@
 				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				F118C0A5E0000000000000B1 /* ConsentManager.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,
+				A1640000000000000000B001 /* AppLog.swift in Sources */,
 				E1B0B56DFE04846921EB22AD /* FoldLine.swift in Sources */,
 				B433F6F86D8B7ABD5D079477 /* PollutantCache.swift in Sources */,
 				D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */,
@@ -1870,6 +1877,7 @@
 			files = (
 				836FAAEAA8355066E6EBD112 /* DuoScreenshotTests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E18 /* ShareScreenshotTests.swift in Sources */,
+				5A1C0E7B3D2F4A6B8C9D0E21 /* HelpTabUITests.swift in Sources */,
 				5A1C0E7B3D2F4A6B8C9D0E1A /* AppStoreScreenshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

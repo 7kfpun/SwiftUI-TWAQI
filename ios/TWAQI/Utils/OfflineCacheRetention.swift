@@ -89,10 +89,7 @@ enum OfflineCacheRetention {
     /// Called at launch.
     static func purgeInBackground() {
         DispatchQueue.global(qos: .utility).async {
-            let removed = purge(widgetDirectory: WidgetStationDetailCache.defaultDirectory)
-            if !removed.isEmpty {
-                print("OfflineCacheRetention purged", removed.map(\.lastPathComponent))
-            }
+            _ = purge(widgetDirectory: WidgetStationDetailCache.defaultDirectory)
         }
         WatchStore.purgeExpiredReadings()
     }
