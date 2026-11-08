@@ -175,3 +175,60 @@ final class AqiForecastTests: XCTestCase {
         XCTAssertNil(AqiForecastStore.makeRequest(baseURL: nil, token: "abc", today: "2026-10-31"))
     }
 }
+
+/// FOX-10: MOENV sand/dust advisories on the Forecast tab.
+final class SandstormAdvisoryTests: XCTestCase {
+    /// 2026-11-08 12:00 Taiwan.
+    private let now = AqiForecastDates.parsePublishTime("2026-11-08 12:00:00")!
+
+    private func advisory(_ time: String, subject: String? = "沙塵", content: String? = "內容") -> SandstormAdvisory {
+        SandstormAdvisory(publishTime: time, subject: subject, content: content)
+    }
+
+    func testDecodesDirectusRowsAndMissingText() throws {
+        let json = #"{"data":[{"publish_time":"2026-11-08 09:30:00","subject":"沙塵暴","content":null}]}"#
+        let decoded = try JSONDecoder().decode(SandstormAdvisoryResponse.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.data, [SandstormAdvisory(publishTime: "2026-11-08 09:30:00", subject: "沙塵暴", content: nil)])
+    }
+
+    func testPublishTimeIsTaiwanTime() throws {
+        let published = try XCTUnwrap(advisory("2026-11-08 09:30:00").publishedAt)
+        // 09:30 in Taipei (UTC+8) is 01:30 UTC whatever the device zone.
+        XCTAssertEqual(published.timeIntervalSince1970, 1_794_101_400)
+    }
+
+    func testCurrentKeepsFortyEightHoursNewestFirst() {
+        let result = SandstormAdvisory.current([
+            advisory("2026-11-06 13:00:00"), // 47 h old: shown
+            advisory("2026-11-08 09:30:00"),
+            advisory("2026-11-06 11:00:00"), // 49 h old: dropped
+        ], now: now)
+        XCTAssertEqual(result.map(\.publishTime), ["2026-11-08 09:30:00", "2026-11-06 13:00:00"])
+    }
+
+    func testCurrentDropsEmptyTextAndUnparseableTimes() {
+        let result = SandstormAdvisory.current([
+            advisory("2026-11-08 09:30:00", subject: " ", content: nil),
+            advisory("not a time"),
+            advisory("2026-11-08 10:00:00", subject: nil, content: "只有內文"),
+        ], now: now)
+        XCTAssertEqual(result.map(\.publishTime), ["2026-11-08 10:00:00"])
+    }
+
+    func testFutureDatedAdvisoryCountsAsJustPublished() {
+        XCTAssertEqual(SandstormAdvisory.current([advisory("2026-11-08 12:30:00")], now: now).count, 1)
+    }
+
+    func testRequestReadsActiveRowsNewestFirst() throws {
+        let request = try XCTUnwrap(SandstormAdvisoryRequest.make(baseURL: "https://directus.example.com", token: "abc"))
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer abc")
+        let components = try XCTUnwrap(URLComponents(url: XCTUnwrap(request.url), resolvingAgainstBaseURL: false))
+        XCTAssertEqual(components.path, "/items/twaqi_sandstorm_advisories")
+        let query = Dictionary(uniqueKeysWithValues: (components.queryItems ?? []).map { ($0.name, $0.value ?? "") })
+        XCTAssertEqual(query["filter[archived][_neq]"], "true")
+        XCTAssertEqual(query["sort"], "-publish_time")
+
+        XCTAssertNil(SandstormAdvisoryRequest.make(baseURL: "https://directus.example.com", token: ""))
+        XCTAssertNil(SandstormAdvisoryRequest.make(baseURL: nil, token: "abc"))
+    }
+}

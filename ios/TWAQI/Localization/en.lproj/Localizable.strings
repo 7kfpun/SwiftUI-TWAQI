@@ -432,6 +432,7 @@
 "Forecast.your_area" = "Your area";
 "Forecast.favourite_area" = "Favourites";
 "Forecast.none_current" = "No current forecast to show. The latest one couldn't be loaded; try again later.";
+"Forecast.sandstorm_title" = "Sand and dust advisory";
 
 /* Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) */
 "Weather.title" = "Weather";

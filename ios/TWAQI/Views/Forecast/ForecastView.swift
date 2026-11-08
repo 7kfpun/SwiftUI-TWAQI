@@ -33,11 +33,15 @@ struct ForecastView: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .empty:
-            OfflineEmptyStateView(retry: load)
-                .padding(.horizontal, 32)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(spacing: 16) {
+                advisoryBanners
+                OfflineEmptyStateView(retry: load)
+                    .padding(.horizontal, 32)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         case .noCurrentForecast:
             VStack(spacing: 16) {
+                advisoryBanners
                 EmptyStateView(icon: "calendar", message: "Forecast.none_current")
                 Button(action: load) {
                     Text("Offline.retry")
@@ -51,11 +55,21 @@ struct ForecastView: View {
         }
     }
 
+    /// Current sand/dust advisories (FOX-10), shown in every state so they
+    /// don't wait on the area forecast.
+    private var advisoryBanners: some View {
+        ForEach(viewModel.advisories, id: \.publishTime) { advisory in
+            SandstormAdvisoryBanner(advisory: advisory)
+        }
+    }
+
     private func list(_ areas: [ForecastTabArea]) -> some View {
         let shared = ForecastTabOrdering.sharedContent(areas)
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
+                advisoryBanners
+
                 if let shared = shared {
                     ForecastContentText(
                         content: shared,
@@ -81,6 +95,54 @@ struct ForecastView: View {
     private func load() {
         viewModel.load(favouriteStationIds: settings.savedFavouriteStations)
     }
+}
+
+/// A MOENV sand/dust advisory (FOX-10), above the forecast cards.
+struct SandstormAdvisoryBanner: View {
+    let advisory: SandstormAdvisory
+
+    private var subject: String? {
+        advisory.subject?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
+    private var content: String? {
+        advisory.content?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "wind")
+                    .foregroundColor(.orange)
+                Group {
+                    if let subject = subject {
+                        Text(subject)
+                    } else {
+                        Text("Forecast.sandstorm_title")
+                    }
+                }
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            }
+            if let content = content {
+                ForecastContentText(content: content)
+            }
+            if let published = advisory.publishedAt {
+                Text("Forecast.published \(AreaForecastView.publishedText(published))")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.15))
+        .clipShape(RoundedRectangle(cornerRadius: AreaForecastView.cornerRadius, style: .continuous))
+        .padding(.horizontal)
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
 struct ForecastView_Previews: PreviewProvider {

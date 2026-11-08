@@ -1,5 +1,5 @@
 // Syncs MOENV air-quality station webcam JPEGs (aqx_p_01) into R2 every 10 minutes,
-// the MOENV air-quality forecast (aqf_p_01) into Directus hourly at :35, and CWA weather
+// the MOENV air-quality forecast (aqf_p_01) and sand/dust advisories (sandst_p_01) into Directus hourly at :35, and CWA weather
 // (F-C0032-001, O-A0003-001) into R2 every 15 minutes.
 // Deployed by GitHub Actions (.github/workflows/workers.yml) on merge to master.
 // Secrets (never in git) are listed in secrets.required; CI uploads them from
