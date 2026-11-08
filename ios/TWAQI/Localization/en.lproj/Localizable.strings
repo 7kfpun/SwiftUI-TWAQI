@@ -599,3 +599,16 @@
 "WhatsNew.3_1_5.welcome_body" = "New installs are guided through location, your closest station, air quality alerts and quiet hours, so setup takes a minute.";
 "WhatsNew.3_1_5.appearance_title" = "Choose your Appearance";
 "WhatsNew.3_1_5.appearance_body" = "System default follows your iPhone; Light and Dark stay as you set them. Change it in Help.";
+
+"Map.Locate.label" = "My location";
+"Map.Locate.off" = "Off";
+"Map.Locate.centred" = "Centred on you";
+"Map.Locate.following" = "Following you";
+"Map.Locate.hint_off" = "Centres the map on you and the nearest stations";
+"Map.Locate.hint_centred" = "Makes the map follow you as you move";
+"Map.Locate.hint_following" = "Centres the map on you again";
+"Map.Locate.you_are_here" = "You are here";
+"Map.Locate.off_title" = "Location is off";
+"Map.Locate.off_message" = "Turn on location for Taiwan Air in Settings to see where you are on the map.";
+"Map.Locate.open_settings" = "Open Settings";
+"Map.Locate.cancel" = "Cancel";

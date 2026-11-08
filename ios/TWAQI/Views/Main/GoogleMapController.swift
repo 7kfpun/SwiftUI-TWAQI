@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import CoreLocation
 import GoogleMaps
 import SnapKit
 import SwiftUI
@@ -39,6 +40,17 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var defaultLocationButton: DefaultLocationButton!
     var indexSelectorView: IndexSelectorView!
     var myLocationButton: MyLocationButton!
+
+    // Locate me (FOX-185)
+    let locationTracker = UserLocationTracker()
+    private let userMarkerView = UserLocationMarkerView()
+    private var userMarker: GMSMarker?
+    private var userHalo: GMSCircle?
+    private var pendingLocateTap = false
+    private var pendingCentre = false
+    var locateMode: LocateMeMode = .off {
+        didSet { myLocationButton?.mode = locateMode }
+    }
     var timelineView: MapTimelineView!
     var windModeButton: WindModeButton!
 
@@ -47,7 +59,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// down when the banner goes away.
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
-    private var onboardingObserver: NSObjectProtocol?
     private var isProLayout = false
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.
@@ -80,7 +91,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         // A closed iPad window must free its map: stop the refresh timer and
         // drop every observer this controller registered (FOX-135).
         refreshTimer?.invalidate()
-        [onboardingObserver, proObserver, foregroundObserver, backgroundObserver]
+        locationTracker.stop()
+        [proObserver, foregroundObserver, backgroundObserver]
             .forEach { $0.map(NotificationCenter.default.removeObserver) }
     }
 
@@ -96,21 +108,126 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         goToMyLocation()
     }
 
-    func goToMyLocation(isSkipLog: Bool = false) {
-        if let mylocation = self.mapView.myLocation {
-            let mylocationCamera = GMSCameraPosition.camera(
-                withLatitude: mylocation.coordinate.latitude,
-                longitude: mylocation.coordinate.longitude,
-                zoom: 13
-            )
-            self.currentLatitude = mylocation.coordinate.latitude
-            self.currentLongitude = mylocation.coordinate.longitude
-            self.mapView.animate(to: mylocationCamera)
+    // MARK: - Locate me (FOX-185)
 
-            if !isSkipLog {
-                TrackingManager.logEvent(.moveToCurrentLocation)
+    /// Tap: ask on first use, explain when denied, otherwise step the mode.
+    func goToMyLocation(isSkipLog: Bool = false) {
+        switch locationTracker.access {
+        case .ask:
+            pendingLocateTap = true
+            locationTracker.requestAccess()
+        case .explain:
+            showLocationOffAlert()
+        case .allowed:
+            locationTracker.startIfAllowed()
+            locateMode = locateMode.afterTap
+            if locateMode == .off { return }
+            if !isSkipLog { TrackingManager.logEvent(.moveToCurrentLocation) }
+            if let location = locationTracker.location {
+                centreOnUser(location, zoomToStation: locateMode == .centred)
+            } else {
+                // First fix still on its way: the next update centres.
+                pendingCentre = true
             }
         }
+    }
+
+    private func handleAccessChange(_ access: LocateMeAccess) {
+        if access == .allowed, pendingLocateTap {
+            pendingLocateTap = false
+            goToMyLocation()
+        } else if access != .ask {
+            pendingLocateTap = false
+        }
+        if access != .allowed { clearUserMarker(); locateMode = .off }
+    }
+
+    private func handleLocation(_ location: CLLocation) {
+        updateUserMarker(location)
+        if pendingCentre {
+            pendingCentre = false
+            centreOnUser(location, zoomToStation: true)
+        } else if locateMode == .following {
+            mapView.animate(toLocation: location.coordinate)
+        }
+    }
+
+    private func centreOnUser(_ location: CLLocation, zoomToStation: Bool) {
+        currentLatitude = location.coordinate.latitude
+        currentLongitude = location.coordinate.longitude
+        let zoom: Float
+        if zoomToStation {
+            let stations = countryPollutants.values.flatMap { $0 }
+                .map { (id: $0.stationId, latitude: $0.lat, longitude: $0.lon) }
+            let nearest = LocateMe.nearest(to: location.coordinate, in: stations)
+            zoom = LocateMe.zoom(latitude: location.coordinate.latitude, nearestStationDistance: nearest?.distance)
+        } else {
+            zoom = max(mapView.camera.zoom, LocateMe.minZoom)
+        }
+        mapView.animate(to: GMSCameraPosition.camera(withTarget: location.coordinate, zoom: zoom))
+    }
+
+    /// Camera moves the app makes itself report `gesture == false`. A user gesture on the map ends centring and following.
+    func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
+        guard gesture, locateMode != .off else { return }
+        pendingCentre = false
+        locateMode = locateMode.afterGesture
+    }
+
+    private func updateUserMarker(_ location: CLLocation) {
+        if userMarker == nil {
+            let marker = GMSMarker()
+            marker.iconView = userMarkerView
+            marker.groundAnchor = CGPoint(x: 0.5, y: 0.5)
+            marker.isFlat = true
+            marker.isTappable = false
+            marker.zIndex = 1_000
+            marker.title = "Map.Locate.you_are_here".localized
+            userMarker = marker
+        }
+        userMarker?.position = location.coordinate
+        userMarker?.map = mapView
+
+        if let radius = LocateMe.haloRadius(horizontalAccuracy: location.horizontalAccuracy) {
+            if userHalo == nil {
+                let halo = GMSCircle()
+                halo.fillColor = UIColor(rgb: 0x007AFF).withAlphaComponent(0.15)
+                halo.strokeColor = UIColor(rgb: 0x007AFF).withAlphaComponent(0.5)
+                halo.strokeWidth = 1
+                halo.zIndex = 999
+                userHalo = halo
+            }
+            userHalo?.position = location.coordinate
+            userHalo?.radius = radius
+            userHalo?.map = mapView
+        } else {
+            userHalo?.map = nil
+        }
+    }
+
+    private func clearUserMarker() {
+        userMarker?.map = nil
+        userHalo?.map = nil
+    }
+
+    private func handleHeading(_ heading: CLLocationDirection?) {
+        userMarkerView.showsHeading = heading != nil
+        userMarker?.rotation = heading ?? 0
+    }
+
+    private func showLocationOffAlert() {
+        let alert = UIAlertController(
+            title: "Map.Locate.off_title".localized,
+            message: "Map.Locate.off_message".localized,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Map.Locate.cancel".localized, style: .cancel))
+        alert.addAction(UIAlertAction(title: "Map.Locate.open_settings".localized, style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        })
+        present(alert, animated: true)
     }
 
     @objc func goToDefaultLocation() {
@@ -697,20 +814,13 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     override func loadView() {
-        // Prepare a map. Showing the blue dot asks for location, so on the
-        // launch the welcome flow opens it waits for the flow, which asks on
-        // its own step, rather than stacking a second prompt over it.
-        if !Onboarding.isOpenAtLaunch {
-            mapView.isMyLocationEnabled = true
-        } else {
-            onboardingObserver = NotificationCenter.default.addObserver(
-                forName: Onboarding.didFinish, object: nil, queue: .main
-            ) { [weak self] _ in
-                self?.mapView.isMyLocationEnabled = true
-                self?.onboardingObserver.map(NotificationCenter.default.removeObserver)
-                self?.onboardingObserver = nil
-            }
-        }
+        // Prepare a map. The position marker is drawn by the app and its
+        // updates start only once permission is given; the prompt itself comes
+        // from the welcome flow's step or the locate-me button, never from here.
+        locationTracker.onLocation = { [weak self] in self?.handleLocation($0) }
+        locationTracker.onHeading = { [weak self] in self?.handleHeading($0) }
+        locationTracker.onAccessChange = { [weak self] in self?.handleAccessChange($0) }
+        locationTracker.startIfAllowed()
         mapView.settings.compassButton = true
         // Exposes the markers, by their titles, to VoiceOver.
         mapView.accessibilityElementsHidden = false

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B185A40000000000000A4000 /* LocateMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A40000000000000A4000 /* LocateMeTests.swift */; };
+		B185A30000000000000A3000 /* UserLocationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A30000000000000A3000 /* UserLocationTracker.swift */; };
+		B185A20000000000000A2000 /* UserLocationMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A20000000000000A2000 /* UserLocationMarker.swift */; };
+		B185A10000000000000A1000 /* LocateMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A10000000000000A1000 /* LocateMe.swift */; };
 		F0A76D1E0000000000000138 /* WidgetStationChoiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */; };
 		F133A0000000000000000402 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000401 /* PrivacyInfo.xcprivacy */; };
 		F133A0000000000000000302 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000301 /* PrivacyInfo.xcprivacy */; };
@@ -413,6 +417,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F185A40000000000000A4000 /* LocateMeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocateMeTests.swift; sourceTree = "<group>"; };
+		F185A30000000000000A3000 /* UserLocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationTracker.swift; sourceTree = "<group>"; };
+		F185A20000000000000A2000 /* UserLocationMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationMarker.swift; sourceTree = "<group>"; };
+		F185A10000000000000A1000 /* LocateMe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocateMe.swift; sourceTree = "<group>"; };
 		F133A0000000000000000401 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F133A0000000000000000301 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F133A0000000000000000201 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -820,6 +828,7 @@
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
 				F0A124000000000000000001 /* StationLocationTests.swift */,
 				9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */,
+				F185A40000000000000A4000 /* LocateMeTests.swift */,
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
 				CB032C4EF1224FBBA5C5EA5B /* WidgetRelevanceTests.swift */,
 				F0A76D1E0000000000000006 /* WidgetPagingTests.swift */,
@@ -993,6 +1002,9 @@
 				9EC0FFEE2A10000000000004 /* MapTimelineView.swift */,
 				9EA1BC70236DDA2D008C3942 /* Marker.swift */,
 				9EDF685623838CDA00B08589 /* MyLocationButton.swift */,
+				F185A30000000000000A3000 /* UserLocationTracker.swift */,
+				F185A20000000000000A2000 /* UserLocationMarker.swift */,
+				F185A10000000000000A1000 /* LocateMe.swift */,
 				9EAB27F32379180600AEAF5A /* WindModeButton.swift */,
 			);
 			path = Main;
@@ -1691,6 +1703,7 @@
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
 				F0A124000000000000000002 /* StationLocationTests.swift in Sources */,
 				9EC0FFEE2A10000000000069 /* MapMarkerTests.swift in Sources */,
+				B185A40000000000000A4000 /* LocateMeTests.swift in Sources */,
 				56DC2B74771540AF415D4285 /* PublishTimeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1858,6 +1871,9 @@
 				9E794A692340A6090064D874 /* SettingsRow.swift in Sources */,
 				9E03DF6423975CF9002F8DA4 /* FavouriteListView.swift in Sources */,
 				9EDF685723838CDA00B08589 /* MyLocationButton.swift in Sources */,
+				B185A30000000000000A3000 /* UserLocationTracker.swift in Sources */,
+				B185A20000000000000A2000 /* UserLocationMarker.swift in Sources */,
+				B185A10000000000000A1000 /* LocateMe.swift in Sources */,
 				9EC3CF22235F3B0B00F17332 /* LabelView.swift in Sources */,
 				9E1AC564233F9AC100AC862D /* DetailsListView.swift in Sources */,
 				9E1AC555233F99F600AC862D /* MainView.swift in Sources */,
