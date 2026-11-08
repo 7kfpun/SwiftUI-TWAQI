@@ -78,6 +78,7 @@ enum WidgetBridge {
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
         reloadControls()
         updateShortcutStations()
+        WatchEventRelay.shared.sendFavourites(ids)
     }
 
     /// Refreshes the cached reading of any favourite station in `pollutants`,

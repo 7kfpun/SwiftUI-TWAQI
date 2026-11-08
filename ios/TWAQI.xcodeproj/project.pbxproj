@@ -337,6 +337,7 @@
 		F63A00000000000000000024 /* PhoneRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000004 /* PhoneRelay.swift */; };
 		F63A00000000000000000025 /* WatchEventRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000005 /* WatchEventRelay.swift */; };
 		F63A00000000000000000026 /* LockedComplicationLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000006 /* LockedComplicationLogTests.swift */; };
+		F63A00000000000000000F01 /* WatchFavouritesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63A00000000000000000F02 /* WatchFavouritesTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -654,6 +655,7 @@
 		F63A00000000000000000004 /* PhoneRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneRelay.swift; sourceTree = "<group>"; };
 		F63A00000000000000000005 /* WatchEventRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchEventRelay.swift; sourceTree = "<group>"; };
 		F63A00000000000000000006 /* LockedComplicationLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockedComplicationLogTests.swift; sourceTree = "<group>"; };
+		F63A00000000000000000F02 /* WatchFavouritesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchFavouritesTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -810,6 +812,7 @@
 				F44A00000000000000000002 /* AnalyticsTests.swift */,
 				F63A00000000000000000002 /* ComplicationStyleTests.swift */,
 				F63A00000000000000000006 /* LockedComplicationLogTests.swift */,
+				F63A00000000000000000F02 /* WatchFavouritesTests.swift */,
 				8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */,
 				4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */,
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
@@ -1672,6 +1675,7 @@
 				F44A00000000000000000013 /* AnalyticsTests.swift in Sources */,
 				F63A00000000000000000013 /* ComplicationStyleTests.swift in Sources */,
 				F63A00000000000000000026 /* LockedComplicationLogTests.swift in Sources */,
+				F63A00000000000000000F01 /* WatchFavouritesTests.swift in Sources */,
 				F63A00000000000000000012 /* ComplicationStyle.swift in Sources */,
 				408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */,
 				6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */,
