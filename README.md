@@ -1,8 +1,12 @@
-# WIP: SwiftUI-TWAQI
+# TWAQI — Taiwan air quality
+
+Taiwan air-quality app for iPhone, iPad, Apple Watch, Apple Vision Pro and Android, with Home Screen widgets, push alerts and station cams. Website, privacy policy and terms: [taiwanair.wahthefox.com](https://taiwanair.wahthefox.com). Contact: [info@wahthefox.com](mailto:info@wahthefox.com).
 
 ## Download
 
 [![App Store Button](assets/app-store.png "App Store Button")](https://itunes.apple.com/tw/app/id1286516443?mt=8)
+&nbsp;
+[**Get it on Google Play**](https://play.google.com/store/apps/details?id=com.kfpun.twaqi)
 
 ## Screenshots
 
@@ -11,6 +15,10 @@
 <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios0.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios1.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios2.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios3.png" width="210">
 
 <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios4.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios5.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios6.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios7.png" width="210">
+
+### Android
+
+<img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/android/app/src/main/play/listings/en-US/graphics/phone-screenshots/1.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/android/app/src/main/play/listings/en-US/graphics/phone-screenshots/2.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/android/app/src/main/play/listings/en-US/graphics/phone-screenshots/3.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/android/app/src/main/play/listings/en-US/graphics/phone-screenshots/4.png" width="210">
 
 ### Apple Watch
 
@@ -29,7 +37,7 @@ Two platforms in one repository (FOX-89):
 | Folder | What |
 | --- | --- |
 | `ios/` | The Apple app: `TWAQI.xcworkspace` / `TWAQI.xcodeproj`, the targets (`TWAQI`, `TWAQIWidget`, `TWAQIWatch`, `TWAQIWatchWidget`, `TWAQIVision`, `TWAQITests`, `TWAQIUITests`), `Podfile`, `fastlane/` and `.swiftlint.yml` |
-| `android/` | The Android app (Kotlin + Jetpack Compose); the project comes with FOX-52 |
+| `android/` | The Android app (Kotlin + Jetpack Compose, package `com.kfpun.twaqi`) and its Wear OS app; see [`android/README.md`](android/README.md) |
 | root | Shared: `.github/`, `.githooks/`, `docs/`, `tools/`, `assets/`, `services/`, `web/`, `workers/`, Firebase Hosting (`firebase.json`, `.firebaserc`) |
 
 ## Development (iOS)
@@ -59,6 +67,22 @@ $ open TWAQI.xcworkspace
 The commands above run in `ios/`. `ios/TWAQI/Config/debug.xcconfig`, `release.xcconfig` and `ios/TWAQI/GoogleService-Info.plist` are gitignored; they hold real keys. So is `ios/fastlane/.env`.
 
 Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatchWidget`, `TWAQIVision` (visionOS), all under `ios/`. Cloudflare Workers live under `workers/<name>/`, the Cloud Run read API under `services/twaqi-api/`.
+
+## Development (Android)
+
+Needs JDK 17 and the Android command-line tools (platform 36). Details, config and release steps: [`android/README.md`](android/README.md).
+
+```bash
+export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=$(brew --prefix)/share/android-commandlinetools
+
+cd android
+# Optional: real keys. A clean checkout builds with secrets.example.properties alone.
+cp secrets.example.properties secrets.properties   # then fill in API_DOMAIN, MAPS_API_KEY, ...
+./gradlew ktlintCheck lint test assembleDebug
+```
+
+`android/secrets.properties`, `android/app/google-services.json` and `android/keystore.properties` are gitignored.
 
 ## Services
 
@@ -112,7 +136,7 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 
   | Level | When the PR touches only… | Runs |
   |---|---|---|
-  | **skip** | `android/`, `workers/`, `services/`, `web/`, `ios/fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing; the check is green in seconds |
+  | **skip** | `android/`, `workers/`, `services/`, `web/`, `ios/fastlane/`, `assets/`, docs (`.md`), media, `.github/**` except `.github/workflows/ci.yml` and `.github/actions/unit-tests-build/` | nothing; the `Unit tests` check is skipped, so no macOS runner starts (FOX-143) |
   | **build** | any other path (Swift, strings, asset catalogs, widget / watch / visionOS, `project.pbxproj`) | `build-for-testing` only; no simulator pick, boot or test run |
   | **test** | a `CI_GUARDED_PATHS` entry (the subset suites' test files and the sources they test), `.github/workflows/ci.yml`, `.github/actions/unit-tests-build/`, `tools/ci_test_level.py` (and its test), `ios/Podfile`, `ios/Podfile.lock`, `Package.resolved` | build + boot + the subset |
 
@@ -136,6 +160,13 @@ Targets: `TWAQI` (iPhone/iPad, iOS 15), `TWAQIWidget`, `TWAQIWatch` + `TWAQIWatc
 - Put the Linear ticket (`FOX-nn`) and its scope in the PR body, and only claim behavior the diff shows — the reviewer checks both. The PR template carries the merge gates.
 - `master` protection (required checks, no direct pushes, up-to-date branches) is proposed in [`docs/master-protection.md`](docs/master-protection.md).
 - Releases (version bump, TestFlight, App Store) use the fastlane lanes in [`ios/fastlane/README.md`](ios/fastlane/README.md) (run from `ios/`) and are run by hand, never from a feature PR. Screenshot uploads refuse to run while the version is `WAITING_FOR_REVIEW` (`fastlane asc_version_state` shows the state). The website deploys through the manual `Firebase Hosting` workflow.
+
+## Releases
+
+Both stores are released by hand-off scripts, never from a feature PR, and name no secrets in the repository.
+
+- **iOS:** a scheduled job builds `master` every day and uploads it to TestFlight when the iOS app changed since the last build. Each Friday another job submits the latest TestFlight build of the current version for App Store review with **manual release**, so it only goes live when the owner releases it. Lanes: [`ios/fastlane/README.md`](ios/fastlane/README.md).
+- **Android:** the Gradle Play Publisher tasks and the Play API scripts upload the bundle, listing and release notes ([`android/README.md`](android/README.md#release-play-internal-track)). Managed publishing is off, so an update goes live as soon as Google approves it.
 
 ## License
 
