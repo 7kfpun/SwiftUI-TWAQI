@@ -60,6 +60,10 @@ describe('decideForecast', () => {
   const base = { quiet: false, lastSentAt: null, lastDigest: null, digest: 'a', now: evening }
   it('fires for a device with no earlier heads-up', () => assert.equal(decideForecast(base), 'fire'))
   it('drops it in quiet hours', () => assert.equal(decideForecast({ ...base, quiet: true }), 'quiet'))
+  it('waits out the cool-down after an AQI alert', () => {
+    assert.equal(decideForecast({ ...base, lastAlertAt: '2026-11-08T09:50:00Z' }), 'cooldown') // 30 min ago
+    assert.equal(decideForecast({ ...base, lastAlertAt: '2026-11-08T07:00:00Z' }), 'fire') // 3 h 20 min ago
+  })
   it('sends once per Taiwan day', () => {
     assert.equal(decideForecast({ ...base, lastSentAt: '2026-11-08T10:20:00Z', digest: 'b' }), 'already-sent')
     // 23:00 Taiwan the night before is another day.
@@ -188,6 +192,14 @@ describe('runForecast', () => {
     const result = await runForecast(s.env, { now: new Date('2026-11-08T12:20:00Z') })
     assert.equal(result.counts['already-sent'], 1)
     assert.equal(s.fcm.length, 0)
+  })
+
+  it('holds the push back after a recent AQI alert, unmarked', async () => {
+    const s = await setup(badNorth, [{ ...sub(1, '105', device(5)), last_fired_at: '2026-11-08T09:50:00Z' }])
+    const result = await runForecast(s.env, { now: evening })
+    assert.equal(result.counts.cooldown, 1)
+    assert.equal(s.fcm.length, 0)
+    assert.equal(s.marks.length, 0)
   })
 
   it('skips a device in do-not-disturb and leaves it unmarked', async () => {

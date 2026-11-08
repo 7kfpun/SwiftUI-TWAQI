@@ -107,20 +107,26 @@ function cleanPollutant(raw: string | null | undefined): string | null {
   return value && value !== '-' ? value : null
 }
 
-export type ForecastOutcome = 'fire' | 'quiet' | 'already-sent' | 'unchanged'
+export type ForecastOutcome = 'fire' | 'quiet' | 'cooldown' | 'already-sent' | 'unchanged'
 
 /** Whether a device gets its heads-up now. Quiet hours drop it for this run
  * (a later run in the window may still send it); one per Taiwan day; and not
- * again for a forecast that says the same thing. The once-a-day rule is
- * stricter than COOLDOWN_MINUTES, so the cool-down needs no check of its own. */
+ * again for a forecast that says the same thing. A recent AQI alert
+ * (within COOLDOWN_MINUTES) holds it back too. */
 export function decideForecast(input: {
   quiet: boolean
   lastSentAt: string | null | undefined
   lastDigest: string | null | undefined
   digest: string
   now: Date
+  /** The device's latest AQI alert (max `last_fired_at` of its subscriptions). */
+  lastAlertAt?: string | null
+  cooldownMinutes?: number
 }): ForecastOutcome {
   if (input.quiet) return 'quiet'
+  // The AQI alerts' cool-down: not right after one. Unmarked, so a later run in the window retries.
+  const alert = input.lastAlertAt ? Date.parse(input.lastAlertAt) : NaN
+  if (Number.isFinite(alert) && input.now.getTime() - alert < (input.cooldownMinutes ?? 180) * 60_000) return 'cooldown'
   const last = input.lastSentAt ? new Date(input.lastSentAt) : null
   if (last && Number.isFinite(last.getTime()) && taipei(last).day === taipei(input.now).day) return 'already-sent'
   if (input.lastDigest && input.lastDigest === input.digest) return 'unchanged'
@@ -228,6 +234,11 @@ export async function runForecast(env: Env, options: { now?: Date; dryRun?: bool
 
   // One push per device, covering every qualifying zone it has a favourite in.
   const byDevice = new Map<number, { device: Subscription['device']; zones: Map<string, ZoneForecast>; station: number }>()
+  const lastAlert = new Map<number, string>()
+  // Every alert the device has fired, in any zone, counts for the cool-down.
+  for (const sub of subs) {
+    if (sub.last_fired_at && sub.last_fired_at > (lastAlert.get(sub.device.id) ?? '')) lastAlert.set(sub.device.id, sub.last_fired_at)
+  }
   for (const sub of subs) {
     const area = sub.station_id === null ? undefined : zoneOf.get(sub.station_id)
     if (!area || sub.station_id === null) continue
@@ -241,7 +252,7 @@ export async function runForecast(env: Env, options: { now?: Date; dryRun?: bool
   for (const [id, { device, zones, station }] of byDevice) {
     const list = [...zones.values()]
     const digest = await forecastDigest(tomorrow, list)
-    const outcome = decideForecast({ quiet: isQuiet(device, now), lastSentAt: device.forecast_sent_at, lastDigest: device.forecast_digest, digest, now })
+    const outcome = decideForecast({ quiet: isQuiet(device, now), lastSentAt: device.forecast_sent_at, lastDigest: device.forecast_digest, digest, now, lastAlertAt: lastAlert.get(id), cooldownMinutes: Number(env.COOLDOWN_MINUTES ?? 180) })
     count(outcome)
     if (outcome === 'fire') toSend.push({ id, device, zones: list, station, digest })
   }

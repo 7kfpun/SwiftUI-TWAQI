@@ -192,6 +192,8 @@ export async function forecastRows(env: DirectusConfig, days: string[]): Promise
     fields: 'area,forecast_date,aqi,major_pollutant,publish_time',
     'filter[archived][_neq]': 'true',
     'filter[forecast_date][_in]': days.join(','),
+    // Newest publish first, so a cut could only drop the oldest rows.
+    sort: '-publish_time',
     limit: '200',
   })
   const { data } = await request<{ data: ForecastRow[] }>(env, 'GET', `/items/twaqi_aqi_forecast?${params}`)
