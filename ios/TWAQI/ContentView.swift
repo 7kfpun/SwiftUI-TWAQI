@@ -106,17 +106,24 @@ struct ContentView: View {
     }
 
     /// Opens What's New a moment after launch, unless something else is on
-    /// screen or a system permission prompt is still due. Skipped launches
-    /// aren't counted; it comes on a later one.
+    /// screen. While a system permission prompt this launch asks for is
+    /// still unanswered it waits (up to 30 s) and opens once it is answered;
+    /// a launch that gives up isn't counted, so it comes on a later one.
     private func presentWhatsNewIfDue() async {
         guard opensWhatsNew else { return }
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
-        let notifications = await UNUserNotificationCenter.current().notificationSettings()
-        let locationUndetermined = CLLocationManager.authorizationStatus() == .notDetermined
-        guard WhatsNew.isClearOfPermissionPrompts(
-            locationUndetermined: locationUndetermined,
-            notificationsUndetermined: notifications.authorizationStatus == .notDetermined
-        ), !showingOnboarding, router.openedStation == nil, !router.showingPro else { return }
+        let pushPrompts = OnboardingStore().promptsForPushAtLaunch
+        for attempt in 0..<31 {
+            try? await Task.sleep(nanoseconds: attempt == 0 ? 1_500_000_000 : 1_000_000_000)
+            if Task.isCancelled { return }
+            let notifications = await UNUserNotificationCenter.current().notificationSettings()
+            if WhatsNew.isClearOfPermissionPrompts(
+                locationUndetermined: CLLocationManager.authorizationStatus() == .notDetermined,
+                notificationsUndetermined: notifications.authorizationStatus == .notDetermined,
+                pushPromptsAtLaunch: pushPrompts
+            ) { break }
+            if attempt == 30 { return }
+        }
+        guard !Task.isCancelled, !showingOnboarding, router.openedStation == nil, !router.showingPro else { return }
         showingWhatsNew = true
     }
 

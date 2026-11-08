@@ -62,12 +62,18 @@ enum WhatsNew {
         return false
     }
 
-    /// Nothing may open over a system permission prompt that is still
-    /// waiting to be asked or answered (location from the map, notifications
-    /// for older installs). The launch is skipped, not counted, so the popup
-    /// comes on a later one.
-    static func isClearOfPermissionPrompts(locationUndetermined: Bool, notificationsUndetermined: Bool) -> Bool {
-        !locationUndetermined && !notificationsUndetermined
+    /// Nothing may open over a system permission prompt this launch asks
+    /// for. Location: with the welcome flow closed the map asks while it is
+    /// undetermined. Notifications: only an install that `AppDelegate` asks
+    /// at launch (`pushPromptsAtLaunch`); a quiet `.notDetermined` (welcome
+    /// skipped before its notifications step) never prompts, so it must not
+    /// hold the popup back forever.
+    static func isClearOfPermissionPrompts(
+        locationUndetermined: Bool,
+        notificationsUndetermined: Bool,
+        pushPromptsAtLaunch: Bool
+    ) -> Bool {
+        !locationUndetermined && !(notificationsUndetermined && pushPromptsAtLaunch)
     }
 
     /// A scene has taken the popup on this launch. Main thread only; tests

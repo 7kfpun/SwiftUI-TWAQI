@@ -73,9 +73,15 @@ final class WhatsNewTests: XCTestCase {
     }
 
     func testPermissionPromptsHoldItBack() {
-        XCTAssertTrue(WhatsNew.isClearOfPermissionPrompts(locationUndetermined: false, notificationsUndetermined: false))
-        XCTAssertFalse(WhatsNew.isClearOfPermissionPrompts(locationUndetermined: true, notificationsUndetermined: false))
-        XCTAssertFalse(WhatsNew.isClearOfPermissionPrompts(locationUndetermined: false, notificationsUndetermined: true))
+        func clear(_ location: Bool, _ notifications: Bool, _ push: Bool) -> Bool {
+            WhatsNew.isClearOfPermissionPrompts(
+                locationUndetermined: location, notificationsUndetermined: notifications, pushPromptsAtLaunch: push)
+        }
+        XCTAssertTrue(clear(false, false, true))
+        XCTAssertFalse(clear(true, false, false))
+        // Notifications hold it back only when the launch asks for them.
+        XCTAssertFalse(clear(false, true, true))
+        XCTAssertTrue(clear(false, true, false))
     }
 
     func testOnlyOneSceneClaimsThePopup() {
