@@ -41,5 +41,25 @@ final class PhoneRelay: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         flush()
+        if activationState == .activated {
+            apply(context: session.receivedApplicationContext)
+        }
     }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        apply(context: applicationContext)
+    }
+
+    /// Keeps the phone's favourites for the pager (FOX-174).
+    private func apply(context: [String: Any]) {
+        guard let ids = WatchFavourites.ids(fromContext: context) else { return }
+        DispatchQueue.main.async {
+            WatchStore.favouriteStationIds = ids
+            NotificationCenter.default.post(name: .watchFavouritesChanged, object: nil)
+        }
+    }
+}
+
+extension Notification.Name {
+    static let watchFavouritesChanged = Notification.Name("watchFavouritesChanged")
 }
