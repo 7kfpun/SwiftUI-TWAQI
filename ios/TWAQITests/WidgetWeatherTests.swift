@@ -133,13 +133,12 @@ final class WidgetWeatherTests: XCTestCase {
         XCTAssertNil(WidgetWeather(temperature: 20).skyText(chinese: true))
     }
 
-    func testCompactLineDropsHumidityAndRain() {
+    func testMediumLinesAreLeadAndDetail() {
         let weather = WidgetWeather(
             temperature: 24.3, humidity: 75, rain: 0.5, windSpeed: 3.2, windDirection: 45, code: 4, cwaText: "多雲"
         )
-        XCTAssertEqual(weather.compactText(chinese: true), "24° · NE 3.2 m/s · 多雲")
-        XCTAssertFalse(weather.compactText(chinese: true).contains("75"))
-        XCTAssertFalse(weather.compactText(chinese: true).contains("mm"))
+        XCTAssertEqual(weather.compactLead, "24° · NE 3.2 m/s")
+        XCTAssertEqual(weather.compactDetail, "75% · 0.5 mm")
     }
 
     func testSpokenTextCoversEveryShownField() {
@@ -150,9 +149,9 @@ final class WidgetWeatherTests: XCTestCase {
         XCTAssertEqual(weather.compactLead, "24° · NE 3.2 m/s")
     }
 
-    func testCompactLineWithMissingFieldsShowsDashes() {
-        XCTAssertEqual(WidgetWeather(code: 4, cwaText: "多雲").compactText(chinese: true), "— · — · 多雲")
-        XCTAssertEqual(WidgetWeather(temperature: 20).compactText(chinese: true), "20° · —")
+    func testMediumLinesWithMissingFieldsShowDashes() {
+        XCTAssertEqual(WidgetWeather(code: 4, cwaText: "多雲").compactLead, "— · —")
+        XCTAssertEqual(WidgetWeather(temperature: 20).compactDetail, "— · —")
     }
 
     func testDetailItemsAreHumidityRainWind() {

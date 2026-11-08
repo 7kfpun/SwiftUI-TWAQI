@@ -129,24 +129,21 @@ struct WidgetWeather: Equatable {
         ]
     }
 
-    /// The medium widget's one compact line: temperature, wind, sky. Humidity,
-    /// rain and chance of rain are dropped: the least useful of the fields
-    /// next to the air quality values.
-    func compactText(chinese: Bool) -> String {
-        var parts = [compactLead]
-        if let sky = skyText(chinese: chinese) {
-            parts.append(sky)
-        }
-        return parts.joined(separator: " · ")
-    }
-
+    /// The medium widget's first line is `compactLead` and the sky; the
+    /// second is `compactDetail`. Chance of rain is the one field left to the
+    /// station page.
     /// The compact line without the sky: temperature and wind, which stay at
     /// full size while a long sky text is truncated.
     var compactLead: String {
         "\(Self.temperatureText(temperature)) · \(Self.windText(speed: windSpeed, direction: windDirection))"
     }
 
-    /// Everything the large row shows, for VoiceOver.
+    /// Humidity and rain today, the medium widget's second line.
+    var compactDetail: String {
+        "\(Self.percentText(humidity)) · \(Self.rainText(rain))"
+    }
+
+    /// Everything the widget shows, for VoiceOver.
     func spokenText(chinese: Bool) -> String {
         ([Self.temperatureText(temperature), skyText(chinese: chinese)].compactMap { $0 } + detailItems)
             .joined(separator: " · ")

@@ -906,30 +906,36 @@ struct ReadingWidgetView: View {
         .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
     }
 
-    /// Medium: one line, icon, temperature, wind and sky. Humidity and rain
-    /// are dropped before the air quality values lose any room.
+    /// Medium: icon, temperature, wind and sky, then humidity and rain today.
     private var compactWeather: some View {
-        HStack(spacing: 4) {
-            Image(systemName: entry.weather?.symbol ?? "cloud.fill")
-                .symbolRenderingMode(.multicolor)
-                .opacity(entry.weather == nil ? 0.35 : 1)
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 4) {
+                Image(systemName: entry.weather?.symbol ?? "cloud.fill")
+                    .symbolRenderingMode(.multicolor)
+                    .opacity(entry.weather == nil ? 0.35 : 1)
+                    .accessibilityHidden(true)
+                if let weather = entry.weather {
+                    Text(verbatim: weather.compactLead)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .fixedSize()
+                    if let sky = weather.skyText(chinese: Locale.isChinese) {
+                        Text(verbatim: "· \(sky)")
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                } else {
+                    Text(verbatim: "—")
+                }
+            }
             if let weather = entry.weather {
-                Text(verbatim: weather.compactLead)
+                Text(verbatim: weather.compactDetail)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .fixedSize()
-                if let sky = weather.skyText(chinese: Locale.isChinese) {
-                    Text(verbatim: "· \(sky)")
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-            } else {
-                Text(verbatim: "—")
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Widget.weather_label \(entry.weather.map { $0.compactText(chinese: Locale.isChinese) } ?? "—")"))
+        .accessibilityLabel(Text("Widget.weather_label \(entry.weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
         .font(.caption2)
         .foregroundStyle(.secondary)
     }
