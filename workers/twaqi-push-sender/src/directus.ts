@@ -178,6 +178,33 @@ export async function stationSubscriptions(
   return all
 }
 
+/** Each device's latest AQI alert (`last_fired_at`) across ALL its live
+ * subscriptions, whatever the station, for the forecast's cool-down. */
+export async function lastAlerts(
+  env: DirectusConfig,
+  deviceIds: number[],
+  counter: { requests: number } = { requests: 0 },
+): Promise<Map<number, string>> {
+  const out = new Map<number, string>()
+  for (let i = 0; i < deviceIds.length; i += 100) {
+    const filter = JSON.stringify({
+      _and: [...LIVE, { last_fired_at: { _nnull: true } }, { device: { _in: deviceIds.slice(i, i + 100) } }],
+    })
+    for (let page = 1; ; page++) {
+      const params = new URLSearchParams({ fields: 'device.id,last_fired_at', filter, sort: 'id', limit: String(PAGE_SIZE), page: String(page) })
+      counter.requests++
+      const { data } = await request<{ data: Array<{ device: { id: number } | null; last_fired_at: string | null }> }>(
+        env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
+      for (const row of data) {
+        if (!row.device || !row.last_fired_at) continue
+        if (row.last_fired_at > (out.get(row.device.id) ?? '')) out.set(row.device.id, row.last_fired_at)
+      }
+      if (data.length < PAGE_SIZE) break
+    }
+  }
+  return out
+}
+
 /** The forecast rows for these Taiwan days, archived ones left out. */
 export interface ForecastRow {
   area: string

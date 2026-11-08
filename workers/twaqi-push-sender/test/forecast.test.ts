@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, describe, it } from 'node:test'
 import {
-  badTomorrow, decideForecast, forecastDigest, forecastText, inWindow, matchArea, nextDay, pickDays, runForecast, taipei,
+  badTomorrow, decideForecast, holdApplies, forecastDigest, forecastText, inWindow, matchArea, nextDay, pickDays, runForecast, taipei,
 } from '../src/forecast.ts'
 
 const row = (area: string, date: string, aqi: number | null, pollutant: string | null = '細懸浮微粒', publish = '2026-11-08 16:30:00') =>
@@ -60,9 +60,15 @@ describe('decideForecast', () => {
   const base = { quiet: false, lastSentAt: null, lastDigest: null, digest: 'a', now: evening }
   it('fires for a device with no earlier heads-up', () => assert.equal(decideForecast(base), 'fire'))
   it('drops it in quiet hours', () => assert.equal(decideForecast({ ...base, quiet: true }), 'quiet'))
-  it('waits out the cool-down after an AQI alert', () => {
-    assert.equal(decideForecast({ ...base, lastAlertAt: '2026-11-08T09:50:00Z' }), 'cooldown') // 30 min ago
+  it('waits out the cool-down after an AQI alert, while a later run remains', () => {
+    assert.equal(decideForecast({ ...base, lastAlertAt: '2026-11-08T09:50:00Z' }), 'cooldown') // 18:20 run, alert 30 min ago
     assert.equal(decideForecast({ ...base, lastAlertAt: '2026-11-08T07:00:00Z' }), 'fire') // 3 h 20 min ago
+  })
+  it('does not let the cool-down cost the day: the 20:20 run sends regardless', () => {
+    const late = new Date('2026-11-08T12:20:00Z') // 20:20 Taiwan
+    assert.equal(holdApplies(evening), true)
+    assert.equal(holdApplies(late), false)
+    assert.equal(decideForecast({ ...base, now: late, lastAlertAt: '2026-11-08T12:20:00Z' }), 'fire') // alert from the same run
   })
   it('sends once per Taiwan day', () => {
     assert.equal(decideForecast({ ...base, lastSentAt: '2026-11-08T10:20:00Z', digest: 'b' }), 'already-sent')
@@ -119,7 +125,7 @@ describe('runForecast', () => {
   })
   const sub = (id: number, station: string, dev: ReturnType<typeof device>) => ({ id, station_id: station, device: dev })
 
-  async function setup(forecast: ReturnType<typeof row>[], subs: ReturnType<typeof sub>[]) {
+  async function setup(forecast: ReturnType<typeof row>[], subs: Array<Record<string, unknown>>, alerts: Array<Record<string, unknown>> = []) {
     const fcm: Array<Record<string, unknown>> = []
     const marks: Array<Record<string, unknown>> = []
     let subReads = 0
@@ -139,6 +145,8 @@ describe('runForecast', () => {
       if (url.pathname.endsWith('/twaqi_aqi_forecast')) return Response.json({ data: forecast })
       if (url.pathname.endsWith('/twaqi_push_subscriptions')) {
         subReads++
+        // The cool-down read names only device.id and last_fired_at.
+        if (url.searchParams.get('fields') === 'device.id,last_fired_at') return Response.json({ data: alerts })
         return Response.json({ data: subs })
       }
       if (url.pathname.endsWith('/twaqi_push_devices') && init.method === 'PATCH') {
@@ -200,6 +208,19 @@ describe('runForecast', () => {
     assert.equal(result.counts.cooldown, 1)
     assert.equal(s.fcm.length, 0)
     assert.equal(s.marks.length, 0)
+  })
+
+  it('sees a recent alert on a station outside the qualifying zone', async () => {
+    const s = await setup(badNorth, [sub(1, '105', device(5))], [{ device: { id: 5 }, last_fired_at: '2026-11-08T09:50:00Z' }])
+    const result = await runForecast(s.env, { now: evening })
+    assert.equal(result.counts.cooldown, 1)
+    assert.equal(s.fcm.length, 0)
+  })
+
+  it('sends at 20:20 after a 18:20 hold, and even after an alert from that same run', async () => {
+    const s = await setup(badNorth, [sub(1, '105', device(5))], [{ device: { id: 5 }, last_fired_at: '2026-11-08T12:20:00Z' }])
+    const result = await runForecast(s.env, { now: new Date('2026-11-08T12:21:00Z') })
+    assert.equal(result.counts.sent, 1)
   })
 
   it('skips a device in do-not-disturb and leaves it unmarked', async () => {

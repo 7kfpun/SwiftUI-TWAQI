@@ -7,6 +7,7 @@ import { allReadings } from './aqi.ts'
 import {
   archiveDevices,
   forecastRows,
+  lastAlerts,
   markForecastSent,
   stationSubscriptions,
   tokenSuffix,
@@ -107,12 +108,22 @@ function cleanPollutant(raw: string | null | undefined): string | null {
   return value && value !== '-' ? value : null
 }
 
+/** Whether the AQI cool-down may hold the heads-up back at `now`: only while a
+ * later scheduled run (two hours on) still falls inside the window. The last
+ * run of the window sends regardless, so an alert from the same run, or from
+ * just before, can't cost the day's heads-up. */
+export function holdApplies(now: Date): boolean {
+  const { hour } = taipei(now)
+  const minutes = hour * 60 + Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Taipei', minute: '2-digit' }).format(now))
+  return minutes + 120 < WINDOW_END_HOUR * 60
+}
+
 export type ForecastOutcome = 'fire' | 'quiet' | 'cooldown' | 'already-sent' | 'unchanged'
 
 /** Whether a device gets its heads-up now. Quiet hours drop it for this run
  * (a later run in the window may still send it); one per Taiwan day; and not
  * again for a forecast that says the same thing. A recent AQI alert
- * (within COOLDOWN_MINUTES) holds it back too. */
+ * (within COOLDOWN_MINUTES) holds it back too, except on the window's last run. */
 export function decideForecast(input: {
   quiet: boolean
   lastSentAt: string | null | undefined
@@ -126,7 +137,7 @@ export function decideForecast(input: {
   if (input.quiet) return 'quiet'
   // The AQI alerts' cool-down: not right after one. Unmarked, so a later run in the window retries.
   const alert = input.lastAlertAt ? Date.parse(input.lastAlertAt) : NaN
-  if (Number.isFinite(alert) && input.now.getTime() - alert < (input.cooldownMinutes ?? 180) * 60_000) return 'cooldown'
+  if (holdApplies(input.now) && Number.isFinite(alert) && input.now.getTime() - alert < (input.cooldownMinutes ?? 180) * 60_000) return 'cooldown'
   const last = input.lastSentAt ? new Date(input.lastSentAt) : null
   if (last && Number.isFinite(last.getTime()) && taipei(last).day === taipei(input.now).day) return 'already-sent'
   if (input.lastDigest && input.lastDigest === input.digest) return 'unchanged'
@@ -234,11 +245,6 @@ export async function runForecast(env: Env, options: { now?: Date; dryRun?: bool
 
   // One push per device, covering every qualifying zone it has a favourite in.
   const byDevice = new Map<number, { device: Subscription['device']; zones: Map<string, ZoneForecast>; station: number }>()
-  const lastAlert = new Map<number, string>()
-  // Every alert the device has fired, in any zone, counts for the cool-down.
-  for (const sub of subs) {
-    if (sub.last_fired_at && sub.last_fired_at > (lastAlert.get(sub.device.id) ?? '')) lastAlert.set(sub.device.id, sub.last_fired_at)
-  }
   for (const sub of subs) {
     const area = sub.station_id === null ? undefined : zoneOf.get(sub.station_id)
     if (!area || sub.station_id === null) continue
@@ -248,6 +254,9 @@ export async function runForecast(env: Env, options: { now?: Date; dryRun?: bool
   }
   result.devices = byDevice.size
 
+  // Every alert the device has fired, at any station, counts for the cool-down
+  // (read for all its subscriptions, not just those in a qualifying zone).
+  const lastAlert = holdApplies(now) && byDevice.size ? await lastAlerts(env, [...byDevice.keys()]) : new Map<number, string>()
   const toSend: Array<{ id: number; device: Subscription['device']; zones: ZoneForecast[]; station: number; digest: string }> = []
   for (const [id, { device, zones, station }] of byDevice) {
     const list = [...zones.values()]
