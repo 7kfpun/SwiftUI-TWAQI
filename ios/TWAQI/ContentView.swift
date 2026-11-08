@@ -26,6 +26,8 @@ struct ContentView: View {
     /// Kept outside the rebuilt tabs so changing language stays on Help.
     @State private var selectedTab: AppTab = .main
 
+    @Environment(\.scenePhase) private var scenePhase
+
     /// The welcome flow, opened by itself once per flow version for every
     /// user (FOX-49). Help opens it again on its own.
     @State private var showingOnboarding: Bool
@@ -47,6 +49,11 @@ struct ContentView: View {
         _showingOnboarding = State(initialValue: opensOnboarding)
     }
 
+    private func gatherConsent() {
+        guard !showingOnboarding else { return }
+        ConsentManager.shared.gather(isPro: settings.isPro)
+    }
+
     enum AppTab: Hashable {
         case main, forecast, favourites, detailsList, help
     }
@@ -63,6 +70,11 @@ struct ContentView: View {
         .environment(\.locale, language.locale())
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
+        // UMP consent for free users, once the welcome flow is out of the way.
+        .onAppear { gatherConsent() }
+        .onChange(of: showingOnboarding) { _ in gatherConsent() }
+        // A form that failed to show retries when the app comes back (a no-op once gathered).
+        .onChange(of: scenePhase) { phase in if phase == .active { gatherConsent() } }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView(isLaunchFlow: true) { showingOnboarding = false }
                 .environment(\.locale, language.locale())

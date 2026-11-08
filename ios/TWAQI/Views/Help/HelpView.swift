@@ -16,6 +16,7 @@ enum HelpSection: String, CaseIterable, Identifiable {
     case appearance
     case welcome
     case contact
+    case privacy
     case widgetsAndWatch
     case definition
     case dataSources
@@ -26,9 +27,12 @@ enum HelpSection: String, CaseIterable, Identifiable {
 
     /// Premium leads the list so free users see it first (FOX-68); Pro users
     /// don't get it. The developer section shows only in developer mode.
-    static func order(isPro: Bool, developerMode: Bool) -> [HelpSection] {
+    /// Privacy settings show wherever UMP requires the entry point (EEA, UK;
+    /// FOX-118), Pro or not: a Pro user who chose while free can still change it.
+    static func order(isPro: Bool, developerMode: Bool, privacyOptionsRequired: Bool = false) -> [HelpSection] {
         allCases.filter { section in
             switch section {
+            case .privacy: return privacyOptionsRequired
             case .purchase: return !isPro
             case .developer: return developerMode
             default: return true
@@ -72,6 +76,7 @@ enum DataSource: String, CaseIterable, Identifiable {
 struct HelpView: View {
     @EnvironmentObject var settings: SettingsStore
     @ObservedObject var viewModel: HelpViewModel
+    @ObservedObject private var consent = ConsentManager.shared
 
     @State private var showingPro = false
     @State private var showingOnboarding = false
@@ -89,7 +94,7 @@ struct HelpView: View {
         // beside the list in a wide window, as stations do in the lists.
         AdaptiveNavigation(placeholderIcon: "questionmark.circle", placeholderMessage: "Help.select_a_topic") {
             Form {
-                ForEach(HelpSection.order(isPro: settings.isPro, developerMode: developerMode)) { section in
+                ForEach(HelpSection.order(isPro: settings.isPro, developerMode: developerMode, privacyOptionsRequired: consent.privacyOptionsRequired)) { section in
                     view(for: section)
                 }
             }
@@ -122,6 +127,7 @@ struct HelpView: View {
         case .appearance: appearanceSection
         case .welcome: welcomeSection
         case .contact: contactSection
+        case .privacy: privacySection
         case .widgetsAndWatch: widgetsAndWatchSection
         case .definition: definitionSection
         case .dataSources: dataSourcesSection
@@ -242,6 +248,17 @@ struct HelpView: View {
 
             NavigationLink(destination: CooperateView()) {
                 Text("Help.interested_to_be_our_business_partner")
+                    .fontWeight(.light)
+            }
+        }
+    }
+
+    private var privacySection: some View {
+        Section(header: Label("Help.privacy", systemImage: "hand.raised")) {
+            Button {
+                consent.presentPrivacyOptions()
+            } label: {
+                Text("Help.privacy_settings")
                     .fontWeight(.light)
             }
         }
