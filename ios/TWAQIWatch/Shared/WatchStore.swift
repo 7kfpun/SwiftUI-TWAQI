@@ -51,6 +51,13 @@ enum WatchFavourites {
         pinned == nil || pinned == fetched
     }
 
+    /// Whether a swipe to `stationId` has to pin it: unless it already is the
+    /// pin. Compared with the pin, not the reading: a fetch for the previous
+    /// pin may be in flight, so a swipe back must re-pin and rerun.
+    static func needsPin(_ stationId: Int, pinned: Int?, isPinnedSource: Bool) -> Bool {
+        stationId != pinned || !isPinnedSource
+    }
+
     /// The pages to swipe between: the favourites in order. A station on
     /// screen that isn't one of them (home, or picked by hand) leads until a
     /// favourite is on screen; the station list is the way back. Fewer than two pages means no pager.

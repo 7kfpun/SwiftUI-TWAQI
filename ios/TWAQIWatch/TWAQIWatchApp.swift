@@ -170,7 +170,7 @@ final class WatchModel: ObservableObject {
     /// follow, as they do for a pick in the list; the reading shows at once
     /// from the cached favourite and refreshes behind it.
     func pin(stationId: Int) {
-        guard stationId != reading?.stationId || source != .pinned else { return }
+        guard WatchFavourites.needsPin(stationId, pinned: WatchStore.pinnedStationId, isPinnedSource: source == .pinned) else { return }
         WatchStore.pinnedStationId = stationId
         source = .pinned
         if let cached = WatchStore.favouriteReadings.first(where: { $0.stationId == stationId }) {

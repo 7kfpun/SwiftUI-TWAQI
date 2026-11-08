@@ -58,4 +58,12 @@ final class WatchFavouritesTests: XCTestCase {
         XCTAssertTrue(WatchFavourites.mayStore(fetched: 15, pinned: 15))
         XCTAssertTrue(WatchFavourites.mayStore(fetched: 7, pinned: nil))
     }
+
+    func testSwipeBackWhilePinMovedNeedsPin() {
+        // Screen shows 7, pin moved to 42 (fetch in flight): swiping back to 7 must re-pin.
+        XCTAssertTrue(WatchFavourites.needsPin(7, pinned: 42, isPinnedSource: true))
+        XCTAssertFalse(WatchFavourites.needsPin(42, pinned: 42, isPinnedSource: true))
+        XCTAssertTrue(WatchFavourites.needsPin(42, pinned: 42, isPinnedSource: false))
+        XCTAssertTrue(WatchFavourites.needsPin(7, pinned: nil, isPinnedSource: true))
+    }
 }
