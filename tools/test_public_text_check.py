@@ -17,7 +17,13 @@ def kinds(text, **kw):
 class CheckText(unittest.TestCase):
     def test_website_hosts_are_fine(self):
         self.assertEqual(kinds("see https://taiwanair.wahthefox.com/privacy.html and kf-twaqi.web.app"), [])
-        self.assertEqual(kinds("kf-nihongo.web.app, japanesedaily.wahthefox.com"), [])
+
+    def test_allowlist_is_exactly_the_public_sites(self):
+        # CLAUDE.md names the public sites; adding a host here must be a deliberate change.
+        self.assertEqual(
+            ptc.ALLOWED_HOSTS,
+            {"taiwanair.wahthefox.com", "kf-twaqi.web.app", "kf-nihongo.web.app"},
+        )
 
     def test_other_hosts_are_flagged(self):
         for host in (
