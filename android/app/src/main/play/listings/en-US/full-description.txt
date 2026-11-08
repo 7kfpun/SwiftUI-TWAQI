@@ -48,6 +48,9 @@ WHY IT MATTERS
 Air pollution is not only a respiratory problem. It raises the risk of cardiovascular disease, stroke and other chronic illness, and in 2013 the International Agency for Research on Cancer classified outdoor air pollution as a Group 1 carcinogen. Children and older adults are affected most. Thirty seconds before you leave the house tells you whether to take the mask, or to run the purifier instead of opening the window.
 
 WHERE THE DATA COMES FROM
-Air quality readings, forecasts and station cameras are open data from Taiwan's Ministry of Environment; weather is open data from the Central Weather Administration. We display it; we do not adjust it.
+Air quality readings, forecasts and station cameras are open data from Taiwan's Ministry of Environment (https://www.moenv.gov.tw). Weather is open data from the Central Weather Administration (https://www.cwa.gov.tw). We display it; we do not adjust it.
+
+NOT A GOVERNMENT APP
+Taiwan Air is an independent app by Fox Technologies Limited. It is not affiliated with, endorsed by or operated by any government agency, and it does not represent a government entity. For official information, visit the sources above.
 
 Questions, problems or ideas? Send them from Help › Feedback in the app. We read everything.
