@@ -586,3 +586,16 @@
 "Help.shortcuts_control_header" = "Control Center";
 "Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
 "Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";
+
+/* What's New (FOX-142) */
+"WhatsNew.title" = "What's New";
+"WhatsNew.version %@" = "Version %@";
+"WhatsNew.close" = "Got it";
+"WhatsNew.pro" = "Pro";
+"Help.show_whats_new" = "What's new in this version";
+"WhatsNew.3_1_5.trend_title" = "24-hour air quality trend";
+"WhatsNew.3_1_5.trend_body" = "Open a station to see its last 24 hours of AQI, hour by hour, with a one-line verdict: improving, getting worse or holding steady.";
+"WhatsNew.3_1_5.station_title" = "A new station screen";
+"WhatsNew.3_1_5.station_body" = "Name, township, county and air quality zone in one header, all six pollutants at once, and how many hours old each reading is.";
+"WhatsNew.3_1_5.search_title" = "Better search";
+"WhatsNew.3_1_5.search_body" = "Stations are grouped by air quality zone, and you can search by township or county as well as by station name.";
