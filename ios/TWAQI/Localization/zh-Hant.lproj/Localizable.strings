@@ -288,6 +288,7 @@
 
 "Widget.widget_name" = "空氣品質";
 "Widget.widget_description" = "顯示最近測站或第一個最愛測站的目前 AQI，並列出你其他的最愛測站。";
+"Widget.weather_label %@" = "天氣：%@";
 "Widget.favourites" = "最愛";
 "Widget.no_favourites" = "在「最愛」加入測站，即可在此顯示。";
 "Widget.station" = "測站";

@@ -284,6 +284,7 @@
 
 "Widget.widget_name" = "Air quality";
 "Widget.widget_description" = "Current AQI at your nearest station or first favourite, plus your other favourites.";
+"Widget.weather_label %@" = "Weather: %@";
 "Widget.favourites" = "Favourites";
 "Widget.no_favourites" = "Save stations in Favourites to list them here.";
 "Widget.station" = "Station";
