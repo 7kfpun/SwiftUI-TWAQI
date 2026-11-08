@@ -205,4 +205,37 @@ final class DeepLinkTests: XCTestCase {
         XCTAssertFalse(router.open(try url("https://example.com/pro"), isPro: false))
         XCTAssertFalse(router.showingPro)
     }
+
+    // MARK: - Quick actions (FOX-138)
+
+    func testQuickActionsListClosestThenThreeFavourites() {
+        let items = QuickActions.items(
+            favourites: [(1, "A"), (2, "B"), (3, "C"), (4, "D")], closestTitle: "Closest"
+        )
+        XCTAssertEqual(items.map(\.title), ["Closest", "A", "B", "C"])
+    }
+
+    func testQuickActionsSkipDuplicateAndInvalidIds() {
+        let items = QuickActions.items(favourites: [(1, "A"), (1, "A again"), (0, "Bad")], closestTitle: "Closest")
+        XCTAssertEqual(items.map(\.title), ["Closest", "A"])
+    }
+
+    func testQuickActionsWithNoFavouritesKeepClosest() {
+        let items = QuickActions.items(favourites: [], closestTitle: "Closest")
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(QuickActions.target(forType: items[0].type), .closest)
+    }
+
+    func testQuickActionTypeRoundTripsToItsStation() throws {
+        let items = QuickActions.items(favourites: [(126, "Songshan")], closestTitle: "Closest")
+        XCTAssertEqual(QuickActions.target(forType: items[1].type), .station(126))
+        XCTAssertNil(QuickActions.target(forType: "twaqi.quickaction.station.abc"))
+        XCTAssertNil(QuickActions.target(forType: "twaqi.quickaction.station.-5"))
+        XCTAssertNil(QuickActions.target(forType: "other"))
+    }
+
+    func testQuickActionStationLinkCarriesItsSource() throws {
+        let url = try XCTUnwrap(DeepLink.stationURL(stationId: 126, source: .quickAction))
+        XCTAssertEqual(DeepLink(url: url), .station(id: 126, source: .quickAction))
+    }
 }

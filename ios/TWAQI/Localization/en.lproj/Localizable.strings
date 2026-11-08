@@ -586,3 +586,6 @@
 "Help.shortcuts_control_header" = "Control Center";
 "Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
 "Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";
+
+// Home Screen quick actions (FOX-138)
+"QuickAction.closest_station" = "Closest station";
