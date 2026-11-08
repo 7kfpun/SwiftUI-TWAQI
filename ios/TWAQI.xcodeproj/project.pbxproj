@@ -17,6 +17,10 @@
 		39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC438F9A61389C50464FC038 /* StationWeatherView.swift */; };
 		DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AF890677A74B0C87F84851 /* StationWeatherStore.swift */; };
 		7DB134A990DD8C29D6F7010C /* StationWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */; };
+		FA181A000000000000000006 /* StationWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */; };
+		FA181A000000000000000002 /* WidgetWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA181A000000000000000001 /* WidgetWeather.swift */; };
+		FA181A000000000000000003 /* WidgetWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA181A000000000000000001 /* WidgetWeather.swift */; };
+		FA181A000000000000000005 /* WidgetWeatherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA181A000000000000000004 /* WidgetWeatherTests.swift */; };
 		F084A11E0000000000000002 /* OnboardingAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000001 /* OnboardingAnimation.swift */; };
 		F084A11E0000000000000004 /* OnboardingAnimations in Resources */ = {isa = PBXBuildFile; fileRef = F084A11E0000000000000003 /* OnboardingAnimations */; };
 		97DD8D3099A1D036F4AA8A65 /* WidgetFamilyRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41069023CE2A01483825C22B /* WidgetFamilyRules.swift */; };
@@ -414,6 +418,8 @@
 		F1AFD81FB955076250384E18 /* StationWeatherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherTests.swift; sourceTree = "<group>"; };
 		AC438F9A61389C50464FC038 /* StationWeatherView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherView.swift; sourceTree = "<group>"; };
 		77AF890677A74B0C87F84851 /* StationWeatherStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeatherStore.swift; sourceTree = "<group>"; };
+		FA181A000000000000000001 /* WidgetWeather.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetWeather.swift; sourceTree = "<group>"; };
+		FA181A000000000000000004 /* WidgetWeatherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetWeatherTests.swift; sourceTree = "<group>"; };
 		E2CC4DFB6CA3DD4B189BD2C2 /* StationWeather.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationWeather.swift; sourceTree = "<group>"; };
 		F084A11E0000000000000001 /* OnboardingAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimation.swift; sourceTree = "<group>"; };
 		F084A11E0000000000000003 /* OnboardingAnimations */ = {isa = PBXFileReference; lastKnownFileType = folder; path = OnboardingAnimations; sourceTree = "<group>"; };
@@ -800,6 +806,7 @@
 				B3C8DF4EB91BE74F07936907 /* OfflineCacheRetentionTests.swift */,
 				5FD0F0A915F639F806ED94BA /* AqiForecastTests.swift */,
 				F1AFD81FB955076250384E18 /* StationWeatherTests.swift */,
+				FA181A000000000000000004 /* WidgetWeatherTests.swift */,
 				F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */,
 				F0A43A0E0000000000000001 /* AppAppearanceTests.swift */,
 				F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */,
@@ -1028,6 +1035,7 @@
 			isa = PBXGroup;
 			children = (
 				C7BE86183E947AD699CC7713 /* WidgetStationDetail.swift */,
+				FA181A000000000000000001 /* WidgetWeather.swift */,
 				41069023CE2A01483825C22B /* WidgetFamilyRules.swift */,
 				C087A9241D43CECA11D0085C /* Onboarding.swift */,
 				346558AFF08D2DD24C5AE502 /* WindExtensions.swift */,
@@ -1657,6 +1665,7 @@
 				1D47802FE96EE0627AEF5D8A /* OfflineCacheRetentionTests.swift in Sources */,
 				5AA6CCAF2A673B4C3404C5EE /* AqiForecastTests.swift in Sources */,
 				95E3353483BA62DF5D8CF59A /* StationWeatherTests.swift in Sources */,
+				FA181A000000000000000005 /* WidgetWeatherTests.swift in Sources */,
 				F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */,
 				F0A43A0E0000000000000002 /* AppAppearanceTests.swift in Sources */,
 				F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */,
@@ -1688,6 +1697,8 @@
 				4B5BD018818CBE05240227A0 /* StationDetailLoader.swift in Sources */,
 				2617111BE81559B4AFDEA9CB /* WidgetStationDetail.swift in Sources */,
 				88B20C7BB8243B3114D5DB73 /* WidgetFamilyRules.swift in Sources */,
+				FA181A000000000000000003 /* WidgetWeather.swift in Sources */,
+				FA181A000000000000000006 /* StationWeather.swift in Sources */,
 				336A325C9C3483B3334702A0 /* AirQualityAnswer.swift in Sources */,
 				708DB99E3A834420516790CD /* StationEntity.swift in Sources */,
 				DF854E0A946408CD3DE034E7 /* AirQualityControl.swift in Sources */,
@@ -1775,6 +1786,7 @@
 				39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */,
 				DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */,
 				7DB134A990DD8C29D6F7010C /* StationWeather.swift in Sources */,
+				FA181A000000000000000002 /* WidgetWeather.swift in Sources */,
 				575C32ECAC604E2E809E24D3 /* StationCamFrameCache.swift in Sources */,
 				89BC9288FC32C3148198A8DA /* StationCamHistoryCache.swift in Sources */,
 				4A7A2D044EB766BF3330071E /* OfflineCacheRetention.swift in Sources */,

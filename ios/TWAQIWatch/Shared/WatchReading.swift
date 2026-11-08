@@ -31,6 +31,9 @@ struct WatchReading: Codable, Equatable {
     /// Optional: readings saved before FOX-75 have none.
     var latitude: Double?
     var longitude: Double?
+    /// The county in Chinese (「臺北市」), to match the widget's weather
+    /// forecast (FOX-181). Optional: readings saved before it have none.
+    var countyLocal: String?
 
     init(_ pollutant: Pollutant) {
         stationId = pollutant.stationId
@@ -49,6 +52,7 @@ struct WatchReading: Codable, Equatable {
         publishTime = pollutant.publishTime
         latitude = pollutant.lat
         longitude = pollutant.lon
+        countyLocal = pollutant.countyLocal
     }
 
     /// Shown in the complication gallery before any real reading exists.
