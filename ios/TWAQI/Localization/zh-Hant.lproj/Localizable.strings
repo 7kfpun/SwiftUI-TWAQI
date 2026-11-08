@@ -593,7 +593,6 @@
 
 /* What's New (FOX-142) */
 "WhatsNew.title" = "新功能";
-"WhatsNew.version %@" = "版本 %@";
 "WhatsNew.close" = "知道了";
 "WhatsNew.pro" = "Pro";
 "Help.show_whats_new" = "本版新功能";

@@ -29,9 +29,6 @@ struct WhatsNewView: View {
                     Text("WhatsNew.title")
                         .font(.largeTitle.bold())
                         .accessibilityAddTraits(.isHeader)
-                    Text(String(format: "WhatsNew.version %@".localized, release.version))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
                 }
 
                 ForEach(release.items, id: \.titleKey) { item in

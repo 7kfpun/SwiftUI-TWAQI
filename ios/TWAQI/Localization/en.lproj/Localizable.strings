@@ -589,7 +589,6 @@
 
 /* What's New (FOX-142) */
 "WhatsNew.title" = "What's New";
-"WhatsNew.version %@" = "Version %@";
 "WhatsNew.close" = "Got it";
 "WhatsNew.pro" = "Pro";
 "Help.show_whats_new" = "What's new in this version";
