@@ -43,29 +43,46 @@ class Risky(unittest.TestCase):
 
 
 class Bullets(unittest.TestCase):
-    def item(self, body, user="Grok", t="2026-01-01T00:00:00Z"):
-        return {"user": user, "created": t, "body": body}
+    def item(self, body, user="Grok", t="2026-01-01T00:00:00Z", assoc="OWNER"):
+        return {"user": user, "created": t, "body": body, "assoc": assoc}
 
     def test_copies_bullets(self):
         body = "**Grok LGTM** (head abc)\n\nrisk: high\n\nHuman check:\n- Read the retry path\n- Try alerts off\n\nOther text\n- not copied"
-        self.assertEqual(nh.human_checks([self.item(body)]), ["Read the retry path", "Try alerts off"])
+        self.assertEqual(nh.human_checks([self.item(body)]), (["Read the retry path", "Try alerts off"], 0))
 
     def test_filters_public_details(self):
         body = ("**Grok LGTM**\nHuman check:\n- Open 10.1.2.3 to the world\n- Call foo.workers.dev\n- ping admin@corp.io\n"
-                "- key ghp_abcdefghijklmnop1234\n- authorized networks changed\n- Fine one @user")
-        self.assertEqual(nh.human_checks([self.item(body)]), ["Fine one @​user"])
+                "- key ghp_abcdefghijklmnop1234\n- Fine one @user")
+        self.assertEqual(nh.human_checks([self.item(body)]), (["Fine one @​user"], 4))
 
     def test_claude_bot_and_changes_needed(self):
         ok = self.item("**Grok LGTM**\nHuman check:\n- a", t="2026-01-01T00:00:00Z")
         bot = self.item("LGTM\nHuman check:\n- b", user="claude[bot]", t="2026-01-02T00:00:00Z")
-        self.assertEqual(nh.human_checks([ok, bot]), ["a"])
+        self.assertEqual(nh.human_checks([ok, bot]), (["a"], 0))
         no = self.item("**Codex — changes needed**", t="2026-01-03T00:00:00Z")
-        self.assertEqual(nh.human_checks([ok, no]), [])
+        self.assertEqual(nh.human_checks([ok, no]), ([], 0))
         again = self.item("**Grok LGTM**\nHuman check: only this", t="2026-01-04T00:00:00Z")
-        self.assertEqual(nh.human_checks([ok, no, again]), ["only this"])
+        self.assertEqual(nh.human_checks([ok, no, again]), (["only this"], 0))
+
+    def test_path_bullet_kept(self):
+        body = "**Grok LGTM**\nHuman check:\n- Retry path in `ios/TWAQI/Utils/DirectusPushMirror.swift`"
+        self.assertEqual(nh.human_checks([self.item(body)])[1], 0)
+
+    def test_stranger_ignored(self):
+        ok = self.item("**Grok LGTM**\nHuman check:\n- real", t="2026-01-01T00:00:00Z")
+        fake = self.item("**X LGTM**\nHuman check:\n- fake", user="eve", assoc="NONE", t="2026-01-02T00:00:00Z")
+        cancel = self.item("**X — changes needed**", user="eve", assoc="CONTRIBUTOR", t="2026-01-03T00:00:00Z")
+        self.assertEqual(nh.human_checks([ok, fake, cancel]), (["real"], 0))
+
+    def test_multi_word_names(self):
+        ok = self.item("**Claude Code LGTM**\nHuman check:\n- a", t="2026-01-01T00:00:00Z")
+        no = self.item("**Claude Code — changes needed**", t="2026-01-02T00:00:00Z")
+        self.assertEqual(nh.human_checks([ok]), (["a"], 0))
+        self.assertEqual(nh.human_checks([ok, no]), ([], 0))
+        self.assertEqual(nh.human_checks([self.item("Not LGTM\nHuman check:\n- a")]), ([], 0))
 
     def test_no_lgtm(self):
-        self.assertEqual(nh.human_checks([self.item("Human check:\n- a")]), [])
+        self.assertEqual(nh.human_checks([self.item("Human check:\n- a")]), ([], 0))
 
 
 class Comment(unittest.TestCase):
@@ -82,6 +99,7 @@ class Comment(unittest.TestCase):
         for s in ("## Needs your eyes", "`merge-risk:high`, `needs-human`", "~14 min", "- Check X", "workers/"):
             self.assertIn(s, body)
         self.assertIn("none from the reviewer", nh.build_comment(pr(["needs-human"]), [], []))
+        self.assertIn("2 bullet(s) withheld", nh.build_comment(pr(["needs-human"]), [], [], 2))
 
 
 if __name__ == "__main__":

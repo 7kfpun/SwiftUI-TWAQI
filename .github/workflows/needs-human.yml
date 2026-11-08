@@ -28,7 +28,7 @@ permissions:
 jobs:
   sticky:
     name: Needs your eyes comment
-    if: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && (github.event_name != 'issue_comment' || github.event.issue.pull_request) }}
+    if: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && (github.event_name != 'issue_comment' || (github.event.issue.pull_request && github.event.comment.user.login != 'github-actions[bot]')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

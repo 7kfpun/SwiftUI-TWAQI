@@ -57,11 +57,12 @@ RISKY = (
 
 SECRETISH = re.compile(
     r"\b(?:ghp|gho|ghs|github_pat|sk|pk|xox[bp]|AIza|AKIA)[-_A-Za-z0-9]{12,}|"
-    r"\b[A-Za-z0-9+/_-]{32,}\b|(?:token|secret|password|api[_ -]?key)\s*[:=]\s*\S+",
+    r"\b[A-Za-z0-9+_-]{32,}\b|(?:token|secret|password|api[_ -]?key)\s*[:=]\s*\S+",
     re.I,
 )
-LGTM_RE = re.compile(r"^\W*(?:\w+\s+)?LGTM\b", re.I)
-CHANGES_RE = re.compile(r"^\W*(?:\w+\s+)?(?:\W+\s*)?(?:changes needed|changes requested)\b", re.I)
+LGTM_RE = re.compile(r"^\W*(?!(?:not|never|almost|no)\b)(?:[\w.-]+\s+){0,3}LGTM\b", re.I)
+CHANGES_RE = re.compile(r"^\W*(?:[\w.-]+\s+){0,3}\W*(?:changes needed|changes requested)\b", re.I)
+TRUSTED = ("OWNER", "MEMBER", "COLLABORATOR")  # a stranger's comment never counts
 HUMAN_RE = re.compile(r"^\W*human check\W*:?\s*(.*)$", re.I)
 BULLET_RE = re.compile(r"^\s*[-*•]\s+(.*\S)\s*$")
 
@@ -105,14 +106,15 @@ def safe_bullet(text: str) -> str | None:
     return text if len(text) <= MAX_BULLET_CHARS else text[: MAX_BULLET_CHARS - 1].rstrip() + "…"
 
 
-def human_checks(items: list[dict]) -> list[str]:
+def human_checks(items: list[dict]) -> tuple[list[str], int]:
     """`Human check:` bullets of the latest LGTM review/comment, unless changes were asked later.
 
-    items: [{"user", "created", "body"}]. claude[bot] never counts as a reviewer.
+    items: [{"user", "created", "body", "assoc"}]. Only OWNER/MEMBER/COLLABORATOR count, never
+    claude[bot]. Returns (bullets, number withheld by the filter).
     """
     last = None
     for it in sorted(items, key=lambda i: i["created"]):
-        if it["user"] == "claude[bot]":
+        if it["user"] == "claude[bot]" or it.get("assoc") not in TRUSTED:
             continue
         first = (it["body"] or "").lstrip().split("\n", 1)[0]
         if CHANGES_RE.match(first):
@@ -120,7 +122,7 @@ def human_checks(items: list[dict]) -> list[str]:
         elif LGTM_RE.match(first):
             last = it
     if not last:
-        return []
+        return [], 0
     bullets: list[str] = []
     in_block = False
     for line in last["body"].splitlines():
@@ -137,7 +139,7 @@ def human_checks(items: list[dict]) -> list[str]:
             elif line.strip():
                 in_block = False
     out = [b for b in map(safe_bullet, bullets) if b]
-    return out[:MAX_BULLETS]
+    return out[:MAX_BULLETS], len(bullets) - len(out)
 
 
 def waiting_labels(pr: dict) -> list[str]:
@@ -149,7 +151,7 @@ def needs_eyes(pr: dict) -> bool:
     return pr.get("state") == "open" and not pr.get("draft") and bool(waiting_labels(pr))
 
 
-def build_comment(pr: dict, files: list[dict], bullets: list[str]) -> str:
+def build_comment(pr: dict, files: list[dict], bullets: list[str], withheld: int = 0) -> str:
     minutes, lines = read_minutes(files)
     why = ", ".join(f"`{l}`" for l in waiting_labels(pr))
     parts = [
@@ -163,6 +165,8 @@ def build_comment(pr: dict, files: list[dict], bullets: list[str]) -> str:
     parts.append("**Risky paths:** " + ("; ".join(risky) if risky else "none of workers/, iOS push, purchases, .github/"))
     parts += ["", "**Human check:**"]
     parts += [f"- {b}" for b in bullets] if bullets else ["- none from the reviewer"]
+    if withheld:
+        parts.append(f"- {withheld} bullet(s) withheld by the public-text filter; see the reviewer's LGTM")
     parts += ["", f"<sub>Head `{pr['head']['sha'][:7]}`. Updated by `tools/needs_human.py`; removed when the labels are gone.</sub>"]
     return "\n".join(parts) + "\n"
 
@@ -190,9 +194,11 @@ def paged(path: str) -> list:
 
 
 def review_items(repo: str, n: int) -> list[dict]:
-    items = [{"user": r["user"]["login"], "created": r.get("submitted_at") or "", "body": r.get("body") or ""}
+    items = [{"user": r["user"]["login"], "created": r.get("submitted_at") or "", "body": r.get("body") or "",
+              "assoc": r.get("author_association")}
              for r in paged(f"repos/{repo}/pulls/{n}/reviews") if r.get("state") != "DISMISSED"]
-    items += [{"user": c["user"]["login"], "created": c["created_at"], "body": c.get("body") or ""}
+    items += [{"user": c["user"]["login"], "created": c["created_at"], "body": c.get("body") or "",
+               "assoc": c.get("author_association")}
               for c in paged(f"repos/{repo}/issues/{n}/comments")]
     return items
 
@@ -214,7 +220,8 @@ def sync_pr(repo: str, n: int, dry: bool) -> str:
             return "removed"
         return "none"
     files = paged(f"repos/{repo}/pulls/{n}/files")
-    body = build_comment(pr, files, human_checks(review_items(repo, n)))
+    bullets, withheld = human_checks(review_items(repo, n))
+    body = build_comment(pr, files, bullets, withheld)
     if dry:
         print(body)
         return "dry-run"
