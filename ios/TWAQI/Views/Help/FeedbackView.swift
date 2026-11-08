@@ -287,7 +287,6 @@ struct FeedbackView: View {
                 #endif
             } catch {
                 let feedbackError = error as? FeedbackError ?? .network
-                debugPrint("FeedbackService.submit failed: \(feedbackError)")
                 TrackingManager.logEvent(
                     .submitFeedbackFailed,
                     parameters: ["reason": String(describing: feedbackError)]
