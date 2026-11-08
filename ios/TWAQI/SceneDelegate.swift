@@ -35,7 +35,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Create the SwiftUI view that provides the window contents.
         opensOnboarding = Onboarding.claimLaunchFlow(showsOnLaunch: OnboardingStore().showsOnLaunch)
-        let contentView = ContentView(router: router, opensOnboarding: opensOnboarding)
+        let whatsNew = WhatsNew.claimLaunchPopup(shows: WhatsNewStore().showsOnLaunch(
+            version: WhatsNew.currentVersion, onboardingOpensAtLaunch: Onboarding.isOpenAtLaunch
+        ))
+        let contentView = ContentView(router: router, opensOnboarding: opensOnboarding, opensWhatsNew: whatsNew)
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {

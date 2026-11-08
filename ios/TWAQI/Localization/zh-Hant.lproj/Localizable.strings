@@ -591,3 +591,15 @@
 "Help.shortcuts_control_header" = "控制中心";
 "Help.shortcuts_control_body" = "iOS 18 以上：打開控制中心，按住空白處，點「加入控制項目」並搜尋 Taiwan Air。它會顯示最近測站或最愛測站的 AQI，點一下即可開啟測站頁面。也可以放在鎖定畫面的控制按鈕。";
 "Help.shortcuts_footer" = "所有人皆可免費使用。Siri 與捷徑需要 iOS 16 以上。";
+
+/* What's New (FOX-142) */
+"WhatsNew.title" = "新功能";
+"WhatsNew.close" = "知道了";
+"WhatsNew.pro" = "Pro";
+"Help.show_whats_new" = "本版新功能";
+"WhatsNew.3_1_5.weather_title" = "測站天氣資訊";
+"WhatsNew.3_1_5.weather_body" = "測站頁面現在顯示中央氣象署的當地天氣：氣溫、濕度、風與降雨，並附上縣市預報。";
+"WhatsNew.3_1_5.welcome_title" = "五步驟歡迎導覽";
+"WhatsNew.3_1_5.welcome_body" = "新安裝會依序引導你設定定位、最近的測站、空氣品質警示與勿擾時段，一分鐘就能完成。";
+"WhatsNew.3_1_5.appearance_title" = "自選外觀";
+"WhatsNew.3_1_5.appearance_body" = "「跟隨系統」會依 iPhone 設定切換；「淺色」與「深色」則維持你的選擇。可在說明中更改。";
