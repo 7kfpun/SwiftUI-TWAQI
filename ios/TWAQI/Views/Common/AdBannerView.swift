@@ -31,13 +31,19 @@ struct AdBannerView: View {
     /// this much at the end of their content so the last row can clear it.
     static let height = AdSizeBanner.size.height
 
+    /// The banner takes room only for free users UMP lets ask for ads; Pro and
+    /// declined consent leave no gap (FOX-118).
+    nonisolated static func reservesSpace(isPro: Bool, canRequestAds: Bool) -> Bool {
+        !isPro && canRequestAds
+    }
+
     var body: some View {
         // Sized to the banner and nothing more. This is used as a
         // `.safeAreaInset(edge: .bottom)`, which measures the inset view's own
         // content — an enclosing `VStack { Spacer() ... }` reported maximal
         // height, so the inset claimed the whole screen and a full-screen
         // transparent view sat over the list swallowing every tap.
-        if !settings.isPro && consent.canRequestAds {
+        if Self.reservesSpace(isPro: settings.isPro, canRequestAds: consent.canRequestAds) {
             GADBannerViewController(adUnitID: adUnitID, placement: placement)
                 .frame(width: AdSizeBanner.size.width, height: AdSizeBanner.size.height)
         }

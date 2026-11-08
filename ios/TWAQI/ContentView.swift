@@ -37,9 +37,9 @@ struct ContentView: View {
         _showingOnboarding = State(initialValue: opensOnboarding)
     }
 
-    private func gatherConsentIfFree() {
-        guard !showingOnboarding, !settings.isPro else { return }
-        ConsentManager.shared.gather()
+    private func gatherConsent() {
+        guard !showingOnboarding else { return }
+        ConsentManager.shared.gather(isPro: settings.isPro)
     }
 
     enum AppTab: Hashable {
@@ -59,8 +59,8 @@ struct ContentView: View {
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()
         // UMP consent for free users, once the welcome flow is out of the way.
-        .onAppear { gatherConsentIfFree() }
-        .onChange(of: showingOnboarding) { _ in gatherConsentIfFree() }
+        .onAppear { gatherConsent() }
+        .onChange(of: showingOnboarding) { _ in gatherConsent() }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView(isLaunchFlow: true) { showingOnboarding = false }
                 .environment(\.locale, language.locale())

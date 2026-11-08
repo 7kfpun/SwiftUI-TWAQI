@@ -39,16 +39,22 @@ final class ConsentManager: ObservableObject {
         status == .required
     }
 
-    /// Asks UMP for the current consent state and shows the form when one is
-    /// needed, once per launch. Free users only: Pro has no ads, so nothing to
-    /// ask. Starts the ads SDK only once UMP allows ad requests.
-    func gather() {
-        startAdsIfAllowed()
+    /// Asks UMP for the current consent state, once per launch, so Help knows
+    /// whether to offer the privacy options entry point. That runs for Pro too
+    /// (a Pro user may have chosen while free and can still withdraw). Only
+    /// free users get the form and the ads SDK: Pro has no ads to ask about.
+    func gather(isPro: Bool) {
+        if !isPro { startAdsIfAllowed() }
         guard !didGather else { return }
         didGather = true
 
         let parameters = RequestParameters()
         #if DEBUG
+        // Launch argument `-UMPReset` forgets the stored choice, so the form
+        // can be checked again on the same install.
+        if ProcessInfo.processInfo.arguments.contains("-UMPReset") {
+            ConsentInformation.shared.reset()
+        }
         // Launch argument `-UMPDebugGeographyEEA` forces the EEA flow.
         if ProcessInfo.processInfo.arguments.contains("-UMPDebugGeographyEEA") {
             let debug = DebugSettings()
@@ -65,16 +71,24 @@ final class ConsentManager: ObservableObject {
                     self.refresh()
                     return
                 }
+                guard !isPro else {
+                    self.refresh(startAds: false)
+                    return
+                }
+                // The welcome cover may still be dismissing; presenting over it fails.
+                let top = await Self.settledTopViewController()
                 do {
-                    try await ConsentForm.loadAndPresentIfRequired(from: Self.topViewController())
+                    try await ConsentForm.loadAndPresentIfRequired(from: top)
                 } catch {
                     print("UMP: consent form failed — \(error.localizedDescription)")
+                    // Not shown: ask again on the next trigger rather than skip until a cold start.
+                    self.didGather = false
                 }
                 self.refresh()
             }
         }
         // Consent stored by an earlier launch already allows ads.
-        refresh()
+        refresh(startAds: !isPro)
     }
 
     /// Opens the privacy options form (Help → Privacy settings).
@@ -89,17 +103,28 @@ final class ConsentManager: ObservableObject {
         }
     }
 
-    private func refresh() {
+    private func refresh(startAds: Bool = true) {
         let info = ConsentInformation.shared
         canRequestAds = info.canRequestAds
         privacyOptionsRequired = Self.showsPrivacyOptions(info.privacyOptionsRequirementStatus)
-        startAdsIfAllowed()
+        if startAds { startAdsIfAllowed() }
     }
 
     private func startAdsIfAllowed() {
         guard canRequestAds, !didStartAds else { return }
         didStartAds = true
         MobileAds.shared.start(completionHandler: nil)
+    }
+
+    /// The top view controller once nothing is mid-dismissal (up to 2 s).
+    private static func settledTopViewController() async -> UIViewController? {
+        for _ in 0..<10 {
+            if let top = topViewController(), !top.isBeingDismissed, !top.isBeingPresented {
+                return top
+            }
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+        return topViewController()
     }
 
     private static func topViewController() -> UIViewController? {

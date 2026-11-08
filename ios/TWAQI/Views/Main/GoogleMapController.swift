@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import Combine
 import GoogleMaps
 import SnapKit
 import SwiftUI
@@ -48,11 +49,17 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
     private var onboardingObserver: NSObjectProtocol?
-    private var isProLayout = false
+    private var hasBannerLayout = false
+    private var consentObserver: AnyCancellable?
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.
-    private static func bannerClearance(isPro: Bool) -> CGFloat {
-        isPro ? -10 : -(AdBannerView.height + 10)
+    private static func bannerClearance(hasBanner: Bool) -> CGFloat {
+        hasBanner ? -(AdBannerView.height + 10) : -10
+    }
+
+    /// A banner is on screen only for free users UMP lets ask for ads.
+    private var hasBanner: Bool {
+        AdBannerView.reservesSpace(isPro: defaults.bool(forKey: "pro"), canRequestAds: ConsentManager.shared.canRequestAds)
     }
 
     var currentLatitude: Double = GoogleMapViewController.initialCamera.target.latitude
@@ -377,8 +384,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(32)
         }
 
-        let isPro = defaults.bool(forKey: "pro")
-        isProLayout = isPro
+        let hasBanner = self.hasBanner
+        hasBannerLayout = hasBanner
         let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
@@ -401,7 +408,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(timelineView)
         timelineView.snp.makeConstraints { (make) -> Void in
             bottomBarBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-                .offset(Self.bannerClearance(isPro: isPro)).constraint
+                .offset(Self.bannerClearance(hasBanner: hasBanner)).constraint
             make.height.equalTo(MapTimelineView.preferredHeight)
             make.centerX.equalTo(view.safeAreaLayoutGuide.snp.centerX)
             make.width.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.width).offset(-30)
@@ -730,6 +737,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self?.updateBannerClearance()
         }
 
+        // Declining consent removes the banner too, and UMP answers after launch.
+        // `$canRequestAds` publishes before the value is set, so re-read next turn.
+        consentObserver = ConsentManager.shared.$canRequestAds
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateBannerClearance() }
+
         startRefreshTimer()
 
         foregroundObserver = NotificationCenter.default.addObserver(
@@ -780,10 +793,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     private func updateBannerClearance() {
-        let isPro = defaults.bool(forKey: "pro")
-        guard isPro != isProLayout else { return }
-        isProLayout = isPro
-        bottomBarBottom?.update(offset: Self.bannerClearance(isPro: isPro))
+        let hasBanner = self.hasBanner
+        guard hasBanner != hasBannerLayout else { return }
+        hasBannerLayout = hasBanner
+        bottomBarBottom?.update(offset: Self.bannerClearance(hasBanner: hasBanner))
         UIView.animate(withDuration: 0.25) { self.view.layoutIfNeeded() }
     }
 

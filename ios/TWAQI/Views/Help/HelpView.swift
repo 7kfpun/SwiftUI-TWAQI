@@ -27,12 +27,12 @@ enum HelpSection: String, CaseIterable, Identifiable {
 
     /// Premium leads the list so free users see it first (FOX-68); Pro users
     /// don't get it. The developer section shows only in developer mode.
-    /// Privacy settings show only where UMP requires the entry point (EEA, UK;
-    /// FOX-118) and for free users, who are the ones asked.
+    /// Privacy settings show wherever UMP requires the entry point (EEA, UK;
+    /// FOX-118), Pro or not: a Pro user who chose while free can still change it.
     static func order(isPro: Bool, developerMode: Bool, privacyOptionsRequired: Bool = false) -> [HelpSection] {
         allCases.filter { section in
             switch section {
-            case .privacy: return privacyOptionsRequired && !isPro
+            case .privacy: return privacyOptionsRequired
             case .purchase: return !isPro
             case .developer: return developerMode
             default: return true

@@ -49,7 +49,17 @@ final class PrivacySettingsVisibilityTests: XCTestCase {
     func testHelpSectionFollowsTheRequirement() {
         XCTAssertFalse(HelpSection.order(isPro: false, developerMode: false).contains(.privacy))
         XCTAssertTrue(HelpSection.order(isPro: false, developerMode: false, privacyOptionsRequired: true).contains(.privacy))
-        XCTAssertFalse(HelpSection.order(isPro: true, developerMode: false, privacyOptionsRequired: true).contains(.privacy))
+        // Pro keeps the entry point: they may have chosen while free.
+        XCTAssertTrue(HelpSection.order(isPro: true, developerMode: false, privacyOptionsRequired: true).contains(.privacy))
+        XCTAssertFalse(HelpSection.order(isPro: true, developerMode: false).contains(.privacy))
+    }
+
+    /// Whether the ad banner takes room: free users who UMP lets ask for ads.
+    func testBannerSpaceFollowsProAndConsent() {
+        XCTAssertTrue(AdBannerView.reservesSpace(isPro: false, canRequestAds: true))
+        XCTAssertFalse(AdBannerView.reservesSpace(isPro: false, canRequestAds: false))
+        XCTAssertFalse(AdBannerView.reservesSpace(isPro: true, canRequestAds: true))
+        XCTAssertFalse(AdBannerView.reservesSpace(isPro: true, canRequestAds: false))
     }
 
     func testPrivacyStringsExistInEnglishAndChinese() throws {

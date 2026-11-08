@@ -23,6 +23,7 @@ struct DetailsView: View {
 
     /// Needed to know whether the ad banner is taking space at the bottom.
     @EnvironmentObject var settings: SettingsStore
+    @ObservedObject private var consent = ConsentManager.shared
 
     /// Set when shown from the map, in the panel beside it or a sheet over
     /// it, neither of which has a back button.
@@ -215,7 +216,7 @@ struct DetailsView: View {
             // the bottom `.safeAreaInset`, so the banner sat on top of the
             // last section instead of below it. Reserving the space in the
             // content works in all of them.
-            .padding(.bottom, settings.isPro ? 0 : AdBannerView.height)
+            .padding(.bottom, AdBannerView.reservesSpace(isPro: settings.isPro, canRequestAds: consent.canRequestAds) ? AdBannerView.height : 0)
         }
         .overlay(alignment: .bottom) {
             AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!, placement: .details)
