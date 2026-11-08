@@ -141,6 +141,9 @@ struct ReadingEntry: TimelineEntry {
     var detail: WidgetStationDetail?
     /// Extra large only: the cam's latest frame, downsampled.
     var camFrame: UIImage?
+    /// Medium and large: the weather at `reading`'s station (FOX-181). Nil
+    /// shows 「—」; free users see it unblurred.
+    var weather: WidgetWeather?
     /// How far up a StandBy or Home Screen Smart Rotate stack this entry
     /// should go (`WidgetRelevance`).
     var relevance: TimelineEntryRelevance?
@@ -224,7 +227,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
     /// favourite never fetched yet is left out rather than shown blank.
     static func makeEntry(
         date: Date, leading: WatchReading?, configuration: SelectIndexIntent, family: WidgetFamily,
-        isPreview: Bool, isLocked: Bool, state: WidgetPageState, relevance: TimelineEntryRelevance? = nil
+        isPreview: Bool, isLocked: Bool, state: WidgetPageState, relevance: TimelineEntryRelevance? = nil,
+        weatherFile: WeatherFile? = nil
     ) -> ReadingEntry {
         let configuredIndex = configuration.index.airIndexType
         let key = widgetKey(family: family, configuration: configuration)
@@ -267,6 +271,19 @@ struct ReadingProvider: AppIntentTimelineProvider {
             guard id != entry.reading?.stationId, seen.insert(id).inserted else { return nil }
             return readings[id]
         }
+        if WidgetFamilyRules.showsWeather(family) {
+            let shown = entry.reading
+            entry.weather = WidgetWeather.make(
+                lat: shown?.latitude, lon: shown?.longitude, countyLocal: shown?.countyLocal,
+                windDirection: shown?.windDirection, windSpeed: shown?.windSpeed,
+                in: weatherFile ?? WidgetWeatherCache.shared?.load(), now: date
+            )
+            // The gallery shows what the size can do, with and without weather.
+            if entry.weather == nil, isPreview, shown?.stationId == 0 {
+                entry.weather = .placeholder
+            }
+        }
+
         // The gallery shows what the size can do, even before any favourite.
         if entry.favourites.isEmpty, isPreview {
             entry.favourites = WatchReading.placeholderFavourites
@@ -279,7 +296,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
         return ReadingEntry(
             date: Date(), reading: .placeholder, airIndexType: .aqi,
             listsFavourites: lists, favourites: lists ? WatchReading.placeholderFavourites : [],
-            detail: WidgetFamilyRules.showsStationDetail(context.family) ? .placeholder : nil
+            detail: WidgetFamilyRules.showsStationDetail(context.family) ? .placeholder : nil,
+            weather: WidgetFamilyRules.showsWeather(context.family) ? .placeholder : nil
         )
     }
 
@@ -316,6 +334,12 @@ struct ReadingProvider: AppIntentTimelineProvider {
                 configuration: configuration, context: context, isLocked: isLocked, state: state, now: now
             )
         }
+
+        // Medium and large: the weather file is fetched alongside the air
+        // quality, with its own short timeout, and falls back to the saved
+        // copy, so it never holds the readings back (FOX-181).
+        async let weatherFetch: WeatherFile? = WidgetFamilyRules.showsWeather(context.family)
+            ? WidgetWeatherLoader.refresh() : nil
 
         var reading = WatchStore.latestReading
         let lists = Self.listsFavourites(in: context.family)
@@ -405,10 +429,12 @@ struct ReadingProvider: AppIntentTimelineProvider {
             let place = primary.flatMap { $0.stationId == stationId ? WidgetStationDetail.Place($0) : nil }
             (detail, camFrame) = await StationDetailLoader.refresh(stationId: stationId, place: place)
         }
+        let weatherFile = await weatherFetch
         func entry(at date: Date) -> ReadingEntry {
             var made = Self.makeEntry(
                 date: date, leading: reading, configuration: configuration, family: context.family,
-                isPreview: context.isPreview, isLocked: isLocked, state: state, relevance: relevance
+                isPreview: context.isPreview, isLocked: isLocked, state: state, relevance: relevance,
+                weatherFile: weatherFile
             )
             made.detail = detail
             made.camFrame = camFrame
@@ -577,6 +603,7 @@ struct ReadingWidgetView: View {
                     } else {
                         indexValue(value, unit: false)
                             .font(.title3.monospacedDigit().weight(.semibold))
+                        compactWeather
                     }
                 }
                 Spacer(minLength: 0)
@@ -729,7 +756,11 @@ struct ReadingWidgetView: View {
         let status = reading.status(type)
         let tint = Color(status.getColor())
 
-        return HStack(alignment: .top, spacing: 12) {
+        // Station on the left, favourites on the right, 2:1: the weather line
+        // needs the room, the favourites are a name and a badge.
+        return GeometryReader { proxy in
+            let side = (proxy.size.width - 25) / 3   // 25 = two gaps of 12 and the divider
+            HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(reading.displayName)
                     .font(.headline)
@@ -740,6 +771,7 @@ struct ReadingWidgetView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                 detailLine(reading)
+                compactWeather
                 Spacer(minLength: 0)
                 HStack(alignment: .center, spacing: 6) {
                     indexValue(reading.formatted(type), unit: false)
@@ -750,7 +782,8 @@ struct ReadingWidgetView: View {
                     face(status, value: reading.formatted(type), size: 40)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .frame(width: side * 2, alignment: .leading)
+            .frame(maxHeight: .infinity, alignment: .leading)
 
             Divider()
 
@@ -762,7 +795,9 @@ struct ReadingWidgetView: View {
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(width: side, alignment: .topLeading)
+            .frame(maxHeight: .infinity, alignment: .topLeading)
+            }
         }
         .padding(4)
     }
@@ -792,6 +827,7 @@ struct ReadingWidgetView: View {
 
             detailLine(reading)
             otherIndices(reading)
+            largeWeather
 
             Divider()
 
@@ -816,6 +852,92 @@ struct ReadingWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(4)
+    }
+
+    // MARK: - Weather (FOX-181)
+
+    /// Large: icon, temperature and sky on one line, humidity, rain today and
+    /// wind under it. Never blurred: weather is free.
+    private var largeWeather: some View {
+        let weather = entry.weather
+        let sky = weather?.skyText(chinese: Locale.isChinese)
+
+        return HStack(spacing: 10) {
+            Image(systemName: weather?.symbol ?? "cloud.fill")
+                .symbolRenderingMode(.multicolor)
+                .font(.title2)
+                .frame(width: 30)
+                .opacity(weather == nil ? 0.35 : 1)
+                .accessibilityHidden(true)
+            if let weather {
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(verbatim: WidgetWeather.temperatureText(weather.temperature))
+                            .font(.headline.monospacedDigit())
+                        if let sky {
+                            Text(verbatim: sky)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
+                    // A free user's banner covers the bottom of the widget:
+                    // one line there leaves the fourth favourite clear.
+                    if !entry.isLocked {
+                        Text(verbatim: weather.detailItems.joined(separator: " · "))
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                    }
+                }
+            } else {
+                Text(verbatim: "—")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
+    }
+
+    /// Medium: icon, temperature, wind and sky, then humidity and rain today.
+    private var compactWeather: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 4) {
+                Image(systemName: entry.weather?.symbol ?? "cloud.fill")
+                    .symbolRenderingMode(.multicolor)
+                    .opacity(entry.weather == nil ? 0.35 : 1)
+                    .accessibilityHidden(true)
+                if let weather = entry.weather {
+                    Text(verbatim: weather.compactLead)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .fixedSize()
+                    if let sky = weather.skyText(chinese: Locale.isChinese) {
+                        Text(verbatim: "· \(sky)")
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                } else {
+                    Text(verbatim: "—")
+                }
+            }
+            if let weather = entry.weather {
+                Text(verbatim: weather.compactDetail)
+                    .monospacedDigit()
+                    .lineLimit(1)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Widget.weather_label \(entry.weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
+        .font(.caption2)
+        .foregroundStyle(.secondary)
     }
 
     // MARK: - Buttons (FOX-76)
@@ -959,6 +1081,8 @@ struct ReadingWidgetView: View {
             Text(reading.displayName)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
+                // Medium's list column is a third of the widget.
+                .minimumScaleFactor(showsStatus ? 1 : 0.7)
             if showsStatus {
                 Text(status.toString())
                     .font(.caption2)
@@ -1098,10 +1222,13 @@ extension View {
 
 #if DEBUG
 private extension ReadingEntry {
-    static func preview(favourites: [WatchReading] = WatchReading.placeholderFavourites, isLocked: Bool = false) -> ReadingEntry {
+    static func preview(
+        favourites: [WatchReading] = WatchReading.placeholderFavourites, isLocked: Bool = false,
+        weather: WidgetWeather? = .placeholder
+    ) -> ReadingEntry {
         ReadingEntry(
             date: Date(), reading: .placeholder, airIndexType: .aqi,
-            listsFavourites: true, favourites: favourites, isLocked: isLocked
+            listsFavourites: true, favourites: favourites, isLocked: isLocked, weather: weather
         )
     }
 }
@@ -1118,6 +1245,7 @@ private extension ReadingEntry {
 } timeline: {
     ReadingEntry.preview()
     ReadingEntry.preview(favourites: [])
+    ReadingEntry.preview(weather: nil)
 }
 
 #Preview("Large", as: .systemLarge) {
@@ -1125,6 +1253,7 @@ private extension ReadingEntry {
 } timeline: {
     ReadingEntry.preview()
     ReadingEntry.preview(favourites: [])
+    ReadingEntry.preview(weather: nil)
 }
 
 #Preview("Medium · no Pro", as: .systemMedium) {
