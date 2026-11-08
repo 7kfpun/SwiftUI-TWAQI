@@ -49,6 +49,13 @@ final class WatchEventRelay: NSObject, WCSessionDelegate {
         DispatchQueue.main.async { self.sendFavourites(ids) }
     }
 
+    /// The watch app was installed (or removed): send the list it missed.
+    func sessionWatchStateDidChange(_ session: WCSession) {
+        guard session.isWatchAppInstalled else { return }
+        let ids = SettingsStore().savedFavouriteStations
+        DispatchQueue.main.async { self.sendFavourites(ids) }
+    }
+
     func sessionDidBecomeInactive(_ session: WCSession) {}
 
     /// After switching to another watch: activate again for the new one.

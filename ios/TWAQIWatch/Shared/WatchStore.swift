@@ -44,9 +44,16 @@ enum WatchFavourites {
         return raw.filter { seen.insert($0).inserted }
     }
 
+    /// Whether a fetched station may become the reading: only when it is the
+    /// pinned one, or nothing is pinned (home). A fetch that finishes after
+    /// the pin moved on is dropped.
+    static func mayStore(fetched: Int, pinned: Int?) -> Bool {
+        pinned == nil || pinned == fetched
+    }
+
     /// The pages to swipe between: the favourites in order. A station on
-    /// screen that isn't one of them (home, or picked by hand) leads, so
-    /// leaving it never drops it. Fewer than two pages means no pager.
+    /// screen that isn't one of them (home, or picked by hand) leads until a
+    /// favourite is on screen; the station list is the way back. Fewer than two pages means no pager.
     static func pages(favourites: [Int], current: Int?) -> [Int] {
         guard let current, !favourites.contains(current) else { return favourites }
         return [current] + favourites

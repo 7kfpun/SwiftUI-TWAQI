@@ -81,11 +81,24 @@ final class WatchModel: ObservableObject {
         }
     }
 
+    /// Set when a refresh is asked for while one is in flight (a swipe moved
+    /// the pin): the running refresh goes round again for the new pin.
+    private var rerunRequested = false
+
     func refresh() async {
-        guard !isLoading else { return }
+        if isLoading {
+            rerunRequested = true
+            return
+        }
         isLoading = true
         defer { isLoading = false }
+        repeat {
+            rerunRequested = false
+            await refreshOnce()
+        } while rerunRequested
+    }
 
+    private func refreshOnce() async {
         do {
             let pollutant: Pollutant?
             if let stationId = WatchStore.pinnedStationId {
@@ -106,6 +119,8 @@ final class WatchModel: ObservableObject {
             }
 
             guard let pollutant else { throw WatchAPI.Failure.badResponse }
+            // The pin moved while this fetched: the rerun loads the new one.
+            guard WatchFavourites.mayStore(fetched: pollutant.stationId, pinned: WatchStore.pinnedStationId) else { return }
             if pollutant.stationId != reading?.stationId {
                 history = []
             }
@@ -115,7 +130,9 @@ final class WatchModel: ObservableObject {
             // The reading is already on screen; a missing chart shouldn't fail it.
             isLoadingHistory = true
             defer { isLoadingHistory = false }
-            history = (try? await WatchAPI.history(stationId: pollutant.stationId, limit: Self.historyHours)) ?? []
+            let fetchedHistory = (try? await WatchAPI.history(stationId: pollutant.stationId, limit: Self.historyHours)) ?? []
+            guard WatchFavourites.mayStore(fetched: pollutant.stationId, pinned: WatchStore.pinnedStationId) else { return }
+            history = fetchedHistory
         } catch {
             failed = true
         }
@@ -152,7 +169,6 @@ final class WatchModel: ObservableObject {
         guard stationId != reading?.stationId || source != .pinned else { return }
         WatchStore.pinnedStationId = stationId
         source = .pinned
-        history = []
         if let cached = WatchStore.favouriteReadings.first(where: { $0.stationId == stationId }) {
             store(cached)
         }
@@ -171,6 +187,9 @@ final class WatchModel: ObservableObject {
 
 struct RootView: View {
     @StateObject private var model = WatchModel()
+    /// The page under the finger. It follows a swipe at once; the model's
+    /// reading catches up behind it.
+    @State private var selection: Int?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -207,14 +226,20 @@ struct RootView: View {
             ReadingView(model: model)
         } else {
             TabView(selection: Binding(
-                get: { model.reading?.stationId ?? pages[0] },
-                set: { model.pin(stationId: $0) }
+                get: { selection ?? model.reading?.stationId ?? pages[0] },
+                set: {
+                    selection = $0
+                    model.pin(stationId: $0)
+                }
             )) {
                 ForEach(pages, id: \.self) { id in
                     // Only the page on screen is built: the model holds one station.
                     Group {
                         if model.reading?.stationId == id {
                             ReadingView(model: model)
+                        } else if model.failed && !model.isLoading {
+                            Image(systemName: "exclamationmark.triangle")
+                                .onTapGesture { Task { await model.refresh() } }
                         } else {
                             ProgressView()
                         }

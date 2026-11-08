@@ -52,4 +52,10 @@ final class WatchFavouritesTests: XCTestCase {
     func testOneFavouriteThatIsOnScreenMeansNoPager() {
         XCTAssertLessThan(WatchFavourites.pages(favourites: [5], current: 5).count, 2)
     }
+
+    func testFetchAfterPinMovedIsNotStored() {
+        XCTAssertFalse(WatchFavourites.mayStore(fetched: 42, pinned: 15))
+        XCTAssertTrue(WatchFavourites.mayStore(fetched: 15, pinned: 15))
+        XCTAssertTrue(WatchFavourites.mayStore(fetched: 7, pinned: nil))
+    }
 }
