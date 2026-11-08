@@ -212,6 +212,8 @@ export interface ForecastResult {
   counts: Partial<Record<ForecastOutcome | 'sent' | 'failed' | 'dead-token', number>>
   logged: number
   events: number
+  /** Heads-ups delivered but not marked sent in Directus (state write failed). */
+  unmarked: number
   dryRun: boolean
 }
 
@@ -223,7 +225,7 @@ export interface ForecastResult {
 export async function runForecast(env: Env, options: { now?: Date; dryRun?: boolean } = {}): Promise<ForecastResult> {
   const now = options.now ?? new Date()
   const dryRun = options.dryRun ?? false
-  const result: ForecastResult = { zones: 0, devices: 0, counts: {}, logged: 0, events: 0, dryRun }
+  const result: ForecastResult = { zones: 0, devices: 0, counts: {}, logged: 0, events: 0, unmarked: 0, dryRun }
   const count = (key: keyof ForecastResult['counts']) => (result.counts[key] = (result.counts[key] ?? 0) + 1)
   if (!inWindow(now)) return { ...result, skipped: 'window' }
 
@@ -314,7 +316,14 @@ export async function runForecast(env: Env, options: { now?: Date; dryRun?: bool
         await markForecastSent(env, marks)
         break
       } catch (e) {
-        if (attempt >= 3) throw e
+        if (attempt >= 3) {
+          // Sent but not marked: a later run in the window may send these
+          // again. Report it and carry on, so the logs and the later batches
+          // are not lost with it.
+          result.unmarked += marks.length
+          console.warn('forecast state write failed', marks.length, String(e))
+          break
+        }
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt * attempt))
       }
     }

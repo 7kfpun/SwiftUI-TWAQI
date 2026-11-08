@@ -59,9 +59,11 @@ export function parseArgs(argv: string[]): { dryRun: boolean } {
  * refused (`failed`) fails it, after run() has saved state and logs, so a run
  * where FCM rejects every alert doesn't go green. Dead tokens (the device is
  * archived) and deferred sends (they go out next run) are expected. */
-export function failure(result: RunResult, forecast?: Pick<ForecastResult, 'counts'>): string | null {
+export function failure(result: RunResult, forecast?: Pick<ForecastResult, 'counts'> & Partial<Pick<ForecastResult, 'unmarked'>>): string | null {
   const failed = (result.counts.failed ?? 0) + (forecast?.counts.failed ?? 0)
-  return failed ? `${failed} alert(s) failed to send; they stay unsent and are retried next run` : null
+  if (failed) return `${failed} alert(s) failed to send; they stay unsent and are retried next run`
+  const unmarked = forecast?.unmarked ?? 0
+  return unmarked ? `${unmarked} forecast heads-up(s) sent but not marked sent; a later run may send them again` : null
 }
 
 /** Stands in for the PUSH_EVENTS binding: keeps every data point run()

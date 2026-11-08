@@ -125,6 +125,7 @@ describe('runForecast', () => {
   })
   const sub = (id: number, station: string, dev: ReturnType<typeof device>) => ({ id, station_id: station, device: dev })
 
+  let failMarks = false
   async function setup(forecast: ReturnType<typeof row>[], subs: Array<Record<string, unknown>>, alerts: Array<Record<string, unknown>> = []) {
     const fcm: Array<Record<string, unknown>> = []
     const marks: Array<Record<string, unknown>> = []
@@ -150,6 +151,7 @@ describe('runForecast', () => {
         return Response.json({ data: subs })
       }
       if (url.pathname.endsWith('/twaqi_push_devices') && init.method === 'PATCH') {
+        if (failMarks) return new Response('{"errors":[]}', { status: 503 })
         marks.push(...JSON.parse(String(init.body)))
         return Response.json({ data: [] })
       }
@@ -230,6 +232,23 @@ describe('runForecast', () => {
     assert.equal(result.counts.quiet, 1)
     assert.equal(s.fcm.length, 0)
     assert.equal(s.marks.length, 0)
+  })
+
+  it('reports a failed state write and still logs and sends the later batches', async () => {
+    failMarks = true
+    const devices = Array.from({ length: 101 }, (_, i) => sub(i + 1, '105', device(i + 1)))
+    const s = await setup(badNorth, devices)
+    const realSetTimeout = globalThis.setTimeout
+    globalThis.setTimeout = ((fn: () => void) => realSetTimeout(fn, 0)) as typeof setTimeout
+    try {
+      const result = await runForecast(s.env, { now: evening })
+      assert.equal(result.counts.sent, 101) // the second batch went out too
+      assert.equal(result.unmarked, 101)
+      assert.equal(s.fcm.length, 101)
+    } finally {
+      globalThis.setTimeout = realSetTimeout
+      failMarks = false
+    }
   })
 
   it('writes nothing in a dry run', async () => {
