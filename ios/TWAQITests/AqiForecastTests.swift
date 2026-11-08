@@ -157,7 +157,7 @@ final class AqiForecastTests: XCTestCase {
 
     func testRequestReadsTodayOnwardsWithBearerToken() throws {
         let request = try XCTUnwrap(AqiForecastStore.makeRequest(
-            baseURL: "https://cms.wahthefox.com",
+            baseURL: "https://directus.example.com",
             token: "abc",
             today: "2026-10-31"
         ))
@@ -171,7 +171,7 @@ final class AqiForecastTests: XCTestCase {
         // before this token may read it) would fail the whole request.
         XCTAssertEqual(query["fields"], "*")
 
-        XCTAssertNil(AqiForecastStore.makeRequest(baseURL: "https://cms.wahthefox.com", token: "", today: "2026-10-31"))
+        XCTAssertNil(AqiForecastStore.makeRequest(baseURL: "https://directus.example.com", token: "", today: "2026-10-31"))
         XCTAssertNil(AqiForecastStore.makeRequest(baseURL: nil, token: "abc", today: "2026-10-31"))
     }
 }

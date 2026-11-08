@@ -136,7 +136,7 @@ class DetailsViewModel: ObservableObject {
                 }
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("station request failed: \(error.localizedDescription)")
                 if isLatest {
                     self.stationLoadFailed = self.station == nil
                 }
@@ -164,7 +164,7 @@ class DetailsViewModel: ObservableObject {
                 }
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("station request failed: \(error.localizedDescription)")
                 // Whatever is on screen — the saved reading, or one from
                 // earlier this visit — is now the last good one.
                 self.isShowingLastGood = self.pollutant != nil

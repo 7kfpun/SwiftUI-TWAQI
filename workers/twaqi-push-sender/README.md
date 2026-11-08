@@ -14,7 +14,7 @@ The run:
   2. Ask Directus for **only the subscriptions whose zone changes at those readings**, filtered per station: an "above" alert with threshold ≤ AQI that isn't marked `in_zone` yet (send it), or one marked `in_zone` whose threshold AQI no longer reaches (re-arm it). "Below" mirrors it. Ten stations per request, so 84 stations take 9 requests; a run where nothing crossed reads no subscriptions at all.
   3. Send an alert to each one that crossed in, and write back only the rows whose state changed.
 - **Only devices with an `fcm_token`**, i.e. builds from FOX-13 on. Older builds have no FCM token. They were served by the OneSignal tracker in `ai-playground`, which is being switched off. The app keeps OneSignal registered with the same tags, so it can be switched back on.
-- **Directus** (`https://cms.wahthefox.com`) is the database. The app creates and updates rows; this Worker reads them and updates state. Nothing is deleted: dead rows get `archived = true`.
+- **Directus** (`DIRECTUS_URL` in `wrangler.jsonc`) is the database. The app creates and updates rows; this Worker reads them and updates state. Nothing is deleted: dead rows get `archived = true`.
 
 ## Rules
 
@@ -80,7 +80,7 @@ DIRECTUS_ADMIN_TOKEN=… node directus/push-logs.mjs --apply  # create it
 
 ## Routes
 
-`https://twaqi-push-sender.710kfpun.workers.dev`
+This Worker's `workers.dev` URL (the value of the `PUSH_SENDER_URL` secret; not written in this repo).
 
 | Route | |
 | --- | --- |
@@ -153,9 +153,10 @@ gh secret set FCM_SERVICE_ACCOUNT -R 7kfpun/SwiftUI-TWAQI --env push-sender < kf
 gh secret set DIRECTUS_PUSH_TOKEN -R 7kfpun/SwiftUI-TWAQI --env push-sender
 gh secret set AQI_API_BASE        -R 7kfpun/SwiftUI-TWAQI --env push-sender
 gh secret set SYNC_TOKEN          -R 7kfpun/SwiftUI-TWAQI --env push-sender
+gh secret set PUSH_SENDER_URL     -R 7kfpun/SwiftUI-TWAQI --env push-sender
 ```
 
-The Worker's URL for the event forward is `PUSH_SENDER_URL` in the workflow (`https://twaqi-push-sender.710kfpun.workers.dev`), not a secret.
+The Worker's URL for the event forward is the `PUSH_SENDER_URL` secret, set above. Without it the events are only counted, with a warning.
 
 Create it before the workflow's first run: a workflow that names a missing environment creates it with no branch rule. Rotating a secret means setting it in both environments.
 

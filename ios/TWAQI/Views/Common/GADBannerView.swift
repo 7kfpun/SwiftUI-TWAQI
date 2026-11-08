@@ -43,12 +43,8 @@ struct GADBannerViewController: UIViewControllerRepresentable {
             self.placement = placement
         }
 
-        func bannerViewDidReceiveAd(_ bannerView: BannerView) {
-            print("AdMob: received ad for \(bannerView.adUnitID ?? "?")")
-        }
-
         func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
-            print("AdMob: FAILED for \(bannerView.adUnitID ?? "?") — \(error.localizedDescription)")
+            AppLog.app.error("AdMob banner failed: \(error.localizedDescription)")
         }
 
         func bannerViewDidRecordClick(_ bannerView: BannerView) {
