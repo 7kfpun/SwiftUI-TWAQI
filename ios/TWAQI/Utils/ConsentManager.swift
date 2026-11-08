@@ -24,6 +24,7 @@ final class ConsentManager: ObservableObject {
     @Published private(set) var privacyOptionsRequired: Bool
 
     private var didGather = false
+    private var didDebugReset = false
     private var didStartAds = false
 
     private init() {
@@ -44,17 +45,20 @@ final class ConsentManager: ObservableObject {
     /// (a Pro user may have chosen while free and can still withdraw). Only
     /// free users get the form and the ads SDK: Pro has no ads to ask about.
     func gather(isPro: Bool) {
+        #if DEBUG
+        // Launch argument `-UMPReset` forgets the stored choice, so the form
+        // can be checked again on the same install. Before anything starts ads.
+        if !didDebugReset, ProcessInfo.processInfo.arguments.contains("-UMPReset") {
+            didDebugReset = true
+            ConsentInformation.shared.reset()
+        }
+        #endif
         if !isPro { startAdsIfAllowed() }
         guard !didGather else { return }
         didGather = true
 
         let parameters = RequestParameters()
         #if DEBUG
-        // Launch argument `-UMPReset` forgets the stored choice, so the form
-        // can be checked again on the same install.
-        if ProcessInfo.processInfo.arguments.contains("-UMPReset") {
-            ConsentInformation.shared.reset()
-        }
         // Launch argument `-UMPDebugGeographyEEA` forces the EEA flow.
         if ProcessInfo.processInfo.arguments.contains("-UMPDebugGeographyEEA") {
             let debug = DebugSettings()
@@ -111,7 +115,9 @@ final class ConsentManager: ObservableObject {
     }
 
     private func startAdsIfAllowed() {
-        guard canRequestAds, !didStartAds else { return }
+        // Free users only, whichever path got here (the privacy form and a
+        // failed update call `refresh()` for Pro users too).
+        guard canRequestAds, !didStartAds, !UserDefaults.standard.bool(forKey: "pro") else { return }
         didStartAds = true
         MobileAds.shared.start(completionHandler: nil)
     }
