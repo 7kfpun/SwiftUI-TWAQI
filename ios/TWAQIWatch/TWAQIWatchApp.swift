@@ -47,6 +47,9 @@ final class WatchModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var isLoadingHistory = false
     @Published private(set) var failed = false
+    /// Bumped when the station is chosen from the list or home, so the pager
+    /// drops its swipe selection and follows the reading again.
+    @Published private(set) var listPicks = 0
     @Published private(set) var isPro = WatchPro.isUnlocked
     /// The phone's favourites, in its order (FOX-174).
     @Published private(set) var favouriteIds: [Int] = WatchStore.favouriteStationIds
@@ -149,6 +152,7 @@ final class WatchModel: ObservableObject {
 
     /// Pins a station, or returns to home with `nil`.
     func pin(_ pollutant: Pollutant?) {
+        listPicks += 1
         WatchStore.pinnedStationId = pollutant?.stationId
         if let pollutant {
             source = .pinned
@@ -199,6 +203,8 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: .watchFavouritesChanged)) { _ in
             model.reloadFavourites()
         }
+        .onChange(of: model.listPicks) { _, _ in selection = nil }
+        .onChange(of: model.reading?.stationId) { _, _ in selection = nil }
         .task { await model.observeTransactions() }
         .task {
             await model.checkPro()
