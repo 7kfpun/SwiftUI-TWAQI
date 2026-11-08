@@ -756,7 +756,11 @@ struct ReadingWidgetView: View {
         let status = reading.status(type)
         let tint = Color(status.getColor())
 
-        return HStack(alignment: .top, spacing: 12) {
+        // Station on the left, favourites on the right, 2:1: the weather line
+        // needs the room, the favourites are a name and a badge.
+        return GeometryReader { proxy in
+            let side = (proxy.size.width - 25) / 3   // 25 = two gaps of 12 and the divider
+            HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(reading.displayName)
                     .font(.headline)
@@ -778,7 +782,8 @@ struct ReadingWidgetView: View {
                     face(status, value: reading.formatted(type), size: 40)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .frame(width: side * 2, alignment: .leading)
+            .frame(maxHeight: .infinity, alignment: .leading)
 
             Divider()
 
@@ -790,7 +795,9 @@ struct ReadingWidgetView: View {
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .frame(width: side, alignment: .topLeading)
+            .frame(maxHeight: .infinity, alignment: .topLeading)
+            }
         }
         .padding(4)
     }
@@ -1068,6 +1075,8 @@ struct ReadingWidgetView: View {
             Text(reading.displayName)
                 .font(.caption.weight(.medium))
                 .lineLimit(1)
+                // Medium's list column is a third of the widget.
+                .minimumScaleFactor(showsStatus ? 1 : 0.7)
             if showsStatus {
                 Text(status.toString())
                     .font(.caption2)
