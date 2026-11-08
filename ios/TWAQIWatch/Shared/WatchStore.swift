@@ -25,6 +25,48 @@ struct StationDirectoryEntry: Codable, Equatable {
     }
 }
 
+/// The phone's favourites on their way to the watch (FOX-174), and how the
+/// watch pages through them. The phone sends only station ids, in the reader's
+/// order: alerts are not part of it, so reordering never touches them.
+enum WatchFavourites {
+    /// Key in the `WCSession` application context.
+    static let contextKey = "favouriteStationIds"
+
+    static func context(for ids: [Int]) -> [String: Any] {
+        [contextKey: ids]
+    }
+
+    /// The ids in a received context; `nil` when it carries none, so an
+    /// unrelated context never wipes the list. Duplicates are dropped.
+    static func ids(fromContext context: [String: Any]) -> [Int]? {
+        guard let raw = context[contextKey] as? [Int] else { return nil }
+        var seen = Set<Int>()
+        return raw.filter { seen.insert($0).inserted }
+    }
+
+    /// Whether a fetched station may become the reading: only when it is the
+    /// pinned one, or nothing is pinned (home). A fetch that finishes after
+    /// the pin moved on is dropped.
+    static func mayStore(fetched: Int, pinned: Int?) -> Bool {
+        pinned == nil || pinned == fetched
+    }
+
+    /// Whether a swipe to `stationId` has to pin it: unless it already is the
+    /// pin. Compared with the pin, not the reading: a fetch for the previous
+    /// pin may be in flight, so a swipe back must re-pin and rerun.
+    static func needsPin(_ stationId: Int, pinned: Int?, isPinnedSource: Bool) -> Bool {
+        stationId != pinned || !isPinnedSource
+    }
+
+    /// The pages to swipe between: the favourites in order. A station on
+    /// screen that isn't one of them (home, or picked by hand) leads until a
+    /// favourite is on screen; the station list is the way back. Fewer than two pages means no pager.
+    static func pages(favourites: [Int], current: Int?) -> [Int] {
+        guard let current, !favourites.contains(current) else { return favourites }
+        return [current] + favourites
+    }
+}
+
 /// State the watch app shares with its complications.
 ///
 /// Lives in the app group rather than `.standard`: the widget extension is a
