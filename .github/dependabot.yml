@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keeps the GitHub Actions in .github/workflows and .github/actions current,
+  # including the actions pinned to a commit SHA (FOX-190).
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      - "/.github/actions/unit-tests-build"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

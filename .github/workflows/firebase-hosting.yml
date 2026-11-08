@@ -49,6 +49,7 @@ jobs:
     name: Check taiwanair.wahthefox.com
     if: inputs.action == 'check-domain'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Custom domain serves the site over HTTPS
         run: |
@@ -68,6 +69,7 @@ jobs:
     name: ${{ inputs.action }}
     if: inputs.action == 'deploy-main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: firebase-hosting
     steps:
       - name: Only from master
@@ -81,6 +83,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v4
