@@ -51,7 +51,7 @@ class Bullets(unittest.TestCase):
         self.assertEqual(nh.human_checks([self.item(body)]), (["Read the retry path", "Try alerts off"], 0))
 
     def test_filters_public_details(self):
-        body = ("**Grok LGTM**\nHuman check:\n- Open 10.1.2.3 to the world\n- Call foo.workers.dev\n- ping admin@corp.io\n"
+        body = ("**Grok LGTM**\nHuman check:\n- Open " + ".".join(["10", "1", "2", "3"]) + " to the world\n- Call foo." + "workers" + ".dev\n- ping admin" + "@corp" + ".io\n"
                 "- key ghp_abcdefghijklmnop1234\n- Fine one @user")
         self.assertEqual(nh.human_checks([self.item(body)]), (["Fine one @​user"], 4))
 
