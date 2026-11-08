@@ -10,7 +10,7 @@ import type { PushLog } from './directus.ts'
 export const MAX_EVENTS_PER_REQUEST = 250
 
 const STATUSES = new Set<string>(['sent', 'failed', 'unregistered'])
-const TRIGGERS = new Set<string>(['pollution', 'cleanliness', 'test'])
+const TRIGGERS = new Set<string>(['pollution', 'cleanliness', 'test', 'forecast'])
 /** Analytics Engine: an index is at most 96 bytes; a point's blobs 16 KB. */
 const MAX_INDEX_BYTES = 96
 const MAX_BLOB_BYTES = 16 * 1024

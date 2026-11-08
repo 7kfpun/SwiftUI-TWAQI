@@ -15,6 +15,10 @@ export interface Reading {
   nameZh: string | null
   nameEn: string | null
   publishTime: string | null
+  /** The station's 空品區 and county in Chinese ("北部空品區"), for matching a
+   * MOENV forecast area (FOX-191). Null when the API sends none. */
+  areaZh?: string | null
+  countyZh?: string | null
 }
 
 interface ApiPollutant {
@@ -23,6 +27,8 @@ interface ApiPollutant {
   aqi?: number | null
   name?: { zh?: string; en?: string; th?: string }
   publish_time?: string
+  area?: { zh?: string }
+  additional_info?: { county?: { zh?: string } }
 }
 
 /** Every station in `AQI_COUNTRIES`, keyed by station id: one request per
@@ -52,5 +58,7 @@ function toReading(p: ApiPollutant): Reading {
     nameZh: p.name?.zh || null,
     nameEn: p.name?.en || p.name?.th || p.code || null,
     publishTime: p.publish_time ?? null,
+    areaZh: p.area?.zh || null,
+    countyZh: p.additional_info?.county?.zh || null,
   }
 }
