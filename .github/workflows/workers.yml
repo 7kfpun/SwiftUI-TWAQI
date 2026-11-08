@@ -41,12 +41,14 @@ jobs:
     name: Find changed Workers
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       workers: ${{ steps.list.outputs.workers }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: List Worker folders
@@ -107,6 +109,7 @@ jobs:
     needs: changes
     if: github.event_name == 'pull_request' && needs.changes.outputs.workers != '[]'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -117,6 +120,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -139,6 +144,7 @@ jobs:
     needs: [changes, check]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Summarize Worker checks
         env:
@@ -163,6 +169,7 @@ jobs:
       github.ref == 'refs/heads/master' &&
       needs.changes.outputs.workers != '[]'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: workers-production
     # Never cancel a deploy halfway; queue the next one behind it.
     concurrency:
@@ -178,6 +185,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v4

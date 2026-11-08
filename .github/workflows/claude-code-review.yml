@@ -18,6 +18,7 @@ jobs:
       startsWith(github.head_ref, 'feature/') &&
       (github.base_ref == 'master' || github.base_ref == 'feature/fox-52-android-project-setup')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
@@ -26,10 +27,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Claude PR review
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true
@@ -37,10 +39,16 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Review this pull request for TWAQI: a SwiftUI app (iPhone/iPad, iOS 15) with a
-            WidgetKit widget, an Apple Watch app and complication, a visionOS app, and
-            Cloudflare Workers under `workers/`. Your job is to find real problems before
-            they ship and suggest worthwhile improvements, not to restate the diff.
+            Review this pull request for TWAQI, a Taiwan air-quality product on two platforms
+            plus a backend:
+            - iOS (`ios/`): a SwiftUI app (iPhone/iPad, iOS 15) with a WidgetKit widget, an
+              Apple Watch app and complication, and a visionOS app.
+            - Android (`android/`): Kotlin, Jetpack Compose and Material 3. Modules `app`,
+              `wear` (Wear OS) and `core`. minSdk 26, targetSdk 36.
+            - Backend: Cloudflare Workers under `workers/`, Directus, Firebase.
+            Your job is to find real problems before they ship and suggest worthwhile
+            improvements, not to restate the diff. Start with `gh pr diff --name-only` to see
+            which platforms the PR touches, and apply the matching sections below.
 
             ## Method
 
@@ -54,12 +62,21 @@ jobs:
             4. Break it. For each change, try concrete failure scenarios: empty / nil /
                first launch / no network / slow network / API error / old persisted data from
                the previous version / Pro vs free / Taiwan vs elsewhere / iPhone vs iPad split
-               view / widget and watch targets / zh-Hant vs en / VoiceOver / backgrounding
-               mid-request / two quick taps.
+               view / widget and watch targets / zh-Hant vs en / VoiceOver or TalkBack /
+               backgrounding mid-request / two quick taps / rotation, process death and
+               restore (Android) / offline then back online / clock or time zone changed /
+               very large or empty lists / a station that has no data or no cam / a 429 or
+               5xx from the API / a partial or malformed response.
             5. Verify before reporting. Each finding must name the file:line, the concrete
                input or state, and the wrong result. If you can't state the scenario, it is
                a question, not a finding. Don't report what you haven't checked in the code.
-            6. Earlier threads. If an `**Author reply**` already answered a point, don't
+            6. Other platform. If the PR changes behaviour, data, copy or an API call on one
+               platform, check whether `ios/` and `android/` should match (see Parity). Grep
+               the other side; name the file that is missing the change.
+            7. Tests. Read the new or changed tests. Would they fail if the fix were
+               reverted? Is the failing path (error, empty, boundary) covered, or only the
+               happy path?
+            8. Earlier threads. If an `**Author reply**` already answered a point, don't
                repeat it unless the reply is wrong, and then say why.
 
             ## What to look for
@@ -68,24 +85,56 @@ jobs:
               error paths that swallow failures or leave UI stuck in loading, retries that
               loop, state not reset.
             - Time: Taiwan-local logic (cam hour keys, forecast dates, MOENV publish times,
-              "today") uses `Asia/Taipei`, never `TimeZone.current` / `Calendar.current`.
-              UTC timestamps from the API stay UTC. Date formatters need a fixed locale.
-            - Data: Codable key or type mismatches with the API / Directus columns; renamed
-              UserDefaults / App Group keys with no migration; cache directories outside the
-              ones `OfflineCacheRetention` scans.
+              "today") uses `Asia/Taipei`, never `TimeZone.current` / `Calendar.current`
+              (iOS) or `ZoneId.systemDefault()` / `TimeZone.getDefault()` / `LocalDate.now()`
+              without a zone (Android). UTC timestamps from the API stay UTC. Date formatters
+              need a fixed locale (`Locale.ROOT` / `en_US_POSIX`), not the phone's.
+            - Data: Codable (Swift) or kotlinx.serialization (Kotlin) key or type mismatches
+              with the API / Directus columns, and missing defaults or `ignoreUnknownKeys` so
+              one new field breaks decoding; renamed UserDefaults / App Group keys (iOS) or
+              DataStore / SharedPreferences keys (Android) with no migration; cache
+              directories outside the ones `OfflineCacheRetention` scans (both platforms).
+            - Resilience: no timeout, no retry cap or backoff, an error shown as an empty
+              state, a stale cache shown as fresh, work that continues after the user left.
             - Concurrency: UI updates off the main actor, races between overlapping tasks,
               tasks not cancelled when a view goes away, retain cycles in closures.
             - SwiftUI: state ownership (@State / @StateObject / @ObservedObject), views that
               re-create expensive objects on every render, iPad two-pane navigation.
-            - Targets: shared files compile for the widget, watch and visionOS targets;
+            - Targets (iOS): shared files compile for the widget, watch and visionOS targets;
               widget timeline reload policy, App Group sharing, memory limits.
+            - Android: `collectAsState` where `collectAsStateWithLifecycle` is needed; work
+              in a `GlobalScope` or a scope that outlives the screen; blocking calls on the
+              main thread; state kept in a `remember` that should survive rotation
+              (`rememberSaveable` / `ViewModel`); unstable lambdas or `List` params causing
+              needless recomposition; a manifest change (permission, exported component,
+              cleartext) the ticket did not ask for; a ProGuard / R8 rule missing for
+              reflection or serialization; activities that are not `AppCompatActivity`;
+              dark mode read from the phone instead of `isSystemInDarkTheme()`; widget,
+              notification or worker text not built from `AppLocale.localizedContext`;
+              Pro status read from anywhere but `ProGraph.repository`; code that assumes
+              Firebase is initialised; a new backup-worthy secret or cache missing from
+              `backup_rules.xml` and `data_extraction_rules.xml`.
+            - Android identity: the package id `com.kfpun.twaqi` never changes; `versionCode`
+              stays above 3000000 and only goes up; no `secrets.properties`,
+              `keystore.properties` or `google-services.json` in the diff; a new config key
+              goes in `secrets.example.properties` with a dummy value.
             - Localization and accessibility: every new user-facing string in both
-              `en` and `zh-Hant` `Localizable.strings`; removed UI also removes its keys;
-              labels for icon-only buttons.
-            - Security: secrets or keys in code, insecure HTTP, logging personal data.
+              `en` and `zh-Hant` `Localizable.strings` (iOS) and `values/strings.xml` and
+              `values-zh-rTW/strings.xml` (Android, key = iOS key in snake_case); removed UI
+              also removes its keys; no hard-coded user-facing text; labels for icon-only
+              buttons (`accessibilityLabel` / `contentDescription`); touch targets of at
+              least 44 pt / 48 dp; text that survives large font sizes.
+            - Security: secrets or keys in code, insecure HTTP, logging personal data (device
+              ids, locations, tokens), tokens or secrets written to logs, analytics or
+              crash reports, a Worker endpoint without signature checks, SQL or URL built by
+              string concatenation, deep links (`twaqi://`) that trust their parameters.
             - Tests: new logic in a pure function without a test; tests that can't fail;
               a change in a CI-subset area (offline caches, push dual-write, favourites ↔
-              alerts, cam history, `SettingsStore`) with no test.
+              alerts, cam history, `SettingsStore`) with no test; a fix with no regression
+              test; tests that assert on mocks only, or on the code's own output.
+            - Dependencies and CI: a new dependency (Pod, SPM, Gradle, npm) without a stated
+              reason, an unpinned or very old version, a wide permission; a workflow change
+              that widens token permissions or runs untrusted input in a shell.
             - Ticket and body. The PR body names a Linear ticket (FOX-nn) and should quote
               its scope; you can't open Linear, so work from what the body states. Flag
               scope the diff misses and product changes outside it. If the ticket removes
@@ -98,27 +147,46 @@ jobs:
 
             ## Blocking invariants (always Blocking when broken)
 
-            - Push settings live in Directus (`DirectusPushMirror`, `twaqi_push_devices` /
+            - Push settings live in Directus (iOS `DirectusPushMirror`, Android `push/` with
+              `PushApi`; `twaqi_push_devices` /
               `twaqi_push_subscriptions`), where the FCM sender reads them. A change is
               saved on the device first and synced after, retried until it lands; a failed
               write must never drop it. Switching an alert off soft-archives the Directus
               row, never deletes it.
-            - Favourites ↔ alerts (`FavouriteAlerts`): a station with an alert on is always
+            - Favourites ↔ alerts (`FavouriteAlerts` on iOS and Android): a station with an alert on is always
               a favourite, and leaving Favourites turns its alerts off. Alerts are keyed
-              by station id. Reordering favourites must not touch alerts.
+              by station id. Reordering favourites must not touch alerts. At most 3 stations
+              have alerts on either platform.
+
+            ## Parity (iOS ↔ Android)
+
+            The two apps are meant to behave the same. Flag, as Should fix (Blocking when it
+            breaks an invariant above), a PR that changes one side only when it touches:
+            the favourites and alerts rules, the AQI scale, colours and category names, the
+            push payload or `/app/v1` calls, Directus collection fields, station and cam
+            URLs, cache lifetimes, string keys and copy, deep links, or Pro gating. If the
+            difference is on purpose (platform feature), the PR body must say so. When a PR
+            touches only one platform and the body is silent, ask whether the other needs it.
 
             ## Domain notes
 
-            - Push is Firebase Cloud Messaging (FOX-13); settings in Directus on
-              cms.wahthefox.com, written through the twaqi-push-sender Worker's
+            - Push is Firebase Cloud Messaging (FOX-13); settings in Directus,
+              written through the twaqi-push-sender Worker's
               /app/v1 API (no Directus token in the app). The OneSignal SDK stays
               on purpose with the same alert tags (OneSignalTags), so OneSignal
               can be switched back on; it does not send. That is not a regression.
-            - Station cams: R2 behind `https://twaqi.app.wahthefox.com`. Latest frame
+            - Station cams: R2 behind the webcam host (`StationCams` base URL). Latest frame
               `stations/{siteId}.jpg`, hourly history `stations/{siteId}/{yyyy-MM-dd}/{HH}.jpg`.
               `siteId` is the MOENV image site id, not a TWAQI station id. History is a
               rolling 24 h window; a missing hour is a normal 404, not an error.
             - Offline caches (readings, cam frames, hourly frames) are purged after a week.
+
+            ## Before you post
+
+            Re-read each finding against the code once more. Drop it if the scenario cannot
+            happen (a guard upstream, a type that rules it out, code the PR did not change
+            and nobody can reach). A short list of real problems beats a long one with noise.
+            If the diff is large, say which files you read only in part.
 
             ## Output
 
