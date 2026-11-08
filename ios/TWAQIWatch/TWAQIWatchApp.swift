@@ -47,7 +47,12 @@ final class WatchModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var isLoadingHistory = false
     @Published private(set) var failed = false
+    /// Bumped when the station is chosen from the list or home, so the pager
+    /// drops its swipe selection and follows the reading again.
+    @Published private(set) var listPicks = 0
     @Published private(set) var isPro = WatchPro.isUnlocked
+    /// The phone's favourites, in its order (FOX-174).
+    @Published private(set) var favouriteIds: [Int] = WatchStore.favouriteStationIds
 
     private let locator = Locator()
 
@@ -79,11 +84,24 @@ final class WatchModel: ObservableObject {
         }
     }
 
+    /// Set when a refresh is asked for while one is in flight (a swipe moved
+    /// the pin): the running refresh goes round again for the new pin.
+    private var rerunRequested = false
+
     func refresh() async {
-        guard !isLoading else { return }
+        if isLoading {
+            rerunRequested = true
+            return
+        }
         isLoading = true
         defer { isLoading = false }
+        repeat {
+            rerunRequested = false
+            await refreshOnce()
+        } while rerunRequested
+    }
 
+    private func refreshOnce() async {
         do {
             let pollutant: Pollutant?
             if let stationId = WatchStore.pinnedStationId {
@@ -104,6 +122,8 @@ final class WatchModel: ObservableObject {
             }
 
             guard let pollutant else { throw WatchAPI.Failure.badResponse }
+            // The pin moved while this fetched: the rerun loads the new one.
+            guard WatchFavourites.mayStore(fetched: pollutant.stationId, pinned: WatchStore.pinnedStationId) else { return }
             if pollutant.stationId != reading?.stationId {
                 history = []
             }
@@ -113,7 +133,9 @@ final class WatchModel: ObservableObject {
             // The reading is already on screen; a missing chart shouldn't fail it.
             isLoadingHistory = true
             defer { isLoadingHistory = false }
-            history = (try? await WatchAPI.history(stationId: pollutant.stationId, limit: Self.historyHours)) ?? []
+            let fetchedHistory = (try? await WatchAPI.history(stationId: pollutant.stationId, limit: Self.historyHours)) ?? []
+            guard WatchFavourites.mayStore(fetched: pollutant.stationId, pinned: WatchStore.pinnedStationId) else { return }
+            history = fetchedHistory
         } catch {
             failed = true
         }
@@ -130,11 +152,29 @@ final class WatchModel: ObservableObject {
 
     /// Pins a station, or returns to home with `nil`.
     func pin(_ pollutant: Pollutant?) {
+        listPicks += 1
         WatchStore.pinnedStationId = pollutant?.stationId
         if let pollutant {
             source = .pinned
             history = []
             store(WatchReading(pollutant))
+        }
+        Task { await refresh() }
+    }
+
+    func reloadFavourites() {
+        favouriteIds = WatchStore.favouriteStationIds
+    }
+
+    /// Pins a station by id when the reader swipes to it. The complications
+    /// follow, as they do for a pick in the list; the reading shows at once
+    /// from the cached favourite and refreshes behind it.
+    func pin(stationId: Int) {
+        guard WatchFavourites.needsPin(stationId, pinned: WatchStore.pinnedStationId, isPinnedSource: source == .pinned) else { return }
+        WatchStore.pinnedStationId = stationId
+        source = .pinned
+        if let cached = WatchStore.favouriteReadings.first(where: { $0.stationId == stationId }) {
+            store(cached)
         }
         Task { await refresh() }
     }
@@ -151,12 +191,20 @@ final class WatchModel: ObservableObject {
 
 struct RootView: View {
     @StateObject private var model = WatchModel()
+    /// The page under the finger. It follows a swipe at once; the model's
+    /// reading catches up behind it.
+    @State private var selection: Int?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
-            ReadingView(model: model)
+            pager
         }
+        .onReceive(NotificationCenter.default.publisher(for: .watchFavouritesChanged)) { _ in
+            model.reloadFavourites()
+        }
+        .onChange(of: model.listPicks) { _, _ in selection = nil }
+        .onChange(of: model.reading?.stationId) { _, _ in selection = nil }
         .task { await model.observeTransactions() }
         .task {
             await model.checkPro()
@@ -164,12 +212,48 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
+                model.reloadFavourites()
                 PhoneRelay.shared.flush()
                 Task {
                     await model.checkPro()
                     await model.refresh()
                 }
             }
+        }
+    }
+
+    /// Swipe between the favourites; with none, or only the one on screen,
+    /// it is the plain reading with the station list behind the toolbar button.
+    @ViewBuilder
+    private var pager: some View {
+        let pages = WatchFavourites.pages(favourites: model.favouriteIds, current: model.reading?.stationId)
+
+        if pages.count < 2 {
+            ReadingView(model: model)
+        } else {
+            TabView(selection: Binding(
+                get: { selection ?? model.reading?.stationId ?? pages[0] },
+                set: {
+                    selection = $0
+                    model.pin(stationId: $0)
+                }
+            )) {
+                ForEach(pages, id: \.self) { id in
+                    // Only the page on screen is built: the model holds one station.
+                    Group {
+                        if model.reading?.stationId == id {
+                            ReadingView(model: model)
+                        } else if model.failed && !model.isLoading {
+                            Image(systemName: "exclamationmark.triangle")
+                                .onTapGesture { Task { await model.refresh() } }
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    .tag(id)
+                }
+            }
+            .tabViewStyle(.page)
         }
     }
 }
