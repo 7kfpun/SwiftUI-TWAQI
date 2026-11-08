@@ -27,6 +27,7 @@ The run:
 | Stale data | Stations whose `publish_time` is older than `MAX_DATA_AGE_MINUTES` (180), or whose AQI is ≤ 0, are left out of the filter, so nothing on them changes. |
 | Limit | The app allows alerts on at most **3 stations** per device (`FavouriteAlerts.maxAlertedStations`). Enforced in the app only. |
 | Opted out | The app reports `notifications_allowed` on its row (false when notifications are off for it in iOS Settings, or never allowed). Only devices where it is **true** are sent to. Not asked yet (empty) waits: a crossing before the user allows notifications stays unmarked and fires on the first run after they do, which the app reports at once. Rows from before this build have no FCM token, so they're not sent to anyway. |
+| Forecast heads-up (FOX-191) | One extra push per device, **18:00–21:59 Taiwan time** (the 18:20 run; the 20:20 run if that one was late or failed), sent when tomorrow's 空品區 forecast (`twaqi_aqi_forecast`) for a zone where the device has an alert (a favourite) is **above AQI 100 and worse than today's** for that zone. A day with no AQI in either row sends nothing. **One push per device**, covering every such zone; at most **one per Taiwan day** (`forecast_sent_at` on the device), not again for a forecast that says the same (`forecast_digest`), and dropped in quiet hours for that run (a later run in the window may still send it). The once-a-day rule is stricter than `COOLDOWN_MINUTES`, so the cool-down needs no check of its own. Same `apns-collapse-id` per device (`forecast-<device id>`), so a newer one replaces an older one still on screen; expires after 3 hours. The level is fixed at 100 until the app has a setting for it (FOX-192). A failed send leaves the device unmarked, so the next run in the window retries. Read-only until a zone qualifies: a fine forecast costs one request. Logged like alerts, with `trigger = forecast`. |
 | Failed send | `in_zone` is left as it was, so the next run retries. |
 | Dead token | FCM `UNREGISTERED`, `SENDER_ID_MISMATCH`, or `INVALID_ARGUMENT` about the registration token → device `archived = true`. Its subscriptions stop matching until the app writes its row again (which sets `archived = false`). |
 | Expiry | An alert APNs can't deliver within an hour is dropped (`apns-expiration`). Same subscription → same `apns-collapse-id`; a station's alerts share a `thread-id`. No badge. |
@@ -38,7 +39,19 @@ The text is written here, in the app's language (`device.locale`, which the app 
 | above | **中山 AQI 135** 空氣品質指標已高於你設定的 120，外出請留意。 | **Zhongshan: AQI 135** Air quality is now above your alert level of 120. |
 | below | **中山 AQI 24** 空氣品質指標已低於你設定的 30，空氣變好了。 | **Zhongshan: AQI 24** Air quality is now below your alert level of 30. The air has cleared up. |
 
-The FCM `data` carries `station_id`, `site_id`, `subscription_id`, `direction`, `threshold` and `aqi` (strings), for the app to open the station from a tap once it reads them.
+The forecast heads-up (`src/forecast.ts`), one zone:
+
+| zh-Hant | en |
+| --- | --- |
+| **明天 北部空品區 空氣品質不佳** 11/9 預報 AQI 130（對敏感族群不健康），主要污染物 細懸浮微粒，外出請留意。 | **Poor air expected tomorrow: North** Forecast for 11/09: AQI 130, unhealthy for sensitive groups, mainly PM2.5. Plan outdoor time with care. |
+
+Several zones go in one push: **明天 2 個空品區空氣品質不佳** / **Poor air expected tomorrow in 2 zones**, each zone listed in the body. Its `data` is `type=forecast`, `forecast_date` and `areas`.
+
+The forecast pass runs in the GitHub Actions job right after `run()` (`scripts/run.ts`), not on the Worker. A failure there is a warning and never stops the AQI alerts; a send FCM refused fails the job like an alert does. The station's zone comes from the same current-pollutants response (`area`, county for the islands), matched to the MOENV area name as the app does.
+
+**Directus, before this deploys:** `twaqi_push_devices` gets `forecast_sent_at` (timestamp) and `forecast_digest` (string). [`directus/push-devices-forecast.mjs`](directus/push-devices-forecast.mjs) adds them and lets the push Worker's policy read and update them (idempotent, `--apply` to write). Until they exist the forecast pass fails with a warning and the alerts go on as before.
+
+The FCM `data` of an AQI alert carries `station_id`, `site_id`, `subscription_id`, `direction`, `threshold` and `aqi` (strings), for the app to open the station from a tap once it reads them.
 
 ## App API (FOX-37 M5)
 
@@ -67,7 +80,7 @@ Every send is recorded in **Workers Analytics Engine** (dataset `twaqi_push_even
 - A forward that fails twice is a **warning** in the job (`N of M push events not forwarded`), with counts only. It never re-sends an alert and doesn't fail the job: only `counts.failed` (alerts FCM refused) does.
 - **Free plan:** 40k events a run is 160 requests to the Worker, well inside 100,000 requests a day. But Analytics Engine on Free includes **100,000 data points a day**, and twelve runs at the 40k sizing would be 480k. Below that sizing it fits. Cloudflare's limits page doesn't say what happens to writes past the daily allowance on Free, so if volume nears it, check the dataset's daily counts against the job logs' `events forwarded` (or move to Workers Paid: 10M a month). The Directus failure rows are unaffected either way. Only **failures, dead tokens and `/test` sends** also get a row in Directus `twaqi_push_logs`: at 40k alerts a run, a row per send would be ~14M rows a month.
 
-The Directus rows are: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
+The Directus rows are: `token_suffix` (last 6 characters of the FCM token, **never the whole token**), `status` (`sent` / `failed` / `unregistered`), `station`, `trigger` (`pollution` = above, `cleanliness` = below, `test`, `forecast` = the evening heads-up), `device` (M2O to `twaqi_push_devices`), `aqi`, `fcm_message_id`, `error_code`, `archived`, `date_created`. Archive soft delete on `archived`; nothing is deleted.
 
 Both logs are best effort: a failed write is logged to the console and never holds up a send or its state. Quiet-hours and cool-down skips are not logged (the subscription's `last_value` / `in_zone` record those).
 

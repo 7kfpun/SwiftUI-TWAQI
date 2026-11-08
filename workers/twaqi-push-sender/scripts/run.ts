@@ -18,6 +18,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { MAX_EVENTS_PER_REQUEST } from '../src/events.ts'
+import { runForecast, type ForecastResult } from '../src/forecast.ts'
 import { run, type Env, type RunResult } from '../src/index.ts'
 
 export const SECRETS = ['FCM_SERVICE_ACCOUNT', 'DIRECTUS_PUSH_TOKEN', 'AQI_API_BASE', 'SYNC_TOKEN'] as const
@@ -58,8 +59,8 @@ export function parseArgs(argv: string[]): { dryRun: boolean } {
  * refused (`failed`) fails it, after run() has saved state and logs, so a run
  * where FCM rejects every alert doesn't go green. Dead tokens (the device is
  * archived) and deferred sends (they go out next run) are expected. */
-export function failure(result: RunResult): string | null {
-  const failed = result.counts.failed ?? 0
+export function failure(result: RunResult, forecast?: Pick<ForecastResult, 'counts'>): string | null {
+  const failed = (result.counts.failed ?? 0) + (forecast?.counts.failed ?? 0)
   return failed ? `${failed} alert(s) failed to send; they stay unsent and are retried next run` : null
 }
 
@@ -159,14 +160,26 @@ async function main(): Promise<void> {
   const env = { ...nodeEnv(config, process.env), PUSH_EVENTS: collector.dataset }
   // Events are forwarded once run() has saved state and logs, or has thrown.
   // That is separate from the exit code below.
+  let forecast: ForecastResult | undefined
   const result = await runThenForward(
-    () => run(env, { dryRun }),
+    async () => {
+      const alerts = await run(env, { dryRun })
+      // The evening forecast heads-up (FOX-191) runs after the alerts, and its
+      // own failure never stops them: it is a warning, retried next run.
+      try {
+        forecast = await runForecast(env, { dryRun })
+      } catch (e) {
+        console.log(`::warning::forecast heads-up failed: ${String(e).slice(0, 200)}`)
+      }
+      return alerts
+    },
     () => forwardCollected(collector.points, env.SYNC_TOKEN),
   )
   // The log is public (public repo): counts only, never device ids, token
   // suffixes or per-device decisions.
   const { decisions, archivedDevices, ...summary } = result
-  const failed = failure(result)
+  if (forecast) console.log('forecast', JSON.stringify(forecast))
+  const failed = failure(result, forecast)
   console.log(
     failed ? 'run finished with failures' : 'run ok',
     JSON.stringify({ ...summary, archivedDevices: archivedDevices.length, decisions: decisions?.length }),
