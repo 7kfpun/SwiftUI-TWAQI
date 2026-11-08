@@ -12,9 +12,9 @@ Taiwan air-quality app for iPhone, iPad, Apple Watch, Apple Vision Pro and Andro
 
 ### iOS
 
-<img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios0.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios1.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios2.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios3.png" width="210">
+<img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-en-US-01.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-en-US-02.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-en-US-03.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-en-US-04.png" width="210">
 
-<img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios4.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios5.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios6.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios7.png" width="210">
+<img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-zh-Hant-01.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-zh-Hant-02.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-zh-Hant-03.png" width="210"> <img src="https://raw.github.com/7kfpun/SwiftUI-TWAQI/master/assets/screenshot-ios-zh-Hant-04.png" width="210">
 
 ### Android
 

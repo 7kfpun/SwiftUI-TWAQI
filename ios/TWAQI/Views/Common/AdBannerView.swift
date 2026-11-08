@@ -42,6 +42,18 @@ struct AdBannerView: View {
     }
 }
 
+extension View {
+    /// Puts the banner in its own strip under this view. Unlike
+    /// `.safeAreaInset`, the list never scrolls beneath the banner, so the
+    /// banner covers no row (FOX-180).
+    func adBannerBelow(adUnitID: String, placement: AdPlacement) -> some View {
+        VStack(spacing: 0) {
+            self
+            AdBannerView(adUnitID: adUnitID, placement: placement)
+        }
+    }
+}
+
 struct AdBannerView_Previews: PreviewProvider {
     static var previews: some View {
         Separator().environmentObject(SettingsStore())

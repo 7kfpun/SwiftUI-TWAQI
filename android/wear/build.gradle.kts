@@ -42,8 +42,8 @@ android {
         targetSdk = 36
         // Wear OS codes: 203_000_000 and up, always above the phone's (3_000_000 and up) and
         // increasing with every Wear OS upload. WearIdentityTest guards the range.
-        versionCode = 203_000_001
-        versionName = "2.0.1"
+        versionCode = 203_000_002
+        versionName = "2.0.2"
 
         buildConfigField("String", "API_DOMAIN", javaString(secret("API_DOMAIN")))
     }

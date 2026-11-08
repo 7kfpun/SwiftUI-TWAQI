@@ -94,9 +94,7 @@ struct HelpView: View {
                 }
             }
             .navigationBarTitle("Help.help")
-            .safeAreaInset(edge: .bottom) {
-                AdBannerView(adUnitID: getEnv("AdUnitIdHelpFooter")!, placement: .help)
-            }
+            .adBannerBelow(adUnitID: getEnv("AdUnitIdHelpFooter")!, placement: .help)
         }
         .sheet(isPresented: $showingPro) {
             ProView(source: .helpRow)
@@ -203,6 +201,7 @@ struct HelpView: View {
             } label: {
                 Text("Help.language")
             }
+            .pushedChoices()
         }
     }
 
@@ -220,6 +219,7 @@ struct HelpView: View {
             } label: {
                 Text("Help.appearance")
             }
+            .pushedChoices()
         }
     }
 
@@ -382,6 +382,20 @@ struct HelpView: View {
         let short = info?["CFBundleShortVersionString"] as? String ?? "—"
         let build = info?["CFBundleVersion"] as? String ?? "—"
         return "\(short) (\(build))"
+    }
+}
+
+private extension View {
+    /// A Form picker that pushes a list of choices, as it did before iOS 16
+    /// made it a floating menu. That menu got stuck open on a real iPhone and
+    /// swallowed every tap on the list (FOX-180).
+    @ViewBuilder
+    func pushedChoices() -> some View {
+        if #available(iOS 16.0, *) {
+            pickerStyle(.navigationLink)
+        } else {
+            self
+        }
     }
 }
 
