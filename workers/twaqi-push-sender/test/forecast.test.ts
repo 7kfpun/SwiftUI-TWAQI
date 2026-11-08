@@ -203,7 +203,7 @@ describe('runForecast', () => {
   })
 
   it('holds the push back after a recent AQI alert, unmarked', async () => {
-    const s = await setup(badNorth, [{ ...sub(1, '105', device(5)), last_fired_at: '2026-11-08T09:50:00Z' }])
+    const s = await setup(badNorth, [sub(1, '105', device(5))], [{ device: { id: 5 }, last_fired_at: '2026-11-08T09:50:00Z' }])
     const result = await runForecast(s.env, { now: evening })
     assert.equal(result.counts.cooldown, 1)
     assert.equal(s.fcm.length, 0)
