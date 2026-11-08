@@ -36,6 +36,12 @@ enum WidgetFamilyRules {
         isProFamily(family) && !isPro && !isPreview
     }
 
+    /// Medium and large show the weather at the station (FOX-181); small,
+    /// extra large and the Lock Screen families don't.
+    static func showsWeather(_ family: WidgetFamily) -> Bool {
+        family == .systemMedium || family == .systemLarge
+    }
+
     /// Extra large shows the station page (history, forecast, cam), and is
     /// the only family that fetches them.
     static func showsStationDetail(_ family: WidgetFamily) -> Bool {
