@@ -31,12 +31,12 @@ enum WhatsNew {
     /// opens no popup (it is still counted as seen).
     static let releases: [Release] = [
         Release(version: "3.1.5", items: [
-            Item(icon: "chart.xyaxis.line", titleKey: "WhatsNew.3_1_5.trend_title",
-                 bodyKey: "WhatsNew.3_1_5.trend_body"),
-            Item(icon: "rectangle.grid.1x2", titleKey: "WhatsNew.3_1_5.station_title",
-                 bodyKey: "WhatsNew.3_1_5.station_body"),
-            Item(icon: "magnifyingglass", titleKey: "WhatsNew.3_1_5.search_title",
-                 bodyKey: "WhatsNew.3_1_5.search_body"),
+            Item(icon: "cloud.sun", titleKey: "WhatsNew.3_1_5.weather_title",
+                 bodyKey: "WhatsNew.3_1_5.weather_body"),
+            Item(icon: "hand.wave", titleKey: "WhatsNew.3_1_5.welcome_title",
+                 bodyKey: "WhatsNew.3_1_5.welcome_body"),
+            Item(icon: "circle.lefthalf.filled", titleKey: "WhatsNew.3_1_5.appearance_title",
+                 bodyKey: "WhatsNew.3_1_5.appearance_body"),
         ]),
     ]
 

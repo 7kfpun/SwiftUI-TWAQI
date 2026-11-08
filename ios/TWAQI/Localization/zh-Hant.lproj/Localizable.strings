@@ -597,9 +597,9 @@
 "WhatsNew.close" = "知道了";
 "WhatsNew.pro" = "Pro";
 "Help.show_whats_new" = "本版新功能";
-"WhatsNew.3_1_5.trend_title" = "24 小時空氣品質趨勢";
-"WhatsNew.3_1_5.trend_body" = "打開測站，就能看到過去 24 小時逐時的 AQI，並以一句話告訴你：正在好轉、變差，還是持平。";
-"WhatsNew.3_1_5.station_title" = "全新測站頁面";
-"WhatsNew.3_1_5.station_body" = "名稱、鄉鎮、縣市與空品區整合在同一標題，六項污染物一次列出，並標示每筆資料距今幾小時。";
-"WhatsNew.3_1_5.search_title" = "搜尋更好用";
-"WhatsNew.3_1_5.search_body" = "測站依空品區分組，除了測站名稱，也能用鄉鎮或縣市名稱搜尋。";
+"WhatsNew.3_1_5.weather_title" = "測站天氣資訊";
+"WhatsNew.3_1_5.weather_body" = "測站頁面現在顯示中央氣象署的當地天氣：氣溫、濕度、風與降雨，並附上縣市預報。";
+"WhatsNew.3_1_5.welcome_title" = "五步驟歡迎導覽";
+"WhatsNew.3_1_5.welcome_body" = "新安裝會依序引導你設定定位、最近的測站、空氣品質警示與勿擾時段，一分鐘就能完成。";
+"WhatsNew.3_1_5.appearance_title" = "自選外觀";
+"WhatsNew.3_1_5.appearance_body" = "在說明中選擇系統預設、淺色或深色，不受 iPhone 設定影響。";

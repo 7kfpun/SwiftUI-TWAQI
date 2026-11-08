@@ -593,9 +593,9 @@
 "WhatsNew.close" = "Got it";
 "WhatsNew.pro" = "Pro";
 "Help.show_whats_new" = "What's new in this version";
-"WhatsNew.3_1_5.trend_title" = "24-hour air quality trend";
-"WhatsNew.3_1_5.trend_body" = "Open a station to see its last 24 hours of AQI, hour by hour, with a one-line verdict: improving, getting worse or holding steady.";
-"WhatsNew.3_1_5.station_title" = "A new station screen";
-"WhatsNew.3_1_5.station_body" = "Name, township, county and air quality zone in one header, all six pollutants at once, and how many hours old each reading is.";
-"WhatsNew.3_1_5.search_title" = "Better search";
-"WhatsNew.3_1_5.search_body" = "Stations are grouped by air quality zone, and you can search by township or county as well as by station name.";
+"WhatsNew.3_1_5.weather_title" = "Weather at your station";
+"WhatsNew.3_1_5.weather_body" = "Station pages now show the local weather from the Central Weather Administration: temperature, humidity, wind and rain, with the county forecast.";
+"WhatsNew.3_1_5.welcome_title" = "A five-step welcome";
+"WhatsNew.3_1_5.welcome_body" = "New installs are guided through location, your closest station, air quality alerts and quiet hours, so setup takes a minute.";
+"WhatsNew.3_1_5.appearance_title" = "Choose your Appearance";
+"WhatsNew.3_1_5.appearance_body" = "Pick System default, Light or Dark in Help, whatever your iPhone is set to.";
