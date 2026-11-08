@@ -331,8 +331,6 @@ CI notes:
   harmless today because nothing in the host app writes on that notification. If a future observer
   writes on it, these tests could end up calling OneSignal.
 - CI picks the newest simulator named plainly "iPhone NN", so it never uses "iPhone 18 Pro". Fine.
-- **Japanese pipeline:** not in this repo. The only reference is the DNS runbook in
-  `docs/web-hosting.md` (the Japanese site's record → `kf-nihongo.web.app`). It needs its own review in that repo.
 
 ## Won't fix / defer
 

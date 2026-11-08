@@ -1,8 +1,7 @@
 # Website hosting: taiwanair.wahthefox.com
 
 The product site, privacy policy and terms (`web/`) move from `kf-twaqi.web.app` to
-**https://taiwanair.wahthefox.com**, the same `wahthefox.com` pattern as
-the Japanese study site. (FOX-26)
+**https://taiwanair.wahthefox.com**. (FOX-26)
 
 ## Layout
 
@@ -41,7 +40,7 @@ Run this only after the PR is approved and merged. Each step depends on the one 
    `/zh-Hant/privacy.html`, `/terms.html`, `/zh-Hant/terms.html`.
 3. **Add the custom domain**: Firebase console → Hosting → site `taiwanair-wahthefox` →
    *Add custom domain* → `taiwanair.wahthefox.com` (no redirect option).
-4. **DNS** (Cloudflare, zone `wahthefox.com`), mirroring the Japanese study site's record → `kf-nihongo.web.app`:
+4. **DNS** (Cloudflare, zone `wahthefox.com`):
 
    | Type | Name | Content | Proxy |
    |---|---|---|---|
@@ -49,8 +48,7 @@ Run this only after the PR is approved and merged. Each step depends on the one 
 
    Add any TXT record the console asks for (ownership or `_acme-challenge`) exactly as shown.
    Leave the record **unproxied**: Firebase issues the HTTPS certificate itself and can't
-   while Cloudflare is proxying. That site's record is also unproxied (it resolves to Firebase's
-   `199.36.158.100`).
+   while Cloudflare is proxying.
 5. **Wait for HTTPS**: the console shows *Connected*, usually within minutes and at most
    24 hours. Then check:
    ```sh
