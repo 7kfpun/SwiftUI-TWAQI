@@ -28,6 +28,7 @@ jobs:
       startsWith(github.head_ref, 'feature/') &&
       github.base_ref == 'master'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: read
@@ -36,6 +37,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # The level decision's own tests, and the two lists in the `Unit tests`
       # job's env against this checkout. Seconds, before anything is built.
@@ -89,6 +92,7 @@ jobs:
       github.base_ref == 'master' &&
       (needs.scope.result != 'success' || needs.scope.outputs.level != 'skip')
     runs-on: macos-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       pull-requests: read
@@ -173,6 +177,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Prepare gitignored config
         run: |
@@ -355,6 +361,7 @@ jobs:
       startsWith(github.head_ref, 'feature/') &&
       github.base_ref == 'master'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
@@ -362,6 +369,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Install osv-scanner
