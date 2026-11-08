@@ -7,12 +7,13 @@
 // CWA weather sync: F-C0032-001 + O-A0003-001 -> R2 `weather/latest.json` (see weather.ts),
 // every 15 minutes in its own invocation, so it never shares the forecast's CPU or subrequest budget.
 import { unzipSync } from 'fflate'
+import { syncAdvisories, type AdvisoryEnv } from './advisories'
 import { syncForecast, type ForecastEnv, type ForecastSyncResult } from './forecast'
 import { errorText, syncWeather, WEATHER_STATUS_KEY, type WeatherEnv, type WeatherSyncResult } from './weather'
 import { HISTORY_CACHE_CONTROL, HISTORY_ROUTE, hourKey, shouldWriteHour, staleHourKeys, sweepDue } from './history'
 import { handleApi, isApiPath, type ApiEnv } from './api'
 
-interface Env extends ForecastEnv, ApiEnv, WeatherEnv {
+interface Env extends ForecastEnv, AdvisoryEnv, ApiEnv, WeatherEnv {
   CAMS: R2Bucket
   MOENV_API_KEY: string
   SYNC_TOKEN: string
@@ -177,6 +178,15 @@ interface ForecastStatus {
 async function runForecastSync(env: Env): Promise<ForecastStatus> {
   let status: ForecastStatus
   try {
+    // Advisories first and on their own: a failure here never blocks the forecast.
+    const advisories = await syncAdvisories(env).then(
+      (r) => r,
+      (e) => {
+        console.error('advisory sync failed', e)
+        return { error: String(e) }
+      },
+    )
+    console.log('advisory sync', JSON.stringify(advisories))
     const result = await syncForecast(env)
     console.log('forecast sync ok', JSON.stringify(result))
     status = { ok: true, at: new Date().toISOString(), result }

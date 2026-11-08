@@ -126,3 +126,99 @@ final class AqiForecastStore {
         fetchedAt = modified
     }
 }
+
+/// Fetches the sand/dust advisories from Directus `twaqi_sandstorm_advisories`
+/// (FOX-10) for the Forecast tab banner.
+///
+/// Unlike the forecast, an empty answer is real ("no advisory"): it is cached
+/// and clears the banner. Only a failed request keeps the last good copy, and a
+/// copy older than `OfflineCacheRetention.maxAge` isn't used. The banner is
+/// optional, so a failure never shows an error.
+final class SandstormAdvisoryStore {
+    static let shared = SandstormAdvisoryStore()
+
+    static let ttl: TimeInterval = 30 * 60
+
+    private let session: URLSession
+    private let cacheFile: URL
+    private let baseURL: String?
+    private let token: String?
+
+    private var advisories: [SandstormAdvisory]?
+    private var fetchedAt: Date?
+    private var waiting: [([SandstormAdvisory]) -> Void] = []
+
+    init(
+        session: URLSession = .shared,
+        cacheFile: URL = SandstormAdvisoryStore.defaultCacheFile,
+        baseURL: String? = getEnv("DirectusUrl"),
+        token: String? = getEnv("DirectusFeedbackToken")
+    ) {
+        self.session = session
+        self.cacheFile = cacheFile
+        self.baseURL = baseURL
+        self.token = token
+    }
+
+    static var defaultCacheFile: URL {
+        let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        return directory.appendingPathComponent("sandstorm-advisories.json")
+    }
+
+    /// The advisories still worth showing, on the main queue.
+    func current(completion: @escaping ([SandstormAdvisory]) -> Void) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        if advisories == nil {
+            loadFromDisk()
+        }
+
+        if let advisories = advisories, let fetchedAt = fetchedAt, Date().timeIntervalSince(fetchedAt) < Self.ttl {
+            completion(SandstormAdvisory.current(advisories))
+            return
+        }
+
+        guard let request = SandstormAdvisoryRequest.make(baseURL: baseURL, token: token) else {
+            completion(SandstormAdvisory.current(advisories ?? []))
+            return
+        }
+
+        waiting.append(completion)
+        guard waiting.count == 1 else { return }
+
+        session.dataTask(with: request) { data, response, _ in
+            let ok = (response as? HTTPURLResponse).map { (200..<300).contains($0.statusCode) } ?? false
+            let decoded = ok ? data.flatMap { try? JSONDecoder().decode(SandstormAdvisoryResponse.self, from: $0) } : nil
+
+            DispatchQueue.main.async {
+                if let decoded = decoded, let data = data {
+                    self.advisories = decoded.data
+                    self.fetchedAt = Date()
+                    try? FileManager.default.createDirectory(
+                        at: self.cacheFile.deletingLastPathComponent(),
+                        withIntermediateDirectories: true
+                    )
+                    try? data.write(to: self.cacheFile, options: .atomic)
+                }
+
+                let current = SandstormAdvisory.current(self.advisories ?? [])
+                let waiting = self.waiting
+                self.waiting = []
+                waiting.forEach { $0(current) }
+            }
+        }
+        .resume()
+    }
+
+    private func loadFromDisk() {
+        let modified = OfflineCacheRetention.modificationDate(of: cacheFile)
+        guard
+            !OfflineCacheRetention.isExpired(modified),
+            let data = try? Data(contentsOf: cacheFile),
+            let decoded = try? JSONDecoder().decode(SandstormAdvisoryResponse.self, from: data)
+        else { return }
+
+        advisories = decoded.data
+        fetchedAt = modified
+    }
+}

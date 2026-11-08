@@ -435,6 +435,7 @@
 "Forecast.your_area" = "所在地區";
 "Forecast.favourite_area" = "最愛測站";
 "Forecast.none_current" = "目前沒有可顯示的最新預報，暫時無法載入，請稍後再試。";
+"Forecast.sandstorm_title" = "沙塵暴特報";
 
 /* 測站頁的天氣（FOX-11，中央氣象署 F-C0032-001、O-A0003-001） */
 "Weather.title" = "天氣";

@@ -56,6 +56,10 @@ struct ForecastView: View {
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
+                ForEach(viewModel.advisories, id: \.publishTime) { advisory in
+                    SandstormAdvisoryBanner(advisory: advisory)
+                }
+
                 if let shared = shared {
                     ForecastContentText(
                         content: shared,
@@ -81,6 +85,51 @@ struct ForecastView: View {
     private func load() {
         viewModel.load(favouriteStationIds: settings.savedFavouriteStations)
     }
+}
+
+/// A MOENV sand/dust advisory (FOX-10), above the forecast cards.
+struct SandstormAdvisoryBanner: View {
+    let advisory: SandstormAdvisory
+
+    private var subject: String? {
+        advisory.subject?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
+    private var content: String? {
+        advisory.content?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "wind")
+                    .foregroundColor(.orange)
+                Text(subject ?? NSLocalizedString("Forecast.sandstorm_title", comment: ""))
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            if let content = content {
+                ForecastContentText(content: content)
+            }
+            if let published = advisory.publishedAt {
+                Text(String(
+                    format: NSLocalizedString("Forecast.published %@", comment: ""),
+                    published.formatted(date: .abbreviated, time: .shortened)
+                ))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.15))
+        .clipShape(RoundedRectangle(cornerRadius: AreaForecastView.cornerRadius, style: .continuous))
+        .padding(.horizontal)
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
 struct ForecastView_Previews: PreviewProvider {
