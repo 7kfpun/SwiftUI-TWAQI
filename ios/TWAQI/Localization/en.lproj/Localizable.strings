@@ -588,3 +588,15 @@
 "Help.shortcuts_control_header" = "Control Center";
 "Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
 "Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";
+
+/* What's New (FOX-142) */
+"WhatsNew.title" = "What's New";
+"WhatsNew.close" = "Got it";
+"WhatsNew.pro" = "Pro";
+"Help.show_whats_new" = "What's new in this version";
+"WhatsNew.3_1_5.weather_title" = "Weather at your station";
+"WhatsNew.3_1_5.weather_body" = "Station pages now show the local weather from the Central Weather Administration: temperature, humidity, wind and rain, with the county forecast.";
+"WhatsNew.3_1_5.welcome_title" = "A five-step welcome";
+"WhatsNew.3_1_5.welcome_body" = "New installs are guided through location, your closest station, air quality alerts and quiet hours, so setup takes a minute.";
+"WhatsNew.3_1_5.appearance_title" = "Choose your Appearance";
+"WhatsNew.3_1_5.appearance_body" = "System default follows your iPhone; Light and Dark stay as you set them. Change it in Help.";
