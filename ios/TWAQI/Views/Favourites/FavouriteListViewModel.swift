@@ -46,7 +46,6 @@ class FavouriteListViewModel: ObservableObject {
 
     private(set) lazy var getData: () -> Void = {
         let ids = self.settings.savedFavouriteStations
-        print("getFavouritePollutants", ids)
 
         guard !ids.isEmpty else {
             self.favouritePollutants = []
@@ -67,7 +66,6 @@ class FavouriteListViewModel: ObservableObject {
         APIManager.getCurrentPollutantsByStationId(stationId: ids.map(String.init).joined(separator: ",")) { result in
             switch result {
             case .success(let result):
-                print("getCurrentPollutantsByStationId Total: \(result.count)")
                 // The API returns stations by ID; list them in the
                 // reader's order, the one the widget follows too.
                 let order = self.settings.savedFavouriteStations
@@ -78,7 +76,7 @@ class FavouriteListViewModel: ObservableObject {
                 self.loadFailed = false
                 WidgetBridge.cacheFavourites(from: result)
             case .failure(let error):
-                print(error.localizedDescription)
+                AppLog.network.error("favourites request failed: \(error.localizedDescription)")
                 self.showSaved(ids: self.settings.savedFavouriteStations)
                 self.isShowingLastGood = !self.favouritePollutants.isEmpty
                 self.loadFailed = self.favouritePollutants.isEmpty
