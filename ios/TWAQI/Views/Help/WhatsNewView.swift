@@ -20,6 +20,11 @@ struct WhatsNewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                // The welcome flow's sparkles Lottie (FOX-84), played once;
+                // still under Reduce Motion, skipped by VoiceOver.
+                OnboardingAnimationView(animation: .more, size: 120, tint: .accentColor)
+                    .frame(maxWidth: .infinity)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("WhatsNew.title")
                         .font(.largeTitle.bold())
