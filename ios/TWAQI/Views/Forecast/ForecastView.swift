@@ -33,11 +33,15 @@ struct ForecastView: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .empty:
-            OfflineEmptyStateView(retry: load)
-                .padding(.horizontal, 32)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(spacing: 16) {
+                advisoryBanners
+                OfflineEmptyStateView(retry: load)
+                    .padding(.horizontal, 32)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         case .noCurrentForecast:
             VStack(spacing: 16) {
+                advisoryBanners
                 EmptyStateView(icon: "calendar", message: "Forecast.none_current")
                 Button(action: load) {
                     Text("Offline.retry")
@@ -51,14 +55,20 @@ struct ForecastView: View {
         }
     }
 
+    /// Current sand/dust advisories (FOX-10), shown in every state so they
+    /// don't wait on the area forecast.
+    private var advisoryBanners: some View {
+        ForEach(viewModel.advisories, id: \.publishTime) { advisory in
+            SandstormAdvisoryBanner(advisory: advisory)
+        }
+    }
+
     private func list(_ areas: [ForecastTabArea]) -> some View {
         let shared = ForecastTabOrdering.sharedContent(areas)
 
         return ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
-                ForEach(viewModel.advisories, id: \.publishTime) { advisory in
-                    SandstormAdvisoryBanner(advisory: advisory)
-                }
+                advisoryBanners
 
                 if let shared = shared {
                     ForecastContentText(
@@ -104,18 +114,21 @@ struct SandstormAdvisoryBanner: View {
             HStack(spacing: 6) {
                 Image(systemName: "wind")
                     .foregroundColor(.orange)
-                Text(subject ?? NSLocalizedString("Forecast.sandstorm_title", comment: ""))
-                    .font(.headline)
-                    .accessibilityAddTraits(.isHeader)
+                Group {
+                    if let subject = subject {
+                        Text(subject)
+                    } else {
+                        Text("Forecast.sandstorm_title")
+                    }
+                }
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
             }
             if let content = content {
                 ForecastContentText(content: content)
             }
             if let published = advisory.publishedAt {
-                Text(String(
-                    format: NSLocalizedString("Forecast.published %@", comment: ""),
-                    published.formatted(date: .abbreviated, time: .shortened)
-                ))
+                Text("Forecast.published \(AreaForecastView.publishedText(published))")
                 .font(.caption2)
                 .foregroundColor(.secondary)
             }

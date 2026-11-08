@@ -43,7 +43,7 @@ test('sync: creates only unseen publish times, archives old rows', async () => {
         ]),
       )
     }
-    if (method === 'GET' && url.includes('fields=publish_time')) return new Response(JSON.stringify({ data: [{ publish_time: '2026-11-08 09:30:00' }] }))
+    if (method === 'GET' && url.includes('fields=id%2Cpublish_time')) return new Response(JSON.stringify({ data: [{ id: 9, publish_time: '2026-11-08 09:30:00', subject: 'A', content: 'a' }] }))
     if (method === 'GET') return new Response(JSON.stringify({ data: [{ id: 4 }] }))
     return new Response('{}')
   }) as typeof fetch
@@ -56,6 +56,24 @@ test('sync: creates only unseen publish times, archives old rows', async () => {
   const post = calls.find((c) => c.method === 'POST')!
   assert.deepEqual(post.body, [{ publish_time: '2026-11-08 12:00:00', subject: 'B', content: 'b', source: 'SANDST_P_01', archived: false }])
   assert.deepEqual(calls.find((c) => c.method === 'PATCH')!.body, { keys: [4], data: { archived: true } })
+})
+
+test('sync: changed text under a stored publish time is updated, not duplicated', async () => {
+  const calls: { method: string; body?: unknown }[] = []
+  globalThis.fetch = (async (input: URL | string, init?: RequestInit) => {
+    const url = String(input)
+    const method = init?.method ?? 'GET'
+    calls.push({ method, body: init?.body ? JSON.parse(String(init.body)) : undefined })
+    if (url.startsWith('https://moenv.test')) return new Response(JSON.stringify([{ PublishTime: '2026-11-08 09:30:00', Subject: 'A', Content: 'a2' }]))
+    if (method === 'GET' && url.includes('fields=id%2Cpublish_time')) return new Response(JSON.stringify({ data: [{ id: 9, publish_time: '2026-11-08 09:30:00', subject: 'A', content: 'a' }] }))
+    if (method === 'GET') return new Response(JSON.stringify({ data: [] }))
+    return new Response('{}')
+  }) as typeof fetch
+  const result = await syncAdvisories(ENV)
+  assert.equal(result.created, 0)
+  assert.equal(result.updated, 1)
+  assert.ok(!calls.some((c) => c.method === 'POST'))
+  assert.deepEqual(calls.find((c) => c.method === 'PATCH')!.body, { keys: [9], data: { subject: 'A', content: 'a2', archived: false } })
 })
 
 test('sync: an empty feed is "no advisory", not an error, and creates nothing', async () => {

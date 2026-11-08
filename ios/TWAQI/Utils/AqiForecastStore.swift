@@ -138,6 +138,7 @@ final class SandstormAdvisoryStore {
     static let shared = SandstormAdvisoryStore()
 
     static let ttl: TimeInterval = 30 * 60
+    static let cacheFileName = "sandstorm-advisories.json"
 
     private let session: URLSession
     private let cacheFile: URL
@@ -162,7 +163,7 @@ final class SandstormAdvisoryStore {
 
     static var defaultCacheFile: URL {
         let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return directory.appendingPathComponent("sandstorm-advisories.json")
+        return directory.appendingPathComponent(cacheFileName)
     }
 
     /// The advisories still worth showing, on the main queue.

@@ -1,7 +1,7 @@
 // MOENV sand/dust advisories (FOX-10): SANDST_P_01 -> Directus `twaqi_sandstorm_advisories`.
 //
 // One row per advisory, keyed by its PublishTime (Taiwan local, as MOENV publishes it):
-// a PublishTime already stored is skipped, a new one is created. MOENV only lists an
+// a new PublishTime is created, a stored one is updated only if MOENV changed its text. MOENV only lists an
 // advisory while it is relevant, so an empty feed is normal ("no advisory") and is not an
 // error; a failed or unparseable response throws, leaving Directus as it was. Nothing is
 // deleted; rows published more than ARCHIVE_AFTER_DAYS ago are soft-archived.
@@ -29,6 +29,8 @@ export interface AdvisorySyncResult {
   fetched: number
   rows: number
   created: number
+  /** Stored advisories whose text MOENV changed under the same PublishTime. */
+  updated: number
   unchanged: number
   archived: number
   latestPublishTime: string | null
@@ -46,16 +48,25 @@ export async function syncAdvisories(env: AdvisoryEnv): Promise<AdvisorySyncResu
   const directus = new Directus(env.DIRECTUS_URL, env.DIRECTUS_FORECAST_TOKEN)
 
   let created = 0
+  let updated = 0
   if (rows.length) {
-    const existing = await directus.list<{ publish_time: string | null }>({
+    const existing = await directus.list<{ id: number; publish_time: string | null; subject: string | null; content: string | null }>({
       'filter[publish_time][_in]': rows.map((r) => r.publish_time).join(','),
-      fields: 'publish_time',
+      fields: 'id,publish_time,subject,content',
       limit: '-1',
     })
-    const known = new Set(existing.map((e) => toLocalDateTime(e.publish_time) ?? ''))
+    const known = new Map(existing.map((e) => [toLocalDateTime(e.publish_time) ?? '', e]))
     const fresh = rows.filter((r) => !known.has(r.publish_time))
     if (fresh.length) await directus.create(fresh)
     created = fresh.length
+    // MOENV may correct the text of an advisory without a new PublishTime.
+    for (const row of rows) {
+      const cur = known.get(row.publish_time)
+      if (cur && ((cur.subject ?? null) !== row.subject || (cur.content ?? null) !== row.content)) {
+        await directus.update([cur.id], { subject: row.subject, content: row.content, archived: false })
+        updated++
+      }
+    }
   }
 
   const archived = await archiveOld(directus)
@@ -63,7 +74,8 @@ export async function syncAdvisories(env: AdvisoryEnv): Promise<AdvisorySyncResu
     fetched: raw.length,
     rows: rows.length,
     created,
-    unchanged: rows.length - created,
+    updated,
+    unchanged: rows.length - created - updated,
     archived,
     latestPublishTime: rows.reduce<string | null>((max, r) => (max === null || r.publish_time > max ? r.publish_time : max), null),
   }
