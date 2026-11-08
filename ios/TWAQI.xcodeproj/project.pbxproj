@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F0A76D1E0000000000000138 /* WidgetStationChoiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */; };
 		F133A0000000000000000402 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000401 /* PrivacyInfo.xcprivacy */; };
 		F133A0000000000000000302 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000301 /* PrivacyInfo.xcprivacy */; };
 		F133A0000000000000000202 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F133A0000000000000000201 /* PrivacyInfo.xcprivacy */; };
@@ -303,6 +304,8 @@
 		D6BECCE6B239A731788B171C /* AqiForecastStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E425F835864C0736F1EB0969 /* AqiForecastStore.swift */; };
 		D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */; };
 		8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02741CF262046B02509EB59F /* AreaForecastView.swift */; };
+		F117A0000000000000000002 /* TaiwanPlaceNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = F117A0000000000000000001 /* TaiwanPlaceNames.swift */; };
+		F117A0000000000000000004 /* TaiwanPlaceNamesTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F117A0000000000000000003 /* TaiwanPlaceNamesTable.swift */; };
 		01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */; };
 		408DACCA3CD6CF52D33A3877 /* StationCamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */; };
 		6364F1BED5FABB5F78380B82 /* PollutantCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */; };
@@ -420,6 +423,7 @@
 		A8544981F11CA37788E5429C /* WidgetExtraLargeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetExtraLargeTests.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000001 /* WidgetPaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPaging.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000004 /* WidgetPagingIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingIntents.swift; sourceTree = "<group>"; };
+		F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStationChoiceTests.swift; sourceTree = "<group>"; };
 		F0A76D1E0000000000000006 /* WidgetPagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPagingTests.swift; sourceTree = "<group>"; };
 		3505CC0C51F7E03C8EF7D305 /* AirQualityAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityAnswer.swift; sourceTree = "<group>"; };
 		30C4BFA857FEEE037C6C242B /* StationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationEntity.swift; sourceTree = "<group>"; };
@@ -616,6 +620,8 @@
 		E425F835864C0736F1EB0969 /* AqiForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AqiForecastStore.swift; sourceTree = "<group>"; };
 		37FAA59E1A0126AD90AA73A4 /* StationCamView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamView.swift; sourceTree = "<group>"; };
 		02741CF262046B02509EB59F /* AreaForecastView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AreaForecastView.swift; sourceTree = "<group>"; };
+		F117A0000000000000000001 /* TaiwanPlaceNames.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TaiwanPlaceNames.swift; sourceTree = "<group>"; };
+		F117A0000000000000000003 /* TaiwanPlaceNamesTable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TaiwanPlaceNamesTable.swift; sourceTree = "<group>"; };
 		4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnDeviceTranslation.swift; sourceTree = "<group>"; };
 		8EA8ADEAC17667DBE0AA43A6 /* StationCamTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationCamTests.swift; sourceTree = "<group>"; };
 		4192DDD8C0DE73883D28B72B /* PollutantCacheTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PollutantCacheTests.swift; sourceTree = "<group>"; };
@@ -801,6 +807,7 @@
 				B8F081D3A01571EF64C6E139 /* PublishTimeTests.swift */,
 				CB032C4EF1224FBBA5C5EA5B /* WidgetRelevanceTests.swift */,
 				F0A76D1E0000000000000006 /* WidgetPagingTests.swift */,
+				F0A76D1E0000000000000137 /* WidgetStationChoiceTests.swift */,
 			);
 			path = TWAQITests;
 			sourceTree = SOURCE_ROOT;
@@ -1041,6 +1048,8 @@
 				9E34B4F52371B78600B6E600 /* IAPManager.swift */,
 				9E942E3B2372CA4B0010915D /* LocaleExtension.swift */,
 				4423A411B7699945286E1E56 /* OnDeviceTranslation.swift */,
+				F117A0000000000000000003 /* TaiwanPlaceNamesTable.swift */,
+				F117A0000000000000000001 /* TaiwanPlaceNames.swift */,
 				9EA1BC682365CC0F008C3942 /* NumberExtensions.swift */,
 				B7E1D2A40C5F4A6B8D9E0F01 /* PushService.swift */,
 				B7E1D2A40C5F4A6B8D9E0F02 /* DirectusPushMirror.swift */,
@@ -1632,6 +1641,7 @@
 				770E61E5B1EA99B320C16058 /* AirQualityIntentTests.swift in Sources */,
 				8238948F2B134126BC272BA3 /* WidgetRelevanceTests.swift in Sources */,
 				F0A76D1E0000000000000007 /* WidgetPagingTests.swift in Sources */,
+				F0A76D1E0000000000000138 /* WidgetStationChoiceTests.swift in Sources */,
 				FEC3DE3DAF39B017A6EFB46A /* OnboardingTests.swift in Sources */,
 				F0A45D1E0000000000000002 /* StoreReviewTests.swift in Sources */,
 				F0A47D1E0000000000000014 /* DeepLinkTests.swift in Sources */,
@@ -1756,6 +1766,8 @@
 				D2B5A33137956A6CCDEDDED4 /* StationCamView.swift in Sources */,
 				8A3DB3FBF207054E64124DC1 /* AreaForecastView.swift in Sources */,
 				01BE869ED763860B13699590 /* OnDeviceTranslation.swift in Sources */,
+				F117A0000000000000000004 /* TaiwanPlaceNamesTable.swift in Sources */,
+				F117A0000000000000000002 /* TaiwanPlaceNames.swift in Sources */,
 				48DC54120D58FC203EF47240 /* StationCamStore.swift in Sources */,
 				39CCFA9943F8452A6A2B7C61 /* StationWeatherView.swift in Sources */,
 				DB2ECB91C504CBC9DC664A7E /* StationWeatherStore.swift in Sources */,
