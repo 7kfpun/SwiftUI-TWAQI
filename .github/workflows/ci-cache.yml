@@ -45,6 +45,7 @@ jobs:
     # branch would fill caches that only that branch can read.
     if: github.ref == 'refs/heads/master'
     runs-on: macos-latest
+    timeout-minutes: 60
     permissions:
       contents: read
     env:
@@ -54,6 +55,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # A copy of ci.yml's step (the placeholders the PR job builds with).
       # tools/ci_test_level.py check fails when the two differ.
