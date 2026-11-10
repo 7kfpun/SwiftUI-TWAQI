@@ -6,7 +6,7 @@
 Fails when:
   - the head branch does not start with feature/ (CI, review and the unit tests
     only run for feature/ branches, so anything else would merge unchecked);
-  - neither the branch nor the title names a Linear ticket (FOX-nn);
+  - neither the branch nor the title names a ticket (FOX-nn in Linear, TWAQ-nn in Plan);
   - the body says the PR is stacked ("Depends on #N", "Stacked on #N",
     "Merge after #N") and any PR named there is not merged yet.
 
@@ -19,7 +19,7 @@ import re
 import subprocess
 import sys
 
-TICKET = re.compile(r"\bFOX-\d+\b", re.I)
+TICKET = re.compile(r"\b(?:FOX|TWAQ)-\d+\b", re.I)
 DEPENDENCY_LINE = re.compile(r"^[\s>*_-]*(depends on|stacked on|merge after)\b(.*)$", re.I | re.M)
 
 
@@ -45,7 +45,7 @@ def check(pull, lookup):
     if not head_ref.startswith("feature/"):
         errors.append(f"Head branch '{head_ref}' must start with feature/ (CI and review only run on feature/ branches).")
     if not (TICKET.search(head_ref) or TICKET.search(title)):
-        errors.append("Name the Linear ticket (FOX-nn) in the branch name or the PR title.")
+        errors.append("Name the ticket (FOX-nn in Linear, TWAQ-nn in Plan) in the branch name or the PR title.")
     for number in dependencies(body):
         other = lookup(number)
         if other is None:
