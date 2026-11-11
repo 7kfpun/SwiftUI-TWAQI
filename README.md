@@ -149,7 +149,7 @@ cp secrets.example.properties secrets.properties   # then fill in API_DOMAIN, MA
 
 - Work on `feature/fox-nn-*` branches and open a PR to `master`, as a draft until it is ready. Flow: Orca codes → another agent's review → user greenlight → squash-merge → TestFlight / App Store / Firebase only when the ticket names them. Full map of checks and deploy paths: [`docs/ci-cd-guardrails.md`](docs/ci-cd-guardrails.md).
 - On every PR to `master`, drafts included:
-  - **PR policy** — `feature/` branch, `FOX-nn` (Linear) or `TWAQ-nn` (Plan) in the branch or title, `Depends on #N` merged first, and version / build numbers / What's New consistent.
+  - **PR policy** — `feature/` branch, `Depends on #N` merged first, and version / build numbers / What's New consistent.
   - **Secret files** — fails on `debug.xcconfig`, `release.xcconfig`, `GoogleService-Info.plist`, `.env`, `.dev.vars`, signing keys, force-added gitignored files or real-looking secret values in the diff.
   - **LGTM** (status) — pending until a reviewer's LGTM covers the head commit: a pull request review or comment whose first line is `**<Name> LGTM**`, with any reviewer name (or none). A later `**<Name> — changes needed**` sets it back to pending. The advisory Claude Code Review bot doesn't count.
 - On a **non-draft** PR from `feature/*` to `master`, GitHub also runs:

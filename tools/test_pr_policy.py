@@ -7,24 +7,23 @@ def pull(ref, title="", body=""):
     return {"head": {"ref": ref}, "title": title, "body": body}
 
 
-class TicketKeyTests(unittest.TestCase):
-    def errors(self, ref, title=""):
-        return check(pull(ref, title), lambda n: None)[0]
+class PolicyTests(unittest.TestCase):
+    def test_feature_branch_needs_no_ticket(self):
+        errors, _ = check(pull("feature/release", "Something"), lambda n: None)
+        self.assertEqual(errors, [])
 
-    def test_linear_key_in_branch(self):
-        self.assertEqual(self.errors("feature/fox-12-thing"), [])
+    def test_non_feature_branch_fails(self):
+        errors, _ = check(pull("fix/thing", "Something"), lambda n: None)
+        self.assertEqual(len(errors), 1)
 
-    def test_plan_key_in_branch(self):
-        self.assertEqual(self.errors("feature/twaq-1-release-3.1.6"), [])
+    def test_stacked_on_unmerged_pr_fails(self):
+        errors, _ = check(pull("feature/a", body="Depends on #5"), lambda n: {"state": "open", "merged_at": None})
+        self.assertEqual(len(errors), 1)
 
-    def test_plan_key_in_title(self):
-        self.assertEqual(self.errors("feature/release", "TWAQ-7: Something"), [])
-
-    def test_no_key_fails(self):
-        self.assertEqual(len(self.errors("feature/release", "Something")), 1)
-
-    def test_other_key_fails(self):
-        self.assertEqual(len(self.errors("feature/abc-1-thing", "ABC-1: Something")), 1)
+    def test_stacked_on_merged_pr_passes(self):
+        errors, notes = check(pull("feature/a", body="Depends on #5"), lambda n: {"state": "closed", "merged_at": "x"})
+        self.assertEqual(errors, [])
+        self.assertEqual(notes, ["#5 is merged."])
 
 
 if __name__ == "__main__":
