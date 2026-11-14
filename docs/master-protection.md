@@ -34,7 +34,7 @@ plus these:
 | `required_status_checks` | `strict: true` | The branch must be up to date with `master` before merging. Stacked PRs then merge in order, and each one is tested against what is actually on `master`. |
 | required: `Unit tests` | CI | Reports at every level: green in seconds for docs, media, `android/`, `assets/`, `ios/fastlane/`, `web/`, `workers/` and `.github/`-only PRs (other than `ci.yml`); build only for other app changes; build + subset for guarded paths ([ci-cd-guardrails.md](ci-cd-guardrails.md)). |
 | required: `Vulnerability checks` | CI | Fails only on TruffleHog **verified** secrets. osv-scanner and unverified findings are warnings. |
-| required: `PR policy` | PR policy | `feature/` branch, `FOX-nn` in the branch or title, `Depends on #N` merged first, release version/build/What's New consistent. |
+| required: `PR policy` | PR policy | `feature/` branch, `Depends on #N` merged first, release version/build/What's New consistent. |
 | required: `Secret files` | PR policy | No `debug.xcconfig` / `release.xcconfig` / `GoogleService-Info.plist` / `.env` / `.dev.vars` / signing keys, no force-added gitignored files, no real-looking secret values. |
 | required: `Workers` | Workers | One summary check on every PR, green when no Worker changed. |
 | required: `Android` | Android | One check on every PR to `master` (FOX-52): ktlint, Android lint, JVM unit tests and a debug build. Green at once on drafts and when nothing under `android/` or `.github/workflows/android.yml` changed. Added after the FOX-52 merge, see [below](#android-check-fox-52). |
@@ -101,8 +101,8 @@ reviewed the head. The gate script runs from
 `tools/` still deserves a careful read. The user greenlight is a human step (the PR
 template's checkbox), not a check.
 
-`FOX-nn` in the branch or title is enforced by the `PR policy` check, not by a ruleset
-metadata rule.
+The `feature/` branch name and the `Depends on #N` rule are enforced by the `PR policy` check, not by a
+ruleset metadata rule.
 
 ## Apply (after the FOX-38 PR is merged)
 
