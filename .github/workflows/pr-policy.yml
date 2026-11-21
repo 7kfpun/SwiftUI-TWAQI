@@ -35,7 +35,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Branch, ticket and merge order
+      - name: Branch and merge order
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
