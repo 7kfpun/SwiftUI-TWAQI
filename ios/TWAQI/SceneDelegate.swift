@@ -146,12 +146,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Sets the icon's quick actions: "Closest station" and the favourites,
     /// named in the app's language like the Siri and Shortcuts station list.
     private static func refreshQuickActions() {
-        let favourites = StationChoice.choices(
+        let favourites = StationChoice.namedFavourites(
             favouriteIds: WatchStore.favouriteStationIds,
             readings: WatchStore.favouriteReadings,
-            locale: .app,
-            bundle: .appLanguage
-        ).compactMap { choice in choice.stationId.map { (id: $0, name: choice.name) } }
+            locale: .app
+        )
         let closest = Bundle.appLanguage.localizedString(forKey: "QuickAction.closest_station", value: nil, table: nil)
         UIApplication.shared.shortcutItems = QuickActions.items(favourites: favourites, closestTitle: closest).map {
             UIApplicationShortcutItem(

@@ -115,7 +115,6 @@ enum WidgetBridge {
     /// change and once at launch, for a choice made by an older build.
     static func publish(appLanguage: AppLanguage) {
         guard AppLanguage.mirror(appLanguage, to: AppLanguage.shared) else { return }
-        NotificationCenter.default.post(name: QuickActions.didChange, object: nil)
         WidgetCenter.shared.reloadTimelines(ofKind: homeWidgetKind)
         reloadControls()
         updateShortcutStations()
