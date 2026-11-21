@@ -11,7 +11,6 @@ import UIKit
 import FirebaseCore
 import FirebaseMessaging
 import GoogleMaps
-import GoogleMobileAds
 import OneSignal
 import UserNotifications
 
@@ -65,8 +64,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         OneSignalTags.start(launchOptions: launchOptions)
         startPush(application, promptsAtLaunch: onboarding.promptsForPushAtLaunch)
 
-        // Initialize the Google Mobile Ads SDK.
-        MobileAds.shared.start(completionHandler: nil)
+        // The Google Mobile Ads SDK starts from `ConsentManager` once UMP
+        // allows ad requests (FOX-118).
 
         // Initialize Google Map Service
         if let gmsServicesApiKey = getEnv("GMSServicesApiKey") {
