@@ -24,12 +24,9 @@ class DetailsViewModel: ObservableObject {
     @Published var historicalPollutants: HistoricalPollutants = []
 
     /// `historicalPollutants` is the saved copy (`PollutantHistoryCache`),
-    /// because the latest request failed. Not set while the request is still
-    /// on the wire: it may yet succeed.
+    /// or an earlier visit's, because the latest request failed. Not set while
+    /// the request is still on the wire: it may yet succeed.
     @Published private(set) var isShowingCachedHistory = false
-
-    /// `historicalPollutants` came from the saved copy, not from a request.
-    private var historyIsFromCache = false
 
     /// Whether the station has an alert on.
     @Published private(set) var hasAlerts: Bool
@@ -119,7 +116,6 @@ class DetailsViewModel: ObservableObject {
         // Likewise the saved history, so the charts work offline.
         if self.historicalPollutants.isEmpty, let saved = PollutantHistoryCache.shared.readings(stationId: self.stationId) {
             self.historicalPollutants = saved
-            self.historyIsFromCache = true
         }
         self.generation += 1
         let generation = self.generation
@@ -143,7 +139,6 @@ class DetailsViewModel: ObservableObject {
                 }
                 let history = result["data"] as? HistoricalPollutants ?? []
                 self.historicalPollutants = history
-                self.historyIsFromCache = false
                 self.isShowingCachedHistory = false
                 PollutantHistoryCache.shared.save(history, stationId: self.stationId)
                 if let station = self.station {
@@ -155,7 +150,7 @@ class DetailsViewModel: ObservableObject {
             case .failure(let error):
                 AppLog.network.error("station request failed: \(error.localizedDescription)")
                 // Whatever history is on screen is now the last good one.
-                self.isShowingCachedHistory = self.historyIsFromCache
+                self.isShowingCachedHistory = !self.historicalPollutants.isEmpty
                 if isLatest {
                     self.stationLoadFailed = self.station == nil
                 }

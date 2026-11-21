@@ -234,6 +234,7 @@
 "Details.high" = "High";
 "Details.average" = "Average";
 "Details.no_trend_data" = "Not enough readings yet to show a trend";
+"Details.history_verdict_window" = "Based on the last 24 hours";
 "Details.history_range_24h" = "24 h";
 "Details.history_range_7d" = "7 days";
 "Details.history_range_label" = "History range";

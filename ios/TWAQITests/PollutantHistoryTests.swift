@@ -140,6 +140,20 @@ final class PollutantHistoryTests: XCTestCase {
         XCTAssertEqual(series.values, [25])
     }
 
+    func testSectionShowsWhenOnlyTheWeekHasAChart() {
+        // 48 hourly rows: real values 47–24 hours ago, zeros in the newest day.
+        let readings = (0..<48).reversed().map { reading(hoursAgo: $0, pm25: $0 >= 24 ? 10 : 0) }
+
+        XCTAssertFalse(PollutantHistorySeries.make(readings: readings, airIndexType: .pm25, range: .day).isChartable)
+        XCTAssertTrue(PollutantHistorySeries.make(readings: readings, airIndexType: .pm25, range: .week).isChartable)
+        XCTAssertTrue(PollutantHistorySeries.hasChart(readings: readings, airIndexType: .pm25))
+    }
+
+    func testNoSectionWhenNeitherRangeHasAChart() {
+        XCTAssertFalse(PollutantHistorySeries.hasChart(readings: [reading(hoursAgo: 0)], airIndexType: .pm25))
+        XCTAssertFalse(PollutantHistorySeries.hasChart(readings: [], airIndexType: .pm25))
+    }
+
     // MARK: Summary and scrubbing
 
     func testLowestHighestAndLatest() {

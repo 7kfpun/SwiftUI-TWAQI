@@ -30,7 +30,7 @@ struct DetailsHistoryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if dayValues.count >= 2 {
+            if hasChart {
                 // Names what the chart is showing — without it, tapping a
                 // pollutant above changes the bars with nothing to say why.
                 Text(verbatim: airIndexType.toString())
@@ -39,7 +39,9 @@ struct DetailsHistoryView: View {
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
 
-                headline
+                if dayValues.count >= 2 {
+                    headline
+                }
                 rangePicker
                 if series.isChartable {
                     readout
@@ -80,6 +82,13 @@ struct DetailsHistoryView: View {
                     .font(.caption)
                     .fontWeight(.light)
                     .foregroundColor(.secondary)
+
+                // The verdict always judges today; say so beside a week chart.
+                if range == .week {
+                    Text("Details.history_verdict_window")
+                        .font(.caption2.weight(.light))
+                        .foregroundColor(.secondary)
+                }
             }
 
             Spacer()
@@ -134,7 +143,11 @@ struct DetailsHistoryView: View {
                 Spacer()
                 Text(verbatim: axisLabel(at: series.samples.count / 2))
                 Spacer()
-                Text("Details.now")
+                if isLatestHourCurrent {
+                    Text("Details.now")
+                } else {
+                    Text(verbatim: axisLabel(at: series.samples.count - 1))
+                }
             }
             // `.font(_:.weight)` rather than `.fontWeight`, which is iOS 16+.
             .font(.caption2.weight(.light))
@@ -195,6 +208,10 @@ struct DetailsHistoryView: View {
 
     // MARK: - Data
 
+    private var hasChart: Bool {
+        seriesByRange.values.contains { $0.isChartable }
+    }
+
     private var series: PollutantHistorySeries {
         seriesByRange[range] ?? PollutantHistorySeries(range: range, samples: [])
     }
@@ -217,6 +234,13 @@ struct DetailsHistoryView: View {
 
     private var trend: TrendVerdict {
         TrendVerdict(values: dayValues, airIndexType: airIndexType)
+    }
+
+    /// The series ends on the newest reading, which a cached or lagging
+    /// station can place hours back; "Now" is only honest for a current one.
+    private var isLatestHourCurrent: Bool {
+        guard let last = series.samples.last else { return true }
+        return Date().timeIntervalSince(last.time) < 3 * 3600
     }
 
     private func axisLabel(at index: Int) -> String {

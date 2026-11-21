@@ -238,6 +238,7 @@
 "Details.high" = "最高";
 "Details.average" = "平均";
 "Details.no_trend_data" = "資料還不夠，無法顯示趨勢";
+"Details.history_verdict_window" = "依最近 24 小時判斷";
 "Details.history_range_24h" = "24 小時";
 "Details.history_range_7d" = "7 天";
 "Details.history_range_label" = "歷史範圍";

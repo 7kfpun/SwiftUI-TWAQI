@@ -23,6 +23,10 @@ struct PollutantHistoryChart: View {
     @Binding var selected: Int?
 
     private let height: CGFloat = 110
+    /// Whether the drag in progress is mostly sideways. Decided once, from its
+    /// first movement, so a finger that starts moving up or down hands the
+    /// gesture to the page's scroll view and a sideways one scrubs.
+    @State private var isScrubbing: Bool?
     private let lineWidth: CGFloat = 3
 
     var body: some View {
@@ -35,12 +39,18 @@ struct PollutantHistoryChart: View {
             }
             .contentShape(Rectangle())
             .gesture(
-                DragGesture(minimumDistance: 0)
+                DragGesture(minimumDistance: 6)
                     .onChanged { drag in
-                        guard proxy.size.width > 0 else { return }
+                        if isScrubbing == nil {
+                            isScrubbing = abs(drag.translation.width) > abs(drag.translation.height)
+                        }
+                        guard isScrubbing == true, proxy.size.width > 0 else { return }
                         selected = series.index(atFraction: Double(drag.location.x / proxy.size.width))
                     }
-                    .onEnded { _ in selected = nil }
+                    .onEnded { _ in
+                        isScrubbing = nil
+                        selected = nil
+                    }
             )
         }
         .frame(height: height)
@@ -148,8 +158,10 @@ struct PollutantHistoryChart: View {
     }
 
     private var selectedReading: String {
-        guard let index = selected, series.samples.indices.contains(index) else { return "" }
-        let sample = series.samples[index]
+        // The latest hour when nothing is picked, so the adjustable action
+        // has a value to announce from the start.
+        let sample = selected.flatMap { series.samples.indices.contains($0) ? series.samples[$0] : nil } ?? series.latest
+        guard let sample = sample else { return "" }
         return "\(PollutantHistoryFormat.hour(sample.time)), \(reading(sample))"
     }
 

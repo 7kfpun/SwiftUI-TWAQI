@@ -78,6 +78,15 @@ struct PollutantHistorySeries: Equatable {
         return PollutantHistorySeries(range: range, samples: samples)
     }
 
+    /// Whether the history section has anything to chart: either range has a
+    /// line. A pollutant that reads 0 for the last day but not before it still
+    /// gets its chart, so its 7-day range can be reached.
+    static func hasChart(readings: [HistoricalPollutant], airIndexType: AirIndexTypes) -> Bool {
+        HistoryRange.allCases.contains {
+            make(readings: readings, airIndexType: airIndexType, range: $0).isChartable
+        }
+    }
+
     // MARK: - Reading the series
 
     var values: [Double] { samples.compactMap(\.value) }
