@@ -459,6 +459,26 @@
 "Weather.wind" = "Wind";
 "Weather.temperature %@" = "Temperature %@";
 "Weather.chance_of_rain %@" = "Chance of rain %@";
+
+/* Forecast strip: next 24 h on the station page (TWAQ-12) */
+"Strip.title" = "Next 24 hours";
+"Strip.observed" = "Observed";
+"Strip.forecast" = "Forecast";
+"Strip.now" = "Now";
+"Strip.part.morning" = "Morning";
+"Strip.part.afternoon" = "Afternoon";
+"Strip.part.evening" = "Evening";
+"Strip.part.night" = "Night";
+"Strip.aqi_note" = "Observed readings are hourly. The forecast is the regional daily AQI, not an hourly value.";
+"Strip.weather_note" = "Weather is forecast in 12-hour periods and shown by part of the day, so both parts of a period share one temperature and rain chance.";
+"Strip.loading" = "Loading the forecast";
+"Strip.empty" = "No forecast to show for this station right now.";
+"Strip.empty_offline" = "The forecast couldn't be loaded. Check your connection and try again.";
+"Strip.saved_note" = "Showing saved data";
+"Strip.a11y_observed %d" = "Observed AQI now %d";
+"Strip.a11y_forecast %@ %d" = "Forecast for %1$@: AQI %2$d";
+"Strip.a11y_weather %@ %@ %@ %@" = "%1$@: %2$@, %3$@, chance of rain %4$@";
+"Strip.a11y_day_part %@ %@" = "%1$@ %2$@";
 "Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
 "Weather.station_nearby %@" = "Weather station %@ away";
 "Weather.observed %@" = "observed %@";
