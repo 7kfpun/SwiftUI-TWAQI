@@ -46,13 +46,16 @@ final class PrivacySettingsVisibilityTests: XCTestCase {
         XCTAssertFalse(ConsentManager.showsPrivacyOptions(.unknown))
     }
 
-    /// TWAQ-8: the form is skipped when Pro shows up between `gather` and presenting.
-    func testConsentFormSkippedForProEitherWay() {
-        XCTAssertTrue(ConsentManager.shouldPresentForm(isPro: false, livePro: false))
-        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: true, livePro: true))
-        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: true, livePro: false))
-        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: false, livePro: true),
-                       "Stale free flag at launch, Pro once StoreKit answered")
+    /// TWAQ-8: form and ads start follow the live Pro state, not a cached flag.
+    func testFormAndAdsFollowLivePro() {
+        // Stale free cache, Pro once StoreKit answered: no form, no ads start.
+        XCTAssertFalse(ConsentManager.shouldPresentForm(livePro: true))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: true, canRequestAds: true, didStart: false))
+        // Stale Pro cache, free once StoreKit answered: the form is still reachable.
+        XCTAssertTrue(ConsentManager.shouldPresentForm(livePro: false))
+        XCTAssertTrue(ConsentManager.shouldStartAds(livePro: false, canRequestAds: true, didStart: false))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: false, canRequestAds: false, didStart: false))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: false, canRequestAds: true, didStart: true))
     }
 
     func testHelpSectionFollowsTheRequirement() {

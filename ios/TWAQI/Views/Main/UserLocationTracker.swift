@@ -95,7 +95,8 @@ final class UserLocationTracker: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let latest = locations.last else { return }
+        // A fix that arrives after a stop (revoked, hidden, backgrounded) is dropped.
+        guard running, let latest = locations.last else { return }
         location = latest
         onLocation?(latest)
     }
