@@ -153,6 +153,8 @@ enum WidgetBridge {
     /// Siri's "air at <station>" phrases list "Nearest" and the favourites
     /// by name. Also called once at launch.
     static func updateShortcutStations() {
+        // The icon's quick actions list the same favourites (FOX-138).
+        NotificationCenter.default.post(name: QuickActions.didChange, object: nil)
         if #available(iOS 16.0, *) {
             TWAQIShortcuts.favouritesChanged()
         }
