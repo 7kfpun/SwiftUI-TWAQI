@@ -32,7 +32,7 @@ runs:
     # instead of each PR storing its own ~880 MB copy under the same key.
     - name: Restore Swift packages
       id: spm
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         # Xcode's default spot. The app's "Upload dSYMs to Crashlytics" phase
         # runs DerivedData/SourcePackages/checkouts/firebase-ios-sdk/...
@@ -43,7 +43,7 @@ runs:
 
     - name: Restore Pods
       id: pods
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: ios/Pods
         # Podfile too: its post_install hook patches the pods' sources.
@@ -58,7 +58,7 @@ runs:
     # the cached Pods / package products can be reused.
     - name: Restore DerivedData
       id: deriveddata
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: |
           ${{ runner.temp }}/DerivedData/Build
@@ -135,21 +135,21 @@ runs:
     # skipped with a warning by actions/cache/save, not a failure.
     - name: Save Swift packages
       if: steps.cached.outputs.skip != 'true' && steps.spm.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ${{ runner.temp }}/DerivedData/SourcePackages
         key: ${{ steps.spm.outputs.cache-primary-key }}
 
     - name: Save Pods
       if: steps.cached.outputs.skip != 'true' && steps.pods.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ios/Pods
         key: ${{ steps.pods.outputs.cache-primary-key }}
 
     - name: Save DerivedData
       if: steps.cached.outputs.skip != 'true' && steps.deriveddata.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: |
           ${{ runner.temp }}/DerivedData/Build
