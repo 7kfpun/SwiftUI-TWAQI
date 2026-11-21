@@ -57,7 +57,7 @@ struct FavouriteListView: View {
         List {
             if viewModel.isShowingLastGood {
                 Section {
-                    OfflineNotice()
+                    OfflineNotice(retry: getData)
                 }
             }
 
@@ -73,6 +73,7 @@ struct FavouriteListView: View {
                             reading: .init(
                                 aqi: pollutant.aqi,
                                 publishTime: pollutant.publishTime,
+                                isOffline: viewModel.isShowingLastGood,
                                 pollutants: Self.keyPollutants.map {
                                     .init(type: $0, value: pollutant.getValue(airIndexType: $0))
                                 }
@@ -86,6 +87,10 @@ struct FavouriteListView: View {
             }
         }
         .listStyle(InsetGroupedListStyle())
+        .refreshable {
+            getData()
+            await viewModel.refreshGate.wait()
+        }
     }
 
     /// Shown instead of the list: no favourites, or saved ones that can't
@@ -100,9 +105,7 @@ struct FavouriteListView: View {
         } else if viewModel.loadFailed {
             OfflineEmptyStateView(retry: getData)
         } else {
-            ProgressView()
-                .frame(maxWidth: .infinity)
-                .padding(.top, 64)
+            SkeletonStationList(rows: min(settings.savedFavouriteStations.count, 6))
         }
     }
 

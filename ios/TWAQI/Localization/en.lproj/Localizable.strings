@@ -234,6 +234,18 @@
 "Details.high" = "High";
 "Details.average" = "Average";
 "Details.no_trend_data" = "Not enough readings yet to show a trend";
+"Details.history_verdict_window" = "Based on the last 24 hours";
+"Details.history_range_24h" = "24 h";
+"Details.history_range_7d" = "7 days";
+"Details.history_range_label" = "History range";
+"Details.history_no_reading" = "No reading";
+"Details.history_updated %@" = "Last updated %@";
+"Details.history_offline" = "Offline: showing saved history";
+"Details.history_short %d" = "Only the last %d hours of history are available so far.";
+"Details.history_span_day" = "last 24 hours";
+"Details.history_span_week" = "last 7 days";
+"Details.history_span_hours %d" = "last %d hours";
+"Details.history_a11y %@ %@ %@ %@ %@" = "%1$@, %2$@. Lowest %3$@, highest %4$@, latest %5$@. Swipe up or down to step through the hours.";
 "Details.not_reporting" = "No live readings";
 "Details.not_reporting_message" = "This station isn't reporting right now. It may be offline for maintenance, or retired. Stations nearby are on the map.";
 "Details.pollutants" = "Pollutants";
@@ -495,6 +507,12 @@
 "Offline.updated_ago %@" = "Offline · updated %@";
 "Offline.nothing_saved" = "Can't connect, and there's nothing saved to show. Check your connection and try again.";
 "Offline.retry" = "Try Again";
+"Offline.badge" = "Offline";
+"Offline.card_unavailable" = "Can't load readings. Check your connection.";
+"Freshness.stale_updated_ago %@" = "Updated %@ · may be out of date";
+"Freshness.stale_short %@" = "Updated %@ · outdated";
+"Freshness.updated_ago %@" = "Updated %@";
+"Loading.label" = "Loading";
 
 /* Welcome flow (FOX-34) */
 "Help.welcome" = "Getting started";

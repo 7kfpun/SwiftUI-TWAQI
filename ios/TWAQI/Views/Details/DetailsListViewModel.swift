@@ -16,6 +16,9 @@ class DetailsListViewModel: ObservableObject {
     /// The latest request failed and there was no saved list to show.
     @Published var loadFailed = false
 
+    /// Held by pull-to-refresh until the request answers.
+    let refreshGate = RefreshGate()
+
     private(set) lazy var getData: () -> Void = {
         let countryCode = Self.countryCode
 
@@ -27,6 +30,7 @@ class DetailsListViewModel: ObservableObject {
 
         self.loadFailed = false
         APIManager.getStations(countryCode: countryCode) { result in
+            defer { self.refreshGate.finish() }
             switch result {
             case .success(let stations):
                 guard !stations.isEmpty, stations != self.stations else { return }

@@ -30,6 +30,8 @@ final class ClosestStationView: UIControl {
     private var weatherRainLabel: UILabel!
     private var weatherStationLabel: UILabel!
 
+    private var stack: UIStackView!
+    private var skeletonView: UIView!
     private var label: UILabel!
     private var localityLabel: UILabel!
     private var subLabel: UILabel!
@@ -81,6 +83,34 @@ final class ClosestStationView: UIControl {
         }
     }
 
+    /// No reading has arrived yet: grey bars where the name, status and value
+    /// will be, rather than an empty card (TWAQ-19).
+    var isLoading = false {
+        didSet {
+            guard isLoading != oldValue else { return }
+            skeletonView.isHidden = !isLoading
+            stack.isHidden = isLoading
+            if isLoading { startSkeletonPulse() } else { skeletonView.layer.removeAllAnimations() }
+        }
+    }
+
+    /// The request failed and nothing was saved: says so in plain words.
+    func showUnavailable() {
+        isLoading = false
+        label.text = "Offline.card_unavailable".localized
+        localityLabel.isHidden = true
+        subLabel.text = nil
+        updatedLabel.isHidden = true
+    }
+
+    private func startSkeletonPulse() {
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        skeletonView.alpha = 1
+        UIView.animate(withDuration: 0.9, delay: 0, options: [.repeat, .autoreverse, .allowUserInteraction]) {
+            self.skeletonView.alpha = 0.45
+        }
+    }
+
     private func updateUpdatedLabel() {
         if let timelineContext, !timelineContext.isEmpty {
             updatedLabel.isHidden = false
@@ -96,13 +126,20 @@ final class ClosestStationView: UIControl {
             return
         }
 
-        updatedLabel.textColor = .secondaryLabel
         guard let publishTime = publishTime, !publishTime.isEmpty else {
+            updatedLabel.textColor = .secondaryLabel
             updatedLabel.text = nil
             updatedLabel.isHidden = true
             return
         }
         updatedLabel.isHidden = false
+        // Online, but published longer ago than a fresh reading can be.
+        if ReadingFreshness.decide(publishTime: publishTime, isFromCache: false) == .stale {
+            updatedLabel.text = String(format: "Freshness.stale_short %@".localized, ReadingFreshness.ageText(of: publishTime))
+            updatedLabel.textColor = .systemOrange
+            return
+        }
+        updatedLabel.textColor = .secondaryLabel
         updatedLabel.text = "\("Details.last_updated".localized) \(publishTime.asPublishTime)"
     }
 
@@ -280,7 +317,7 @@ final class ClosestStationView: UIControl {
         }
 
         // MARK: Left column — identity
-        let stack = UIStackView()
+        stack = UIStackView()
         stack.isUserInteractionEnabled = false
         stack.axis = .vertical
         stack.alignment = .leading
@@ -293,6 +330,7 @@ final class ClosestStationView: UIControl {
         }
 
         label = UILabel()
+        label.numberOfLines = 2
         label.font = .systemFont(ofSize: 15, weight: .semibold)
         stack.addArrangedSubview(label)
 
@@ -311,6 +349,34 @@ final class ClosestStationView: UIControl {
         updatedLabel.textColor = .secondaryLabel
         stack.addArrangedSubview(updatedLabel)
         stack.setCustomSpacing(5, after: subLabel)
+
+        // MARK: Skeleton — shown in place of both columns while loading
+        skeletonView = UIView()
+        skeletonView.isHidden = true
+        skeletonView.isAccessibilityElement = true
+        skeletonView.accessibilityLabel = "Loading.label".localized
+        addSubview(skeletonView)
+        skeletonView.snp.makeConstraints { (make) -> Void in
+            make.top.right.bottom.equalTo(rightView)
+            make.left.equalTo(self)
+        }
+        func bar(width: CGFloat, height: CGFloat, radius: CGFloat) -> UIView {
+            let bar = UIView()
+            bar.backgroundColor = .quaternarySystemFill
+            bar.layer.cornerRadius = radius
+            skeletonView.addSubview(bar)
+            return bar
+        }
+        let nameBar = bar(width: 110, height: 14, radius: 4)
+        nameBar.snp.makeConstraints { $0.left.equalTo(skeletonView).offset(12); $0.centerY.equalTo(skeletonView).offset(-14); $0.width.equalTo(110); $0.height.equalTo(14) }
+        let statusBar = bar(width: 80, height: 12, radius: 4)
+        statusBar.snp.makeConstraints { $0.left.equalTo(skeletonView).offset(12); $0.top.equalTo(nameBar.snp.bottom).offset(8); $0.width.equalTo(80); $0.height.equalTo(12) }
+        let timeBar = bar(width: 60, height: 10, radius: 4)
+        timeBar.snp.makeConstraints { $0.left.equalTo(skeletonView).offset(12); $0.top.equalTo(statusBar.snp.bottom).offset(8); $0.width.equalTo(60); $0.height.equalTo(10) }
+        let pillBar = bar(width: 56, height: 24, radius: 6)
+        pillBar.snp.makeConstraints { $0.top.equalTo(skeletonView).offset(12); $0.right.equalTo(skeletonView).offset(-8); $0.width.equalTo(56); $0.height.equalTo(24) }
+        let faceBar = bar(width: 36, height: 36, radius: 18)
+        faceBar.snp.makeConstraints { $0.top.equalTo(pillBar.snp.bottom).offset(8); $0.centerX.equalTo(pillBar); $0.width.equalTo(36); $0.height.equalTo(36) }
 
         // MARK: Chevron: the card opens the details panel
         chevron = UIImageView(image: UIImage(

@@ -57,6 +57,10 @@ struct DetailsListView: View {
             }
         }
         .listStyle(InsetGroupedListStyle())
+        .refreshable {
+            getData()
+            await viewModel.refreshGate.wait()
+        }
     }
 
     /// Matched stations bucketed by air-quality region, regions in first-seen
