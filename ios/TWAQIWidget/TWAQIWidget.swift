@@ -234,6 +234,8 @@ struct ReadingProvider: AppIntentTimelineProvider {
         let key = widgetKey(family: family, configuration: configuration)
         var entry = ReadingEntry(date: date, reading: leading, airIndexType: configuredIndex, relevance: relevance)
         guard listsFavourites(in: family) else {
+            // The rectangular Lock Screen widget carries a temperature.
+            applyWeather(to: &entry, family: family, isPreview: isPreview, weatherFile: weatherFile, date: date)
             // Extra large is Pro and shows one station in detail (FOX-72).
             if WidgetFamilyRules.showsStationDetail(family) {
                 entry.isLocked = isLocked
@@ -271,24 +273,30 @@ struct ReadingProvider: AppIntentTimelineProvider {
             guard id != entry.reading?.stationId, seen.insert(id).inserted else { return nil }
             return readings[id]
         }
-        if WidgetFamilyRules.showsWeather(family) {
-            let shown = entry.reading
-            entry.weather = WidgetWeather.make(
-                lat: shown?.latitude, lon: shown?.longitude, countyLocal: shown?.countyLocal,
-                windDirection: shown?.windDirection, windSpeed: shown?.windSpeed,
-                in: weatherFile ?? WidgetWeatherCache.shared?.load(), now: date
-            )
-            // The gallery shows what the size can do, with and without weather.
-            if entry.weather == nil, isPreview, shown?.stationId == 0 {
-                entry.weather = .placeholder
-            }
-        }
+        applyWeather(to: &entry, family: family, isPreview: isPreview, weatherFile: weatherFile, date: date)
 
         // The gallery shows what the size can do, even before any favourite.
         if entry.favourites.isEmpty, isPreview {
             entry.favourites = WatchReading.placeholderFavourites
         }
         return entry
+    }
+
+    /// The weather at the shown station, for the families that carry it.
+    private static func applyWeather(
+        to entry: inout ReadingEntry, family: WidgetFamily, isPreview: Bool, weatherFile: WeatherFile?, date: Date
+    ) {
+        guard WidgetFamilyRules.showsWeather(family) else { return }
+        let shown = entry.reading
+        entry.weather = WidgetWeather.make(
+            lat: shown?.latitude, lon: shown?.longitude, countyLocal: shown?.countyLocal,
+            windDirection: shown?.windDirection, windSpeed: shown?.windSpeed,
+            in: weatherFile ?? WidgetWeatherCache.shared?.load(), now: date
+        )
+        // The gallery shows what the size can do, with and without weather.
+        if entry.weather == nil, isPreview, shown?.stationId == 0 {
+            entry.weather = .placeholder
+        }
     }
 
     func placeholder(in context: Context) -> ReadingEntry {
@@ -570,6 +578,7 @@ struct ReadingWidgetView: View {
                     .monospacedDigit()
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Color(status.getForegroundColor()))
+                smallWeather(foreground: Color(status.getForegroundColor()))
                 Spacer(minLength: 0)
                 Text(reading.displayName)
                     .font(.caption2)
@@ -652,9 +661,17 @@ struct ReadingWidgetView: View {
                         .minimumScaleFactor(0.5)
                     Text(verbatim: "\(type.toString()) \(value)")
                         .monospacedDigit()
-                    Text(reading.displayName)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(reading.displayName)
+                            .lineLimit(1)
+                        if let weather = entry.weather, weather.temperature != nil {
+                            Spacer(minLength: 2)
+                            Text(verbatim: WidgetWeather.temperatureText(weather.temperature))
+                                .monospacedDigit()
+                                .accessibilityLabel(Text("Widget.weather_label \(weather.spokenText(chinese: Locale.isChinese))"))
+                        }
+                    }
+                    .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -746,10 +763,41 @@ struct ReadingWidgetView: View {
             .padding(.vertical, 6)
             .background(Color(status.getColor()), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            favouriteRows(limit: 2, showsStatus: false)
+            smallWeather(foreground: .secondary)
+                .padding(.horizontal, 8)
+            // The weather line takes the room of one favourite.
+            favouriteRows(limit: entry.weather == nil ? 2 : 1, showsStatus: false)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// Small: icon, temperature and chance of rain on one line. Nothing when
+    /// there is no weather, so the favourites keep the room.
+    @ViewBuilder
+    private func smallWeather<S: ShapeStyle>(foreground: S) -> some View {
+        if let weather = entry.weather {
+            HStack(spacing: 4) {
+                Image(systemName: weather.symbol)
+                    .symbolRenderingMode(.multicolor)
+                    .accessibilityHidden(true)
+                Text(verbatim: weather.briefText)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .font(.caption2)
+            .foregroundStyle(foreground)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(weatherLabel(weather))
+        }
+    }
+
+    /// 「Weather: 24° · 多雲 · …」, with the chance of rain when there is one.
+    private func weatherLabel(_ weather: WidgetWeather) -> Text {
+        let spoken = weather.spokenText(chinese: Locale.isChinese)
+        guard let chance = weather.chanceOfRain else { return Text("Widget.weather_label \(spoken)") }
+        return Text("Widget.weather_chance_label \(spoken) \(WidgetWeather.percentText(chance))")
     }
 
     private func mediumWithFavourites(_ reading: WatchReading) -> some View {
@@ -1238,6 +1286,27 @@ private extension ReadingEntry {
 } timeline: {
     ReadingEntry.preview()
     ReadingEntry.preview(favourites: [])
+    ReadingEntry.preview(weather: nil)
+}
+
+#Preview("Lock Screen · circular", as: .accessoryCircular) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
+    ReadingEntry(date: Date(), reading: nil, airIndexType: .aqi)
+}
+
+#Preview("Lock Screen · rectangular", as: .accessoryRectangular) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi, weather: .placeholder)
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
+}
+
+#Preview("Lock Screen · inline", as: .accessoryInline) {
+    TWAQIWidget()
+} timeline: {
+    ReadingEntry(date: Date(), reading: .placeholder, airIndexType: .aqi)
 }
 
 #Preview("Medium", as: .systemMedium) {
