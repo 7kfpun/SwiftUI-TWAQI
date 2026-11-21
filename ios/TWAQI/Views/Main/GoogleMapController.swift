@@ -6,6 +6,7 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import Combine
 import CoreLocation
 import GoogleMaps
 import SnapKit
@@ -59,11 +60,18 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// down when the banner goes away.
     private var bottomBarBottom: Constraint?
     private var proObserver: NSObjectProtocol?
-    private var isProLayout = false
+    private var onboardingObserver: NSObjectProtocol?
+    private var hasBannerLayout = false
+    private var consentObserver: AnyCancellable?
 
     /// Gap between the index bar and the tab bar, plus the banner when shown.
-    private static func bannerClearance(isPro: Bool) -> CGFloat {
-        isPro ? -10 : -(AdBannerView.height + 10)
+    private static func bannerClearance(hasBanner: Bool) -> CGFloat {
+        hasBanner ? -(AdBannerView.height + 10) : -10
+    }
+
+    /// A banner is on screen only for free users UMP lets ask for ads.
+    private var hasBanner: Bool {
+        AdBannerView.reservesSpace(isPro: defaults.bool(forKey: "pro"), canRequestAds: ConsentManager.shared.canRequestAds)
     }
 
     var currentLatitude: Double = GoogleMapViewController.initialCamera.target.latitude
@@ -307,6 +315,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             // republish to the widgets, which must keep the live reading.
             renderMarkers()
             loadClosestStationView()
+            updateCenterWeather()
         }
     }
 
@@ -488,7 +497,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
             make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
             make.width.equalTo(ClosestStationView.preferredSize.width)
-            make.height.equalTo(ClosestStationView.preferredSize.height)
+            closestStationHeight = make.height.equalTo(ClosestStationView.preferredSize.height).constraint
         }
 
         // MARK: airStatusesView
@@ -501,8 +510,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(32)
         }
 
-        let isPro = defaults.bool(forKey: "pro")
-        isProLayout = isPro
+        let hasBanner = self.hasBanner
+        hasBannerLayout = hasBanner
         let airIndexTypeSelected = defaults.string(forKey: "airIndexTypeSelected")
             .flatMap { AirIndexTypes(rawValue: $0) } ?? .aqi
 
@@ -525,7 +534,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.addSubview(timelineView)
         timelineView.snp.makeConstraints { (make) -> Void in
             bottomBarBottom = make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-                .offset(Self.bannerClearance(isPro: isPro)).constraint
+                .offset(Self.bannerClearance(hasBanner: hasBanner)).constraint
             make.height.equalTo(MapTimelineView.preferredHeight)
             make.centerX.equalTo(view.safeAreaLayoutGuide.snp.centerX)
             make.width.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.width).offset(-30)
@@ -792,6 +801,46 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    private var closestStationHeight: Constraint?
+    private var weatherWorkItem: DispatchWorkItem?
+
+    /// `mapView(_:idleAt:)` fires repeatedly while the camera settles, so the
+    /// weather for the centre is looked up once it has been still for a moment.
+    func scheduleCenterWeather() {
+        weatherWorkItem?.cancel()
+        let item = DispatchWorkItem { [weak self] in self?.updateCenterWeather() }
+        weatherWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: item)
+    }
+
+    /// Weather is the current reading, so it is hidden while the timeline is
+    /// scrubbed back. `StationWeatherStore` answers from its saved file when
+    /// the request fails, and with nil (row hidden) when there is none: the
+    /// card is never blocked on it.
+    private func updateCenterWeather() {
+        guard timelineHoursAgo == 0 else {
+            showCenterWeather(nil)
+            return
+        }
+        StationWeatherStore.shared.weather { [weak self] file in
+            guard let self = self else { return }
+            guard self.timelineHoursAgo == 0 else { return }
+            self.showCenterWeather(file.flatMap {
+                MapCenterWeather.make(lat: self.currentLatitude, lon: self.currentLongitude, in: $0)
+            })
+        }
+    }
+
+    private func showCenterWeather(_ weather: MapCenterWeather?) {
+        guard weather != closestStationView.weather else { return }
+        closestStationView.weather = weather
+        let height = weather == nil
+            ? ClosestStationView.preferredSize.height
+            : ClosestStationView.heightWithWeather
+        closestStationHeight?.update(offset: height)
+        view.layoutIfNeeded()
+    }
+
     func loadClosestStationView() {
         if let livePollutant = self.closestPollutant {
             let closestPollutant = displayedPollutant(livePollutant).pollutant
@@ -847,6 +896,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             self?.updateBannerClearance()
         }
 
+        // Declining consent removes the banner too, and UMP answers after launch.
+        // `$canRequestAds` publishes before the value is set, so re-read next turn.
+        consentObserver = ConsentManager.shared.$canRequestAds
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateBannerClearance() }
+
         startRefreshTimer()
 
         foregroundObserver = NotificationCenter.default.addObserver(
@@ -897,10 +952,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
 
     private func updateBannerClearance() {
-        let isPro = defaults.bool(forKey: "pro")
-        guard isPro != isProLayout else { return }
-        isProLayout = isPro
-        bottomBarBottom?.update(offset: Self.bannerClearance(isPro: isPro))
+        let hasBanner = self.hasBanner
+        guard hasBanner != hasBannerLayout else { return }
+        hasBannerLayout = hasBanner
+        bottomBarBottom?.update(offset: Self.bannerClearance(hasBanner: hasBanner))
         UIView.animate(withDuration: 0.25) { self.view.layoutIfNeeded() }
     }
 
@@ -1002,6 +1057,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.currentLongitude = longitude
         checkClosestCountry(latitude: latitude, longitude: longitude)
         checkClosestStation(latitude: latitude, longitude: longitude)
+        scheduleCenterWeather()
 
         // Panned back in time and on to new stations: fetch theirs too.
         if timelineHoursAgo > 0 {

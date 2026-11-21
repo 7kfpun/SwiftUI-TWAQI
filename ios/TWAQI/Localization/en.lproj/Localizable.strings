@@ -58,6 +58,8 @@
 "Help.ad_free" = "Remove ads & get complication numbers";
 "Help.restore_purchase" = "Restore purchase";
 "Help.contact_us" = "Contact us";
+"Help.privacy" = "Privacy";
+"Help.privacy_settings" = "Privacy settings";
 "Help.interested_to_be_our_business_partner" = "Interested to be our Business Partner?";
 "Help.feedback_or_contact_us" = "Feedback / Contact us";
 "Help.definition" = "Understanding the readings";
@@ -443,6 +445,8 @@
 "Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
 "Weather.station_nearby %@" = "Weather station %@ away";
 "Weather.observed %@" = "observed %@";
+"Weather.map_station %@ %@" = "%1$@ · %2$@";
+"Weather.map_station_nearby %@" = "%@ away";
 /* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
 "Weather.wx.1" = "Clear";
 "Weather.wx.2" = "Mostly clear";
