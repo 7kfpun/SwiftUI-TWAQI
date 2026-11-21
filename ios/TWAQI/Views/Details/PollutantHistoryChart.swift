@@ -46,6 +46,8 @@ struct PollutantHistoryChart: View {
         .frame(height: height)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: accessibilitySummary))
+        // What swiping up or down landed on: the hour and its reading.
+        .accessibilityValue(Text(verbatim: selectedReading))
         .accessibilityAdjustableAction { direction in
             step(direction)
         }
@@ -143,6 +145,12 @@ struct PollutantHistoryChart: View {
             reading(series.highest),
             reading(series.latest)
         )
+    }
+
+    private var selectedReading: String {
+        guard let index = selected, series.samples.indices.contains(index) else { return "" }
+        let sample = series.samples[index]
+        return "\(PollutantHistoryFormat.hour(sample.time)), \(reading(sample))"
     }
 
     private func reading(_ sample: HistorySample?) -> String {

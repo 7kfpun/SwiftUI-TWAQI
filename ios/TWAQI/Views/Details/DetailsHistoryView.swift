@@ -21,6 +21,10 @@ struct DetailsHistoryView: View {
     /// The readings are the saved copy, because the latest request failed.
     var isCached = false
 
+    /// Both ranges, built once per set of readings: a drag redraws the view
+    /// on every move and shouldn't re-parse a week of times each time.
+    private let seriesByRange: [HistoryRange: PollutantHistorySeries]
+
     @State private var range: HistoryRange = .day
     @State private var selected: Int?
 
@@ -192,13 +196,13 @@ struct DetailsHistoryView: View {
     // MARK: - Data
 
     private var series: PollutantHistorySeries {
-        PollutantHistorySeries.make(readings: historicalPollutants, airIndexType: airIndexType, range: range)
+        seriesByRange[range] ?? PollutantHistorySeries(range: range, samples: [])
     }
 
     /// Readings of the last 24 hours, for the verdict: it judges today, whichever
     /// range is on screen.
     private var dayValues: [Double] {
-        PollutantHistorySeries.make(readings: historicalPollutants, airIndexType: airIndexType, range: .day).values
+        seriesByRange[.day]?.values ?? []
     }
 
     private var values: [Double] { series.values }
@@ -233,6 +237,9 @@ struct DetailsHistoryView: View {
         self.historicalPollutants = historicalPollutants
         self.airIndexType = airIndexType
         self.isCached = isCached
+        self.seriesByRange = Dictionary(uniqueKeysWithValues: HistoryRange.allCases.map {
+            ($0, PollutantHistorySeries.make(readings: historicalPollutants, airIndexType: airIndexType, range: $0))
+        })
     }
 }
 
