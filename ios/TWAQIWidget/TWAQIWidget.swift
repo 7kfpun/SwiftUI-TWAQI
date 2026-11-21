@@ -769,11 +769,21 @@ struct ReadingWidgetView: View {
 
             smallWeather(foreground: .secondary, onStatusFill: false)
                 .padding(.horizontal, 8)
-            // The weather line takes the room of one favourite.
-            favouriteRows(limit: entry.weather == nil ? 2 : 1, showsStatus: false)
+            smallChips(foreground: .secondary)
+                .padding(.horizontal, 8)
+            // The weather line takes the room of one favourite, and the chips
+            // line (TWAQ-14) the room of the other.
+            favouriteRows(limit: favouriteLimit, showsStatus: false)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// How many favourites the small widget keeps under the station: two
+    /// alone, one with the weather line, none when the chips line is shown too.
+    private var favouriteLimit: Int {
+        guard let weather = entry.weather else { return 2 }
+        return weather.chips().contains { $0.kind != .rain } ? 0 : 1
     }
 
     /// Small: icon, temperature and chance of rain on one line. Nothing when

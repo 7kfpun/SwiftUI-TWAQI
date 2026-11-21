@@ -594,4 +594,15 @@ extension StationWeatherTests {
             ClosestStationView.heightWithWeather + ClosestStationView.hintRowHeight
         )
     }
+
+    func testChipsRowHidesWhenTheCardLosesItsWeather() throws {
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.05, lon: 121.52, in: try chipsFile(), now: now))
+        let card = ClosestStationView(frame: CGRect(x: 0, y: 0, width: 232, height: 96))
+        XCTAssertTrue(card.chipsAreHidden)
+        card.weather = weather
+        XCTAssertFalse(card.chipsAreHidden)
+        // Timeline scrubbed, or panned offshore: no weather, so no stray chips.
+        card.weather = nil
+        XCTAssertTrue(card.chipsAreHidden)
+    }
 }

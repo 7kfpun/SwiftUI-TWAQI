@@ -264,6 +264,9 @@ final class ClosestStationView: UIControl {
         topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
         guard let weather else {
             weatherRow.isHidden = true
+            // The chips row is a sibling of the weather row: hide it too, or it
+            // stays painted under a card that has shrunk back.
+            updateChips([])
             return
         }
         weatherRow.isHidden = false
@@ -279,6 +282,9 @@ final class ClosestStationView: UIControl {
 
         weatherStationLabel.text = Self.stationText(name: weather.stationName, distanceKm: weather.distanceKm)
     }
+
+    /// Whether the chips row is hidden: with no weather, or no chip with a reading.
+    var chipsAreHidden: Bool { chipsRow.isHidden }
 
     /// One capsule per chip with a reading; none (and no row height) when
     /// every reading is missing.
