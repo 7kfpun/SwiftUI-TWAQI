@@ -85,4 +85,49 @@ final class MapAdviceTests: XCTestCase {
         card.advice = nil
         XCTAssertEqual(label?.isHidden, true)
     }
+
+    /// Draws the card for every level, in both languages, when
+    /// `TEST_RUNNER_ADVICE_SHOT_DIR` is set (PR screenshots). Otherwise it only
+    /// checks that a card with advice lays out inside its own height.
+    func testCardForEveryLevel() throws {
+        let dir = ProcessInfo.processInfo.environment["ADVICE_SHOT_DIR"]
+        let originalLanguage = UserDefaults.standard.string(forKey: AppLanguage.defaultsKey)
+        defer {
+            if let originalLanguage { UserDefaults.standard.set(originalLanguage, forKey: AppLanguage.defaultsKey) }
+            else { UserDefaults.standard.removeObject(forKey: AppLanguage.defaultsKey) }
+        }
+        let samples: [(Double, AirStatuses)] = [(30, .good), (70, .moderate), (120, .unhealthyforsensitivegroup),
+                                                (170, .unhealthy), (250, .veryunhealthy), (350, .hazardous)]
+        for language in [AppLanguage.english, .traditionalChinese] {
+            UserDefaults.standard.set(language.localeIdentifier, forKey: AppLanguage.defaultsKey)
+            let board = UIView(frame: CGRect(x: 0, y: 0, width: 3 * 252, height: 2 * 136))
+            board.backgroundColor = .systemGray5
+            for (index, sample) in samples.enumerated() {
+                let card = ClosestStationView()
+                card.translatesAutoresizingMaskIntoConstraints = true
+                card.stationName = "Songshan"
+                card.locality = "Xinyi District, Taipei"
+                card.status = "AirStatus.\(sample.1.rawValue)".localized
+                card.aqi = "AQI \(Int(sample.0))"
+                card.aqiColor = UIColor(rgb: Int(sample.1.getColor()))
+                card.aqiForegroundColor = UIColor(rgb: Int(sample.1.getForegroundColor()))
+                card.image = UIImage(named: sample.1.getImage())
+                card.advice = sample.1.adviceKey?.localized
+                card.isEnabled = true
+                let height = ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: true)
+                card.frame = CGRect(x: 10 + CGFloat(index % 3) * 252, y: 10 + CGFloat(index / 3) * 136,
+                                    width: ClosestStationView.preferredSize.width, height: height)
+                board.addSubview(card)
+                card.layoutIfNeeded()
+            }
+            board.layoutIfNeeded()
+            let image = UIGraphicsImageRenderer(bounds: board.bounds).image { context in
+                board.layer.render(in: context.cgContext)
+            }
+            if let dir, let data = image.pngData() {
+                try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+                try data.write(to: URL(fileURLWithPath: dir).appendingPathComponent("twaq-13-\(language == .english ? "en" : "zh-Hant")-card-levels.png"))
+            }
+        }
+    }
 }
