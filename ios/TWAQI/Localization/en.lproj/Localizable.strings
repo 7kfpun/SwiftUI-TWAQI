@@ -651,3 +651,20 @@
 "WhatsNew.3_1_7.mapweather_body" = "The local weather at the centre of the map now sits under the air quality card.";
 "WhatsNew.3_1_7.quickactions_title" = "Quick actions on the icon";
 "WhatsNew.3_1_7.quickactions_body" = "Press and hold the app icon to jump to your closest station or any of your favourites.";
+
+/* Wind arrows layer (TWAQ-15) */
+"Map.WindLayer.label" = "Wind arrows";
+"Map.WindLayer.hint" = "Shows or hides wind arrows from weather stations";
+"Map.WindLayer.on" = "On";
+"Map.WindLayer.off" = "Off";
+"WindLayer.from.north" = "north";
+"WindLayer.from.north_east" = "north-east";
+"WindLayer.from.east" = "east";
+"WindLayer.from.south_east" = "south-east";
+"WindLayer.from.south" = "south";
+"WindLayer.from.south_west" = "south-west";
+"WindLayer.from.west" = "west";
+"WindLayer.from.north_west" = "north-west";
+"WindLayer.hint_higher %@" = "Air is coming from the %@, where PM2.5 is higher";
+"WindLayer.hint_lower %@" = "Air is coming from the %@, where PM2.5 is lower";
+"WindLayer.arrow %@ %@" = "Wind from the %1$@ at %2$@ metres per second";

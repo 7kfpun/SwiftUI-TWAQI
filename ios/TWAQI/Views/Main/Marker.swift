@@ -298,3 +298,35 @@ enum MarkerIcons {
         }
     }
 }
+
+
+/// One CWA station's wind arrow on the optional wind layer (TWAQ-15). Drawn
+/// with `MarkerIcons.arrow` (length and weight carry the speed), tinted by
+/// speed band, rotated to point downwind, and below the station pills so a
+/// tap or a pill is never covered. Not tappable: it is context.
+final class WindArrowMarker: GMSMarker {
+    private(set) var reading: WindReading
+
+    init(reading: WindReading) {
+        self.reading = reading
+        super.init()
+        isTappable = false
+        isFlat = true
+        groundAnchor = CGPoint(x: 0.5, y: 0.5)
+        zIndex = -10
+        update(reading)
+    }
+
+    func update(_ reading: WindReading) {
+        self.reading = reading
+        position = CLLocationCoordinate2D(latitude: reading.lat, longitude: reading.lon)
+        icon = MarkerIcons.arrow(
+            strength: reading.wind.strengthFraction,
+            color: WindLayer.color(speed: reading.speed)
+        )
+        // Drawn pointing south: rotating by where the wind comes *from*
+        // leaves it pointing downwind.
+        rotation = reading.direction
+        title = WindLayer.accessibilityText(reading)
+    }
+}
