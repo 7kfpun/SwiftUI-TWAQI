@@ -307,6 +307,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             // republish to the widgets, which must keep the live reading.
             renderMarkers()
             loadClosestStationView()
+            updateCenterWeather()
         }
     }
 
@@ -488,7 +489,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
             make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
             make.width.equalTo(ClosestStationView.preferredSize.width)
-            make.height.equalTo(ClosestStationView.preferredSize.height)
+            closestStationHeight = make.height.equalTo(ClosestStationView.preferredSize.height).constraint
         }
 
         // MARK: airStatusesView
@@ -792,6 +793,46 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    private var closestStationHeight: Constraint?
+    private var weatherWorkItem: DispatchWorkItem?
+
+    /// `mapView(_:idleAt:)` fires repeatedly while the camera settles, so the
+    /// weather for the centre is looked up once it has been still for a moment.
+    func scheduleCenterWeather() {
+        weatherWorkItem?.cancel()
+        let item = DispatchWorkItem { [weak self] in self?.updateCenterWeather() }
+        weatherWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: item)
+    }
+
+    /// Weather is the current reading, so it is hidden while the timeline is
+    /// scrubbed back. `StationWeatherStore` answers from its saved file when
+    /// the request fails, and with nil (row hidden) when there is none: the
+    /// card is never blocked on it.
+    private func updateCenterWeather() {
+        guard timelineHoursAgo == 0 else {
+            showCenterWeather(nil)
+            return
+        }
+        StationWeatherStore.shared.weather { [weak self] file in
+            guard let self = self else { return }
+            guard self.timelineHoursAgo == 0 else { return }
+            self.showCenterWeather(file.flatMap {
+                MapCenterWeather.make(lat: self.currentLatitude, lon: self.currentLongitude, in: $0)
+            })
+        }
+    }
+
+    private func showCenterWeather(_ weather: MapCenterWeather?) {
+        guard weather != closestStationView.weather else { return }
+        closestStationView.weather = weather
+        let height = weather == nil
+            ? ClosestStationView.preferredSize.height
+            : ClosestStationView.heightWithWeather
+        closestStationHeight?.update(offset: height)
+        view.layoutIfNeeded()
+    }
+
     func loadClosestStationView() {
         if let livePollutant = self.closestPollutant {
             let closestPollutant = displayedPollutant(livePollutant).pollutant
@@ -1002,6 +1043,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.currentLongitude = longitude
         checkClosestCountry(latitude: latitude, longitude: longitude)
         checkClosestStation(latitude: latitude, longitude: longitude)
+        scheduleCenterWeather()
 
         // Panned back in time and on to new stations: fetch theirs too.
         if timelineHoursAgo > 0 {
