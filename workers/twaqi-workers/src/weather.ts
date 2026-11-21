@@ -4,7 +4,7 @@
 //
 //   F-C0032-001  county (縣市) 36-hour forecast: Wx, PoP, MinT, MaxT per 12 h period
 //   O-A0003-001  observations from CWA's staffed stations: temperature,
-//                humidity, rain since midnight, wind, observation time
+//                humidity, rain since midnight, wind, UV index, observation time
 //
 // Each set is fetched and parsed on its own. A set that fails (HTTP error,
 // non-JSON body, nothing usable) keeps its section from the last good file;
@@ -80,6 +80,8 @@ export interface Observation {
   wind: number | null
   /** Degrees clockwise from north the wind blows *from* (0-360), 10-minute mean. */
   windDir: number | null
+  /** UV index, 0-20+. Only some stations carry a UV sensor; null elsewhere and after dark readings of -99. */
+  uv: number | null
 }
 
 export interface WeatherFile {
@@ -339,7 +341,9 @@ export function parseObservations(body: unknown): Observation[] {
     const wind = valid(num(get(element, 'WindSpeed', 'windSpeed')), (n) => n >= 0 && n < 100)
     // 0 and 360 are both north (calm is told by speed). CWA's -99, -990 and 990 (variable) fall outside 0..360 and become null.
     const windDir = valid(num(get(element, 'WindDirection', 'windDirection')), (n) => n >= 0 && n <= 360)
-    if (temp === null && humidity === null && rain === null && wind === null) continue
+    // CWA's -99 (no sensor / no reading) falls outside 0..25 and becomes null.
+    const uv = valid(num(get(element, 'UVIndex', 'uvIndex')), (n) => n >= 0 && n <= 25)
+    if (temp === null && humidity === null && rain === null && wind === null && uv === null) continue
 
     out.push({
       id,
@@ -353,6 +357,7 @@ export function parseObservations(body: unknown): Observation[] {
       rain,
       wind,
       windDir,
+      uv,
     })
   }
 

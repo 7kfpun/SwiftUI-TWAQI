@@ -103,9 +103,10 @@ test('observations: WGS84 position, county, readings and time per station', () =
     rain: 0.5,
     wind: 3.2,
     windDir: 70,
+    uv: null, // -99 in the fixture: no UV sensor
   })
   // Only the fields the app shows.
-  assert.deepEqual(Object.keys(taipei!).sort(), ['county', 'humidity', 'id', 'lat', 'lon', 'name', 'rain', 'temp', 'time', 'wind', 'windDir'])
+  assert.deepEqual(Object.keys(taipei!).sort(), ['county', 'humidity', 'id', 'lat', 'lon', 'name', 'rain', 'temp', 'time', 'uv', 'wind', 'windDir'])
 })
 
 test('observations: -99 style markers are null, a station with no reading left is dropped, a bad time is dropped', () => {
@@ -124,6 +125,17 @@ test('observations: wind direction is degrees from north; -99 and out-of-range v
   const dir = (id: string) => parseObservations(body).find((s) => s.id === id)!.windDir
   assert.equal(dir(String((stations[0] as any).StationId)), null)
   assert.equal(dir(String((stations[1] as any).StationId)), null)
+})
+
+test('observations: UV index is kept for stations with a sensor; -99 and out-of-range values are null', () => {
+  const body = JSON.parse(JSON.stringify(OBSERVATIONS))
+  const stations = body.records.Station as Array<{ StationId: string; WeatherElement: Record<string, unknown> }>
+  stations[0].WeatherElement.UVIndex = 7.5
+  stations[1].WeatherElement.UVIndex = 99
+  const uv = (id: string) => parseObservations(body).find((s) => s.id === id)!.uv
+  assert.equal(uv(stations[0].StationId), 7.5)
+  assert.equal(uv(stations[1].StationId), null)
+  assert.equal(parseObservations(OBSERVATIONS).find((s) => s.id === '467480')!.uv, null) // -99
 })
 
 test('observations: rain T (trace) and -98 (no rain for 6 h) are 0; X and other negatives stay null', () => {
