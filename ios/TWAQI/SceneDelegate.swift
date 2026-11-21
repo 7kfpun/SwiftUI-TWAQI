@@ -173,9 +173,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         case .closest:
             Task { @MainActor in
                 let result = await AirQualityLookup.lookup(requestedStationId: nil)
-                if let id = result.reading?.stationId,
+                // Only a real closest station: with no location the lookup
+                // answers for a favourite or the default, which isn't what
+                // the label promises, so the app just opens. The lookup
+                // just read this station from the API, so it exists even if
+                // nothing has cached it yet.
+                if result.kind == "nearest",
+                   let id = result.reading?.stationId,
                    let url = DeepLink.stationURL(stationId: id, source: .quickAction) {
-                    open(url)
+                    open(url, alsoKnown: id)
                 }
             }
         case nil:
@@ -222,19 +228,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// are sheets on the root view, so a sheet left open (a station, Help's
     /// own Pro screen, a share sheet) is closed first; otherwise the new one
     /// could not be shown. The Pro screen already open is left as it is.
-    private func open(_ url: URL) {
+    private func open(_ url: URL, alsoKnown stationId: Int? = nil) {
         let isPro = settings.isPro
+        let isKnown: (Int) -> Bool = { $0 == stationId || KnownStations.contains($0) }
         // Unknown stations are dropped here too, so they don't close a sheet.
-        guard let link = DeepLink.route(url, isPro: isPro, isKnownStation: KnownStations.contains),
+        guard let link = DeepLink.route(url, isPro: isPro, isKnownStation: isKnown),
               !(router.showingPro && link.isPro),
               let root = window?.rootViewController,
               root.presentedViewController != nil
         else {
-            router.open(url, isPro: isPro)
+            router.open(url, isPro: isPro, isKnownStation: isKnown)
             return
         }
         root.dismiss(animated: false) { [router] in
-            router.open(url, isPro: isPro)
+            router.open(url, isPro: isPro, isKnownStation: isKnown)
         }
     }
 
