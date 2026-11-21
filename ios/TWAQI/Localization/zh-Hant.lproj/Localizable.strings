@@ -631,3 +631,10 @@
 "WhatsNew.3_1_6.watch_body" = "在手錶上直接滑動，即可切換你收藏的測站。";
 "WhatsNew.3_1_6.alert_title" = "點警示直達測站";
 "WhatsNew.3_1_6.alert_body" = "點選空氣品質警示，App 會直接開啟該測站。";
+
+"WhatsNew.3_1_7.locate_title" = "在地圖上找到自己";
+"WhatsNew.3_1_7.locate_body" = "地圖會以精確度範圍圈標示你的位置，並新增定位按鈕，可置中於你，或隨你移動。";
+"WhatsNew.3_1_7.mapweather_title" = "地圖上的天氣";
+"WhatsNew.3_1_7.mapweather_body" = "空氣品質卡片下方，現在會顯示地圖中心的當地天氣。";
+"WhatsNew.3_1_7.quickactions_title" = "主畫面圖示快速動作";
+"WhatsNew.3_1_7.quickactions_body" = "長按 App 圖示，即可直達最近的測站或你收藏的測站。";

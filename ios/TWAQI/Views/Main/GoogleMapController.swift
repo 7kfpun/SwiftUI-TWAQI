@@ -129,7 +129,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         case .allowed:
             locationTracker.startIfAllowed()
             locateMode = locateMode.afterTap
-            if locateMode == .off { return }
             if !isSkipLog { TrackingManager.logEvent(.moveToCurrentLocation) }
             if let location = locationTracker.location {
                 centreOnUser(location, zoomToStation: locateMode == .centred)
@@ -876,7 +875,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         locationTracker.onLocation = { [weak self] in self?.handleLocation($0) }
         locationTracker.onHeading = { [weak self] in self?.handleHeading($0) }
         locationTracker.onAccessChange = { [weak self] in self?.handleAccessChange($0) }
-        locationTracker.startIfAllowed()
         mapView.settings.compassButton = true
         // Exposes the markers, by their titles, to VoiceOver.
         mapView.accessibilityElementsHidden = false
@@ -907,6 +905,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         foregroundObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
         ) { [weak self] _ in
+            self?.locationTracker.setAppActive(true)
             self?.startRefreshTimer()
             self?.refreshAfterForeground()
         }
@@ -916,6 +915,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main
         ) { [weak self] _ in
             self?.stopRefreshTimer()
+            self?.locationTracker.setAppActive(false)
         }
 
         loadContent()
@@ -1071,9 +1071,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Position and compass run only while the map is showing.
+        locationTracker.setVisible(true)
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         stopPlaying()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        locationTracker.setVisible(false)
     }
 }
 

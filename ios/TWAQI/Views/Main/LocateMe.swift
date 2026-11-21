@@ -53,6 +53,12 @@ enum LocateMeAccess: Equatable {
 }
 
 enum LocateMe {
+    /// Whether location and compass updates should run: only while the map is
+    /// on screen in an active app, and only when permission is already given.
+    static func shouldRunUpdates(visible: Bool, appActive: Bool, access: LocateMeAccess) -> Bool {
+        visible && appActive && access == .allowed
+    }
+
     static let minZoom: Float = 9
     static let maxZoom: Float = 15
 

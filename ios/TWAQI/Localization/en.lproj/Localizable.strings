@@ -627,3 +627,10 @@
 "WhatsNew.3_1_6.watch_body" = "Swipe between your favourite stations right on the watch.";
 "WhatsNew.3_1_6.alert_title" = "Alerts open the station";
 "WhatsNew.3_1_6.alert_body" = "Tap an air quality alert and the app opens straight to that station.";
+
+"WhatsNew.3_1_7.locate_title" = "Find yourself on the map";
+"WhatsNew.3_1_7.locate_body" = "The map shows your position with an accuracy halo, and a locate button that centres on you or follows you as you move.";
+"WhatsNew.3_1_7.mapweather_title" = "Weather on the map";
+"WhatsNew.3_1_7.mapweather_body" = "The local weather at the centre of the map now sits under the air quality card.";
+"WhatsNew.3_1_7.quickactions_title" = "Quick actions on the icon";
+"WhatsNew.3_1_7.quickactions_body" = "Press and hold the app icon to jump to your closest station or any of your favourites.";
