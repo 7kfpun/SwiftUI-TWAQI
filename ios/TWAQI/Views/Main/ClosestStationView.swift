@@ -16,7 +16,13 @@ import UIKit
 final class ClosestStationView: UIView {
     static let preferredSize = CGSize(width: 232, height: 96)
     /// Extra height while the weather row (TWAQ-6) is shown under the station.
-    static let weatherRowHeight: CGFloat = 30
+    static let weatherRowHeight: CGFloat = 26
+    /// The station and AQI area is tighter while the row is shown, so the
+    /// card grows by less than the row (pill 12 + 24, face 8 + 36 fit in it).
+    static let topHeightWithWeather: CGFloat = 82
+    static var heightWithWeather: CGFloat { topHeightWithWeather + weatherRowHeight }
+
+    private var topHeight: Constraint?
 
     private var weatherRow: UIView!
     private var weatherIcon: UIImageView!
@@ -125,6 +131,7 @@ final class ClosestStationView: UIView {
     }
 
     private func updateWeatherRow() {
+        topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
         guard let weather else {
             weatherRow.isHidden = true
             weatherRow.accessibilityLabel = nil
@@ -205,7 +212,7 @@ final class ClosestStationView: UIView {
         addSubview(rightView)
         rightView.snp.makeConstraints { (make) -> Void in
             make.top.right.equalTo(self)
-            make.height.equalTo(Self.preferredSize.height)
+            topHeight = make.height.equalTo(Self.preferredSize.height).constraint
             make.width.equalTo(72)
         }
 

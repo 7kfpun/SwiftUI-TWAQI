@@ -702,8 +702,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private func showCenterWeather(_ weather: MapCenterWeather?) {
         guard weather != closestStationView.weather else { return }
         closestStationView.weather = weather
-        let height = ClosestStationView.preferredSize.height
-            + (weather == nil ? 0 : ClosestStationView.weatherRowHeight)
+        let height = weather == nil
+            ? ClosestStationView.preferredSize.height
+            : ClosestStationView.heightWithWeather
         closestStationHeight?.update(offset: height)
         view.layoutIfNeeded()
     }
