@@ -25,6 +25,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// This scene opened the welcome flow by itself (FOX-49).
     private var opensOnboarding = false
 
+    /// Rebuilds the icon's quick actions when favourites or language change.
+    private var quickActionsObserver: NSObjectProtocol?
+
+    /// A quick action that launched the app; opened once the scene is active.
+    private var pendingQuickAction: UIApplicationShortcutItem?
+
     /// Links posted by an App Intent running in this process (FOX-74).
     private var pendingLinkObserver: NSObjectProtocol?
 
@@ -54,6 +60,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Launched by a URL, e.g. a tap on the locked Pro widget.
         pendingURL = connectionOptions.urlContexts.first?.url
+
+        // Long-press Home Screen quick actions (FOX-138).
+        pendingQuickAction = connectionOptions.shortcutItem
+        Self.refreshQuickActions()
+        quickActionsObserver = NotificationCenter.default.addObserver(
+            forName: QuickActions.didChange, object: nil, queue: .main
+        ) { _ in Self.refreshQuickActions() }
 
         // "Open station" from Shortcuts or the Action button runs in this
         // process, before or after the scene is active.
@@ -89,6 +102,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let pendingLinkObserver {
             NotificationCenter.default.removeObserver(pendingLinkObserver)
         }
+        if let quickActionsObserver {
+            NotificationCenter.default.removeObserver(quickActionsObserver)
+        }
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
@@ -97,6 +113,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Self.clearBadge()
         // Permission may have changed: the system prompt, or Settings.
         WidgetBridge.publishLocationPermission()
+        if let item = pendingQuickAction {
+            pendingQuickAction = nil
+            openQuickAction(item)
+        }
         if let url = pendingURL ?? PendingLink.take() {
             pendingURL = nil
             open(url)
@@ -110,6 +130,62 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             UNUserNotificationCenter.current().setBadgeCount(0)
         } else {
             UIApplication.shared.applicationIconBadgeNumber = 0
+        }
+    }
+
+    /// A quick action used while the app was already running.
+    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(QuickActions.target(forType: shortcutItem.type) != nil)
+        if windowScene.activationState == .foregroundActive {
+            openQuickAction(shortcutItem)
+        } else {
+            pendingQuickAction = shortcutItem
+        }
+    }
+
+    /// Sets the icon's quick actions: "Closest station" and the favourites,
+    /// named in the app's language like the Siri and Shortcuts station list.
+    private static func refreshQuickActions() {
+        let favourites = StationChoice.namedFavourites(
+            favouriteIds: WatchStore.favouriteStationIds,
+            readings: WatchStore.favouriteReadings,
+            locale: .app
+        )
+        let closest = Bundle.appLanguage.localizedString(forKey: "QuickAction.closest_station", value: nil, table: nil)
+        UIApplication.shared.shortcutItems = QuickActions.items(favourites: favourites, closestTitle: closest).map {
+            UIApplicationShortcutItem(
+                type: $0.type,
+                localizedTitle: $0.title,
+                localizedSubtitle: nil,
+                icon: UIApplicationShortcutIcon(systemImageName: $0.type == QuickActions.closestType ? "location.fill" : "heart.fill"),
+                userInfo: nil
+            )
+        }
+    }
+
+    /// A favourite opens its station through the link path; "Closest
+    /// station" resolves the same station Siri and the "Open station"
+    /// shortcut would, then does the same.
+    private func openQuickAction(_ item: UIApplicationShortcutItem) {
+        switch QuickActions.target(forType: item.type) {
+        case .station(let id):
+            if let url = DeepLink.stationURL(stationId: id, source: .quickAction) { open(url) }
+        case .closest:
+            Task { @MainActor in
+                let result = await AirQualityLookup.lookup(requestedStationId: nil)
+                // Only a real closest station: with no location the lookup
+                // answers for a favourite or the default, which isn't what
+                // the label promises, so the app just opens. The lookup
+                // just read this station from the API, so it exists even if
+                // nothing has cached it yet.
+                if result.kind == "nearest",
+                   let id = result.reading?.stationId,
+                   let url = DeepLink.stationURL(stationId: id, source: .quickAction) {
+                    open(url, alsoKnown: id)
+                }
+            }
+        case nil:
+            break
         }
     }
 
@@ -152,19 +228,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// are sheets on the root view, so a sheet left open (a station, Help's
     /// own Pro screen, a share sheet) is closed first; otherwise the new one
     /// could not be shown. The Pro screen already open is left as it is.
-    private func open(_ url: URL) {
+    private func open(_ url: URL, alsoKnown stationId: Int? = nil) {
         let isPro = settings.isPro
+        let isKnown: (Int) -> Bool = { $0 == stationId || KnownStations.contains($0) }
         // Unknown stations are dropped here too, so they don't close a sheet.
-        guard let link = DeepLink.route(url, isPro: isPro, isKnownStation: KnownStations.contains),
+        guard let link = DeepLink.route(url, isPro: isPro, isKnownStation: isKnown),
               !(router.showingPro && link.isPro),
               let root = window?.rootViewController,
               root.presentedViewController != nil
         else {
-            router.open(url, isPro: isPro)
+            router.open(url, isPro: isPro, isKnownStation: isKnown)
             return
         }
         root.dismiss(animated: false) { [router] in
-            router.open(url, isPro: isPro)
+            router.open(url, isPro: isPro, isKnownStation: isKnown)
         }
     }
 
