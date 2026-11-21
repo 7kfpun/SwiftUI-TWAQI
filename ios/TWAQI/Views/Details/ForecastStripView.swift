@@ -71,7 +71,7 @@ struct ForecastStripView: View {
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: AreaForecastView.cornerRadius, style: .continuous))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text(verbatim: Self.accessibilitySummary(state)))
+            .accessibilityLabel(Text(verbatim: Self.accessibilitySummary(state, isSaved: isSaved)))
         }
         .padding(.horizontal)
     }
@@ -139,6 +139,10 @@ struct ForecastStripView: View {
         VStack(spacing: 4) {
             Text(LocalizedStringKey(cell.part.localizationKey))
                 .font(.caption.weight(.semibold))
+            // The date of a later day's cell; a blank keeps the row level.
+            Text(ForecastStrip.dateLabel(cell) ?? " ")
+                .font(.caption2.monospacedDigit())
+                .foregroundColor(.secondary)
             Image(systemName: WeatherCode.symbol(code: cell.wx, night: cell.part.isNight))
                 .symbolRenderingMode(.multicolor)
                 .font(.title3)
@@ -157,7 +161,7 @@ struct ForecastStripView: View {
     // MARK: VoiceOver
 
     /// One sentence per row: the AQI trend, then each part of the day.
-    static func accessibilitySummary(_ state: ForecastStripState) -> String {
+    static func accessibilitySummary(_ state: ForecastStripState, isSaved: Bool = false, now: Date = Date()) -> String {
         let title = "Strip.title".localized
         switch state {
         case .loading:
@@ -166,10 +170,13 @@ struct ForecastStripView: View {
             return "\(title). \((offline ? "Strip.empty_offline" : "Strip.empty").localized)"
         case .loaded(let trend, let cells):
             var parts = [title]
+            if isSaved {
+                parts.append("Strip.saved_note".localized)
+            }
             if let trend = trend {
                 parts.append(aqiSummary(trend))
             }
-            parts.append(contentsOf: cells.map(weatherSummary))
+            parts.append(contentsOf: cells.map { weatherSummary($0, now: now) })
             return parts.joined(separator: ". ")
         }
     }
@@ -186,8 +193,14 @@ struct ForecastStripView: View {
         return sentences.joined(separator: ", ")
     }
 
-    static func weatherSummary(_ cell: WeatherStripCell) -> String {
-        let part = cell.part.localizationKey.localized
+    /// A later day's cell starts with that day ("Tomorrow Morning"), so two
+    /// parts of the same name are told apart.
+    static func weatherSummary(_ cell: WeatherStripCell, now: Date = Date()) -> String {
+        var part = cell.part.localizationKey.localized
+        if ForecastStrip.dateLabel(cell, now: now) != nil {
+            let day = AreaForecastView.dayTitle(WeatherDates.day(cell.start), now: now)
+            part = String(format: "Strip.a11y_day_part %@ %@".localized, day, part)
+        }
         let condition = WeatherCode.text(code: cell.wx, cwaText: cell.text, chinese: Locale.isChinese)
         return String(
             format: "Strip.a11y_weather %@ %@ %@ %@".localized,
@@ -215,16 +228,8 @@ private struct StripAqiTrendChart: View {
                     forecastBar(span, size: size)
                 }
 
-                ForEach(Array(zip(trend.observed, trend.observed.dropFirst()).enumerated()), id: \.offset) { _, pair in
-                    Path { path in
-                        path.move(to: point(pair.0, size: size))
-                        path.addLine(to: point(pair.1, size: size))
-                    }
-                    .stroke(color(pair.1.aqi), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                }
-                if trend.observed.count == 1, let only = trend.observed.first {
-                    Circle().fill(color(only.aqi)).frame(width: 8, height: 8)
-                        .position(point(only, size: size))
+                ForEach(Array(trend.observedRuns.enumerated()), id: \.offset) { _, run in
+                    observedRun(run, size: size)
                 }
 
                 // Now
@@ -239,6 +244,22 @@ private struct StripAqiTrendChart: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .position(x: min(max(xPosition(trend.now, width: size.width), 14), size.width - 14), y: 6)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func observedRun(_ run: [StripAqiTrend.Point], size: CGSize) -> some View {
+        if run.count == 1, let only = run.first {
+            Circle().fill(color(only.aqi)).frame(width: 8, height: 8)
+                .position(point(only, size: size))
+        } else {
+            ForEach(Array(zip(run, run.dropFirst()).enumerated()), id: \.offset) { _, pair in
+                Path { path in
+                    path.move(to: point(pair.0, size: size))
+                    path.addLine(to: point(pair.1, size: size))
+                }
+                .stroke(color(pair.1.aqi), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
             }
         }
     }

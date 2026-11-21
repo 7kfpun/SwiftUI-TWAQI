@@ -79,6 +79,21 @@ struct StripAqiTrend: Equatable {
     /// Soonest first, from `now` to `windowEnd`.
     let forecast: [Span]
 
+    /// Consecutive hourly readings. A missing hour breaks the line, as in the
+    /// history chart, so a gap never reads as a straight stretch between its
+    /// neighbours. A run of one is drawn as a dot.
+    var observedRuns: [[Point]] {
+        var runs: [[Point]] = []
+        for point in observed {
+            if let last = runs.last?.last, point.time.timeIntervalSince(last.time) <= 3600 + 1 {
+                runs[runs.count - 1].append(point)
+            } else {
+                runs.append([point])
+            }
+        }
+        return runs
+    }
+
     /// Enough to draw: a line, or at least one forecast day.
     var isChartable: Bool { observed.count >= 2 || !forecast.isEmpty }
 }
@@ -127,6 +142,18 @@ enum ForecastStrip {
         // Overlapping periods (a feed hiccup) would double a part: keep the first.
         var seen = Set<Date>()
         return cells.filter { seen.insert($0.start).inserted }
+    }
+
+    /// 「11/23」 for a cell that starts on a later Taiwan day than `now`, so
+    /// the two "Night"s or "Morning"s of a 24-hour window can be told apart;
+    /// nil for today's cells.
+    static func dateLabel(_ cell: WeatherStripCell, now: Date = Date()) -> String? {
+        guard WeatherDates.day(cell.start) != WeatherDates.day(now) else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = WeatherDates.taipei
+        formatter.dateFormat = "M/d"
+        return formatter.string(from: cell.start)
     }
 
     // MARK: AQI

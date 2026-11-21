@@ -480,7 +480,8 @@
 "Strip.saved_note" = "顯示已儲存的資料";
 "Strip.a11y_observed %d" = "目前實測 AQI %d";
 "Strip.a11y_forecast %@ %d" = "%1$@預報：AQI %2$d";
-"Strip.a11y_weather %@ %@ %@ %@" = "%1$@：%2$@，氣溫 %3$@ 度，降雨機率 %4$@";
+"Strip.a11y_weather %@ %@ %@ %@" = "%1$@：%2$@，氣溫 %3$@，降雨機率 %4$@";
+"Strip.a11y_day_part %@ %@" = "%1$@%2$@";
 "Weather.station_named %@ %@" = "%1$@測站，距離 %2$@";
 "Weather.station_nearby %@" = "氣象測站，距離 %@";
 "Weather.observed %@" = "觀測於%@";

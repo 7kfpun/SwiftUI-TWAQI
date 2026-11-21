@@ -476,7 +476,8 @@
 "Strip.saved_note" = "Showing saved data";
 "Strip.a11y_observed %d" = "Observed AQI now %d";
 "Strip.a11y_forecast %@ %d" = "Forecast for %1$@: AQI %2$d";
-"Strip.a11y_weather %@ %@ %@ %@" = "%1$@: %2$@, %3$@ degrees, chance of rain %4$@";
+"Strip.a11y_weather %@ %@ %@ %@" = "%1$@: %2$@, %3$@, chance of rain %4$@";
+"Strip.a11y_day_part %@ %@" = "%1$@ %2$@";
 "Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
 "Weather.station_nearby %@" = "Weather station %@ away";
 "Weather.observed %@" = "observed %@";

@@ -303,7 +303,17 @@ class DetailsViewModel: ObservableObject {
 
     /// Called by both station requests, like `findCam`; the first match wins.
     private func findForecast(areaLocal: String?, countyLocal: String?, title: String?) {
-        guard forecast == nil, areaLocal != nil || countyLocal != nil else { return }
+        guard forecast == nil else { return }
+        // No area or county name to join on (a micro-sensor): nothing to look
+        // up, so the strip must not wait for an answer that never comes.
+        guard areaLocal != nil || countyLocal != nil else {
+            forecastAnswered = true
+            return
+        }
+        // A lookup is starting: the strip waits for it, so a reading saved
+        // without names followed by a station record with them does not flash
+        // the empty message first.
+        forecastAnswered = false
 
         AqiForecastStore.shared.forecasts { forecasts in
             self.forecastAnswered = true

@@ -154,7 +154,7 @@ struct DetailsView: View {
                 // are absent, not empty, when there is none to show.
                 VStack(alignment: .leading, spacing: 16) {
                     if showsForecastStrip {
-                        ForecastStripView(state: forecastStripState, isSaved: viewModel.isShowingLastGood)
+                        ForecastStripView(state: forecastStripState, isSaved: viewModel.isShowingLastGood || viewModel.isShowingCachedHistory)
                     }
 
                     if let forecast = viewModel.forecast {

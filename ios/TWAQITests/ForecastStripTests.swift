@@ -208,4 +208,57 @@ final class ForecastStripTests: XCTestCase {
         XCTAssertTrue(text.contains("90"))
         XCTAssertGreaterThanOrEqual(text.components(separatedBy: ". ").count, 2 + cells.count)
     }
+
+    // MARK: Review fixes
+
+    func testAMissingHourBreaksTheObservedLine() {
+        let readings = [
+            reading("2026-11-22T06:00:00", aqi: 40),
+            reading("2026-11-22T07:00:00", aqi: 0),
+            reading("2026-11-22T08:00:00", aqi: 80),
+            reading("2026-11-22T09:00:00", aqi: 82),
+            reading("2026-11-22T10:00:00", aqi: 0),
+        ]
+        let trend = ForecastStrip.aqiTrend(readings: readings, days: [], now: now)
+        // 40 stands alone; 80 and 82 are joined: no stretch from 40 to 80.
+        XCTAssertEqual(trend.observedRuns.map { $0.map(\.aqi) }, [[40], [80, 82]])
+    }
+
+    func testUnbrokenHoursAreOneRun() {
+        let readings = (6...10).map { reading(String(format: "2026-11-22T%02d:00:00", $0), aqi: Double($0 * 5)) }
+        let trend = ForecastStrip.aqiTrend(readings: readings, days: [], now: now)
+        XCTAssertEqual(trend.observedRuns.count, 1)
+        XCTAssertEqual(trend.observedRuns.first?.count, 5)
+        XCTAssertTrue(ForecastStrip.aqiTrend(readings: [], days: [], now: now).observedRuns.isEmpty)
+    }
+
+    func testDateLabelOnlyForLaterTaiwanDays() throws {
+        let cells = ForecastStrip.weatherCells(weatherPeriods(), now: now)
+        // Today's parts: no date. Tomorrow's morning (06:00 on the 23rd): "11/23".
+        XCTAssertNil(ForecastStrip.dateLabel(cells[0], now: now))
+        XCTAssertNil(ForecastStrip.dateLabel(cells[2], now: now))
+        // The night part after midnight is already the 23rd in Taiwan.
+        XCTAssertEqual(ForecastStrip.dateLabel(cells[3], now: now), "11/23")
+        XCTAssertEqual(ForecastStrip.dateLabel(cells[4], now: now), "11/23")
+    }
+
+    func testDateLabelUsesTaiwanDayNotTheDeviceZone() {
+        // 23:30 UTC on the 21st is 07:30 on the 22nd in Taiwan.
+        let utcNow = WeatherDates.parse("2026-11-21T23:30:00Z")!
+        let cell = WeatherStripCell(
+            part: .morning, start: WeatherDates.parse("2026-11-22T06:00:00+08:00")!,
+            end: WeatherDates.parse("2026-11-22T12:00:00+08:00")!,
+            wx: 1, text: nil, pop: nil, minT: nil, maxT: nil
+        )
+        XCTAssertNil(ForecastStrip.dateLabel(cell, now: utcNow))
+    }
+
+    func testAccessibilitySummaryMentionsSavedData() {
+        let cells = ForecastStrip.weatherCells(weatherPeriods(), now: now)
+        let state = ForecastStripState.loaded(trend: nil, cells: cells)
+        let plain = ForecastStripView.accessibilitySummary(state, isSaved: false, now: now)
+        let saved = ForecastStripView.accessibilitySummary(state, isSaved: true, now: now)
+        XCTAssertGreaterThan(saved.count, plain.count)
+        XCTAssertTrue(saved.contains("Strip.saved_note".localized))
+    }
 }
