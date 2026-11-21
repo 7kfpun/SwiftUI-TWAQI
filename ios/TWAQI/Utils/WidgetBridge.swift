@@ -120,6 +120,14 @@ enum WidgetBridge {
         updateShortcutStations()
     }
 
+    /// Mirrors the Help colour-palette choice into the app group (TWAQ-18).
+    /// Called on every change and once at launch.
+    static func publish(aqiPalette: AQIPalette) {
+        guard AQIPalette.mirror(aqiPalette, to: AQIPalette.shared) else { return }
+        WidgetCenter.shared.reloadAllTimelines()
+        reloadControls()
+    }
+
     /// The large widget lists favourites only with Pro. The phone's app group
     /// is separate from the watch's, so the phone mirrors its own answer here.
     static func publish(isPro: Bool) {
