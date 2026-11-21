@@ -26,6 +26,9 @@ class FavouriteListViewModel: ObservableObject {
 
     private var alertsObserver: NSObjectProtocol?
 
+    /// Held by pull-to-refresh until the request answers.
+    let refreshGate = RefreshGate()
+
     init() {
         alertsObserver = NotificationCenter.default.addObserver(
             forName: FavouriteAlerts.changed,
@@ -52,6 +55,7 @@ class FavouriteListViewModel: ObservableObject {
             self.isShowingLastGood = false
             self.loadFailed = false
             self.alertedStationIds = []
+            self.refreshGate.finish()
             return
         }
 
@@ -64,6 +68,7 @@ class FavouriteListViewModel: ObservableObject {
         self.loadFailed = false
 
         APIManager.getCurrentPollutantsByStationId(stationId: ids.map(String.init).joined(separator: ",")) { result in
+            defer { self.refreshGate.finish() }
             switch result {
             case .success(let result):
                 // The API returns stations by ID; list them in the

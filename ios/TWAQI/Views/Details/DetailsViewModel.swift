@@ -23,6 +23,11 @@ class DetailsViewModel: ObservableObject {
 
     @Published var historicalPollutants: HistoricalPollutants = []
 
+    /// `historicalPollutants` is the saved copy (`PollutantHistoryCache`),
+    /// or an earlier visit's, because the latest request failed. Not set while
+    /// the request is still on the wire: it may yet succeed.
+    @Published private(set) var isShowingCachedHistory = false
+
     /// Whether the station has an alert on.
     @Published private(set) var hasAlerts: Bool
 
@@ -56,6 +61,9 @@ class DetailsViewModel: ObservableObject {
     /// Answers from the latest `getData`, so `loadFailed` is decided once
     /// both requests have answered. `onAppear` can fire again while the first
     /// pair is still on the wire; answers from an older pair are not counted.
+    /// Held by pull-to-refresh until both requests have answered.
+    let refreshGate = RefreshGate()
+
     private var generation = 0
     private var answers: [Bool] = []
 
@@ -108,12 +116,16 @@ class DetailsViewModel: ObservableObject {
             self.findForecast(areaLocal: saved.areaLocal, countyLocal: saved.countyLocal, title: saved.displayArea)
             self.findWeather(lat: saved.lat, lon: saved.lon, county: saved.county, countyLocal: saved.countyLocal)
         }
+        // Likewise the saved history, so the charts work offline.
+        if self.historicalPollutants.isEmpty, let saved = PollutantHistoryCache.shared.readings(stationId: self.stationId) {
+            self.historicalPollutants = saved
+        }
         self.generation += 1
         let generation = self.generation
         self.answers = []
         self.loadFailed = false
 
-        APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
+        APIManager.getHistoricalPollutants(stationId: self.stationId, limit: PollutantHistorySeries.fetchLimit) { result in
             // An answer from an older pair while the latest is still on the
             // wire says nothing about whether the record will load.
             let isLatest = generation == self.generation
@@ -128,7 +140,14 @@ class DetailsViewModel: ObservableObject {
                 if self.station != nil || isLatest {
                     self.stationLoadFailed = self.station == nil
                 }
-                self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
+                let history = result["data"] as? HistoricalPollutants ?? []
+                // An older request answering with no readings doesn't take
+                // away what a newer one loaded.
+                if isLatest || !history.isEmpty {
+                    self.historicalPollutants = history
+                    self.isShowingCachedHistory = false
+                    PollutantHistoryCache.shared.save(history, stationId: self.stationId)
+                }
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
@@ -137,6 +156,12 @@ class DetailsViewModel: ObservableObject {
                 self.requestFinished(failed: false, generation: generation)
             case .failure(let error):
                 AppLog.network.error("station request failed: \(error.localizedDescription)")
+                // Whatever history is on screen is now the last good one.
+                // Only for the latest request: an older one failing after a
+                // newer one loaded says nothing about the readings now shown.
+                if isLatest {
+                    self.isShowingCachedHistory = !self.historicalPollutants.isEmpty
+                }
                 if isLatest {
                     self.stationLoadFailed = self.station == nil
                 }
@@ -178,6 +203,7 @@ class DetailsViewModel: ObservableObject {
         answers.append(failed)
         guard answers.count == 2 else { return }
         loadFailed = answers.allSatisfy { $0 } && pollutant == nil && historicalPollutants.isEmpty
+        refreshGate.finish()
     }
 
     /// Read from the shared defaults rather than kept here, so the heart

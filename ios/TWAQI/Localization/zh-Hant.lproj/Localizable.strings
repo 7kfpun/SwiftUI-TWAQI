@@ -238,6 +238,18 @@
 "Details.high" = "最高";
 "Details.average" = "平均";
 "Details.no_trend_data" = "資料還不夠，無法顯示趨勢";
+"Details.history_verdict_window" = "依最近 24 小時判斷";
+"Details.history_range_24h" = "24 小時";
+"Details.history_range_7d" = "7 天";
+"Details.history_range_label" = "歷史範圍";
+"Details.history_no_reading" = "無讀數";
+"Details.history_updated %@" = "最後更新 %@";
+"Details.history_offline" = "離線中：顯示已儲存的歷史資料";
+"Details.history_short %d" = "目前僅有最近 %d 小時的歷史資料。";
+"Details.history_span_day" = "最近 24 小時";
+"Details.history_span_week" = "最近 7 天";
+"Details.history_span_hours %d" = "最近 %d 小時";
+"Details.history_a11y %@ %@ %@ %@ %@" = "%1$@，%2$@。最低 %3$@，最高 %4$@，最新 %5$@。上下滑動可逐小時查看。";
 "Details.not_reporting" = "目前沒有即時資料";
 "Details.not_reporting_message" = "這個測站目前沒有回報資料，可能正在維修或已停止運作。附近的測站可在地圖上查看。";
 "Details.pollutants" = "污染物";
@@ -500,6 +512,12 @@
 "Offline.updated_ago %@" = "離線・%@更新";
 "Offline.nothing_saved" = "目前無法連線，也沒有已儲存的資料。請檢查網路連線後再試一次。";
 "Offline.retry" = "重試";
+"Offline.badge" = "離線";
+"Offline.card_unavailable" = "無法載入資料，請檢查網路連線。";
+"Freshness.stale_updated_ago %@" = "%@更新・可能不是最新資料";
+"Freshness.stale_short %@" = "%@更新・資料過時";
+"Freshness.updated_ago %@" = "%@更新";
+"Loading.label" = "載入中";
 
 /* 歡迎導覽（FOX-34） */
 "Help.welcome" = "開始使用";

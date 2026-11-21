@@ -110,7 +110,7 @@ struct DetailsView: View {
             // takes the selected pollutant's colour.
             VStack(alignment: .leading, spacing: 0) {
                 if viewModel.isShowingLastGood {
-                    OfflineNotice()
+                    OfflineNotice(retry: getData)
                         .padding(.horizontal)
                         .padding(.top, 8)
                 } else if viewModel.loadFailed {
@@ -118,7 +118,11 @@ struct DetailsView: View {
                         .padding(.bottom, 24)
                 }
 
-                header
+                if isLoadingFirstReading {
+                    SkeletonStationHeader()
+                } else {
+                    header
+                }
 
                 AqiScaleView(aqi: currentAqi)
                     .padding(.top, 4)
@@ -178,10 +182,11 @@ struct DetailsView: View {
 
                 // A retired station still returns its last 24 points, which
                 // would read as today's trend.
-                if !viewModel.isNotReporting || viewModel.hasRecentHistory {
+                if !isLoadingFirstReading, !viewModel.isNotReporting || viewModel.hasRecentHistory {
                     DetailsHistoryView(
                         historicalPollutants: viewModel.historicalPollutants,
-                        airIndexType: selectedPollutant
+                        airIndexType: selectedPollutant,
+                        isCached: viewModel.isShowingCachedHistory
                     )
                 }
 
@@ -220,6 +225,10 @@ struct DetailsView: View {
         }
         .overlay(alignment: .bottom) {
             AdBannerView(adUnitID: getEnv("AdUnitIdDetailsFooter")!, placement: .details)
+        }
+        .pullToRefresh {
+            getData()
+            await viewModel.refreshGate.wait()
         }
         .onAppear {
             self.getData()
@@ -359,6 +368,13 @@ struct DetailsView: View {
             ?? viewModel.station?.displayLocality(township: TaiwanPlaceNames.displayTownship)
     }
 
+    /// Neither a saved nor a live reading yet, and nothing has failed or
+    /// answered empty: the header is a placeholder, not a blank.
+    private var isLoadingFirstReading: Bool {
+        viewModel.pollutant == nil && viewModel.station == nil
+            && !viewModel.loadFailed && !viewModel.stationLoadFailed && !viewModel.isNotReporting
+    }
+
     private var header: some View {
         let pollutant = viewModel.pollutant
         let station = viewModel.station
@@ -369,7 +385,8 @@ struct DetailsView: View {
             area: pollutant?.displayArea ?? station?.displayArea,
             stationType: pollutant?.stationType ?? station?.stationType ?? .unknown,
             aqi: currentAqi,
-            publishTime: viewModel.latestPublishTime
+            publishTime: viewModel.latestPublishTime,
+            isOffline: viewModel.isShowingLastGood
         )
     }
 
