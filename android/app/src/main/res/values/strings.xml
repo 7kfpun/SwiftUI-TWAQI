@@ -61,7 +61,9 @@
     <string name="help_interested_to_be_our_business_partner">Interested to be our Business Partner?</string>
     <string name="help_feedback_or_contact_us">Feedback / Contact us</string>
     <string name="help_definition">Understanding the readings</string>
-    <string name="help_data_provided_by_government">The data is provided by the Environmental Protection Administration, Executive Yuan, R.O.C. (Taiwan)</string>
+    <string name="help_data_provided_by_government">Taiwan Air is an independent app, not a government app. Air quality data is open data from the %1$s. Weather data is open data from the %2$s.</string>
+    <string name="help_source_moenv">Ministry of Environment</string>
+    <string name="help_source_cwa">Central Weather Administration</string>
 
     <string name="feedback_title">Feedback</string>
     <string name="feedback_rating_header">How satisfied are you with the app?</string>

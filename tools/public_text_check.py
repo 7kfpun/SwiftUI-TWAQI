@@ -35,10 +35,7 @@ from dataclasses import dataclass
 # Public websites: fine anywhere.
 ALLOWED_HOSTS = {
     "taiwanair.wahthefox.com",
-    "japanesedaily.wahthefox.com",
     "kf-twaqi.web.app",
-    "kf-twaqi.firebaseapp.com",
-    "taiwanair-wahthefox.web.app",
     "kf-nihongo.web.app",
 }
 

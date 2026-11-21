@@ -242,7 +242,7 @@ private fun AboutSection() {
     LinkRow(stringResource(R.string.pro_terms_of_use), onClick = {
         uriHandler.openSafely(LegalPage.TERMS.url(chinese))
     }, external = true)
-    SectionFooter(stringResource(R.string.help_data_provided_by_government))
+    DataSourcesFooter(uriHandler)
 }
 
 /** The activity UMP's privacy form shows over. */

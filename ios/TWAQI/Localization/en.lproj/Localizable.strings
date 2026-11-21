@@ -589,6 +589,9 @@
 "Help.shortcuts_control_body" = "On iOS 18 or later, open Control Center, touch and hold an empty space, tap Add a Control and search for Taiwan Air. It shows the AQI of your nearest station or a favourite; tap it to open the station. It also fits the Lock Screen's control buttons.";
 "Help.shortcuts_footer" = "Free for everyone. Siri and Shortcuts need iOS 16 or later.";
 
+// Home Screen quick actions (FOX-138)
+"QuickAction.closest_station" = "Closest station";
+
 /* What's New (FOX-142) */
 "WhatsNew.title" = "What's New";
 "WhatsNew.close" = "Got it";
@@ -600,3 +603,9 @@
 "WhatsNew.3_1_5.welcome_body" = "New installs are guided through location, your closest station, air quality alerts and quiet hours, so setup takes a minute.";
 "WhatsNew.3_1_5.appearance_title" = "Choose your Appearance";
 "WhatsNew.3_1_5.appearance_body" = "System default follows your iPhone; Light and Dark stay as you set them. Change it in Help.";
+"WhatsNew.3_1_6.widget_title" = "Widgets, your way";
+"WhatsNew.3_1_6.widget_body" = "Pick which station a widget shows, and the medium and large widgets now include the local weather.";
+"WhatsNew.3_1_6.watch_title" = "Swipe on Apple Watch";
+"WhatsNew.3_1_6.watch_body" = "Swipe between your favourite stations right on the watch.";
+"WhatsNew.3_1_6.alert_title" = "Alerts open the station";
+"WhatsNew.3_1_6.alert_body" = "Tap an air quality alert and the app opens straight to that station.";
