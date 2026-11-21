@@ -613,7 +613,7 @@
 "Map.Locate.following" = "跟隨你的位置";
 "Map.Locate.hint_off" = "將地圖置中於你與最近的測站";
 "Map.Locate.hint_centred" = "讓地圖隨你移動";
-"Map.Locate.hint_following" = "再次將地圖置中於你的位置";
+"Map.Locate.hint_following" = "停止跟隨並將地圖置中於你的位置";
 "Map.Locate.you_are_here" = "你在這裡";
 "Map.Locate.off_title" = "定位已關閉";
 "Map.Locate.off_message" = "請到「設定」開啟台灣空氣的定位服務，即可在地圖上看到你的位置。";

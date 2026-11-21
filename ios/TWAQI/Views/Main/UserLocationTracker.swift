@@ -26,6 +26,7 @@ final class UserLocationTracker: NSObject, CLLocationManagerDelegate {
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         manager.distanceFilter = 5
+        manager.headingFilter = 5
     }
 
     var access: LocateMeAccess {

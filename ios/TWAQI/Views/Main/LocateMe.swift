@@ -20,7 +20,7 @@ enum LocateMeMode: Equatable {
     case following
 
     /// What one tap on the button does: off → centred → following, and a tap
-    /// while following centres on the user again.
+    /// while following stops following and centres on the user.
     var afterTap: LocateMeMode {
         switch self {
         case .off: return .centred
