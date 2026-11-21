@@ -135,6 +135,8 @@ enum AnalyticsEvent: String, CaseIterable {
     case selectLanguage = "select_language"
     /// `label`: system / light / dark (FOX-43).
     case selectAppearance = "select_appearance"
+    /// `label`: standard / colorBlindSafe (TWAQ-18).
+    case selectAqiPalette = "select_aqi_palette"
     /// `label`: on / off, `dndStartTime`, `dndEndTime`.
     case setDndNotification = "set_dnd_notification"
     case setDndNotificationStartTime = "set_dnd_notification_start_time"

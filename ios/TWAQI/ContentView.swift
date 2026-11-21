@@ -22,6 +22,9 @@ struct ContentView: View {
     /// tabs refreshes text produced in code (`.localized`, the UIKit map
     /// overlay, formatters, `Locale.isChinese` names).
     @AppStorage(AppLanguage.defaultsKey) private var language: AppLanguage = .system
+    /// The AQI colours chosen under Help (TWAQ-18). Colours are read when a
+    /// view is built, so a change rebuilds the tabs like a language change.
+    @AppStorage(AQIPalette.defaultsKey) private var aqiPalette: AQIPalette = .standard
 
     /// Kept outside the rebuilt tabs so changing language stays on Help.
     @State private var selectedTab: AppTab = .main
@@ -66,7 +69,7 @@ struct ContentView: View {
                 classicTabs
             }
         }
-        .id(language)
+        .id("\(language.rawValue)|\(aqiPalette.rawValue)")
         .environment(\.locale, language.locale())
         // Outside the rebuilt tabs, so a language change doesn't lose it.
         .readsFoldLine()

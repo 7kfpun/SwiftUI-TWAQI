@@ -34,7 +34,7 @@ private let missingDataMarkerOpacity: Float = 0.55
 struct MarkerAppearance: Hashable {
     enum Shape: Hashable {
         /// The reading in a rounded pill.
-        case pill(text: String, foregroundColor: UInt32)
+        case pill(text: String, foregroundColor: UInt32, level: Int)
         /// Wind mode: an arrow whose length carries the speed, rotated by
         /// `bearing` (where the wind comes *from*) to point downwind.
         case arrow(strength: Double, bearing: Double)
@@ -82,7 +82,9 @@ struct MarkerAppearance: Hashable {
         } else {
             shape = .pill(
                 text: value != 0 ? value.format(f: airIndexType.getFormat()) : "-",
-                foregroundColor: airStatus.getForegroundColor()
+                foregroundColor: airStatus.getForegroundColor(),
+                // The colour-blind palette adds a second cue: one pip per level.
+                level: AQIPalette.current == .colorBlindSafe ? airStatus.level : 0
             )
         }
     }
@@ -141,8 +143,8 @@ final class StationMapMarker: GMSMarker, StationMarker {
         opacity = appearance.opacity
 
         switch appearance.shape {
-        case .pill(let text, let foregroundColor):
-            icon = MarkerIcons.pill(text: text, color: appearance.color, foregroundColor: foregroundColor)
+        case .pill(let text, let foregroundColor, let level):
+            icon = MarkerIcons.pill(text: text, color: appearance.color, foregroundColor: foregroundColor, level: level)
             groundAnchor = CGPoint(x: 0.5, y: 1)
             rotation = 0
             isFlat = false
@@ -201,8 +203,8 @@ enum MarkerIcons {
     }
 
     /// The reading in a rounded pill, 40 × 30, white hairline border.
-    static func pill(text: String, color: UInt32, foregroundColor: UInt32) -> UIImage {
-        cached("pill|\(text)|\(color)|\(foregroundColor)") {
+    static func pill(text: String, color: UInt32, foregroundColor: UInt32, level: Int = 0) -> UIImage {
+        cached("pill|\(text)|\(color)|\(foregroundColor)|\(level)") {
             let label = UILabel(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 30)))
             label.text = text
             label.textColor = UIColor(rgb: Int(foregroundColor))
@@ -218,7 +220,24 @@ enum MarkerIcons {
             format.opaque = false
             return UIGraphicsImageRenderer(bounds: label.bounds, format: format).image { context in
                 label.layer.render(in: context.cgContext)
+                pips(level: level, in: label.bounds, color: UIColor(rgb: Int(foregroundColor)))
             }
+        }
+    }
+
+    /// `level` small dots along the pill's lower edge: a cue that doesn't
+    /// depend on colour (TWAQ-18). Nothing for 0.
+    private static func pips(level: Int, in bounds: CGRect, color: UIColor) {
+        guard level > 0 else { return }
+        let diameter: CGFloat = 3
+        let gap: CGFloat = 2
+        let width = CGFloat(level) * diameter + CGFloat(level - 1) * gap
+        var x = bounds.midX - width / 2
+        let y = bounds.maxY - diameter - 3
+        color.setFill()
+        for _ in 0..<level {
+            UIBezierPath(ovalIn: CGRect(x: x, y: y, width: diameter, height: diameter)).fill()
+            x += diameter + gap
         }
     }
 

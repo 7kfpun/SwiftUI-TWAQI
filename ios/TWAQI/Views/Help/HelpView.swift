@@ -226,6 +226,19 @@ struct HelpView: View {
                 Text("Help.appearance")
             }
             .pushedChoices()
+
+            // TWAQ-18: the AQI band colours. The level name and the marker's
+            // pips stay, so colour is never the only cue.
+            Picker(selection: Binding(
+                get: { settings.aqiPalette },
+                set: { settings.aqiPalette = $0 }
+            )) {
+                Text("Help.aqi_palette_standard").tag(AQIPalette.standard)
+                Text("Help.aqi_palette_colorblind").tag(AQIPalette.colorBlindSafe)
+            } label: {
+                Text("Help.aqi_palette")
+            }
+            .pushedChoices()
         }
     }
 
