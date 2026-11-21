@@ -40,11 +40,24 @@ final class ConsentManager: ObservableObject {
         status == .required
     }
 
-    /// Asks UMP for the current consent state, once per launch, so Help knows
-    /// whether to offer the privacy options entry point. That runs for Pro too
-    /// (a Pro user may have chosen while free and can still withdraw). Only
-    /// free users get the form and the ads SDK: Pro has no ads to ask about.
-    func gather(isPro: Bool) {
+    /// The consent form and the ads SDK are for free users only, decided from
+    /// the live Pro state (`SettingsStore.refreshPro()` has answered), never
+    /// from a cached flag a caller saw earlier.
+    nonisolated static func shouldPresentForm(livePro: Bool) -> Bool { !livePro }
+
+    nonisolated static func shouldStartAds(livePro: Bool, canRequestAds: Bool, didStart: Bool) -> Bool {
+        !livePro && canRequestAds && !didStart
+    }
+
+    private var livePro: Bool { UserDefaults.standard.bool(forKey: "pro") }
+
+    /// Asks UMP for the current consent state, so Help knows whether to offer
+    /// the privacy options entry point. That runs for Pro too (a Pro user may
+    /// have chosen while free and can still withdraw). Only free users get the
+    /// form and the ads SDK: Pro has no ads to ask about. Pro is refreshed
+    /// first, so a stale cached flag (fresh install, restore, another device,
+    /// a lapse) decides nothing.
+    func gather() {
         #if DEBUG
         // Launch argument `-UMPReset` forgets the stored choice, so the form
         // can be checked again on the same install. Before anything starts ads.
@@ -53,10 +66,20 @@ final class ConsentManager: ObservableObject {
             ConsentInformation.shared.reset()
         }
         #endif
-        if !isPro { startAdsIfAllowed() }
-        guard !didGather else { return }
+        // Claim the request before the first await: ContentView calls gather()
+        // from onAppear and again on scenePhase .active, and both would
+        // otherwise pass the guard while refreshPro() is suspended.
+        let shouldRequest = !didGather
         didGather = true
+        Task { @MainActor in
+            await SettingsStore.refreshPro()
+            startAdsIfAllowed()
+            guard shouldRequest else { return }
+            requestConsentInfo()
+        }
+    }
 
+    private func requestConsentInfo() {
         let parameters = RequestParameters()
         #if DEBUG
         // Launch argument `-UMPDebugGeographyEEA` forces the EEA flow.
@@ -75,8 +98,12 @@ final class ConsentManager: ObservableObject {
                     self.refresh()
                     return
                 }
-                guard !isPro else {
-                    self.refresh(startAds: false)
+                // Right before the form: the answer may have changed since gather.
+                await SettingsStore.refreshPro()
+                guard Self.shouldPresentForm(livePro: self.livePro) else {
+                    // Pro: no form. Ask again on a later trigger, in case Pro lapses this launch.
+                    self.didGather = false
+                    self.refresh()
                     return
                 }
                 // The welcome cover may still be dismissing; presenting over it fails.
@@ -92,7 +119,7 @@ final class ConsentManager: ObservableObject {
             }
         }
         // Consent stored by an earlier launch already allows ads.
-        refresh(startAds: !isPro)
+        refresh()
     }
 
     /// Opens the privacy options form (Help → Privacy settings).
@@ -103,21 +130,21 @@ final class ConsentManager: ObservableObject {
             } catch {
                 print("UMP: privacy options form failed — \(error.localizedDescription)")
             }
+            await SettingsStore.refreshPro()
             refresh()
         }
     }
 
-    private func refresh(startAds: Bool = true) {
+    private func refresh() {
         let info = ConsentInformation.shared
         canRequestAds = info.canRequestAds
         privacyOptionsRequired = Self.showsPrivacyOptions(info.privacyOptionsRequirementStatus)
-        if startAds { startAdsIfAllowed() }
+        startAdsIfAllowed()
     }
 
     private func startAdsIfAllowed() {
-        // Free users only, whichever path got here (the privacy form and a
-        // failed update call `refresh()` for Pro users too).
-        guard canRequestAds, !didStartAds, !UserDefaults.standard.bool(forKey: "pro") else { return }
+        // Free users only, whichever path got here. Callers refresh Pro first.
+        guard Self.shouldStartAds(livePro: livePro, canRequestAds: canRequestAds, didStart: didStartAds) else { return }
         didStartAds = true
         MobileAds.shared.start(completionHandler: nil)
     }

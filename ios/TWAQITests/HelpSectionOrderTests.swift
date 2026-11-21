@@ -46,6 +46,18 @@ final class PrivacySettingsVisibilityTests: XCTestCase {
         XCTAssertFalse(ConsentManager.showsPrivacyOptions(.unknown))
     }
 
+    /// TWAQ-8: form and ads start follow the live Pro state, not a cached flag.
+    func testFormAndAdsFollowLivePro() {
+        // Stale free cache, Pro once StoreKit answered: no form, no ads start.
+        XCTAssertFalse(ConsentManager.shouldPresentForm(livePro: true))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: true, canRequestAds: true, didStart: false))
+        // Stale Pro cache, free once StoreKit answered: the form is still reachable.
+        XCTAssertTrue(ConsentManager.shouldPresentForm(livePro: false))
+        XCTAssertTrue(ConsentManager.shouldStartAds(livePro: false, canRequestAds: true, didStart: false))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: false, canRequestAds: false, didStart: false))
+        XCTAssertFalse(ConsentManager.shouldStartAds(livePro: false, canRequestAds: true, didStart: true))
+    }
+
     func testHelpSectionFollowsTheRequirement() {
         XCTAssertFalse(HelpSection.order(isPro: false, developerMode: false).contains(.privacy))
         XCTAssertTrue(HelpSection.order(isPro: false, developerMode: false, privacyOptionsRequired: true).contains(.privacy))

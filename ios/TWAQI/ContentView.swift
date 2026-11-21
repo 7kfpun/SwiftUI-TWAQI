@@ -51,7 +51,7 @@ struct ContentView: View {
 
     private func gatherConsent() {
         guard !showingOnboarding else { return }
-        ConsentManager.shared.gather(isPro: settings.isPro)
+        ConsentManager.shared.gather()
     }
 
     enum AppTab: Hashable {
