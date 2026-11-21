@@ -34,6 +34,9 @@ enum StationLinkSource: String {
     case widget
     /// A tap on a push alert, on the station it is about (FOX-141).
     case push
+    /// A Home Screen quick action: a favourite, or "Closest station" once it
+    /// resolved to a station (FOX-138).
+    case quickAction = "quick_action"
     /// `twaqi://station` with no `source`, or one this build doesn't know.
     case deepLink = "deep_link"
 }
@@ -127,5 +130,53 @@ enum DeepLink: Equatable {
         case .station(let id, _):
             return isKnownStation(id) ? link : nil
         }
+    }
+}
+
+/// The Home Screen quick actions on the app icon (FOX-138): "Closest
+/// station", then up to `maxFavourites` favourites in Favourites' order. Each
+/// opens its station through the same `twaqi://station` path as a widget tap.
+/// This is only the pure part; `SceneDelegate` sets them on `UIApplication`.
+enum QuickActions {
+    /// iOS shows four quick actions; one is "Closest station".
+    static let maxFavourites = 3
+
+    /// Posted when the favourites, their names or the language changed and
+    /// the icon's quick actions should be rebuilt. The widget extension
+    /// shares `WidgetBridge`, so the posting side cannot touch UIKit.
+    static let didChange = Notification.Name("TWAQI.QuickActions.didChange")
+
+    private static let typePrefix = "twaqi.quickaction."
+    static let closestType = typePrefix + "closest"
+    private static let stationTypePrefix = typePrefix + "station."
+
+    struct Item: Equatable {
+        let type: String
+        let title: String
+    }
+
+    enum Target: Equatable {
+        case closest
+        case station(Int)
+    }
+
+    /// "Closest station" first, then the favourites. `favourites` is already
+    /// in the reader's order; duplicates and non-positive ids are skipped.
+    static func items(favourites: [(id: Int, name: String)], closestTitle: String) -> [Item] {
+        var seen: Set<Int> = []
+        let stations = favourites
+            .filter { $0.id > 0 && seen.insert($0.id).inserted }
+            .prefix(maxFavourites)
+            .map { Item(type: stationTypePrefix + String($0.id), title: $0.name) }
+        return [Item(type: closestType, title: closestTitle)] + stations
+    }
+
+    /// What a tapped quick action asks for; nil for a type that isn't ours.
+    static func target(forType type: String) -> Target? {
+        if type == closestType { return .closest }
+        guard type.hasPrefix(stationTypePrefix),
+              let id = Int(type.dropFirst(stationTypePrefix.count)), id > 0
+        else { return nil }
+        return .station(id)
     }
 }
