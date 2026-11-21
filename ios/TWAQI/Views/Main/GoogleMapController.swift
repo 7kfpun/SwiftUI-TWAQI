@@ -955,11 +955,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         guard weather != closestStationView.weather || hint != closestStationView.windHint else { return }
         closestStationView.weather = weather
         closestStationView.windHint = hint
-        var height = weather == nil
-            ? ClosestStationView.preferredSize.height
-            : ClosestStationView.heightWithWeather
-        if hint != nil { height += ClosestStationView.hintRowHeight }
-        closestStationHeight?.update(offset: height)
+        closestStationHeight?.update(
+            offset: ClosestStationView.height(weather: weather, hasHint: hint != nil)
+        )
         view.layoutIfNeeded()
     }
 

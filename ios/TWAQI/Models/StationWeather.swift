@@ -86,6 +86,9 @@ struct WeatherObservation: Decodable, Equatable {
     /// Degrees clockwise from north the wind blows *from*, 0–360; absent in
     /// files written before the wind layer (TWAQ-15).
     let windDir: Double?
+    /// UV index. Only some stations carry a UV sensor, and files written
+    /// before TWAQ-14 have none.
+    var uv: Double?
 
     var observedAt: Date? { WeatherDates.parse(time) }
 }
@@ -162,6 +165,28 @@ enum StationWeatherMatcher {
                 return StationWeather.Now(observation: station, distanceKm: km, observedAt: observedAt)
             }
             .min { $0.distanceKm < $1.distanceKm }
+    }
+
+    /// UV changes slowly across space and few stations measure it, so its
+    /// nearest station may be further off than the weather station's.
+    static let maxUVDistanceKm = 40.0
+
+    /// The UV index of the closest fresh station that has one within
+    /// `maxUVDistanceKm`, or nil. A station without a UV sensor is skipped
+    /// rather than ending the search.
+    static func nearestUV(lat: Double, lon: Double, in stations: [WeatherObservation], now: Date) -> Double? {
+        guard lat != 0 || lon != 0 else { return nil }
+        return stations
+            .compactMap { station -> (km: Double, uv: Double)? in
+                guard
+                    let uv = station.uv, uv >= 0,
+                    let observedAt = station.observedAt, isFresh(observedAt, now: now)
+                else { return nil }
+                let km = StationCamMatcher.distanceKm(lat, lon, station.lat, station.lon)
+                return km <= maxUVDistanceKm ? (km, uv) : nil
+            }
+            .min { $0.km < $1.km }?
+            .uv
     }
 
     /// A reading from the last `maxObservationAge`. A few minutes ahead of the
@@ -316,6 +341,12 @@ struct MapCenterWeather: Equatable {
     let isNight: Bool
     /// Chance of rain, %, for the period running now.
     let rainChance: Double?
+    /// %, from the same station as `temperature`.
+    let humidity: Double?
+    /// m/s, from the same station as `temperature`.
+    let windSpeed: Double?
+    /// UV index of the nearest station that measures it (TWAQ-14).
+    let uv: Double?
     /// zh-Hant, as CWA publishes it.
     let stationName: String
     /// From the map centre to the CWA station.
@@ -345,10 +376,99 @@ struct MapCenterWeather: Equatable {
             wx: period?.wx,
             isNight: period?.isNight ?? (hour >= 18 || hour < 6),
             rainChance: period?.pop,
+            humidity: reading.observation.humidity,
+            windSpeed: reading.observation.wind,
+            uv: StationWeatherMatcher.nearestUV(lat: lat, lon: lon, in: file.observations?.stations ?? [], now: now),
             stationName: reading.observation.name,
             distanceKm: reading.distanceKm,
             observedAt: reading.observedAt
         )
+    }
+
+    /// The chips under the AQI on the map card.
+    var chips: [WeatherChip] {
+        WeatherChips.make(
+            temperature: temperature, humidity: humidity, windSpeed: windSpeed,
+            rainChance: rainChance, uv: uv
+        )
+    }
+}
+
+// MARK: - Weather chips (TWAQ-14)
+
+/// One small reading under the temperature: chance of rain, feels-like or UV.
+struct WeatherChip: Equatable {
+    enum Kind: Equatable { case rain, feelsLike, uv }
+
+    let kind: Kind
+    /// What the chip shows, 「☂ 10%」, 「Feels 26°」, 「UV 5」.
+    let text: String
+    /// What VoiceOver reads, with units: 「Chance of rain 10%」.
+    let spoken: String
+}
+
+/// Builds the chips from raw readings, shared by the map card and the
+/// widgets. A reading that is missing leaves its chip out: there is never a
+/// dash or an empty chip.
+enum WeatherChips {
+    /// Below this the UV chip says little (night, heavy cloud) and is left out.
+    static let minUV = 1
+
+    /// Apparent temperature in °C, the Australian Bureau of Meteorology's
+    /// version of Steadman's formula: `T + 0.33·e − 0.70·ws − 4.00`, with `e`
+    /// the water vapour pressure from humidity. Nil unless temperature,
+    /// humidity and wind speed are all known (guessing a calm day or a dry
+    /// one would mislead).
+    static func feelsLike(temperature: Double?, humidity: Double?, windSpeed: Double?) -> Double? {
+        guard
+            let t = temperature, let rh = humidity, let wind = windSpeed,
+            (0...100).contains(rh), wind >= 0
+        else { return nil }
+        let vapour = rh / 100 * 6.105 * exp(17.27 * t / (237.7 + t))
+        return t + 0.33 * vapour - 0.70 * wind - 4.00
+    }
+
+    /// The UV chip's category key suffix (WHO bands).
+    static func uvBand(_ uv: Int) -> String {
+        switch uv {
+        case ..<3: return "low"
+        case 3...5: return "moderate"
+        case 6...7: return "high"
+        case 8...10: return "very_high"
+        default: return "extreme"
+        }
+    }
+
+    static func make(
+        temperature: Double?, humidity: Double?, windSpeed: Double?, rainChance: Double?, uv: Double?,
+        bundle: Bundle = .appLanguage
+    ) -> [WeatherChip] {
+        func text(_ key: String, _ args: CVarArg...) -> String {
+            String(format: NSLocalizedString(key, bundle: bundle, comment: ""), arguments: args)
+        }
+        var chips: [WeatherChip] = []
+
+        if let chance = rainChance, (0...100).contains(chance) {
+            let percent = "\(Int(chance.rounded()))%"
+            chips.append(WeatherChip(
+                kind: .rain, text: "☂ \(percent)", spoken: text("Weather.chance_of_rain %@", percent)
+            ))
+        }
+        if let feels = feelsLike(temperature: temperature, humidity: humidity, windSpeed: windSpeed) {
+            let degrees = "\(Int(feels.rounded()))°"
+            chips.append(WeatherChip(
+                kind: .feelsLike, text: text("Weather.chip_feels_like %@", degrees),
+                spoken: text("Weather.feels_like %@", degrees)
+            ))
+        }
+        if let uv = uv, uv >= 0, uv < 100, Int(uv.rounded()) >= minUV {
+            let value = Int(uv.rounded())
+            chips.append(WeatherChip(
+                kind: .uv, text: text("Weather.chip_uv %@", "\(value)"),
+                spoken: text("Weather.uv_index %@ %@", "\(value)", text("Weather.uv.\(uvBand(value))"))
+            ))
+        }
+        return chips
     }
 }
 

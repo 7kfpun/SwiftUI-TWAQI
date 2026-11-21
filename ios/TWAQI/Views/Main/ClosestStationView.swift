@@ -24,13 +24,28 @@ final class ClosestStationView: UIControl {
     /// Extra height while the wind layer's "air is coming from…" line
     /// (TWAQ-15) is shown under the weather row.
     static let hintRowHeight: CGFloat = 22
+    /// Extra height while the weather chips (TWAQ-14: rain, feels-like, UV)
+    /// are shown under the weather row.
+    static let chipsRowHeight: CGFloat = 26
+
+    /// The card's height for what it shows: the station alone, plus the
+    /// weather row, the chips row when any chip has a reading, and the wind
+    /// hint.
+    static func height(weather: MapCenterWeather?, hasHint: Bool) -> CGFloat {
+        guard let weather else { return preferredSize.height }
+        var height = heightWithWeather
+        if !weather.chips.isEmpty { height += chipsRowHeight }
+        if hasHint { height += hintRowHeight }
+        return height
+    }
 
     private var topHeight: Constraint?
 
     private var weatherRow: UIView!
     private var weatherIcon: UIImageView!
     private var weatherTempLabel: UILabel!
-    private var weatherRainLabel: UILabel!
+    private var chipsRow: UIStackView!
+    private var chipsHeight: Constraint?
     private var weatherStationLabel: UILabel!
     private var windHintLabel: UILabel!
 
@@ -260,11 +275,38 @@ final class ClosestStationView: UIControl {
         )
         weatherTempLabel.text = Self.temperature(weather.temperature)
 
-        let rain = weather.rainChance.map(Self.percent)
-        weatherRainLabel.text = rain.map { "☂ \($0)" }
-        weatherRainLabel.isHidden = rain == nil
+        updateChips(weather.chips)
 
         weatherStationLabel.text = Self.stationText(name: weather.stationName, distanceKm: weather.distanceKm)
+    }
+
+    /// One capsule per chip with a reading; none (and no row height) when
+    /// every reading is missing.
+    private func updateChips(_ chips: [WeatherChip]) {
+        chipsRow.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for chip in chips {
+            chipsRow.addArrangedSubview(Self.makeChip(chip))
+        }
+        chipsRow.isHidden = chips.isEmpty
+        chipsHeight?.update(offset: chips.isEmpty ? 0 : Self.chipsRowHeight - 2)
+    }
+
+    private static func makeChip(_ chip: WeatherChip) -> UIView {
+        let label = PaddedChipLabel()
+        label.text = chip.text
+        label.font = UIFontMetrics(forTextStyle: .caption2)
+            .scaledFont(for: .systemFont(ofSize: 11, weight: .medium), maximumPointSize: 15)
+        label.adjustsFontForContentSizeCategory = true
+        label.textColor = .secondaryLabel
+        label.backgroundColor = .tertiarySystemFill
+        label.layer.cornerRadius = 9
+        label.layer.masksToBounds = true
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.7
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        // The card is one VoiceOver element; its text is read from `accessibilityText`.
+        label.isAccessibilityElement = false
+        return label
     }
 
     /// 「24°」, rounded; 「—」 when missing.
@@ -292,9 +334,8 @@ final class ClosestStationView: UIControl {
         if let condition = WeatherCode.text(code: weather.wx, cwaText: nil, chinese: false) {
             parts.append(condition)
         }
-        if let rain = weather.rainChance {
-            parts.append(String(format: "Weather.chance_of_rain %@".localized, percent(rain)))
-        }
+        // Chance of rain, feels-like and UV, with units (TWAQ-14).
+        parts.append(contentsOf: weather.chips.map(\.spoken))
         parts.append(stationText(name: weather.stationName, distanceKm: weather.distanceKm, chinese: chinese))
         return parts.joined(separator: ", ")
     }
@@ -473,16 +514,6 @@ final class ClosestStationView: UIControl {
             make.centerY.equalTo(weatherRow)
         }
 
-        weatherRainLabel = UILabel()
-        weatherRainLabel.font = .systemFont(ofSize: 11)
-        weatherRainLabel.textColor = .secondaryLabel
-        weatherRainLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-        weatherRow.addSubview(weatherRainLabel)
-        weatherRainLabel.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(weatherTempLabel.snp.right).offset(6)
-            make.centerY.equalTo(weatherRow)
-        }
-
         weatherStationLabel = UILabel()
         weatherStationLabel.font = .systemFont(ofSize: 10, weight: .light)
         weatherStationLabel.textColor = .secondaryLabel
@@ -491,8 +522,24 @@ final class ClosestStationView: UIControl {
         weatherStationLabel.minimumScaleFactor = 0.7
         weatherRow.addSubview(weatherStationLabel)
         weatherStationLabel.snp.makeConstraints { (make) -> Void in
-            make.left.greaterThanOrEqualTo(weatherRainLabel.snp.right).offset(6)
+            make.left.greaterThanOrEqualTo(weatherTempLabel.snp.right).offset(6)
             make.right.centerY.equalTo(weatherRow)
+        }
+
+        // MARK: Chips (TWAQ-14)
+        chipsRow = UIStackView()
+        chipsRow.axis = .horizontal
+        chipsRow.spacing = 6
+        chipsRow.alignment = .center
+        chipsRow.distribution = .fillProportionally
+        chipsRow.isHidden = true
+        chipsRow.isUserInteractionEnabled = false
+        addSubview(chipsRow)
+        chipsRow.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(weatherRow.snp.bottom).offset(2)
+            make.left.equalTo(self).offset(12)
+            make.right.lessThanOrEqualTo(self).offset(-12)
+            chipsHeight = make.height.equalTo(0).constraint
         }
 
         // MARK: Wind hint (TWAQ-15)
@@ -505,10 +552,25 @@ final class ClosestStationView: UIControl {
         windHintLabel.isHidden = true
         addSubview(windHintLabel)
         windHintLabel.snp.makeConstraints { (make) -> Void in
-            make.top.equalTo(weatherRow.snp.bottom)
+            make.top.equalTo(chipsRow.snp.bottom)
             make.left.equalTo(self).offset(12)
             make.right.equalTo(self).offset(-12)
             make.height.equalTo(Self.hintRowHeight - 4)
         }
+    }
+}
+
+
+/// A label with room around its text, so the chip's background reads as a capsule.
+private final class PaddedChipLabel: UILabel {
+    private let inset = UIEdgeInsets(top: 2, left: 7, bottom: 2, right: 7)
+
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: inset))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let size = super.intrinsicContentSize
+        return CGSize(width: size.width + inset.left + inset.right, height: size.height + inset.top + inset.bottom)
     }
 }

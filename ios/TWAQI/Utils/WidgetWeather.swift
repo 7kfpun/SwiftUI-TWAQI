@@ -39,17 +39,19 @@ struct WidgetWeather: Equatable {
     var chanceOfRain: Double?
     /// The period is an evening one, for the icon.
     var isNight = false
+    /// UV index of the nearest station that measures it (TWAQ-14).
+    var uv: Double?
 
     /// Whether there is anything to show.
     var isEmpty: Bool {
         temperature == nil && humidity == nil && rain == nil && windSpeed == nil && code == nil
-            && cwaText == nil && chanceOfRain == nil
+            && cwaText == nil && chanceOfRain == nil && uv == nil
     }
 
     /// Shown in the widget gallery before any weather is saved.
     static let placeholder = WidgetWeather(
         temperature: 24.3, humidity: 75, rain: 0.5, windSpeed: 3.2, windDirection: 45,
-        code: 4, cwaText: "多雲", chanceOfRain: 10
+        code: 4, cwaText: "多雲", chanceOfRain: 10, uv: 5
     )
 
     // MARK: - From the weather file
@@ -82,6 +84,9 @@ struct WidgetWeather: Equatable {
             weather.chanceOfRain = period.pop
             weather.isNight = period.isNight
         }
+        weather.uv = StationWeatherMatcher.nearestUV(
+            lat: lat, lon: lon, in: file.observations?.stations ?? [], now: now
+        )
         return weather.isEmpty ? nil : weather
     }
 
@@ -141,6 +146,15 @@ struct WidgetWeather: Equatable {
     /// Humidity and rain today, the medium widget's second line.
     var compactDetail: String {
         "\(Self.percentText(humidity)) · \(Self.rainText(rain))"
+    }
+
+    /// Chance of rain, feels-like and UV for the widgets (TWAQ-14); the ones
+    /// whose readings are missing are left out.
+    func chips(bundle: Bundle = .appLanguage) -> [WeatherChip] {
+        WeatherChips.make(
+            temperature: temperature, humidity: humidity, windSpeed: windSpeed,
+            rainChance: chanceOfRain, uv: uv, bundle: bundle
+        )
     }
 
     /// The small widget's line: temperature and chance of rain, 「24° · 10%」.
