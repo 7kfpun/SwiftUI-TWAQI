@@ -61,7 +61,9 @@
     <string name="help_interested_to_be_our_business_partner">想成為我們的合作夥伴嗎？</string>
     <string name="help_feedback_or_contact_us">意見回饋 / 聯絡我們</string>
     <string name="help_definition">認識空氣品質指標</string>
-    <string name="help_data_provided_by_government">本 App 資料由環境部「空氣品質監測網」開放資料提供。</string>
+    <string name="help_data_provided_by_government">台灣空氣品質是獨立 App，並非政府 App。空氣品質資料為%1$s開放資料，天氣資料為%2$s開放資料。</string>
+    <string name="help_source_moenv">環境部</string>
+    <string name="help_source_cwa">中央氣象署</string>
 
     <string name="feedback_title">意見回饋</string>
     <string name="feedback_rating_header">您對應用程序的滿意程度如何？</string>
