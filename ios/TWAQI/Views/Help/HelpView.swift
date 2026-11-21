@@ -389,6 +389,7 @@ struct HelpView: View {
                 } label: {
                     Text(verbatim: "Pro")
                 }
+                .pushedChoices()
             }
         }
         .task { isTestEnvironment = await IAPManager.isTestEnvironment() }
