@@ -39,9 +39,10 @@ nearby. Resolving a conflict or any edit of the branch's own changes the net
 change and needs a fresh LGTM.
 
 A review is tied to the commit it was left on. A comment has no commit of its
-own: one with a "(head <sha>)" note is tied to that commit, so it survives a
-rebase like a review does; one without a note covers the head only when it was
-written at or after that commit.
+own: one with a "(head <sha>)" note is tied to that commit. One without a note
+is tied to the PR's latest commit that existed when it was written (the head the
+writer saw), so a bare "Human LGTM" survives "Update branch" like a review does.
+Either way, the same-net-change rule above then decides.
 
 Needs `gh` (GH_TOKEN with statuses:write) and a full clone (fetch-depth 0).
 `python3 tools/lgtm_gate.py --self-test` checks the decision table.
@@ -194,6 +195,17 @@ def parse_time(value):
         return None
 
 
+def infer_commit(item, commits):
+    """The latest of `commits` ([(sha, committer time)]) not newer than the
+    comment: the head its writer saw. "" when there is none."""
+    created = parse_time(item.get("at"))
+    if not created:
+        return ""
+    seen = [(parse_time(when), sha) for sha, when in commits]
+    seen = [(when, sha) for when, sha in seen if when and when <= created]
+    return max(seen)[1] if seen else ""
+
+
 def covers(item, head, head_time, base_ref, finger):
     reviewed = reviewed_commit(item)
     if not reviewed:
@@ -264,6 +276,10 @@ def main():
     head, base_ref = pull["head"]["sha"], pull["base"]["ref"]
     reviews = [normalize_review(review) for review in gh_json_lines(f"repos/{repo}/pulls/{number}/reviews?per_page=100")]
     comments = [normalize_comment(comment) for comment in gh_json_lines(f"repos/{repo}/issues/{number}/comments?per_page=100")]
+    commits = [(c["sha"], c["commit"]["committer"]["date"]) for c in gh_json_lines(f"repos/{repo}/pulls/{number}/commits?per_page=100")]
+    for comment in comments:
+        if not reviewed_commit(comment):
+            comment["commit_id"] = infer_commit(comment, commits)
     state, description = decide(reviews + comments, head, commit_time(head), base_ref)
     print(f"{CONTEXT}: {state} — {description} (head {head[:7]})")
     if "--dry-run" in sys.argv:
@@ -412,10 +428,31 @@ def self_test():
             print(f"FAIL gated base {base}: want {want_gated}")
         else:
             print(f"ok   gated base {base}: {want_gated}")
+    infer_cases = [
+        ("infer: latest commit before the comment", {"at": "2026-11-02T12:00:00Z"}, "bbbbbbb"),
+        ("infer: none before the comment", {"at": "2026-11-02T08:00:00Z"}, ""),
+        ("infer: no time", {"at": ""}, ""),
+    ]
+    commits = [("aaaaaaa", "2026-11-02T09:00:00Z"), ("bbbbbbb", "2026-11-02T18:30:00+08:00"), ("ccccccc", "2026-11-02T13:00:00Z")]
+    for name, extra, want in infer_cases:
+        got = infer_commit(extra, commits)
+        if got != want:
+            failed += 1
+            print(f"FAIL {name}: got {got!r}, want {want!r}")
+        else:
+            print(f"ok   {name}")
+    # A bare comment written before a same-change update still covers the head.
+    bare = item("Human LGTM", commit_id=infer_commit({"at": "2026-11-02T12:00:00Z"}, commits))
+    state, description = decide([bare], head, "2026-11-02T13:00:00Z", "master", lambda r, b: "same" if r in ("bbbbbbb", head) else "other")
+    if state != "success":
+        failed += 1
+        print(f"FAIL bare comment before a same-change update: got {state} ({description})")
+    else:
+        print("ok   bare comment before a same-change update: success")
     if failed:
         print(f"{failed} failed")
         return 1
-    print(f"{len(cases) + len(diff_cases) + len(base_cases) + len(gate_cases)} passed")
+    print(f"{len(cases) + len(diff_cases) + len(base_cases) + len(gate_cases) + len(infer_cases) + 1} passed")
     return 0
 
 
