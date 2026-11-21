@@ -23,10 +23,6 @@ struct PollutantHistoryChart: View {
     @Binding var selected: Int?
 
     private let height: CGFloat = 110
-    /// Whether the drag in progress is mostly sideways. Decided once, from its
-    /// first movement, so a finger that starts moving up or down leaves the page to
-    /// its scroll view and a sideways one scrubs.
-    @State private var isScrubbing: Bool?
     private let lineWidth: CGFloat = 3
 
     var body: some View {
@@ -38,24 +34,16 @@ struct PollutantHistoryChart: View {
                 cursor(size: proxy.size)
             }
             .contentShape(Rectangle())
-            // Simultaneous with the page's scroll view, not exclusive with it:
-            // an exclusive drag would own the touch from the first points and
-            // stop the page scrolling under a finger that started on the chart.
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { drag in
-                        if isScrubbing == nil {
-                            // Wait for a clear direction before deciding.
-                            guard hypot(drag.translation.width, drag.translation.height) >= 6 else { return }
-                            isScrubbing = abs(drag.translation.width) > abs(drag.translation.height)
-                        }
-                        guard isScrubbing == true, proxy.size.width > 0 else { return }
-                        selected = series.index(atFraction: Double(drag.location.x / proxy.size.width))
-                    }
-                    .onEnded { _ in
-                        isScrubbing = nil
-                        selected = nil
-                    }
+            // A UIKit pan that refuses to begin on a vertical movement, so
+            // the page's scroll view keeps those; a SwiftUI drag can't decline
+            // a touch it has started on.
+            .overlay(
+                HorizontalScrub(
+                    onChange: { fraction in
+                        selected = series.index(atFraction: Double(fraction))
+                    },
+                    onEnd: { selected = nil }
+                )
             )
         }
         .frame(height: height)
@@ -204,5 +192,58 @@ enum PollutantHistoryFormat {
         formatter.locale = .app
         formatter.setLocalizedDateFormatFromTemplate("MMMdHHmm")
         return formatter.string(from: date)
+    }
+}
+
+/// A pan over the chart that begins only for a mostly sideways movement.
+/// Reports the finger's position as a fraction of the width, 0 to 1.
+private struct HorizontalScrub: UIViewRepresentable {
+    var onChange: (CGFloat) -> Void
+    var onEnd: () -> Void
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        // The chart is one accessibility element; this is not another.
+        view.isAccessibilityElement = false
+        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pan(_:)))
+        pan.delegate = context.coordinator
+        view.addGestureRecognizer(pan)
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.parent = self
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var parent: HorizontalScrub
+
+        init(_ parent: HorizontalScrub) {
+            self.parent = parent
+        }
+
+        @objc func pan(_ recognizer: UIPanGestureRecognizer) {
+            guard let view = recognizer.view, view.bounds.width > 0 else { return }
+            switch recognizer.state {
+            case .began, .changed:
+                let x = recognizer.location(in: view).x / view.bounds.width
+                parent.onChange(min(1, max(0, x)))
+            case .ended, .cancelled, .failed:
+                parent.onEnd()
+            default:
+                break
+            }
+        }
+
+        func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
+            guard let pan = recognizer as? UIPanGestureRecognizer else { return true }
+            let velocity = pan.velocity(in: pan.view)
+            return abs(velocity.x) > abs(velocity.y)
+        }
     }
 }

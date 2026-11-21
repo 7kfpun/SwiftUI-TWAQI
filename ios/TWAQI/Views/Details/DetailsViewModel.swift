@@ -141,9 +141,13 @@ class DetailsViewModel: ObservableObject {
                     self.stationLoadFailed = self.station == nil
                 }
                 let history = result["data"] as? HistoricalPollutants ?? []
-                self.historicalPollutants = history
-                self.isShowingCachedHistory = false
-                PollutantHistoryCache.shared.save(history, stationId: self.stationId)
+                // An older request answering with no readings doesn't take
+                // away what a newer one loaded.
+                if isLatest || !history.isEmpty {
+                    self.historicalPollutants = history
+                    self.isShowingCachedHistory = false
+                    PollutantHistoryCache.shared.save(history, stationId: self.stationId)
+                }
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
