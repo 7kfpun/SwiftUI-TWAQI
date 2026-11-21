@@ -40,6 +40,13 @@ final class ConsentManager: ObservableObject {
         status == .required
     }
 
+    /// The consent form is for free users only. `isPro` is what the caller saw
+    /// when it asked; `livePro` is the state re-read right before presenting.
+    /// Pro in either one skips the form.
+    nonisolated static func shouldPresentForm(isPro: Bool, livePro: Bool) -> Bool {
+        !isPro && !livePro
+    }
+
     /// Asks UMP for the current consent state, once per launch, so Help knows
     /// whether to offer the privacy options entry point. That runs for Pro too
     /// (a Pro user may have chosen while free and can still withdraw). Only
@@ -76,6 +83,13 @@ final class ConsentManager: ObservableObject {
                     return
                 }
                 guard !isPro else {
+                    self.refresh(startAds: false)
+                    return
+                }
+                // `isPro` was read when `gather` ran, and the cached flag is false
+                // until StoreKit answers (fresh install, restore). Ask again now.
+                await SettingsStore.refreshPro()
+                guard Self.shouldPresentForm(isPro: isPro, livePro: UserDefaults.standard.bool(forKey: "pro")) else {
                     self.refresh(startAds: false)
                     return
                 }

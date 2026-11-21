@@ -46,6 +46,15 @@ final class PrivacySettingsVisibilityTests: XCTestCase {
         XCTAssertFalse(ConsentManager.showsPrivacyOptions(.unknown))
     }
 
+    /// TWAQ-8: the form is skipped when Pro shows up between `gather` and presenting.
+    func testConsentFormSkippedForProEitherWay() {
+        XCTAssertTrue(ConsentManager.shouldPresentForm(isPro: false, livePro: false))
+        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: true, livePro: true))
+        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: true, livePro: false))
+        XCTAssertFalse(ConsentManager.shouldPresentForm(isPro: false, livePro: true),
+                       "Stale free flag at launch, Pro once StoreKit answered")
+    }
+
     func testHelpSectionFollowsTheRequirement() {
         XCTAssertFalse(HelpSection.order(isPro: false, developerMode: false).contains(.privacy))
         XCTAssertTrue(HelpSection.order(isPro: false, developerMode: false, privacyOptionsRequired: true).contains(.privacy))

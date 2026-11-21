@@ -67,4 +67,15 @@ final class LocateMeTests: XCTestCase {
         XCTAssertEqual(LocateMe.headingOrientation(for: .landscapeRight), .landscapeLeft)
         XCTAssertEqual(LocateMe.headingOrientation(for: .unknown), .portrait)
     }
+
+    /// TWAQ-8: position and compass run only for a visible map in an active app.
+    func testUpdatesRunOnlyWhileVisibleActiveAndAllowed() {
+        XCTAssertTrue(LocateMe.shouldRunUpdates(visible: true, appActive: true, access: .allowed))
+        XCTAssertFalse(LocateMe.shouldRunUpdates(visible: false, appActive: true, access: .allowed),
+                       "Another tab")
+        XCTAssertFalse(LocateMe.shouldRunUpdates(visible: true, appActive: false, access: .allowed),
+                       "App in the background")
+        XCTAssertFalse(LocateMe.shouldRunUpdates(visible: true, appActive: true, access: .ask))
+        XCTAssertFalse(LocateMe.shouldRunUpdates(visible: true, appActive: true, access: .explain))
+    }
 }

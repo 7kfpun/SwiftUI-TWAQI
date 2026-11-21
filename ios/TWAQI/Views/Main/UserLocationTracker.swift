@@ -35,24 +35,53 @@ final class UserLocationTracker: NSObject, CLLocationManagerDelegate {
         manager.headingOrientation = LocateMe.headingOrientation(for: orientation)
     }
 
+    /// `authorizationStatus` alone: it reads `.denied` while Location Services
+    /// are off, so no `locationServicesEnabled()` call (it blocks the main thread).
     var access: LocateMeAccess {
-        LocateMeAccess(status: manager.authorizationStatus, servicesEnabled: CLLocationManager.locationServicesEnabled())
+        LocateMeAccess(status: manager.authorizationStatus)
     }
 
-    /// Starts updates when permission is already given; does nothing otherwise.
-    func startIfAllowed() {
-        guard access == .allowed else { return }
-        manager.startUpdatingLocation()
-        if CLLocationManager.headingAvailable() { manager.startUpdatingHeading() }
-        if let last = manager.location, location == nil {
+    /// The map is on screen, and the app is in the foreground. Updates run
+    /// only while both hold (and permission is given); see `LocateMe.shouldRunUpdates`.
+    private var visible = false
+    private var appActive = true
+    private var running = false
+
+    func setVisible(_ visible: Bool) {
+        self.visible = visible
+        sync()
+    }
+
+    func setAppActive(_ active: Bool) {
+        appActive = active
+        sync()
+    }
+
+    /// Starts updates when permission is already given and the map is showing;
+    /// does nothing otherwise.
+    func startIfAllowed() { sync() }
+
+    func stop() {
+        running = false
+        manager.stopUpdatingLocation()
+        manager.stopUpdatingHeading()
+    }
+
+    private func sync() {
+        guard LocateMe.shouldRunUpdates(visible: visible, appActive: appActive, access: access) else {
+            if running { stop() }
+            return
+        }
+        if !running {
+            running = true
+            manager.startUpdatingLocation()
+            if CLLocationManager.headingAvailable() { manager.startUpdatingHeading() }
+        }
+        // On a restart this also hands the following map the newest known fix.
+        if let last = manager.location, last.timestamp > (location?.timestamp ?? .distantPast) {
             location = last
             onLocation?(last)
         }
-    }
-
-    func stop() {
-        manager.stopUpdatingLocation()
-        manager.stopUpdatingHeading()
     }
 
     /// The one place that shows the system permission prompt.
