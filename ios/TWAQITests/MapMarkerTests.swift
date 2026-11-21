@@ -26,7 +26,7 @@ final class MapMarkerTests: XCTestCase {
 
     func testPillShowsReadingOnItsBand() throws {
         let look = try appearance(station(aqi: 42))
-        XCTAssertEqual(look.shape, .pill(text: "42", foregroundColor: 0xFFFFFF))
+        XCTAssertEqual(look.shape, .pill(text: "42", foregroundColor: 0x000000, level: 0))
         XCTAssertEqual(look.color, 0x009866)
         XCTAssertEqual(look.opacity, 1)
     }
@@ -34,7 +34,7 @@ final class MapMarkerTests: XCTestCase {
     /// No reading that hour: grey "-", faded.
     func testMissingReadingIsGreyDashFaded() throws {
         let look = try appearance(station(aqi: 0), hasData: false)
-        XCTAssertEqual(look.shape, .pill(text: "-", foregroundColor: 0xFFFFFF))
+        XCTAssertEqual(look.shape, .pill(text: "-", foregroundColor: 0xFFFFFF, level: 0))
         XCTAssertEqual(look.color, 0x676767)
         XCTAssertEqual(look.opacity, 0.55)
     }
