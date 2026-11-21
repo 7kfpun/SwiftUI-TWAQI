@@ -58,6 +58,30 @@ jobs:
             || cp tools/check_release_consistency.py "$script"
           python3 "$script" "$PWD/ios"
 
+      - name: Tests for the gate scripts and workflows this PR touches
+        # The PR's own copies of the scripts and tests, run only when the diff
+        # touches them (the LGTM gate's self-test and the policy tests had no CI run).
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          touched() { grep -Eq "$1" <<<"$changed"; }
+          if touched '^(tools/(lgtm_gate\.py)|\.github/workflows/lgtm\.yml)$'; then
+            python3 tools/lgtm_gate.py --self-test
+          fi
+          if touched '^(tools/(pr_policy|test_pr_policy|check_release_consistency)\.py|\.github/workflows/pr-policy\.yml)$'; then
+            python3 -m unittest discover -s tools -p 'test_pr_policy.py'
+          fi
+          if touched '^(tools/(public_text_check|test_public_text_check)\.py|\.github/workflows/public-text\.yml)$'; then
+            python3 -m unittest discover -s tools -p 'test_public_text_check.py'
+          fi
+          # Any workflow file must still parse.
+          for f in $(grep -E '^\.github/workflows/.*\.ya?ml$' <<<"$changed" || true); do
+            [ -f "$f" ] && python3 -c "import sys,yaml;yaml.safe_load(open(sys.argv[1]))" "$f"
+          done
+
   secret-files:
     name: Secret files
     runs-on: ubuntu-latest
