@@ -115,6 +115,7 @@ enum AnalyticsEvent: String, CaseIterable {
     /// `label`: on / off.
     case setWindMode = "set_wind_mode"
     case setWindLayer = "set_wind_layer"
+    case setHeatmapLayer = "set_heatmap_layer"
     case moveToCurrentLocation = "move_to_current_location"
     case moveToDefaultLocation = "move_to_default_location"
     case mapTimelinePlay = "map_timeline_play"

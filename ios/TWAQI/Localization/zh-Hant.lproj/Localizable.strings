@@ -678,3 +678,11 @@
 "WindLayer.hint_higher %@" = "空氣由%@方吹來，該方向 PM2.5 較高";
 "WindLayer.hint_lower %@" = "空氣由%@方吹來，該方向 PM2.5 較低";
 "WindLayer.arrow %@ %@" = "%1$@風，風速每秒 %2$@ 公尺";
+
+/* Heatmap layer (TWAQ-22) */
+"Map.Heatmap.label" = "熱度圖";
+"Map.Heatmap.hint" = "顯示或隱藏測站之間的空氣品質推估色彩圖層";
+"Map.Heatmap.on" = "開";
+"Map.Heatmap.off" = "關";
+"Map.Heatmap.estimated" = "測站間推估值";
+"Map.Heatmap.description" = "熱度圖已開啟。色彩為測站之間的推估值，並非實際測值。";
