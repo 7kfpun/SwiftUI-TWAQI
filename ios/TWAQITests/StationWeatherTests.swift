@@ -425,6 +425,22 @@ extension StationWeatherTests {
                      "a 7-hour-old reading is not shown as now")
     }
 
+    func testMapCenterGapBetweenPeriodsShowsNoCondition() throws {
+        // The first period starts at 14:00, so 12:40 falls in a gap: the
+        // not-yet-started period must not pass as the current condition.
+        let gapJson = json.replacingOccurrences(
+            of: "\"start\": \"2026-11-05T12:00:00+08:00\", \"end\": \"2026-11-05T18:00:00+08:00\", \"wx\": 4",
+            with: "\"start\": \"2026-11-05T14:00:00+08:00\", \"end\": \"2026-11-05T18:00:00+08:00\", \"wx\": 4"
+        )
+        XCTAssertNotEqual(gapJson, json)
+        let file = try JSONDecoder().decode(WeatherFile.self, from: Data(gapJson.utf8))
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.06, lon: 121.52, in: file, now: now))
+        XCTAssertEqual(weather.temperature, 24.3)
+        XCTAssertNil(weather.wx)
+        XCTAssertNil(weather.rainChance)
+        XCTAssertFalse(weather.isNight)
+    }
+
     func testMapCenterOutsideRangeIsNil() throws {
         let file = try file()
         XCTAssertNil(MapCenterWeather.make(lat: 22.03, lon: 121.55, in: file, now: now))

@@ -306,7 +306,8 @@ enum WeatherDates {
 /// period for the condition icon and rain chance.
 struct MapCenterWeather: Equatable {
     let temperature: Double?
-    /// CWA weather code of the period running now.
+    /// CWA weather code of the period running now; nil in a gap between
+    /// periods, never the next one's.
     let wx: Int?
     /// For the moon variants of the icon, Taiwan time.
     let isNight: Bool
@@ -330,7 +331,7 @@ struct MapCenterWeather: Equatable {
         let period = weather.periods.first { period in
             guard let start = period.startDate, let end = period.endDate else { return false }
             return start <= now && now < end
-        } ?? weather.periods.first
+        }
         let hour = WeatherDates.calendar.component(.hour, from: now)
 
         let temperature = reading.observation.temp
