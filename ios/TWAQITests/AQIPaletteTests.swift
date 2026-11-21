@@ -69,6 +69,18 @@ final class AQIPaletteTests: XCTestCase {
         }
     }
 
+    /// The band colour is also drawn as text or a glyph straight on the system
+    /// background (rows, widgets), so the darkest colour-blind bands must stay
+    /// visible on white and on the dark background (3:1, the non-text bar).
+    func testDarkestColourBlindBandsStayVisibleOnLightAndDarkBackgrounds() {
+        let darkBackground: UInt32 = 0x1C1C1E
+        for status in [AirStatuses.veryunhealthy, .hazardous] {
+            let color = status.getColor(palette: .colorBlindSafe)
+            XCTAssertGreaterThanOrEqual(AQIContrast.ratio(color, 0xFFFFFF), 3, "\(status) on white")
+            XCTAssertGreaterThanOrEqual(AQIContrast.ratio(color, darkBackground), 3, "\(status) on dark")
+        }
+    }
+
     func testContrastMaths() {
         XCTAssertEqual(AQIContrast.ratio(0xFFFFFF, 0x000000), 21, accuracy: 0.01)
         XCTAssertEqual(AQIContrast.ratio(0x777777, 0x777777), 1, accuracy: 0.001)

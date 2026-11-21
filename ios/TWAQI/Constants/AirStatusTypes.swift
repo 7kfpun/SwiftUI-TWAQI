@@ -208,8 +208,8 @@ enum AQIPalette: String, CaseIterable, Identifiable {
             case .moderate: return 0xF0E442
             case .unhealthyforsensitivegroup: return 0xE69F00
             case .unhealthy: return 0xD55E00
-            case .veryunhealthy: return 0x8E2A74
-            case .hazardous: return 0x3B0F2E
+            case .veryunhealthy: return 0xB5559A
+            case .hazardous: return 0x7B61D6
             case .unknown: return 0x676767
             }
         }
