@@ -603,3 +603,9 @@
 "WhatsNew.3_1_5.welcome_body" = "新安裝會依序引導你設定定位、最近的測站、空氣品質警示與勿擾時段，一分鐘就能完成。";
 "WhatsNew.3_1_5.appearance_title" = "自選外觀";
 "WhatsNew.3_1_5.appearance_body" = "「跟隨系統」會依 iPhone 設定切換；「淺色」與「深色」則維持你的選擇。可在說明中更改。";
+"WhatsNew.3_1_6.widget_title" = "小工具隨你設定";
+"WhatsNew.3_1_6.widget_body" = "可自選小工具顯示的測站，中型與大型小工具也加入了當地天氣。";
+"WhatsNew.3_1_6.watch_title" = "Apple Watch 滑動切換";
+"WhatsNew.3_1_6.watch_body" = "在手錶上直接滑動，即可切換你收藏的測站。";
+"WhatsNew.3_1_6.alert_title" = "點警示直達測站";
+"WhatsNew.3_1_6.alert_body" = "點選空氣品質警示，App 會直接開啟該測站。";
