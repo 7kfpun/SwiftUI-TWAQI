@@ -337,7 +337,7 @@ export function parseObservations(body: unknown): Observation[] {
     if (humidity !== null && humidity > 0 && humidity <= 1) humidity = Math.round(humidity * 100)
     const rain = rainfall(get(get(element, 'Now', 'now'), 'Precipitation', 'precipitation'))
     const wind = valid(num(get(element, 'WindSpeed', 'windSpeed')), (n) => n >= 0 && n < 100)
-    // 0 is calm and 360 is north; CWA's markers (-99, -990) and anything past 360 are null.
+    // 0 and 360 are both north (calm is told by speed). CWA's -99, -990 and 990 (variable) fall outside 0..360 and become null.
     const windDir = valid(num(get(element, 'WindDirection', 'windDirection')), (n) => n >= 0 && n <= 360)
     if (temp === null && humidity === null && rain === null && wind === null) continue
 

@@ -369,6 +369,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             if timelineHoursAgo > 0 {
                 requestVisibleHistory()
             }
+            // New readings change the PM2.5 behind the hint; the weather
+            // store answers from its cache within its ttl.
+            scheduleCenterWeather()
+            refreshWindLayer()
         }
     }
 
@@ -684,8 +688,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         windLayerButton.button.addTarget(self, action: #selector(toggleWindLayer), for: .touchUpInside)
         view.addSubview(windLayerButton)
         windLayerButton.snp.makeConstraints { (make) -> Void in
-            make.bottom.equalTo(windModeButton.snp.top).offset(-12)
-            make.left.equalTo(view.safeAreaLayoutGuide.snp.left).offset(15)
+            // Same row as the wind-mode button, so the left stack stays one
+            // button tall and clears the station card in landscape.
+            make.bottom.equalTo(windModeButton)
+            make.left.equalTo(windModeButton.snp.right).offset(12)
             make.width.equalTo(60)
             make.height.equalTo(60)
         }

@@ -45,7 +45,7 @@ final class WindModeButton: UIView {
     }
 }
 
-/// Toggle for the wind arrows layer (TWAQ-15), above the wind-mode button.
+/// Toggle for the wind arrows layer (TWAQ-15), beside the wind-mode button.
 final class WindLayerButton: UIView {
     var button: UIButton!
 
