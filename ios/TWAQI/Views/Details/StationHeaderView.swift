@@ -111,7 +111,8 @@ struct LastUpdatedView: View {
         case .fresh:
             fresh
         case .offline:
-            flagged(icon: "wifi.slash", badge: Text("Offline.badge"), detail: Text("Offline.updated_ago \(age)"))
+            flagged(icon: "wifi.slash", badge: Text("Offline.badge"),
+                    detail: compact ? Text("Offline.updated_ago \(age)") : Text("Freshness.updated_ago \(age)"))
         case .stale:
             flagged(icon: "clock.badge.exclamationmark", badge: nil, detail: compact ? Text("Freshness.stale_short \(age)") : Text("Freshness.stale_updated_ago \(age)"))
         }

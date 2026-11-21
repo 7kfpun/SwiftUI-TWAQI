@@ -182,7 +182,7 @@ struct DetailsView: View {
 
                 // A retired station still returns its last 24 points, which
                 // would read as today's trend.
-                if !viewModel.isNotReporting || viewModel.hasRecentHistory {
+                if !isLoadingFirstReading, !viewModel.isNotReporting || viewModel.hasRecentHistory {
                     DetailsHistoryView(
                         historicalPollutants: viewModel.historicalPollutants,
                         airIndexType: selectedPollutant

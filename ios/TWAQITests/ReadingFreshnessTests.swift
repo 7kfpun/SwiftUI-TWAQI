@@ -115,7 +115,9 @@ final class ReadingFreshnessTests: XCTestCase {
     func testRefreshGateResumesWaitersWhenTheRequestAnswers() async {
         let gate = RefreshGate()
         let waiting = Task { await gate.wait(); return true }
-        await Task.yield()
+        // Give the task time to start waiting; finish() before wait() is not
+        // a state the screens reach (answers arrive on the main queue later).
+        try? await Task.sleep(nanoseconds: 100_000_000)
         await MainActor.run { gate.finish() }
         let done = await waiting.value
         XCTAssertTrue(done)

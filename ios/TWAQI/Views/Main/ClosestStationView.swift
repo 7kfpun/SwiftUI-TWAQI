@@ -132,7 +132,7 @@ final class ClosestStationView: UIView {
         updatedLabel.isHidden = false
         // Online, but published longer ago than a fresh reading can be.
         if ReadingFreshness.decide(publishTime: publishTime, isFromCache: false) == .stale {
-            updatedLabel.text = String(format: "Freshness.stale_updated_ago %@".localized, ReadingFreshness.ageText(of: publishTime))
+            updatedLabel.text = String(format: "Freshness.stale_short %@".localized, ReadingFreshness.ageText(of: publishTime))
             updatedLabel.textColor = .systemOrange
             return
         }
