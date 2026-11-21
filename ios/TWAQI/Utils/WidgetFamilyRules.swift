@@ -36,10 +36,17 @@ enum WidgetFamilyRules {
         isProFamily(family) && !isPro && !isPreview
     }
 
-    /// Medium and large show the weather at the station (FOX-181); small,
-    /// extra large and the Lock Screen families don't.
+    /// Small, medium and large show the weather at the station (FOX-181,
+    /// TWAQ-17), and so does the rectangular Lock Screen widget (a line of
+    /// temperature). Extra large, the circular and the inline Lock Screen
+    /// widgets don't.
     static func showsWeather(_ family: WidgetFamily) -> Bool {
-        family == .systemMedium || family == .systemLarge
+        switch family {
+        case .systemSmall, .systemMedium, .systemLarge: return true
+        default:
+            if #available(iOS 16.0, *) { return family == .accessoryRectangular }
+            return false
+        }
     }
 
     /// Extra large shows the station page (history, forecast, cam), and is

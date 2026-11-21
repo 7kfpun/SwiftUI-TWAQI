@@ -153,6 +153,21 @@ final class SettingsStore: ObservableObject {
         get { AppAppearance.stored(in: defaults) }
     }
 
+    /// Colours of the AQI bands, chosen under Help (TWAQ-18). Mirrored into
+    /// the app group so the widgets draw the same colours.
+    var aqiPalette: AQIPalette {
+        set {
+            if newValue == .standard {
+                defaults.removeObject(forKey: AQIPalette.defaultsKey)
+            } else {
+                defaults.set(newValue.rawValue, forKey: AQIPalette.defaultsKey)
+            }
+            WidgetBridge.publish(aqiPalette: newValue)
+            TrackingManager.logEvent(.selectAqiPalette, parameters: ["label": newValue.rawValue])
+        }
+        get { AQIPalette.stored(in: defaults) }
+    }
+
     var isDndEnabled: Bool {
         set { defaults.set(newValue, forKey: Keys.dndEnabled) }
         get { defaults.bool(forKey: Keys.dndEnabled) }

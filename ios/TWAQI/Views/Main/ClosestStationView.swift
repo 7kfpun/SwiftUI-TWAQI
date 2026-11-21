@@ -13,7 +13,7 @@ import UIKit
 ///
 /// Layout: identity on the left (name, locality, status, last-updated), the
 /// current value pill and health face on the right.
-final class ClosestStationView: UIView {
+final class ClosestStationView: UIControl {
     static let preferredSize = CGSize(width: 232, height: 96)
     /// Extra height while the weather row (TWAQ-6) is shown under the station.
     static let weatherRowHeight: CGFloat = 26
@@ -21,6 +21,9 @@ final class ClosestStationView: UIView {
     /// card grows by less than the row (pill 12 + 24, face 8 + 36 fit in it).
     static let topHeightWithWeather: CGFloat = 82
     static var heightWithWeather: CGFloat { topHeightWithWeather + weatherRowHeight }
+    /// Extra height while the wind layer's "air is coming from…" line
+    /// (TWAQ-15) is shown under the weather row.
+    static let hintRowHeight: CGFloat = 22
 
     private var topHeight: Constraint?
 
@@ -29,6 +32,7 @@ final class ClosestStationView: UIView {
     private var weatherTempLabel: UILabel!
     private var weatherRainLabel: UILabel!
     private var weatherStationLabel: UILabel!
+    private var windHintLabel: UILabel!
 
     private var stack: UIStackView!
     private var skeletonView: UIView!
@@ -41,7 +45,10 @@ final class ClosestStationView: UIView {
 
     var stationName: String? {
         get { return label?.text }
-        set { label.text = newValue?.maxLength(length: 16) }
+        set {
+            label.text = newValue?.maxLength(length: 16)
+            updateAccessibility()
+        }
     }
 
     /// Township / county, hidden when the API doesn't supply it.
@@ -87,6 +94,7 @@ final class ClosestStationView: UIView {
             guard isLoading != oldValue else { return }
             skeletonView.isHidden = !isLoading
             stack.isHidden = isLoading
+            updateAccessibility()
             if isLoading { startSkeletonPulse() } else { skeletonView.layer.removeAllAnimations() }
         }
     }
@@ -98,6 +106,7 @@ final class ClosestStationView: UIView {
         localityLabel.isHidden = true
         subLabel.text = nil
         updatedLabel.isHidden = true
+        updateAccessibility()
     }
 
     private func startSkeletonPulse() {
@@ -142,7 +151,63 @@ final class ClosestStationView: UIView {
 
     var aqi: String? {
         get { return aqiLabel?.text }
-        set { aqiLabel.text = newValue }
+        set {
+            aqiLabel.text = newValue
+            updateAccessibility()
+        }
+    }
+
+    // MARK: Tap (TWAQ-11)
+
+    private var chevron: UIImageView!
+
+    /// Pressed state: the card dims a little under the finger.
+    override var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.12) {
+                self.alpha = self.isHighlighted ? 0.7 : 1
+            }
+        }
+    }
+
+    /// Off while there is nothing to open (loading, no reading, outside the
+    /// supported country): no chevron, and VoiceOver reads what is on screen rather than a button.
+    override var isEnabled: Bool {
+        didSet {
+            chevron?.isHidden = !isEnabled
+            updateAccessibility()
+        }
+    }
+
+    /// One element for the whole card (station, AQI and weather rows). A button
+    /// that says it opens details only while it does; loading and the offline
+    /// message are read as what is on screen.
+    private func updateAccessibility() {
+        isAccessibilityElement = true
+        if isLoading {
+            accessibilityTraits = .staticText
+            accessibilityLabel = "Loading.label".localized
+            accessibilityValue = nil
+            return
+        }
+        var parts = [label?.text, subLabel?.text, aqiLabel?.text].compactMap { $0 }.filter { !$0.isEmpty }
+        if let weather {
+            parts.append(Self.accessibilityText(weather))
+        }
+        // The wind line is a subview of this one element, so it is not read on its own.
+        if let windHint, !windHint.isEmpty {
+            parts.append(windHint)
+        }
+        let spoken = parts.joined(separator: ", ")
+        if isEnabled {
+            accessibilityTraits = .button
+            accessibilityLabel = "MapCard.accessibility_label".localized
+            accessibilityValue = spoken
+        } else {
+            accessibilityTraits = .staticText
+            accessibilityLabel = spoken
+            accessibilityValue = nil
+        }
     }
 
     var aqiColor: UIColor? {
@@ -164,14 +229,26 @@ final class ClosestStationView: UIView {
     /// AQI. Nil hides the row (outside Taiwan, no recent CWA reading, or the
     /// timeline is scrubbed back).
     var weather: MapCenterWeather? {
-        didSet { updateWeatherRow() }
+        didSet {
+            updateWeatherRow()
+            updateAccessibility()
+        }
+    }
+
+    /// Wind layer hint, e.g. 「Air is coming from the north-east, where PM2.5
+    /// is higher」. Nil hides the line; it only shows under the weather row.
+    var windHint: String? {
+        didSet {
+            windHintLabel.text = windHint
+            windHintLabel.isHidden = windHint == nil
+            updateAccessibility()
+        }
     }
 
     private func updateWeatherRow() {
         topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
         guard let weather else {
             weatherRow.isHidden = true
-            weatherRow.accessibilityLabel = nil
             return
         }
         weatherRow.isHidden = false
@@ -188,8 +265,6 @@ final class ClosestStationView: UIView {
         weatherRainLabel.isHidden = rain == nil
 
         weatherStationLabel.text = Self.stationText(name: weather.stationName, distanceKm: weather.distanceKm)
-
-        weatherRow.accessibilityLabel = Self.accessibilityText(weather)
     }
 
     /// 「24°」, rounded; 「—」 when missing.
@@ -247,6 +322,7 @@ final class ClosestStationView: UIView {
         // MARK: Right column — value pill + health face
         let rightView = UIView()
         addSubview(rightView)
+        rightView.isUserInteractionEnabled = false
         rightView.snp.makeConstraints { (make) -> Void in
             make.top.right.equalTo(self)
             topHeight = make.height.equalTo(Self.preferredSize.height).constraint
@@ -277,6 +353,7 @@ final class ClosestStationView: UIView {
 
         // MARK: Left column — identity
         stack = UIStackView()
+        stack.isUserInteractionEnabled = false
         stack.axis = .vertical
         stack.alignment = .leading
         stack.spacing = 2
@@ -336,10 +413,30 @@ final class ClosestStationView: UIView {
         let faceBar = bar(width: 36, height: 36, radius: 18)
         faceBar.snp.makeConstraints { $0.top.equalTo(pillBar.snp.bottom).offset(8); $0.centerX.equalTo(pillBar); $0.width.equalTo(36); $0.height.equalTo(36) }
 
+        // MARK: Chevron: the card opens the details panel
+        chevron = UIImageView(image: UIImage(
+            systemName: "chevron.right",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 9, weight: .semibold)
+        ))
+        chevron.tintColor = .tertiaryLabel
+        chevron.contentMode = .scaleAspectFit
+        chevron.isHidden = !isEnabled
+        addSubview(chevron)
+        chevron.snp.makeConstraints { (make) -> Void in
+            // Beside the face, where the 72pt column has room even for a long pill.
+            make.right.equalTo(self).offset(-5)
+            make.centerY.equalTo(imageView)
+            make.width.equalTo(8)
+            make.height.equalTo(12)
+        }
+
+        isEnabled = false
+
         // MARK: Weather row (secondary reading)
         weatherRow = UIView()
         weatherRow.isHidden = true
-        weatherRow.isAccessibilityElement = true
+        // Read as part of the card, which is one button.
+        weatherRow.isUserInteractionEnabled = false
         addSubview(weatherRow)
         weatherRow.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(rightView.snp.bottom)
@@ -396,6 +493,22 @@ final class ClosestStationView: UIView {
         weatherStationLabel.snp.makeConstraints { (make) -> Void in
             make.left.greaterThanOrEqualTo(weatherRainLabel.snp.right).offset(6)
             make.right.centerY.equalTo(weatherRow)
+        }
+
+        // MARK: Wind hint (TWAQ-15)
+        windHintLabel = UILabel()
+        windHintLabel.font = .systemFont(ofSize: 11)
+        windHintLabel.textColor = .secondaryLabel
+        windHintLabel.numberOfLines = 1
+        windHintLabel.adjustsFontSizeToFitWidth = true
+        windHintLabel.minimumScaleFactor = 0.7
+        windHintLabel.isHidden = true
+        addSubview(windHintLabel)
+        windHintLabel.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(weatherRow.snp.bottom)
+            make.left.equalTo(self).offset(12)
+            make.right.equalTo(self).offset(-12)
+            make.height.equalTo(Self.hintRowHeight - 4)
         }
     }
 }

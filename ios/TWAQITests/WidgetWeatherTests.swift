@@ -174,16 +174,29 @@ final class WidgetWeatherTests: XCTestCase {
 
     // MARK: Families
 
-    func testOnlyMediumAndLargeShowWeather() {
+    func testWeatherFamilies() {
+        XCTAssertTrue(WidgetFamilyRules.showsWeather(.systemSmall))
         XCTAssertTrue(WidgetFamilyRules.showsWeather(.systemMedium))
         XCTAssertTrue(WidgetFamilyRules.showsWeather(.systemLarge))
-        XCTAssertFalse(WidgetFamilyRules.showsWeather(.systemSmall))
         XCTAssertFalse(WidgetFamilyRules.showsWeather(.systemExtraLarge))
         if #available(iOS 16.0, *) {
-            for family: WidgetFamily in [.accessoryCircular, .accessoryRectangular, .accessoryInline] {
+            XCTAssertTrue(WidgetFamilyRules.showsWeather(.accessoryRectangular))
+            for family: WidgetFamily in [.accessoryCircular, .accessoryInline] {
                 XCTAssertFalse(WidgetFamilyRules.showsWeather(family), "\(family)")
             }
         }
+    }
+
+    func testBriefSpokenTextHasOnlyWhatTheSmallWidgetShows() {
+        let weather = WidgetWeather(temperature: 24.3, humidity: 75, rain: 0.5, windSpeed: 3.2, code: 4, cwaText: "多雲", chanceOfRain: 10)
+        XCTAssertEqual(weather.briefSpokenText(chinese: true), "24° · 多雲")
+        XCTAssertEqual(WidgetWeather(temperature: 20).briefSpokenText(chinese: false), "20°")
+    }
+
+    func testBriefTextIsTemperatureAndChanceOfRain() {
+        XCTAssertEqual(WidgetWeather(temperature: 24.3, chanceOfRain: 10).briefText, "24° · 10%")
+        XCTAssertEqual(WidgetWeather(temperature: 24.3).briefText, "24°")
+        XCTAssertEqual(WidgetWeather(chanceOfRain: 30).briefText, "— · 30%")
     }
 
     // MARK: Cache
