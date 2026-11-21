@@ -90,6 +90,7 @@ final class ClosestStationView: UIControl {
             guard isLoading != oldValue else { return }
             skeletonView.isHidden = !isLoading
             stack.isHidden = isLoading
+            updateAccessibility()
             if isLoading { startSkeletonPulse() } else { skeletonView.layer.removeAllAnimations() }
         }
     }
@@ -101,6 +102,7 @@ final class ClosestStationView: UIControl {
         localityLabel.isHidden = true
         subLabel.text = nil
         updatedLabel.isHidden = true
+        updateAccessibility()
     }
 
     private func startSkeletonPulse() {
@@ -173,16 +175,31 @@ final class ClosestStationView: UIControl {
         }
     }
 
-    /// One button for the whole card (station, AQI and weather rows).
+    /// One element for the whole card (station, AQI and weather rows). A button
+    /// that says it opens details only while it does; loading and the offline
+    /// message are read as what is on screen.
     private func updateAccessibility() {
         isAccessibilityElement = true
-        accessibilityTraits = isEnabled ? .button : [.button, .notEnabled]
-        accessibilityLabel = "MapCard.accessibility_label".localized
+        if isLoading {
+            accessibilityTraits = .staticText
+            accessibilityLabel = "Loading.label".localized
+            accessibilityValue = nil
+            return
+        }
         var parts = [label?.text, subLabel?.text, aqiLabel?.text].compactMap { $0 }.filter { !$0.isEmpty }
         if let weather {
             parts.append(Self.accessibilityText(weather))
         }
-        accessibilityValue = parts.joined(separator: ", ")
+        let spoken = parts.joined(separator: ", ")
+        if isEnabled {
+            accessibilityTraits = .button
+            accessibilityLabel = "MapCard.accessibility_label".localized
+            accessibilityValue = spoken
+        } else {
+            accessibilityTraits = .staticText
+            accessibilityLabel = spoken
+            accessibilityValue = nil
+        }
     }
 
     var aqiColor: UIColor? {
