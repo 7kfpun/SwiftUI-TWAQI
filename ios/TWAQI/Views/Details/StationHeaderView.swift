@@ -16,6 +16,8 @@ struct StationHeaderView: View {
     var stationType: StationTypes
     var aqi: Double
     var publishTime: String?
+    /// The reading is the saved copy, because the latest request failed.
+    var isOffline = false
 
     var body: some View {
         let airStatus = AirStatuses.checkAirStatus(airIndexType: .aqi, value: aqi)
@@ -88,7 +90,7 @@ struct StationHeaderView: View {
             }
 
             if let publishTime = publishTime {
-                LastUpdatedView(publishTime: publishTime)
+                LastUpdatedView(publishTime: publishTime, isOffline: isOffline)
             }
         }
         .padding(.horizontal)
@@ -97,11 +99,25 @@ struct StationHeaderView: View {
 }
 
 /// "Last updated 22:00 · 2h ago" — shared by the map card and station screen.
+/// A saved copy or a reading past `ReadingFreshness.staleAfter` says so in
+/// orange, with its age, instead of passing as fresh (TWAQ-19).
 struct LastUpdatedView: View {
     var publishTime: String
     var compact: Bool = false
+    var isOffline = false
 
     var body: some View {
+        switch ReadingFreshness.decide(publishTime: publishTime, isFromCache: isOffline) {
+        case .fresh:
+            fresh
+        case .offline:
+            flagged(icon: "wifi.slash", badge: Text("Offline.badge"), detail: Text("Offline.updated_ago \(age)"))
+        case .stale:
+            flagged(icon: "clock.badge.exclamationmark", badge: nil, detail: Text("Freshness.stale_updated_ago \(age)"))
+        }
+    }
+
+    private var fresh: some View {
         HStack(spacing: 4) {
             Image(systemName: "clock")
             if compact {
@@ -119,6 +135,27 @@ struct LastUpdatedView: View {
         }
         .font(.caption.weight(.light))
         .foregroundColor(.secondary)
+    }
+
+    private var age: String { ReadingFreshness.ageText(of: publishTime) }
+
+    private func flagged(icon: String, badge: Text?, detail: Text) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+            if !compact, let badge = badge {
+                badge
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Color.orange.opacity(0.18))
+                    .clipShape(Capsule())
+            }
+            detail
+                .lineLimit(compact ? 1 : 2)
+        }
+        .font(.caption.weight(.light))
+        .foregroundColor(.orange)
+        .accessibilityElement(children: .combine)
     }
 }
 

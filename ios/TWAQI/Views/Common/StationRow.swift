@@ -21,6 +21,8 @@ struct StationRow: View {
     struct Reading {
         var aqi: Double
         var publishTime: String?
+        /// The reading is the saved copy, because the latest request failed.
+        var isOffline = false
         /// A few pollutants, one line under the locality. Empty leaves the
         /// row as just the AQI.
         var pollutants: [PollutantValue] = []
@@ -60,7 +62,7 @@ struct StationRow: View {
                 }
 
                 if let publishTime = reading?.publishTime {
-                    LastUpdatedView(publishTime: publishTime, compact: true)
+                    LastUpdatedView(publishTime: publishTime, compact: true, isOffline: reading?.isOffline ?? false)
                 }
             }
 
@@ -141,15 +143,30 @@ struct EmptyStateView: View {
 /// One line saying the readings below are the last good ones saved, because
 /// the latest request failed. Each reading already shows its own time.
 struct OfflineNotice: View {
+    /// A way to try again, where the page has no list to pull down.
+    var retry: (() -> Void)?
+
     var body: some View {
-        Label {
-            Text("Offline.showing_saved_readings")
-        } icon: {
-            Image(systemName: "wifi.slash")
+        HStack(spacing: 8) {
+            Label {
+                Text("Offline.showing_saved_readings")
+            } icon: {
+                Image(systemName: "wifi.slash")
+            }
+            .font(.footnote)
+            .foregroundColor(.orange)
+            .accessibilityElement(children: .combine)
+
+            if let retry = retry {
+                Spacer(minLength: 8)
+                Button(action: retry) {
+                    Text("Offline.retry")
+                        .font(.footnote.weight(.medium))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
         }
-        .font(.footnote)
-        .foregroundColor(.orange)
-        .accessibilityElement(children: .combine)
     }
 }
 

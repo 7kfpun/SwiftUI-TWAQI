@@ -291,6 +291,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     var countryPollutants: [String: Pollutants] = [:] {
         didSet {
+            closestStationView?.isLoading = false
             loadMarkers()
             updateTimelineAnchor()
             // A new publish hour moves the window; top up what's in view.
@@ -407,7 +408,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 // Keep what is on screen; with nothing on screen yet, show the
                 // last good readings rather than an empty map.
                 if self.countryPollutants[countryCode] == nil {
-                    guard let cached = PollutantCache.shared.pollutants(countryCode: countryCode) else { return }
+                    guard let cached = PollutantCache.shared.pollutants(countryCode: countryCode) else {
+                        if self.closestPollutant == nil { self.closestStationView.showUnavailable() }
+                        return
+                    }
                     self.lastGoodCountryCodes.insert(countryCode)
                     self.countryPollutants[countryCode] = cached
                 } else {
@@ -491,6 +495,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
         // MARK: closestStationView
         closestStationView = ClosestStationView()
+        closestStationView.isLoading = true
         view.addSubview(closestStationView)
         closestStationView.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
