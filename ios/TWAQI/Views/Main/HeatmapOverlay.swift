@@ -77,9 +77,71 @@ final class HeatmapOverlay {
         overlay.bounds = box
         overlay.opacity = HeatmapInterpolation.opacity(forZoom: zoom)
         // Under every marker, over the base map.
-        overlay.zIndex = -10
+        overlay.zIndex = -20
         overlay.isTappable = false
         overlay.map = isEnabled ? mapView : nil
         self.overlay = overlay
     }
+}
+
+/// Where the heatmap's on/off choice is remembered.
+enum HeatmapLayer {
+    static let defaultsKey = "heatmapLayerOn"
+}
+
+/// Toggle for the heatmap layer (TWAQ-22), beside the wind layer button.
+final class HeatmapLayerButton: UIView {
+    var button: UIButton!
+
+    var isOn: Bool {
+        get { return button.tintColor == .white }
+        set {
+            button.tintColor = newValue ? .white : .label
+            button.backgroundColor = newValue ? UIColor(rgb: 0xFF9500) : .tertiarySystemBackground
+            button.accessibilityValue = (newValue ? "Map.Heatmap.on" : "Map.Heatmap.off").localized
+            button.isSelected = newValue
+        }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        createSubviews()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        createSubviews()
+    }
+
+    private func createSubviews() {
+        button = UIButton(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        button.setImage(UIImage(systemName: "smoke.fill"), for: .normal)
+        button.layer.cornerRadius = 30
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 4)
+        button.layer.shadowRadius = 2
+        button.layer.shadowOpacity = 0.2
+        button.accessibilityLabel = "Map.Heatmap.label".localized
+        button.accessibilityHint = "Map.Heatmap.hint".localized
+        addSubview(button)
+        isOn = false
+    }
+}
+
+/// "Estimated between stations", shown while the layer is on.
+final class HeatmapNoteLabel: UILabel {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        text = "  " + "Map.Heatmap.estimated".localized + "  "
+        font = .preferredFont(forTextStyle: .caption1)
+        adjustsFontForContentSizeCategory = true
+        textColor = .label
+        backgroundColor = UIColor.systemBackground.withAlphaComponent(0.85)
+        layer.cornerRadius = 10
+        clipsToBounds = true
+        isHidden = true
+        accessibilityLabel = "Map.Heatmap.description".localized
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 }

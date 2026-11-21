@@ -72,11 +72,11 @@ final class HeatmapInterpolationTests: XCTestCase {
     }
 
     func testZoomOpacityFadesOutWhenZoomedIn() {
-        XCTAssertEqual(HeatmapInterpolation.opacity(forZoom: 7), 0.7, accuracy: 0.001)
+        XCTAssertEqual(HeatmapInterpolation.opacity(forZoom: 7), 0.85, accuracy: 0.001)
         XCTAssertEqual(HeatmapInterpolation.opacity(forZoom: 12), 0)
         let mid = HeatmapInterpolation.opacity(forZoom: 10)
         XCTAssertGreaterThan(mid, 0)
-        XCTAssertLessThan(mid, 0.7)
+        XCTAssertLessThan(mid, 0.85)
     }
 
     func testImageHasTheGridSize() {

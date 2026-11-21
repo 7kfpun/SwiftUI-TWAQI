@@ -672,3 +672,11 @@
 "WindLayer.hint_higher %@" = "Air is coming from the %@, where PM2.5 is higher";
 "WindLayer.hint_lower %@" = "Air is coming from the %@, where PM2.5 is lower";
 "WindLayer.arrow %@ %@" = "Wind from the %1$@ at %2$@ metres per second";
+
+/* Heatmap layer (TWAQ-22) */
+"Map.Heatmap.label" = "Heatmap";
+"Map.Heatmap.hint" = "Shows or hides an estimated air quality colour layer between stations";
+"Map.Heatmap.on" = "On";
+"Map.Heatmap.off" = "Off";
+"Map.Heatmap.estimated" = "Estimated between stations";
+"Map.Heatmap.description" = "Heatmap on. Colours are estimated between stations and do not show exact readings.";

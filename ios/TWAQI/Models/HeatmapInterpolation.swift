@@ -120,7 +120,7 @@ enum HeatmapInterpolation {
     static func opacity(forZoom zoom: Float) -> Float {
         let full: Float = 8.0
         let none: Float = 12.0
-        let strongest: Float = 0.7
+        let strongest: Float = 0.85
         if zoom <= full { return strongest }
         if zoom >= none { return 0 }
         return strongest * (none - zoom) / (none - full)
