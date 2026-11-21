@@ -171,7 +171,7 @@ final class ClosestStationView: UIControl {
     }
 
     /// Off while there is nothing to open (loading, no reading, outside the
-    /// supported country): no chevron, and VoiceOver says it is dimmed.
+    /// supported country): no chevron, and VoiceOver reads what is on screen rather than a button.
     override var isEnabled: Bool {
         didSet {
             chevron?.isHidden = !isEnabled
@@ -193,6 +193,10 @@ final class ClosestStationView: UIControl {
         var parts = [label?.text, subLabel?.text, aqiLabel?.text].compactMap { $0 }.filter { !$0.isEmpty }
         if let weather {
             parts.append(Self.accessibilityText(weather))
+        }
+        // The wind line is a subview of this one element, so it is not read on its own.
+        if let windHint, !windHint.isEmpty {
+            parts.append(windHint)
         }
         let spoken = parts.joined(separator: ", ")
         if isEnabled {
@@ -237,6 +241,7 @@ final class ClosestStationView: UIControl {
         didSet {
             windHintLabel.text = windHint
             windHintLabel.isHidden = windHint == nil
+            updateAccessibility()
         }
     }
 
