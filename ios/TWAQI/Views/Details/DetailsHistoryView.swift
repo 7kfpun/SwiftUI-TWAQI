@@ -8,8 +8,8 @@
 
 import SwiftUI
 
-/// Last 24 hours of air quality, answering one question: is it getting better
-/// or worse?
+/// The last 24 hours or 7 days of air quality, answering one question: is it
+/// getting better or worse? Drag the chart to read an exact value and time.
 ///
 /// Defaults to AQI and follows whichever pollutant the reader taps in
 /// `StationInfoView`. That selection is passed in and held by the station
@@ -18,10 +18,21 @@ import SwiftUI
 struct DetailsHistoryView: View {
     var historicalPollutants: HistoricalPollutants
     var airIndexType: AirIndexTypes = .aqi
+    /// The readings are the saved copy, because the latest request failed.
+    var isCached = false
+
+    /// Both ranges, built once per set of readings: a drag redraws the view
+    /// on every move and shouldn't re-parse a week of times each time.
+    private let seriesByRange: [HistoryRange: PollutantHistorySeries]
+    /// `PollutantHistorySeries.hasChart`, decided once with the series.
+    private let hasChart: Bool
+
+    @State private var range: HistoryRange = .day
+    @State private var selected: Int?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if points.count >= 2 {
+            if hasChart {
                 // Names what the chart is showing — without it, tapping a
                 // pollutant above changes the bars with nothing to say why.
                 Text(verbatim: airIndexType.toString())
@@ -30,9 +41,21 @@ struct DetailsHistoryView: View {
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
 
-                headline
-                chart
-                footnote
+                if dayValues.count >= 2 {
+                    headline
+                }
+                rangePicker
+                if series.isChartable {
+                    readout
+                    chart
+                    footnote
+                } else {
+                    Text("Details.no_trend_data")
+                        .font(.callout)
+                        .fontWeight(.light)
+                        .foregroundColor(.secondary)
+                }
+                notes
             } else {
                 Text("Details.no_trend_data")
                     .font(.callout)
@@ -61,6 +84,13 @@ struct DetailsHistoryView: View {
                     .font(.caption)
                     .fontWeight(.light)
                     .foregroundColor(.secondary)
+
+                // The verdict always judges today; say so beside a week chart.
+                if range == .week {
+                    Text("Details.history_verdict_window")
+                        .font(.caption2.weight(.light))
+                        .foregroundColor(.secondary)
+                }
             }
 
             Spacer()
@@ -69,32 +99,87 @@ struct DetailsHistoryView: View {
 
     // MARK: - Chart
 
+    private var rangePicker: some View {
+        Picker(selection: $range, label: Text("Details.history_range_label")) {
+            Text("Details.history_range_24h").tag(HistoryRange.day)
+            Text("Details.history_range_7d").tag(HistoryRange.week)
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .onChange(of: range) { _ in selected = nil }
+    }
+
+    /// The hour under the finger, or the latest one at rest.
+    private var readout: some View {
+        let sample = selected.flatMap { series.samples.indices.contains($0) ? series.samples[$0] : nil } ?? series.latest
+        return HStack(alignment: .firstTextBaseline, spacing: 6) {
+            if let value = sample?.value {
+                Text(value.format(f: airIndexType.getFormat()))
+                    .font(.title3.weight(.medium))
+                    .foregroundColor(Color(AirStatuses.checkAirStatus(airIndexType: airIndexType, value: value).getColor()))
+                Text(airIndexType.getUnit())
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("Details.history_no_reading")
+                    .font(.title3.weight(.medium))
+                    .foregroundColor(.secondary)
+            }
+            if let time = sample?.time {
+                Text(verbatim: PollutantHistoryFormat.hour(time))
+                    .font(.caption)
+                    .fontWeight(.light)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+        .accessibilityHidden(true)
+    }
+
     private var chart: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .bottom, spacing: 3) {
-                ForEach(Array(points.enumerated()), id: \.offset) { _, point in
-                    RoundedRectangle(cornerRadius: 2.5)
-                        .fill(Color(AirStatuses.checkAirStatus(
-                            airIndexType: airIndexType,
-                            value: point.value
-                        ).getColor()))
-                        .frame(height: barHeight(for: point.value))
-                }
-            }
-            .frame(height: maxBarHeight, alignment: .bottom)
+            PollutantHistoryChart(series: series, airIndexType: airIndexType, selected: $selected)
 
             // Three anchors only — a label per hour is noise.
             HStack {
-                Text(label(at: 0))
+                Text(verbatim: axisLabel(at: 0))
                 Spacer()
-                Text(label(at: points.count / 2))
+                Text(verbatim: axisLabel(at: series.samples.count / 2))
                 Spacer()
-                Text("Details.now")
+                if isLatestHourCurrent {
+                    Text("Details.now")
+                } else {
+                    Text(verbatim: axisLabel(at: series.samples.count - 1))
+                }
             }
             // `.font(_:.weight)` rather than `.fontWeight`, which is iOS 16+.
             .font(.caption2.weight(.light))
             .foregroundColor(.secondary)
+            .accessibilityHidden(true)
         }
+    }
+
+    /// When the data was last updated, that it is a saved copy, and what the
+    /// 7-day range is missing.
+    private var notes: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let latest = series.latest {
+                Text(String(
+                    format: NSLocalizedString("Details.history_updated %@", bundle: .appLanguage, comment: ""),
+                    PollutantHistoryFormat.hour(latest.time)
+                ))
+            }
+            if isCached {
+                Text("Details.history_offline")
+            }
+            if range == .week, series.isShorterThanRange, series.isChartable {
+                Text(String(
+                    format: NSLocalizedString("Details.history_short %d", bundle: .appLanguage, comment: ""),
+                    series.coveredHours
+                ))
+            }
+        }
+        .font(.caption2.weight(.light))
+        .foregroundColor(.secondary)
     }
 
     private var footnote: some View {
@@ -125,20 +210,17 @@ struct DetailsHistoryView: View {
 
     // MARK: - Data
 
-    private struct Point {
-        var value: Double
-        var time: String
+    private var series: PollutantHistorySeries {
+        seriesByRange[range] ?? PollutantHistorySeries(range: range, samples: [])
     }
 
-    /// Newest last, capped at 24 hours.
-    private var points: [Point] {
-        let all = historicalPollutants.map {
-            Point(value: $0.getValue(airIndexType: airIndexType), time: $0.publishTime)
-        }
-        return all.count > 24 ? Array(all.suffix(24)) : all
+    /// Readings of the last 24 hours, for the verdict: it judges today, whichever
+    /// range is on screen.
+    private var dayValues: [Double] {
+        seriesByRange[.day]?.values ?? []
     }
 
-    private var values: [Double] { points.map { $0.value } }
+    private var values: [Double] { series.values }
 
     private var lowest: Double { values.min() ?? 0 }
     private var highest: Double { values.max() ?? 0 }
@@ -149,40 +231,38 @@ struct DetailsHistoryView: View {
     // MARK: - Trend
 
     private var trend: TrendVerdict {
-        TrendVerdict(values: values, airIndexType: airIndexType)
+        TrendVerdict(values: dayValues, airIndexType: airIndexType)
     }
 
-    // MARK: - Geometry
-
-    private let maxBarHeight: CGFloat = 72
-    private let minBarHeight: CGFloat = 10
-
-    /// Scaled to the day's own range, padded a little. A zero-baseline axis
-    /// renders a 60–89 day as a flat wall of identical bars, which is exactly
-    /// what this view is meant to stop doing.
-    ///
-    /// The padding is a fraction of the range rather than a fixed number of
-    /// points: CO spans hundredths of a ppm, so a flat ±5 would swamp the whole
-    /// series and flatten every bar.
-    private func barHeight(for value: Double) -> CGFloat {
-        let range = highest - lowest
-        let pad = range > 0 ? range * 0.15 : max(highest * 0.05, 0.001)
-        let lower = max(0, lowest - pad)
-        let upper = max(highest + pad, lower + 0.001)
-        let fraction = (value - lower) / (upper - lower)
-        return minBarHeight + (maxBarHeight - minBarHeight) * CGFloat(max(0, min(1, fraction)))
+    /// The series ends on the newest reading, which a cached or lagging
+    /// station can place hours back; "Now" is only honest for a current one.
+    private var isLatestHourCurrent: Bool {
+        guard let last = series.samples.last else { return true }
+        return Date().timeIntervalSince(last.time) < 3 * 3600
     }
 
-    private func label(at index: Int) -> String {
-        // Same formatter as the watch, so this view can
-        // be shared with the visionOS app.
-        guard points.indices.contains(index), Date.fromApi(points[index].time) != nil else { return "" }
-        return points[index].time.asPublishTime
+    private func axisLabel(at index: Int) -> String {
+        guard series.samples.indices.contains(index) else { return "" }
+        let time = series.samples[index].time
+        // A week spans days, so the hour alone would be ambiguous.
+        return range == .day ? Self.hourOfDay(time) : PollutantHistoryFormat.hour(time)
     }
 
-    init(historicalPollutants: HistoricalPollutants, airIndexType: AirIndexTypes = .aqi) {
+    private static func hourOfDay(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        formatter.timeZone = .taipei
+        return formatter.string(from: date)
+    }
+
+    init(historicalPollutants: HistoricalPollutants, airIndexType: AirIndexTypes = .aqi, isCached: Bool = false) {
         self.historicalPollutants = historicalPollutants
         self.airIndexType = airIndexType
+        self.isCached = isCached
+        self.hasChart = PollutantHistorySeries.hasChart(readings: historicalPollutants, airIndexType: airIndexType)
+        self.seriesByRange = Dictionary(uniqueKeysWithValues: HistoryRange.allCases.map {
+            ($0, PollutantHistorySeries.make(readings: historicalPollutants, airIndexType: airIndexType, range: $0))
+        })
     }
 }
 

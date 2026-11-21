@@ -38,13 +38,14 @@ enum OfflineCacheRetention {
     static func isCacheFile(named name: String) -> Bool {
         (name.hasPrefix("stations-") && name.hasSuffix(".json"))
             || (name.hasPrefix(PollutantCache.fileNamePrefix) && name.hasSuffix(".json"))
+            || (name.hasPrefix(PollutantHistoryCache.fileNamePrefix) && name.hasSuffix(".json"))
             || name == "aqi-forecast.json"
             || name == "station-cams-manifest.json"
             || name == StationWeatherStore.cacheFileName
     }
 
     /// Deletes every offline cache file last written more than `maxAge` ago:
-    /// the station lists, last good pollutants, the area forecast, the cam
+    /// the station lists, last good pollutants, each station's hourly history, the area forecast, the cam
     /// manifest, the CWA weather file, saved cam frames and saved hourly cam frames (the scrubber's)
     /// in `directory` (Application Support), and the extra-large widget's
     /// station details and cam frames in `widgetDirectory` (app group).

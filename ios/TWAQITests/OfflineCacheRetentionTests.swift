@@ -51,6 +51,7 @@ final class OfflineCacheRetentionTests: XCTestCase {
             "stations-twn.json",
             "pollutants-twn.json",
             "pollutants-stations.json",
+            "pollutant-history-91.json",
             "aqi-forecast.json",
             "station-cams-manifest.json",
             "cwa-weather.json",

@@ -111,6 +111,7 @@ jobs:
       #   Directus create-only forms: FeedbackServiceTests, CooperateServiceTests
       CI_TEST_SUITES: |
         PollutantCacheTests
+        PollutantHistoryTests
         OfflineCacheRetentionTests
         PushServiceTests
         FavouriteAlertsTests
@@ -130,6 +131,7 @@ jobs:
       CI_GUARDED_PATHS: |
         # Test files of the subset suites
         ios/TWAQITests/PollutantCacheTests.swift
+        ios/TWAQITests/PollutantHistoryTests.swift
         ios/TWAQITests/OfflineCacheRetentionTests.swift
         ios/TWAQITests/PushServiceTests.swift
         ios/TWAQITests/StationCamTests.swift
@@ -141,6 +143,8 @@ jobs:
         # WidgetExtraLargeTests for the widget's station detail cache; the watch's
         # reading expiry is checked against the same ceiling)
         ios/TWAQI/Utils/PollutantCache.swift
+        ios/TWAQI/Utils/PollutantHistoryCache.swift
+        ios/TWAQI/Models/PollutantHistorySeries.swift
         ios/TWAQI/Utils/WidgetStationDetail.swift
         ios/TWAQI/Utils/OfflineCacheRetention.swift
         ios/TWAQIWatch/Shared/WatchStore.swift

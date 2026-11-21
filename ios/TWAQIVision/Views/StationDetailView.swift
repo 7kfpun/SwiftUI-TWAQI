@@ -124,7 +124,7 @@ struct StationDetailView: View {
     }
 
     private func load() async {
-        async let history = try? WatchAPI.history(stationId: stationId)
+        async let history = try? WatchAPI.history(stationId: stationId, limit: PollutantHistorySeries.fetchLimit)
         if store.station(stationId) == nil {
             fetched = try? await WatchAPI.currentPollutant(stationId: stationId)
         }
