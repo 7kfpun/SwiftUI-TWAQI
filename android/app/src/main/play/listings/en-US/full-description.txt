@@ -1,3 +1,5 @@
+Taiwan Air is an independent app and is not a government app. Its data comes from official open data of the Ministry of Environment (https://www.moenv.gov.tw) and the Central Weather Administration (https://www.cwa.gov.tw).
+
 Taiwan Air shows you the air you are actually breathing, right now, measured by the government monitoring stations across Taiwan.
 
 IS IT GETTING BETTER OR WORSE?
