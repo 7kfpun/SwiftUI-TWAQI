@@ -498,6 +498,7 @@
 "Offline.badge" = "Offline";
 "Offline.card_unavailable" = "Can't load readings. Check your connection.";
 "Freshness.stale_updated_ago %@" = "Updated %@ · may be out of date";
+"Freshness.stale_short %@" = "Updated %@ · outdated";
 "Loading.label" = "Loading";
 
 /* Welcome flow (FOX-34) */

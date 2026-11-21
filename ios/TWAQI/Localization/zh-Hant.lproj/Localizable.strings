@@ -502,6 +502,7 @@
 "Offline.badge" = "離線";
 "Offline.card_unavailable" = "無法載入資料，請檢查網路連線。";
 "Freshness.stale_updated_ago %@" = "%@更新・可能不是最新資料";
+"Freshness.stale_short %@" = "%@更新・資料過時";
 "Loading.label" = "載入中";
 
 /* 歡迎導覽（FOX-34） */
