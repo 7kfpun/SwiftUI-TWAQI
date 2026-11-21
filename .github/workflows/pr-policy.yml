@@ -61,6 +61,9 @@ jobs:
       - name: Tests for the gate scripts and workflows this PR touches
         # The PR's own copies of the scripts and tests, run only when the diff
         # touches them (the LGTM gate's self-test and the policy tests had no CI run).
+        # Unlike the steps above it runs the PR's own scripts: the job has a read-only
+        # token and no persisted credentials. The YAML check catches syntax only, not
+        # an invalid ${{ }} expression.
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
