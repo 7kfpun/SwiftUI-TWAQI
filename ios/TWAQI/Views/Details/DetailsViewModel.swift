@@ -84,6 +84,11 @@ class DetailsViewModel: ObservableObject {
     /// heading.
     @Published var weatherCountyTitle: String?
 
+    /// The forecast and weather lookups have each finished (found something
+    /// or not), so the forecast strip can say "nothing" instead of "loading".
+    @Published private(set) var forecastAnswered = false
+    @Published private(set) var weatherAnswered = false
+
     /// `pollutant` seeds a reading the caller already holds, so the heart
     /// works before the first load answers.
     init(stationId: Int, historicalPollutants: HistoricalPollutants = [], pollutant: Pollutant? = nil) {
@@ -301,6 +306,7 @@ class DetailsViewModel: ObservableObject {
         guard forecast == nil, areaLocal != nil || countyLocal != nil else { return }
 
         AqiForecastStore.shared.forecasts { forecasts in
+            self.forecastAnswered = true
             guard self.forecast == nil else { return }
             self.forecast = AqiForecastMatcher.forecast(
                 areaLocal: areaLocal,
@@ -318,6 +324,7 @@ class DetailsViewModel: ObservableObject {
         guard weather == nil else { return }
 
         StationWeatherStore.shared.weather { file in
+            self.weatherAnswered = true
             guard self.weather == nil, let file = file else { return }
             guard let weather = StationWeatherMatcher.weather(lat: lat, lon: lon, countyLocal: countyLocal, in: file) else { return }
             self.weatherCountyTitle = Locale.isChinese ? countyLocal : county

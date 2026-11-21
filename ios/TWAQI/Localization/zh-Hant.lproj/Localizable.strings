@@ -462,6 +462,25 @@
 "Weather.wind" = "風速";
 "Weather.temperature %@" = "氣溫 %@";
 "Weather.chance_of_rain %@" = "降雨機率 %@";
+
+/* Forecast strip: next 24 h on the station page (TWAQ-12) */
+"Strip.title" = "未來 24 小時";
+"Strip.observed" = "實測";
+"Strip.forecast" = "預報";
+"Strip.now" = "現在";
+"Strip.part.morning" = "上午";
+"Strip.part.afternoon" = "下午";
+"Strip.part.evening" = "晚上";
+"Strip.part.night" = "凌晨";
+"Strip.aqi_note" = "實測為每小時資料；預報為空品區每日 AQI，並非逐時數值。";
+"Strip.weather_note" = "天氣預報以 12 小時為一個時段，這裡依時段拆成上午、下午、晚上、凌晨，同一時段共用同一組氣溫與降雨機率。";
+"Strip.loading" = "正在載入預報";
+"Strip.empty" = "目前沒有這個測站的預報。";
+"Strip.empty_offline" = "無法載入預報，請檢查網路後再試。";
+"Strip.saved_note" = "顯示已儲存的資料";
+"Strip.a11y_observed %d" = "目前實測 AQI %d";
+"Strip.a11y_forecast %@ %d" = "%1$@預報：AQI %2$d";
+"Strip.a11y_weather %@ %@ %@ %@" = "%1$@：%2$@，氣溫 %3$@ 度，降雨機率 %4$@";
 "Weather.station_named %@ %@" = "%1$@測站，距離 %2$@";
 "Weather.station_nearby %@" = "氣象測站，距離 %@";
 "Weather.observed %@" = "觀測於%@";
