@@ -97,6 +97,20 @@ final class AirQualityIntentTests: XCTestCase {
 
     // MARK: - Station picker
 
+    func testNamedFavouritesSkipsStationsWithoutACachedReading() throws {
+        let readings = [
+            try reading(id: 4, name: "Banqiao", nameLocal: "板橋"),
+            try reading(id: 3, name: "Hsinchu", nameLocal: "新竹"),
+        ]
+        let named = StationChoice.namedFavourites(favouriteIds: [4, 9, 3, 4], readings: readings, locale: en)
+        XCTAssertEqual(named.map(\.id), [4, 3])
+        XCTAssertEqual(named.map(\.name), ["Banqiao", "Hsinchu"])
+    }
+
+    func testNamedFavouritesIsEmptyWithNoCachedReadings() {
+        XCTAssertTrue(StationChoice.namedFavourites(favouriteIds: [126, 9], readings: [], locale: en).isEmpty)
+    }
+
     func testChoicesListNearestFirstThenFavouritesInTheReadersOrder() throws {
         let readings = [
             try reading(id: 4, name: "Banqiao", nameLocal: "板橋"),
