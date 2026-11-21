@@ -574,11 +574,13 @@ struct ReadingWidgetView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(verbatim: value)
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    // The weather line below needs the room, or the station
+                    // name at the bottom is clipped on the smallest widget.
+                    .font(.system(size: entry.weather == nil ? 44 : 36, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Color(status.getForegroundColor()))
-                smallWeather(foreground: Color(status.getForegroundColor()))
+                smallWeather(foreground: Color(status.getForegroundColor()), onStatusFill: true)
                 Spacer(minLength: 0)
                 Text(reading.displayName)
                     .font(.caption2)
@@ -668,7 +670,8 @@ struct ReadingWidgetView: View {
                             Spacer(minLength: 2)
                             Text(verbatim: WidgetWeather.temperatureText(weather.temperature))
                                 .monospacedDigit()
-                                .accessibilityLabel(Text("Widget.weather_label \(weather.spokenText(chinese: Locale.isChinese))"))
+                                .layoutPriority(1)
+                                .accessibilityLabel(Text("Widget.weather_label \(WidgetWeather.temperatureText(weather.temperature))"))
                         }
                     }
                     .foregroundStyle(.secondary)
@@ -763,7 +766,7 @@ struct ReadingWidgetView: View {
             .padding(.vertical, 6)
             .background(Color(status.getColor()), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
-            smallWeather(foreground: .secondary)
+            smallWeather(foreground: .secondary, onStatusFill: false)
                 .padding(.horizontal, 8)
             // The weather line takes the room of one favourite.
             favouriteRows(limit: entry.weather == nil ? 2 : 1, showsStatus: false)
@@ -775,11 +778,13 @@ struct ReadingWidgetView: View {
     /// Small: icon, temperature and chance of rain on one line. Nothing when
     /// there is no weather, so the favourites keep the room.
     @ViewBuilder
-    private func smallWeather<S: ShapeStyle>(foreground: S) -> some View {
+    private func smallWeather<S: ShapeStyle>(foreground: S, onStatusFill: Bool) -> some View {
         if let weather = entry.weather {
             HStack(spacing: 4) {
+                // On the status colour a multicolour sun (yellow) vanishes
+                // against the yellow Moderate fill: take the text colour.
                 Image(systemName: weather.symbol)
-                    .symbolRenderingMode(.multicolor)
+                    .symbolRenderingMode(onStatusFill ? .monochrome : .multicolor)
                     .accessibilityHidden(true)
                 Text(verbatim: weather.briefText)
                     .monospacedDigit()
@@ -795,7 +800,7 @@ struct ReadingWidgetView: View {
 
     /// 「Weather: 24° · 多雲 · …」, with the chance of rain when there is one.
     private func weatherLabel(_ weather: WidgetWeather) -> Text {
-        let spoken = weather.spokenText(chinese: Locale.isChinese)
+        let spoken = weather.briefSpokenText(chinese: Locale.isChinese)
         guard let chance = weather.chanceOfRain else { return Text("Widget.weather_label \(spoken)") }
         return Text("Widget.weather_chance_label \(spoken) \(WidgetWeather.percentText(chance))")
     }

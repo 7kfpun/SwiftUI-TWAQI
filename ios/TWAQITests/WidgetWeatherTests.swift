@@ -187,6 +187,12 @@ final class WidgetWeatherTests: XCTestCase {
         }
     }
 
+    func testBriefSpokenTextHasOnlyWhatTheSmallWidgetShows() {
+        let weather = WidgetWeather(temperature: 24.3, humidity: 75, rain: 0.5, windSpeed: 3.2, code: 4, cwaText: "多雲", chanceOfRain: 10)
+        XCTAssertEqual(weather.briefSpokenText(chinese: true), "24° · 多雲")
+        XCTAssertEqual(WidgetWeather(temperature: 20).briefSpokenText(chinese: false), "20°")
+    }
+
     func testBriefTextIsTemperatureAndChanceOfRain() {
         XCTAssertEqual(WidgetWeather(temperature: 24.3, chanceOfRain: 10).briefText, "24° · 10%")
         XCTAssertEqual(WidgetWeather(temperature: 24.3).briefText, "24°")

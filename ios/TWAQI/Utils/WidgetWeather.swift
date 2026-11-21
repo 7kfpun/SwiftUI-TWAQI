@@ -150,6 +150,12 @@ struct WidgetWeather: Equatable {
         return "\(Self.temperatureText(temperature)) · \(Self.percentText(chance))"
     }
 
+    /// What the small and rectangular widgets show, for VoiceOver: temperature
+    /// and sky. The chance of rain is added by the caller's own string.
+    func briefSpokenText(chinese: Bool) -> String {
+        [Self.temperatureText(temperature), skyText(chinese: chinese)].compactMap { $0 }.joined(separator: " · ")
+    }
+
     /// Everything the widget shows, for VoiceOver.
     func spokenText(chinese: Bool) -> String {
         ([Self.temperatureText(temperature), skyText(chinese: chinese)].compactMap { $0 } + detailItems)
