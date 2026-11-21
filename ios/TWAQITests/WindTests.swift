@@ -300,6 +300,19 @@ final class WindLayerTests: XCTestCase {
         XCTAssertNil(hint(try file([station("A", lat: 23.0, lon: 120.0)]), northEast, 20))
     }
 
+    /// A calm station on top of the centre doesn't hide a windier one further
+    /// out (within range): the hint reads the nearest station that has wind.
+    func testHintSkipsACalmStationNextToTheCentre() throws {
+        let file = try file([
+            station("calm", lat: 25.001, lon: 121.501, wind: "0.4", dir: "225"),
+            station("windy", lat: 25.05, lon: 121.55, wind: "3.0", dir: "45"),
+        ])
+        XCTAssertEqual(
+            WindLayer.hint(lat: centre.lat, lon: centre.lon, localPm25: 20, stations: northEast, in: file, now: now),
+            WindLayer.Hint(fromIndex: 1, trend: .higher)
+        )
+    }
+
     // MARK: Words
 
     private func lproj(_ identifier: String) throws -> Bundle {
