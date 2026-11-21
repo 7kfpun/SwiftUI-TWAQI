@@ -300,3 +300,51 @@ enum WeatherDates {
         return formatter
     }()
 }
+
+/// The compact weather reading on the map's top-left card (TWAQ-6): the
+/// nearest CWA station to the map centre, with the county's current forecast
+/// period for the condition icon and rain chance.
+struct MapCenterWeather: Equatable {
+    let temperature: Double?
+    /// CWA weather code of the period running now; nil in a gap between
+    /// periods, never the next one's.
+    let wx: Int?
+    /// For the moon variants of the icon, Taiwan time.
+    let isNight: Bool
+    /// Chance of rain, %, for the period running now.
+    let rainChance: Double?
+    /// zh-Hant, as CWA publishes it.
+    let stationName: String
+    /// From the map centre to the CWA station.
+    let distanceKm: Double
+    let observedAt: Date
+
+    /// Nil when no CWA station with a recent reading is within
+    /// `StationWeatherMatcher.maxDistanceKm` of the centre (the sea, abroad),
+    /// or the reading has neither a temperature nor a condition.
+    static func make(lat: Double, lon: Double, in file: WeatherFile, now: Date = Date()) -> MapCenterWeather? {
+        guard
+            let weather = StationWeatherMatcher.weather(lat: lat, lon: lon, countyLocal: nil, in: file, now: now),
+            let reading = weather.now
+        else { return nil }
+
+        let period = weather.periods.first { period in
+            guard let start = period.startDate, let end = period.endDate else { return false }
+            return start <= now && now < end
+        }
+        let hour = WeatherDates.calendar.component(.hour, from: now)
+
+        let temperature = reading.observation.temp
+        guard temperature != nil || period?.wx != nil else { return nil }
+
+        return MapCenterWeather(
+            temperature: temperature,
+            wx: period?.wx,
+            isNight: period?.isNight ?? (hour >= 18 || hour < 6),
+            rainChance: period?.pop,
+            stationName: reading.observation.name,
+            distanceKm: reading.distanceKm,
+            observedAt: reading.observedAt
+        )
+    }
+}

@@ -15,6 +15,20 @@ import UIKit
 /// current value pill and health face on the right.
 final class ClosestStationView: UIView {
     static let preferredSize = CGSize(width: 232, height: 96)
+    /// Extra height while the weather row (TWAQ-6) is shown under the station.
+    static let weatherRowHeight: CGFloat = 26
+    /// The station and AQI area is tighter while the row is shown, so the
+    /// card grows by less than the row (pill 12 + 24, face 8 + 36 fit in it).
+    static let topHeightWithWeather: CGFloat = 82
+    static var heightWithWeather: CGFloat { topHeightWithWeather + weatherRowHeight }
+
+    private var topHeight: Constraint?
+
+    private var weatherRow: UIView!
+    private var weatherIcon: UIImageView!
+    private var weatherTempLabel: UILabel!
+    private var weatherRainLabel: UILabel!
+    private var weatherStationLabel: UILabel!
 
     private var label: UILabel!
     private var localityLabel: UILabel!
@@ -109,6 +123,70 @@ final class ClosestStationView: UIView {
         set { imageView.image = newValue }
     }
 
+    /// Simple weather for the map centre, the secondary reading under the
+    /// AQI. Nil hides the row (outside Taiwan, no recent CWA reading, or the
+    /// timeline is scrubbed back).
+    var weather: MapCenterWeather? {
+        didSet { updateWeatherRow() }
+    }
+
+    private func updateWeatherRow() {
+        topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
+        guard let weather else {
+            weatherRow.isHidden = true
+            weatherRow.accessibilityLabel = nil
+            return
+        }
+        weatherRow.isHidden = false
+
+        let config = UIImage.SymbolConfiguration.preferringMulticolor()
+        weatherIcon.image = UIImage(
+            systemName: WeatherCode.symbol(code: weather.wx, night: weather.isNight),
+            withConfiguration: config
+        )
+        weatherTempLabel.text = Self.temperature(weather.temperature)
+
+        let rain = weather.rainChance.map(Self.percent)
+        weatherRainLabel.text = rain.map { "☂ \($0)" }
+        weatherRainLabel.isHidden = rain == nil
+
+        weatherStationLabel.text = Self.stationText(name: weather.stationName, distanceKm: weather.distanceKm)
+
+        weatherRow.accessibilityLabel = Self.accessibilityText(weather)
+    }
+
+    /// 「24°」, rounded; 「—」 when missing.
+    static func temperature(_ value: Double?) -> String {
+        value.map { "\(Int($0.rounded()))°" } ?? "—"
+    }
+
+    static func percent(_ value: Double) -> String {
+        "\(Int(value.rounded()))%"
+    }
+
+    /// 「臺北 · 4.2 km」 in Chinese; 「4.2 km away」 in English, where CWA's
+    /// Chinese station name is not shown.
+    static func stationText(name: String, distanceKm: Double, chinese: Bool = Locale.isChinese) -> String {
+        let distance = String(format: "%.1f km", distanceKm)
+        return chinese
+            ? String(format: "Weather.map_station %@ %@".localized, name, distance)
+            : String(format: "Weather.map_station_nearby %@".localized, distance)
+    }
+
+    /// Read after the station and AQI (the card's other labels come first):
+    /// temperature, condition, chance of rain, then the station.
+    static func accessibilityText(_ weather: MapCenterWeather, chinese: Bool = Locale.isChinese) -> String {
+        var parts = [String(format: "Weather.temperature %@".localized, temperature(weather.temperature))]
+        if let condition = WeatherCode.text(code: weather.wx, cwaText: nil, chinese: false) {
+            parts.append(condition)
+        }
+        if let rain = weather.rainChance {
+            parts.append(String(format: "Weather.chance_of_rain %@".localized, percent(rain)))
+        }
+        parts.append(stationText(name: weather.stationName, distanceKm: weather.distanceKm, chinese: chinese))
+        return parts.joined(separator: ", ")
+    }
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         createSubviews()
@@ -133,7 +211,8 @@ final class ClosestStationView: UIView {
         let rightView = UIView()
         addSubview(rightView)
         rightView.snp.makeConstraints { (make) -> Void in
-            make.top.right.bottom.equalTo(self)
+            make.top.right.equalTo(self)
+            topHeight = make.height.equalTo(Self.preferredSize.height).constraint
             make.width.equalTo(72)
         }
 
@@ -168,7 +247,7 @@ final class ClosestStationView: UIView {
         stack.snp.makeConstraints { (make) -> Void in
             make.left.equalTo(self).offset(12)
             make.right.equalTo(rightView.snp.left).offset(-4)
-            make.centerY.equalTo(self)
+            make.centerY.equalTo(rightView)
         }
 
         label = UILabel()
@@ -190,5 +269,67 @@ final class ClosestStationView: UIView {
         updatedLabel.textColor = .secondaryLabel
         stack.addArrangedSubview(updatedLabel)
         stack.setCustomSpacing(5, after: subLabel)
+
+        // MARK: Weather row (secondary reading)
+        weatherRow = UIView()
+        weatherRow.isHidden = true
+        weatherRow.isAccessibilityElement = true
+        addSubview(weatherRow)
+        weatherRow.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(rightView.snp.bottom)
+            make.left.equalTo(self).offset(12)
+            make.right.equalTo(self).offset(-12)
+            make.height.equalTo(Self.weatherRowHeight)
+        }
+
+        let separator = UIView()
+        separator.backgroundColor = .separator
+        weatherRow.addSubview(separator)
+        separator.snp.makeConstraints { (make) -> Void in
+            make.top.left.right.equalTo(weatherRow)
+            make.height.equalTo(1 / UIScreen.main.scale)
+        }
+
+        weatherIcon = UIImageView()
+        weatherIcon.contentMode = .scaleAspectFit
+        weatherRow.addSubview(weatherIcon)
+        weatherIcon.snp.makeConstraints { (make) -> Void in
+            make.left.centerY.equalTo(weatherRow)
+            make.width.height.equalTo(20)
+        }
+
+        weatherTempLabel = UILabel()
+        weatherTempLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        weatherTempLabel.adjustsFontSizeToFitWidth = true
+        weatherTempLabel.minimumScaleFactor = 0.7
+        weatherTempLabel.setContentHuggingPriority(.required, for: .horizontal)
+        weatherTempLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        weatherRow.addSubview(weatherTempLabel)
+        weatherTempLabel.snp.makeConstraints { (make) -> Void in
+            make.left.equalTo(weatherIcon.snp.right).offset(4)
+            make.centerY.equalTo(weatherRow)
+        }
+
+        weatherRainLabel = UILabel()
+        weatherRainLabel.font = .systemFont(ofSize: 11)
+        weatherRainLabel.textColor = .secondaryLabel
+        weatherRainLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        weatherRow.addSubview(weatherRainLabel)
+        weatherRainLabel.snp.makeConstraints { (make) -> Void in
+            make.left.equalTo(weatherTempLabel.snp.right).offset(6)
+            make.centerY.equalTo(weatherRow)
+        }
+
+        weatherStationLabel = UILabel()
+        weatherStationLabel.font = .systemFont(ofSize: 10, weight: .light)
+        weatherStationLabel.textColor = .secondaryLabel
+        weatherStationLabel.textAlignment = .right
+        weatherStationLabel.adjustsFontSizeToFitWidth = true
+        weatherStationLabel.minimumScaleFactor = 0.7
+        weatherRow.addSubview(weatherStationLabel)
+        weatherStationLabel.snp.makeConstraints { (make) -> Void in
+            make.left.greaterThanOrEqualTo(weatherRainLabel.snp.right).offset(6)
+            make.right.centerY.equalTo(weatherRow)
+        }
     }
 }
