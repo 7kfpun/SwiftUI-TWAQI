@@ -35,7 +35,11 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -195,4 +199,37 @@ internal fun UriHandler.openSafely(url: String) {
     } catch (_: ActivityNotFoundException) {
     } catch (_: IllegalArgumentException) {
     }
+}
+
+/** Official open-data sources (Google Play "source link" policy): shown in Help and in the store listing. */
+internal const val MOENV_URL = "https://www.moenv.gov.tw"
+internal const val CWA_URL = "https://www.cwa.gov.tw"
+
+/** Not-a-government-app disclaimer with the agency names as tappable links to their official sites. */
+@Composable
+internal fun DataSourcesFooter(uriHandler: UriHandler) {
+    val moenv = stringResource(R.string.help_source_moenv)
+    val cwa = stringResource(R.string.help_source_cwa)
+    val template = stringResource(R.string.help_data_provided_by_government, "\u0001", "\u0002")
+    val linkStyle = TextLinkStyles(
+        SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)
+    )
+    val text = buildAnnotatedString {
+        fun link(name: String, url: String) {
+            withLink(LinkAnnotation.Url(url, linkStyle) { uriHandler.openSafely(url) }) { append(name) }
+        }
+        template.forEach { ch ->
+            when (ch) {
+                '\u0001' -> link(moenv, MOENV_URL)
+                '\u0002' -> link(cwa, CWA_URL)
+                else -> append(ch)
+            }
+        }
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)
+    )
 }
