@@ -92,6 +92,19 @@ struct StationChoice: Equatable {
         return [nearest(bundle: bundle)] + favourites
     }
 
+    /// The favourites whose name is known, in the reader's order. The icon's
+    /// quick actions use this instead of `choices`: a menu entry reading
+    /// "#126" is worse than none, and the entry appears once a reading is
+    /// cached (the menu is rebuilt then).
+    static func namedFavourites(favouriteIds: [Int], readings: [WatchReading], locale: Locale) -> [(id: Int, name: String)] {
+        let names = Dictionary(readings.map { ($0.stationId, $0) }, uniquingKeysWith: { _, latest in latest })
+        var seen: Set<Int> = []
+        return favouriteIds.compactMap { id in
+            guard seen.insert(id).inserted, let reading = names[id] else { return nil }
+            return (id: id, name: AirQualityAnswer.name(of: reading, locale: locale))
+        }
+    }
+
     static func nearest(bundle: Bundle) -> StationChoice {
         StationChoice(id: nearestId, name: bundle.localizedString(forKey: "Intent.station_nearest", value: nil, table: nil))
     }
