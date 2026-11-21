@@ -138,6 +138,16 @@ test('observations: UV index is kept for stations with a sensor; -99 and out-of-
   assert.equal(parseObservations(OBSERVATIONS).find((s) => s.id === '467480')!.uv, null) // -99
 })
 
+test('observations: a station whose only reading is UV is dropped', () => {
+  const body = JSON.parse(JSON.stringify(OBSERVATIONS))
+  const stations = body.records.Station as Array<{ StationId: string; WeatherElement: Record<string, unknown> }>
+  const element = stations[0].WeatherElement
+  for (const key of ['AirTemperature', 'RelativeHumidity', 'WindSpeed']) element[key] = -99
+  element.Now = { Precipitation: -99 }
+  element.UVIndex = 6
+  assert.equal(parseObservations(body).some((s) => s.id === stations[0].StationId), false)
+})
+
 test('observations: rain T (trace) and -98 (no rain for 6 h) are 0; X and other negatives stay null', () => {
   const stations = parseObservations(OBSERVATIONS)
   const rain = (id: string) => stations.find((s) => s.id === id)!.rain

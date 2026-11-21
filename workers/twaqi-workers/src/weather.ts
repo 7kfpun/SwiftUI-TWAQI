@@ -343,7 +343,8 @@ export function parseObservations(body: unknown): Observation[] {
     const windDir = valid(num(get(element, 'WindDirection', 'windDirection')), (n) => n >= 0 && n <= 360)
     // CWA's -99 (no sensor / no reading) falls outside 0..25 and becomes null.
     const uv = valid(num(get(element, 'UVIndex', 'uvIndex')), (n) => n >= 0 && n <= 25)
-    if (temp === null && humidity === null && rain === null && wind === null && uv === null) continue
+    // UV alone doesn't keep a station: the app picks its weather station by position and would show 「—」 for it.
+    if (temp === null && humidity === null && rain === null && wind === null) continue
 
     out.push({
       id,
