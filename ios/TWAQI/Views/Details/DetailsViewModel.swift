@@ -150,7 +150,11 @@ class DetailsViewModel: ObservableObject {
             case .failure(let error):
                 AppLog.network.error("station request failed: \(error.localizedDescription)")
                 // Whatever history is on screen is now the last good one.
-                self.isShowingCachedHistory = !self.historicalPollutants.isEmpty
+                // Only for the latest request: an older one failing after a
+                // newer one loaded says nothing about the readings now shown.
+                if isLatest {
+                    self.isShowingCachedHistory = !self.historicalPollutants.isEmpty
+                }
                 if isLatest {
                     self.stationLoadFailed = self.station == nil
                 }

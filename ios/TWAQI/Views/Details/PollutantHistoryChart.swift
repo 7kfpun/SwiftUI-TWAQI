@@ -24,8 +24,8 @@ struct PollutantHistoryChart: View {
 
     private let height: CGFloat = 110
     /// Whether the drag in progress is mostly sideways. Decided once, from its
-    /// first movement, so a finger that starts moving up or down hands the
-    /// gesture to the page's scroll view and a sideways one scrubs.
+    /// first movement, so a finger that starts moving up or down leaves the page to
+    /// its scroll view and a sideways one scrubs.
     @State private var isScrubbing: Bool?
     private let lineWidth: CGFloat = 3
 
@@ -38,10 +38,15 @@ struct PollutantHistoryChart: View {
                 cursor(size: proxy.size)
             }
             .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 6)
+            // Simultaneous with the page's scroll view, not exclusive with it:
+            // an exclusive drag would own the touch from the first points and
+            // stop the page scrolling under a finger that started on the chart.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
                     .onChanged { drag in
                         if isScrubbing == nil {
+                            // Wait for a clear direction before deciding.
+                            guard hypot(drag.translation.width, drag.translation.height) >= 6 else { return }
                             isScrubbing = abs(drag.translation.width) > abs(drag.translation.height)
                         }
                         guard isScrubbing == true, proxy.size.width > 0 else { return }

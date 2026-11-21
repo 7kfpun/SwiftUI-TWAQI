@@ -24,6 +24,8 @@ struct DetailsHistoryView: View {
     /// Both ranges, built once per set of readings: a drag redraws the view
     /// on every move and shouldn't re-parse a week of times each time.
     private let seriesByRange: [HistoryRange: PollutantHistorySeries]
+    /// `PollutantHistorySeries.hasChart`, decided once with the series.
+    private let hasChart: Bool
 
     @State private var range: HistoryRange = .day
     @State private var selected: Int?
@@ -208,10 +210,6 @@ struct DetailsHistoryView: View {
 
     // MARK: - Data
 
-    private var hasChart: Bool {
-        seriesByRange.values.contains { $0.isChartable }
-    }
-
     private var series: PollutantHistorySeries {
         seriesByRange[range] ?? PollutantHistorySeries(range: range, samples: [])
     }
@@ -261,6 +259,7 @@ struct DetailsHistoryView: View {
         self.historicalPollutants = historicalPollutants
         self.airIndexType = airIndexType
         self.isCached = isCached
+        self.hasChart = PollutantHistorySeries.hasChart(readings: historicalPollutants, airIndexType: airIndexType)
         self.seriesByRange = Dictionary(uniqueKeysWithValues: HistoryRange.allCases.map {
             ($0, PollutantHistorySeries.make(readings: historicalPollutants, airIndexType: airIndexType, range: $0))
         })
