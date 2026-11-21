@@ -175,7 +175,7 @@ final class StationWeatherTests: XCTestCase {
     func testCountyFallsBackToTheNearestStationsAndAccepts台() {
         let counties: Set<String> = ["臺北市", "花蓮縣"]
         let hualienStation = WeatherObservation(id: "466990", name: "花蓮", county: "花蓮縣", lat: 0, lon: 0,
-                                                time: "", temp: nil, humidity: nil, rain: nil, wind: nil)
+                                                time: "", temp: nil, humidity: nil, rain: nil, wind: nil, windDir: nil)
         XCTAssertEqual(StationWeatherMatcher.county(countyLocal: "台北市", nearest: nil, in: counties), "臺北市")
         XCTAssertEqual(StationWeatherMatcher.county(countyLocal: nil, nearest: hualienStation, in: counties), "花蓮縣")
         XCTAssertEqual(StationWeatherMatcher.county(countyLocal: "連江縣", nearest: hualienStation, in: counties), "花蓮縣")

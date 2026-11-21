@@ -102,9 +102,10 @@ test('observations: WGS84 position, county, readings and time per station', () =
     humidity: 75,
     rain: 0.5,
     wind: 3.2,
+    windDir: 70,
   })
   // Only the fields the app shows.
-  assert.deepEqual(Object.keys(taipei!).sort(), ['county', 'humidity', 'id', 'lat', 'lon', 'name', 'rain', 'temp', 'time', 'wind'])
+  assert.deepEqual(Object.keys(taipei!).sort(), ['county', 'humidity', 'id', 'lat', 'lon', 'name', 'rain', 'temp', 'time', 'wind', 'windDir'])
 })
 
 test('observations: -99 style markers are null, a station with no reading left is dropped, a bad time is dropped', () => {
@@ -113,6 +114,16 @@ test('observations: -99 style markers are null, a station with no reading left i
   const chiayi = stations.find((s) => s.id === '467480')!
   assert.equal(chiayi.rain, null) // -99
   assert.equal(chiayi.humidity, 81) // 0.81 in the old fractional form
+})
+
+test('observations: wind direction is degrees from north; -99 and out-of-range values are null', () => {
+  const body = JSON.parse(JSON.stringify(OBSERVATIONS))
+  const stations = body.records.Station as Array<{ WeatherElement: Record<string, unknown> }>
+  stations[0].WeatherElement.WindDirection = -99
+  stations[1].WeatherElement.WindDirection = 361
+  const dir = (id: string) => parseObservations(body).find((s) => s.id === id)!.windDir
+  assert.equal(dir(String((stations[0] as any).StationId)), null)
+  assert.equal(dir(String((stations[1] as any).StationId)), null)
 })
 
 test('observations: rain T (trace) and -98 (no rain for 6 h) are 0; X and other negatives stay null', () => {

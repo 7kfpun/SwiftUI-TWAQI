@@ -21,6 +21,9 @@ final class ClosestStationView: UIView {
     /// card grows by less than the row (pill 12 + 24, face 8 + 36 fit in it).
     static let topHeightWithWeather: CGFloat = 82
     static var heightWithWeather: CGFloat { topHeightWithWeather + weatherRowHeight }
+    /// Extra height while the wind layer's "air is coming from…" line
+    /// (TWAQ-15) is shown under the weather row.
+    static let hintRowHeight: CGFloat = 22
 
     private var topHeight: Constraint?
 
@@ -29,6 +32,7 @@ final class ClosestStationView: UIView {
     private var weatherTempLabel: UILabel!
     private var weatherRainLabel: UILabel!
     private var weatherStationLabel: UILabel!
+    private var windHintLabel: UILabel!
 
     private var stack: UIStackView!
     private var skeletonView: UIView!
@@ -165,6 +169,15 @@ final class ClosestStationView: UIView {
     /// timeline is scrubbed back).
     var weather: MapCenterWeather? {
         didSet { updateWeatherRow() }
+    }
+
+    /// Wind layer hint, e.g. 「Air is coming from the north-east, where PM2.5
+    /// is higher」. Nil hides the line; it only shows under the weather row.
+    var windHint: String? {
+        didSet {
+            windHintLabel.text = windHint
+            windHintLabel.isHidden = windHint == nil
+        }
     }
 
     private func updateWeatherRow() {
@@ -396,6 +409,22 @@ final class ClosestStationView: UIView {
         weatherStationLabel.snp.makeConstraints { (make) -> Void in
             make.left.greaterThanOrEqualTo(weatherRainLabel.snp.right).offset(6)
             make.right.centerY.equalTo(weatherRow)
+        }
+
+        // MARK: Wind hint (TWAQ-15)
+        windHintLabel = UILabel()
+        windHintLabel.font = .systemFont(ofSize: 11)
+        windHintLabel.textColor = .secondaryLabel
+        windHintLabel.numberOfLines = 1
+        windHintLabel.adjustsFontSizeToFitWidth = true
+        windHintLabel.minimumScaleFactor = 0.7
+        windHintLabel.isHidden = true
+        addSubview(windHintLabel)
+        windHintLabel.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(weatherRow.snp.bottom)
+            make.left.equalTo(self).offset(12)
+            make.right.equalTo(self).offset(-12)
+            make.height.equalTo(Self.hintRowHeight - 4)
         }
     }
 }
