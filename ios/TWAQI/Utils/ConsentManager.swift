@@ -66,11 +66,15 @@ final class ConsentManager: ObservableObject {
             ConsentInformation.shared.reset()
         }
         #endif
+        // Claim the request before the first await: ContentView calls gather()
+        // from onAppear and again on scenePhase .active, and both would
+        // otherwise pass the guard while refreshPro() is suspended.
+        let shouldRequest = !didGather
+        didGather = true
         Task { @MainActor in
             await SettingsStore.refreshPro()
             startAdsIfAllowed()
-            guard !didGather else { return }
-            didGather = true
+            guard shouldRequest else { return }
             requestConsentInfo()
         }
     }
