@@ -10,6 +10,7 @@
 //
 
 import CoreLocation
+import UIKit
 
 final class UserLocationTracker: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
@@ -27,6 +28,11 @@ final class UserLocationTracker: NSObject, CLLocationManagerDelegate {
         manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         manager.distanceFilter = 5
         manager.headingFilter = 5
+    }
+
+    /// Keeps the compass heading relative to the top of the screen, not the portrait edge.
+    func setInterfaceOrientation(_ orientation: UIInterfaceOrientation) {
+        manager.headingOrientation = LocateMe.headingOrientation(for: orientation)
     }
 
     var access: LocateMeAccess {

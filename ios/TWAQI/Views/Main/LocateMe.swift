@@ -8,6 +8,7 @@
 //
 
 import CoreLocation
+import UIKit
 import Foundation
 
 /// The three states of the locate-me button.
@@ -88,6 +89,18 @@ enum LocateMe {
     static func haloRadius(horizontalAccuracy: CLLocationAccuracy) -> CLLocationDistance? {
         guard horizontalAccuracy >= 0 else { return nil }
         return min(max(horizontalAccuracy, 20), 1_500)
+    }
+
+    /// The compass reports headings relative to the device's top edge in this
+    /// orientation. Interface landscape-left is device landscape-right and the
+    /// other way round.
+    static func headingOrientation(for interface: UIInterfaceOrientation) -> CLDeviceOrientation {
+        switch interface {
+        case .portraitUpsideDown: return .portraitUpsideDown
+        case .landscapeLeft: return .landscapeRight
+        case .landscapeRight: return .landscapeLeft
+        default: return .portrait
+        }
     }
 
     /// A heading from the compass, or `nil` while it is unavailable or uncalibrated.

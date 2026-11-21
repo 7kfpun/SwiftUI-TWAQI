@@ -165,6 +165,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             zoom = max(mapView.camera.zoom, LocateMe.minZoom)
         }
         mapView.animate(to: GMSCameraPosition.camera(withTarget: location.coordinate, zoom: zoom))
+        updateUserMarker(location)
     }
 
     /// Camera moves the app makes itself report `gesture == false`. A user gesture on the map ends centring and following.
@@ -208,6 +209,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     private func clearUserMarker() {
         userMarker?.map = nil
         userHalo?.map = nil
+    }
+
+    private func syncHeadingOrientation() {
+        if let orientation = view.window?.windowScene?.interfaceOrientation {
+            locationTracker.setInterfaceOrientation(orientation)
+        }
     }
 
     private func handleHeading(_ heading: CLLocationDirection?) {
@@ -922,6 +929,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil) { [weak self] _ in self?.syncHeadingOrientation() }
         self.checkClosestStation(latitude: self.currentLatitude, longitude: self.currentLongitude)
 
         // From the sizes rather than `UIDevice.orientation`, which is still
@@ -1003,6 +1011,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
+        syncHeadingOrientation()
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
 

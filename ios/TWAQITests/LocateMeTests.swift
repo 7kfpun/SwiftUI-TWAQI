@@ -59,4 +59,12 @@ final class LocateMeTests: XCTestCase {
         XCTAssertEqual(LocateMe.haloRadius(horizontalAccuracy: 90_000), 1_500, "A poor fix is capped")
         XCTAssertNil(LocateMe.haloRadius(horizontalAccuracy: -1))
     }
+
+    func testHeadingOrientationMapsInterfaceToDeviceOrientation() {
+        XCTAssertEqual(LocateMe.headingOrientation(for: .portrait), .portrait)
+        XCTAssertEqual(LocateMe.headingOrientation(for: .portraitUpsideDown), .portraitUpsideDown)
+        XCTAssertEqual(LocateMe.headingOrientation(for: .landscapeLeft), .landscapeRight)
+        XCTAssertEqual(LocateMe.headingOrientation(for: .landscapeRight), .landscapeLeft)
+        XCTAssertEqual(LocateMe.headingOrientation(for: .unknown), .portrait)
+    }
 }
