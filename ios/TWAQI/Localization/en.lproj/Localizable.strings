@@ -633,3 +633,4 @@
 "WhatsNew.3_1_7.mapweather_body" = "The local weather at the centre of the map now sits under the air quality card.";
 "WhatsNew.3_1_7.quickactions_title" = "Quick actions on the icon";
 "WhatsNew.3_1_7.quickactions_body" = "Press and hold the app icon to jump to your closest station or any of your favourites.";
+"MapCard.accessibility_label" = "Air quality here, opens details";

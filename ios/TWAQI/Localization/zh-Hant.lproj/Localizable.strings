@@ -637,3 +637,4 @@
 "WhatsNew.3_1_7.mapweather_body" = "空氣品質卡片下方，現在會顯示地圖中心的當地天氣。";
 "WhatsNew.3_1_7.quickactions_title" = "主畫面圖示快速動作";
 "WhatsNew.3_1_7.quickactions_body" = "長按 App 圖示，即可直達最近的測站或你收藏的測站。";
+"MapCard.accessibility_label" = "此處空氣品質，開啟詳細資料";

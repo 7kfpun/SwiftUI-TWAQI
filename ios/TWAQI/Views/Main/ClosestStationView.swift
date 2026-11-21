@@ -13,7 +13,7 @@ import UIKit
 ///
 /// Layout: identity on the left (name, locality, status, last-updated), the
 /// current value pill and health face on the right.
-final class ClosestStationView: UIView {
+final class ClosestStationView: UIControl {
     static let preferredSize = CGSize(width: 232, height: 96)
     /// Extra height while the weather row (TWAQ-6) is shown under the station.
     static let weatherRowHeight: CGFloat = 26
@@ -39,7 +39,10 @@ final class ClosestStationView: UIView {
 
     var stationName: String? {
         get { return label?.text }
-        set { label.text = newValue?.maxLength(length: 16) }
+        set {
+            label.text = newValue?.maxLength(length: 16)
+            updateAccessibility()
+        }
     }
 
     /// Township / county, hidden when the API doesn't supply it.
@@ -105,7 +108,44 @@ final class ClosestStationView: UIView {
 
     var aqi: String? {
         get { return aqiLabel?.text }
-        set { aqiLabel.text = newValue }
+        set {
+            aqiLabel.text = newValue
+            updateAccessibility()
+        }
+    }
+
+    // MARK: Tap (TWAQ-11)
+
+    private var chevron: UIImageView!
+
+    /// Pressed state: the card dims a little under the finger.
+    override var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.12) {
+                self.alpha = self.isHighlighted ? 0.7 : 1
+            }
+        }
+    }
+
+    /// Off while there is nothing to open (loading, no reading, outside the
+    /// supported country): no chevron, and VoiceOver says it is dimmed.
+    override var isEnabled: Bool {
+        didSet {
+            chevron?.isHidden = !isEnabled
+            updateAccessibility()
+        }
+    }
+
+    /// One button for the whole card (station, AQI and weather rows).
+    private func updateAccessibility() {
+        isAccessibilityElement = true
+        accessibilityTraits = isEnabled ? .button : [.button, .notEnabled]
+        accessibilityLabel = "MapCard.accessibility_label".localized
+        var parts = [label?.text, subLabel?.text, aqiLabel?.text].compactMap { $0 }.filter { !$0.isEmpty }
+        if let weather {
+            parts.append(Self.accessibilityText(weather))
+        }
+        accessibilityValue = parts.joined(separator: ", ")
     }
 
     var aqiColor: UIColor? {
@@ -127,14 +167,16 @@ final class ClosestStationView: UIView {
     /// AQI. Nil hides the row (outside Taiwan, no recent CWA reading, or the
     /// timeline is scrubbed back).
     var weather: MapCenterWeather? {
-        didSet { updateWeatherRow() }
+        didSet {
+            updateWeatherRow()
+            updateAccessibility()
+        }
     }
 
     private func updateWeatherRow() {
         topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
         guard let weather else {
             weatherRow.isHidden = true
-            weatherRow.accessibilityLabel = nil
             return
         }
         weatherRow.isHidden = false
@@ -151,8 +193,6 @@ final class ClosestStationView: UIView {
         weatherRainLabel.isHidden = rain == nil
 
         weatherStationLabel.text = Self.stationText(name: weather.stationName, distanceKm: weather.distanceKm)
-
-        weatherRow.accessibilityLabel = Self.accessibilityText(weather)
     }
 
     /// 「24°」, rounded; 「—」 when missing.
@@ -210,6 +250,7 @@ final class ClosestStationView: UIView {
         // MARK: Right column — value pill + health face
         let rightView = UIView()
         addSubview(rightView)
+        rightView.isUserInteractionEnabled = false
         rightView.snp.makeConstraints { (make) -> Void in
             make.top.right.equalTo(self)
             topHeight = make.height.equalTo(Self.preferredSize.height).constraint
@@ -240,6 +281,7 @@ final class ClosestStationView: UIView {
 
         // MARK: Left column — identity
         let stack = UIStackView()
+        stack.isUserInteractionEnabled = false
         stack.axis = .vertical
         stack.alignment = .leading
         stack.spacing = 2
@@ -270,10 +312,29 @@ final class ClosestStationView: UIView {
         stack.addArrangedSubview(updatedLabel)
         stack.setCustomSpacing(5, after: subLabel)
 
+        // MARK: Chevron: the card opens the details panel
+        chevron = UIImageView(image: UIImage(
+            systemName: "chevron.right",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 9, weight: .semibold)
+        ))
+        chevron.tintColor = .tertiaryLabel
+        chevron.contentMode = .scaleAspectFit
+        chevron.isHidden = !isEnabled
+        addSubview(chevron)
+        chevron.snp.makeConstraints { (make) -> Void in
+            make.right.equalTo(self).offset(-5)
+            make.top.equalTo(self).offset(6)
+            make.width.equalTo(8)
+            make.height.equalTo(12)
+        }
+
+        isEnabled = false
+
         // MARK: Weather row (secondary reading)
         weatherRow = UIView()
         weatherRow.isHidden = true
-        weatherRow.isAccessibilityElement = true
+        // Read as part of the card, which is one button.
+        weatherRow.isUserInteractionEnabled = false
         addSubview(weatherRow)
         weatherRow.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(rightView.snp.bottom)

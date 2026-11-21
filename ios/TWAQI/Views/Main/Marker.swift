@@ -298,3 +298,24 @@ enum MarkerIcons {
         }
     }
 }
+
+/// TWAQ-11: the station the map's top-left card opens the details panel for.
+enum MapCardTarget {
+    /// The card always reads from one station (the one nearest the map centre),
+    /// so that is the station it opens. Nil, so the card does nothing, while
+    /// nothing is loaded, when the reading is empty ("-"), or when the station
+    /// is outside the supported country: its marker is context only, with no
+    /// details page behind it. Ids are only unique within a country, so the
+    /// station is looked up in the supported country's list.
+    static func stationId(
+        closest: Pollutant?,
+        supportedCountryCode: String?,
+        countryPollutants: [String: [Pollutant]],
+        hasReading: Bool
+    ) -> Int? {
+        guard hasReading, let closest, let code = supportedCountryCode,
+              let stations = countryPollutants[code],
+              stations.contains(where: { $0.stationId == closest.stationId }) else { return nil }
+        return closest.stationId
+    }
+}
