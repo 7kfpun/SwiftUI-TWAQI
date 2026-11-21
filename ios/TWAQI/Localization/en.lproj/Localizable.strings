@@ -52,6 +52,9 @@
 "Help.appearance_system" = "System default";
 "Help.appearance_light" = "Light";
 "Help.appearance_dark" = "Dark";
+"Help.aqi_palette" = "AQI colours";
+"Help.aqi_palette_standard" = "Standard";
+"Help.aqi_palette_colorblind" = "Colour-blind friendly";
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";

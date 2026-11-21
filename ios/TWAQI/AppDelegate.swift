@@ -38,6 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         WidgetBridge.publish(favouriteStationIds: SettingsStore().savedFavouriteStations)
         // Likewise a language chosen under Help before the widget followed it.
         WidgetBridge.publish(appLanguage: AppLanguage.stored())
+        WidgetBridge.publish(aqiPalette: AQIPalette.stored())
         // Siri's station phrases, for favourites saved by an older build.
         WidgetBridge.updateShortcutStations()
         // The Control Center control's "Nearest" follows the app's permission.
