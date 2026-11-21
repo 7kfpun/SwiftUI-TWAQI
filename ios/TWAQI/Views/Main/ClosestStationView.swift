@@ -322,8 +322,9 @@ final class ClosestStationView: UIControl {
         chevron.isHidden = !isEnabled
         addSubview(chevron)
         chevron.snp.makeConstraints { (make) -> Void in
+            // Beside the face, where the 72pt column has room even for a long pill.
             make.right.equalTo(self).offset(-5)
-            make.top.equalTo(self).offset(6)
+            make.centerY.equalTo(imageView)
             make.width.equalTo(8)
             make.height.equalTo(12)
         }
