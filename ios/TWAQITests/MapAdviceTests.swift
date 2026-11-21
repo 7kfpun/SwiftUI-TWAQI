@@ -5,6 +5,7 @@
 //  TWAQ-13: one line of advice for the AQI level on the map card and station header.
 //
 
+import SwiftUI
 import XCTest
 @testable import Taiwan_Air
 
@@ -86,9 +87,45 @@ final class MapAdviceTests: XCTestCase {
         XCTAssertEqual(label?.isHidden, true)
     }
 
+    /// The card is a fixed-size map overlay with fixed fonts, like its other rows, so
+    /// the largest Dynamic Type size must neither grow the line nor push it out of its row.
+    func testAdviceStaysOneClippedLineAtLargestDynamicType() throws {
+        guard #available(iOS 17.0, *) else { throw XCTSkip("trait overrides need iOS 17") }
+        let card = ClosestStationView()
+        card.translatesAutoresizingMaskIntoConstraints = true
+        card.frame = CGRect(origin: .zero, size: CGSize(
+            width: ClosestStationView.preferredSize.width,
+            height: ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: true)
+        ))
+        card.traitOverrides.preferredContentSizeCategory = .accessibilityExtraExtraExtraLarge
+        card.advice = "Avoid outdoor activities and keep doors and windows closed"
+        card.layoutIfNeeded()
+        let label = try XCTUnwrap(Mirror(reflecting: card).children.first { $0.label == "adviceLabel" }?.value as? UILabel)
+        XCTAssertEqual(label.numberOfLines, 1)
+        XCTAssertLessThanOrEqual(label.frame.height, ClosestStationView.adviceRowHeight)
+        XCTAssertLessThanOrEqual(label.frame.maxX, card.bounds.width)
+        XCTAssertLessThanOrEqual(label.intrinsicContentSize.height, ClosestStationView.adviceRowHeight)
+    }
+
+    /// The station header scales with Dynamic Type; the advice must stay one line there:
+    /// a very long sentence is exactly as tall as a short one.
+    func testHeaderAdviceStaysOneLineAtLargestDynamicType() {
+        func height(_ advice: String) -> CGFloat {
+            let header = StationHeaderView(title: "Songshan", locality: nil, area: nil, stationType: .general,
+                                           aqi: 170, publishTime: nil, advice: advice)
+                .environment(\.sizeCategory, .accessibilityExtraExtraExtraLarge)
+            let host = UIHostingController(rootView: header)
+            return host.sizeThatFits(in: CGSize(width: 390, height: CGFloat.greatestFiniteMagnitude)).height
+        }
+        let short = height("Reduce outdoor activities")
+        let long = height(String(repeating: "Avoid outdoor activities and keep doors and windows closed. ", count: 4))
+        XCTAssertEqual(short, long, accuracy: 0.5)
+        XCTAssertGreaterThan(short, height(""), "the line is shown")
+    }
+
     /// Draws the card for every level, in both languages, when
-    /// `TEST_RUNNER_ADVICE_SHOT_DIR` is set (PR screenshots). Otherwise it only
-    /// checks that a card with advice lays out inside its own height.
+    /// `ADVICE_SHOT_DIR` is set (passed as `TEST_RUNNER_ADVICE_SHOT_DIR`, for PR
+    /// screenshots). Always checks that the advice line lies inside its card.
     func testCardForEveryLevel() throws {
         let dir = ProcessInfo.processInfo.environment["ADVICE_SHOT_DIR"]
         let originalLanguage = UserDefaults.standard.string(forKey: AppLanguage.defaultsKey)
@@ -119,6 +156,8 @@ final class MapAdviceTests: XCTestCase {
                                     width: ClosestStationView.preferredSize.width, height: height)
                 board.addSubview(card)
                 card.layoutIfNeeded()
+                let label = try XCTUnwrap(Mirror(reflecting: card).children.first { $0.label == "adviceLabel" }?.value as? UILabel)
+                XCTAssertTrue(card.bounds.contains(label.frame), "\(language) \(sample.1)")
             }
             board.layoutIfNeeded()
             let image = UIGraphicsImageRenderer(bounds: board.bounds).image { context in

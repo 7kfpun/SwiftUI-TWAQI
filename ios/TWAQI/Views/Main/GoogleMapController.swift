@@ -1018,7 +1018,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                     .map { "\($0.clock)・\($0.relative)" }
                 : nil
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
-            closestStationView.advice = adviceText(for: airStatus, hasReading: value != 0)
+            // Only for the AQI, whose levels the guidance is written for (the header uses it too),
+            // and not while the timeline shows a past hour: the sentence is present tense.
+            closestStationView.advice = adviceText(
+                for: airStatus,
+                hasReading: value != 0 && airIndexTypeSelected == .aqi && timelineHoursAgo == 0
+            )
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
