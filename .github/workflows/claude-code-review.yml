@@ -135,8 +135,9 @@ jobs:
             - Dependencies and CI: a new dependency (Pod, SPM, Gradle, npm) without a stated
               reason, an unpinned or very old version, a wide permission; a workflow change
               that widens token permissions or runs untrusted input in a shell.
-            - Ticket and body. The PR body names a Linear ticket (FOX-nn) and should quote
-              its scope; you can't open Linear, so work from what the body states. Flag
+            - Ticket and body. The PR body should say what the change is for and quote the
+              ticket's scope if it names one (a ticket is optional); you can't open the
+              tracker, so work from what the body states. Flag
               scope the diff misses and product changes outside it. If the ticket removes
               a UI element, confirm it's gone from the views and its strings. Check every
               behavioural claim in the body ("no behavior change", "tests cover X")
