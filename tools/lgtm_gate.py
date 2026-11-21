@@ -56,7 +56,6 @@ import subprocess
 import sys
 
 CONTEXT = "LGTM"
-DEPENDABOT = "dependabot[bot]"
 # Bases whose PRs get the status: master, and the Android integration branch
 # that Android ticket PRs target until it merges to master itself (FOX-52, #77).
 GATED_BASES = ("master", "feature/fox-52-android-project-setup")
@@ -263,18 +262,6 @@ def main():
         print(f"{CONTEXT}: skip — base is {pull['base']['ref']}, not one of {', '.join(GATED_BASES)}")
         return 0
     head, base_ref = pull["head"]["sha"], pull["base"]["ref"]
-    if pull["user"]["login"] == DEPENDABOT:
-        # Dependency bumps need no review; the other required checks still run.
-        state, description = "success", "Dependabot PR: no LGTM needed"
-        print(f"{CONTEXT}: {state} — {description} (head {head[:7]})")
-        if "--dry-run" in sys.argv:
-            return 0
-        run(
-            "gh", "api", "--method", "POST", f"repos/{repo}/statuses/{head}",
-            "-f", f"state={state}", "-f", f"context={CONTEXT}",
-            "-f", f"description={description}", "-f", f"target_url={pull['html_url']}",
-        )
-        return 0
     reviews = [normalize_review(review) for review in gh_json_lines(f"repos/{repo}/pulls/{number}/reviews?per_page=100")]
     comments = [normalize_comment(comment) for comment in gh_json_lines(f"repos/{repo}/issues/{number}/comments?per_page=100")]
     state, description = decide(reviews + comments, head, commit_time(head), base_ref)

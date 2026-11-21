@@ -22,7 +22,7 @@ permissions:
 jobs:
   policy:
     name: PR policy
-    # Dependabot's branch names and bodies can't follow the ticket rules.
+    # Dependabot's branch names and bodies can't follow the ticket rules; it also skips the version checks, which dependency bumps don't touch.
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
