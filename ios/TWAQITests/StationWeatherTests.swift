@@ -402,3 +402,64 @@ private final class WeatherStubProtocol: URLProtocol {
 
     override func stopLoading() {}
 }
+
+// MARK: - Map centre weather (TWAQ-6)
+
+extension StationWeatherTests {
+    func testMapCenterUsesNearestStationAndCurrentPeriod() throws {
+        let file = try file()
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.06, lon: 121.52, in: file, now: now))
+        XCTAssertEqual(weather.stationName, "臺北")
+        XCTAssertEqual(weather.temperature, 24.3)
+        // 12:40 Taiwan time falls in the 12:00–18:00 period (wx 4, 10%).
+        XCTAssertEqual(weather.wx, 4)
+        XCTAssertEqual(weather.rainChance, 10)
+        XCTAssertFalse(weather.isNight)
+        XCTAssertLessThan(weather.distanceKm, 5)
+    }
+
+    func testMapCenterIgnoresStaleReading() throws {
+        let evening = ISO8601DateFormatter().date(from: "2026-11-05T11:00:00Z")!   // 19:00 Taiwan
+        let file = try file()
+        XCTAssertNil(MapCenterWeather.make(lat: 25.06, lon: 121.52, in: file, now: evening),
+                     "a 7-hour-old reading is not shown as now")
+    }
+
+    func testMapCenterGapBetweenPeriodsShowsNoCondition() throws {
+        // The first period starts at 14:00, so 12:40 falls in a gap: the
+        // not-yet-started period must not pass as the current condition.
+        let gapJson = json.replacingOccurrences(
+            of: "\"start\": \"2026-11-05T12:00:00+08:00\", \"end\": \"2026-11-05T18:00:00+08:00\", \"wx\": 4",
+            with: "\"start\": \"2026-11-05T14:00:00+08:00\", \"end\": \"2026-11-05T18:00:00+08:00\", \"wx\": 4"
+        )
+        XCTAssertNotEqual(gapJson, json)
+        let file = try JSONDecoder().decode(WeatherFile.self, from: Data(gapJson.utf8))
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.06, lon: 121.52, in: file, now: now))
+        XCTAssertEqual(weather.temperature, 24.3)
+        XCTAssertNil(weather.wx)
+        XCTAssertNil(weather.rainChance)
+        XCTAssertFalse(weather.isNight)
+    }
+
+    func testMapCenterOutsideRangeIsNil() throws {
+        let file = try file()
+        XCTAssertNil(MapCenterWeather.make(lat: 22.03, lon: 121.55, in: file, now: now))
+        XCTAssertNil(MapCenterWeather.make(lat: 35.68, lon: 139.69, in: file, now: now))
+    }
+
+    func testMapCenterFollowsThePanTarget() throws {
+        let file = try file()
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 23.98, lon: 121.60, in: file, now: now))
+        XCTAssertEqual(weather.stationName, "花蓮")
+        XCTAssertEqual(weather.wx, 2)
+    }
+
+    func testMapCenterFormatting() {
+        XCTAssertEqual(ClosestStationView.temperature(24.6), "25°")
+        XCTAssertEqual(ClosestStationView.temperature(nil), "—")
+        XCTAssertEqual(ClosestStationView.percent(29.6), "30%")
+        XCTAssertTrue(ClosestStationView.stationText(name: "臺北", distanceKm: 4.24, chinese: true).contains("臺北"))
+        XCTAssertTrue(ClosestStationView.stationText(name: "臺北", distanceKm: 4.24, chinese: true).contains("4.2 km"))
+        XCTAssertFalse(ClosestStationView.stationText(name: "臺北", distanceKm: 4.24, chinese: false).contains("臺北"))
+    }
+}
