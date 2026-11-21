@@ -20,6 +20,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     case system
     case traditionalChinese = "zh-Hant"
     case english = "en"
+    case japanese = "ja"
 
     static let defaultsKey = "appLanguage"
 
@@ -92,6 +93,31 @@ extension Locale {
             code = languageCode
         }
         return code?.hasPrefix("zh") ?? false
+    }
+
+    static var isJapanese: Bool {
+        app.isJapanese
+    }
+
+    var isJapanese: Bool {
+        let code: String?
+        if #available(iOS 16, watchOS 9, *) {
+            code = language.languageCode?.identifier
+        } else {
+            code = languageCode
+        }
+        return code == "ja"
+    }
+
+    /// Chinese or Japanese: the app shows the source's Chinese station,
+    /// county and weather names, which Japanese readers can read as kanji,
+    /// and runs sentences on without spaces.
+    static var usesLocalNames: Bool {
+        app.usesLocalNames
+    }
+
+    var usesLocalNames: Bool {
+        isChinese || isJapanese
     }
 }
 

@@ -23,6 +23,7 @@ REPO_ROOT = File.expand_path("..", ROOT)
 #
 #   fastlane/screenshots_raw/en-US/*.png
 #   fastlane/screenshots_raw/zh-Hant/*.png
+#   fastlane/screenshots_raw/ja/*.png
 #
 # Capture them ad-free and in the right language. No code change is needed —
 # NSUserDefaults' argument domain overrides those keys for one launch only, and
@@ -75,6 +76,9 @@ FONT_LATIN_BOLD    = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 FONT_LATIN_REGULAR = "/System/Library/Fonts/Supplemental/Arial.ttf"
 FONT_CJK_BOLD      = "/System/Library/Fonts/STHeiti Medium.ttc"
 FONT_CJK_REGULAR   = "/System/Library/Fonts/STHeiti Light.ttc"
+# Japanese: STHeiti has Han glyphs but no reliable kana.
+FONT_JA_BOLD       = "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc"
+FONT_JA_REGULAR    = "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc"
 
 # Per-locale banner copy and fonts, keyed by App Store locale code. Add a locale
 # here and drop its captures in fastlane/screenshots_raw/<locale>/ — the lane
@@ -122,6 +126,28 @@ LOCALES = {
       "Vision_Pro_02" => ["捏一下，立即讀取", "AQI、各項污染物與風向，就在測站上方"],
       "Vision_Pro_03" => ["看見空污往哪裡吹", "風向模式把每個測站變成箭頭"],
       "Vision_Pro_04" => ["把測站釘選在任何地方", "24 小時趨勢與健康建議，就在你身邊"]
+    }
+  },
+  "ja" => {
+    bold: FONT_JA_BOLD,
+    regular: FONT_JA_REGULAR,
+    titles: {
+      "iPhone_6.9_01" => ["台湾の全測定局を、ひと目で", "リアルタイム大気質マップ"],
+      "iPhone_6.9_02" => ["出かける前に、空気をチェック", "AQIと各汚染物質を測定局ごとに"],
+      "iPhone_6.9_03" => ["過去24時間が、ひと目で分かる", "汚染物質をタップして推移を確認"],
+      "iPhone_6.9_04" => ["よく使う測定局を、いつでも", "お気に入りに追加。ウィジェットと通知も"],
+      "iPad_13_01"    => ["台湾の全測定局を、ひと目で", "リアルタイム大気質マップ"],
+      "iPad_13_02"    => ["地図と測定局を並べて表示", "AQIと各汚染物質を測定局ごとに"],
+      "iPad_13_03"    => ["過去24時間が、ひと目で分かる", "汚染物質をタップして推移を確認"],
+      "iPad_13_04"    => ["よく使う測定局を、いつでも", "お気に入りに追加。ウィジェットと通知も"],
+      "iPhone_Duo_01" => ["台湾の全測定局を、ひと目で", "リアルタイム大気質マップ"],
+      "iPhone_Duo_02" => ["開くと、地図と測定局が並びます", "すべての数値をひと目で"],
+      "iPhone_Duo_03" => ["どの測定局もすぐ見つかる", "検索と詳細をひとつの画面に"],
+      "iPhone_Duo_04" => ["吸っている空気を、シェア", "測定局の数値をカードにして送信"],
+      "Vision_Pro_01" => ["立体の台湾、全測定局", "実際の地形でリアルタイムの大気質を表示"],
+      "Vision_Pro_02" => ["つまんで、すぐ読む", "AQI、各汚染物質、風向を測定地点の上に"],
+      "Vision_Pro_03" => ["空気の流れを見る", "風モードで各測定局が矢印に"],
+      "Vision_Pro_04" => ["測定局をどこにでも固定", "24時間の推移と健康アドバイスをそばに"]
     }
   }
 }.freeze
@@ -228,7 +254,7 @@ platform :ios do
        "--dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active " \
        "--cellularBars 4 --batteryState charged --batteryLevel 100")
 
-    { "en-US" => "en", "zh-Hant" => "zh-Hant" }.each do |locale, language|
+    { "en-US" => "en", "zh-Hant" => "zh-Hant", "ja" => "ja" }.each do |locale, language|
       out_dir = File.join(RAW_ROOT, locale)
       sh("mkdir -p '#{out_dir}'")
       sh("rm -f '#{out_dir}/#{prefix} '[0-9][0-9]*.png")
@@ -269,7 +295,7 @@ platform :ios do
 
     sh((xcodebuild + ["build-for-testing", "-quiet"]).shelljoin)
 
-    { "en-US" => "en", "zh-Hant" => "zh-Hant" }.each do |locale, language|
+    { "en-US" => "en", "zh-Hant" => "zh-Hant", "ja" => "ja" }.each do |locale, language|
       out_dir = File.join(RAW_ROOT, locale)
       sh("mkdir -p '#{out_dir}'")
       # xcodebuild hands TEST_RUNNER_-prefixed variables to the test runner

@@ -202,7 +202,7 @@ struct StationPickerView: View {
     }
 
     private func locality(_ pollutant: Pollutant) -> String? {
-        let value = Locale.isChinese ? pollutant.countyLocal : pollutant.county
+        let value = Locale.usesLocalNames ? pollutant.countyLocal : pollutant.county
         return (value?.isEmpty ?? true) ? nil : value
     }
 }

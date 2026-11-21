@@ -342,7 +342,7 @@ struct ReadingWidgetView: View {
     /// English wraps between words, up to four lines; Chinese has no spaces
     /// and reads fine broken anywhere.
     private func statusLines(_ status: AirStatuses) -> Int {
-        guard !Locale.isChinese else { return 2 }
+        guard !Locale.usesLocalNames else { return 2 }
         // Built first: an interpolated literal would look up "AirStatus.%@".
         let key = "AirStatus.\(status.rawValue)"
         let words = String(localized: String.LocalizationValue(key)).split(separator: " ").count

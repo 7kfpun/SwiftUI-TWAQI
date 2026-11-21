@@ -91,7 +91,7 @@ extension StationDirectoryEntry {
 
     /// The station's name in `locale`'s language, never blank.
     func displayName(locale: Locale) -> String {
-        let preferred = locale.isChinese ? nameLocal : name
+        let preferred = locale.usesLocalNames ? nameLocal : name
         if !preferred.isEmpty { return preferred }
         return code.isEmpty ? "#\(id)" : code
     }

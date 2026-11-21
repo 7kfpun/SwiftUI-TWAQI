@@ -22,7 +22,7 @@ final class HelpTabUITests: XCTestCase {
             "-onboardingCompleted", "YES",
             "-onboardingLegacyInstall", "NO",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", language.hasPrefix("zh") ? "zh_TW" : "en_US",
+            "-AppleLocale", language.hasPrefix("zh") ? "zh_TW" : (language == "ja" ? "ja_JP" : "en_US"),
         ]
         app.launch()
         let tabs = app.tabBars.buttons

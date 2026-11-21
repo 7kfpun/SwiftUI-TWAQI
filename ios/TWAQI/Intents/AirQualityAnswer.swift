@@ -198,7 +198,7 @@ enum AirQualityAnswer {
 
     /// The station's name in `locale`'s language, never blank.
     static func name(of reading: WatchReading, locale: Locale) -> String {
-        let preferred = locale.isChinese ? reading.nameLocal : reading.name
+        let preferred = locale.usesLocalNames ? reading.nameLocal : reading.name
         return preferred.isEmpty ? (reading.code.isEmpty ? "#\(reading.stationId)" : reading.code) : preferred
     }
 
@@ -221,6 +221,6 @@ enum AirQualityAnswer {
 
     /// Chinese sentences run on; English ones take a space.
     private static func join(_ sentences: [String], locale: Locale) -> String {
-        sentences.joined(separator: locale.isChinese ? "" : " ")
+        sentences.joined(separator: locale.usesLocalNames ? "" : " ")
     }
 }

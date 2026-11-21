@@ -40,9 +40,9 @@ extension Country {
 
     /// Never blank: falls back through the other language, then the code.
     var displayName: String {
-        let preferred = Locale.isChinese ? nameLocal : name
+        let preferred = Locale.usesLocalNames ? nameLocal : name
         if !preferred.isEmpty { return preferred }
-        let alternate = Locale.isChinese ? name : nameLocal
+        let alternate = Locale.usesLocalNames ? name : nameLocal
         if !alternate.isEmpty { return alternate }
         return code.uppercased()
     }

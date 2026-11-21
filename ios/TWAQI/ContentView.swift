@@ -215,7 +215,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ForEach(["zh-Hant", "en"], id: \.self) { localIdentifier in
+        ForEach(["zh-Hant", "en", "ja"], id: \.self) { localIdentifier in
             ContentView(router: AppRouter(), opensOnboarding: false)
                 .environmentObject(SettingsStore())
                 .environment(\.locale, .init(identifier: localIdentifier))

@@ -20,7 +20,7 @@ import XCTest
 ///
 ///   SCREENSHOT_DIR       where the PNGs are written (a path on the Mac)
 ///   SCREENSHOT_PREFIX    file name prefix: "iPhone" or "iPad"
-///   SCREENSHOT_LANGUAGE  "en" or "zh-Hant"
+///   SCREENSHOT_LANGUAGE  "en", "zh-Hant" or "ja"
 ///   SCREENSHOT_MAP_ZOOM  optional; the map's zoom, default 7.2
 ///
 /// It writes nothing to OneSignal or Directus: the welcome flow is marked
@@ -33,6 +33,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     private var outputDir: URL!
     private var prefix = "iPhone"
     private var isChinese = false
+    private var isJapanese = false
 
     /// Songshan, Banqiao, Xitun and Hualien: north, centre and east coast.
     private static let favouriteStationIds = [105, 106, 112, 104]
@@ -50,6 +51,7 @@ final class AppStoreScreenshotTests: XCTestCase {
 
         let language = env["SCREENSHOT_LANGUAGE"] ?? "en"
         isChinese = language.hasPrefix("zh")
+        isJapanese = language == "ja"
         let zoom = env["SCREENSHOT_MAP_ZOOM"].flatMap { $0.isEmpty ? nil : $0 } ?? "7.2"
 
         let favourites = Self.favouriteStationIds.map { "<integer>\($0)</integer>" }.joined()
@@ -71,7 +73,7 @@ final class AppStoreScreenshotTests: XCTestCase {
             "-lastestMapZoom", zoom,
             "-savedFavouriteStations", "<array>\(favourites)</array>",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", isChinese ? "zh_TW" : "en_US",
+            "-AppleLocale", isChinese ? "zh_TW" : (isJapanese ? "ja_JP" : "en_US"),
         ]
         app.launch()
         dismissSystemAlerts()
@@ -80,7 +82,7 @@ final class AppStoreScreenshotTests: XCTestCase {
     func testCaptureAppStoreScreenshots() throws {
         // Stands alone on the east coast, so a tap can't land on a neighbour
         // the way one in the Taipei cluster would.
-        let station = isChinese ? "花蓮" : "Hualien"
+        let station = isChinese ? "花蓮" : (isJapanese ? "花蓮" : "Hualien")
 
         // 01: the map.
         let marker = app.descendants(matching: .any)
@@ -93,7 +95,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         // 02: the station, from its marker — a sheet on iPhone, the panel
         // beside the map in a wide window.
         marker.tap()
-        let share = app.buttons[isChinese ? "分享" : "Share"].firstMatch
+        let share = app.buttons[isChinese ? "分享" : (isJapanese ? "共有" : "Share")].firstMatch
         XCTAssertTrue(share.waitForExistence(timeout: 60), "Station page did not open")
         let loaded = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: share)
         wait(for: [loaded], timeout: 90)
@@ -106,7 +108,7 @@ final class AppStoreScreenshotTests: XCTestCase {
         // the chart under them shows its last 24 hours.
         // The section label is drawn in capitals; match it either way.
         let pollutantsLabel = app.staticTexts
-            .matching(NSPredicate(format: "label ==[c] %@", isChinese ? "污染物" : "Pollutants"))
+            .matching(NSPredicate(format: "label ==[c] %@", isChinese ? "污染物" : (isJapanese ? "汚染物質" : "Pollutants")))
             .firstMatch
         XCTAssertTrue(pollutantsLabel.waitForExistence(timeout: 15), "No pollutants section")
         scrollToTop(pollutantsLabel)
@@ -135,11 +137,11 @@ final class AppStoreScreenshotTests: XCTestCase {
             app.buttons["xmark"].firstMatch.tap()
         }
         settle(seconds: 2)
-        let favouritesTab = app.buttons[isChinese ? "最愛" : "Favourites"].firstMatch
+        let favouritesTab = app.buttons[isChinese ? "最愛" : (isJapanese ? "お気に入り" : "Favourites")].firstMatch
         XCTAssertTrue(favouritesTab.waitForExistence(timeout: 10), "No Favourites tab")
         favouritesTab.tap()
         let firstRow = app.buttons
-            .matching(NSPredicate(format: "label BEGINSWITH %@", isChinese ? "松山" : "Songshan"))
+            .matching(NSPredicate(format: "label BEGINSWITH %@", isChinese ? "松山" : (isJapanese ? "松山" : "Songshan")))
             .firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 90), "Favourites did not load")
         settle()
@@ -253,15 +255,15 @@ final class AppStoreScreenshotTests: XCTestCase {
     /// until OneSignal has answered (FOX-37 M3). Fails the run rather than
     /// capture a station page that isn't what the app shows.
     private func assertAlertsCardOffAndUnlocked() {
-        let title = isChinese ? "空品通知" : "Air quality alerts"
-        let off = isChinese ? "未開啟" : "Off"
+        let title = isChinese ? "空品通知" : (isJapanese ? "大気質の通知" : "Air quality alerts")
+        let off = isChinese ? "未開啟" : (isJapanese ? "オフ" : "Off")
         let card = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label BEGINSWITH %@", title))
             .firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 15), "No alerts card on the station page")
         XCTAssertTrue(card.label.hasSuffix(off), "Alerts card isn't off: \(card.label)")
 
-        let cap = app.staticTexts[isChinese ? "最多只能設定 2 個測站" : "You can only enable at most for 2 stations"]
+        let cap = app.staticTexts[isChinese ? "最多只能設定 2 個測站" : (isJapanese ? "最大2局までしか設定できません" : "You can only enable at most for 2 stations")]
         let unlocked = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: cap)
         wait(for: [unlocked], timeout: 30)
         XCTAssertFalse(cap.exists, "Alerts card still shows the two-station cap")

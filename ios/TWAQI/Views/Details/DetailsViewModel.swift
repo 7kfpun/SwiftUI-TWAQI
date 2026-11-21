@@ -320,7 +320,7 @@ class DetailsViewModel: ObservableObject {
         StationWeatherStore.shared.weather { file in
             guard self.weather == nil, let file = file else { return }
             guard let weather = StationWeatherMatcher.weather(lat: lat, lon: lon, countyLocal: countyLocal, in: file) else { return }
-            self.weatherCountyTitle = Locale.isChinese ? countyLocal : county
+            self.weatherCountyTitle = Locale.usesLocalNames ? countyLocal : county
             self.weather = weather
         }
     }

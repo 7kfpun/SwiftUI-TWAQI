@@ -1,0 +1,653 @@
+/*
+  Localizable.strings (ja)
+  TWAQI
+
+  Created by kf on 6/11/19.
+  Copyright © 2019 kf. All rights reserved.
+*/
+
+"Tabbar.main" = "メイン";
+"Tabbar.forecast" = "予報";
+"Tabbar.favourites" = "お気に入り";
+"Tabbar.details_list" = "検索";
+"Tabbar.help" = "ヘルプ";
+
+"FavouriteList.favourites" = "お気に入り";
+"Favourites.add_your_first_favourite_station" = "最初のお気に入り観測所を追加しましょう";
+"Favourites.add_to_favourites" = "お気に入りに追加";
+"Favourites.remove_from_favourites" = "お気に入りから削除";
+"Favourites.alerts_on" = "通知オン";
+"Favourites.remove_station_with_alerts_title" = "お気に入りから削除しますか?";
+"Favourites.remove_station_with_alerts_message" = "この観測所は AQI 通知がオンになっています。お気に入りから削除すると、通知もオフになります。";
+"Favourites.remove_and_turn_off_alerts" = "削除して通知をオフにする";
+"Favourites.cancel" = "キャンセル";
+"Favourites.added_to_favourites" = "お気に入りに追加しました";
+"Favourites.alerts_cap_reached_message %lld" = "通知はすでに上限の %lld か所でオンになっているため、この観測所ではオフのままです。ここで通知を受け取るには、ほかの観測所のページで通知をオフにしてください。";
+"Favourites.notifications_off_message" = "Taiwan Air の通知がオフになっているため、この観測所の通知はオフのままです。設定でオンにしてから、下で通知をオンにしてください。";
+"Favourites.open_settings" = "設定を開く";
+"Favourites.ok" = "OK";
+
+"DetailsList.details" = "詳細";
+"DetailsList.search" = "検索";
+
+"Details.general_public" = "一般の方";
+"Details.sensitive_group" = "敏感な方";
+
+"Settings.notice_me_when_aqi_is_above" = "AQI が次の値を超えたらお知らせ";
+"Settings.the_value_is_too_small_you_would_get_lots_of_notifications" = "値が小さすぎるため、通知が多くなります";
+"Settings.notice_me_when_aqi_is_below" = "AQI が次の値を下回ったらお知らせ";
+"Settings.the_value_is_too_large_you_would_get_lots_of_notifications" = "値が大きすぎるため、通知が多くなります";
+"Settings.alerts_station_limit %lld" = "通知をオンにできる観測所は最大 %lld か所です。";
+
+"Help.help" = "ヘルプ";
+"Help.select_a_topic" = "トピックを選択";
+"Help.do_not_disturb" = "おやすみモード";
+"Help.turn_on_do_not_disturb" = "おやすみモードをオンにする";
+"Help.start_time" = "開始時刻";
+"Help.end_time" = "終了時刻";
+"Help.language" = "言語";
+"Help.language_system" = "システム設定に従う";
+"Help.language_footer" = "政府が提供する住所や予報の文章は中国語です。ほかの言語では、設定の「翻訳」でその言語をダウンロードしてあれば、このデバイス上で翻訳されます。";
+"Help.appearance" = "外観";
+"Help.appearance_system" = "システム設定に従う";
+"Help.appearance_light" = "ライト";
+"Help.appearance_dark" = "ダーク";
+"Help.cancel_site_notification" = "観測所の通知を解除";
+"Help.all_site_notification_has_been_cancelled" = "すべての観測所の通知を解除しました";
+"Help.in_app_purchase" = "アプリ内課金";
+"Help.ad_free" = "広告を非表示にして、コンプリケーションに数値を表示";
+"Help.restore_purchase" = "購入を復元";
+"Help.contact_us" = "お問い合わせ";
+"Help.privacy" = "プライバシー";
+"Help.privacy_settings" = "プライバシー設定";
+"Help.interested_to_be_our_business_partner" = "ビジネスパートナーにご興味がありますか?";
+"Help.feedback_or_contact_us" = "ご意見・お問い合わせ";
+"Help.definition" = "数値の見方";
+/* Help → Data sources (FOX-88): every source, named here instead of on each screen */
+"DataSources.header" = "データソース";
+"DataSources.air_quality_title" = "大気質の観測値";
+"DataSources.air_quality_detail" = "環境部(MOENV)の大気質モニタリングネットワーク:AQI、汚染物質、風。1時間ごとに公開されます。";
+"DataSources.forecast_title" = "地域別予報";
+"DataSources.forecast_detail" = "MOENV による各地域の大気質予報。1日に数回発表されます。";
+"DataSources.cams_title" = "観測所カメラ";
+"DataSources.cams_detail" = "MOENV による各観測所からの眺め。10分ごとに新しい画像に更新され、直近24時間分を1時間に1枚ずつ保存します。";
+"DataSources.weather_title" = "天気";
+"DataSources.weather_detail" = "中央気象署(CWA)のオープンデータ:各県市の36時間予報(約6時間ごとに発表)と、最寄りの有人気象観測所の観測値(10分ごとに報告)。";
+"DataSources.map_title" = "地図";
+"DataSources.map_detail" = "Google マップ。";
+"DataSources.licence_title" = "政府データオープンライセンス 第1.0版";
+"DataSources.footer" = "MOENV と CWA は、台湾の政府データオープンライセンス第1.0版のもとでこのデータを公開しており、Taiwan Air はそのライセンスの条件に従って利用しています。Taiwan Air は政府が運営するものではない、独立したアプリです。";
+"Help.data_provided_by_government" = "データは中華民国(台湾)行政院環境保護署が提供しています";
+
+"Feedback.title" = "フィードバック";
+"Feedback.rating_header" = "アプリにどのくらい満足していますか?";
+"Feedback.rating_stars %lld" = "星 %lld つ";
+"Feedback.message_header" = "ご提案";
+"Feedback.message_placeholder" = "どの機能を改善すべきだと思いますか?";
+"Feedback.other_header" = "その他のご意見・ご質問";
+"Feedback.optional" = "任意";
+"Feedback.interview" = "ユーザーインタビューに興味がありますか?";
+"Feedback.interview_footer" = "台北で不定期にユーザーインタビューを行っています。オンにすると、ご案内のメールをお送りすることがあります。";
+"Feedback.name_placeholder" = "お名前(任意)";
+"Feedback.email_placeholder" = "メールアドレス *";
+"Feedback.email_footer" = "返信のために使用します。";
+"Feedback.email_invalid" = "メールアドレスをご確認ください。";
+"Feedback.privacy_footer" = "調査の参考にするため、アプリのバージョン、機種、OS のバージョン、言語をフィードバックと一緒に送信します。";
+"Feedback.send" = "送信";
+"Feedback.sent_title" = "ありがとうございます!";
+"Feedback.sent_message" = "フィードバックを送信しました。";
+"Feedback.sent_message_may_reply" = "フィードバックを送信しました。メールでご返信することがあります。";
+"Feedback.rate_on_app_store" = "App Store で評価する";
+"Feedback.error_title" = "フィードバックを送信できませんでした";
+"Feedback.error_offline" = "オフラインのようです。接続を確認して、もう一度お試しください。";
+"Feedback.error_generic" = "問題が発生しました。しばらくしてからもう一度お試しください。";
+"Feedback.try_again" = "再試行";
+"Feedback.cancel" = "キャンセル";
+
+"Cooperate.title" = "ビジネス提携";
+"Cooperate.intro_header" = "提携のお問い合わせ";
+"Cooperate.intro_footer" = "ブランド、メディア、学校、公的機関など、どなたでも歓迎します。できるだけ早くメールでご返信します。";
+"Cooperate.type" = "種類";
+"Cooperate.type_choose" = "選択してください";
+"Cooperate.type_advertising" = "広告";
+"Cooperate.type_data_api" = "データ・API";
+"Cooperate.type_sponsorship" = "スポンサーシップ";
+"Cooperate.type_media" = "メディア・広報";
+"Cooperate.type_other" = "その他";
+"Cooperate.company_header" = "会社・団体";
+"Cooperate.company_placeholder" = "会社・団体名 *";
+"Cooperate.website_placeholder" = "ウェブサイト(任意)";
+"Cooperate.contact_header" = "ご連絡先";
+"Cooperate.name_placeholder" = "お名前 *";
+"Cooperate.job_title_placeholder" = "役職(任意)";
+"Cooperate.phone_placeholder" = "電話番号(任意)";
+"Cooperate.contact_footer" = "メールでご連絡します。";
+"Cooperate.message_header" = "提携について";
+"Cooperate.message_placeholder" = "アイデアのほか、時期や予算があればお知らせください。";
+"Cooperate.privacy_footer" = "入力された内容は、このお問い合わせへの返信にのみ使用します。アプリのバージョン、機種、OS のバージョン、言語、タイムゾーンも一緒に送信されます。";
+"Cooperate.sent_title" = "ありがとうございます!";
+"Cooperate.sent_message" = "お問い合わせを受け付けました。まもなくご連絡します。";
+"Cooperate.error_title" = "お問い合わせを送信できませんでした";
+
+"Help.widgets_and_watch" = "ウィジェットと Apple Watch";
+"Help.widgets_title" = "ホーム画面とロック画面のウィジェット";
+"Help.widgets_shows_header" = "表示される内容";
+"Help.widgets_shows_body" = "最寄りの観測所、または最初のお気に入りの現在の観測値を表示します。ウィジェットを編集して選択できます。";
+"Help.widgets_favourites_header" = "お気に入りの観測所";
+"Help.widgets_favourites_body" = "ホーム画面の小・中・大サイズのウィジェットでは、メインの観測所の下にほかのお気に入りの観測所が重複なく並びます。特大(iPad)はお気に入りの一覧ではなく、1つの観測所を詳しく表示します。すべての指数、風、過去24時間、地域別予報、観測所カメラが見られます。中・大・特大のウィジェットは Pro の機能です。";
+"Help.widgets_favourites_add" = "お気に入りを追加するには、観測所を開いてハートをタップします。ウィジェットは「お気に入り」の並び順に従います。「お気に入り」で「編集」をタップし、ドラッグして並べ替えてください。";
+"Help.widgets_favourites_offline" = "接続がないときは、ウィジェットは最後に保存した観測値を表示します。";
+"Help.widgets_index_header" = "指数の選択";
+"Help.widgets_index_body" = "ウィジェットを編集して、AQI、PM2.5、PM10、O3、CO、SO2、NO2 から表示する指数を選べます。";
+"Help.widgets_paging_header" = "お気に入りを切り替える";
+"Help.widgets_paging_body" = "中・大サイズのウィジェットで ‹ または › をタップすると、お気に入りの観測所を1つずつ切り替えられます。間の「2 / 5」のような数字は現在の位置を示します。それ以外の場所をタップすると、その観測所がアプリで開きます。タップせずに30分たつか、新しい観測値が届くと、ウィジェットは元の観測所に戻ります。Pro と、2か所以上のお気に入りが必要です。";
+"Help.widgets_cycle_body" = "ホーム画面のウィジェットで指数名(AQI、PM2.5 など)をタップすると、次の指数に切り替わります。最初は「ウィジェットを編集」で選んだ指数から始まります。";
+"Help.widgets_stack_tip" = "ヒント:Taiwan Air のウィジェットを1つのスタックにまとめ(ウィジェットをほかのウィジェットの上にドラッグ)、それぞれ別の設定にします。たとえば、最寄りの観測所と最初のお気に入り、または AQI と PM2.5 にして、スワイプで切り替えます。";
+"Help.widgets_sizes_header" = "サイズ";
+"Help.widgets_home_sizes" = "ホーム画面:小、中、大、特大(iPad)。";
+"Help.widgets_lock_sizes" = "ロック画面:円形、長方形、インライン。";
+"Help.widgets_standby_header" = "スタンバイとスタック";
+"Help.widgets_standby_body" = "スタンバイ:iPhone を横向きにして充電中にスタンバイを長押しし、+ をタップして、小サイズの Taiwan Air ウィジェットを追加します。空気が悪くなると、自動で最前面に表示されます。";
+"Help.widgets_smart_rotate_body" = "「スマートローテーション」をオンにしたホーム画面のスタックでは、空気が悪い日にウィジェットが自動で最前面に移動します。";
+"Help.widgets_add_header" = "追加方法";
+"Help.widgets_add_1" = "1. ホーム画面またはロック画面を長押しし、「ウィジェットを追加」をタップします。";
+"Help.widgets_add_2" = "2. 「Taiwan Air」「TWAQI」または「空気の質」で検索します。";
+"Help.widgets_add_3" = "3. ウィジェットを長押しして「ウィジェットを編集」をタップし、観測所と指数を選びます。";
+"Help.widgets_footer" = "観測所と観測値を準備するため、一度このアプリを開いてください。";
+
+"Help.watch_title" = "Apple Watch";
+"Help.watch_app_header" = "Watch アプリ";
+"Help.watch_app_body" = "無料です。最寄りの観測所、または選んだ観測所の現在の観測値と、過去12時間を表示します。";
+"Help.watch_complications_header" = "文字盤のコンプリケーション";
+"Help.watch_complications_body" = "文字盤のスタイルは無料です。レベルに応じた色の文字盤で、AQI、PM2.5、または7つの指数のいずれかを表示できます。Pro では、数値とさらに多くのスタイル(数値付きラベル、数値のみ、言葉での状態表示)が加わります。Watch アプリ自体は無料です。";
+"Help.watch_smart_stack_header" = "スマートスタック";
+"Help.watch_smart_stack_body" = "Pro の機能です。文字盤で Digital Crown を回してスマートスタックを開き、長押しして + をタップし、Taiwan Air を追加します。空気が悪くなったときや通勤の時間帯に、自動で表示されます。";
+"Help.watch_add_header" = "コンプリケーションの追加方法";
+"Help.watch_add_1" = "1. 文字盤を編集して、コンプリケーションを追加します。";
+"Help.watch_add_2" = "2. 「Taiwan Air」「TWAQI」または「空気の質」を選びます。";
+"Help.watch_footer" = "観測所と観測値を利用できるようにするため、一度このアプリまたは Watch アプリを開いてください。";
+
+"AirIndex.meaning_aqi" = "大気質指数";
+"AirIndex.meaning_pm25" = "微小粒子状物質(PM2.5)";
+"AirIndex.meaning_pm10" = "粒子状物質(PM10)";
+"AirIndex.meaning_o3" = "オゾン";
+"AirIndex.meaning_co" = "一酸化炭素";
+"AirIndex.meaning_so2" = "二酸化硫黄";
+"AirIndex.meaning_no2" = "二酸化窒素";
+
+
+"AirStatus.good" = "良い";
+"AirStatus.moderate" = "普通";
+"AirStatus.unhealthyforsensitivegroup" = "敏感な方に不健康";
+"AirStatus.unhealthy" = "不健康";
+"AirStatus.veryunhealthy" = "非常に不健康";
+"AirStatus.hazardous" = "危険";
+"AirStatus.unknown" = "-";
+
+"AirStatus.general_public_guidance_good" = "いつも通り屋外で過ごせます";
+"AirStatus.general_public_guidance_moderate" = "いつも通り屋外で過ごせます";
+"AirStatus.general_public_guidance_unhealthyforsensitivegroup" = "屋外での活動を控えめにしましょう";
+"AirStatus.general_public_guidance_unhealthy" = "特に屋外での激しい運動は控えましょう";
+"AirStatus.general_public_guidance_veryunhealthy" = "屋外での活動を減らしましょう";
+"AirStatus.general_public_guidance_hazardous" = "屋外での活動を避け、ドアや窓を閉めておきましょう";
+
+"AirStatus.sensitive_group_guidance_good" = "いつも通り屋外で過ごせます";
+"AirStatus.sensitive_group_guidance_moderate" = "屋外で活動しても問題ありません";
+"AirStatus.sensitive_group_guidance_unhealthyforsensitivegroup" = "激しい運動や屋外での活動を控えましょう";
+"AirStatus.sensitive_group_guidance_unhealthy" = "屋内で過ごし、激しい運動は控えましょう";
+"AirStatus.sensitive_group_guidance_veryunhealthy" = "屋内で過ごし、激しい運動は控えましょう";
+"AirStatus.sensitive_group_guidance_hazardous" = "屋内で過ごし、体を動かす活動は避けましょう";
+
+"Details.last_updated" = "最終更新";
+"Details.address" = "住所";
+"Details.coordinates" = "座標";
+"Details.wind" = "風";
+"Details.location" = "場所";
+"Details.map_of %@" = "%@の地図";
+"Details.open_in_maps" = "マップで開きます";
+"Details.no_data" = "データなし";
+"Details.select_a_station" = "観測所を選択";
+
+"StationType.general" = "一般";
+"StationType.traffic" = "道路沿い";
+"StationType.industrial" = "工業";
+"StationType.background" = "バックグラウンド";
+"StationType.national_park" = "国立公園";
+"StationType.other" = "その他";
+
+"Wind.calm" = "静穏";
+"Wind.light_air" = "至軽風";
+"Wind.light_breeze" = "軽風";
+"Wind.gentle_breeze" = "軟風";
+"Wind.moderate_breeze" = "和風";
+"Wind.strong_breeze" = "強風";
+
+/* 24-hour AQI trend */
+"Details.trend_improving" = "改善中";
+"Details.trend_worsening" = "悪化中";
+"Details.trend_steady" = "横ばい";
+"Details.trend_improving_detail" = "ここ数時間で AQI が %d 下がりました";
+"Details.trend_worsening_detail" = "ここ数時間で AQI が %d 上がりました";
+"Details.trend_steady_detail" = "AQI %d 前後で推移しています";
+"Details.now" = "現在";
+"Details.low" = "最低";
+"Details.high" = "最高";
+"Details.average" = "平均";
+"Details.no_trend_data" = "傾向を表示するための観測値がまだ足りません";
+"Details.history_verdict_window" = "過去24時間に基づく";
+"Details.history_range_24h" = "24時間";
+"Details.history_range_7d" = "7日間";
+"Details.history_range_label" = "履歴の期間";
+"Details.history_no_reading" = "観測値なし";
+"Details.history_updated %@" = "最終更新 %@";
+"Details.history_offline" = "オフライン:保存済みの履歴を表示しています";
+"Details.history_short %d" = "これまでの履歴は直近 %d 時間分のみです。";
+"Details.history_span_day" = "過去24時間";
+"Details.history_span_week" = "過去7日間";
+"Details.history_span_hours %d" = "過去 %d 時間";
+"Details.history_a11y %@ %@ %@ %@ %@" = "%1$@、%2$@。最低 %3$@、最高 %4$@、最新 %5$@。上下にスワイプして時間ごとに確認できます。";
+"Details.not_reporting" = "リアルタイムの観測値なし";
+"Details.not_reporting_message" = "この観測所は現在データを報告していません。メンテナンス中でオフラインか、廃止された可能性があります。近くの観測所は地図で確認できます。";
+"Details.pollutants" = "汚染物質";
+"Details.health_advice" = "健康へのアドバイス";
+"Details.alerts_title" = "大気質の通知";
+"Details.alerts_pitch" = "ここの空気が悪くなったときや、改善したときにお知らせします。";
+"Details.alerts_on" = "オン";
+"Details.alerts_off" = "オフ";
+"Details.alerts_unavailable" = "現在、通知を読み込めません。接続を確認して、もう一度お試しください。";
+"Details.alerts_try_again" = "再試行";
+"Details.live_cam" = "ライブカメラ";
+"Details.cam_captured %@" = "撮影 %@";
+"Details.no_cam" = "この観測所にはカメラがありません";
+"Details.cam_unavailable" = "カメラ画像を読み込めませんでした";
+"Details.cam_showing_saved" = "最新の画像を読み込めなかったため、最後に保存した画像を表示しています";
+"Details.cam_live" = "ライブ";
+"Details.cam_timeline" = "カメラ、過去24時間";
+"Details.cam_hour_missing" = "この時間の画像はありません";
+"Details.send_feedback" = "フィードバックを送る";
+
+/* Share card */
+"Share.share" = "共有";
+"Share.message" = "%1$@:AQI %2$d、%3$@ — Taiwan Air より";
+"Share.preview_title" = "共有カード";
+"Share.shape" = "形式";
+"Share.shape_feed" = "投稿 4:5";
+"Share.shape_story" = "ストーリーズ 9:16";
+"Share.shape_square" = "チャット 1:1";
+"Share.save_to_photos" = "写真に保存";
+"Share.saved" = "写真に保存しました";
+"Share.save_denied" = "Taiwan Air には写真の追加が許可されていません。設定で許可できます。";
+"Share.save_failed" = "カードを保存できませんでした。もう一度お試しください。";
+"Share.open_settings" = "設定を開く";
+"Share.cancel" = "キャンセル";
+"Share.download" = "App Store で Taiwan Air をダウンロード";
+
+/* Watch */
+"Watch.stations" = "観測所";
+"Watch.loading_failed" = "観測値を読み込めませんでした";
+"Watch.retry" = "再試行";
+"Watch.widget_name" = "大気質";
+"Watch.widget_description" = "アプリで選んだ観測所の大気質。文字盤は無料で、数値とそのほかのスタイルは Pro の機能です。";
+"Watch.widget_short %@" = "%@(数値のみ)";
+"Watch.widget_face %@" = "%@(文字盤)";
+"Watch.widget_status %@" = "%@(状態)";
+"Watch.widget_no_station %@" = "%@、観測所なし";
+"Watch.widget_pro %@" = "%@ · Pro";
+
+"Widget.widget_name" = "大気質";
+"Widget.widget_description" = "最寄りの観測所または最初のお気に入りの現在の AQI と、そのほかのお気に入りを表示します。";
+"Widget.weather_label %@" = "天気:%@";
+"Widget.favourites" = "お気に入り";
+"Widget.no_favourites" = "お気に入りに観測所を保存すると、ここに一覧表示されます。";
+"Widget.station" = "観測所";
+"Widget.station_closest" = "最寄りの観測所";
+"Widget.station_first_favourite" = "最初のお気に入り";
+"Widget.station_chosen" = "観測所を選択";
+"Widget.station_picker" = "観測所を選択";
+"Widget.pro_only_title" = "Pro ウィジェット";
+"Widget.pro_only_body" = "中・大・特大のウィジェットは Pro ユーザー向けです。アプリを開いてアップグレードしてください。";
+"Widget.pro_unlock" = "Pro ですべての観測値を解放";
+"Widget.next_station" = "次の観測所";
+"Widget.previous_station" = "前の観測所";
+"Widget.show_index %@" = "%@を表示";
+"Widget.page_position %lld %lld" = "観測所 %1$lld / %2$lld";
+"Widget.intent_page_title" = "ウィジェットに観測所を表示";
+"Widget.intent_index_title" = "ウィジェットの指数を変更";
+"Widget.intent_widget" = "ウィジェット";
+"Watch.no_station" = "アプリを開いて観測所を選択してください";
+"Watch.history" = "過去12時間";
+"Watch.closest" = "最寄りの観測所";
+"Watch.default_station" = "デフォルト · 位置情報なし";
+"Watch.pro_title" = "数値とスタイル · Pro";
+"Watch.pro_failed" = "購入が見つかりません。もう一度お試しいただくか、復元してください。";
+"Watch.pro_locked" = "Pro · アプリを開いて解放";
+
+/* Pro */
+"Pro.title" = "Taiwan Air Pro";
+"Pro.subtitle" = "すっきりした画面と、文字盤で見る大気質。";
+"Pro.features" = "利用できる機能";
+"Pro.feature_no_ads" = "広告なし";
+"Pro.feature_no_ads_detail" = "地図を含むすべての画面で。";
+"Pro.feature_complications" = "コンプリケーションの数値とスタイル";
+"Pro.feature_complications_detail" = "AQI、PM2.5、または7つの指数のいずれかについて、文字盤に数値とさらに多くのスタイルを表示します。文字盤のスタイルと Watch アプリは無料です。";
+"Pro.feature_widgets" = "中・大・特大のウィジェット";
+"Pro.feature_widgets_detail" = "ホーム画面に自分の観測所とお気に入りの観測所を表示します。iPad では1つの観測所を詳しく表示します。";
+"Pro.feature_support" = "独立系アプリを応援";
+"Pro.feature_support_detail" = "アプリの保守と観測値の提供を続ける支えになります。";
+"Pro.choose_plan" = "プランを選択";
+"Pro.best_value" = "いちばんお得";
+"Pro.per_month %@" = "%@ / 月";
+"Pro.billed_monthly" = "月額課金";
+"Pro.lifetime_detail" = "一度のお支払いで Pro をずっと利用できます";
+"Pro.renewal_terms" = "サブスクリプションは、期間終了の24時間前までに解約しない限り自動的に更新されます。「設定」›「Apple ID」›「サブスクリプション」で管理できます。";
+"Pro.terms_of_use" = "利用規約";
+"Pro.privacy_policy" = "プライバシーポリシー";
+"Pro.purchase_failed" = "購入を完了できませんでした。もう一度お試しください。";
+"Watch.pro_feature_complications" = "文字盤に数値を表示";
+"Watch.pro_feature_no_ads" = "iPhone で広告なし";
+"Watch.pro_feature_indices" = "AQI、PM2.5、ほか5つの指数";
+"Watch.pro_complications_cta" = "文字盤に数値を表示";
+
+/* Guide */
+"Guide.section_what" = "概要";
+"Guide.section_sources" = "発生源";
+"Guide.section_health" = "健康への影響";
+"Guide.section_measure" = "測定方法";
+"Guide.section_tips" = "できる対策";
+"Guide.section_bands" = "このアプリの色区分";
+"Guide.bands_footer" = "地図、観測所のページ、Watch のすべての観測値は、これらの区分で色分けされます。";
+"Guide.further_reading" = "Wikipedia で詳しく見る";
+"Guide.sources_footer" = "出典:環境部(台湾)、世界保健機関(WHO)「世界大気質ガイドライン」(2021年)。";
+
+"Guide.aqi.what" = "空気の状態を0〜500の1つの数値にまとめたものです。6種類の汚染物質をそれぞれ同じ0〜500の尺度に換算し、その中で最も高い値が AQI になります。その汚染物質が主要汚染物質として示されます。オゾンが原因で160になった場合と PM2.5 が原因の場合では必要な対策が異なるため、どの汚染物質が原因か確認しておくと安心です。";
+"Guide.aqi.measure" = "台湾の環境部が1時間ごとに AQI を公表します。その時間の瞬間値ではありません。粒子状物質は加重移動平均(直近12時間と直近4時間を半分ずつ)、オゾンと一酸化炭素は8時間平均、二酸化硫黄と二酸化窒素は直近1時間の値を使います。そのため、急な上昇は AQI に反映される前に、個々の汚染物質の値に先に表れます。";
+"Guide.aqi.tips" = "数値だけでなく推移も見ましょう。朝に AQI が上がっている場合、天気が変わるまで上がり続けることがよくあります。100を超えたら、敏感な方(子ども、高齢の方、心臓や肺の病気がある方)は、長時間や激しい屋外活動を控えてください。150を超えたら、すべての方が控えてください。";
+
+"Guide.pm25.what" = "直径2.5マイクロメートル以下の粒子で、髪の毛の太さの約30分の1です。肺の奥まで届くほど小さく、特に細かいものは血液中にまで入り込みます。";
+"Guide.pm25.sources" = "自動車の排気ガス、発電所、工場、あらゆる燃焼のほか、二酸化硫黄、窒素酸化物、アンモニアから大気中で生成される粒子もあります。台湾では、風が弱く地域の汚染がこもりやすく、北東の季節風がアジア大陸からのかすみを運んでくる秋から春にかけて、濃度が高くなる傾向があります。西海岸の中部・南部が最も悪くなることが多いです。";
+"Guide.pm25.health" = "長期間さらされると、心臓病、脳卒中、肺がん、子どもの肺の発達の遅れとの関連が指摘されています。短時間の急上昇でも、ぜんそくの発作や心臓の不調を引き起こすことがあります。WHO のガイドライン値は、24時間平均で15 µg/m³、年平均で5 µg/m³です。";
+"Guide.pm25.measure" = "1立方メートルあたりのマイクログラム(µg/m³)で、1時間ごとに測定します。AQI は移動平均を使うため、1時間ごとの値のほうが先に反応します。";
+"Guide.pm25.tips" = "濃度が高い日は、窓を閉めて HEPA フィルター付きの空気清浄機を使いましょう。屋外では、顔にしっかり合った N95 や KN95 のマスクが微小粒子を防ぎます。一般的なサージカルマスクは隙間が大きく、あまり効果がありません。";
+
+"Guide.pm10.what" = "直径10マイクロメートル以下の粒子で、PM2.5 も含みます。粗い粒子の多くは、肺の奥ではなく、鼻やのど、上気道で捕らえられます。";
+"Guide.pm10.sources" = "道路や工事現場の粉じん、むき出しの地面、海塩、春には中国北部やモンゴルから飛んでくる黄砂などです。秋から冬の風の強い日には、濁水渓の干上がった河床から舞い上がる砂ぼこりが、雲林や彰化一帯に広がります。";
+"Guide.pm10.health" = "目、鼻、のどを刺激し、ぜんそくや気管支炎を悪化させます。WHO のガイドライン値は、24時間平均で45 µg/m³です。";
+"Guide.pm10.measure" = "1立方メートルあたりのマイクログラム(µg/m³)で、1時間ごとに測定します。AQI には PM2.5 と同じ移動平均を使います。";
+"Guide.pm10.tips" = "砂ぼこりの多い日は窓を閉め、から拭きではなく、湿らせた布で表面を拭きましょう。マスクは、PM2.5 よりも粗い粉じんに対して効果的です。";
+
+"Guide.o3.what" = "大気の高いところにある保護層ではなく、地表付近のオゾンです。直接排出されるものではなく、窒素酸化物と揮発性有機化合物が日光のもとで反応して生成されます。";
+"Guide.o3.sources" = "原料の多くは、交通、産業、溶剤に由来します。オゾンは生成に数時間かかるため、晴れて暑い日の昼過ぎから午後の早い時間に最も高くなることが多く、都市の中より風下のほうが高くなることもよくあります。";
+"Guide.o3.health" = "気道を刺激し、せき、胸の締めつけ、息切れを引き起こし、特に運動中に肺の機能を低下させます。ぜんそくのある方が最も影響を受けます。";
+"Guide.o3.measure" = "ppb(10億分の1)で、1時間ごとに測定します。AQI には8時間平均を使うため、午後のピークより遅れて反映されます。";
+"Guide.o3.tips" = "オゾンが高い日は、朝か夕方に運動しましょう。オゾンは屋内ですぐに分解されるため、屋内で過ごすのが効果的です。マスクはガスを通すため防げません。";
+
+"Guide.co.what" = "燃料が酸素不足で燃えるときに発生する、無色無臭のガスです。";
+"Guide.co.sources" = "主に自動車の排気ガスなので、ラッシュ時の交通量の多い道路沿いで最も高くなります。台湾の屋外では、「良い」の区分を超えることはほとんどありません。";
+"Guide.co.health" = "一酸化炭素は血液中で酸素の代わりに結合します。屋外の濃度では、主に心臓病のある方に影響します。高濃度になると、頭痛、めまい、意識障害を起こし、死に至ることもあります。";
+"Guide.co.measure" = "ppm(100万分の1)で、1時間ごとに測定します。AQI には8時間平均を使います。";
+"Guide.co.tips" = "本当に危険なのは屋内です。台湾では毎年冬に、閉め切ったベランダや浴室のガス給湯器による一酸化炭素中毒が起きています。十分に換気し、一酸化炭素警報器を取り付けましょう。";
+
+"Guide.so2.what" = "硫黄を含む燃料を燃やすと発生する、刺激臭のあるガスです。";
+"Guide.so2.sources" = "石炭や石油を燃料とする発電所、製油所、重工業、船舶などです。火山の噴気孔からも出るため、陽明山周辺の大屯火山群に近い観測所では、値が高くなることがあります。";
+"Guide.so2.health" = "気道を刺激し、数分でぜんそくを引き起こすことがあります。大気中では硫酸塩粒子に変わって PM2.5 を増やし、酸性雨の原因にもなります。";
+"Guide.so2.measure" = "ppb(10億分の1)で、AQI には直近1時間の値を使います。";
+"Guide.so2.tips" = "ぜんそくのある方は、濃度が上がったとき、特に工業地帯や火山の噴気孔の近くでは、発作止めの吸入薬を持ち歩きましょう。";
+
+"Guide.no2.what" = "高温での燃焼の際に発生する、赤褐色のガスです。";
+"Guide.no2.sources" = "主に道路交通で、次いで発電所や産業です。交通量の多い道路沿いやラッシュ時に最も高くなり、数百メートル離れると下がります。";
+"Guide.no2.health" = "気道に炎症を起こし、呼吸器感染症への抵抗力を下げます。長期間さらされると、子どものぜんそく発症との関連が指摘されています。オゾンや PM2.5 の生成も促します。";
+"Guide.no2.measure" = "ppb(10億分の1)で、AQI には直近1時間の値を使います。";
+"Guide.no2.tips" = "できれば、幹線道路から1ブロック離れた道で歩いたり走ったり自転車に乗ったりして、ラッシュ時を避けましょう。";
+
+/* visionOS */
+"Vision.map_unavailable" = "地図を利用できません";
+"Vision.offline" = "オフライン";
+"Vision.refresh" = "更新";
+"Vision.index" = "指数";
+"Vision.tabletop" = "テーブルトップ";
+"Vision.wind" = "風";
+"Vision.stations" = "観測所";
+"Vision.nearest" = "最寄り";
+"Vision.nearest_station" = "最寄りの観測所";
+"Vision.find_nearest" = "最寄りの観測所を探す";
+"Vision.close" = "閉じる";
+"Vision.details" = "詳細";
+"Vision.pin" = "固定";
+"Vision.unpin" = "固定を解除";
+"Vision.show_on_map" = "地図で表示";
+"Vision.open_in_new_window" = "新しいウインドウで開く";
+"Vision.drag_to_pin" = "ドラッグして空間に固定";
+"Vision.about" = "情報";
+"Vision.version" = "バージョン";
+"Vision.map_data" = "海岸線:Natural Earth。標高:Mapzen Terrain Tiles(SRTM、GMTED、ETOPO1 など)、AWS Open Data 経由。";
+
+/* Map timeline */
+"Timeline.title" = "過去24時間";
+"Timeline.now" = "現在";
+"Timeline.latest" = "最新";
+"Timeline.hours_ago" = "%d 時間前";
+"Timeline.yesterday" = "昨日";
+"Timeline.loading" = "読み込み中 %d/%d";
+"Timeline.play" = "過去24時間を再生";
+"Timeline.pause" = "一時停止";
+"Timeline.accessibility_label" = "タイムライン";
+
+/* Area forecast (MOENV AQF_P_01) */
+"Forecast.title" = "地域別予報";
+"Forecast.today" = "今日";
+"Forecast.tomorrow" = "明日";
+"Forecast.day_after_tomorrow" = "明後日";
+"Forecast.major_pollutant %@" = "主要汚染物質:%@";
+"Forecast.no_value" = "予報値なし";
+"Forecast.published %@" = "%@発表";
+"Forecast.more" = "もっと見る";
+"Forecast.less" = "閉じる";
+"Forecast.tab_title" = "AQI 予報";
+"Forecast.your_area" = "現在地の地域";
+"Forecast.favourite_area" = "お気に入り";
+"Forecast.none_current" = "表示できる最新の予報がありません。最新の予報を読み込めませんでした。しばらくしてからもう一度お試しください。";
+
+/* Weather on the station page (FOX-11, CWA F-C0032-001 + O-A0003-001) */
+"Weather.title" = "天気";
+"Weather.humidity" = "湿度";
+"Weather.rain_today" = "今日の降水量";
+"Weather.wind" = "風";
+"Weather.temperature %@" = "気温 %@";
+"Weather.chance_of_rain %@" = "降水確率 %@";
+"Weather.station_named %@ %@" = "%1$@観測所、%2$@先";
+"Weather.station_nearby %@" = "気象観測所は%@先";
+"Weather.observed %@" = "%@に観測";
+"Weather.map_station %@ %@" = "%1$@ · %2$@";
+"Weather.map_station_nearby %@" = "%@先";
+/* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
+"Weather.wx.1" = "晴れ";
+"Weather.wx.2" = "晴れ時々曇り";
+"Weather.wx.3" = "晴れ時々曇り";
+"Weather.wx.4" = "晴れ時々曇り";
+"Weather.wx.5" = "曇り時々晴れ";
+"Weather.wx.6" = "曇り時々晴れ";
+"Weather.wx.7" = "曇り";
+"Weather.wx.8" = "晴れ時々曇り、ところにより短時間のにわか雨";
+"Weather.wx.9" = "曇り時々晴れ、ところにより雨";
+"Weather.wx.10" = "曇り時々晴れ、ところにより雨";
+"Weather.wx.11" = "曇り、ところにより雨";
+"Weather.wx.12" = "曇り時々晴れ、にわか雨";
+"Weather.wx.13" = "曇り時々晴れ、雨";
+"Weather.wx.14" = "雨";
+"Weather.wx.15" = "晴れ時々曇り、にわか雨または雷雨";
+"Weather.wx.16" = "曇り時々晴れ、にわか雨または雷雨";
+"Weather.wx.17" = "曇り時々晴れ、雷を伴うにわか雨";
+"Weather.wx.18" = "にわか雨または雷雨";
+"Weather.wx.19" = "晴れ、ところにより午後に雨";
+"Weather.wx.20" = "晴れ時々曇り、午後にわか雨";
+"Weather.wx.21" = "晴れ、午後に雷を伴うにわか雨";
+"Weather.wx.22" = "晴れ時々曇り、午後に雷を伴うにわか雨";
+"Weather.wx.23" = "雨または雪";
+"Weather.wx.24" = "晴れ、霧";
+"Weather.wx.25" = "晴れ時々曇り、霧";
+"Weather.wx.26" = "晴れ時々曇り、霧";
+"Weather.wx.27" = "晴れ時々曇り、霧";
+"Weather.wx.28" = "曇り、霧";
+"Weather.wx.29" = "晴れ時々曇り、ところにより雨";
+"Weather.wx.30" = "曇り時々晴れ、ところにより雨";
+"Weather.wx.31" = "晴れ時々曇り、霧でところにより雨";
+"Weather.wx.32" = "曇り時々晴れ、霧でところにより雨";
+"Weather.wx.33" = "晴れ時々曇り、ところにより雷を伴うにわか雨";
+"Weather.wx.34" = "曇り時々晴れ、ところにより雷を伴うにわか雨";
+"Weather.wx.35" = "晴れ時々曇り、雷雨と霧";
+"Weather.wx.36" = "曇り時々晴れ、雷雨と霧";
+"Weather.wx.37" = "雨または雪、霧";
+"Weather.wx.38" = "曇り、ところにより雨、霧";
+"Weather.wx.39" = "雨、霧";
+"Weather.wx.41" = "にわか雨または雷雨、霧";
+"Weather.wx.42" = "雪";
+
+/* Offline: last good readings */
+"Offline.showing_saved_readings" = "オフライン — 最後に保存した観測値を表示しています";
+"Offline.updated_ago %@" = "オフライン · %@に更新";
+"Offline.nothing_saved" = "接続できず、表示できる保存済みデータもありません。接続を確認して、もう一度お試しください。";
+"Offline.retry" = "再試行";
+"Offline.badge" = "オフライン";
+"Offline.card_unavailable" = "観測値を読み込めません。接続を確認してください。";
+"Freshness.stale_updated_ago %@" = "%@に更新 · 古い可能性があります";
+"Freshness.stale_short %@" = "%@に更新 · 古いデータ";
+"Freshness.updated_ago %@" = "%@に更新";
+"Loading.label" = "読み込み中";
+
+/* Welcome flow (FOX-34) */
+"Help.welcome" = "はじめに";
+"Help.show_welcome_guide" = "ウェルカムガイドを表示";
+"Onboarding.back" = "戻る";
+"Onboarding.skip" = "スキップ";
+"Onboarding.step %lld %lld" = "ステップ %1$lld / %2$lld";
+"Onboarding.continue" = "続ける";
+"Onboarding.not_now" = "今はしない";
+"Onboarding.open_settings" = "設定を開く";
+"Onboarding.get_started" = "はじめる";
+"Onboarding.done" = "Taiwan Air を使いはじめる";
+"Onboarding.welcome_title" = "台湾全土の大気質";
+"Onboarding.welcome_body" = "台湾のすべての観測所の AQI と汚染物質の観測値を、地図と一覧で確認できます。お気に入りの観測所にもワンタップでアクセスできます。";
+"Onboarding.location_title" = "最寄りの観測所を探す";
+"Onboarding.location_body" = "位置情報を許可すると、Taiwan Air があなたに最も近い観測所を見つけ、地図上に現在地を表示できます。";
+"Onboarding.enable_location" = "位置情報を許可";
+"Onboarding.location_on" = "位置情報はオンです。";
+"Onboarding.location_off" = "位置情報はオフです。設定でオンにするまで、Taiwan Air は台北市中正区を起点に表示します。";
+"Onboarding.closest_title" = "最寄りの観測所";
+"Onboarding.closest_body" = "お気に入りに追加すると通知も一緒にオンになり、その場所の空気が不健康になったときにお知らせします。違う場所ですか?別の観測所を選んでください。";
+"Onboarding.closest_fallback" = "位置情報がオフのため、仮の観測所として台北市中正区に最も近い観測所を表示しています。下からご自身の観測所を選んでください。";
+"Onboarding.closest_failed" = "現在、観測所を読み込めません。お気に入りは、あとで地図や検索から追加できます。";
+"Onboarding.add_to_favourites" = "お気に入りと通知に追加";
+"Onboarding.in_favourites" = "お気に入りに追加済み";
+"Onboarding.alerts_need_notifications" = "Taiwan Air の通知を許可するまで、通知はオフのままです。";
+"Onboarding.notifications_title" = "大気質の通知を受け取る";
+"Onboarding.notifications_body" = "通知を許可すると、お気に入りの観測所の空気が変化したときに Taiwan Air がお知らせします。通知するレベルは各観測所のページで選べます。";
+"Onboarding.allow_notifications" = "通知を許可";
+"Onboarding.notifications_on" = "通知はオンです。";
+"Onboarding.notifications_off" = "通知はオフです。設定でオンにできます。";
+"Onboarding.dnd_title" = "おやすみ時間";
+"Onboarding.dnd_body" = "iPhone の集中モードとは別の、Taiwan Air 独自の設定です。この時間帯は通知を送りません。";
+"Onboarding.dnd_footer" = "ヘルプからいつでも変更できます。";
+"Onboarding.premium_body" = "通知、お気に入り、地図、Watch アプリは無料です。Pro は任意で、広告を非表示にし、さらに機能が加わります。";
+"Onboarding.see_pro_plans" = "Pro のプランを見る";
+"Onboarding.premium_active" = "Pro をご利用中です。ご支援ありがとうございます!";
+"Onboarding.welcome_data" = "観測値は環境部(MOENV)から1時間ごとに届きます。Taiwan Air は政府が運営するものではない、独立したアプリです。";
+"Onboarding.choose_station" = "別の観測所を選ぶ";
+"Onboarding.choose_station_title" = "観測所を選択";
+"Onboarding.cancel" = "キャンセル";
+"Onboarding.close" = "閉じる";
+"Onboarding.alerts_now_on" = "この観測所の通知をオンにしました。変更やオフは、観測所のページで行えます。";
+"Onboarding.dnd_after_notifications" = "通知をオンにすると、ここでおやすみ時間を設定できます。";
+"Onboarding.more_title" = "Taiwan Air のそのほかの機能";
+"Onboarding.more_body" = "アプリを開かなくても、空気の状態がひと目でわかります。";
+"Onboarding.more_widgets_title" = "ウィジェット";
+"Onboarding.more_widgets_body" = "ホーム画面とロック画面で使えます。‹ › でお気に入りを切り替えられ、iPad の特大ウィジェットでは1つの観測所を詳しく表示します。";
+"Onboarding.more_siri_title" = "Siri、ショートカット、コントロールセンター";
+"Onboarding.more_siri_body" = "Siri に空気の状態を聞いたり、アクションボタンやコントロールセンターに追加したりできます。";
+"Onboarding.more_forecast_title" = "AQI 予報";
+"Onboarding.more_forecast_body" = "画面下部の「AQI 予報」をタップすると、各地域の今後数日間の予報を確認できます。";
+"Onboarding.how_to_add" = "追加方法";
+"Onboarding.free_heading" = "無料";
+"Onboarding.free_siri" = "Siri、ショートカット、コントロールセンターのコントロール";
+"Onboarding.free_complication" = "レベルに応じた文字盤の、Watch コンプリケーション";
+"Onboarding.free_index_cycling" = "小サイズのウィジェット:指数名をタップすると、AQI、PM2.5 などに切り替わります";
+"Onboarding.pro_heading" = "Pro の場合";
+"Onboarding.pro_trial_days %lld" = "%lld 日間の無料トライアル";
+"Onboarding.pro_trial_weeks %lld" = "%lld 週間の無料トライアル";
+"Onboarding.pro_trial_months %lld" = "%lld か月間の無料トライアル";
+"Onboarding.pro_trial_years %lld" = "%lld 年間の無料トライアル";
+
+/* Siri, Shortcuts and Control Center (FOX-74) */
+"Intent.station" = "観測所";
+"Intent.station_nearest" = "最寄りの観測所";
+"Intent.get_air_quality_title" = "大気質を取得";
+"Intent.get_air_quality_description" = "最寄りの観測所またはお気に入りの、現在の AQI、レベル、主要汚染物質、とるべき行動を読み上げます。";
+"Intent.get_air_quality_short" = "大気質";
+"Intent.open_station_title" = "観測所を開く";
+"Intent.open_station_description" = "Taiwan Air で観測所のページを開きます。";
+"Intent.open_station_short" = "観測所を開く";
+"Get the air at ${station}" = "${station}の空気を取得";
+"Open ${station}" = "${station}を開く";
+"Intent.answer_fallback_favourite" = "Taiwan Air は位置情報を取得できないため、最初のお気に入りをお知らせします。";
+"Intent.answer_fallback_default" = "Taiwan Air は位置情報を取得できず、お気に入りもないため、台北の中心部をお知らせします。";
+"Intent.answer_no_reading" = "まだ観測値がありません。オンラインの状態で一度 Taiwan Air を開いてください。";
+"Intent.answer_no_aqi" = "%@の AQI 観測値は現在ありません。";
+"Intent.answer_reading" = "%1$@:AQI %2$@、%3$@。";
+"Intent.answer_main_pollutant" = "主要汚染物質:%@。";
+"Intent.answer_guidance" = "%@。";
+"Intent.answer_cached_age" = "オフラインのため、%@前に保存された最後の観測値です。";
+"Intent.answer_cached" = "オフラインのため、最後に保存された観測値です。";
+"Intent.answer_old_age" = "この観測値は%@前のものです。";
+"Control.display_name" = "大気質";
+"Control.description" = "最寄りの観測所またはお気に入りの AQI。タップして開きます。";
+"Control.configuration_title" = "観測所";
+"Help.shortcuts_title" = "Siri、ショートカット、コントロールセンター";
+"Help.shortcuts_siri_header" = "Siri に聞く";
+"Help.shortcuts_siri_body" = "「Taiwan Air で空気はどう?」と話しかけると最寄りの観測所を、「Taiwan Air 松山の空気」と話しかけるとお気に入りの観測所を答えます。Siri は AQI、レベル、主要汚染物質、とるべき行動を読み上げます。接続がないときは、最後に保存した観測値と、その経過時間を答えます。";
+"Help.shortcuts_location_body" = "「最寄り」は、このアプリに位置情報を許可済みの場合にのみ現在地を使います。許可していない場合は、最初のお気に入りをお知らせします。";
+"Help.shortcuts_app_header" = "ショートカット、Spotlight、アクションボタン";
+"Help.shortcuts_app_body" = "「大気質を取得」と「観測所を開く」は、設定なしでショートカット App と Spotlight で使えます。アクションボタンのある iPhone では、「設定」→「アクションボタン」→「ショートカット」で選択します。";
+"Help.shortcuts_control_header" = "コントロールセンター";
+"Help.shortcuts_control_body" = "iOS 18 以降では、コントロールセンターを開き、空いているところを長押しして「コントロールを追加」をタップし、Taiwan Air を検索します。最寄りの観測所またはお気に入りの AQI が表示され、タップするとその観測所が開きます。ロック画面のコントロールボタンにも使えます。";
+"Help.shortcuts_footer" = "どなたでも無料でご利用いただけます。Siri とショートカットには iOS 16 以降が必要です。";
+
+// Home Screen quick actions (FOX-138)
+"QuickAction.closest_station" = "最寄りの観測所";
+
+/* What's New (FOX-142) */
+"WhatsNew.title" = "新機能";
+"WhatsNew.close" = "OK";
+"WhatsNew.pro" = "Pro";
+"Help.show_whats_new" = "このバージョンの新機能";
+"WhatsNew.3_1_5.weather_title" = "観測所の天気";
+"WhatsNew.3_1_5.weather_body" = "観測所のページに、中央気象署の地域の天気(気温、湿度、風、雨)と県市の予報が表示されるようになりました。";
+"WhatsNew.3_1_5.welcome_title" = "5ステップのウェルカムガイド";
+"WhatsNew.3_1_5.welcome_body" = "新規インストールでは、位置情報、最寄りの観測所、大気質の通知、おやすみ時間の順に案内します。設定は1分で終わります。";
+"WhatsNew.3_1_5.appearance_title" = "外観を選べます";
+"WhatsNew.3_1_5.appearance_body" = "「システム設定に従う」は iPhone の設定に合わせます。ライトとダークは選んだ外観のままになります。ヘルプで変更できます。";
+
+"Map.Locate.label" = "現在地";
+"Map.Locate.off" = "オフ";
+"Map.Locate.centred" = "現在地を中心に表示";
+"Map.Locate.following" = "現在地を追従中";
+"Map.Locate.hint_off" = "地図の中心を現在地と最寄りの観測所に合わせます";
+"Map.Locate.hint_centred" = "移動に合わせて地図が追従します";
+"Map.Locate.hint_following" = "追従をやめて、現在地を中心に表示します";
+"Map.Locate.you_are_here" = "現在地";
+"Map.Locate.off_title" = "位置情報がオフです";
+"Map.Locate.off_message" = "地図上で現在地を確認するには、設定で Taiwan Air の位置情報をオンにしてください。";
+"Map.Locate.open_settings" = "設定を開く";
+"Map.Locate.cancel" = "キャンセル";
+
+"WhatsNew.3_1_6.widget_title" = "ウィジェットを自分好みに";
+"WhatsNew.3_1_6.widget_body" = "ウィジェットに表示する観測所を選べるようになり、中・大サイズのウィジェットにはその地域の天気も表示されます。";
+"WhatsNew.3_1_6.watch_title" = "Apple Watch でスワイプ";
+"WhatsNew.3_1_6.watch_body" = "Watch 上で、お気に入りの観測所をスワイプして切り替えられます。";
+"WhatsNew.3_1_6.alert_title" = "通知から観測所を開く";
+"WhatsNew.3_1_6.alert_body" = "大気質の通知をタップすると、アプリでその観測所が直接開きます。";
+
+"WhatsNew.3_1_7.locate_title" = "地図で現在地を確認";
+"WhatsNew.3_1_7.locate_body" = "地図に精度を示す円とともに現在地が表示されます。現在地ボタンで、現在地を中心に表示したり、移動に合わせて追従したりできます。";
+"WhatsNew.3_1_7.mapweather_title" = "地図に天気を表示";
+"WhatsNew.3_1_7.mapweather_body" = "地図の中心にある地域の天気が、大気質カードの下に表示されるようになりました。";
+"WhatsNew.3_1_7.quickactions_title" = "アイコンのクイックアクション";
+"WhatsNew.3_1_7.quickactions_body" = "アプリのアイコンを長押しすると、最寄りの観測所やお気に入りの観測所にすぐ移動できます。";

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taiwan Air：台湾全測定局のリアルタイムAQIとPM2.5</title>
+<meta name="description" content="Taiwan Air（台湾の大気質）は、台湾の環境部の全測定局のAQIとPM2.5、24時間の推移、測定局のライブカメラ、公式の大気質区域予報、おやすみ時間付きの通知、ウィジェット、Apple Watch、Apple Vision Proに対応した無料アプリです。">
+<link rel="canonical" href="https://taiwanair.wahthefox.com/ja/">
+<link rel="alternate" hreflang="en" href="https://taiwanair.wahthefox.com/">
+<link rel="alternate" hreflang="zh-Hant" href="https://taiwanair.wahthefox.com/zh-Hant/">
+<link rel="alternate" hreflang="ja" href="https://taiwanair.wahthefox.com/ja/">
+<link rel="alternate" hreflang="x-default" href="https://taiwanair.wahthefox.com/">
+<meta name="theme-color" content="#f4f8fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-itunes-app" content="app-id=1286516443">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Taiwan Air 台湾の大気質">
+<meta property="og:title" content="Taiwan Air：台湾全測定局のリアルタイムAQIとPM2.5">
+<meta property="og:description" content="台湾の公式測定局すべてのリアルタイムの大気質に、通知、ウィジェット、Apple Watch、Apple Vision Proも。無料、アカウント登録不要。">
+<meta property="og:url" content="https://taiwanair.wahthefox.com/ja/">
+<meta property="og:image" content="https://taiwanair.wahthefox.com/assets/og-en.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="514">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Taiwan Air",
+  "alternateName": "台湾の大気質",
+  "operatingSystem": "iOS, iPadOS, watchOS, visionOS",
+  "applicationCategory": "WeatherApplication",
+  "url": "https://taiwanair.wahthefox.com/ja/",
+  "downloadUrl": "https://apps.apple.com/jp/app/id1286516443",
+  "image": "https://taiwanair.wahthefox.com/assets/icon-192.png",
+  "inLanguage": ["ja", "en", "zh-Hant"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Taiwan Air は無料ですか？", "acceptedAnswer": { "@type": "Answer", "text": "はい。ダウンロードは無料で、大気質に関するすべての機能を無料版でお使いいただけます（無料版にはバナー広告が表示されます）。Taiwan Air Pro は任意の追加機能で、広告を非表示にし、Apple Watch のコンプリケーションと、中・大サイズのホーム画面ウィジェットが使えるようになります。" } },
+    { "@type": "Question", "name": "アカウントは必要ですか？", "acceptedAnswer": { "@type": "Answer", "text": "いいえ。登録もログインもありません。お気に入りや設定は端末の中に保存されます。唯一の例外は通知です。測定局の通知をオンにすると（お気に入りに追加したときに自動でオンになる通知を含みます）、通知を届けるために、その測定局としきい値がプッシュ通知サービス（OneSignal）と当社のサーバーに送信されます。" } },
+    { "@type": "Question", "name": "データの出典はどこですか？", "acceptedAnswer": { "@type": "Answer", "text": "すべての測定値は、台湾の環境部（環境部）の大気質モニタリングネットワークが公開しているオープンデータです。区域予報は環境部が公式に発表する「空品區預報」です。Taiwan Air は数値を公表されたまま表示し、手を加えていません。" } },
+    { "@type": "Question", "name": "測定値はどのくらいの頻度で更新されますか？", "acceptedAnswer": { "@type": "Answer", "text": "測定局は1時間に1回、測定値を公表します。アプリは自動的に更新され、各測定値がいつ公表されたか、そこからどれくらい経ったかを表示します。" } },
+    { "@type": "Question", "name": "オフラインでも使えますか？", "acceptedAnswer": { "@type": "Answer", "text": "はい。読み込んだ測定値、予報、ライブカメラの画像は約1週間端末に保存されるので、接続がなくても直近の値を確認できます。ウィジェットも最後に保存した値を表示します。" } },
+    { "@type": "Question", "name": "Taiwan Air は私のどんな情報を取得しますか？", "acceptedAnswer": { "@type": "Answer", "text": "ごくわずかです。位置情報は任意で、最寄りの測定局を探すために端末の中でのみ使われます。通知をオンにすると（測定局をお気に入りに追加すると1件オンになります）、通知を送るために測定局としきい値が保存されます。お名前とメールアドレスを受け取るのは、フィードバックまたはビジネスパートナーのフォームを送信された場合だけです。収集する情報のすべては、プライバシーポリシー（英語）に記載しています。" } },
+    { "@type": "Question", "name": "どの端末で使えますか？", "acceptedAnswer": { "@type": "Answer", "text": "iOS 15以降のiPhoneとiPad、watchOS 10以降のApple Watch、Apple Vision Proで使えます。ホーム画面とロック画面のウィジェットも含まれます。" } },
+    { "@type": "Question", "name": "Taiwan Air は医療上のアドバイスですか？", "acceptedAnswer": { "@type": "Answer", "text": "いいえ。Taiwan Air は一般的な情報の提供を目的としています。測定値は遅れたり欠けたり、後から環境部によって訂正されたりすることがあります。健康上の不安がある場合は、専門家に相談し、政府の公式情報をご確認ください。" } }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">本文へスキップ</a>
+
+<nav class="nav" aria-label="メインメニュー">
+  <a class="brand" href="/ja/" aria-current="page"><img src="/assets/icon-192.png" alt="" width="24" height="24">Taiwan Air</a>
+  <ul class="nav-links">
+    <li><a href="#features">機能</a></li>
+    <li><a href="#how">使い方</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+    <li><a href="#contact">お問い合わせ</a></li>
+    <li><a href="/" hreflang="en" lang="en">English</a></li>
+    <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文</a></li>
+  </ul>
+  <a class="nav-cta" href="https://apps.apple.com/jp/app/id1286516443">ダウンロード</a>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="メニュー"><span></span><span></span></button>
+</nav>
+<div class="menu-panel" id="menu" aria-hidden="true">
+  <ul>
+    <li><a href="#features">機能</a></li>
+    <li><a href="#how">使い方</a></li>
+    <li><a href="#faq">よくある質問</a></li>
+    <li><a href="#contact">お問い合わせ</a></li>
+    <li><a href="/" hreflang="en" lang="en">English</a></li>
+    <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文版</a></li>
+  </ul>
+  <div class="menu-foot"><a href="https://apps.apple.com/jp/app/id1286516443">App Storeでダウンロード</a></div>
+</div>
+
+<main id="main">
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>iPhone · iPad · Apple Watch · Apple Vision Pro</span>
+        <h1>出かける前に、<br>台湾の空気をチェック</h1>
+        <p class="lede">環境部の全測定局のリアルタイムのAQIとPM2.5、空気が良くなっているか悪くなっているかのひと言、そしてお気に入りの測定局が設定した値を超えたときの通知。</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/jp/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>無料ダウンロード</small>App Store</span>
+          </a>
+        </div>
+        <ul class="proof">
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>環境部の公式オープンデータ</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>アカウント登録不要</li>
+          <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg>日本語・English・繁體中文</li>
+        </ul>
+        <div class="bands" aria-hidden="true"><span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span><span class="b5"></span><span class="b6"></span></div>
+      </div>
+      <div class="devices">
+        <div class="phone back"><img src="/assets/detail-en.webp" width="600" height="1215" alt="花蓮の測定局の画面：AQI 60（普通）。ライブカメラと各汚染物質の測定値つき"></div>
+        <div class="phone"><img src="/assets/map-en.webp" width="600" height="1215" alt="台湾の地図。すべての測定局に現在のAQIが表示され、区分ごとに色分けされています" fetchpriority="high"></div>
+        <div class="watch"><img src="/assets/watch-en.webp" width="416" height="496" alt="松山のAQI 33（良好）を表示したApple Watchの文字盤"></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">主な機能</p>
+        <h2 id="features-title">台湾の観測網が測るすべてを、落ち着いた1つのアプリに</h2>
+        <p>開くとすぐに最寄りの測定局が表示され、窓を開けるか、マスクを着けるか、空気清浄機を回すかが数秒で分かります。</p>
+      </div>
+
+      <div class="feature-row reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/map-en.webp" width="600" height="1215" alt="AQI、PM2.5、PM10、O3、COを切り替えられる測定局のライブ地図" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>すべての測定局を、ひとつのライブ地図に</h3>
+          <p>公式の測定局すべてに現在の測定値が表示され、健康影響の区分ごとに色分けされます。</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-trifold"/></svg><span><strong>7つの指標。</strong>地図全体を AQI、PM2.5、PM10、O3、CO、SO2、NO2 で切り替えられます。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#wind"/></svg><span><strong>風モード。</strong>マーカーが矢印になり、汚染がどちらへ、どれくらいの強さで流れているかが分かります。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#map-pin"/></svg><span><strong>最寄りの測定局。</strong>位置情報を許可すると、測定値と測定時刻つきで常に画面に表示されます。</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feature-row flip reveal">
+        <div class="feature-media"><div class="phone"><img src="/assets/detail-en.webp" width="600" height="1215" alt="AQI、ライブカメラ、各汚染物質の測定値を表示した測定局の詳細" loading="lazy"></div></div>
+        <div class="feature-copy">
+          <h3>本当に知りたいことに答える、測定局の詳細</h3>
+          <p>良くなっている？ 悪くなっている？ 各測定局がひと言で答え、その下に1時間ごとに色分けした24時間のAQIグラフが表示されます。</p>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#chart-line-up"/></svg><span><strong>24時間の推移。</strong>改善中、悪化中、横ばいのいずれかを、その日の最低値・最高値・平均値とともに表示します。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#video-camera"/></svg><span><strong>測定局のライブカメラ。</strong>カメラのある測定局では、最新の映像を見たり、過去24時間を1時間ずつさかのぼったりできます。</span></li>
+            <li><svg aria-hidden="true"><use href="/assets/icons.svg#check-circle"/></svg><span><strong>6種類の汚染物質と健康アドバイス。</strong>PM2.5、PM10、オゾン、CO、SO2、NO2に加え、一般の方と影響を受けやすい方それぞれへのアドバイスも。</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#calendar-dots"/></svg></div>
+          <h3>大気質区域の予報（空品區預報）</h3>
+          <p>環境部が公式に発表する、区域ごとの数日先の大気質予報です。週末のランニングや学校行事の計画にお役立てください。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#heart"/></svg></div>
+          <h3>お気に入り</h3>
+          <p>自宅、職場、学校を登録して、まとめて確認できます。測定局名、町、県・市で検索でき、大気質区域ごとにグループ表示されます。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#bell-ringing"/></svg></div>
+          <h3>睡眠を妨げない通知</h3>
+          <p>測定局のAQIが設定した値を超えたとき、または下回って窓を開けても安全になったときに通知します。おやすみ時間を設定すれば、夜間は何も届きません。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#squares-four"/></svg></div>
+          <h3>ホーム画面・ロック画面ウィジェット</h3>
+          <p>最寄りの測定局、または最初のお気に入りを、7つの指標のどれでも表示。大きなウィジェットでは、ほかのお気に入りも一覧できます。</p>
+          <span class="tag">中・大サイズのウィジェットは Pro 版</span>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#wifi-slash"/></svg></div>
+          <h3>オフラインでも使えます</h3>
+          <p>開いた測定値、予報、ライブカメラの画像は約1週間端末に保存されるので、電車の中や山の中でも直近の数値を確認できます。</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#translate"/></svg></div>
+          <h3>日本語・English・繁體中文</h3>
+          <p>アプリ全体を3つの言語で利用できます。健康影響の区分には、環境部の公式の表現を踏まえた言葉を使っています。</p>
+        </article>
+      </div>
+
+      <div class="platforms">
+        <article class="platform reveal">
+          <div class="shot"><img src="/assets/watch-en.webp" width="416" height="496" alt="AQIのコンプリケーションを表示したApple Watchの文字盤" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Watch</h3>
+            <p>お気に入りの測定局を確認できる無料のウォッチアプリ。Pro 版では、AQI、PM2.5などの指標を文字盤に表示するコンプリケーションも使えます。</p>
+          </div>
+        </article>
+        <article class="platform vision reveal">
+          <div class="shot"><img src="/assets/vision-en.webp" width="1200" height="675" alt="Apple Vision Proでテーブルの上に表示した台湾の3D立体地図。各測定局が測定値とともに立ち、測定局のカードが開いています" loading="lazy"></div>
+          <div class="meta">
+            <h3>Apple Vision Pro</h3>
+            <p>台湾の立体地図をテーブルの上に。すべての測定局が測定値とともに立ち、同じ指標の切り替えと風モードも使えます。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tagline" aria-label="なぜ大切なのか">
+    <div class="wrap">
+      <p data-reveal-words>外出前の30秒で、<br> マスクを持っていくべきか、<br> 窓を閉めておくべきかが分かります。</p>
+      <p class="source reveal">屋外の大気汚染は、2013年に国際がん研究機関（IARC）によって、発がん性がある「グループ1」に分類されました。特に影響を受けやすいのは子どもと高齢者です。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="bands-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">色の見方</p>
+        <h2 id="bands-title">環境部と同じ6つの区分</h2>
+        <p>すべてのマーカー、ウィジェット、ウォッチの文字盤で公式のAQI区分を使っているので、アプリ内のどこでも同じ色は同じ意味です。</p>
+      </div>
+      <div class="legend reveal">
+        <div><i class="b1"></i><b>良好</b><span>0〜50</span></div>
+        <div><i class="b2"></i><b>普通</b><span>51〜100</span></div>
+        <div><i class="b3"></i><b>敏感な方に健康影響あり</b><span>101〜150</span></div>
+        <div><i class="b4"></i><b>健康影響あり</b><span>151〜200</span></div>
+        <div><i class="b5"></i><b>非常に健康影響あり</b><span>201〜300</span></div>
+        <div><i class="b6"></i><b>危険</b><span>301以上</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">使い方</p>
+        <h2 id="how-title">1分足らずで設定できます</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><span class="n">1</span><h3>無料でダウンロード</h3><p>App Store から Taiwan Air を入手します。登録は必要ありません。</p></li>
+        <li class="reveal"><span class="n">2</span><h3>測定局を見つける</h3><p>位置情報を許可すると最寄りの測定局が表示されます。地図上のマーカーをタップして選ぶこともできます。位置情報が端末の外に出ることはありません。</p></li>
+        <li class="reveal"><span class="n">3</span><h3>保存して通知を受け取る</h3><p>ハートをタップしてお気に入りに追加すると、AQIが120を超えたときの通知も同時にオンになります。値の変更やおやすみ時間の設定はいつでもできます。あとはウィジェットを追加したり、ウォッチを確認したりするだけです。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">FAQ</p>
+        <h2 id="faq-title">よくある質問</h2>
+      </div>
+      <div class="faq reveal">
+        <details>
+          <summary>Taiwan Air は無料ですか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>はい。ダウンロードは無料で、大気質に関するすべての機能を無料版でお使いいただけます（無料版にはバナー広告が表示されます）。Taiwan Air Pro は任意の追加機能で、広告を非表示にし、Apple Watch のコンプリケーションと、中・大サイズのホーム画面ウィジェットが使えるようになります。</p></div>
+        </details>
+        <details>
+          <summary>アカウントは必要ですか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>いいえ。登録もログインもありません。お気に入りや設定は端末の中に保存されます。唯一の例外は通知です。測定局の通知をオンにすると（お気に入りに追加したときに自動でオンになる通知を含みます）、通知を届けるために、その測定局としきい値がプッシュ通知サービス（OneSignal）と当社のサーバーに送信されます。</p></div>
+        </details>
+        <details>
+          <summary>データの出典はどこですか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>すべての測定値は、台湾の環境部（環境部）の大気質モニタリングネットワークが公開しているオープンデータです。区域予報は環境部が公式に発表する「空品區預報」です。Taiwan Air は数値を公表されたまま表示し、手を加えていません。</p></div>
+        </details>
+        <details>
+          <summary>測定値はどのくらいの頻度で更新されますか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>測定局は1時間に1回、測定値を公表します。アプリは自動的に更新され、各測定値がいつ公表されたか、そこからどれくらい経ったかを表示します。</p></div>
+        </details>
+        <details>
+          <summary>オフラインでも使えますか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>はい。読み込んだ測定値、予報、ライブカメラの画像は約1週間端末に保存されるので、接続がなくても直近の値を確認できます。ウィジェットも最後に保存した値を表示します。</p></div>
+        </details>
+        <details>
+          <summary>Taiwan Air は私のどんな情報を取得しますか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a">
+            <p>ごくわずかです。位置情報は任意で、最寄りの測定局を探すために端末の中でのみ使われます。通知をオンにすると（測定局をお気に入りに追加すると1件オンになります）、通知を送るために測定局としきい値が保存されます。お名前とメールアドレスを受け取るのは、フィードバックまたはビジネスパートナーのフォームを送信された場合だけです。</p>
+            <p>収集する情報のすべてと共有先は、<a href="/privacy.html" hreflang="en" lang="en">プライバシーポリシー（英語）</a>に記載しています。</p>
+          </div>
+        </details>
+        <details>
+          <summary>どの端末で使えますか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>iOS 15以降のiPhoneとiPad、watchOS 10以降のApple Watch、Apple Vision Proで使えます。ホーム画面とロック画面のウィジェットも含まれます。</p></div>
+        </details>
+        <details>
+          <summary>Taiwan Air は医療上のアドバイスですか？<svg aria-hidden="true"><use href="/assets/icons.svg#plus"/></svg></summary>
+          <div class="a"><p>いいえ。Taiwan Air は一般的な情報の提供を目的としています。測定値は遅れたり欠けたり、後から環境部によって訂正されたりすることがあります。健康上の不安がある場合は、専門家に相談し、政府の公式情報をご確認ください。<a href="/terms.html" hreflang="en" lang="en">利用規約（英語）</a>もご覧ください。</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="kicker">お問い合わせ</p>
+        <h2 id="contact-title">作っている人に、直接お話しください</h2>
+        <p>Taiwan Air は個人の開発者が作っています。2つのフォームはどちらもアプリの「ヘルプ」タブにあります。</p>
+      </div>
+      <div class="contact">
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#chat-circle-text"/></svg></div>
+          <h3>フィードバックとサポート</h3>
+          <p>ご質問、不具合のご報告、アイデア、送信いただいた情報の確認や削除のご依頼など。</p>
+          <p class="path"><span>ヘルプ</span><i aria-hidden="true">›</i><span>フィードバック / お問い合わせ</span></p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg aria-hidden="true"><use href="/assets/icons.svg#handshake"/></svg></div>
+          <h3>ビジネスパートナー</h3>
+          <p>広告、データ・API、スポンサー、メディアに関するお問い合わせ。</p>
+          <p class="path"><span>ヘルプ</span><i aria-hidden="true">›</i><span>ビジネスパートナーにご興味がありますか？</span></p>
+        </article>
+      </div>
+      <p class="note reveal">アプリが手元にない場合は <a href="mailto:info@wahthefox.com">info@wahthefox.com</a> までメールをお送りください。アプリ内のフォームは、返信のために、入力された内容（お名前とメールアドレスを含みます）を当社のサーバーに送信します。<a href="/privacy.html" hreflang="en" lang="en">プライバシーポリシー（英語）</a>をご覧ください。</p>
+    </div>
+  </section>
+
+  <section class="final" aria-labelledby="final-title">
+    <div class="wrap">
+      <div class="box reveal">
+        <img class="icon" src="/assets/icon-192.png" width="80" height="80" alt="Taiwan Air アプリのアイコン">
+        <h2 id="final-title">出かける前に、空気をチェック</h2>
+        <p>iPhone、iPad、Apple Watch、Apple Vision Pro で無料。アカウントは不要です。</p>
+        <div class="hero-actions">
+          <a class="btn btn-store" href="https://apps.apple.com/jp/app/id1286516443">
+            <svg aria-hidden="true"><use href="/assets/icons.svg#apple-logo"/></svg>
+            <span class="lines"><small>無料ダウンロード</small>App Store</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a class="brand" href="/ja/"><img src="/assets/icon-192.png" alt="" width="24" height="24">Taiwan Air 台湾の大気質</a>
+      <p class="foot-note">大気質データ：台湾の環境部（環境部）のオープンデータ。地図データ © Google。</p>
+      <p>© 2017–2026 Taiwan Air</p>
+    </div>
+    <div>
+      <h2>法的情報</h2>
+      <ul>
+        <li><a href="/privacy.html" hreflang="en" lang="en">Privacy Policy</a></li>
+        <li><a href="/terms.html" hreflang="en" lang="en">Terms of Service</a></li>
+        <li><a href="/zh-Hant/privacy.html" hreflang="zh-Hant" lang="zh-Hant">隱私權政策</a></li>
+        <li><a href="/zh-Hant/terms.html" hreflang="zh-Hant" lang="zh-Hant">服務條款</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Taiwan Air</h2>
+      <ul>
+        <li><a href="https://apps.apple.com/jp/app/id1286516443">App Store</a></li>
+        <li><a href="#contact">お問い合わせ</a></li>
+        <li><a href="/" hreflang="en" lang="en">English</a></li>
+        <li><a href="/zh-Hant/" hreflang="zh-Hant" lang="zh-Hant">中文版</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>

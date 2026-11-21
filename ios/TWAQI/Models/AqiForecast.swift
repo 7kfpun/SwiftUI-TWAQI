@@ -67,7 +67,7 @@ struct AqiForecast: Codable, Equatable {
     /// Readable major pollutant: MOENV's Chinese name in Chinese, the usual
     /// symbol otherwise. Nil when MOENV names none (normal for 良好 days).
     var displayMajorPollutant: String? {
-        majorPollutant.flatMap { AqiForecastPollutant.display($0, chinese: Locale.isChinese) }
+        majorPollutant.flatMap { AqiForecastPollutant.display($0, chinese: Locale.usesLocalNames) }
     }
 }
 

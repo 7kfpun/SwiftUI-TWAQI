@@ -14,11 +14,12 @@ import XCTest
 /// runs it once per locale and passes, via `TEST_RUNNER_`-prefixed variables:
 ///
 ///   SCREENSHOT_DIR       where the PNGs are written (a path on the Mac)
-///   SCREENSHOT_LANGUAGE  "en" or "zh-Hant"
+///   SCREENSHOT_LANGUAGE  "en", "zh-Hant" or "ja"
 final class DuoScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
     private var outputDir: URL!
     private var isChinese = false
+    private var isJapanese = false
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -32,6 +33,7 @@ final class DuoScreenshotTests: XCTestCase {
 
         let language = env["SCREENSHOT_LANGUAGE"] ?? "en"
         isChinese = language.hasPrefix("zh")
+        isJapanese = language == "ja"
 
         app = XCUIApplication()
         // NSUserDefaults' argument domain, for this launch only: `pro` hides
@@ -43,7 +45,7 @@ final class DuoScreenshotTests: XCTestCase {
             "-lastestMapLon", "121.0",
             "-lastestMapZoom", "7.2",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", isChinese ? "zh_TW" : "en_US",
+            "-AppleLocale", isChinese ? "zh_TW" : (isJapanese ? "ja_JP" : "en_US"),
         ]
         app.launch()
         dismissSystemAlerts()
@@ -52,7 +54,7 @@ final class DuoScreenshotTests: XCTestCase {
     func testCaptureDuoScreenshots() throws {
         // Stands alone on the east coast, so a tap on it can't land on a
         // neighbouring marker the way one in the Taipei cluster would.
-        let station = isChinese ? "花蓮" : "Hualien"
+        let station = isChinese ? "花蓮" : (isJapanese ? "花蓮" : "Hualien")
 
         // 01: the map on its own.
         let marker = app.descendants(matching: .any)

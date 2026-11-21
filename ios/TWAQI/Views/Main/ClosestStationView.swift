@@ -203,7 +203,7 @@ final class ClosestStationView: UIView {
 
     /// 「臺北 · 4.2 km」 in Chinese; 「4.2 km away」 in English, where CWA's
     /// Chinese station name is not shown.
-    static func stationText(name: String, distanceKm: Double, chinese: Bool = Locale.isChinese) -> String {
+    static func stationText(name: String, distanceKm: Double, chinese: Bool = Locale.usesLocalNames) -> String {
         let distance = String(format: "%.1f km", distanceKm)
         return chinese
             ? String(format: "Weather.map_station %@ %@".localized, name, distance)
@@ -212,7 +212,7 @@ final class ClosestStationView: UIView {
 
     /// Read after the station and AQI (the card's other labels come first):
     /// temperature, condition, chance of rain, then the station.
-    static func accessibilityText(_ weather: MapCenterWeather, chinese: Bool = Locale.isChinese) -> String {
+    static func accessibilityText(_ weather: MapCenterWeather, chinese: Bool = Locale.usesLocalNames) -> String {
         var parts = [String(format: "Weather.temperature %@".localized, temperature(weather.temperature))]
         if let condition = WeatherCode.text(code: weather.wx, cwaText: nil, chinese: false) {
             parts.append(condition)

@@ -108,7 +108,7 @@ struct WatchReading: Codable, Equatable {
     }
 
     static func displayName(name: String, nameLocal: String, code: String, id: Int) -> String {
-        let preferred = Locale.isChinese ? nameLocal : name
+        let preferred = Locale.usesLocalNames ? nameLocal : name
         return preferred.isEmpty ? (code.isEmpty ? "#\(id)" : code) : preferred
     }
 

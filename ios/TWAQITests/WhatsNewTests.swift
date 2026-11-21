@@ -107,7 +107,7 @@ final class WhatsNewTests: XCTestCase {
         XCTAssertFalse(release.items.isEmpty)
         XCTAssertLessThanOrEqual(release.items.count, 3)
         XCTAssertFalse(release.items.contains { $0.isPro })
-        for language in ["en", "zh-Hant"] {
+        for language in ["en", "zh-Hant", "ja"] {
             let path = try XCTUnwrap(Bundle.main.path(
                 forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: language))
             let strings = try XCTUnwrap(NSDictionary(contentsOfFile: path) as? [String: String])
