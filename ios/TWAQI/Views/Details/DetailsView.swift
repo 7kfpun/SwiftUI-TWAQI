@@ -412,7 +412,10 @@ struct DetailsView: View {
             stationType: pollutant?.stationType ?? station?.stationType ?? .unknown,
             aqi: currentAqi,
             publishTime: viewModel.latestPublishTime,
-            isOffline: viewModel.isShowingLastGood
+            isOffline: viewModel.isShowingLastGood,
+            advice: settings.showsAdvice
+                ? AirStatuses.checkAirStatus(airIndexType: .aqi, value: currentAqi).adviceKey.map { $0.localized }
+                : nil
         )
     }
 

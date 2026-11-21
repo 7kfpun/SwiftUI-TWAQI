@@ -10,6 +10,9 @@
 		F7A12C0000000000000A0006 /* ForecastStripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A12C0000000000000A0005 /* ForecastStripTests.swift */; };
 		F7A12C0000000000000A0004 /* ForecastStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A12C0000000000000A0003 /* ForecastStripView.swift */; };
 		F7A12C0000000000000A0002 /* ForecastStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A12C0000000000000A0001 /* ForecastStrip.swift */; };
+		A1B2C3D4E5F6071829304A04 /* HeatmapInterpolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304A03 /* HeatmapInterpolationTests.swift */; };
+		A1B2C3D4E5F6071829304A06 /* HeatmapOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304A05 /* HeatmapOverlay.swift */; };
+		A1B2C3D4E5F6071829304A02 /* HeatmapInterpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304A01 /* HeatmapInterpolation.swift */; };
 		B185A40000000000000A4000 /* LocateMeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A40000000000000A4000 /* LocateMeTests.swift */; };
 		B185A30000000000000A3000 /* UserLocationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A30000000000000A3000 /* UserLocationTracker.swift */; };
 		B185A20000000000000A2000 /* UserLocationMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F185A20000000000000A2000 /* UserLocationMarker.swift */; };
@@ -192,6 +195,7 @@
 		F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */; };
 		F0A43A0E0000000000000002 /* AppAppearanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A43A0E0000000000000001 /* AppAppearanceTests.swift */; };
 		F0A43A180000000000000002 /* AQIPaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A43A180000000000000001 /* AQIPaletteTests.swift */; };
+		F0A13D0D0000000000000002 /* MapAdviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A13D0D0000000000000001 /* MapAdviceTests.swift */; };
 		F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */; };
 		9E1AC53C233F981700AC862D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53B233F981700AC862D /* AppDelegate.swift */; };
 		9E1AC53E233F981700AC862D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1AC53D233F981700AC862D /* SceneDelegate.swift */; };
@@ -438,6 +442,9 @@
 		F7A12C0000000000000A0005 /* ForecastStripTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastStripTests.swift; sourceTree = "<group>"; };
 		F7A12C0000000000000A0003 /* ForecastStripView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastStripView.swift; sourceTree = "<group>"; };
 		F7A12C0000000000000A0001 /* ForecastStrip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ForecastStrip.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A03 /* HeatmapInterpolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatmapInterpolationTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A05 /* HeatmapOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatmapOverlay.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A01 /* HeatmapInterpolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatmapInterpolation.swift; sourceTree = "<group>"; };
 		F185A40000000000000A4000 /* LocateMeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocateMeTests.swift; sourceTree = "<group>"; };
 		F185A30000000000000A3000 /* UserLocationTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationTracker.swift; sourceTree = "<group>"; };
 		F185A20000000000000A2000 /* UserLocationMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationMarker.swift; sourceTree = "<group>"; };
@@ -558,6 +565,7 @@
 		F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSectionOrderTests.swift; sourceTree = "<group>"; };
 		F0A43A0E0000000000000001 /* AppAppearanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearanceTests.swift; sourceTree = "<group>"; };
 		F0A43A180000000000000001 /* AQIPaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIPaletteTests.swift; sourceTree = "<group>"; };
+		F0A13D0D0000000000000001 /* MapAdviceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapAdviceTests.swift; sourceTree = "<group>"; };
 		F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastTabOrderingTests.swift; sourceTree = "<group>"; };
 		9E1AC538233F981700AC862D /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E1AC53B233F981700AC862D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -860,8 +868,10 @@
 				F0A68D1E0000000000000001 /* HelpSectionOrderTests.swift */,
 				F0A43A0E0000000000000001 /* AppAppearanceTests.swift */,
 				F0A43A180000000000000001 /* AQIPaletteTests.swift */,
+				F0A13D0D0000000000000001 /* MapAdviceTests.swift */,
 				F0A32D1E0000000000000006 /* ForecastTabOrderingTests.swift */,
 				2E010BE4EF22BFDE16E305BC /* WindTests.swift */,
+				A1B2C3D4E5F6071829304A03 /* HeatmapInterpolationTests.swift */,
 				F0A124000000000000000001 /* StationLocationTests.swift */,
 				9EC0FFEE2A1000000000006A /* MapMarkerTests.swift */,
 				F185A40000000000000A4000 /* LocateMeTests.swift */,
@@ -1038,6 +1048,7 @@
 				9EC0FFEE2A10000000000002 /* MapHistoryStore.swift */,
 				9EC0FFEE2A10000000000004 /* MapTimelineView.swift */,
 				9EA1BC70236DDA2D008C3942 /* Marker.swift */,
+				A1B2C3D4E5F6071829304A05 /* HeatmapOverlay.swift */,
 				9EDF685623838CDA00B08589 /* MyLocationButton.swift */,
 				F185A30000000000000A3000 /* UserLocationTracker.swift */,
 				F185A20000000000000A2000 /* UserLocationMarker.swift */,
@@ -1173,6 +1184,7 @@
 				F7A12C0000000000000A0001 /* ForecastStrip.swift */,
 				7B92A7319F203C7207887169 /* AqiForecast.swift */,
 				39D50685ABB6D7832C10DAFD /* AqiTrend.swift */,
+				A1B2C3D4E5F6071829304A01 /* HeatmapInterpolation.swift */,
 				481B3B93C10019C96E6BFA36 /* PollutantHistorySeries.swift */,
 			);
 			path = Models;
@@ -1738,6 +1750,7 @@
 				F0A68D1E0000000000000002 /* HelpSectionOrderTests.swift in Sources */,
 				F0A43A0E0000000000000002 /* AppAppearanceTests.swift in Sources */,
 				F0A43A180000000000000002 /* AQIPaletteTests.swift in Sources */,
+				F0A13D0D0000000000000002 /* MapAdviceTests.swift in Sources */,
 				F0A32D1E0000000000000007 /* ForecastTabOrderingTests.swift in Sources */,
 				4D5D009F5A5AD2705B703BFE /* AirStatusesTests.swift in Sources */,
 				F9177677346FD092C43C7AF5 /* AqiTrendTests.swift in Sources */,
@@ -1750,6 +1763,7 @@
 				FAFF191E9FD391C0F615DE98 /* StationParsingTests.swift in Sources */,
 				3A31D97A13C8BFF257DF9D79 /* AppLanguageTests.swift in Sources */,
 				2F0E76A012C72E91D9C78A73 /* WindTests.swift in Sources */,
+				A1B2C3D4E5F6071829304A04 /* HeatmapInterpolationTests.swift in Sources */,
 				F0A124000000000000000002 /* StationLocationTests.swift in Sources */,
 				9EC0FFEE2A10000000000069 /* MapMarkerTests.swift in Sources */,
 				B185A40000000000000A4000 /* LocateMeTests.swift in Sources */,
@@ -1914,6 +1928,8 @@
 				9E03DF5E23965286002F8DA4 /* HistoricalPollutants.swift in Sources */,
 				9E942E362372BFDA0010915D /* AirIndexTypes.swift in Sources */,
 				9EA1BC71236DDA2D008C3942 /* Marker.swift in Sources */,
+				A1B2C3D4E5F6071829304A06 /* HeatmapOverlay.swift in Sources */,
+				A1B2C3D4E5F6071829304A02 /* HeatmapInterpolation.swift in Sources */,
 				9EA1BC692365CC0F008C3942 /* NumberExtensions.swift in Sources */,
 				9EDF685923838CEE00B08589 /* DefaultLocationButton.swift in Sources */,
 				9E01F535235C3E1900BC3486 /* StationAlertSetting.swift in Sources */,

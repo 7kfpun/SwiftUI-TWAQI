@@ -24,8 +24,22 @@ final class ClosestStationView: UIControl {
     /// Extra height while the wind layer's "air is coming from…" line
     /// (TWAQ-15) is shown under the weather row.
     static let hintRowHeight: CGFloat = 22
+    /// Extra height while the one-line advice (TWAQ-13) is shown under the AQI.
+    static let adviceRowHeight: CGFloat = 20
+
+    /// Height of the whole card for the rows it shows. The station and AQI
+    /// area is the tighter one whenever a row sits under it.
+    static func height(hasWeather: Bool, hasHint: Bool, hasAdvice: Bool) -> CGFloat {
+        var height = hasWeather || hasAdvice ? topHeightWithWeather : preferredSize.height
+        if hasAdvice { height += adviceRowHeight }
+        if hasWeather { height += weatherRowHeight }
+        if hasWeather && hasHint { height += hintRowHeight }
+        return height
+    }
 
     private var topHeight: Constraint?
+    private var adviceHeight: Constraint?
+    private var adviceLabel: UILabel!
 
     private var weatherRow: UIView!
     private var weatherIcon: UIImageView!
@@ -94,6 +108,7 @@ final class ClosestStationView: UIControl {
             guard isLoading != oldValue else { return }
             skeletonView.isHidden = !isLoading
             stack.isHidden = isLoading
+            if isLoading { advice = nil }
             updateAccessibility()
             if isLoading { startSkeletonPulse() } else { skeletonView.layer.removeAllAnimations() }
         }
@@ -102,6 +117,7 @@ final class ClosestStationView: UIControl {
     /// The request failed and nothing was saved: says so in plain words.
     func showUnavailable() {
         isLoading = false
+        advice = nil
         label.text = "Offline.card_unavailable".localized
         localityLabel.isHidden = true
         subLabel.text = nil
@@ -190,7 +206,7 @@ final class ClosestStationView: UIControl {
             accessibilityValue = nil
             return
         }
-        var parts = [label?.text, subLabel?.text, aqiLabel?.text].compactMap { $0 }.filter { !$0.isEmpty }
+        var parts = [label?.text, subLabel?.text, aqiLabel?.text, advice].compactMap { $0 }.filter { !$0.isEmpty }
         if let weather {
             parts.append(Self.accessibilityText(weather))
         }
@@ -225,6 +241,29 @@ final class ClosestStationView: UIControl {
         set { imageView.image = newValue }
     }
 
+    /// One line of advice under the AQI (TWAQ-13), cut with an ellipsis rather
+    /// than wrapped or shrunk. Nil hides the row.
+    var advice: String? {
+        didSet {
+            let shown = !(advice?.isEmpty ?? true)
+            adviceLabel.text = advice
+            adviceLabel.isHidden = !shown
+            adviceHeight?.update(offset: shown ? Self.adviceRowHeight : 0)
+            updateTopHeight()
+            updateAccessibility()
+            if advice != oldValue { onAdviceChange?() }
+        }
+    }
+
+    /// Fires when the advice row appears or goes, so the owner can resize the card.
+    var onAdviceChange: (() -> Void)?
+
+    private var hasAdvice: Bool { !(advice?.isEmpty ?? true) }
+
+    private func updateTopHeight() {
+        topHeight?.update(offset: weather == nil && !hasAdvice ? Self.preferredSize.height : Self.topHeightWithWeather)
+    }
+
     /// Simple weather for the map centre, the secondary reading under the
     /// AQI. Nil hides the row (outside Taiwan, no recent CWA reading, or the
     /// timeline is scrubbed back).
@@ -246,7 +285,7 @@ final class ClosestStationView: UIControl {
     }
 
     private func updateWeatherRow() {
-        topHeight?.update(offset: weather == nil ? Self.preferredSize.height : Self.topHeightWithWeather)
+        updateTopHeight()
         guard let weather else {
             weatherRow.isHidden = true
             return
@@ -432,6 +471,21 @@ final class ClosestStationView: UIControl {
 
         isEnabled = false
 
+        // MARK: Advice row (TWAQ-13), between the AQI area and the weather row
+        adviceLabel = UILabel()
+        adviceLabel.font = .systemFont(ofSize: 12)
+        adviceLabel.textColor = .label
+        adviceLabel.numberOfLines = 1
+        adviceLabel.lineBreakMode = .byTruncatingTail
+        adviceLabel.isHidden = true
+        addSubview(adviceLabel)
+        adviceLabel.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(rightView.snp.bottom)
+            make.left.equalTo(self).offset(12)
+            make.right.equalTo(self).offset(-12)
+            adviceHeight = make.height.equalTo(0).constraint
+        }
+
         // MARK: Weather row (secondary reading)
         weatherRow = UIView()
         weatherRow.isHidden = true
@@ -439,7 +493,7 @@ final class ClosestStationView: UIControl {
         weatherRow.isUserInteractionEnabled = false
         addSubview(weatherRow)
         weatherRow.snp.makeConstraints { (make) -> Void in
-            make.top.equalTo(rightView.snp.bottom)
+            make.top.equalTo(adviceLabel.snp.bottom)
             make.left.equalTo(self).offset(12)
             make.right.equalTo(self).offset(-12)
             make.height.equalTo(Self.weatherRowHeight)

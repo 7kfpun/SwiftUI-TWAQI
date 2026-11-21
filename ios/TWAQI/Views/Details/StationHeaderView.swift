@@ -18,6 +18,8 @@ struct StationHeaderView: View {
     var publishTime: String?
     /// The reading is the saved copy, because the latest request failed.
     var isOffline = false
+    /// One line of advice for the level (TWAQ-13); nil hides it.
+    var advice: String?
 
     var body: some View {
         let airStatus = AirStatuses.checkAirStatus(airIndexType: .aqi, value: aqi)
@@ -87,6 +89,14 @@ struct StationHeaderView: View {
                 }
 
                 Spacer()
+            }
+
+            if hasReading, let advice = advice, !advice.isEmpty {
+                Text(advice)
+                    .font(.subheadline)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundColor(.primary)
             }
 
             if let publishTime = publishTime {
