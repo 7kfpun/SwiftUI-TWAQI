@@ -26,7 +26,7 @@ final class ClosestStationView: UIControl {
     static let hintRowHeight: CGFloat = 22
     /// Extra height while the weather chips (TWAQ-14: rain, feels-like, UV)
     /// are shown under the weather row.
-    static let chipsRowHeight: CGFloat = 26
+    static let chipsRowHeight: CGFloat = 30
 
     /// The card's height for what it shows: the station alone, plus the
     /// weather row, the chips row when any chip has a reading, and the wind
