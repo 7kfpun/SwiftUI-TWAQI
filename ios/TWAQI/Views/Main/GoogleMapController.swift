@@ -86,7 +86,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     /// Code of the country whose markers are openable. Resolved from the
     /// countries endpoint so the id -> code mapping stays server-driven.
-    var supportedCountryCode: String?
+    var supportedCountryCode: String? {
+        didSet { if closestStationView != nil { loadClosestStationView() } }
+    }
 
     var pollutants: Pollutants = []
 
@@ -632,6 +634,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             closestStationHeight = make.height.equalTo(ClosestStationView.preferredSize.height).constraint
         }
 
+        closestStationView.addTarget(self, action: #selector(closestStationTapped), for: .touchUpInside)
+
         // MARK: airStatusesView
         let airStatusesView = AirStatusBarView()
         view.addSubview(airStatusesView)
@@ -1025,7 +1029,31 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         view.layoutIfNeeded()
     }
 
+    /// The station the top-left card opens, nil when there is nothing to open.
+    private var closestCardStationId: Int? {
+        guard let live = closestPollutant else { return nil }
+        return MapCardTarget.stationId(
+            closest: live,
+            supportedCountryCode: supportedCountryCode,
+            countryPollutants: countryPollutants,
+            hasReading: displayedPollutant(live).hasData
+                && displayedPollutant(live).pollutant.getValue(airIndexType: airIndexTypeSelected) != 0
+        )
+    }
+
+    @objc private func closestStationTapped() {
+        guard let stationId = closestCardStationId else { return }
+        TrackingManager.logEvent(.checkMainDetails, parameters: [
+            "name": closestPollutant.name,
+            "nameLocal": closestPollutant.nameLocal,
+            "stationId": stationId,
+            "label": "card",
+        ])
+        onStationSelected?(stationId)
+    }
+
     func loadClosestStationView() {
+        defer { closestStationView.isEnabled = closestCardStationId != nil }
         if let livePollutant = self.closestPollutant {
             let closestPollutant = displayedPollutant(livePollutant).pollutant
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
