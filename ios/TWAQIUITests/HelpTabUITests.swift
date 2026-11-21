@@ -128,3 +128,48 @@ final class HelpTabUITests: XCTestCase {
         shot("help-scrolled-bottom")
     }
 }
+
+/// TWAQ-11: tapping the map's top-left card opens the details panel.
+/// Needs the network (live stations). Set `TEST_RUNNER_CARD_SHOT_DIR` to write
+/// screenshots and `TEST_RUNNER_CARD_LANGUAGE` (en / zh-Hant) to pick the language.
+final class MapCardTapUITests: XCTestCase {
+    func testTappingTheCardOpensDetails() throws {
+        continueAfterFailure = false
+        let language = ProcessInfo.processInfo.environment["CARD_LANGUAGE"] ?? "en"
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboardingCompleted", "YES",
+            "-onboardingLegacyInstall", "NO",
+            "-AppleLanguages", "(\(language))",
+            "-AppleLocale", language.hasPrefix("zh") ? "zh_TW" : "en_US",
+        ]
+        app.launch()
+
+        let label = language.hasPrefix("zh") ? "此處空氣品質，開啟詳細資料" : "Air quality here, opens details"
+        let card = app.buttons[label]
+        XCTAssertTrue(card.waitForExistence(timeout: 30), "The card is one button")
+        let enabled = NSPredicate(format: "isEnabled == true")
+        expectation(for: enabled, evaluatedWith: card)
+        waitForExpectations(timeout: 30)
+
+        shot("\(language)-1-map-card")
+        card.tap()
+
+        // The panel is a sheet with a navigation bar; the card is behind it.
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+        sleep(3)
+        shot("\(language)-2-details")
+    }
+
+    private func shot(_ name: String) {
+        let image = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: image)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if let dir = ProcessInfo.processInfo.environment["CARD_SHOT_DIR"], !dir.isEmpty {
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            try? image.pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+        }
+    }
+}
