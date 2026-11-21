@@ -443,6 +443,8 @@
 "Weather.station_named %@ %@" = "%1$@ station, %2$@ away";
 "Weather.station_nearby %@" = "Weather station %@ away";
 "Weather.observed %@" = "observed %@";
+"Weather.map_station %@ %@" = "%1$@ · %2$@";
+"Weather.map_station_nearby %@" = "%@ away";
 /* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
 "Weather.wx.1" = "Clear";
 "Weather.wx.2" = "Mostly clear";
