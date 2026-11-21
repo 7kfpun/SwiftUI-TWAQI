@@ -753,9 +753,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(60)
         }
         view.addSubview(heatmapNote)
+        // Trails the colour legend, not the button row: the row stays one
+        // button tall so it clears the station card in landscape.
         heatmapNote.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(windModeButton)
-            make.bottom.equalTo(windModeButton.snp.top).offset(-8)
+            make.left.equalTo(airStatusesView.snp.right).offset(8)
+            make.centerY.equalTo(airStatusesView)
+            make.right.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.right).offset(-15)
         }
 
         self.view = view

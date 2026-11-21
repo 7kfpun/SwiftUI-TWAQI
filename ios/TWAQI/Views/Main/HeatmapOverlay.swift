@@ -55,7 +55,12 @@ final class HeatmapOverlay {
             let cells = HeatmapInterpolation.grid(samples: samples, bounds: Self.bounds, width: width, height: height)
             let image = HeatmapInterpolation.image(cells: cells, width: width, height: height, color: color)
             DispatchQueue.main.async {
-                guard let self, wanted == self.generation, let image else { return }
+                guard let self, wanted == self.generation else { return }
+                guard let image else {
+                    // Nothing drawn: let the same inputs try again.
+                    self.renderedKey = nil
+                    return
+                }
                 self.show(UIImage(cgImage: image))
             }
         }
@@ -133,7 +138,8 @@ final class HeatmapNoteLabel: UILabel {
     override init(frame: CGRect) {
         super.init(frame: frame)
         text = "  " + "Map.Heatmap.estimated".localized + "  "
-        font = .preferredFont(forTextStyle: .caption1)
+        font = .preferredFont(forTextStyle: .caption2)
+        numberOfLines = 2
         adjustsFontForContentSizeCategory = true
         textColor = .label
         backgroundColor = UIColor.systemBackground.withAlphaComponent(0.85)
