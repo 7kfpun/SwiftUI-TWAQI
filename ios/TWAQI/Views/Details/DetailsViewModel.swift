@@ -56,6 +56,9 @@ class DetailsViewModel: ObservableObject {
     /// Answers from the latest `getData`, so `loadFailed` is decided once
     /// both requests have answered. `onAppear` can fire again while the first
     /// pair is still on the wire; answers from an older pair are not counted.
+    /// Held by pull-to-refresh until both requests have answered.
+    let refreshGate = RefreshGate()
+
     private var generation = 0
     private var answers: [Bool] = []
 
@@ -178,6 +181,7 @@ class DetailsViewModel: ObservableObject {
         answers.append(failed)
         guard answers.count == 2 else { return }
         loadFailed = answers.allSatisfy { $0 } && pollutant == nil && historicalPollutants.isEmpty
+        refreshGate.finish()
     }
 
     /// Read from the shared defaults rather than kept here, so the heart

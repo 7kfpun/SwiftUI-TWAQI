@@ -495,6 +495,12 @@
 "Offline.updated_ago %@" = "Offline · updated %@";
 "Offline.nothing_saved" = "Can't connect, and there's nothing saved to show. Check your connection and try again.";
 "Offline.retry" = "Try Again";
+"Offline.badge" = "Offline";
+"Offline.card_unavailable" = "Can't load readings. Check your connection.";
+"Freshness.stale_updated_ago %@" = "Updated %@ · may be out of date";
+"Freshness.stale_short %@" = "Updated %@ · outdated";
+"Freshness.updated_ago %@" = "Updated %@";
+"Loading.label" = "Loading";
 
 /* Welcome flow (FOX-34) */
 "Help.welcome" = "Getting started";
