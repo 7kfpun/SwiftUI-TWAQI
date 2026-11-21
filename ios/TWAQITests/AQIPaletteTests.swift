@@ -81,6 +81,34 @@ final class AQIPaletteTests: XCTestCase {
         }
     }
 
+    /// Levels must stay apart under protanopia and deuteranopia (Machado 2009,
+    /// full severity): distance between the simulated sRGB colours, 0…441.
+    func testColourBlindPaletteLevelsStayApartUnderRedGreenDeficiency() {
+        let protan: [[Double]] = [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]]
+        let deutan: [[Double]] = [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]]
+
+        func simulated(_ rgb: UInt32, _ m: [[Double]]) -> [Double] {
+            let linear = [16, 8, 0].map { shift -> Double in
+                let c = Double((rgb >> UInt32(shift)) & 0xFF) / 255
+                return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+            }
+            return m.map { row in
+                let v = min(1, max(0, zip(row, linear).map(*).reduce(0, +)))
+                return 255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * pow(v, 1 / 2.4) - 0.055)
+            }
+        }
+
+        let colors = AirStatuses.getShowAllCases().map { $0.getColor(palette: .colorBlindSafe) }
+        for m in [protan, deutan] {
+            for (i, a) in colors.enumerated() {
+                for b in colors[(i + 1)...] {
+                    let distance = zip(simulated(a, m), simulated(b, m)).map { ($0 - $1) * ($0 - $1) }.reduce(0, +).squareRoot()
+                    XCTAssertGreaterThanOrEqual(distance, 50, "\(String(a, radix: 16)) vs \(String(b, radix: 16))")
+                }
+            }
+        }
+    }
+
     func testContrastMaths() {
         XCTAssertEqual(AQIContrast.ratio(0xFFFFFF, 0x000000), 21, accuracy: 0.01)
         XCTAssertEqual(AQIContrast.ratio(0x777777, 0x777777), 1, accuracy: 0.001)

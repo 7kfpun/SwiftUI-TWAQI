@@ -182,8 +182,10 @@ enum AirStatuses: String, CaseIterable, Hashable {
 enum AQIPalette: String, CaseIterable, Identifiable {
     /// The official colours.
     case standard
-    /// Blue → yellow → orange → vermilion → purple, picked from the Okabe–Ito
-    /// set so the levels stay apart under red–green colour blindness.
+    /// Okabe–Ito blue, yellow, orange and vermilion for the first four
+    /// levels, then a violet and a brown that stay apart from them under
+    /// red–green colour blindness and stay visible (3:1) on white and on the
+    /// dark system background, where rows and widgets draw the colour as text.
     case colorBlindSafe
 
     static let defaultsKey = "aqiPalette"
@@ -208,8 +210,8 @@ enum AQIPalette: String, CaseIterable, Identifiable {
             case .moderate: return 0xF0E442
             case .unhealthyforsensitivegroup: return 0xE69F00
             case .unhealthy: return 0xD55E00
-            case .veryunhealthy: return 0xB5559A
-            case .hazardous: return 0x7B61D6
+            case .veryunhealthy: return 0x9B5DE5
+            case .hazardous: return 0x9A6A50
             case .unknown: return 0x676767
             }
         }
