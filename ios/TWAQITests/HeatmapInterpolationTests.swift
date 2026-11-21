@@ -85,4 +85,22 @@ final class HeatmapInterpolationTests: XCTestCase {
         XCTAssertEqual(image?.width, 2)
         XCTAssertEqual(image?.height, 2)
     }
+
+    /// A Taiwan-sized station set (about 80) over the overlay's real bounds
+    /// and grid size stays well under a second, off the main thread.
+    func testFullOverlayRenderIsFastOnARealisticStationSet() {
+        var samples: [HeatmapSample] = []
+        for index in 0..<80 {
+            let latitude: Double = 22.0 + Double(index % 20) * 0.2
+            let longitude: Double = 120.0 + Double(index / 20) * 0.6 + Double(index % 7) * 0.05
+            samples.append(HeatmapSample(latitude: latitude, longitude: longitude, value: Double(20 + index % 90)))
+        }
+        let start = Date()
+        let cells = HeatmapInterpolation.grid(samples: samples, bounds: HeatmapOverlay.bounds, width: 300, height: 340)
+        let image = HeatmapInterpolation.image(cells: cells, width: 300, height: 340) { _ in 0x009866 }
+        let elapsed = Date().timeIntervalSince(start)
+        print("heatmap render seconds: \(elapsed)")
+        XCTAssertNotNil(image)
+        XCTAssertLessThan(elapsed, 2.0)
+    }
 }
