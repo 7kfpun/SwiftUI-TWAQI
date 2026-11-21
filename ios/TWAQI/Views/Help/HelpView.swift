@@ -239,6 +239,14 @@ struct HelpView: View {
                 Text("Help.aqi_palette")
             }
             .pushedChoices()
+
+            // TWAQ-13: the one-line advice under the AQI.
+            Toggle(isOn: Binding(
+                get: { settings.showsAdvice },
+                set: { settings.showsAdvice = $0 }
+            )) {
+                Text("Help.show_advice")
+            }
         }
     }
 

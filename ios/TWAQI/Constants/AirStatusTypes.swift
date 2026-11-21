@@ -97,6 +97,13 @@ enum AirStatuses: String, CaseIterable, Hashable {
         return readableStrings[self.rawValue] ?? ""
     }
 
+    /// Localizable key of the one-line "what to do" for the map card and the
+    /// station header (TWAQ-13): the general-public activity guidance, which is
+    /// the MOENV wording, so it is not our own medical claim. Nil for `.unknown`.
+    var adviceKey: String? {
+        self == .unknown ? nil : "AirStatus.general_public_guidance_\(rawValue)"
+    }
+
     func getSensitivePublicGuidance() -> LocalizedStringKey {
         let readableStrings = [
             "good": "AirStatus.sensitive_group_guidance_good" as LocalizedStringKey,

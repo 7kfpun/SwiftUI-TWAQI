@@ -59,6 +59,7 @@
 "Help.aqi_palette" = "空氣品質顏色";
 "Help.aqi_palette_standard" = "標準";
 "Help.aqi_palette_colorblind" = "色盲友善";
+"Help.show_advice" = "在空氣品質下顯示活動建議";
 "Help.cancel_site_notification" = "取消所有測站通知";
 "Help.all_site_notification_has_been_cancelled" = "已取消所有測站通知";
 "Help.in_app_purchase" = "App 內購買";

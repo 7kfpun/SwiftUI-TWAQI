@@ -581,6 +581,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         // MARK: closestStationView
         closestStationView = ClosestStationView()
         closestStationView.isLoading = true
+        closestStationView.onAdviceChange = { [weak self] in self?.updateClosestStationHeight() }
         view.addSubview(closestStationView)
         closestStationView.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
@@ -955,11 +956,15 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         guard weather != closestStationView.weather || hint != closestStationView.windHint else { return }
         closestStationView.weather = weather
         closestStationView.windHint = hint
-        var height = weather == nil
-            ? ClosestStationView.preferredSize.height
-            : ClosestStationView.heightWithWeather
-        if hint != nil { height += ClosestStationView.hintRowHeight }
-        closestStationHeight?.update(offset: height)
+        updateClosestStationHeight()
+    }
+
+    private func updateClosestStationHeight() {
+        closestStationHeight?.update(offset: ClosestStationView.height(
+            hasWeather: closestStationView.weather != nil,
+            hasHint: closestStationView.windHint != nil,
+            hasAdvice: closestStationView.advice != nil
+        ))
         view.layoutIfNeeded()
     }
 
@@ -986,6 +991,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         onStationSelected?(stationId)
     }
 
+    /// The card's one line of advice (TWAQ-13), nil when switched off in Help or there is no reading.
+    private func adviceText(for status: AirStatuses, hasReading: Bool) -> String? {
+        guard hasReading, defaults.object(forKey: SettingsStore.showsAdviceKey) as? Bool ?? true else { return nil }
+        return status.adviceKey?.localized
+    }
+
     func loadClosestStationView() {
         defer { closestStationView.isEnabled = closestCardStationId != nil }
         if let livePollutant = self.closestPollutant {
@@ -1007,6 +1018,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                     .map { "\($0.clock)・\($0.relative)" }
                 : nil
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
+            closestStationView.advice = adviceText(for: airStatus, hasReading: value != 0)
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
@@ -1216,6 +1228,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         syncHeadingOrientation()
+        // The advice switch lives in Help: pick up a change on coming back.
+        if closestStationView != nil { loadClosestStationView() }
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
 

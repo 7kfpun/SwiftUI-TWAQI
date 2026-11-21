@@ -55,6 +55,7 @@
 "Help.aqi_palette" = "AQI colours";
 "Help.aqi_palette_standard" = "Standard";
 "Help.aqi_palette_colorblind" = "Colour-blind friendly";
+"Help.show_advice" = "Show advice under the AQI";
 "Help.cancel_site_notification" = "Cancel site notification";
 "Help.all_site_notification_has_been_cancelled" = "All site notification has been cancelled";
 "Help.in_app_purchase" = "In-app purchase";
