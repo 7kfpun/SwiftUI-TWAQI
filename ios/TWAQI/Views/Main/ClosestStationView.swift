@@ -288,7 +288,7 @@ final class ClosestStationView: UIControl {
             chipsRow.addArrangedSubview(Self.makeChip(chip))
         }
         chipsRow.isHidden = chips.isEmpty
-        chipsHeight?.update(offset: chips.isEmpty ? 0 : Self.chipsRowHeight - 2)
+        chipsHeight?.update(offset: chips.isEmpty ? 0 : Self.chipsRowHeight)
     }
 
     private static func makeChip(_ chip: WeatherChip) -> UIView {
@@ -536,7 +536,7 @@ final class ClosestStationView: UIControl {
         chipsRow.isUserInteractionEnabled = false
         addSubview(chipsRow)
         chipsRow.snp.makeConstraints { (make) -> Void in
-            make.top.equalTo(weatherRow.snp.bottom).offset(2)
+            make.top.equalTo(weatherRow.snp.bottom)
             make.left.equalTo(self).offset(12)
             make.right.lessThanOrEqualTo(self).offset(-12)
             chipsHeight = make.height.equalTo(0).constraint

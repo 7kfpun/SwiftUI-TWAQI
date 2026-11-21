@@ -42,10 +42,11 @@ struct WidgetWeather: Equatable {
     /// UV index of the nearest station that measures it (TWAQ-14).
     var uv: Double?
 
-    /// Whether there is anything to show.
+    /// Whether there is anything to show. UV alone doesn't count: a block of
+    /// only a UV chip says too little, and the chips need the rest anyway.
     var isEmpty: Bool {
         temperature == nil && humidity == nil && rain == nil && windSpeed == nil && code == nil
-            && cwaText == nil && chanceOfRain == nil && uv == nil
+            && cwaText == nil && chanceOfRain == nil
     }
 
     /// Shown in the widget gallery before any weather is saved.

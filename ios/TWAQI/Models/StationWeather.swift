@@ -173,7 +173,9 @@ enum StationWeatherMatcher {
 
     /// The UV index of the closest fresh station that has one within
     /// `maxUVDistanceKm`, or nil. A station without a UV sensor is skipped
-    /// rather than ending the search.
+    /// rather than ending the search. A station that reads 0 (dusk) is still
+    /// the nearest: the chip is then left out (`WeatherChips.minUV`) instead of
+    /// borrowing a far station's daytime value for a place that is dark.
     static func nearestUV(lat: Double, lon: Double, in stations: [WeatherObservation], now: Date) -> Double? {
         guard lat != 0 || lon != 0 else { return nil }
         return stations

@@ -231,8 +231,8 @@ extension WidgetWeatherTests {
         XCTAssertEqual(WidgetWeather(uv: 4).chips().map(\.kind), [.uv])
     }
 
-    func testUVAloneIsEnoughToShowWeather() {
-        XCTAssertFalse(WidgetWeather(uv: 4).isEmpty)
+    func testUVAloneIsNotEnoughToShowWeather() {
+        XCTAssertTrue(WidgetWeather(uv: 4).isEmpty)
         XCTAssertTrue(WidgetWeather().isEmpty)
     }
 
