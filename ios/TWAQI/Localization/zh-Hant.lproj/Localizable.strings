@@ -657,3 +657,20 @@
 "WhatsNew.3_1_7.quickactions_title" = "主畫面圖示快速動作";
 "WhatsNew.3_1_7.quickactions_body" = "長按 App 圖示，即可直達最近的測站或你收藏的測站。";
 "MapCard.accessibility_label" = "此處空氣品質，開啟詳細資料";
+
+/* Wind arrows layer (TWAQ-15) */
+"Map.WindLayer.label" = "風向箭頭";
+"Map.WindLayer.hint" = "顯示或隱藏氣象站的風向箭頭";
+"Map.WindLayer.on" = "開啟";
+"Map.WindLayer.off" = "關閉";
+"WindLayer.from.north" = "北";
+"WindLayer.from.north_east" = "東北";
+"WindLayer.from.east" = "東";
+"WindLayer.from.south_east" = "東南";
+"WindLayer.from.south" = "南";
+"WindLayer.from.south_west" = "西南";
+"WindLayer.from.west" = "西";
+"WindLayer.from.north_west" = "西北";
+"WindLayer.hint_higher %@" = "空氣由%@方吹來，該方向 PM2.5 較高";
+"WindLayer.hint_lower %@" = "空氣由%@方吹來，該方向 PM2.5 較低";
+"WindLayer.arrow %@ %@" = "%1$@風，風速每秒 %2$@ 公尺";

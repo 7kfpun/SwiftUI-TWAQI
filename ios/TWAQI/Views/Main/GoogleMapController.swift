@@ -54,6 +54,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
     var timelineView: MapTimelineView!
     var windModeButton: WindModeButton!
+    var windLayerButton: WindLayerButton!
 
     /// The timeline bar sits above the ad banner, which SwiftUI lays out
     /// outside this map, with the index bar on top of it. Kept so both can drop
@@ -109,6 +110,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
         TrackingManager.logEvent(.setWindMode, parameters: ["label": self.isWindMode ? "on" : "off"])
+    }
+
+    @objc func toggleWindLayer() {
+        windLayerOn.toggle()
     }
 
     /// The button's action. `goToMyLocation(isSkipLog:)` can't be the
@@ -278,6 +283,72 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    /// The wind arrows layer (TWAQ-15): off until turned on, then remembered.
+    var windLayerOn = defaults.bool(forKey: WindLayer.defaultsKey) {
+        didSet {
+            guard windLayerOn != oldValue else { return }
+            defaults.set(windLayerOn, forKey: WindLayer.defaultsKey)
+            windLayerButton?.isOn = windLayerOn
+            TrackingManager.logEvent(.setWindLayer, parameters: ["label": windLayerOn ? "on" : "off"])
+            refreshWindLayer()
+            scheduleCenterWeather()
+        }
+    }
+
+    /// Fresh CWA wind readings, strongest first; empty until the layer is on
+    /// and the weather file has loaded.
+    private var windReadings: [WindReading] = []
+    private var windMarkers: [String: WindArrowMarker] = [:]
+
+    /// Reloads the readings (the store answers from its cache within its
+    /// ttl) and redraws. Off, or scrubbed back in time (wind is the current
+    /// reading only), clears the arrows.
+    func refreshWindLayer() {
+        guard windLayerOn, timelineHoursAgo == 0 else {
+            windReadings = []
+            renderWindArrows()
+            return
+        }
+        StationWeatherStore.shared.weather { [weak self] file in
+            guard let self = self, self.windLayerOn, self.timelineHoursAgo == 0 else { return }
+            self.windReadings = file.map { WindLayer.readings(in: $0) } ?? []
+            self.renderWindArrows()
+        }
+    }
+
+    /// Draws the readings in view, thinned by zoom (`WindLayer.visible`).
+    /// Markers are kept and only added or removed as the view moves, so a
+    /// pan costs a handful of changes, not a rebuild.
+    func renderWindArrows() {
+        let wanted: [WindReading]
+        if windReadings.isEmpty {
+            wanted = []
+        } else {
+            let region = mapView.projection.visibleRegion()
+            let corners = [region.nearLeft, region.nearRight, region.farLeft, region.farRight]
+            wanted = WindLayer.visible(
+                windReadings,
+                minLat: corners.map(\.latitude).min() ?? 0, maxLat: corners.map(\.latitude).max() ?? 0,
+                minLon: corners.map(\.longitude).min() ?? 0, maxLon: corners.map(\.longitude).max() ?? 0,
+                zoom: Double(mapView.camera.zoom)
+            )
+        }
+        let ids = Set(wanted.map(\.stationId))
+        for (id, marker) in windMarkers where !ids.contains(id) {
+            marker.map = nil
+            windMarkers[id] = nil
+        }
+        for reading in wanted {
+            if let marker = windMarkers[reading.stationId] {
+                if marker.reading != reading { marker.update(reading) }
+            } else {
+                let marker = WindArrowMarker(reading: reading)
+                marker.map = mapView
+                windMarkers[reading.stationId] = marker
+            }
+        }
+    }
+
     var airIndexTypeSelected: AirIndexTypes {
         get {
             return defaults.string(forKey: "airIndexTypeSelected")
@@ -300,6 +371,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             if timelineHoursAgo > 0 {
                 requestVisibleHistory()
             }
+            // New readings change the PM2.5 behind the hint; the weather
+            // store answers from its cache within its ttl.
+            scheduleCenterWeather()
+            refreshWindLayer()
         }
     }
 
@@ -318,6 +393,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             renderMarkers()
             loadClosestStationView()
             updateCenterWeather()
+            refreshWindLayer()
         }
     }
 
@@ -610,6 +686,20 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(60)
         }
 
+        // MARK: Wind layer button
+        windLayerButton = WindLayerButton()
+        windLayerButton.isOn = windLayerOn
+        windLayerButton.button.addTarget(self, action: #selector(toggleWindLayer), for: .touchUpInside)
+        view.addSubview(windLayerButton)
+        windLayerButton.snp.makeConstraints { (make) -> Void in
+            // Same row as the wind-mode button, so the left stack stays one
+            // button tall and clears the station card in landscape.
+            make.bottom.equalTo(windModeButton)
+            make.left.equalTo(windModeButton.snp.right).offset(12)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
+
         self.view = view
     }
 
@@ -834,24 +924,41 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// card is never blocked on it.
     private func updateCenterWeather() {
         guard timelineHoursAgo == 0 else {
-            showCenterWeather(nil)
+            showCenterWeather(nil, hint: nil)
             return
         }
         StationWeatherStore.shared.weather { [weak self] file in
             guard let self = self else { return }
             guard self.timelineHoursAgo == 0 else { return }
-            self.showCenterWeather(file.flatMap {
+            let weather = file.flatMap {
                 MapCenterWeather.make(lat: self.currentLatitude, lon: self.currentLongitude, in: $0)
-            })
+            }
+            self.showCenterWeather(weather, hint: file.flatMap { self.windHint(in: $0) })
         }
     }
 
-    private func showCenterWeather(_ weather: MapCenterWeather?) {
-        guard weather != closestStationView.weather else { return }
+    /// "Air is coming from…" for the card: only with the wind layer on, and
+    /// when `WindLayer.hint` finds the wind and the stations upwind clear.
+    private func windHint(in file: WeatherFile) -> String? {
+        guard windLayerOn, let closest = closestPollutant else { return nil }
+        let stations = countryPollutants.values.flatMap { $0 }
+            .map { (lat: $0.lat, lon: $0.lon, pm25: $0.pm25) }
+        return WindLayer.hint(
+            lat: currentLatitude, lon: currentLongitude,
+            localPm25: closest.pm25, stations: stations, in: file
+        ).map { WindLayer.hintText($0) }
+    }
+
+    private func showCenterWeather(_ weather: MapCenterWeather?, hint: String?) {
+        // The hint sits under the weather row, so it needs the row.
+        let hint = weather == nil ? nil : hint
+        guard weather != closestStationView.weather || hint != closestStationView.windHint else { return }
         closestStationView.weather = weather
-        let height = weather == nil
+        closestStationView.windHint = hint
+        var height = weather == nil
             ? ClosestStationView.preferredSize.height
             : ClosestStationView.heightWithWeather
+        if hint != nil { height += ClosestStationView.hintRowHeight }
         closestStationHeight?.update(offset: height)
         view.layoutIfNeeded()
     }
@@ -1098,6 +1205,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         checkClosestCountry(latitude: latitude, longitude: longitude)
         checkClosestStation(latitude: latitude, longitude: longitude)
         scheduleCenterWeather()
+        refreshWindLayer()
 
         // Panned back in time and on to new stations: fetch theirs too.
         if timelineHoursAgo > 0 {

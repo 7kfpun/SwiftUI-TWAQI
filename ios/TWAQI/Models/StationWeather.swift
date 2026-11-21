@@ -83,6 +83,9 @@ struct WeatherObservation: Decodable, Equatable {
     let rain: Double?
     /// m/s
     let wind: Double?
+    /// Degrees clockwise from north the wind blows *from*, 0–360; absent in
+    /// files written before the wind layer (TWAQ-15).
+    let windDir: Double?
 
     var observedAt: Date? { WeatherDates.parse(time) }
 }
@@ -346,5 +349,197 @@ struct MapCenterWeather: Equatable {
             distanceKm: reading.distanceKm,
             observedAt: reading.observedAt
         )
+    }
+}
+
+
+// MARK: - Wind layer (TWAQ-15)
+
+/// A CWA station's wind, as the map's arrows layer draws it.
+struct WindReading: Equatable {
+    let stationId: String
+    let name: String
+    let lat: Double
+    let lon: Double
+    /// m/s
+    let speed: Double
+    /// Meteorological: degrees clockwise from north the wind blows *from*.
+    let direction: Double
+
+    var wind: Wind { Wind(direction: direction, speed: speed) }
+}
+
+/// The optional wind arrows layer: which CWA readings to draw, how many per
+/// zoom, how they look, and the card's "air is coming from…" hint.
+enum WindLayer {
+    /// UserDefaults key of the toggle. Off until the user turns it on.
+    static let defaultsKey = "windLayerOn"
+
+    /// Readings with a usable direction and speed, fresh (same rule as the
+    /// weather card), strongest first so thinning keeps the telling ones.
+    static func readings(in file: WeatherFile, now: Date = Date()) -> [WindReading] {
+        (file.observations?.stations ?? [])
+            .compactMap { station -> WindReading? in
+                guard
+                    let speed = station.wind, speed > 0,
+                    let direction = station.windDir, (0...360).contains(direction),
+                    let observedAt = station.observedAt,
+                    StationWeatherMatcher.isFresh(observedAt, now: now),
+                    station.lat != 0 || station.lon != 0
+                else { return nil }
+                return WindReading(
+                    stationId: station.id, name: station.name,
+                    lat: station.lat, lon: station.lon,
+                    speed: speed, direction: direction.truncatingRemainder(dividingBy: 360)
+                )
+            }
+            .sorted { $0.speed != $1.speed ? $0.speed > $1.speed : $0.stationId < $1.stationId }
+    }
+
+    /// Never more arrows than this at once, however far in the user zooms out.
+    static let maxMarkers = 40
+
+    /// Side of the grid cell, in degrees, that holds at most one arrow:
+    /// about 28 km at zoom 8 (the whole island), shrinking by half per zoom
+    /// level until every station has its own cell.
+    static func cellDegrees(zoom: Double) -> Double {
+        64 / pow(2, max(zoom, 0))
+    }
+
+    /// The readings to draw: those in `bounds` (plus a margin), at most one
+    /// per grid cell and `maxMarkers` in all. `readings` is strongest first,
+    /// so a crowded cell shows its strongest wind.
+    static func visible(
+        _ readings: [WindReading],
+        minLat: Double, maxLat: Double, minLon: Double, maxLon: Double,
+        zoom: Double
+    ) -> [WindReading] {
+        let margin = max(maxLat - minLat, maxLon - minLon) * 0.25
+        let cell = cellDegrees(zoom: zoom)
+        var taken = Set<[Int]>()
+        var out: [WindReading] = []
+        for reading in readings {
+            guard
+                reading.lat >= minLat - margin, reading.lat <= maxLat + margin,
+                reading.lon >= minLon - margin, reading.lon <= maxLon + margin
+            else { continue }
+            let key = [Int((reading.lat / cell).rounded(.down)), Int((reading.lon / cell).rounded(.down))]
+            guard taken.insert(key).inserted else { continue }
+            out.append(reading)
+            if out.count == maxMarkers { break }
+        }
+        return out
+    }
+
+    /// Arrow colour by speed band (the same bands as `Wind.toString`): light
+    /// to dark blue, then violet. Separate from the AQI colours, so the layer
+    /// never reads as pollution levels.
+    static func color(speed: Double) -> UInt32 {
+        switch speed {
+        case ..<1.6: return 0x8FD3F4
+        case ..<3.4: return 0x32ADE6
+        case ..<5.5: return 0x0A84FF
+        case ..<8.0: return 0x5E5CE6
+        default: return 0x8E3FD6
+        }
+    }
+
+    // MARK: Compass
+
+    /// Eight points, index 0 = north, clockwise.
+    static let compassNames = ["north", "north_east", "east", "south_east", "south", "south_west", "west", "north_west"]
+
+    /// 0–7 for a bearing in degrees: 337.5° up to 22.5° is north.
+    static func compassIndex(_ bearing: Double) -> Int {
+        let positive = bearing.truncatingRemainder(dividingBy: 360)
+        let normalised = positive < 0 ? positive + 360 : positive
+        return Int((normalised / 45).rounded()) % 8
+    }
+
+    /// Initial bearing from one point to another, degrees clockwise from north.
+    static func bearing(fromLat: Double, fromLon: Double, toLat: Double, toLon: Double) -> Double {
+        let lat1 = fromLat * .pi / 180, lat2 = toLat * .pi / 180
+        let dLon = (toLon - fromLon) * .pi / 180
+        let y = sin(dLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        let degrees = atan2(y, x) * 180 / .pi
+        return degrees < 0 ? degrees + 360 : degrees
+    }
+
+    /// Smallest angle between two bearings, 0…180.
+    static func angleBetween(_ a: Double, _ b: Double) -> Double {
+        let diff = abs(a - b).truncatingRemainder(dividingBy: 360)
+        return diff > 180 ? 360 - diff : diff
+    }
+
+    // MARK: Hint
+
+    /// Wind below this says nothing about where the air comes from.
+    static let hintMinSpeed = 1.5
+    /// Stations this close or closer to the centre are the centre's own air.
+    static let hintMinKm = 3.0
+    static let hintMaxKm = 40.0
+    /// Upwind: within this many degrees of the direction the wind comes from.
+    static let hintHalfAngle = 45.0
+    static let hintMinStations = 2
+    /// µg/m³ PM2.5 the upwind average must differ from the centre by.
+    static let hintMinDifference = 8.0
+
+    struct Hint: Equatable {
+        enum Trend: Equatable { case higher, lower }
+        /// Index into `compassNames`: where the air is coming from.
+        let fromIndex: Int
+        let trend: Trend
+    }
+
+    /// "Air is coming from the north-east, where PM2.5 is higher/lower": only
+    /// when a fresh CWA wind of at least `hintMinSpeed` is within range of the
+    /// map centre, and at least `hintMinStations` AQI stations upwind of it
+    /// differ clearly from the centre station. Otherwise nil, never a guess.
+    /// `local` is the centre station's PM2.5; `stations` are AQI stations
+    /// as (lat, lon, pm25), zero readings excluded by the caller or here.
+    static func hint(
+        lat: Double,
+        lon: Double,
+        localPm25: Double,
+        stations: [(lat: Double, lon: Double, pm25: Double)],
+        in file: WeatherFile,
+        now: Date = Date()
+    ) -> Hint? {
+        guard localPm25 > 0 else { return nil }
+        let windy = (file.observations?.stations ?? []).filter { ($0.wind ?? 0) >= hintMinSpeed && $0.windDir != nil }
+        guard
+            let near = StationWeatherMatcher.nearest(lat: lat, lon: lon, in: windy, now: now),
+            let direction = near.observation.windDir, (0...360).contains(direction)
+        else { return nil }
+
+        let upwind = stations.compactMap { station -> Double? in
+            guard station.pm25 > 0 else { return nil }
+            let km = StationCamMatcher.distanceKm(lat, lon, station.lat, station.lon)
+            guard km >= hintMinKm, km <= hintMaxKm else { return nil }
+            let toward = bearing(fromLat: lat, fromLon: lon, toLat: station.lat, toLon: station.lon)
+            return angleBetween(toward, direction) <= hintHalfAngle ? station.pm25 : nil
+        }
+        guard upwind.count >= hintMinStations else { return nil }
+
+        let difference = upwind.reduce(0, +) / Double(upwind.count) - localPm25
+        guard abs(difference) >= hintMinDifference else { return nil }
+        return Hint(fromIndex: compassIndex(direction), trend: difference > 0 ? .higher : .lower)
+    }
+
+    /// 「Air is coming from the north-east, where PM2.5 is higher」.
+    static func hintText(_ hint: Hint, bundle: Bundle = .appLanguage) -> String {
+        let point = NSLocalizedString("WindLayer.from.\(compassNames[hint.fromIndex])", bundle: bundle, comment: "")
+        let key = hint.trend == .higher ? "WindLayer.hint_higher %@" : "WindLayer.hint_lower %@"
+        return String(format: NSLocalizedString(key, bundle: bundle, comment: ""), point)
+    }
+
+    /// What VoiceOver reads for an arrow: station, where from, how fast.
+    static func accessibilityText(_ reading: WindReading, chinese: Bool = Locale.isChinese, bundle: Bundle = .appLanguage) -> String {
+        let point = NSLocalizedString("WindLayer.from.\(compassNames[compassIndex(reading.direction)])", bundle: bundle, comment: "")
+        let speed = String(format: "%.1f", reading.speed)
+        let description = String(format: NSLocalizedString("WindLayer.arrow %@ %@", bundle: bundle, comment: ""), point, speed)
+        // CWA station names are zh-Hant: not read in English.
+        return chinese ? "\(reading.name)，\(description)" : description
     }
 }
