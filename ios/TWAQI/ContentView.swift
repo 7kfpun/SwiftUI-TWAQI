@@ -6,7 +6,9 @@
 //  Copyright © 2019 kf. All rights reserved.
 //
 
+import CoreLocation
 import SwiftUI
+import UserNotifications
 
 struct ContentView: View {
     /// Screens opened by URL, such as Pro from the locked widget.
@@ -28,12 +30,20 @@ struct ContentView: View {
     /// user (FOX-49). Help opens it again on its own.
     @State private var showingOnboarding: Bool
 
+    /// What's New after an update (FOX-142), once per marketing version.
+    @State private var showingWhatsNew = false
+    private let opensWhatsNew: Bool
+
     /// `opensOnboarding`: whether this scene opens the welcome flow by
     /// itself. `SceneDelegate` decides it, so it knows which scene holds the
     /// launch-time prompts back (via `Onboarding.claimLaunchFlow`). No
     /// default, so a new call site can't open the flow without owning it.
-    init(router: AppRouter, opensOnboarding: Bool) {
+    ///
+    /// `opensWhatsNew`: whether this scene may open the What's New popup
+    /// (FOX-142), once the launch's permission prompts are out of the way.
+    init(router: AppRouter, opensOnboarding: Bool, opensWhatsNew: Bool = false) {
         self.router = router
+        self.opensWhatsNew = opensWhatsNew
         _showingOnboarding = State(initialValue: opensOnboarding)
     }
 
@@ -67,6 +77,16 @@ struct ContentView: View {
                     }
                 }
         }
+        .sheet(isPresented: $showingWhatsNew) {
+            if let release = WhatsNew.release(for: WhatsNew.currentVersion) {
+                WhatsNewView(release: release, source: "launch") { showingWhatsNew = false }
+                    .environment(\.locale, language.locale())
+                    // Counts from the moment it opens, so a swipe-away
+                    // doesn't bring it back on the next launch.
+                    .onAppear { WhatsNewStore().markShown(WhatsNew.currentVersion) }
+            }
+        }
+        .task { await presentWhatsNewIfDue() }
         // A station from the Control Center control or the "Open station"
         // shortcut (FOX-74), over whichever tab is showing.
         .sheet(item: $router.openedStation) { station in
@@ -83,6 +103,28 @@ struct ContentView: View {
             ProView(source: router.proSource)
                 .environment(\.locale, language.locale())
         }
+    }
+
+    /// Opens What's New a moment after launch, unless something else is on
+    /// screen. While a system permission prompt this launch asks for is
+    /// still unanswered it waits (up to 30 s) and opens once it is answered;
+    /// a launch that gives up isn't counted, so it comes on a later one.
+    private func presentWhatsNewIfDue() async {
+        guard opensWhatsNew else { return }
+        let pushPrompts = OnboardingStore().promptsForPushAtLaunch
+        for attempt in 0..<31 {
+            try? await Task.sleep(nanoseconds: attempt == 0 ? 1_500_000_000 : 1_000_000_000)
+            if Task.isCancelled { return }
+            let notifications = await UNUserNotificationCenter.current().notificationSettings()
+            if WhatsNew.isClearOfPermissionPrompts(
+                locationUndetermined: CLLocationManager.authorizationStatus() == .notDetermined,
+                notificationsUndetermined: notifications.authorizationStatus == .notDetermined,
+                pushPromptsAtLaunch: pushPrompts
+            ) { break }
+            if attempt == 30 { return }
+        }
+        guard !Task.isCancelled, !showingOnboarding, router.openedStation == nil, !router.showingPro else { return }
+        showingWhatsNew = true
     }
 
     /// Liquid Glass: the bar floats over content and shrinks while scrolling.
