@@ -181,7 +181,8 @@ struct DetailsView: View {
                 if !viewModel.isNotReporting || viewModel.hasRecentHistory {
                     DetailsHistoryView(
                         historicalPollutants: viewModel.historicalPollutants,
-                        airIndexType: selectedPollutant
+                        airIndexType: selectedPollutant,
+                        isCached: viewModel.isShowingCachedHistory
                     )
                 }
 

@@ -23,6 +23,10 @@ class DetailsViewModel: ObservableObject {
 
     @Published var historicalPollutants: HistoricalPollutants = []
 
+    /// `historicalPollutants` is the saved copy (`PollutantHistoryCache`),
+    /// because the latest request hasn't answered or failed.
+    @Published private(set) var isShowingCachedHistory = false
+
     /// Whether the station has an alert on.
     @Published private(set) var hasAlerts: Bool
 
@@ -108,12 +112,17 @@ class DetailsViewModel: ObservableObject {
             self.findForecast(areaLocal: saved.areaLocal, countyLocal: saved.countyLocal, title: saved.displayArea)
             self.findWeather(lat: saved.lat, lon: saved.lon, county: saved.county, countyLocal: saved.countyLocal)
         }
+        // Likewise the saved history, so the charts work offline.
+        if self.historicalPollutants.isEmpty, let saved = PollutantHistoryCache.shared.readings(stationId: self.stationId) {
+            self.historicalPollutants = saved
+            self.isShowingCachedHistory = true
+        }
         self.generation += 1
         let generation = self.generation
         self.answers = []
         self.loadFailed = false
 
-        APIManager.getHistoricalPollutants(stationId: self.stationId) { result in
+        APIManager.getHistoricalPollutants(stationId: self.stationId, limit: PollutantHistorySeries.fetchLimit) { result in
             // An answer from an older pair while the latest is still on the
             // wire says nothing about whether the record will load.
             let isLatest = generation == self.generation
@@ -128,7 +137,10 @@ class DetailsViewModel: ObservableObject {
                 if self.station != nil || isLatest {
                     self.stationLoadFailed = self.station == nil
                 }
-                self.historicalPollutants = result["data"] as? HistoricalPollutants ?? []
+                let history = result["data"] as? HistoricalPollutants ?? []
+                self.historicalPollutants = history
+                self.isShowingCachedHistory = false
+                PollutantHistoryCache.shared.save(history, stationId: self.stationId)
                 if let station = self.station {
                     self.findCam(name: station.nameLocal, lat: station.lat, lon: station.lon)
                     self.findForecast(areaLocal: station.areaLocal, countyLocal: station.countyLocal, title: station.displayArea)
