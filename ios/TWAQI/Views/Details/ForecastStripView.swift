@@ -201,7 +201,7 @@ struct ForecastStripView: View {
             let day = AreaForecastView.dayTitle(WeatherDates.day(cell.start), now: now)
             part = String(format: "Strip.a11y_day_part %@ %@".localized, day, part)
         }
-        let condition = WeatherCode.text(code: cell.wx, cwaText: cell.text, chinese: Locale.isChinese)
+        let condition = WeatherCode.text(code: cell.wx, cwaText: cell.text, chinese: Locale.usesLocalNames)
         return String(
             format: "Strip.a11y_weather %@ %@ %@ %@".localized,
             part,

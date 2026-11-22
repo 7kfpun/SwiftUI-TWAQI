@@ -800,7 +800,7 @@ struct ReadingWidgetView: View {
 
     /// 「Weather: 24° · 多雲 · …」, with the chance of rain when there is one.
     private func weatherLabel(_ weather: WidgetWeather) -> Text {
-        let spoken = weather.briefSpokenText(chinese: Locale.isChinese)
+        let spoken = weather.briefSpokenText(chinese: Locale.usesLocalNames)
         guard let chance = weather.chanceOfRain else { return Text("Widget.weather_label \(spoken)") }
         return Text("Widget.weather_chance_label \(spoken) \(WidgetWeather.percentText(chance))")
     }

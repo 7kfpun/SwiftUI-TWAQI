@@ -535,7 +535,7 @@ enum WindLayer {
     }
 
     /// What VoiceOver reads for an arrow: station, where from, how fast.
-    static func accessibilityText(_ reading: WindReading, chinese: Bool = Locale.isChinese, bundle: Bundle = .appLanguage) -> String {
+    static func accessibilityText(_ reading: WindReading, chinese: Bool = Locale.usesLocalNames, bundle: Bundle = .appLanguage) -> String {
         let point = NSLocalizedString("WindLayer.from.\(compassNames[compassIndex(reading.direction)])", bundle: bundle, comment: "")
         let speed = String(format: "%.1f", reading.speed)
         let description = String(format: NSLocalizedString("WindLayer.arrow %@ %@", bundle: bundle, comment: ""), point, speed)
