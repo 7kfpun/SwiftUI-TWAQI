@@ -46,7 +46,7 @@ jobs:
       workers: ${{ steps.list.outputs.workers }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -119,7 +119,7 @@ jobs:
         working-directory: workers/${{ matrix.worker }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -184,7 +184,7 @@ jobs:
         working-directory: workers/${{ matrix.worker }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 

@@ -32,7 +32,7 @@ jobs:
         working-directory: services/twaqi-api
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0
