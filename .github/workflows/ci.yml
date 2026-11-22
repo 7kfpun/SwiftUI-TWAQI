@@ -36,7 +36,7 @@ jobs:
       level: ${{ steps.scope.outputs.level }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -180,7 +180,7 @@ jobs:
           exit 1
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -371,7 +371,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 0

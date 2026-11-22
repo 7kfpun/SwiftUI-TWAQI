@@ -579,18 +579,18 @@ extension StationWeatherTests {
     func testCardHeightGrowsWithTheChipsRowOnly() throws {
         let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.05, lon: 121.52, in: try chipsFile(), now: now))
         XCTAssertFalse(weather.chips.isEmpty)
-        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: true), ClosestStationView.preferredSize.height)
+        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: true, hasAdvice: false), ClosestStationView.preferredSize.height)
         XCTAssertEqual(
-            ClosestStationView.height(weather: weather, hasHint: false),
+            ClosestStationView.height(weather: weather, hasHint: false, hasAdvice: false),
             ClosestStationView.heightWithWeather + ClosestStationView.chipsRowHeight
         )
         let bare = MapCenterWeather(
             temperature: 20, wx: nil, isNight: false, rainChance: nil, humidity: nil, windSpeed: nil, uv: nil,
             stationName: "x", distanceKm: 1, observedAt: now
         )
-        XCTAssertEqual(ClosestStationView.height(weather: bare, hasHint: false), ClosestStationView.heightWithWeather)
+        XCTAssertEqual(ClosestStationView.height(weather: bare, hasHint: false, hasAdvice: false), ClosestStationView.heightWithWeather)
         XCTAssertEqual(
-            ClosestStationView.height(weather: bare, hasHint: true),
+            ClosestStationView.height(weather: bare, hasHint: true, hasAdvice: false),
             ClosestStationView.heightWithWeather + ClosestStationView.hintRowHeight
         )
     }

@@ -84,6 +84,11 @@ class DetailsViewModel: ObservableObject {
     /// heading.
     @Published var weatherCountyTitle: String?
 
+    /// The forecast and weather lookups have each finished (found something
+    /// or not), so the forecast strip can say "nothing" instead of "loading".
+    @Published private(set) var forecastAnswered = false
+    @Published private(set) var weatherAnswered = false
+
     /// `pollutant` seeds a reading the caller already holds, so the heart
     /// works before the first load answers.
     init(stationId: Int, historicalPollutants: HistoricalPollutants = [], pollutant: Pollutant? = nil) {
@@ -298,9 +303,20 @@ class DetailsViewModel: ObservableObject {
 
     /// Called by both station requests, like `findCam`; the first match wins.
     private func findForecast(areaLocal: String?, countyLocal: String?, title: String?) {
-        guard forecast == nil, areaLocal != nil || countyLocal != nil else { return }
+        guard forecast == nil else { return }
+        // No area or county name to join on (a micro-sensor): nothing to look
+        // up, so the strip must not wait for an answer that never comes.
+        guard areaLocal != nil || countyLocal != nil else {
+            forecastAnswered = true
+            return
+        }
+        // A lookup is starting: the strip waits for it, so a reading saved
+        // without names followed by a station record with them does not flash
+        // the empty message first.
+        forecastAnswered = false
 
         AqiForecastStore.shared.forecasts { forecasts in
+            self.forecastAnswered = true
             guard self.forecast == nil else { return }
             self.forecast = AqiForecastMatcher.forecast(
                 areaLocal: areaLocal,
@@ -318,6 +334,7 @@ class DetailsViewModel: ObservableObject {
         guard weather == nil else { return }
 
         StationWeatherStore.shared.weather { file in
+            self.weatherAnswered = true
             guard self.weather == nil, let file = file else { return }
             guard let weather = StationWeatherMatcher.weather(lat: lat, lon: lon, countyLocal: countyLocal, in: file) else { return }
             self.weatherCountyTitle = Locale.isChinese ? countyLocal : county
