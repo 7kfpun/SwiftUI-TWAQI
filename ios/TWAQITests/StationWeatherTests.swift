@@ -463,3 +463,146 @@ extension StationWeatherTests {
         XCTAssertFalse(ClosestStationView.stationText(name: "臺北", distanceKm: 4.24, chinese: false).contains("臺北"))
     }
 }
+
+// MARK: - Weather chips (TWAQ-14)
+
+extension StationWeatherTests {
+    /// Taipei (no UV sensor) with a UV-measuring station 12 km away.
+    private var chipsJson: String {
+        """
+        {
+          "version": 1, "updatedAt": "2026-11-05T04:40:00.000Z",
+          "forecast": { "counties": { "臺北市": [
+            { "start": "2026-11-05T12:00:00+08:00", "end": "2026-11-05T18:00:00+08:00", "wx": 4, "text": "多雲", "pop": 10 }
+          ] } },
+          "observations": { "stations": [
+            { "id": "466920", "name": "臺北", "county": "臺北市", "lat": 25.03766, "lon": 121.51485, "time": "2026-11-05T12:00:00+08:00", "temp": 30, "humidity": 70, "wind": 1 },
+            { "id": "466900", "name": "淡水", "county": "新北市", "lat": 25.16498, "lon": 121.44888, "time": "2026-11-05T12:00:00+08:00", "temp": 28, "uv": 7.4 }
+          ] }
+        }
+        """
+    }
+
+    private func chipsFile(_ text: String? = nil) throws -> WeatherFile {
+        try JSONDecoder().decode(WeatherFile.self, from: Data((text ?? chipsJson).utf8))
+    }
+
+    func testFeelsLikeUsesTemperatureHumidityAndWind() throws {
+        // 30 °C, 70 %, 1 m/s: vapour 29.6 hPa → 30 + 9.77 − 0.7 − 4 ≈ 35.1
+        let hot = try XCTUnwrap(WeatherChips.feelsLike(temperature: 30, humidity: 70, windSpeed: 1))
+        XCTAssertEqual(hot, 35.07, accuracy: 0.1)
+        // 10 °C, 50 %, 5 m/s: wind makes it feel colder than the air.
+        let cold = try XCTUnwrap(WeatherChips.feelsLike(temperature: 10, humidity: 50, windSpeed: 5))
+        XCTAssertEqual(cold, 4.5, accuracy: 0.1)
+    }
+
+    func testFeelsLikeNeedsAllThreeReadings() {
+        XCTAssertNil(WeatherChips.feelsLike(temperature: nil, humidity: 70, windSpeed: 1))
+        XCTAssertNil(WeatherChips.feelsLike(temperature: 30, humidity: nil, windSpeed: 1))
+        XCTAssertNil(WeatherChips.feelsLike(temperature: 30, humidity: 70, windSpeed: nil))
+        XCTAssertNil(WeatherChips.feelsLike(temperature: 30, humidity: 140, windSpeed: 1), "an impossible humidity is no reading")
+    }
+
+    func testChipsAreRainFeelsLikeAndUV() {
+        let chips = WeatherChips.make(temperature: 30, humidity: 70, windSpeed: 1, rainChance: 10, uv: 7.4)
+        XCTAssertEqual(chips.map(\.kind), [.rain, .feelsLike, .uv])
+        XCTAssertEqual(chips[0].text, "☂ 10%")
+        XCTAssertTrue(chips[1].text.hasSuffix("35°"), chips[1].text)
+        XCTAssertTrue(chips[2].text.hasSuffix("7"), chips[2].text)
+        // VoiceOver gets units and the UV band, not the symbols.
+        XCTAssertFalse(chips[0].spoken.contains("☂"))
+        XCTAssertTrue(chips[0].spoken.contains("10%"))
+        XCTAssertTrue(chips[1].spoken.contains("35°"))
+        XCTAssertTrue(chips[2].spoken.contains("7"))
+        XCTAssertNotEqual(chips[2].spoken, chips[2].text)
+    }
+
+    func testMissingValuesLeaveTheirChipOutInsteadOfADash() {
+        let none = WeatherChips.make(temperature: nil, humidity: nil, windSpeed: nil, rainChance: nil, uv: nil)
+        XCTAssertTrue(none.isEmpty)
+
+        let rainOnly = WeatherChips.make(temperature: 24, humidity: nil, windSpeed: 2, rainChance: 0, uv: nil)
+        XCTAssertEqual(rainOnly.map(\.kind), [.rain])
+        XCTAssertEqual(rainOnly[0].text, "☂ 0%")
+
+        let all = WeatherChips.make(temperature: 24, humidity: 60, windSpeed: 2, rainChance: 30, uv: 3)
+        XCTAssertFalse(all.contains { $0.text.contains("—") })
+    }
+
+    func testUVChipIsLeftOutAtNightAndForNonsense() {
+        func kinds(_ uv: Double?) -> [WeatherChip.Kind] {
+            WeatherChips.make(temperature: nil, humidity: nil, windSpeed: nil, rainChance: nil, uv: uv).map(\.kind)
+        }
+        XCTAssertEqual(kinds(0), [], "0 after dark says nothing")
+        XCTAssertEqual(kinds(0.4), [])
+        XCTAssertEqual(kinds(-99), [], "CWA's missing marker")
+        XCTAssertEqual(kinds(1), [.uv])
+        XCTAssertEqual(kinds(12.6), [.uv])
+    }
+
+    func testUVBands() {
+        XCTAssertEqual(WeatherChips.uvBand(2), "low")
+        XCTAssertEqual(WeatherChips.uvBand(3), "moderate")
+        XCTAssertEqual(WeatherChips.uvBand(5), "moderate")
+        XCTAssertEqual(WeatherChips.uvBand(6), "high")
+        XCTAssertEqual(WeatherChips.uvBand(8), "very_high")
+        XCTAssertEqual(WeatherChips.uvBand(11), "extreme")
+    }
+
+    func testMapCenterTakesUVFromTheNearestStationThatMeasuresIt() throws {
+        let file = try chipsFile()
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.05, lon: 121.52, in: file, now: now))
+        // Weather comes from 臺北, the UV from 淡水: 臺北 has no sensor.
+        XCTAssertEqual(weather.stationName, "臺北")
+        XCTAssertEqual(weather.uv, 7.4)
+        XCTAssertEqual(weather.humidity, 70)
+        XCTAssertEqual(weather.chips.map(\.kind), [.rain, .feelsLike, .uv])
+    }
+
+    func testUVOutOfRangeOrStaleIsMissing() throws {
+        let file = try chipsFile()
+        let stations = try XCTUnwrap(file.observations?.stations)
+        // Hualien is far from 淡水.
+        XCTAssertNil(StationWeatherMatcher.nearestUV(lat: 23.97, lon: 121.61, in: stations, now: now))
+        let evening = ISO8601DateFormatter().date(from: "2026-11-05T11:00:00Z")!
+        XCTAssertNil(StationWeatherMatcher.nearestUV(lat: 25.05, lon: 121.52, in: stations, now: evening))
+        XCTAssertNil(StationWeatherMatcher.nearestUV(lat: 0, lon: 0, in: stations, now: now))
+    }
+
+    func testFileWithoutUVStillDecodesAndHidesTheChip() throws {
+        // `file()` is the pre-TWAQ-14 shape: no `uv` anywhere.
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.06, lon: 121.52, in: try file(), now: now))
+        XCTAssertNil(weather.uv)
+        XCTAssertFalse(weather.chips.contains { $0.kind == .uv })
+    }
+
+    func testCardHeightGrowsWithTheChipsRowOnly() throws {
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.05, lon: 121.52, in: try chipsFile(), now: now))
+        XCTAssertFalse(weather.chips.isEmpty)
+        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: true, hasAdvice: false), ClosestStationView.preferredSize.height)
+        XCTAssertEqual(
+            ClosestStationView.height(weather: weather, hasHint: false, hasAdvice: false),
+            ClosestStationView.heightWithWeather + ClosestStationView.chipsRowHeight
+        )
+        let bare = MapCenterWeather(
+            temperature: 20, wx: nil, isNight: false, rainChance: nil, humidity: nil, windSpeed: nil, uv: nil,
+            stationName: "x", distanceKm: 1, observedAt: now
+        )
+        XCTAssertEqual(ClosestStationView.height(weather: bare, hasHint: false, hasAdvice: false), ClosestStationView.heightWithWeather)
+        XCTAssertEqual(
+            ClosestStationView.height(weather: bare, hasHint: true, hasAdvice: false),
+            ClosestStationView.heightWithWeather + ClosestStationView.hintRowHeight
+        )
+    }
+
+    func testChipsRowHidesWhenTheCardLosesItsWeather() throws {
+        let weather = try XCTUnwrap(MapCenterWeather.make(lat: 25.05, lon: 121.52, in: try chipsFile(), now: now))
+        let card = ClosestStationView(frame: CGRect(x: 0, y: 0, width: 232, height: 96))
+        XCTAssertTrue(card.chipsAreHidden)
+        card.weather = weather
+        XCTAssertFalse(card.chipsAreHidden)
+        // Timeline scrubbed, or panned offshore: no weather, so no stray chips.
+        card.weather = nil
+        XCTAssertTrue(card.chipsAreHidden)
+    }
+}

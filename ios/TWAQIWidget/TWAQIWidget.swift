@@ -581,6 +581,7 @@ struct ReadingWidgetView: View {
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Color(status.getForegroundColor()))
                 smallWeather(foreground: Color(status.getForegroundColor()), onStatusFill: true)
+                smallChips(foreground: Color(status.getForegroundColor()))
                 Spacer(minLength: 0)
                 Text(reading.displayName)
                     .font(.caption2)
@@ -768,11 +769,18 @@ struct ReadingWidgetView: View {
 
             smallWeather(foreground: .secondary, onStatusFill: false)
                 .padding(.horizontal, 8)
-            // The weather line takes the room of one favourite.
-            favouriteRows(limit: entry.weather == nil ? 2 : 1, showsStatus: false)
+            // The weather line takes the room of one favourite. No chips
+            // line here (TWAQ-14): the favourites list never disappears.
+            favouriteRows(limit: favouriteLimit, showsStatus: false)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// How many favourites the small widget keeps under the station: two
+    /// alone, one with the weather line.
+    private var favouriteLimit: Int {
+        entry.weather == nil ? 2 : 1
     }
 
     /// Small: icon, temperature and chance of rain on one line. Nothing when
@@ -795,6 +803,23 @@ struct ReadingWidgetView: View {
             .foregroundStyle(foreground)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(weatherLabel(weather))
+        }
+    }
+
+    /// Small: feels-like and UV under the brief line (TWAQ-14). The chance of
+    /// rain is already in that line, so it is not repeated. Nothing when both
+    /// readings are missing.
+    @ViewBuilder
+    private func smallChips<S: ShapeStyle>(foreground: S) -> some View {
+        let chips = (entry.weather?.chips() ?? []).filter { $0.kind != .rain }
+        if !chips.isEmpty {
+            Text(verbatim: chips.map(\.text).joined(separator: " · "))
+                .font(.caption2)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .foregroundStyle(foreground)
+                .accessibilityLabel(Text(verbatim: chips.map(\.spoken).joined(separator: ", ")))
         }
     }
 
@@ -985,12 +1010,37 @@ struct ReadingWidgetView: View {
                 Text(verbatim: weather.compactDetail)
                     .monospacedDigit()
                     .lineLimit(1)
+                // Chance of rain, feels-like and UV (TWAQ-14); a missing
+                // reading leaves its chip out.
+                let chips = weather.chips()
+                if !chips.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(chips, id: \.text) { chip in
+                            Text(verbatim: chip.text)
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 1)
+                                .background(Color.primary.opacity(0.08), in: Capsule())
+                        }
+                    }
+                    .padding(.top, 2)
+                }
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Widget.weather_label \(entry.weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
+        .accessibilityLabel(Text("Widget.weather_label \(compactSpokenText)"))
         .font(.caption2)
         .foregroundStyle(.secondary)
+    }
+
+    /// Everything the medium widget shows of the weather, for VoiceOver:
+    /// the readings, then the chips with their units.
+    private var compactSpokenText: String {
+        guard let weather = entry.weather else { return "—" }
+        return ([weather.spokenText(chinese: Locale.isChinese)] + weather.chips().map(\.spoken))
+            .joined(separator: ", ")
     }
 
     // MARK: - Buttons (FOX-76)

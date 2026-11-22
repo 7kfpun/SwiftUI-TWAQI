@@ -214,3 +214,40 @@ final class WidgetWeatherTests: XCTestCase {
         XCTAssertNil(cache.load(now: Date().addingTimeInterval(8 * 24 * 60 * 60)))
     }
 }
+
+// MARK: - Weather chips (TWAQ-14)
+
+extension WidgetWeatherTests {
+    func testWidgetChipsFollowTheReadings() {
+        let weather = WidgetWeather(
+            temperature: 30, humidity: 70, windSpeed: 1, code: 4, chanceOfRain: 20, uv: 6
+        )
+        XCTAssertEqual(weather.chips().map(\.kind), [.rain, .feelsLike, .uv])
+    }
+
+    func testWidgetChipsLeaveMissingReadingsOut() {
+        XCTAssertTrue(WidgetWeather(temperature: 24).chips().isEmpty)
+        XCTAssertEqual(WidgetWeather(temperature: 24, chanceOfRain: 0).chips().map(\.kind), [.rain])
+        XCTAssertEqual(WidgetWeather(uv: 4).chips().map(\.kind), [.uv])
+    }
+
+    func testUVAloneIsNotEnoughToShowWeather() {
+        XCTAssertTrue(WidgetWeather(uv: 4).isEmpty)
+        XCTAssertTrue(WidgetWeather().isEmpty)
+    }
+
+    func testPlaceholderShowsEveryChip() {
+        XCTAssertEqual(WidgetWeather.placeholder.chips().map(\.kind), [.rain, .feelsLike, .uv])
+    }
+
+    func testMakeTakesUVFromAStationThatMeasuresIt() throws {
+        let withUV = json.replacingOccurrences(
+            of: "\"rain\": 0.5, \"wind\": 3.2 }",
+            with: "\"rain\": 0.5, \"wind\": 3.2, \"uv\": 5.2 }"
+        )
+        XCTAssertNotEqual(withUV, json)
+        let file = try JSONDecoder().decode(WeatherFile.self, from: Data(withUV.utf8))
+        XCTAssertEqual(make(in: file)?.uv, 5.2)
+        XCTAssertNil(make(in: try self.file())?.uv)
+    }
+}

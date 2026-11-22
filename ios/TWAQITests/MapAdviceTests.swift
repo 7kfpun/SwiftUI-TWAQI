@@ -53,15 +53,19 @@ final class MapAdviceTests: XCTestCase {
     }
 
     func testCardHeightAddsOneRowPerLine() {
+        let bareWeather = MapCenterWeather(
+            temperature: 20, wx: nil, isNight: false, rainChance: nil, humidity: nil, windSpeed: nil, uv: nil,
+            stationName: "x", distanceKm: 1, observedAt: Date()
+        )
         let base = ClosestStationView.preferredSize.height
-        XCTAssertEqual(ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: false), base)
-        XCTAssertEqual(ClosestStationView.height(hasWeather: true, hasHint: false, hasAdvice: false), ClosestStationView.heightWithWeather)
-        XCTAssertEqual(ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: true),
+        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: false, hasAdvice: false), base)
+        XCTAssertEqual(ClosestStationView.height(weather: bareWeather, hasHint: false, hasAdvice: false), ClosestStationView.heightWithWeather)
+        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: false, hasAdvice: true),
                        ClosestStationView.topHeightWithWeather + ClosestStationView.adviceRowHeight)
-        XCTAssertEqual(ClosestStationView.height(hasWeather: true, hasHint: true, hasAdvice: true),
+        XCTAssertEqual(ClosestStationView.height(weather: bareWeather, hasHint: true, hasAdvice: true),
                        ClosestStationView.heightWithWeather + ClosestStationView.adviceRowHeight + ClosestStationView.hintRowHeight)
         // A hint only shows under the weather row.
-        XCTAssertEqual(ClosestStationView.height(hasWeather: false, hasHint: true, hasAdvice: false), base)
+        XCTAssertEqual(ClosestStationView.height(weather: nil, hasHint: true, hasAdvice: false), base)
     }
 
     func testAdviceIsOnByDefaultAndCanBeSwitchedOff() {
@@ -95,7 +99,7 @@ final class MapAdviceTests: XCTestCase {
         card.translatesAutoresizingMaskIntoConstraints = true
         card.frame = CGRect(origin: .zero, size: CGSize(
             width: ClosestStationView.preferredSize.width,
-            height: ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: true)
+            height: ClosestStationView.height(weather: nil, hasHint: false, hasAdvice: true)
         ))
         card.traitOverrides.preferredContentSizeCategory = .accessibilityExtraExtraExtraLarge
         card.advice = "Avoid outdoor activities and keep doors and windows closed"
@@ -151,7 +155,7 @@ final class MapAdviceTests: XCTestCase {
                 card.image = UIImage(named: sample.1.getImage())
                 card.advice = sample.1.adviceKey?.localized
                 card.isEnabled = true
-                let height = ClosestStationView.height(hasWeather: false, hasHint: false, hasAdvice: true)
+                let height = ClosestStationView.height(weather: nil, hasHint: false, hasAdvice: true)
                 card.frame = CGRect(x: 10 + CGFloat(index % 3) * 252, y: 10 + CGFloat(index / 3) * 136,
                                     width: ClosestStationView.preferredSize.width, height: height)
                 board.addSubview(card)

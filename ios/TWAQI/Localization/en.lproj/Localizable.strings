@@ -484,6 +484,15 @@
 "Weather.observed %@" = "observed %@";
 "Weather.map_station %@ %@" = "%1$@ · %2$@";
 "Weather.map_station_nearby %@" = "%@ away";
+"Weather.chip_feels_like %@" = "Feels %@";
+"Weather.chip_uv %@" = "UV %@";
+"Weather.feels_like %@" = "Feels like %@";
+"Weather.uv_index %@ %@" = "UV index %1$@, %2$@";
+"Weather.uv.low" = "low";
+"Weather.uv.moderate" = "moderate";
+"Weather.uv.high" = "high";
+"Weather.uv.very_high" = "very high";
+"Weather.uv.extreme" = "extreme";
 /* CWA forecast weather codes, one summary per code (預報產品天氣描述代碼表) */
 "Weather.wx.1" = "Clear";
 "Weather.wx.2" = "Mostly clear";
