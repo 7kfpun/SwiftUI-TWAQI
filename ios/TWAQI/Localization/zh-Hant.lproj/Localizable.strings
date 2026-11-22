@@ -689,6 +689,12 @@
 "WhatsNew.3_1_7.mapweather_body" = "空氣品質卡片下方，現在會顯示地圖中心的當地天氣。";
 "WhatsNew.3_1_7.quickactions_title" = "主畫面圖示快速動作";
 "WhatsNew.3_1_7.quickactions_body" = "長按 App 圖示，即可直達最近的測站或你收藏的測站。";
+"WhatsNew.3_1_8.details_title" = "測站資訊一目瞭然";
+"WhatsNew.3_1_8.details_body" = "點一下地圖卡片即可開啟完整資訊，AQI 下方有建議、未來 24 小時預報，以及降雨、紫外線與體感溫度的天氣標籤。";
+"WhatsNew.3_1_8.layers_title" = "風向與熱區圖層";
+"WhatsNew.3_1_8.layers_body" = "可開啟風向箭頭，或測站之間的空氣品質推估熱區圖，並在「說明」中選擇色盲友善配色。";
+"WhatsNew.3_1_8.japanese_title" = "新增日文介面";
+"WhatsNew.3_1_8.japanese_body" = "台灣空氣現在支援日文。可在「說明」中選擇，或跟隨 iPhone 的語言設定。";
 "MapCard.accessibility_label" = "此處空氣品質，開啟詳細資料";
 
 /* Wind arrows layer (TWAQ-15) */

@@ -651,6 +651,12 @@
 "WhatsNew.3_1_7.mapweather_body" = "地図の中心にある地域の天気が、大気質カードの下に表示されるようになりました。";
 "WhatsNew.3_1_7.quickactions_title" = "アイコンのクイックアクション";
 "WhatsNew.3_1_7.quickactions_body" = "アプリのアイコンを長押しすると、最寄りの観測所やお気に入りの観測所にすぐ移動できます。";
+"WhatsNew.3_1_8.details_title" = "観測所の情報をひと目で";
+"WhatsNew.3_1_8.details_body" = "地図のカードをタップすると詳細が開きます。AQI の下にはアドバイス、今後 24 時間の予報、降水・紫外線・体感温度のチップが表示されます。";
+"WhatsNew.3_1_8.layers_title" = "風とヒートマップのレイヤー";
+"WhatsNew.3_1_8.layers_body" = "風向きの矢印や、観測所の間を推定した大気質ヒートマップを表示できます。ヘルプで色覚に配慮した配色も選べます。";
+"WhatsNew.3_1_8.japanese_title" = "日本語に対応";
+"WhatsNew.3_1_8.japanese_body" = "台湾大気質が日本語に対応しました。ヘルプで選ぶか、iPhone の言語に合わせて表示されます。";
 
 // MARK: - Weather forecast strip, wind and heatmap layers, palette (TWAQ-12/13/14/15/18/22)
 "Help.aqi_palette" = "AQIの色";

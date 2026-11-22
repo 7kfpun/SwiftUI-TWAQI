@@ -30,6 +30,14 @@ enum WhatsNew {
     /// and its strings under `WhatsNew.<version>.*`. A version with no entry
     /// opens no popup (it is still counted as seen).
     static let releases: [Release] = [
+        Release(version: "3.1.8", items: [
+            Item(icon: "rectangle.and.text.magnifyingglass", titleKey: "WhatsNew.3_1_8.details_title",
+                 bodyKey: "WhatsNew.3_1_8.details_body"),
+            Item(icon: "wind", titleKey: "WhatsNew.3_1_8.layers_title",
+                 bodyKey: "WhatsNew.3_1_8.layers_body"),
+            Item(icon: "globe", titleKey: "WhatsNew.3_1_8.japanese_title",
+                 bodyKey: "WhatsNew.3_1_8.japanese_body"),
+        ]),
         Release(version: "3.1.7", items: [
             Item(icon: "location.fill", titleKey: "WhatsNew.3_1_7.locate_title",
                  bodyKey: "WhatsNew.3_1_7.locate_body"),
