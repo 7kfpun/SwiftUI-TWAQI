@@ -1027,7 +1027,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     private func updateClosestStationHeight() {
         closestStationHeight?.update(offset: ClosestStationView.height(
-            hasWeather: closestStationView.weather != nil,
+            weather: closestStationView.weather,
             hasHint: closestStationView.windHint != nil,
             hasAdvice: closestStationView.advice != nil
         ))

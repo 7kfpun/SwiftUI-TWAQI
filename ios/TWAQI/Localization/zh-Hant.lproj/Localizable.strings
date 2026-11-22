@@ -488,6 +488,15 @@
 "Weather.observed %@" = "觀測於%@";
 "Weather.map_station %@ %@" = "%1$@ · %2$@";
 "Weather.map_station_nearby %@" = "距離 %@";
+"Weather.chip_feels_like %@" = "體感 %@";
+"Weather.chip_uv %@" = "紫外線 %@";
+"Weather.feels_like %@" = "體感溫度 %@";
+"Weather.uv_index %@ %@" = "紫外線指數 %1$@，%2$@";
+"Weather.uv.low" = "低量級";
+"Weather.uv.moderate" = "中量級";
+"Weather.uv.high" = "高量級";
+"Weather.uv.very_high" = "過量級";
+"Weather.uv.extreme" = "危險級";
 /* 中央氣象署預報天氣描述代碼，每個代碼一則代表描述 */
 "Weather.wx.1" = "晴天";
 "Weather.wx.2" = "晴時多雲";

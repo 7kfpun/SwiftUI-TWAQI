@@ -698,3 +698,14 @@
 "Map.Heatmap.off" = "オフ";
 "Map.Heatmap.estimated" = "観測所の間は推定値";
 "Map.Heatmap.description" = "ヒートマップ表示中。色は観測所の間を推定したもので、正確な測定値ではありません。";
+
+// MARK: - Weather chips (TWAQ-14)
+"Weather.chip_feels_like %@" = "体感 %@";
+"Weather.chip_uv %@" = "UV %@";
+"Weather.feels_like %@" = "体感温度 %@";
+"Weather.uv_index %@ %@" = "UV指数 %1$@、%2$@";
+"Weather.uv.low" = "弱い";
+"Weather.uv.moderate" = "中程度";
+"Weather.uv.high" = "強い";
+"Weather.uv.very_high" = "非常に強い";
+"Weather.uv.extreme" = "極めて強い";
