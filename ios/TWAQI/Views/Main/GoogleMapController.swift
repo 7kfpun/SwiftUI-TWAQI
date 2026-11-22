@@ -55,9 +55,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     var timelineView: MapTimelineView!
     var windModeButton: WindModeButton!
     var windLayerButton: WindLayerButton!
-    var heatmapButton: HeatmapLayerButton!
-    private let heatmapNote = HeatmapNoteLabel()
-    private lazy var heatmapOverlay = HeatmapOverlay(mapView: mapView)
 
     /// The timeline bar sits above the ad banner, which SwiftUI lays out
     /// outside this map, with the index bar on top of it. Kept so both can drop
@@ -296,48 +293,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             refreshWindLayer()
             scheduleCenterWeather()
         }
-    }
-
-    /// The heatmap layer (TWAQ-22): off until turned on, then remembered.
-    var heatmapOn = defaults.bool(forKey: HeatmapLayer.defaultsKey) {
-        didSet {
-            guard heatmapOn != oldValue else { return }
-            defaults.set(heatmapOn, forKey: HeatmapLayer.defaultsKey)
-            heatmapButton?.isOn = heatmapOn
-            TrackingManager.logEvent(.setHeatmapLayer, parameters: ["label": heatmapOn ? "on" : "off"])
-            refreshHeatmap()
-        }
-    }
-
-    @objc func toggleHeatmap() {
-        heatmapOn.toggle()
-    }
-
-    /// Stations with a reading at the timeline's hour feed the estimate; the
-    /// image is rebuilt off the main thread only when they or the palette
-    /// change (`HeatmapOverlay` skips identical input).
-    func refreshHeatmap() {
-        heatmapOverlay.isEnabled = heatmapOn
-        heatmapNote.isHidden = !heatmapOn
-        guard heatmapOn else { return }
-        let type = airIndexTypeSelected
-        let palette = AQIPalette.current
-        var samples: [HeatmapSample] = []
-        for pollutants in countryPollutants.values {
-            let hour = timelineHour(anchor: Self.anchor(of: pollutants))
-            for live in pollutants {
-                let (pollutant, hasData) = displayedPollutant(live, hour: hour)
-                guard hasData else { continue }
-                samples.append(HeatmapSample(latitude: pollutant.lat, longitude: pollutant.lon, value: pollutant.getValue(airIndexType: type)))
-            }
-        }
-        var hasher = Hasher()
-        hasher.combine(type.rawValue)
-        hasher.combine(palette.rawValue)
-        heatmapOverlay.update(samples: samples, paletteKey: hasher.finalize()) { value in
-            AirStatuses.checkAirStatus(airIndexType: type, value: value).getColor(palette: palette)
-        }
-        heatmapOverlay.zoomChanged(mapView.camera.zoom)
     }
 
     /// Fresh CWA wind readings, strongest first; empty until the layer is on
@@ -746,26 +701,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(60)
         }
 
-        // MARK: Heatmap layer button
-        heatmapButton = HeatmapLayerButton()
-        heatmapButton.isOn = heatmapOn
-        heatmapButton.button.addTarget(self, action: #selector(toggleHeatmap), for: .touchUpInside)
-        view.addSubview(heatmapButton)
-        heatmapButton.snp.makeConstraints { (make) -> Void in
-            make.bottom.equalTo(windModeButton)
-            make.left.equalTo(windLayerButton.snp.right).offset(12)
-            make.width.equalTo(60)
-            make.height.equalTo(60)
-        }
-        view.addSubview(heatmapNote)
-        // Trails the colour legend, not the button row: the row stays one
-        // button tall so it clears the station card in landscape.
-        heatmapNote.snp.makeConstraints { (make) -> Void in
-            make.left.equalTo(airStatusesView.snp.right).offset(8)
-            make.centerY.equalTo(airStatusesView)
-            make.right.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.right).offset(-15)
-        }
-
         self.view = view
     }
 
@@ -834,7 +769,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 )
             }
         }
-        refreshHeatmap()
     }
 
     /// The publish hour the timeline is on for a country with this anchor, or
@@ -1275,11 +1209,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         mapView.animate(toLocation: coordinate)
     }
 
-    /// Fades the heatmap with the zoom while pinching; one opacity write.
-    func mapView(_ mapView: GMSMapView, didChange position: GMSCameraPosition) {
-        heatmapOverlay.zoomChanged(position.zoom)
-    }
-
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         let latitude = position.target.latitude as Double
         let longitude = position.target.longitude as Double
@@ -1294,7 +1223,6 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         checkClosestStation(latitude: latitude, longitude: longitude)
         scheduleCenterWeather()
         refreshWindLayer()
-        heatmapOverlay.zoomChanged(position.zoom)
 
         // Panned back in time and on to new stations: fetch theirs too.
         if timelineHoursAgo > 0 {

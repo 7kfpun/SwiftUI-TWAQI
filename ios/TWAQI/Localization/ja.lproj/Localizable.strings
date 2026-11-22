@@ -653,12 +653,12 @@
 "WhatsNew.3_1_7.quickactions_body" = "アプリのアイコンを長押しすると、最寄りの観測所やお気に入りの観測所にすぐ移動できます。";
 "WhatsNew.3_1_8.details_title" = "観測所の情報をひと目で";
 "WhatsNew.3_1_8.details_body" = "地図のカードをタップすると詳細が開きます。AQI の下にはアドバイス、今後 24 時間の予報、降水・紫外線・体感温度のチップが表示されます。";
-"WhatsNew.3_1_8.layers_title" = "風とヒートマップのレイヤー";
-"WhatsNew.3_1_8.layers_body" = "風向きの矢印や、観測所の間を推定した大気質ヒートマップを表示できます。ヘルプで色覚に配慮した配色も選べます。";
+"WhatsNew.3_1_8.layers_title" = "風のレイヤー";
+"WhatsNew.3_1_8.layers_body" = "地図に風向きの矢印を表示できます。ヘルプで色覚に配慮した配色も選べます。";
 "WhatsNew.3_1_8.japanese_title" = "日本語に対応";
 "WhatsNew.3_1_8.japanese_body" = "Taiwan Air が日本語に対応しました。ヘルプで選ぶか、iPhone の言語に合わせて表示されます。";
 
-// MARK: - Weather forecast strip, wind and heatmap layers, palette (TWAQ-12/13/14/15/18/22)
+// MARK: - Weather forecast strip, wind layer, palette (TWAQ-12/13/14/15/18)
 "Help.aqi_palette" = "AQIの色";
 "Help.aqi_palette_standard" = "標準";
 "Help.aqi_palette_colorblind" = "色覚バリアフリー";
@@ -698,12 +698,6 @@
 "WindLayer.hint_higher %@" = "%@から空気が流れてきていて、そちらはPM2.5が高めです";
 "WindLayer.hint_lower %@" = "%@から空気が流れてきていて、そちらはPM2.5が低めです";
 "WindLayer.arrow %@ %@" = "%1$@の風、風速毎秒%2$@メートル";
-"Map.Heatmap.label" = "ヒートマップ";
-"Map.Heatmap.hint" = "観測所の間を推定した大気質の色の層を表示または非表示にします";
-"Map.Heatmap.on" = "オン";
-"Map.Heatmap.off" = "オフ";
-"Map.Heatmap.estimated" = "観測所の間は推定値";
-"Map.Heatmap.description" = "ヒートマップ表示中。色は観測所の間を推定したもので、正確な測定値ではありません。";
 
 // MARK: - Weather chips (TWAQ-14)
 "Weather.chip_feels_like %@" = "体感 %@";

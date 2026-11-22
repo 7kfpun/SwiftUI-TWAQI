@@ -687,8 +687,8 @@
 "WhatsNew.3_1_7.quickactions_body" = "Press and hold the app icon to jump to your closest station or any of your favourites.";
 "WhatsNew.3_1_8.details_title" = "Station details at a glance";
 "WhatsNew.3_1_8.details_body" = "The map card now opens the full details on a tap, with advice under the AQI, a next-24-hours forecast and weather chips for rain, UV and feels-like.";
-"WhatsNew.3_1_8.layers_title" = "Wind and heatmap layers";
-"WhatsNew.3_1_8.layers_body" = "Turn on wind arrows or an estimated air quality heatmap between stations, and pick a colour-blind friendly palette in Help.";
+"WhatsNew.3_1_8.layers_title" = "Wind layer";
+"WhatsNew.3_1_8.layers_body" = "Turn on wind arrows on the map, and pick a colour-blind friendly palette in Help.";
 "WhatsNew.3_1_8.japanese_title" = "Now in Japanese";
 "WhatsNew.3_1_8.japanese_body" = "Taiwan Air speaks Japanese. Choose it in Help, or it follows your iPhone language.";
 "MapCard.accessibility_label" = "Air quality here, opens details";
@@ -710,10 +710,3 @@
 "WindLayer.hint_lower %@" = "Air is coming from the %@, where PM2.5 is lower";
 "WindLayer.arrow %@ %@" = "Wind from the %1$@ at %2$@ metres per second";
 
-/* Heatmap layer (TWAQ-22) */
-"Map.Heatmap.label" = "Heatmap";
-"Map.Heatmap.hint" = "Shows or hides an estimated air quality colour layer between stations";
-"Map.Heatmap.on" = "On";
-"Map.Heatmap.off" = "Off";
-"Map.Heatmap.estimated" = "Estimated between stations";
-"Map.Heatmap.description" = "Heatmap on. Colours are estimated between stations and do not show exact readings.";
