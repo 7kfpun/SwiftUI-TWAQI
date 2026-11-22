@@ -26,7 +26,7 @@ final class MapMarkerTests: XCTestCase {
 
     func testPillShowsReadingOnItsBand() throws {
         let look = try appearance(station(aqi: 42))
-        XCTAssertEqual(look.shape, .pill(text: "42", foregroundColor: 0xFFFFFF))
+        XCTAssertEqual(look.shape, .pill(text: "42", foregroundColor: 0x000000, level: 0))
         XCTAssertEqual(look.color, 0x009866)
         XCTAssertEqual(look.opacity, 1)
     }
@@ -34,7 +34,7 @@ final class MapMarkerTests: XCTestCase {
     /// No reading that hour: grey "-", faded.
     func testMissingReadingIsGreyDashFaded() throws {
         let look = try appearance(station(aqi: 0), hasData: false)
-        XCTAssertEqual(look.shape, .pill(text: "-", foregroundColor: 0xFFFFFF))
+        XCTAssertEqual(look.shape, .pill(text: "-", foregroundColor: 0xFFFFFF, level: 0))
         XCTAssertEqual(look.color, 0x676767)
         XCTAssertEqual(look.opacity, 0.55)
     }
@@ -202,5 +202,49 @@ final class MapMarkerTests: XCTestCase {
         let restarted = try XCTUnwrap(controller.refreshTimer?.fireDate)
         XCTAssertEqual(restarted.timeIntervalSince1970, due.timeIntervalSince1970, accuracy: 0.01)
         controller.stopRefreshTimer()
+    }
+}
+
+/// TWAQ-11: which station the map's top-left card opens.
+final class MapCardTargetTests: XCTestCase {
+    private func pollutant(id: Int) throws -> Pollutant {
+        let json = """
+        {"station_id": \(id), "lat": 25.0, "lon": 121.5, "aqi": 42, "pm25": 10, "pm10": 20,
+         "no2": 1, "so2": 1, "co": 0.1, "o3": 30, "wind_direction": 90, "wind_speed": 2,
+         "publish_time": "2026-11-21T09:00:00", "name": {"en": "Station \(id)", "zh": "測站\(id)"}}
+        """
+        return try JSONDecoder().decode(Pollutant.self, from: Data(json.utf8))
+    }
+
+    func testOpensTheStationTheCardReadsFrom() throws {
+        let station = try pollutant(id: 7)
+        let id = MapCardTarget.stationId(
+            closest: station, supportedCountryCode: "TW",
+            countryPollutants: ["TW": [try pollutant(id: 3), station]], hasReading: true
+        )
+        XCTAssertEqual(id, 7)
+    }
+
+    func testNothingLoadedOpensNothing() throws {
+        XCTAssertNil(MapCardTarget.stationId(
+            closest: nil, supportedCountryCode: "TW", countryPollutants: [:], hasReading: true))
+        XCTAssertNil(MapCardTarget.stationId(
+            closest: try pollutant(id: 7), supportedCountryCode: nil,
+            countryPollutants: ["TW": [try pollutant(id: 7)]], hasReading: true))
+    }
+
+    func testEmptyReadingOpensNothing() throws {
+        let station = try pollutant(id: 7)
+        XCTAssertNil(MapCardTarget.stationId(
+            closest: station, supportedCountryCode: "TW",
+            countryPollutants: ["TW": [station]], hasReading: false))
+    }
+
+    /// Ids are only unique within a country: the same id in another country is not a match.
+    func testStationOutsideSupportedCountryOpensNothing() throws {
+        let station = try pollutant(id: 7)
+        XCTAssertNil(MapCardTarget.stationId(
+            closest: station, supportedCountryCode: "TW",
+            countryPollutants: ["TW": [try pollutant(id: 1)], "JP": [station]], hasReading: true))
     }
 }

@@ -41,30 +41,37 @@ enum AirStatuses: String, CaseIterable, Hashable {
         return readableStrings[self.rawValue] ?? ""
     }
 
-    func getColor() -> UInt32 {
-        let colors = [
-            "good": 0x009866,
-            "moderate": 0xFEDE33,
-            "unhealthyforsensitivegroup": 0xFE9833,
-            "unhealthy": 0xCC0033,
-            "veryunhealthy": 0x660098,
-            "hazardous": 0x7E2200,
-        ]
-        return UInt32(colors[self.rawValue] ?? 0x676767)
+    /// 1 (good) … 6 (hazardous); 0 for `.unknown`. A second cue besides
+    /// colour: the map marker draws this many pips (TWAQ-18).
+    var level: Int {
+        switch self {
+        case .good: return 1
+        case .moderate: return 2
+        case .unhealthyforsensitivegroup: return 3
+        case .unhealthy: return 4
+        case .veryunhealthy: return 5
+        case .hazardous: return 6
+        case .unknown: return 0
+        }
     }
 
+    /// The band colour in the palette chosen under Help (TWAQ-18).
+    func getColor() -> UInt32 {
+        getColor(palette: .current)
+    }
+
+    func getColor(palette: AQIPalette) -> UInt32 {
+        palette.color(for: self)
+    }
+
+    /// Text on the band colour: black or white, whichever is more legible
+    /// (WCAG contrast ratio), so every band's text passes AA in every palette.
     func getForegroundColor() -> UInt32 {
-        let white = 0xFFFFFF
-        let black = 0x000000
-        let colors = [
-            "good": white,
-            "moderate": black,
-            "unhealthyforsensitivegroup": black,
-            "unhealthy": white,
-            "veryunhealthy": white,
-            "hazardous": white,
-        ]
-        return UInt32(colors[self.rawValue] ?? white)
+        getForegroundColor(palette: .current)
+    }
+
+    func getForegroundColor(palette: AQIPalette) -> UInt32 {
+        AQIContrast.legibleText(on: getColor(palette: palette))
     }
 
     func getImage() -> String {
@@ -88,6 +95,13 @@ enum AirStatuses: String, CaseIterable, Hashable {
             "hazardous": "AirStatus.general_public_guidance_hazardous" as LocalizedStringKey,
         ]
         return readableStrings[self.rawValue] ?? ""
+    }
+
+    /// Localizable key of the one-line "what to do" for the map card and the
+    /// station header (TWAQ-13): the general-public activity guidance, which is
+    /// the MOENV wording, so it is not our own medical claim. Nil for `.unknown`.
+    var adviceKey: String? {
+        self == .unknown ? nil : "AirStatus.general_public_guidance_\(rawValue)"
     }
 
     func getSensitivePublicGuidance() -> LocalizedStringKey {
@@ -166,5 +180,96 @@ enum AirStatuses: String, CaseIterable, Hashable {
 
     static func checkAirStatus(airIndexType: AirIndexTypes, value: Double) -> AirStatuses {
         bands[airIndexType]?.first { $0.range.contains(value) }?.status ?? .unknown
+    }
+}
+
+
+/// The colours the AQI bands are drawn in (TWAQ-18). Which band a reading
+/// falls in never changes; only the colour it is drawn with.
+enum AQIPalette: String, CaseIterable, Identifiable {
+    /// The official colours.
+    case standard
+    /// Okabe–Ito blue, yellow, orange and vermilion for the first four
+    /// levels, then a violet and a brown that stay apart from them under
+    /// red–green colour blindness and stay visible (3:1) on white and on the
+    /// dark system background, where rows and widgets draw the colour as text.
+    case colorBlindSafe
+
+    static let defaultsKey = "aqiPalette"
+
+    var id: String { rawValue }
+
+    func color(for status: AirStatuses) -> UInt32 {
+        switch self {
+        case .standard:
+            switch status {
+            case .good: return 0x009866
+            case .moderate: return 0xFEDE33
+            case .unhealthyforsensitivegroup: return 0xFE9833
+            case .unhealthy: return 0xCC0033
+            case .veryunhealthy: return 0x660098
+            case .hazardous: return 0x7E2200
+            case .unknown: return 0x676767
+            }
+        case .colorBlindSafe:
+            switch status {
+            case .good: return 0x0072B2
+            case .moderate: return 0xF0E442
+            case .unhealthyforsensitivegroup: return 0xE69F00
+            case .unhealthy: return 0xD55E00
+            case .veryunhealthy: return 0x9B5DE5
+            case .hazardous: return 0x9A6A50
+            case .unknown: return 0x676767
+            }
+        }
+    }
+
+    static func stored(in defaults: UserDefaults = .standard) -> AQIPalette {
+        defaults.string(forKey: defaultsKey).flatMap(AQIPalette.init(rawValue:)) ?? .standard
+    }
+
+    /// The app reads its own defaults; the widget extension reads the mirror
+    /// in the app group (`WidgetBridge` writes it), as for the language.
+    static var current: AQIPalette {
+        let isExtension = Bundle.main.bundlePath.hasSuffix(".appex")
+        return stored(in: isExtension ? shared : .standard)
+    }
+
+    static var shared: UserDefaults {
+        UserDefaults(suiteName: WatchStore.appGroup) ?? .standard
+    }
+
+    /// Writes `palette` into `shared`; `.standard` removes the key. Returns
+    /// whether anything changed.
+    @discardableResult
+    static func mirror(_ palette: AQIPalette, to shared: UserDefaults) -> Bool {
+        guard stored(in: shared) != palette else { return false }
+        if palette == .standard {
+            shared.removeObject(forKey: defaultsKey)
+        } else {
+            shared.set(palette.rawValue, forKey: defaultsKey)
+        }
+        return true
+    }
+}
+
+/// WCAG 2.1 contrast maths for `0xRRGGBB` colours.
+enum AQIContrast {
+    static func luminance(_ rgb: UInt32) -> Double {
+        func channel(_ shift: UInt32) -> Double {
+            let c = Double((rgb >> shift) & 0xFF) / 255
+            return c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(16) + 0.7152 * channel(8) + 0.0722 * channel(0)
+    }
+
+    static func ratio(_ a: UInt32, _ b: UInt32) -> Double {
+        let (hi, lo) = (max(luminance(a), luminance(b)), min(luminance(a), luminance(b)))
+        return (hi + 0.05) / (lo + 0.05)
+    }
+
+    /// Black or white, whichever has the higher contrast on `background`.
+    static func legibleText(on background: UInt32) -> UInt32 {
+        ratio(0xFFFFFF, background) >= ratio(0x000000, background) ? 0xFFFFFF : 0x000000
     }
 }

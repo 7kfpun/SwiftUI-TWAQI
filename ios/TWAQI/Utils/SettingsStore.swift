@@ -67,7 +67,11 @@ final class SettingsStore: ObservableObject {
         static let lastestMapLon = "lastestMapLon"
         static let lastestMapZoom = "lastestMapZoom"
         static let savedFavouriteStations = "savedFavouriteStations"
+        static let showsAdvice = SettingsStore.showsAdviceKey
     }
+
+    /// Key of the "show advice" switch (TWAQ-13); read by name where no store is at hand.
+    static let showsAdviceKey = "showsAdvice"
 
     private let cancellable: Cancellable
     private let defaults: UserDefaults
@@ -88,6 +92,7 @@ final class SettingsStore: ObservableObject {
             Keys.lastestMapLon: MapHome.longitude,
             Keys.lastestMapZoom: MapHome.zoom,
             Keys.savedFavouriteStations: [126],
+            Keys.showsAdvice: true,
         ])
 
         cancellable = NotificationCenter.default
@@ -151,6 +156,28 @@ final class SettingsStore: ObservableObject {
             TrackingManager.logEvent(.selectAppearance, parameters: ["label": newValue.rawValue])
         }
         get { AppAppearance.stored(in: defaults) }
+    }
+
+    /// Colours of the AQI bands, chosen under Help (TWAQ-18). Mirrored into
+    /// the app group so the widgets draw the same colours.
+    var aqiPalette: AQIPalette {
+        set {
+            if newValue == .standard {
+                defaults.removeObject(forKey: AQIPalette.defaultsKey)
+            } else {
+                defaults.set(newValue.rawValue, forKey: AQIPalette.defaultsKey)
+            }
+            WidgetBridge.publish(aqiPalette: newValue)
+            TrackingManager.logEvent(.selectAqiPalette, parameters: ["label": newValue.rawValue])
+        }
+        get { AQIPalette.stored(in: defaults) }
+    }
+
+    /// One line of advice under the AQI on the map card and the station header
+    /// (TWAQ-13). On by default; off if the card looks crowded.
+    var showsAdvice: Bool {
+        set { defaults.set(newValue, forKey: Keys.showsAdvice) }
+        get { defaults.object(forKey: Keys.showsAdvice) as? Bool ?? true }
     }
 
     var isDndEnabled: Bool {

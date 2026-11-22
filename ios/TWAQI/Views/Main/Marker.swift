@@ -34,7 +34,7 @@ private let missingDataMarkerOpacity: Float = 0.55
 struct MarkerAppearance: Hashable {
     enum Shape: Hashable {
         /// The reading in a rounded pill.
-        case pill(text: String, foregroundColor: UInt32)
+        case pill(text: String, foregroundColor: UInt32, level: Int)
         /// Wind mode: an arrow whose length carries the speed, rotated by
         /// `bearing` (where the wind comes *from*) to point downwind.
         case arrow(strength: Double, bearing: Double)
@@ -82,7 +82,9 @@ struct MarkerAppearance: Hashable {
         } else {
             shape = .pill(
                 text: value != 0 ? value.format(f: airIndexType.getFormat()) : "-",
-                foregroundColor: airStatus.getForegroundColor()
+                foregroundColor: airStatus.getForegroundColor(),
+                // The colour-blind palette adds a second cue: one pip per level.
+                level: AQIPalette.current == .colorBlindSafe ? airStatus.level : 0
             )
         }
     }
@@ -141,8 +143,8 @@ final class StationMapMarker: GMSMarker, StationMarker {
         opacity = appearance.opacity
 
         switch appearance.shape {
-        case .pill(let text, let foregroundColor):
-            icon = MarkerIcons.pill(text: text, color: appearance.color, foregroundColor: foregroundColor)
+        case .pill(let text, let foregroundColor, let level):
+            icon = MarkerIcons.pill(text: text, color: appearance.color, foregroundColor: foregroundColor, level: level)
             groundAnchor = CGPoint(x: 0.5, y: 1)
             rotation = 0
             isFlat = false
@@ -201,8 +203,8 @@ enum MarkerIcons {
     }
 
     /// The reading in a rounded pill, 40 × 30, white hairline border.
-    static func pill(text: String, color: UInt32, foregroundColor: UInt32) -> UIImage {
-        cached("pill|\(text)|\(color)|\(foregroundColor)") {
+    static func pill(text: String, color: UInt32, foregroundColor: UInt32, level: Int = 0) -> UIImage {
+        cached("pill|\(text)|\(color)|\(foregroundColor)|\(level)") {
             let label = UILabel(frame: CGRect(origin: .zero, size: CGSize(width: 40, height: 30)))
             label.text = text
             label.textColor = UIColor(rgb: Int(foregroundColor))
@@ -218,7 +220,24 @@ enum MarkerIcons {
             format.opaque = false
             return UIGraphicsImageRenderer(bounds: label.bounds, format: format).image { context in
                 label.layer.render(in: context.cgContext)
+                pips(level: level, in: label.bounds, color: UIColor(rgb: Int(foregroundColor)))
             }
+        }
+    }
+
+    /// `level` small dots along the pill's lower edge: a cue that doesn't
+    /// depend on colour (TWAQ-18). Nothing for 0.
+    private static func pips(level: Int, in bounds: CGRect, color: UIColor) {
+        guard level > 0 else { return }
+        let diameter: CGFloat = 3
+        let gap: CGFloat = 2
+        let width = CGFloat(level) * diameter + CGFloat(level - 1) * gap
+        var x = bounds.midX - width / 2
+        let y = bounds.maxY - diameter - 3
+        color.setFill()
+        for _ in 0..<level {
+            UIBezierPath(ovalIn: CGRect(x: x, y: y, width: diameter, height: diameter)).fill()
+            x += diameter + gap
         }
     }
 
@@ -296,5 +315,57 @@ enum MarkerIcons {
                 circle.stroke()
             }
         }
+    }
+}
+
+/// TWAQ-11: the station the map's top-left card opens the details panel for.
+enum MapCardTarget {
+    /// The card always reads from one station (the one nearest the map centre),
+    /// so that is the station it opens. Nil, so the card does nothing, while
+    /// nothing is loaded, when the reading is empty ("-"), or when the station
+    /// is outside the supported country: its marker is context only, with no
+    /// details page behind it. Ids are only unique within a country, so the
+    /// station is looked up in the supported country's list.
+    static func stationId(
+        closest: Pollutant?,
+        supportedCountryCode: String?,
+        countryPollutants: [String: [Pollutant]],
+        hasReading: Bool
+    ) -> Int? {
+        guard hasReading, let closest, let code = supportedCountryCode,
+              let stations = countryPollutants[code],
+              stations.contains(where: { $0.stationId == closest.stationId }) else { return nil }
+        return closest.stationId
+    }
+}
+
+/// One CWA station's wind arrow on the optional wind layer (TWAQ-15). Drawn
+/// with `MarkerIcons.arrow` (length and weight carry the speed), tinted by
+/// speed band, rotated to point downwind, and below the station pills so a
+/// tap or a pill is never covered. Not tappable: it is context.
+final class WindArrowMarker: GMSMarker {
+    private(set) var reading: WindReading
+
+    init(reading: WindReading) {
+        self.reading = reading
+        super.init()
+        isTappable = false
+        isFlat = true
+        groundAnchor = CGPoint(x: 0.5, y: 0.5)
+        zIndex = -10
+        update(reading)
+    }
+
+    func update(_ reading: WindReading) {
+        self.reading = reading
+        position = CLLocationCoordinate2D(latitude: reading.lat, longitude: reading.lon)
+        icon = MarkerIcons.arrow(
+            strength: reading.wind.strengthFraction,
+            color: WindLayer.color(speed: reading.speed)
+        )
+        // Drawn pointing south: rotating by where the wind comes *from*
+        // leaves it pointing downwind.
+        rotation = reading.direction
+        title = WindLayer.accessibilityText(reading)
     }
 }

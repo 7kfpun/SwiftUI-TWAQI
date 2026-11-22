@@ -128,3 +128,104 @@ final class HelpTabUITests: XCTestCase {
         shot("help-scrolled-bottom")
     }
 }
+
+/// TWAQ-11: tapping the map's top-left card opens the details panel.
+/// Needs the network (live stations). Set `TEST_RUNNER_CARD_SHOT_DIR` to write
+/// screenshots and `TEST_RUNNER_CARD_LANGUAGE` (en / zh-Hant) to pick the language.
+final class MapCardTapUITests: XCTestCase {
+    func testTappingTheCardOpensDetails() throws {
+        continueAfterFailure = false
+        let language = ProcessInfo.processInfo.environment["CARD_LANGUAGE"] ?? "en"
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboardingCompleted", "YES",
+            "-onboardingLegacyInstall", "NO",
+            "-AppleLanguages", "(\(language))",
+            "-AppleLocale", language.hasPrefix("zh") ? "zh_TW" : "en_US",
+        ]
+        app.launch()
+
+        let label = language.hasPrefix("zh") ? "此處空氣品質，開啟詳細資料" : "Air quality here, opens details"
+        let card = app.buttons[label]
+        XCTAssertTrue(card.waitForExistence(timeout: 30), "The card is one button")
+        let enabled = NSPredicate(format: "isEnabled == true")
+        expectation(for: enabled, evaluatedWith: card)
+        waitForExpectations(timeout: 30)
+
+        shot("\(language)-1-map-card")
+        card.tap()
+
+        // The panel is a sheet with a navigation bar; the card is behind it.
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+        sleep(3)
+        shot("\(language)-2-details")
+    }
+
+    private func shot(_ name: String) {
+        let image = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: image)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if let dir = ProcessInfo.processInfo.environment["CARD_SHOT_DIR"], !dir.isEmpty {
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            try? image.pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+        }
+    }
+}
+
+/// TWAQ-12: the details panel opened from the map card shows the next-24-hours
+/// strip. Needs the network (live stations, forecast, weather). Set
+/// `TEST_RUNNER_STRIP_SHOT_DIR` to write screenshots and
+/// `TEST_RUNNER_STRIP_LANGUAGE` (en / zh-Hant) to pick the language.
+final class ForecastStripUITests: XCTestCase {
+    func testDetailsShowTheForecastStrip() throws {
+        continueAfterFailure = false
+        let language = ProcessInfo.processInfo.environment["STRIP_LANGUAGE"] ?? "en"
+        let chinese = language.hasPrefix("zh")
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-onboardingCompleted", "YES",
+            "-onboardingLegacyInstall", "NO",
+            "-AppleLanguages", "(\(language))",
+            "-AppleLocale", chinese ? "zh_TW" : "en_US",
+        ]
+        app.launch()
+
+        let card = app.buttons[chinese ? "此處空氣品質，開啟詳細資料" : "Air quality here, opens details"]
+        XCTAssertTrue(card.waitForExistence(timeout: 30))
+        let enabled = NSPredicate(format: "isEnabled == true")
+        expectation(for: enabled, evaluatedWith: card)
+        waitForExpectations(timeout: 30)
+        card.tap()
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+
+        // The strip is one VoiceOver element that starts with its title.
+        let title = chinese ? "未來 24 小時" : "Next 24 hours"
+        let strip = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH %@", title)).firstMatch
+        for _ in 0..<8 where !strip.exists || !strip.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(strip.waitForExistence(timeout: 20), "the strip is on the details page")
+        // Bring the whole strip into view, clear of the ad banner, for the screenshot.
+        let screen = app.windows.firstMatch.frame
+        for _ in 0..<8 where strip.frame.minY > screen.height * 0.24 {
+            let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+            from.press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6)))
+        }
+        sleep(2)
+        shot("\(language)-strip")
+    }
+
+    private func shot(_ name: String) {
+        let image = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: image)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if let dir = ProcessInfo.processInfo.environment["STRIP_SHOT_DIR"], !dir.isEmpty {
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            try? image.pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+        }
+    }
+}

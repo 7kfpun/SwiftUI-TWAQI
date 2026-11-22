@@ -54,6 +54,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     }
     var timelineView: MapTimelineView!
     var windModeButton: WindModeButton!
+    var windLayerButton: WindLayerButton!
+    var heatmapButton: HeatmapLayerButton!
+    private let heatmapNote = HeatmapNoteLabel()
+    private lazy var heatmapOverlay = HeatmapOverlay(mapView: mapView)
 
     /// The timeline bar sits above the ad banner, which SwiftUI lays out
     /// outside this map, with the index bar on top of it. Kept so both can drop
@@ -82,7 +86,9 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
 
     /// Code of the country whose markers are openable. Resolved from the
     /// countries endpoint so the id -> code mapping stays server-driven.
-    var supportedCountryCode: String?
+    var supportedCountryCode: String? {
+        didSet { if closestStationView != nil { loadClosestStationView() } }
+    }
 
     var pollutants: Pollutants = []
 
@@ -107,6 +113,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     @objc func toggleIsWindMode() {
         self.isWindMode = !self.isWindMode
         TrackingManager.logEvent(.setWindMode, parameters: ["label": self.isWindMode ? "on" : "off"])
+    }
+
+    @objc func toggleWindLayer() {
+        windLayerOn.toggle()
     }
 
     /// The button's action. `goToMyLocation(isSkipLog:)` can't be the
@@ -276,6 +286,114 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         }
     }
 
+    /// The wind arrows layer (TWAQ-15): off until turned on, then remembered.
+    var windLayerOn = defaults.bool(forKey: WindLayer.defaultsKey) {
+        didSet {
+            guard windLayerOn != oldValue else { return }
+            defaults.set(windLayerOn, forKey: WindLayer.defaultsKey)
+            windLayerButton?.isOn = windLayerOn
+            TrackingManager.logEvent(.setWindLayer, parameters: ["label": windLayerOn ? "on" : "off"])
+            refreshWindLayer()
+            scheduleCenterWeather()
+        }
+    }
+
+    /// The heatmap layer (TWAQ-22): off until turned on, then remembered.
+    var heatmapOn = defaults.bool(forKey: HeatmapLayer.defaultsKey) {
+        didSet {
+            guard heatmapOn != oldValue else { return }
+            defaults.set(heatmapOn, forKey: HeatmapLayer.defaultsKey)
+            heatmapButton?.isOn = heatmapOn
+            TrackingManager.logEvent(.setHeatmapLayer, parameters: ["label": heatmapOn ? "on" : "off"])
+            refreshHeatmap()
+        }
+    }
+
+    @objc func toggleHeatmap() {
+        heatmapOn.toggle()
+    }
+
+    /// Stations with a reading at the timeline's hour feed the estimate; the
+    /// image is rebuilt off the main thread only when they or the palette
+    /// change (`HeatmapOverlay` skips identical input).
+    func refreshHeatmap() {
+        heatmapOverlay.isEnabled = heatmapOn
+        heatmapNote.isHidden = !heatmapOn
+        guard heatmapOn else { return }
+        let type = airIndexTypeSelected
+        let palette = AQIPalette.current
+        var samples: [HeatmapSample] = []
+        for pollutants in countryPollutants.values {
+            let hour = timelineHour(anchor: Self.anchor(of: pollutants))
+            for live in pollutants {
+                let (pollutant, hasData) = displayedPollutant(live, hour: hour)
+                guard hasData else { continue }
+                samples.append(HeatmapSample(latitude: pollutant.lat, longitude: pollutant.lon, value: pollutant.getValue(airIndexType: type)))
+            }
+        }
+        var hasher = Hasher()
+        hasher.combine(type.rawValue)
+        hasher.combine(palette.rawValue)
+        heatmapOverlay.update(samples: samples, paletteKey: hasher.finalize()) { value in
+            AirStatuses.checkAirStatus(airIndexType: type, value: value).getColor(palette: palette)
+        }
+        heatmapOverlay.zoomChanged(mapView.camera.zoom)
+    }
+
+    /// Fresh CWA wind readings, strongest first; empty until the layer is on
+    /// and the weather file has loaded.
+    private var windReadings: [WindReading] = []
+    private var windMarkers: [String: WindArrowMarker] = [:]
+
+    /// Reloads the readings (the store answers from its cache within its
+    /// ttl) and redraws. Off, or scrubbed back in time (wind is the current
+    /// reading only), clears the arrows.
+    func refreshWindLayer() {
+        guard windLayerOn, timelineHoursAgo == 0 else {
+            windReadings = []
+            renderWindArrows()
+            return
+        }
+        StationWeatherStore.shared.weather { [weak self] file in
+            guard let self = self, self.windLayerOn, self.timelineHoursAgo == 0 else { return }
+            self.windReadings = file.map { WindLayer.readings(in: $0) } ?? []
+            self.renderWindArrows()
+        }
+    }
+
+    /// Draws the readings in view, thinned by zoom (`WindLayer.visible`).
+    /// Markers are kept and only added or removed as the view moves, so a
+    /// pan costs a handful of changes, not a rebuild.
+    func renderWindArrows() {
+        let wanted: [WindReading]
+        if windReadings.isEmpty {
+            wanted = []
+        } else {
+            let region = mapView.projection.visibleRegion()
+            let corners = [region.nearLeft, region.nearRight, region.farLeft, region.farRight]
+            wanted = WindLayer.visible(
+                windReadings,
+                minLat: corners.map(\.latitude).min() ?? 0, maxLat: corners.map(\.latitude).max() ?? 0,
+                minLon: corners.map(\.longitude).min() ?? 0, maxLon: corners.map(\.longitude).max() ?? 0,
+                zoom: Double(mapView.camera.zoom)
+            )
+        }
+        let ids = Set(wanted.map(\.stationId))
+        for (id, marker) in windMarkers where !ids.contains(id) {
+            marker.map = nil
+            windMarkers[id] = nil
+        }
+        for reading in wanted {
+            if let marker = windMarkers[reading.stationId] {
+                if marker.reading != reading { marker.update(reading) }
+            } else {
+                let marker = WindArrowMarker(reading: reading)
+                marker.map = mapView
+                windMarkers[reading.stationId] = marker
+            }
+        }
+    }
+
     var airIndexTypeSelected: AirIndexTypes {
         get {
             return defaults.string(forKey: "airIndexTypeSelected")
@@ -298,6 +416,10 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             if timelineHoursAgo > 0 {
                 requestVisibleHistory()
             }
+            // New readings change the PM2.5 behind the hint; the weather
+            // store answers from its cache within its ttl.
+            scheduleCenterWeather()
+            refreshWindLayer()
         }
     }
 
@@ -316,6 +438,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             renderMarkers()
             loadClosestStationView()
             updateCenterWeather()
+            refreshWindLayer()
         }
     }
 
@@ -503,6 +626,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         // MARK: closestStationView
         closestStationView = ClosestStationView()
         closestStationView.isLoading = true
+        closestStationView.onAdviceChange = { [weak self] in self?.updateClosestStationHeight() }
         view.addSubview(closestStationView)
         closestStationView.snp.makeConstraints { (make) -> Void in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(8)
@@ -510,6 +634,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.width.equalTo(ClosestStationView.preferredSize.width)
             closestStationHeight = make.height.equalTo(ClosestStationView.preferredSize.height).constraint
         }
+
+        closestStationView.addTarget(self, action: #selector(closestStationTapped), for: .touchUpInside)
 
         // MARK: airStatusesView
         let airStatusesView = AirStatusBarView()
@@ -606,6 +732,40 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
             make.height.equalTo(60)
         }
 
+        // MARK: Wind layer button
+        windLayerButton = WindLayerButton()
+        windLayerButton.isOn = windLayerOn
+        windLayerButton.button.addTarget(self, action: #selector(toggleWindLayer), for: .touchUpInside)
+        view.addSubview(windLayerButton)
+        windLayerButton.snp.makeConstraints { (make) -> Void in
+            // Same row as the wind-mode button, so the left stack stays one
+            // button tall and clears the station card in landscape.
+            make.bottom.equalTo(windModeButton)
+            make.left.equalTo(windModeButton.snp.right).offset(12)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
+
+        // MARK: Heatmap layer button
+        heatmapButton = HeatmapLayerButton()
+        heatmapButton.isOn = heatmapOn
+        heatmapButton.button.addTarget(self, action: #selector(toggleHeatmap), for: .touchUpInside)
+        view.addSubview(heatmapButton)
+        heatmapButton.snp.makeConstraints { (make) -> Void in
+            make.bottom.equalTo(windModeButton)
+            make.left.equalTo(windLayerButton.snp.right).offset(12)
+            make.width.equalTo(60)
+            make.height.equalTo(60)
+        }
+        view.addSubview(heatmapNote)
+        // Trails the colour legend, not the button row: the row stays one
+        // button tall so it clears the station card in landscape.
+        heatmapNote.snp.makeConstraints { (make) -> Void in
+            make.left.equalTo(airStatusesView.snp.right).offset(8)
+            make.centerY.equalTo(airStatusesView)
+            make.right.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.right).offset(-15)
+        }
+
         self.view = view
     }
 
@@ -674,6 +834,7 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                 )
             }
         }
+        refreshHeatmap()
     }
 
     /// The publish hour the timeline is on for a country with this anchor, or
@@ -830,29 +991,80 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     /// card is never blocked on it.
     private func updateCenterWeather() {
         guard timelineHoursAgo == 0 else {
-            showCenterWeather(nil)
+            showCenterWeather(nil, hint: nil)
             return
         }
         StationWeatherStore.shared.weather { [weak self] file in
             guard let self = self else { return }
             guard self.timelineHoursAgo == 0 else { return }
-            self.showCenterWeather(file.flatMap {
+            let weather = file.flatMap {
                 MapCenterWeather.make(lat: self.currentLatitude, lon: self.currentLongitude, in: $0)
-            })
+            }
+            self.showCenterWeather(weather, hint: file.flatMap { self.windHint(in: $0) })
         }
     }
 
-    private func showCenterWeather(_ weather: MapCenterWeather?) {
-        guard weather != closestStationView.weather else { return }
+    /// "Air is coming from…" for the card: only with the wind layer on, and
+    /// when `WindLayer.hint` finds the wind and the stations upwind clear.
+    private func windHint(in file: WeatherFile) -> String? {
+        guard windLayerOn, let closest = closestPollutant else { return nil }
+        let stations = countryPollutants.values.flatMap { $0 }
+            .map { (lat: $0.lat, lon: $0.lon, pm25: $0.pm25) }
+        return WindLayer.hint(
+            lat: currentLatitude, lon: currentLongitude,
+            localPm25: closest.pm25, stations: stations, in: file
+        ).map { WindLayer.hintText($0) }
+    }
+
+    private func showCenterWeather(_ weather: MapCenterWeather?, hint: String?) {
+        // The hint sits under the weather row, so it needs the row.
+        let hint = weather == nil ? nil : hint
+        guard weather != closestStationView.weather || hint != closestStationView.windHint else { return }
         closestStationView.weather = weather
-        let height = weather == nil
-            ? ClosestStationView.preferredSize.height
-            : ClosestStationView.heightWithWeather
-        closestStationHeight?.update(offset: height)
+        closestStationView.windHint = hint
+        updateClosestStationHeight()
+    }
+
+    private func updateClosestStationHeight() {
+        closestStationHeight?.update(offset: ClosestStationView.height(
+            hasWeather: closestStationView.weather != nil,
+            hasHint: closestStationView.windHint != nil,
+            hasAdvice: closestStationView.advice != nil
+        ))
         view.layoutIfNeeded()
     }
 
+    /// The station the top-left card opens, nil when there is nothing to open.
+    private var closestCardStationId: Int? {
+        guard let live = closestPollutant else { return nil }
+        return MapCardTarget.stationId(
+            closest: live,
+            supportedCountryCode: supportedCountryCode,
+            countryPollutants: countryPollutants,
+            hasReading: displayedPollutant(live).hasData
+                && displayedPollutant(live).pollutant.getValue(airIndexType: airIndexTypeSelected) != 0
+        )
+    }
+
+    @objc private func closestStationTapped() {
+        guard let stationId = closestCardStationId else { return }
+        TrackingManager.logEvent(.checkMainDetails, parameters: [
+            "name": closestPollutant.name,
+            "nameLocal": closestPollutant.nameLocal,
+            "stationId": stationId,
+            "label": "card",
+        ])
+        onStationSelected?(stationId)
+    }
+
+    /// The card's one line of advice (TWAQ-13), nil when switched off in Help or there is no reading.
+    private func adviceText(for status: AirStatuses, hasReading: Bool) -> String? {
+        guard hasReading, defaults.object(forKey: SettingsStore.showsAdviceKey) as? Bool ?? true else { return nil }
+        return status.adviceKey?.localized
+    }
+
     func loadClosestStationView() {
+        defer { closestStationView.isEnabled = closestCardStationId != nil }
         if let livePollutant = self.closestPollutant {
             let closestPollutant = displayedPollutant(livePollutant).pollutant
             let value = closestPollutant.getValue(airIndexType: self.airIndexTypeSelected)
@@ -872,6 +1084,12 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
                     .map { "\($0.clock)・\($0.relative)" }
                 : nil
             closestStationView.status = "AirStatus.\(airStatus.rawValue)".localized
+            // Only for the AQI, whose levels the guidance is written for (the header uses it too),
+            // and not while the timeline shows a past hour: the sentence is present tense.
+            closestStationView.advice = adviceText(
+                for: airStatus,
+                hasReading: value != 0 && airIndexTypeSelected == .aqi && timelineHoursAgo == 0
+            )
             closestStationView.aqi = "\(self.airIndexTypeSelected.toString()) \(text)"
 
             closestStationView.aqiColor = UIColor(rgb: Int(airStatus.getColor()))
@@ -1057,6 +1275,11 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         mapView.animate(toLocation: coordinate)
     }
 
+    /// Fades the heatmap with the zoom while pinching; one opacity write.
+    func mapView(_ mapView: GMSMapView, didChange position: GMSCameraPosition) {
+        heatmapOverlay.zoomChanged(position.zoom)
+    }
+
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         let latitude = position.target.latitude as Double
         let longitude = position.target.longitude as Double
@@ -1070,6 +1293,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
         checkClosestCountry(latitude: latitude, longitude: longitude)
         checkClosestStation(latitude: latitude, longitude: longitude)
         scheduleCenterWeather()
+        refreshWindLayer()
+        heatmapOverlay.zoomChanged(position.zoom)
 
         // Panned back in time and on to new stations: fetch theirs too.
         if timelineHoursAgo > 0 {
@@ -1080,6 +1305,8 @@ class GoogleMapViewController: UIViewController, GMSMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         syncHeadingOrientation()
+        // The advice switch lives in Help: pick up a change on coming back.
+        if closestStationView != nil { loadClosestStationView() }
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
 

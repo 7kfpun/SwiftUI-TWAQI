@@ -153,6 +153,10 @@ struct DetailsView: View {
                 // what it looks like outside. The forecast and the weather
                 // are absent, not empty, when there is none to show.
                 VStack(alignment: .leading, spacing: 16) {
+                    if showsForecastStrip {
+                        ForecastStripView(state: forecastStripState, isSaved: viewModel.isShowingLastGood || viewModel.isShowingCachedHistory)
+                    }
+
                     if let forecast = viewModel.forecast {
                         AreaForecastView(forecast: forecast)
                     }
@@ -375,6 +379,28 @@ struct DetailsView: View {
             && !viewModel.loadFailed && !viewModel.stationLoadFailed && !viewModel.isNotReporting
     }
 
+    /// Hidden for a station that stopped reporting: its history would read as
+    /// a current trend, and there is no area to forecast for.
+    private var showsForecastStrip: Bool {
+        !viewModel.isNotReporting || viewModel.hasRecentHistory
+    }
+
+    private var forecastStripState: ForecastStripState {
+        let now = Date()
+        let trend = ForecastStrip.aqiTrend(
+            readings: viewModel.hasRecentHistory ? viewModel.historicalPollutants : [],
+            days: viewModel.forecast?.days ?? [],
+            now: now
+        )
+        let cells = ForecastStrip.weatherCells(viewModel.weather?.periods ?? [], now: now)
+        return ForecastStripState.make(
+            trend: trend,
+            cells: cells,
+            answered: viewModel.forecastAnswered && viewModel.weatherAnswered,
+            offline: viewModel.loadFailed || viewModel.stationLoadFailed
+        )
+    }
+
     private var header: some View {
         let pollutant = viewModel.pollutant
         let station = viewModel.station
@@ -386,7 +412,10 @@ struct DetailsView: View {
             stationType: pollutant?.stationType ?? station?.stationType ?? .unknown,
             aqi: currentAqi,
             publishTime: viewModel.latestPublishTime,
-            isOffline: viewModel.isShowingLastGood
+            isOffline: viewModel.isShowingLastGood,
+            advice: settings.showsAdvice
+                ? AirStatuses.checkAirStatus(airIndexType: .aqi, value: currentAqi).adviceKey.map { $0.localized }
+                : nil
         )
     }
 
