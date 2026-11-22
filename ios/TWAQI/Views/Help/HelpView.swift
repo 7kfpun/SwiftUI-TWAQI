@@ -204,6 +204,7 @@ struct HelpView: View {
                 // Each language in its own name, whatever the UI language.
                 Text(verbatim: "繁體中文").tag(AppLanguage.traditionalChinese)
                 Text(verbatim: "English").tag(AppLanguage.english)
+                Text(verbatim: "日本語").tag(AppLanguage.japanese)
             } label: {
                 Text("Help.language")
             }

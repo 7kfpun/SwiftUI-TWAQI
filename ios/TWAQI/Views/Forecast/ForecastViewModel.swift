@@ -116,7 +116,7 @@ final class ForecastViewModel: ObservableObject {
             readerArea: nearest.flatMap(areaOf),
             favouriteAreas: favourites().map(areaOf),
             today: today,
-            chinese: Locale.isChinese
+            chinese: Locale.usesLocalNames
         )
         let next: State = areas.isEmpty ? .noCurrentForecast : .loaded(areas)
         if state != next {

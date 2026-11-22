@@ -163,7 +163,7 @@ struct Pollutant: Decodable, Hashable {
 extension Pollutant {
     /// Name in the reader's language, with a fallback that is never "Unknown".
     var displayName: String {
-        let preferred = Locale.isChinese ? nameLocal : name
+        let preferred = Locale.usesLocalNames ? nameLocal : name
         return preferred.isEmpty ? (code.isEmpty ? "#\(stationId)" : code) : preferred
     }
 
@@ -176,7 +176,7 @@ extension Pollutant {
     /// Chinese — passed through `township` first (on-device translation).
     func displayLocality(township translate: (String) -> String) -> String? {
         let township = self.township.map(translate)
-        let parts = Locale.isChinese
+        let parts = Locale.usesLocalNames
             ? [township, countyLocal]
             : [township, county]
         let joined = parts.compactMap { $0 }.filter { !$0.isEmpty }
@@ -184,7 +184,7 @@ extension Pollutant {
     }
 
     var displayArea: String? {
-        let value = Locale.isChinese ? areaLocal : area
+        let value = Locale.usesLocalNames ? areaLocal : area
         return (value?.isEmpty ?? true) ? nil : value
     }
 

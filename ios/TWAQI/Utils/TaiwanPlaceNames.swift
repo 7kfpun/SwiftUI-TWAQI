@@ -34,6 +34,6 @@ enum TaiwanPlaceNames {
     /// The township in English outside Chinese UIs; the name as given in a
     /// Chinese UI or when the table doesn't know it.
     static func displayTownship(_ chinese: String) -> String {
-        Locale.isChinese ? chinese : (township(chinese) ?? chinese)
+        Locale.usesLocalNames ? chinese : (township(chinese) ?? chinese)
     }
 }

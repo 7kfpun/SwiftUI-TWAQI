@@ -512,7 +512,7 @@ enum StationDetailFormat {
     /// device as the app does.
     static func forecastText(_ forecast: AreaForecast) -> String? {
         let locale = Locale.app
-        if locale.isChinese { return forecast.content }
+        if locale.usesLocalNames { return forecast.content }
         return forecast.translatedContent(locale.language.languageCode?.identifier ?? "en")
     }
 }

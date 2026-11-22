@@ -16,11 +16,12 @@ import XCTest
 ///
 ///   SCREENSHOT_DIR       where the PNG is written (a path on the Mac)
 ///   SCREENSHOT_FILE      its file name, e.g. "iPhone Duo 04.png"
-///   SCREENSHOT_LANGUAGE  "en" or "zh-Hant"
+///   SCREENSHOT_LANGUAGE  "en", "zh-Hant" or "ja"
 final class ShareScreenshotTests: XCTestCase {
     private var app: XCUIApplication!
     private var outputURL: URL!
     private var isChinese = false
+    private var isJapanese = false
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -36,6 +37,7 @@ final class ShareScreenshotTests: XCTestCase {
 
         let language = env["SCREENSHOT_LANGUAGE"] ?? "en"
         isChinese = language.hasPrefix("zh")
+        isJapanese = language == "ja"
 
         app = XCUIApplication()
         // Same launch state as DuoScreenshotTests: no ads, the whole island in
@@ -46,7 +48,7 @@ final class ShareScreenshotTests: XCTestCase {
             "-lastestMapLon", "121.0",
             "-lastestMapZoom", "7.2",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", isChinese ? "zh_TW" : "en_US",
+            "-AppleLocale", isChinese ? "zh_TW" : (isJapanese ? "ja_JP" : "en_US"),
         ]
         app.launch()
         dismissSystemAlerts()
@@ -55,7 +57,7 @@ final class ShareScreenshotTests: XCTestCase {
     func testCaptureShareScreenshot() throws {
         // Stands alone on the east coast, so the tap can't land on a
         // neighbour the way one in the Taipei cluster would.
-        let station = isChinese ? "花蓮" : "Hualien"
+        let station = isChinese ? "花蓮" : (isJapanese ? "花蓮" : "Hualien")
 
         let marker = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", station))
@@ -65,7 +67,7 @@ final class ShareScreenshotTests: XCTestCase {
         marker.tap()
 
         // Disabled until the station's reading has loaded.
-        let share = app.buttons[isChinese ? "分享" : "Share"].firstMatch
+        let share = app.buttons[isChinese ? "分享" : (isJapanese ? "共有" : "Share")].firstMatch
         XCTAssertTrue(share.waitForExistence(timeout: 15), "No share button")
         let enabled = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: share)
         wait(for: [enabled], timeout: 30)

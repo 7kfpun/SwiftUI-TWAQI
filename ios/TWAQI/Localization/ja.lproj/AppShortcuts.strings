@@ -1,0 +1,7 @@
+/* App Shortcut phrases (FOX-74). Keys are the phrases in TWAQIShortcuts.swift. */
+"What's the air in ${applicationName}" = "${applicationName}で空気はどう";
+"${applicationName} air quality" = "${applicationName}の大気質";
+"${applicationName} air at ${station}" = "${applicationName}で${station}の空気";
+"What's the air at ${station} in ${applicationName}" = "${applicationName}で${station}の空気を教えて";
+"Open ${station} in ${applicationName}" = "${applicationName}で${station}を開く";
+"Open a station in ${applicationName}" = "${applicationName}で観測所を開く";

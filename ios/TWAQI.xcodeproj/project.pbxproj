@@ -481,6 +481,7 @@
 		384632A1684CD77DE80F997D /* AirQualityIntentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirQualityIntentTests.swift; sourceTree = "<group>"; };
 		50C74C7DBD4777F0396D37D8 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		83E1BC22180F3303632E5351 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
+		A10B1C2D3E4F5061728394A1 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = "ja.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
 		C087A9241D43CECA11D0085C /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B01 /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 		8E9C6F12042B38F8792B3C64 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -583,6 +584,7 @@
 		7F3A73C10B2E4D5F8A9B0C20 /* ShareCardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewView.swift; sourceTree = "<group>"; };
 		7F3A73C10B2E4D5F8A9B0C22 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7F3A73C10B2E4D5F8A9B0C23 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		A10B1C2D3E4F5061728394A2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = "ja.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		9E1AC563233F9AC100AC862D /* DetailsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsListView.swift; sourceTree = "<group>"; };
 		9E1AC566233FB0A400AC862D /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		9E1C9B13238974120052E115 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
@@ -595,6 +597,7 @@
 		9E34B4F72371CDF900B6E600 /* AdBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBannerView.swift; sourceTree = "<group>"; };
 		9E34B5022371E7B700B6E600 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9E34B5042371E7BB00B6E600 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A10B1C2D3E4F5061728394A3 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = "ja.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		9E51276D23AC6DDB00DEA45D /* StoreReviewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreReviewManager.swift; sourceTree = "<group>"; };
 		9E794A682340A6090064D874 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		9E910C36238182FE00B8B316 /* Taiwan Air.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Taiwan Air.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1461,6 +1464,7 @@
 				en,
 				Base,
 				"zh-Hant",
+				ja,
 			);
 			mainGroup = 9E1AC52F233F981700AC862D;
 			packageReferences = (
@@ -2095,6 +2099,7 @@
 			children = (
 				50C74C7DBD4777F0396D37D8 /* en */,
 				83E1BC22180F3303632E5351 /* zh-Hant */,
+				A10B1C2D3E4F5061728394A1 /* ja */,
 			);
 			name = AppShortcuts.strings;
 			sourceTree = "<group>";
@@ -2113,6 +2118,7 @@
 			children = (
 				9E34B5022371E7B700B6E600 /* en */,
 				9E34B5042371E7BB00B6E600 /* zh-Hant */,
+				A10B1C2D3E4F5061728394A3 /* ja */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2122,6 +2128,7 @@
 			children = (
 				7F3A73C10B2E4D5F8A9B0C22 /* en */,
 				7F3A73C10B2E4D5F8A9B0C23 /* zh-Hant */,
+				A10B1C2D3E4F5061728394A2 /* ja */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

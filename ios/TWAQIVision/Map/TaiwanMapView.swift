@@ -112,7 +112,7 @@ private struct LoadingPlacard: View {
             Image(systemName: "aqi.medium")
                 .font(.system(size: 44))
                 .symbolEffect(.pulse)
-            Text(verbatim: Locale.isChinese ? "台灣空氣品質" : "Taiwan Air")
+            Text(verbatim: Locale.isChinese ? "台灣空氣品質" : (Locale.isJapanese ? "台湾の大気質" : "Taiwan Air"))
                 .font(.title.bold())
             ProgressView()
         }

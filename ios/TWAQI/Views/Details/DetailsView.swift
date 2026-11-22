@@ -361,7 +361,7 @@ struct DetailsView: View {
 
     private var stationTitle: String {
         viewModel.pollutant?.displayName
-            ?? viewModel.station.map { Locale.isChinese ? $0.nameLocal : $0.name }
+            ?? viewModel.station.map { Locale.usesLocalNames ? $0.nameLocal : $0.name }
             ?? ""
     }
 

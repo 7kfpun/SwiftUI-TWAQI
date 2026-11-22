@@ -259,4 +259,53 @@ final class AppLanguageTests: XCTestCase {
         OnDeviceTranslation.store("Title", for: line, target: "en")
         XCTAssertEqual(OnDeviceTranslation.display(segments: [line, "Next"], target: "en"), "Title\nNext")
     }
+
+    // MARK: - Japanese (TWAQ-10)
+
+    func testJapaneseLocaleUsesLocalNamesButIsNotChinese() {
+        let japanese = AppLanguage.japanese.locale(system: Locale(identifier: "en_US"))
+        XCTAssertEqual(japanese.identifier, "ja")
+        XCTAssertTrue(japanese.isJapanese)
+        XCTAssertFalse(japanese.isChinese)
+        XCTAssertTrue(japanese.usesLocalNames)
+        XCTAssertTrue(Locale(identifier: "zh_Hant_TW").usesLocalNames)
+        XCTAssertFalse(Locale(identifier: "en_US").usesLocalNames)
+
+        UserDefaults.standard.set(AppLanguage.japanese.rawValue, forKey: AppLanguage.defaultsKey)
+        XCTAssertTrue(Locale.isJapanese)
+        XCTAssertTrue(Locale.usesLocalNames)
+    }
+
+    /// Every key the English file has needs a value, with the same format
+    /// specifiers, in each other language's strings files; a missing one shows
+    /// the raw key on screen.
+    func testEveryEnglishKeyHasAValueInEachLanguage() throws {
+        for file in ["Localizable", "AppShortcuts", "InfoPlist"] {
+            let english = try strings(file, "en")
+            for language in ["zh-Hant", "ja"] {
+                let other = try strings(file, language)
+                for (key, value) in english {
+                    let translated = try XCTUnwrap(other[key], "\(file): \(key) missing in \(language)")
+                    XCTAssertFalse(translated.isEmpty, "\(file): \(key) empty in \(language)")
+                    XCTAssertEqual(
+                        Self.specifiers(translated).sorted(), Self.specifiers(value).sorted(),
+                        "\(file): \(key) format specifiers differ in \(language)")
+                }
+            }
+        }
+    }
+
+    private func strings(_ file: String, _ language: String) throws -> [String: String] {
+        let path = try XCTUnwrap(Bundle.main.path(
+            forResource: file, ofType: "strings", inDirectory: nil, forLocalization: language))
+        return try XCTUnwrap(NSDictionary(contentsOfFile: path) as? [String: String])
+    }
+
+    private static func specifiers(_ text: String) -> [String] {
+        let pattern = "%(?:\\d+\\$)?[@dfsl]+|%[0-9.]*[@dfs]"
+        let regex = try! NSRegularExpression(pattern: pattern)
+        return regex.matches(in: text, range: NSRange(text.startIndex..., in: text)).map {
+            String(text[Range($0.range, in: text)!]).replacingOccurrences(of: "\\d+\\$", with: "", options: .regularExpression)
+        }
+    }
 }

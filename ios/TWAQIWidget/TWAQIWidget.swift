@@ -825,7 +825,7 @@ struct ReadingWidgetView: View {
 
     /// 「Weather: 24° · 多雲 · …」, with the chance of rain when there is one.
     private func weatherLabel(_ weather: WidgetWeather) -> Text {
-        let spoken = weather.briefSpokenText(chinese: Locale.isChinese)
+        let spoken = weather.briefSpokenText(chinese: Locale.usesLocalNames)
         guard let chance = weather.chanceOfRain else { return Text("Widget.weather_label \(spoken)") }
         return Text("Widget.weather_chance_label \(spoken) \(WidgetWeather.percentText(chance))")
     }
@@ -938,7 +938,7 @@ struct ReadingWidgetView: View {
     /// wind under it. Never blurred: weather is free.
     private var largeWeather: some View {
         let weather = entry.weather
-        let sky = weather?.skyText(chinese: Locale.isChinese)
+        let sky = weather?.skyText(chinese: Locale.usesLocalNames)
 
         return HStack(spacing: 10) {
             Image(systemName: weather?.symbol ?? "cloud.fill")
@@ -981,7 +981,7 @@ struct ReadingWidgetView: View {
         .padding(.vertical, 4)
         .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.spokenText(chinese: Locale.isChinese) } ?? "—")"))
+        .accessibilityLabel(Text("Widget.weather_label \(weather.map { $0.spokenText(chinese: Locale.usesLocalNames) } ?? "—")"))
     }
 
     /// Medium: icon, temperature, wind and sky, then humidity and rain today.
@@ -997,7 +997,7 @@ struct ReadingWidgetView: View {
                         .monospacedDigit()
                         .lineLimit(1)
                         .fixedSize()
-                    if let sky = weather.skyText(chinese: Locale.isChinese) {
+                    if let sky = weather.skyText(chinese: Locale.usesLocalNames) {
                         Text(verbatim: "· \(sky)")
                             .lineLimit(1)
                             .truncationMode(.tail)
@@ -1039,7 +1039,7 @@ struct ReadingWidgetView: View {
     /// the readings, then the chips with their units.
     private var compactSpokenText: String {
         guard let weather = entry.weather else { return "—" }
-        return ([weather.spokenText(chinese: Locale.isChinese)] + weather.chips().map(\.spoken))
+        return ([weather.spokenText(chinese: Locale.usesLocalNames)] + weather.chips().map(\.spoken))
             .joined(separator: ", ")
     }
 

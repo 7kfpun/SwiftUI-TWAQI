@@ -55,12 +55,12 @@ struct WidgetStationDetail: Codable, Equatable {
 
     /// "Taipei City" / "臺北市", in the reader's language.
     var displayCounty: String? {
-        Self.preferred(chinese: Locale.isChinese, local: place?.countyLocal, english: place?.county)
+        Self.preferred(chinese: Locale.usesLocalNames, local: place?.countyLocal, english: place?.county)
     }
 
     /// "North" / "北部空品區", in the reader's language.
     var displayArea: String? {
-        Self.preferred(chinese: Locale.isChinese, local: place?.areaLocal, english: place?.area)
+        Self.preferred(chinese: Locale.usesLocalNames, local: place?.areaLocal, english: place?.area)
     }
 
     /// Today's and tomorrow's forecast, or nil when there is none to show.

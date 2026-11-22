@@ -36,7 +36,7 @@ struct Station: Codable, Hashable {
 extension Station {
     /// Name in the reader's language, never blank and never "Unknown".
     var displayName: String {
-        let preferred = Locale.isChinese ? nameLocal : name
+        let preferred = Locale.usesLocalNames ? nameLocal : name
         return preferred.isEmpty ? (code.isEmpty ? "#\(id)" : code) : preferred
     }
 
@@ -49,14 +49,14 @@ extension Station {
     /// Chinese — passed through `township` first (on-device translation).
     func displayLocality(township translate: (String) -> String) -> String? {
         let township = self.township.map(translate)
-        let parts = Locale.isChinese ? [township, countyLocal] : [township, county]
+        let parts = Locale.usesLocalNames ? [township, countyLocal] : [township, county]
         let joined = parts.compactMap { $0 }.filter { !$0.isEmpty }
         return joined.isEmpty ? nil : joined.joined(separator: ", ")
     }
 
     /// Air-quality region, used to group the station list.
     var displayArea: String? {
-        let value = Locale.isChinese ? areaLocal : area
+        let value = Locale.usesLocalNames ? areaLocal : area
         return (value?.isEmpty ?? true) ? nil : value
     }
 

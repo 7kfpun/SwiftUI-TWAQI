@@ -54,7 +54,7 @@ struct StationWeatherView: View {
     private var headingCounty: String? {
         guard !weather.periods.isEmpty else { return nil }
         if let title = countyTitle, !title.isEmpty { return title }
-        return Locale.isChinese ? weather.county : nil
+        return Locale.usesLocalNames ? weather.county : nil
     }
 
     // MARK: - Now
@@ -119,7 +119,7 @@ struct StationWeatherView: View {
                 .frame(width: 30)
                 .accessibilityHidden(true)
 
-            if let text = WeatherCode.text(code: period.wx, cwaText: period.text, chinese: Locale.isChinese) {
+            if let text = WeatherCode.text(code: period.wx, cwaText: period.text, chinese: Locale.usesLocalNames) {
                 Text(text)
                     .font(.subheadline)
                     .lineLimit(2)
@@ -208,7 +208,7 @@ struct StationWeatherView: View {
     /// CWA's Chinese and is only shown in Chinese.
     static func stationLine(_ now: StationWeather.Now, at date: Date) -> String {
         let distance = distanceFormatter.string(from: Measurement(value: now.distanceKm, unit: UnitLength.kilometers))
-        let station = Locale.isChinese
+        let station = Locale.usesLocalNames
             ? String(format: "Weather.station_named %@ %@".localized, now.observation.name, distance)
             : String(format: "Weather.station_nearby %@".localized, distance)
         let age = relativeFormatter.localizedString(for: min(now.observedAt, date), relativeTo: date)
