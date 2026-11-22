@@ -656,7 +656,7 @@
 "WhatsNew.3_1_8.layers_title" = "風とヒートマップのレイヤー";
 "WhatsNew.3_1_8.layers_body" = "風向きの矢印や、観測所の間を推定した大気質ヒートマップを表示できます。ヘルプで色覚に配慮した配色も選べます。";
 "WhatsNew.3_1_8.japanese_title" = "日本語に対応";
-"WhatsNew.3_1_8.japanese_body" = "台湾大気質が日本語に対応しました。ヘルプで選ぶか、iPhone の言語に合わせて表示されます。";
+"WhatsNew.3_1_8.japanese_body" = "Taiwan Air が日本語に対応しました。ヘルプで選ぶか、iPhone の言語に合わせて表示されます。";
 
 // MARK: - Weather forecast strip, wind and heatmap layers, palette (TWAQ-12/13/14/15/18/22)
 "Help.aqi_palette" = "AQIの色";
