@@ -685,6 +685,12 @@
 "WhatsNew.3_1_7.mapweather_body" = "The local weather at the centre of the map now sits under the air quality card.";
 "WhatsNew.3_1_7.quickactions_title" = "Quick actions on the icon";
 "WhatsNew.3_1_7.quickactions_body" = "Press and hold the app icon to jump to your closest station or any of your favourites.";
+"WhatsNew.3_1_8.details_title" = "Station details at a glance";
+"WhatsNew.3_1_8.details_body" = "The map card now opens the full details on a tap, with advice under the AQI, a next-24-hours forecast and weather chips for rain, UV and feels-like.";
+"WhatsNew.3_1_8.layers_title" = "Wind and heatmap layers";
+"WhatsNew.3_1_8.layers_body" = "Turn on wind arrows or an estimated air quality heatmap between stations, and pick a colour-blind friendly palette in Help.";
+"WhatsNew.3_1_8.japanese_title" = "Now in Japanese";
+"WhatsNew.3_1_8.japanese_body" = "Taiwan Air speaks Japanese. Choose it in Help, or it follows your iPhone language.";
 "MapCard.accessibility_label" = "Air quality here, opens details";
 
 /* Wind arrows layer (TWAQ-15) */

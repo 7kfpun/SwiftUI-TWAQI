@@ -102,18 +102,20 @@ final class WhatsNewTests: XCTestCase {
 
     /// Reads each language's strings file directly, so a key present in only
     /// one language fails here instead of showing the raw key on a device.
-    func testRelease317HasItemsWithKeysInBothLanguages() throws {
-        let release = try XCTUnwrap(WhatsNew.release(for: "3.1.7"))
-        XCTAssertFalse(release.items.isEmpty)
-        XCTAssertLessThanOrEqual(release.items.count, 3)
-        XCTAssertFalse(release.items.contains { $0.isPro })
-        for language in ["en", "zh-Hant", "ja"] {
-            let path = try XCTUnwrap(Bundle.main.path(
-                forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: language))
-            let strings = try XCTUnwrap(NSDictionary(contentsOfFile: path) as? [String: String])
-            for item in release.items {
-                for key in [item.titleKey, item.bodyKey] {
-                    XCTAssertFalse(strings[key, default: ""].isEmpty, "\(key) missing in \(language)")
+    func testReleasesHaveItemsWithKeysInAllLanguages() throws {
+        for version in ["3.1.7", "3.1.8"] {
+            let release = try XCTUnwrap(WhatsNew.release(for: version))
+            XCTAssertFalse(release.items.isEmpty)
+            XCTAssertLessThanOrEqual(release.items.count, 3)
+            XCTAssertFalse(release.items.contains { $0.isPro })
+            for language in ["en", "zh-Hant", "ja"] {
+                let path = try XCTUnwrap(Bundle.main.path(
+                    forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: language))
+                let strings = try XCTUnwrap(NSDictionary(contentsOfFile: path) as? [String: String])
+                for item in release.items {
+                    for key in [item.titleKey, item.bodyKey] {
+                        XCTAssertFalse(strings[key, default: ""].isEmpty, "\(key) missing in \(language) (\(version))")
+                    }
                 }
             }
         }
