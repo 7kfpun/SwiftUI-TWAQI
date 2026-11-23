@@ -26,6 +26,9 @@ final class ForecastViewModel: ObservableObject {
     }
 
     @Published private(set) var state: State = .loading
+    /// Sand/dust advisories still worth showing (FOX-10), newest first. Empty
+    /// is the normal case, and when they can't be loaded.
+    @Published private(set) var advisories: [SandstormAdvisory] = []
 
     /// The Watch app's one-shot locator, as in the welcome flow. Only used
     /// once location is allowed, so this tab never prompts.
@@ -78,6 +81,12 @@ final class ForecastViewModel: ObservableObject {
                     stations = fetched
                 }
                 render()
+            }
+        }
+
+        SandstormAdvisoryStore.shared.current { [weak self] current in
+            if self?.advisories != current {
+                self?.advisories = current
             }
         }
 

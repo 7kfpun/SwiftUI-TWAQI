@@ -101,6 +101,13 @@ npx wrangler dev --var MOENV_FORECAST_URL:http://127.0.0.1:8799/feed.json
 curl -X POST -H "Authorization: Bearer $SYNC_TOKEN" localhost:8787/forecast/sync
 ```
 
+## Sand/dust advisories (`sandst_p_01`, FOX-10)
+
+- Runs inside the hourly forecast cron, first and on its own: a failure is logged (`advisory sync failed`) and never blocks the forecast. Code: `src/advisories.ts`.
+- Fetches `sandst_p_01` with `MOENV_API_KEY` and stores one row per advisory in Directus `twaqi_sandstorm_advisories` (`DIRECTUS_FORECAST_TOKEN`), keyed by `publish_time` (Taiwan local `YYYY-MM-DD HH:mm:ss`): a publish time already stored is skipped. Fields: `publish_time`, `subject`, `content`, `source` (`SANDST_P_01`), `archived`.
+- MOENV lists an advisory only while it matters, so an empty feed is normal and creates nothing; a failed or non-JSON response throws and leaves Directus alone. Rows published more than 7 days ago are soft-archived. Nothing is deleted.
+- Directus: create the collection with those fields; the **TWAQI Forecast Worker** role needs read/create/update on it, and the app's role read. The app shows advisories published in the last 48 hours as a banner on the Forecast tab.
+
 ## CWA weather (FOX-11)
 
 - **Cron** `*/15 * * * *` (every 15 minutes, its own invocation so it never shares the forecast's CPU or subrequest budget): fetch two CWA open-data sets with `CWA_API_KEY` → one compact JSON → R2 `weather/latest.json`, `Cache-Control: public, max-age=300`, served straight from the webcam host like `manifest.json` (no Worker in the path). Code: `src/weather.ts`.

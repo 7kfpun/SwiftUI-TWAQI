@@ -435,3 +435,73 @@ enum AqiForecastPollutant {
         return symbols.first { value.contains($0.zh) }?.symbol ?? value
     }
 }
+
+/// A MOENV sand/dust advisory (dataset SANDST_P_01, FOX-10), as the Worker
+/// mirrors it into Directus `twaqi_sandstorm_advisories`. MOENV lists an
+/// advisory only while it matters, so no rows is the normal case.
+struct SandstormAdvisory: Codable, Equatable {
+    /// Taiwan local time as MOENV publishes it, e.g. `"2026-11-08 09:30:00"`.
+    let publishTime: String
+    let subject: String?
+    let content: String?
+
+    enum CodingKeys: String, CodingKey {
+        case subject, content
+        case publishTime = "publish_time"
+    }
+
+    var publishedAt: Date? {
+        AqiForecastDates.parsePublishTime(publishTime)
+    }
+
+    /// How long an advisory stays on the Forecast tab after it is published.
+    static let visibleFor: TimeInterval = 48 * 3600
+
+    /// Advisories still worth showing at `now`, newest first. An advisory with
+    /// no text, or a publish time that doesn't parse, is left out; one dated
+    /// in the future (clock skew) counts as just published.
+    static func current(_ advisories: [SandstormAdvisory], now: Date = Date()) -> [SandstormAdvisory] {
+        advisories
+            .filter { advisory in
+                let text = [advisory.subject, advisory.content]
+                    .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .contains { !$0.isEmpty }
+                guard text, let published = advisory.publishedAt else { return false }
+                return now.timeIntervalSince(published) < visibleFor
+            }
+            .sorted { $0.publishTime > $1.publishTime }
+    }
+}
+
+struct SandstormAdvisoryResponse: Codable {
+    let data: [SandstormAdvisory]
+}
+
+enum SandstormAdvisoryRequest {
+    static let collectionPath = "items/twaqi_sandstorm_advisories"
+
+    /// `GET /items/twaqi_sandstorm_advisories`, newest first, archived rows left out.
+    static func make(baseURL: String?, token: String?) -> URLRequest? {
+        guard let baseURL = baseURL?.trimmingCharacters(in: .whitespaces), !baseURL.isEmpty,
+              let token = token?.trimmingCharacters(in: .whitespaces), !token.isEmpty,
+              let base = URL(string: baseURL),
+              var components = URLComponents(url: base.appendingPathComponent(collectionPath), resolvingAgainstBaseURL: false)
+        else {
+            return nil
+        }
+
+        components.queryItems = [
+            URLQueryItem(name: "filter[archived][_neq]", value: "true"),
+            URLQueryItem(name: "fields", value: "publish_time,subject,content"),
+            URLQueryItem(name: "sort", value: "-publish_time"),
+            URLQueryItem(name: "limit", value: "10"),
+        ]
+        guard let url = components.url else { return nil }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 20
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        return request
+    }
+}

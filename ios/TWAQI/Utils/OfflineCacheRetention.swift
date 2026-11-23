@@ -40,6 +40,7 @@ enum OfflineCacheRetention {
             || (name.hasPrefix(PollutantCache.fileNamePrefix) && name.hasSuffix(".json"))
             || (name.hasPrefix(PollutantHistoryCache.fileNamePrefix) && name.hasSuffix(".json"))
             || name == "aqi-forecast.json"
+            || name == SandstormAdvisoryStore.cacheFileName
             || name == "station-cams-manifest.json"
             || name == StationWeatherStore.cacheFileName
     }
