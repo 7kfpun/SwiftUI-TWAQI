@@ -31,6 +31,9 @@ describe('nodeEnv', () => {
     assert.equal(failure(result({ sent: 10 })), null)
     assert.equal(failure(result({ sent: 10, 'dead-token': 2, deferred: 5 })), null)
     assert.match(failure(result({ sent: 10, failed: 3 })) ?? '', /^3 alert\(s\) failed to send/)
+    // A failed forecast heads-up counts too (FOX-191).
+    assert.match(failure(result({ sent: 1 }), { counts: {}, unmarked: 3 }) ?? '', /^3 forecast heads-up/)
+    assert.match(failure(result({ sent: 1 }), { counts: { failed: 2 } }) ?? '', /^2 alert\(s\) failed to send/)
   })
 
   it('takes only --dry-run', () => {

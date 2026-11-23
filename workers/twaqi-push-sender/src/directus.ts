@@ -19,6 +19,10 @@ export interface Device {
   dnd_start: string | null
   dnd_end: string | null
   timezone: string | null
+  /** When the last forecast heads-up went out (FOX-191); null before the first. */
+  forecast_sent_at?: string | null
+  /** Digest of what that heads-up said, so an unchanged forecast isn't pushed again. */
+  forecast_digest?: string | null
 }
 
 export interface Subscription {
@@ -140,6 +144,99 @@ export async function crossingSubscriptions(
   return all
 }
 
+const FORECAST_DEVICE_FIELDS = [...DEVICE_FIELDS, 'forecast_sent_at', 'forecast_digest']
+
+/** Live subscriptions on these stations, with their devices' forecast state
+ * (FOX-191): every alert on a station is a favourite there. Only this read
+ * names the forecast fields, so the AQI alerts never depend on them. */
+export async function stationSubscriptions(
+  env: DirectusConfig,
+  stationIds: number[],
+  counter: { requests: number } = { requests: 0 },
+): Promise<Subscription[]> {
+  const all: Subscription[] = []
+  const fields = [
+    'id', 'station_id', 'site_id', 'metric', 'direction', 'threshold', 'last_value', 'in_zone', 'last_fired_at',
+    ...FORECAST_DEVICE_FIELDS.map((f) => `device.${f}`),
+  ]
+  for (let i = 0; i < stationIds.length; i += 50) {
+    const filter = JSON.stringify({
+      _and: [...LIVE, { station_id: { _in: stationIds.slice(i, i + 50).map(String) } }],
+    })
+    for (let page = 1; ; page++) {
+      const params = new URLSearchParams({ fields: fields.join(','), filter, sort: 'id', limit: String(PAGE_SIZE), page: String(page) })
+      counter.requests++
+      const { data } = await request<{ data: Subscription[] }>(env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
+      for (const s of data) {
+        if (!s.device?.fcm_token) continue
+        const stationId = Number(s.station_id)
+        all.push({ ...s, station_id: s.station_id != null && Number.isInteger(stationId) ? stationId : null })
+      }
+      if (data.length < PAGE_SIZE) break
+    }
+  }
+  return all
+}
+
+/** Each device's latest AQI alert (`last_fired_at`) across ALL its live
+ * subscriptions, whatever the station, for the forecast's cool-down. */
+export async function lastAlerts(
+  env: DirectusConfig,
+  deviceIds: number[],
+  counter: { requests: number } = { requests: 0 },
+): Promise<Map<number, string>> {
+  const out = new Map<number, string>()
+  for (let i = 0; i < deviceIds.length; i += 100) {
+    const filter = JSON.stringify({
+      _and: [...LIVE, { last_fired_at: { _nnull: true } }, { device: { _in: deviceIds.slice(i, i + 100) } }],
+    })
+    for (let page = 1; ; page++) {
+      const params = new URLSearchParams({ fields: 'device.id,last_fired_at', filter, sort: 'id', limit: String(PAGE_SIZE), page: String(page) })
+      counter.requests++
+      const { data } = await request<{ data: Array<{ device: { id: number } | null; last_fired_at: string | null }> }>(
+        env, 'GET', `/items/twaqi_push_subscriptions?${params}`)
+      for (const row of data) {
+        if (!row.device || !row.last_fired_at) continue
+        if (row.last_fired_at > (out.get(row.device.id) ?? '')) out.set(row.device.id, row.last_fired_at)
+      }
+      if (data.length < PAGE_SIZE) break
+    }
+  }
+  return out
+}
+
+/** The forecast rows for these Taiwan days, archived ones left out. */
+export interface ForecastRow {
+  area: string
+  forecast_date: string
+  aqi: number | null
+  major_pollutant: string | null
+  publish_time: string | null
+}
+
+export async function forecastRows(env: DirectusConfig, days: string[]): Promise<ForecastRow[]> {
+  const params = new URLSearchParams({
+    fields: 'area,forecast_date,aqi,major_pollutant,publish_time',
+    'filter[archived][_neq]': 'true',
+    'filter[forecast_date][_in]': days.join(','),
+    // Newest publish first, so a cut could only drop the oldest rows.
+    sort: '-publish_time',
+    limit: '200',
+  })
+  const { data } = await request<{ data: ForecastRow[] }>(env, 'GET', `/items/twaqi_aqi_forecast?${params}`)
+  return data ?? []
+}
+
+/** What a sent heads-up leaves on the device row. */
+export async function markForecastSent(
+  env: DirectusConfig,
+  marks: Array<{ id: number; forecast_sent_at: string; forecast_digest: string }>,
+): Promise<void> {
+  for (let i = 0; i < marks.length; i += 100) {
+    await request(env, 'PATCH', '/items/twaqi_push_devices?fields=id', marks.slice(i, i + 100))
+  }
+}
+
 export async function device(env: DirectusConfig, id: number): Promise<Device | null> {
   const params = new URLSearchParams({ fields: DEVICE_FIELDS.join(','), 'filter[archived][_eq]': 'false' })
   try {
@@ -172,7 +269,7 @@ export interface PushLog {
   /** AQI API station id, as a string like `twaqi_push_subscriptions.station_id`. */
   station: string | null
   /** `pollution` (an "above" alert), `cleanliness` ("below") or `test`. */
-  trigger: 'pollution' | 'cleanliness' | 'test'
+  trigger: 'pollution' | 'cleanliness' | 'test' | 'forecast'
   device: number
   aqi: number | null
   fcm_message_id: string | null
