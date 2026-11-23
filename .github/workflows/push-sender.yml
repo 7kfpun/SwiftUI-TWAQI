@@ -19,6 +19,15 @@ name: Push sender
 # in the repository (re-enable under Actions). A late run is fine: a crossing
 # stays unsent until a run sends it, and nothing is sent twice.
 #
+# Dead-man's switch (FOX-77): every real run (not a dry run) pings a
+# healthchecks.io check at the end, its ping URL in the `push-sender` secret
+# HEALTHCHECK_PING_URL: the URL itself when the send succeeded, URL + /fail when
+# it didn't. healthchecks.io emails the owner on a /fail ping, and when no
+# success ping arrives within its period (2 h) + grace (1 h): a skipped or
+# switched-off schedule. No secret: the ping is skipped, the run unaffected. A
+# ping that can't be delivered is a warning, never a failed run. Setup and how
+# to pause it: workers/twaqi-push-sender/README.md#dead-mans-switch-healthchecksio.
+#
 # Back on Workers Paid: restore the cron and "limits" in wrangler.jsonc (and the
 # scheduled handler), set SUBREQUEST_LIMIT to match, and delete this workflow.
 # See workers/twaqi-push-sender/README.md.
@@ -87,6 +96,7 @@ jobs:
 
       # No npm ci: run() and scripts/run.ts use only Node built-ins.
       - name: Run the push sender
+        id: send
         env:
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
           DIRECTUS_PUSH_TOKEN: ${{ secrets.DIRECTUS_PUSH_TOKEN }}
@@ -108,3 +118,46 @@ jobs:
           # failed to send (dead tokens and deferred sends don't count). Events
           # that couldn't be forwarded are a warning only.
           npm run --silent send -- "${args[@]}"
+
+      # Dead-man's switch (FOX-77). Runs after a failure too (always()), so a
+      # failed run pings /fail; a dry run never pings. A timed-out or cancelled
+      # job may stop before this step: the missing success ping alerts then.
+      # The body is the run's link, which healthchecks.io shows in its email.
+      # healthchecks.io answers 200 for a wrong or deleted check too, with
+      # `OK (not found)` (or `OK (rate limited)`), so only a body of exactly
+      # `OK` counts as pinged. The job's default working directory is replaced
+      # so a failed checkout can still ping /fail.
+      - name: Ping the monitor
+        if: ${{ always() && !inputs.dry_run }}
+        working-directory: ${{ github.workspace }}
+        env:
+          PING_URL: ${{ secrets.HEALTHCHECK_PING_URL }}
+          SEND_OUTCOME: ${{ steps.send.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$PING_URL" ]; then
+            echo "HEALTHCHECK_PING_URL is not set: no monitor ping."
+            exit 0
+          fi
+          url="${PING_URL%/}"
+          if [ "$SEND_OUTCOME" = success ]; then
+            label=success
+          else
+            label=fail
+            url="${url}/fail"
+          fi
+          warn() {
+            echo "::warning::$1"
+            echo "⚠️ $1" >> "$GITHUB_STEP_SUMMARY"
+          }
+          # In the if, so a failed request doesn't end the step under bash -e.
+          if body="$(curl -fsS -m 10 --retry 5 --data-raw "${label}: ${RUN_URL}" "$url")"; then
+            if [ "$body" = OK ]; then
+              echo "Monitor pinged (${label})."
+            else
+              body="$(printf '%s' "$body" | tr -d '\r' | tr '\n' ' ' | cut -c1-100)"
+              warn "The monitor answered \"${body}\" to the ${label} ping, not OK: check HEALTHCHECK_PING_URL and the check in healthchecks.io."
+            fi
+          else
+            warn "Could not ping the monitor (${label}); it will alert if no success ping arrives in time."
+          fi
